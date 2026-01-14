@@ -1806,6 +1806,7 @@ body.editor-fullscreen-active > nav {
 .btn-preview-html,
 .btn-copy-html,
 .btn-paste-html,
+.btn-sanitize-html,
 .btn-fullscreen {
   display: flex;
   align-items: center;
@@ -1825,9 +1826,82 @@ body.editor-fullscreen-active > nav {
 .btn-preview-html:hover,
 .btn-copy-html:hover,
 .btn-paste-html:hover,
+.btn-sanitize-html:hover,
 .btn-fullscreen:hover {
   border-color: var(--border-active);
   color: var(--text-primary);
+}
+
+/* Special styling for Clean/Sanitize button */
+.btn-sanitize-html {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0.05));
+  border-color: rgba(147, 51, 234, 0.3);
+  color: #a78bfa;
+}
+
+.btn-sanitize-html:hover {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.25), rgba(147, 51, 234, 0.1));
+  border-color: rgba(147, 51, 234, 0.5);
+  color: #c4b5fd;
+}
+
+/* ═══ IFRAME PREVIEW MODE - Exact Browser Rendering ═══ */
+.btn-iframe-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-iframe-preview:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-active);
+  color: var(--text-primary);
+}
+
+.btn-iframe-preview.active {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #4ade80;
+}
+
+.iframe-preview-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 400px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.iframe-preview-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
+  border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.browser-preview-iframe {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  border: none;
+  background: #0a0f1c;
 }
 
 .btn-preview-html.active {
@@ -2165,20 +2239,6 @@ body.editor-fullscreen-active > nav {
   animation-fill-mode: forwards !important;
 }
 
-/* ═══ FIX LANDING PAGE TEMPLATES - Hide decorative backgrounds ═══ */
-/* These elements use position:fixed/absolute with z-index:-1 which breaks editor layout */
-/* MUST come AFTER opacity:1 rule and use higher specificity to override it */
-.html-preview.wysiwyg-editor > .background-container,
-.html-preview.wysiwyg-editor .background-container,
-.html-preview.wysiwyg-editor .bg-layer-base,
-.html-preview.wysiwyg-editor .bg-container,
-.html-preview.wysiwyg-editor .orb,
-.html-preview.wysiwyg-editor .orb-1,
-.html-preview.wysiwyg-editor .orb-2,
-.html-preview.wysiwyg-editor .orb-3 {
-  display: none !important;
-}
-
 /* But keep actual hidden elements hidden */
 .html-preview.wysiwyg-editor [hidden],
 .html-preview.wysiwyg-editor [style*="display: none"],
@@ -2186,35 +2246,26 @@ body.editor-fullscreen-active > nav {
   opacity: 0 !important;
 }
 
-/* ═══ FIX CLIPPED CONTENT - Override overflow:hidden and min-height:100vh from landing pages ═══ */
-/* Landing page sections often use overflow:hidden which clips content in the editor */
-/* Also 100vh heights don't work well inside the editor container */
-.html-preview.wysiwyg-editor section,
-.html-preview.wysiwyg-editor [class*="section"],
-.html-preview.wysiwyg-editor [class*="container"],
-.html-preview.wysiwyg-editor [class*="wrapper"],
-.html-preview.wysiwyg-editor [class*="content"],
-.html-preview.wysiwyg-editor [style*="overflow: hidden"],
-.html-preview.wysiwyg-editor [style*="overflow:hidden"],
-.html-preview.wysiwyg-editor [style*="overflow: clip"],
-.html-preview.wysiwyg-editor > div,
-.html-preview.wysiwyg-editor > div > div {
-  overflow: visible !important;
+/* ═══ FIX LESSON TEMPLATES WITH FIXED BACKGROUNDS ═══ */
+/* Lesson HTML templates use position:fixed backgrounds that escape containers */
+/* Hide decorative background layers entirely - they cause layout issues */
+.html-preview.wysiwyg-editor .background-container,
+.html-preview.wysiwyg-editor .bg-container,
+.html-preview.wysiwyg-editor .bg-layer,
+.html-preview.wysiwyg-editor .bg-layer-base {
+  display: none !important;
 }
 
-/* Override 100vh heights that don't work inside editor */
-.html-preview.wysiwyg-editor [style*="min-height: 100vh"],
-.html-preview.wysiwyg-editor [style*="min-height:100vh"],
-.html-preview.wysiwyg-editor [style*="height: 100vh"],
-.html-preview.wysiwyg-editor [style*="height:100vh"],
-.html-preview.wysiwyg-editor [style*="100vh"] {
-  min-height: auto !important;
-  height: auto !important;
+/* Hide all orb/glow decorations - they use heavy blur effects */
+.html-preview.wysiwyg-editor .orb,
+.html-preview.wysiwyg-editor .orb-1,
+.html-preview.wysiwyg-editor .orb-2,
+.html-preview.wysiwyg-editor .orb-3 {
+  display: none !important;
 }
 
-/* ═══ FIX POSITION FIXED - Convert to relative in editor ═══ */
-/* position:fixed elements escape the editor container and cause layout issues */
-/* Convert them to position:relative so they stay within the content flow */
+/* Fix any element with position:fixed from embedded styles */
+/* Must override all position-related properties */
 .html-preview.wysiwyg-editor [style*="position: fixed"],
 .html-preview.wysiwyg-editor [style*="position:fixed"] {
   position: relative !important;
@@ -2228,53 +2279,43 @@ body.editor-fullscreen-active > nav {
   z-index: auto !important;
 }
 
-/* ═══ FIX BACKGROUND CONTAINERS - Common in landing pages ═══ */
-/* These often use position:fixed with inset:0 and z-index:-1 */
-/* Hide them entirely in editor as they're just decorative backgrounds */
-.html-preview.wysiwyg-editor .background-container,
-.html-preview.wysiwyg-editor .bg-container,
-.html-preview.wysiwyg-editor .bg-layer,
-.html-preview.wysiwyg-editor .bg-layer-base,
-.html-preview.wysiwyg-editor [class*="background-"],
-.html-preview.wysiwyg-editor [class*="bg-layer"] {
-  display: none !important;
-}
-
-/* ═══ FIX ORB/GLOW DECORATIONS - Hide large blur decorations ═══ */
-/* Orbs with large blur filters cause performance issues and overlap content */
-.html-preview.wysiwyg-editor .orb,
-.html-preview.wysiwyg-editor .orb-1,
-.html-preview.wysiwyg-editor .orb-2,
-.html-preview.wysiwyg-editor .orb-3,
-.html-preview.wysiwyg-editor [class*="orb-"],
-.html-preview.wysiwyg-editor [class*="glow-"],
-.html-preview.wysiwyg-editor [class*="blob-"] {
-  display: none !important;
-}
-
-/* ═══ FIX INSET PROPERTY - Causes full-screen overlays ═══ */
-/* inset: 0 makes elements cover the entire viewport */
+/* Fix inset:0 which causes full-screen overlays */
 .html-preview.wysiwyg-editor [style*="inset: 0"],
 .html-preview.wysiwyg-editor [style*="inset:0"] {
   position: relative !important;
   inset: auto !important;
 }
 
-/* ═══ FIX NEGATIVE Z-INDEX - Makes content invisible ═══ */
-/* z-index: -1 hides elements behind the editor container */
+/* Fix negative z-index which hides content */
 .html-preview.wysiwyg-editor [style*="z-index: -"],
 .html-preview.wysiwyg-editor [style*="z-index:-"] {
-  z-index: auto !important;
+  z-index: 1 !important;
 }
 
-/* ═══ FIX BACKDROP-FILTER - Can cause rendering issues ═══ */
-/* backdrop-filter requires a specific stacking context to work */
-/* In editor, it can cause blurry/invisible content */
-.html-preview.wysiwyg-editor [style*="backdrop-filter"],
-.html-preview.wysiwyg-editor [class*="glass"] {
+/* Fix 100vh heights that don't work in containers */
+.html-preview.wysiwyg-editor section,
+.html-preview.wysiwyg-editor [class*="section"] {
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* Fix backdrop-filter which can cause rendering issues */
+.html-preview.wysiwyg-editor [style*="backdrop-filter"] {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+/* Ensure content containers stay above and visible */
+.html-preview.wysiwyg-editor .lesson-container,
+.html-preview.wysiwyg-editor .content-wrapper,
+.html-preview.wysiwyg-editor .glass-card,
+.html-preview.wysiwyg-editor .glass {
+  position: relative !important;
+  z-index: 1 !important;
+  overflow: visible !important;
+}
+
 
 /* ═══ SPACER COMPONENTS - Visible in editor, transparent in Shopify ═══ */
 /* Simple div with height - Shopify keeps the height, editor shows visual indicator */
@@ -4228,6 +4269,7 @@ body.editor-fullscreen-active > nav {
   .btn-preview-html,
   .btn-copy-html,
   .btn-paste-html,
+  .btn-sanitize-html,
   .btn-fullscreen {
     justify-content: center;
     padding: var(--space-3);

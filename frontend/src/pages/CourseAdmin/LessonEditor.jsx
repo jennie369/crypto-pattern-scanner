@@ -65,6 +65,8 @@ import {
   Smartphone,
   Download,
   ShoppingBag,
+  Sparkles,
+  Globe,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { lessonService } from '../../services/lessonService';
@@ -200,6 +202,7 @@ export default function LessonEditor() {
   const [errors, setErrors] = useState({});
   const [showHtmlPreview, setShowHtmlPreview] = useState(true); // Default to preview mode (WYSIWYG editor)
   const [blockEditMode, setBlockEditMode] = useState(false); // Toggle between WYSIWYG and Block drag-drop mode
+  const [iframePreviewMode, setIframePreviewMode] = useState(false); // Show exact browser preview via iframe
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false); // Show mobile device preview
   const [toolboxCollapsed, setToolboxCollapsed] = useState(false); // Toolbox sidebar collapsed state
@@ -311,74 +314,12 @@ export default function LessonEditor() {
   // ═══════════════════════════════════════════════════════════════════
   // SANITIZE HTML FOR EDITOR DISPLAY
   // Removes/modifies problematic CSS that doesn't work in containers
+  // Also removes decorative elements like .background-container, .orb
   // ═══════════════════════════════════════════════════════════════════
   const sanitizeHtmlForEditor = useCallback((html) => {
-    if (!html || typeof html !== 'string') return html;
-
-    // If no <style> tags, return as-is
-    if (!html.includes('<style')) return html;
-
-    try {
-      // Parse HTML
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-
-      // Remove decorative elements that cause layout issues
-      const decorativeSelectors = [
-        '.background-container', '.bg-container', '.bg-layer', '.bg-layer-base',
-        '.orb', '.orb-1', '.orb-2', '.orb-3',
-        '[class*="orb-"]', '[class*="glow-"]', '[class*="blob-"]'
-      ];
-      decorativeSelectors.forEach(selector => {
-        try {
-          doc.querySelectorAll(selector).forEach(el => el.remove());
-        } catch (e) {
-          // Skip invalid selectors
-        }
-      });
-
-      // Sanitize CSS in <style> tags
-      const styleTags = doc.querySelectorAll('style');
-      styleTags.forEach(styleTag => {
-        let cssText = styleTag.textContent || '';
-
-        // Skip decorative element rules
-        const skipPatterns = [
-          /\.background-container[^{]*\{[^}]*\}/gi,
-          /\.bg-container[^{]*\{[^}]*\}/gi,
-          /\.bg-layer[^{]*\{[^}]*\}/gi,
-          /\.orb[^{]*\{[^}]*\}/gi,
-          /\[class\*="orb-"\][^{]*\{[^}]*\}/gi,
-          /\[class\*="glow-"\][^{]*\{[^}]*\}/gi,
-          /\[class\*="blob-"\][^{]*\{[^}]*\}/gi,
-        ];
-        skipPatterns.forEach(pattern => {
-          cssText = cssText.replace(pattern, '');
-        });
-
-        // Sanitize problematic CSS properties
-        cssText = cssText
-          .replace(/position\s*:\s*fixed/gi, 'position: relative')
-          .replace(/inset\s*:\s*0/gi, '')
-          .replace(/z-index\s*:\s*-\d+/gi, 'z-index: 1')
-          .replace(/min-height\s*:\s*100vh/gi, 'min-height: auto')
-          .replace(/height\s*:\s*100vh/gi, 'height: auto')
-          .replace(/backdrop-filter\s*:[^;]+;?/gi, '')
-          .replace(/-webkit-backdrop-filter\s*:[^;]+;?/gi, '');
-
-        styleTag.textContent = cssText;
-      });
-
-      // Get body content if full HTML document
-      const body = doc.body;
-      if (body) {
-        return body.innerHTML;
-      }
-      return html;
-    } catch (err) {
-      console.error('[LessonEditor] Error sanitizing HTML:', err);
-      return html;
-    }
+    // Don't modify HTML - just return as-is
+    // CSS overrides in LessonEditor.css handle display issues
+    return html;
   }, []);
 
   // Fetch lesson for editing
@@ -1030,11 +971,11 @@ export default function LessonEditor() {
     reader.onload = (event) => {
       const htmlContent = event.target?.result;
       if (typeof htmlContent === 'string') {
-        // Extract body content if full HTML document
-        const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-        const content = bodyMatch ? bodyMatch[1] : htmlContent;
+        // Sanitize HTML for editor display (removes decorative backgrounds, fixes CSS)
+        // This handles: position:fixed, inset:0, z-index:-1, .background-container, .orb, etc.
+        const sanitizedContent = sanitizeHtmlForEditor(htmlContent);
         forceSaveToUndo();
-        handleChange('content_html', content.trim());
+        handleChange('content_html', sanitizedContent.trim());
         setSuccessMessage('Đã import nội dung HTML');
         setTimeout(() => setSuccessMessage(''), 2000);
       }
@@ -1086,6 +1027,54 @@ export default function LessonEditor() {
       skipNextUndoSaveRef.current = true;
     }
   }, [formData.content_html]);
+
+  // Re-sanitize current content - removes decorative elements and fixes CSS
+  const handleReSanitize = () => {
+    if (!formData.content_html) {
+      setErrors(prev => ({ ...prev, content_html: 'Không có nội dung để xử lý' }));
+      return;
+    }
+
+    try {
+      forceSaveToUndo();
+
+      // Only remove decorative elements, DON'T touch CSS or styles
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(formData.content_html, 'text/html');
+
+      // Remove ONLY decorative elements that cause visual issues
+      const decorativeSelectors = [
+        '.background-container',
+        '.bg-container',
+        '.bg-layer',
+        '.bg-layer-base',
+        '.orb',
+        '.orb-1',
+        '.orb-2',
+        '.orb-3'
+      ];
+
+      let removedCount = 0;
+      decorativeSelectors.forEach(selector => {
+        try {
+          doc.querySelectorAll(selector).forEach(el => {
+            el.remove();
+            removedCount++;
+          });
+        } catch (e) {
+          // Skip invalid selectors
+        }
+      });
+
+      const cleanedContent = doc.body?.innerHTML || formData.content_html;
+      handleChange('content_html', cleanedContent);
+      setSuccessMessage(`Đã xóa ${removedCount} decorative elements (background, orb)`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      console.error('[LessonEditor] Error cleaning HTML:', err);
+      setErrors(prev => ({ ...prev, content_html: 'Lỗi khi xử lý HTML' }));
+    }
+  };
 
   // Insert HTML tag at cursor position
   const insertHtmlTag = (item) => {
@@ -3078,6 +3067,17 @@ export default function LessonEditor() {
                           Mobile
                         </button>
                       )}
+                      {showHtmlPreview && (
+                        <button
+                          type="button"
+                          className={`btn-iframe-preview ${iframePreviewMode ? 'active' : ''}`}
+                          onClick={() => setIframePreviewMode(!iframePreviewMode)}
+                          title="Xem Browser (hiển thị CSS chính xác, không edit được)"
+                        >
+                          <Globe size={16} />
+                          Browser
+                        </button>
+                      )}
                       <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.2)', margin: '0 4px' }} />
                       {/* Save button */}
                       <button
@@ -3181,7 +3181,44 @@ export default function LessonEditor() {
 
                       {/* Editor or Preview - Preview is now WYSIWYG editable */}
                       {showHtmlPreview ? (
-                        blockEditMode ? (
+                        iframePreviewMode ? (
+                          /* Iframe Preview - exact browser rendering, no editing */
+                          <div className="iframe-preview-container">
+                            <div className="iframe-preview-notice">
+                              <Globe size={14} />
+                              <span>Chế độ xem Browser - CSS hiển thị chính xác, không thể edit</span>
+                            </div>
+                            <iframe
+                              key={`iframe-preview-${lessonId}`}
+                              title="Browser Preview"
+                              srcDoc={`
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                  <meta charset="UTF-8">
+                                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                  <style>
+                                    * { box-sizing: border-box; }
+                                    body {
+                                      margin: 0;
+                                      padding: 0;
+                                      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+                                      background: linear-gradient(180deg, #0a0f1c 0%, #111827 50%, #0a0f1c 100%);
+                                      color: rgba(255, 255, 255, 0.9);
+                                      min-height: 100vh;
+                                    }
+                                  </style>
+                                </head>
+                                <body>
+                                  ${formData.content_html || '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">Chưa có nội dung</p>'}
+                                </body>
+                                </html>
+                              `}
+                              className="browser-preview-iframe"
+                              sandbox="allow-same-origin"
+                            />
+                          </div>
+                        ) : blockEditMode ? (
                           /* Block Drag-and-Drop Editor - Only render in fullscreen mode */
                           isFullscreen && (
                             <DraggableBlockEditor
@@ -4467,6 +4504,15 @@ export default function LessonEditor() {
                         onChange={handleHtmlImport}
                         hidden
                       />
+                      <button
+                        type="button"
+                        className="btn-sanitize-html"
+                        onClick={handleReSanitize}
+                        title="Xóa background/orb elements và sửa CSS có vấn đề"
+                      >
+                        <Sparkles size={16} />
+                        Clean
+                      </button>
                       <button
                         type="button"
                         className="btn-copy-html"
