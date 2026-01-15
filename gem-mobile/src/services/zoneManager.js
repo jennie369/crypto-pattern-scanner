@@ -155,7 +155,12 @@ class ZoneManager {
             // Save to database
             const savedZone = await this._saveZoneToDb(zone);
             if (savedZone) {
-              zones.push(savedZone);
+              // ⚠️ CRITICAL: Merge pattern_id and metadata back - DB doesn't store these
+              zones.push({
+                ...savedZone,
+                pattern_id: zone.pattern_id,
+                metadata: zone.metadata,
+              });
             }
           } else {
             // Just return in-memory zone
@@ -191,16 +196,45 @@ class ZoneManager {
    * @private
    */
   _patternToZone(pattern, symbol, timeframe, userId) {
+    // ⚠️ Use pattern's own symbol and timeframe when available (for multi-coin scans)
+    const actualSymbol = pattern.symbol || symbol;
+    const actualTimeframe = pattern.timeframe || timeframe;
+
     // Determine zone type based on pattern direction
     const direction = pattern.direction || pattern.signalType;
-    const zoneType = direction === 'LONG' ? ZONE_TYPE.LFZ : ZONE_TYPE.HFZ;
+    const isLong = direction === 'LONG';
+    const zoneType = isLong ? ZONE_TYPE.LFZ : ZONE_TYPE.HFZ;
 
-    // Calculate zone boundaries
-    const zoneHigh = pattern.zoneHigh || pattern.entry || pattern.price;
-    const zoneLow = pattern.zoneLow || pattern.stopLoss || pattern.price * 0.99;
+    // Get entry and stopLoss values
+    const entry = parseFloat(pattern.entry || pattern.entryPrice || pattern.price || 0);
+    const stopLoss = parseFloat(pattern.stopLoss || pattern.stop_loss || 0);
+
+    // ⚠️ FIX: Calculate zone boundaries based on DIRECTION
+    // LONG: SL below entry → zoneLow = SL, zoneHigh = entry
+    // SHORT: SL above entry → zoneLow = entry, zoneHigh = SL
+    let zoneHigh, zoneLow;
+    if (pattern.zoneHigh && pattern.zoneLow) {
+      // Use explicit zone bounds if provided
+      zoneHigh = parseFloat(pattern.zoneHigh);
+      zoneLow = parseFloat(pattern.zoneLow);
+    } else if (isLong) {
+      // LONG: entry is top of zone, SL is bottom
+      zoneHigh = entry;
+      zoneLow = stopLoss > 0 ? stopLoss : entry * 0.98;
+    } else {
+      // SHORT: SL is top of zone (above entry), entry is bottom
+      zoneHigh = stopLoss > 0 ? stopLoss : entry * 1.02;
+      zoneLow = entry;
+    }
+
+    // Ensure zoneHigh > zoneLow
+    if (zoneHigh <= zoneLow) {
+      // Swap if needed
+      [zoneHigh, zoneLow] = [Math.max(zoneHigh, zoneLow), Math.min(zoneHigh, zoneLow)];
+    }
 
     if (!zoneHigh || !zoneLow || zoneHigh <= zoneLow) {
-      console.warn('[ZoneManager] Invalid zone boundaries:', { zoneHigh, zoneLow });
+      console.warn('[ZoneManager] Invalid zone boundaries:', { zoneHigh, zoneLow, direction });
       return null;
     }
 
@@ -237,8 +271,8 @@ class ZoneManager {
 
     return {
       user_id: userId,
-      symbol,
-      timeframe,
+      symbol: actualSymbol,
+      timeframe: actualTimeframe,
       zone_type: zoneType,
       zone_high: zoneHigh,
       zone_low: zoneLow,
@@ -251,7 +285,11 @@ class ZoneManager {
       end_time: endTime,
       start_candle_index: startCandleIndex,
       end_candle_index: endCandleIndex,
-      pattern_type: pattern.name || pattern.type || 'UNKNOWN',
+      // ⚠️ FIX: Use actual pattern name, not category
+      // Priority: patternType > name > type > pattern_type
+      pattern_type: pattern.patternType || pattern.name || pattern.type || pattern.pattern_type || 'UNKNOWN',
+      // Store original pattern name for tooltip display
+      pattern_name: pattern.patternType || pattern.name || pattern.type || 'Unknown Pattern',
       pattern_grade: pattern.grade || 'C',
       pattern_confidence: pattern.confidence || pattern.oddsScore || 50,
       status: ZONE_STATUS.FRESH,
@@ -260,6 +298,8 @@ class ZoneManager {
       hierarchy_rank: this._getHierarchyRank(pattern),
       formation_candle_time: pattern.formationTime || new Date().toISOString(),
       odds_score: pattern.oddsScore || pattern.confidence || 50,
+      // ⚠️ ZONE-PATTERN SYNC: Store pattern ID for 2-way linking
+      pattern_id: pattern.pattern_id || null,
       metadata: {
         patternData: pattern,
         createdAt: new Date().toISOString(),

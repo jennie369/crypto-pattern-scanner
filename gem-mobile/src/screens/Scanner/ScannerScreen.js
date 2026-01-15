@@ -132,6 +132,12 @@ const ScannerScreen = ({ navigation }) => {
   const [mtfAlignment, setMtfAlignment] = useState(null);
   const [showZones, setShowZones] = useState(true);
 
+  // =====================================================
+  // ZONE-PATTERN SYNC STATE (2-way linking)
+  // =====================================================
+  const [selectedZonePatternId, setSelectedZonePatternId] = useState(null); // Currently selected pattern/zone ID
+  const [zoneDisplayMode, setZoneDisplayMode] = useState('all'); // 'all' | 'selected' | 'hidden' - Default to 'all'
+
   // Section order for drag & drop (scanResults first by default)
   const [sectionOrder, setSectionOrder] = useState(['scanResults', 'openPositions']);
 
@@ -538,6 +544,26 @@ const ScannerScreen = ({ navigation }) => {
       // Sort patterns by confidence
       allPatterns.sort((a, b) => b.confidence - a.confidence);
 
+      // =====================================================
+      // ENRICH PATTERNS WITH UNIQUE IDs (for zone-pattern linking)
+      // ⚠️ CRITICAL: Use content-based ID, NOT index-based
+      // This ensures zones and UI patterns have matching IDs
+      // =====================================================
+      const generatePatternId = (p) => {
+        // Use pattern properties to create a unique ID
+        // Format: symbol_type_timeframe_entry_sl (entry & sl make it unique)
+        const entryVal = parseFloat(p.entry || p.entryPrice || p.price || 0) || 0;
+        const slVal = parseFloat(p.stopLoss || p.stop_loss || 0) || 0;
+        const entry = entryVal.toFixed(6);
+        const sl = slVal.toFixed(6);
+        return `${p.symbol}_${p.name || p.type}_${p.timeframe || selectedTimeframe}_${entry}_${sl}`;
+      };
+
+      const enrichedPatterns = allPatterns.map((p) => ({
+        ...p,
+        pattern_id: generatePatternId(p),
+      }));
+
       // Sort results - coins with patterns first
       resultsPerCoin.sort((a, b) => {
         const aHas = a.patterns.length > 0 ? 1 : 0;
@@ -545,21 +571,38 @@ const ScannerScreen = ({ navigation }) => {
         return bHas - aHas;
       });
 
-      setPatterns(allPatterns);
-      setScanResults(resultsPerCoin);
+      // Also enrich patterns in resultsPerCoin - SAME ID generation!
+      const enrichedResults = resultsPerCoin.map(result => ({
+        ...result,
+        patterns: result.patterns.map((p) => ({
+          ...p,
+          pattern_id: generatePatternId(p),
+        })),
+      }));
+
+      setPatterns(enrichedPatterns);
+      setScanResults(enrichedResults);
       setLastScanTime(new Date());
 
-      console.log('[Scanner] Scan complete. Patterns found:', allPatterns.length);
-      console.log('[Scanner] Results per coin:', resultsPerCoin.length);
+      // Reset zone-pattern selection on new scan - default to show all
+      setSelectedZonePatternId(null);
+      setZoneDisplayMode('all');
+
+      console.log('[Scanner] Scan complete. Patterns found:', enrichedPatterns.length);
+      console.log('[Scanner] Results per coin:', enrichedResults.length);
 
       // =====================================================
       // CREATE ZONES FROM PATTERNS (Zone Visualization)
+      // ALWAYS create zones for display - tier controls features (rectangles, persistence)
       // =====================================================
-      if (allPatterns.length > 0 && tierAccessService.isZoneVisualizationEnabled()) {
+      if (enrichedPatterns.length > 0) {
         try {
           console.log('[Scanner] Creating zones from patterns...');
+          console.log('[Scanner] Zone viz enabled:', tierAccessService.isZoneVisualizationEnabled());
+          console.log('[Scanner] User tier:', userTier);
+
           const createdZones = await zoneManager.createZonesFromPatterns(
-            allPatterns,
+            enrichedPatterns, // Pass enriched patterns with IDs
             displayCoin,
             selectedTimeframe,
             user?.id
@@ -867,11 +910,44 @@ const ScannerScreen = ({ navigation }) => {
             selectedPattern={selectedPattern}
             patterns={scanResults.find(r => r.symbol === displayCoin)?.patterns || []}
             positionsRefreshTrigger={positionsRefreshTrigger}
-            zones={showZones ? zones : []}
+            zones={(() => {
+              // =====================================================
+              // ZONE FILTERING based on zoneDisplayMode + current coin
+              // =====================================================
+              console.log('[ZONE-DEBUG] showZones:', showZones);
+              console.log('[ZONE-DEBUG] zoneDisplayMode:', zoneDisplayMode);
+              console.log('[ZONE-DEBUG] zones.length:', zones.length);
+              console.log('[ZONE-DEBUG] displayCoin:', displayCoin);
+              console.log('[ZONE-DEBUG] selectedZonePatternId:', selectedZonePatternId);
+
+              if (!showZones || zoneDisplayMode === 'hidden') return [];
+
+              // ⚠️ ALWAYS filter by current displayCoin first (zones belong to specific coins)
+              const coinZones = zones.filter(z => z.symbol === displayCoin);
+              console.log('[ZONE-DEBUG] coinZones for', displayCoin, ':', coinZones.length);
+
+              if (zoneDisplayMode === 'all') return coinZones;
+
+              // 'selected' mode - show only the selected zone
+              if (selectedZonePatternId) {
+                const filtered = coinZones.filter(z =>
+                  z.pattern_id === selectedZonePatternId ||
+                  z.metadata?.patternData?.pattern_id === selectedZonePatternId
+                );
+                console.log('[ZONE-DEBUG] filtered zones:', filtered.length);
+                return filtered;
+              }
+              return []; // No selection = no zones
+            })()}
             zonePreferences={zonePreferences}
+            selectedZonePatternId={selectedZonePatternId}
             onZonePress={(zone) => {
-              console.log('[Scanner] Zone pressed:', zone.id);
-              navigation.navigate('PatternDetail', { pattern: zone });
+              console.log('[Scanner] Zone pressed:', zone.pattern_id || zone.id);
+              // Sync with pattern list
+              const patternId = zone.pattern_id || zone.metadata?.patternData?.pattern_id;
+              if (patternId) {
+                setSelectedZonePatternId(patternId);
+              }
             }}
           />
 
@@ -900,17 +976,26 @@ const ScannerScreen = ({ navigation }) => {
                 isScanning={scanning}
                 onSelectCoin={handleSelectFromResults}
                 onSelectPattern={(pattern) => {
+                  console.log('[PATTERN-SELECT] pattern.pattern_id:', pattern.pattern_id);
+                  console.log('[PATTERN-SELECT] pattern.entry:', pattern.entry, 'entryPrice:', pattern.entryPrice);
                   setSelectedCoins([pattern.symbol]);
                   // Don't call subscribeToPrice - useEffect handles it
                   if (pattern.timeframe) {
                     setSelectedTimeframe(pattern.timeframe);
                   }
                   setSelectedPattern(pattern);
+                  // ⚠️ ZONE-PATTERN SYNC: Update selected zone pattern ID
+                  setSelectedZonePatternId(pattern.pattern_id);
+                  setZoneDisplayMode('selected'); // Show only this zone
                 }}
                 onPaperTrade={handlePaperTrade}
                 selectedCoin={displayCoin}
-                selectedPatternId={selectedPattern?.id}
+                selectedPatternId={selectedZonePatternId}
                 userTier={userTier}
+                // ⚠️ ZONE TOGGLE PROPS
+                zoneDisplayMode={zoneDisplayMode}
+                onZoneDisplayModeChange={setZoneDisplayMode}
+                onClearZoneSelection={() => setSelectedZonePatternId(null)}
               />
             ) : (
               <OpenPositionsSection
@@ -945,17 +1030,26 @@ const ScannerScreen = ({ navigation }) => {
                 isScanning={scanning}
                 onSelectCoin={handleSelectFromResults}
                 onSelectPattern={(pattern) => {
+                  console.log('[PATTERN-SELECT] pattern.pattern_id:', pattern.pattern_id);
+                  console.log('[PATTERN-SELECT] pattern.entry:', pattern.entry, 'entryPrice:', pattern.entryPrice);
                   setSelectedCoins([pattern.symbol]);
                   // Don't call subscribeToPrice - useEffect handles it
                   if (pattern.timeframe) {
                     setSelectedTimeframe(pattern.timeframe);
                   }
                   setSelectedPattern(pattern);
+                  // ⚠️ ZONE-PATTERN SYNC: Update selected zone pattern ID
+                  setSelectedZonePatternId(pattern.pattern_id);
+                  setZoneDisplayMode('selected'); // Show only this zone
                 }}
                 onPaperTrade={handlePaperTrade}
                 selectedCoin={displayCoin}
-                selectedPatternId={selectedPattern?.id}
+                selectedPatternId={selectedZonePatternId}
                 userTier={userTier}
+                // ⚠️ ZONE TOGGLE PROPS
+                zoneDisplayMode={zoneDisplayMode}
+                onZoneDisplayModeChange={setZoneDisplayMode}
+                onClearZoneSelection={() => setSelectedZonePatternId(null)}
               />
             ) : (
               <OpenPositionsSection

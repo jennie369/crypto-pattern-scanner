@@ -75,6 +75,8 @@ const TradingChart = ({
   zones = [],
   zonePreferences = null,
   onZonePress = null,
+  // ⚠️ ZONE-PATTERN SYNC: For highlighting the selected zone
+  selectedZonePatternId = null,
 }) => {
   const [showVolume, setShowVolume] = useState(true);
   const [darkTheme, setDarkTheme] = useState(true);
@@ -287,12 +289,16 @@ const TradingChart = ({
           direction: patternDirection,
         };
 
-        console.log('[TradingChart] Injecting pattern lines:', patternData);
+        // zonesEnabled = true means use canvas zones (TIER1+), hide labels
+        // zonesEnabled = false means FREE tier, show labels on price lines
+        const zonesEnabled = zones && zones.length > 0;
+        console.log('[TradingChart] Injecting pattern lines:', patternData, 'zonesEnabled:', zonesEnabled);
         webViewRef.current?.injectJavaScript(`
           if (window.updatePatternLines) {
             window.updatePatternLines(
               ${JSON.stringify(patternData)},
-              ${JSON.stringify(showOrderLines ? orderLines : [])}
+              ${JSON.stringify(showOrderLines ? orderLines : [])},
+              ${zonesEnabled}
             );
           }
           true;
@@ -311,7 +317,7 @@ const TradingChart = ({
     // Small delay to ensure order lines are processed first
     const timer = setTimeout(injectPatternLines, 200);
     return () => clearTimeout(timer);
-  }, [showPriceLines, hasPatternData, patternEntry, patternTP, patternSL, patternDirection, orderLines, showOrderLines, chartReady]);
+  }, [showPriceLines, hasPatternData, patternEntry, patternTP, patternSL, patternDirection, orderLines, showOrderLines, chartReady, zones]);
 
   // Send zones to WebView when they change and chart is ready
   useEffect(() => {
@@ -703,6 +709,9 @@ const TradingChart = ({
     </div>
   </div>
   <script>
+    // ✅ CODE VERSION: 2026-01-16-v2 (tooltip debounce + zone clipping fix)
+    console.log('[TradingChart] CODE VERSION: 2026-01-16-v2');
+
     const SYMBOL = '${binanceSymbol}';
     const INTERVAL = '${interval}';
     const SHOW_VOLUME = ${showVolume};
@@ -1855,7 +1864,9 @@ const TradingChart = ({
     }
 
     // Update pattern lines from React Native (with smart filtering)
-    window.updatePatternLines = function(patternData, orderLinesData) {
+    // NOTE: If zones are enabled (TIER1+), labels hidden - use tap-to-select on canvas zones
+    //       If zones NOT enabled (FREE), show labels on price lines
+    window.updatePatternLines = function(patternData, orderLinesData, zonesEnabled) {
       // Store order lines for comparison
       currentOrderLinesData = orderLinesData || [];
 
@@ -1885,52 +1896,58 @@ const TradingChart = ({
         });
       }
 
-      // Pattern Entry line - Only show if no order line is close
+      // =====================================================
+      // ZONES DISABLED (FREE tier): Show full labels on price lines
+      // ZONES ENABLED (TIER1+): No labels, use tap-to-select on canvas
+      // =====================================================
+      const showLabels = !zonesEnabled; // FREE tier shows labels
+
+      // Pattern Entry line
       if (entry > 0 && !isPriceCloseToOrderLine(entry, 0.8)) {
-        const showAxisLabel = !wouldPatternLabelOverlap(entry);
+        const showAxisLabel = showLabels && !wouldPatternLabelOverlap(entry);
         if (showAxisLabel) visiblePatternPrices.push(entry);
 
         const entryLine = candleSeries.createPriceLine({
           price: entry,
-          color: '#00F0FF', // Cyan - distinct from order line gold
+          color: showLabels ? '#00F0FF' : 'rgba(0, 240, 255, 0.3)',
           lineWidth: 1,
           lineStyle: LightweightCharts.LineStyle.Dotted,
           axisLabelVisible: showAxisLabel,
-          title: 'P-Entry', // P prefix for Pattern (always show on line)
+          title: showLabels ? 'P-Entry' : '',
         });
         entryLine._patternLine = true;
         patternPriceLines.push(entryLine);
       }
 
-      // Pattern TP line - Only show if no order line is close
+      // Pattern TP line
       if (tp > 0 && !isPriceCloseToOrderLine(tp, 0.8)) {
-        const showAxisLabel = !wouldPatternLabelOverlap(tp);
+        const showAxisLabel = showLabels && !wouldPatternLabelOverlap(tp);
         if (showAxisLabel) visiblePatternPrices.push(tp);
 
         const tpLine = candleSeries.createPriceLine({
           price: tp,
-          color: '#22C55E80', // Semi-transparent green
+          color: showLabels ? '#22C55E80' : 'rgba(34, 197, 94, 0.3)',
           lineWidth: 1,
           lineStyle: LightweightCharts.LineStyle.Dotted,
           axisLabelVisible: showAxisLabel,
-          title: 'P-TP',
+          title: showLabels ? 'P-TP' : '',
         });
         tpLine._patternLine = true;
         patternPriceLines.push(tpLine);
       }
 
-      // Pattern SL line - Only show if no order line is close
+      // Pattern SL line
       if (sl > 0 && !isPriceCloseToOrderLine(sl, 0.8)) {
-        const showAxisLabel = !wouldPatternLabelOverlap(sl);
+        const showAxisLabel = showLabels && !wouldPatternLabelOverlap(sl);
         if (showAxisLabel) visiblePatternPrices.push(sl);
 
         const slLine = candleSeries.createPriceLine({
           price: sl,
-          color: '#EF444480', // Semi-transparent red
+          color: showLabels ? '#EF444480' : 'rgba(239, 68, 68, 0.3)',
           lineWidth: 1,
           lineStyle: LightweightCharts.LineStyle.Dotted,
           axisLabelVisible: showAxisLabel,
-          title: 'P-SL',
+          title: showLabels ? 'P-SL' : '',
         });
         slLine._patternLine = true;
         patternPriceLines.push(slLine);
@@ -1955,6 +1972,9 @@ const TradingChart = ({
     let zoneCanvas = null;       // Canvas overlay for zones
     let zoneCtx = null;          // Canvas 2D context
     let zoneAnimationId = null;  // Animation frame ID
+    let selectedZoneIndex = null; // TAP-TO-SELECT: Currently selected zone
+    let zoneTooltip = null;      // Tooltip element for zone info
+    let zoneBounds = [];         // Store zone rectangles for hit detection
 
     // Create zone canvas overlay
     function createZoneCanvas() {
@@ -1965,6 +1985,8 @@ const TradingChart = ({
 
       zoneCanvas = document.createElement('canvas');
       zoneCanvas.id = 'zone-canvas';
+      // ✅ ALWAYS pointer-events:none - use chart.subscribeClick() for zone selection
+      // This ensures chart pan/zoom is NEVER blocked
       zoneCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;';
 
       // Get chart dimensions
@@ -1978,8 +2000,341 @@ const TradingChart = ({
       zoneCtx = zoneCanvas.getContext('2d');
       zoneCtx.scale(dpr, dpr);
 
+      // ✅ NO touch/click listeners on canvas - using chart.subscribeClick() instead
+      // This prevents blocking chart pan/zoom
+
       chartEl.appendChild(zoneCanvas);
-      console.log('[Zone] Canvas created:', rect.width, 'x', rect.height);
+      console.log('[Zone] Canvas created (pointer-events:none, using chart.subscribeClick):', rect.width, 'x', rect.height);
+    }
+
+    // ✅ Zone canvas ALWAYS has pointer-events:none - no need to toggle
+    function updateZoneCanvasPointerEvents() {
+      // Keep pointer-events:none always - zone selection via chart.subscribeClick()
+      if (zoneCanvas) {
+        zoneCanvas.style.pointerEvents = 'none';
+      }
+    }
+
+    // ==========================================
+    // TAP-TO-SELECT FUNCTIONS
+    // ==========================================
+
+    // Find zone at point (x, y are chart-relative coordinates from chart.subscribeClick)
+    function findZoneAtPoint(x, y) {
+      if (!zoneCanvas || zoneBounds.length === 0) return null;
+
+      // x and y are already chart-relative from chart.subscribeClick(param.point.x, param.point.y)
+
+      // Check each zone's bounds (in reverse order - top zones first)
+      for (let i = zoneBounds.length - 1; i >= 0; i--) {
+        const bounds = zoneBounds[i];
+        if (x >= bounds.left && x <= bounds.right &&
+            y >= bounds.top && y <= bounds.bottom) {
+          return bounds.index;
+        }
+      }
+      return null;
+    }
+
+    // Handle touch tap on zone
+    function handleZoneTap(e) {
+      try {
+        if (!e.touches || e.touches.length === 0) return;
+        if (!activeZones || activeZones.length === 0) return; // No zones to select
+
+        const touch = e.touches[0];
+        const clickedIndex = findZoneAtPoint(touch.clientX, touch.clientY);
+
+        if (clickedIndex !== null && clickedIndex < activeZones.length) {
+          selectedZoneIndex = clickedIndex;
+          const zone = activeZones[clickedIndex];
+          if (zone) showZoneTooltip(zone, touch.clientX, touch.clientY);
+          console.log('[Zone] TAP selected zone:', clickedIndex);
+
+          // ⚠️ ZONE-PATTERN SYNC: Notify React Native of zone selection
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+              type: 'zone_press',
+              zoneId: zone.id || zone.pattern_id,
+              zone: zone
+            }));
+          }
+        } else {
+          selectedZoneIndex = null;
+          hideZoneTooltip();
+          console.log('[Zone] TAP deselected');
+        }
+        // Redraw immediately
+        drawZonesOnCanvas();
+      } catch (err) {
+        console.error('[Zone] handleZoneTap error:', err);
+      }
+    }
+
+    // Handle click on zone (for web)
+    function handleZoneClick(e) {
+      try {
+        if (!activeZones || activeZones.length === 0) return; // No zones to select
+
+        const clickedIndex = findZoneAtPoint(e.clientX, e.clientY);
+
+        if (clickedIndex !== null && clickedIndex < activeZones.length) {
+          selectedZoneIndex = clickedIndex;
+          const zone = activeZones[clickedIndex];
+          if (zone) showZoneTooltip(zone, e.clientX, e.clientY);
+          console.log('[Zone] CLICK selected zone:', clickedIndex);
+
+          // ⚠️ ZONE-PATTERN SYNC: Notify React Native of zone selection
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+              type: 'zone_press',
+              zoneId: zone.id || zone.pattern_id,
+              zone: zone
+            }));
+          }
+        } else {
+          selectedZoneIndex = null;
+          hideZoneTooltip();
+          console.log('[Zone] CLICK deselected');
+        }
+        drawZonesOnCanvas();
+      } catch (err) {
+        console.error('[Zone] handleZoneClick error:', err);
+      }
+    }
+
+    // ✅ Tooltip auto-hide timeout reference (MUST be declared before showZoneTooltip)
+    let tooltipAutoHideTimeout = null;
+    // ✅ Debounce flag to prevent tooltip from being hidden immediately after showing
+    let tooltipJustShown = false;
+    let tooltipDebounceTimeout = null;
+
+    // ✅ VIETNAMESE TRANSLATIONS for pattern types
+    function translatePatternType(type) {
+      const translations = {
+        'continuation': 'Tiếp diễn',
+        'reversal': 'Đảo chiều',
+        'DPD': 'DPD (Giảm-Tăng-Giảm)',
+        'DPU': 'DPU (Giảm-Tăng-Tăng)',
+        'UPD': 'UPD (Tăng-Tăng-Giảm)',
+        'UPU': 'UPU (Tăng-Giảm-Tăng)',
+        'Double Top': 'Hai Đỉnh',
+        'Double Bottom': 'Hai Đáy',
+        'Triple Top': 'Ba Đỉnh',
+        'Triple Bottom': 'Ba Đáy',
+        'Head and Shoulders': 'Vai Đầu Vai',
+        'Inverse H&S': 'Vai Đầu Vai Ngược',
+        'Inverse Head': 'Vai Đầu Vai Ngược',
+        'Cup and Handle': 'Tách và Quai',
+        'Cup Handle': 'Tách và Quai',
+        'Descending Triangle': 'Tam Giác Giảm',
+        'Ascending Triangle': 'Tam Giác Tăng',
+        'Symmetrical Triangle': 'Tam Giác Cân',
+        'Rising Wedge': 'Nêm Tăng',
+        'Falling Wedge': 'Nêm Giảm',
+        'Bull Flag': 'Cờ Tăng',
+        'Bear Flag': 'Cờ Giảm',
+        'Hammer': 'Nến Búa',
+        'Doji': 'Nến Doji',
+        'Engulfing': 'Nến Nhấn Chìm',
+        'Morning Star': 'Sao Mai',
+        'Evening Star': 'Sao Hôm',
+        'Bullish': 'Tăng giá',
+        'Bearish': 'Giảm giá',
+        'Zone': 'Vùng giá',
+        'LFZ': 'Vùng Cầu',
+        'HFZ': 'Vùng Cung',
+      };
+      // Check for partial matches
+      for (const [key, value] of Object.entries(translations)) {
+        if (type && type.toUpperCase().includes(key.toUpperCase())) {
+          return value;
+        }
+      }
+      return type || 'Vùng giá';
+    }
+
+    // Show tooltip with zone info - ✅ VIETNAMESE VERSION
+    function showZoneTooltip(zone, x, y) {
+      try {
+        hideZoneTooltip(); // Remove existing
+
+        if (!zone) return;
+
+        const chartEl = document.getElementById('chart-container');
+        if (!chartEl) return;
+
+        // Get zone data - prioritize pattern_name for actual name display
+        const patternName = zone.pattern_name || zone.patternType || zone.pattern_type || 'Zone';
+        // Check if it's a category name that needs translation, otherwise use as-is
+        const isCategory = ['reversal', 'continuation', 'LFZ', 'HFZ'].includes(patternName.toLowerCase());
+        const patternTypeVN = isCategory ? translatePatternType(patternName) : patternName;
+        const entryPrice = parseFloat(zone.entry_price || zone.entryPrice || zone.entry || zone.price_level || 0);
+        const stopLoss = parseFloat(zone.stop_loss || zone.stopLoss || zone.stop_price || zone.sl || 0);
+
+        // ✅✅✅ CRITICAL FIX: Derive direction from STOP LOSS position vs ENTRY
+        // - SL < Entry → LONG (MUA) - SL ở dưới bảo vệ lệnh mua
+        // - SL > Entry → SHORT (BÁN) - SL ở trên bảo vệ lệnh bán
+        // This is the ONLY correct way - SL position defines trade direction!
+        const isShortForCalc = stopLoss > 0 && entryPrice > 0 && stopLoss > entryPrice;
+        let direction = isShortForCalc ? 'SHORT' : 'LONG';
+
+        // ✅ Get TP from multiple sources, FALLBACK: calculate if missing
+        let takeProfit = parseFloat(zone.take_profit || zone.takeProfit || zone.target_1 || zone.tp || zone.target || zone.targetPrice || 0);
+
+        // ✅ VALIDATE TP direction: For SHORT, TP must be BELOW entry. For LONG, TP must be ABOVE entry.
+        const tpOnWrongSide = takeProfit > 0 && (
+          (isShortForCalc && takeProfit > entryPrice) ||
+          (!isShortForCalc && takeProfit < entryPrice)
+        );
+
+        // ✅ CALCULATE TP if missing OR on wrong side (R:R = 1:2 default)
+        if ((!takeProfit || takeProfit <= 0 || tpOnWrongSide) && entryPrice > 0 && stopLoss > 0) {
+          const risk = Math.abs(entryPrice - stopLoss);
+          // Use direction based on entry vs current price
+          takeProfit = isShortForCalc ? entryPrice - (risk * 2) : entryPrice + (risk * 2);
+        }
+
+        // Calculate R:R
+        let rrRatio = '-';
+        if (entryPrice > 0 && stopLoss > 0 && takeProfit > 0) {
+          const risk = Math.abs(entryPrice - stopLoss);
+          const reward = Math.abs(takeProfit - entryPrice);
+          if (risk > 0) {
+            rrRatio = (reward / risk).toFixed(1);
+          }
+        }
+
+        // ✅ Format prices VIETNAMESE: 95.880,50 (chấm ngăn nghìn, phẩy decimal)
+        function formatPriceVN(price) {
+          if (!price && price !== 0) return '-';
+          const num = parseFloat(price);
+          if (isNaN(num)) return '-';
+
+          // Số nhỏ < 1: 0,2716
+          if (Math.abs(num) < 1) {
+            return num.toFixed(4).replace('.', ',');
+          }
+
+          // Số lớn: 95.880,50
+          const fixed = num.toFixed(2);
+          const [integer, decimal] = fixed.split('.');
+          const intFormatted = integer.replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');
+          return intFormatted + ',' + decimal;
+        }
+        const formatPrice = formatPriceVN;
+
+        // Create tooltip element
+        zoneTooltip = document.createElement('div');
+        zoneTooltip.id = 'zone-tooltip';
+
+        // Use the direction already calculated from entry vs current price
+        const isShort = direction === 'SHORT';
+        const dirColor = isShort ? '#dc3545' : '#0ecb81';
+        // ✅ VIETNAMESE direction labels
+        const dirLabelVN = isShort ? 'BÁN' : 'MUA';
+
+        zoneTooltip.style.cssText = \`
+          position: absolute;
+          background: rgba(17, 34, 80, 0.95);
+          border: 1px solid rgba(255,255,255,0.3);
+          border-radius: 8px;
+          padding: 10px;
+          font-size: 11px;
+          color: #ffffff;
+          z-index: 100;
+          pointer-events: none;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+          min-width: 160px;
+        \`;
+
+        // ✅ CLEAN DESIGN: Mostly white text, only SL red and TP green
+        zoneTooltip.innerHTML = \`
+          <div style="font-weight:bold;margin-bottom:6px;color:#fff;font-size:13px">\${patternTypeVN}</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="color:#aaa">Hướng:</span>
+            <span style="color:\${dirColor};font-weight:bold">\${dirLabelVN}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="color:#fff">Điểm vào:</span>
+            <span style="color:#fff">\${formatPrice(entryPrice)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="color:#dc3545">Cắt lỗ:</span>
+            <span style="color:#dc3545">\${formatPrice(stopLoss)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="color:#0ecb81">Chốt lời:</span>
+            <span style="color:#0ecb81">\${formatPrice(takeProfit)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid #444;padding-top:6px;margin-top:6px">
+            <span style="color:#aaa">Tỷ lệ R:R:</span>
+            <span style="color:#fff;font-weight:bold">1:\${rrRatio}</span>
+          </div>
+        \`;
+
+        // ✅ Position tooltip at TOP LEFT corner of chart - never overlaps zones
+        // Fixed position: top-left corner, away from price action
+        const tooltipX = 10;
+        const tooltipY = 10;
+
+        zoneTooltip.style.left = tooltipX + 'px';
+        zoneTooltip.style.top = tooltipY + 'px';
+
+        chartEl.appendChild(zoneTooltip);
+
+        // ✅ Set debounce flag to prevent immediate hide from double-tap/click
+        tooltipJustShown = true;
+        if (tooltipDebounceTimeout) clearTimeout(tooltipDebounceTimeout);
+        tooltipDebounceTimeout = setTimeout(() => {
+          tooltipJustShown = false;
+        }, 500); // 500ms debounce window
+
+        // ⚠️ AUTO-HIDE after 5 seconds
+        if (tooltipAutoHideTimeout) {
+          clearTimeout(tooltipAutoHideTimeout);
+        }
+        tooltipAutoHideTimeout = setTimeout(() => {
+          hideZoneTooltip(true); // Force hide after timeout
+        }, 5000); // 5 seconds
+
+        console.log('[Zone] Tooltip shown, will auto-hide in 5s');
+
+      } catch (err) {
+        console.error('[Zone] showZoneTooltip error:', err);
+      }
+    }
+
+    // Hide tooltip
+    // @param {boolean} force - Force hide even if just shown (for auto-hide timeout)
+    function hideZoneTooltip(force = false) {
+      try {
+        // ✅ DEBOUNCE: Don't hide if tooltip was just shown (prevents double-tap issue)
+        if (!force && tooltipJustShown) {
+          console.log('[Zone] Ignoring hide - tooltip just shown (debounce)');
+          return;
+        }
+
+        // Clear any pending auto-hide timeout
+        if (tooltipAutoHideTimeout) {
+          clearTimeout(tooltipAutoHideTimeout);
+          tooltipAutoHideTimeout = null;
+        }
+        // Clear debounce timeout
+        if (tooltipDebounceTimeout) {
+          clearTimeout(tooltipDebounceTimeout);
+          tooltipDebounceTimeout = null;
+        }
+        tooltipJustShown = false;
+
+        if (zoneTooltip && zoneTooltip.parentNode) {
+          zoneTooltip.parentNode.removeChild(zoneTooltip);
+        }
+        zoneTooltip = null;
+      } catch (err) {
+        console.error('[Zone] hideZoneTooltip error:', err);
+        zoneTooltip = null;
+      }
     }
 
     // Resize zone canvas when chart resizes
@@ -2001,7 +2356,7 @@ const TradingChart = ({
     }
 
     // Draw all zones on canvas - called every frame
-    // ✅ UPDATED: Renders separate SL/Entry/TP zones with proper colors
+    // ✅ SWIFT ALGO STYLE: Darker colors, labels always visible, cyan entry line
     function drawZonesOnCanvas() {
       if (!zoneCanvas || !zoneCtx || !chart || !candleSeries) return;
       if (activeZones.length === 0) return;
@@ -2016,22 +2371,24 @@ const TradingChart = ({
       // Clear canvas
       zoneCtx.clearRect(0, 0, rect.width, rect.height);
 
-      // Draw each zone with Entry/SL/TP
+      // Reset zone bounds for hit detection
+      zoneBounds = [];
+
+      // Check if any zone is selected (for dimming non-selected zones)
+      const hasSelection = selectedZoneIndex !== null && selectedZoneIndex >= 0;
+
+      // Draw each zone
       activeZones.forEach((zone, idx) => {
-        // 🔍 DEBUG: Log zone data (check all naming conventions)
-        console.log('🔴 [DRAW] Zone[' + idx + ']:', {
-          pattern_type: zone.pattern_type || zone.patternType,
-          direction: zone.direction,
-          entry_price: zone.entry_price,
-          entryPrice: zone.entryPrice,
-          entry: zone.entry,
-          stop_loss: zone.stop_loss,
-          stop_price: zone.stop_price,
-          take_profit: zone.take_profit,
-          target_1: zone.target_1,
-          zone_high: zone.zone_high,
-          zone_low: zone.zone_low
-        });
+        const isSelected = (idx === selectedZoneIndex);
+        const isDimmed = hasSelection && !isSelected; // Dim non-selected zones when one is selected
+
+        // ✅ COLORS - Normal vs Dimmed (when another zone is selected)
+        const DARK_RED = isDimmed ? 'rgba(139, 0, 0, 0.10)' : 'rgba(139, 0, 0, 0.30)';
+        const DARK_GREEN = isDimmed ? 'rgba(0, 100, 0, 0.10)' : 'rgba(0, 100, 0, 0.30)';
+        const SELECTED_RED = 'rgba(180, 30, 30, 0.50)';
+        const SELECTED_GREEN = 'rgba(30, 130, 30, 0.50)';
+        const CYAN_ENTRY = isDimmed ? 'rgba(0, 255, 255, 0.3)' : '#00FFFF';
+        const LABEL_ALPHA = isDimmed ? 0.25 : 1.0; // For text labels
 
         // Get time values
         let startTime = zone.start_time || zone.startTime || zone.formation_time;
@@ -2041,20 +2398,78 @@ const TradingChart = ({
         if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
         if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
 
+        // ⚠️ VALIDATION: Skip zones with invalid/missing timestamps
+        if (!startTime || startTime <= 0) {
+          console.warn('[Zone] Skipping zone with invalid startTime:', startTime);
+          return;
+        }
+
+        // ⚠️ VALIDATION: Check if zone is beyond visible data range
+        // Get visible time range from the chart
+        const visibleRange = timeScale.getVisibleLogicalRange();
+        if (visibleRange) {
+          // Get the last bar's time as reference for "future" check
+          const barsInfo = candleSeries.barsInLogicalRange(visibleRange);
+          if (barsInfo && barsInfo.barsBefore !== undefined) {
+            // If startTime maps to a position far beyond last candle, skip it
+            const x1Test = timeScale.timeToCoordinate(startTime);
+            if (x1Test !== null && x1Test > rect.width - priceScaleWidth - 20) {
+              // Zone starts beyond visible candles - position at last visible area instead
+              console.log('[Zone] Zone positioned beyond candles, clamping to edge:', zone.pattern_type);
+            }
+          }
+        }
+
         // Get X coordinates
         const x1 = timeScale.timeToCoordinate(startTime);
         const x2 = endTime ? timeScale.timeToCoordinate(endTime) : null;
 
-        if (x1 === null) {
-          console.log('🔴 [DRAW] Zone[' + idx + '] - X coordinate null, skipping');
+        // Skip if start is completely off-screen
+        if (x1 === null) return;
+
+        // Calculate zone position and width
+        let left = x1;
+        let right = x2 !== null ? x2 : (left + 120); // Default width ~120px if no end_time
+        let width = right - left;
+
+        // Ensure reasonable width: min 40px, max 180px
+        if (width < 40) width = 40;
+        if (width > 180) width = 180;
+
+        // ⚠️ FIX: Get position of last candle to prevent zones in empty space
+        // Find the x-coordinate of the most recent candle
+        const lastCandleX = (() => {
+          try {
+            const data = candleSeries.data();
+            if (data && data.length > 0) {
+              const lastTime = data[data.length - 1].time;
+              const coord = timeScale.timeToCoordinate(lastTime);
+              // console.log('[Zone] Last candle time:', lastTime, 'x:', coord);
+              return coord;
+            }
+          } catch (e) {
+            console.warn('[Zone] Error getting last candle X:', e);
+          }
+          return rect.width - priceScaleWidth - 20; // Fallback
+        })();
+
+        // ⚠️ CRITICAL: Don't let zones extend beyond last candle
+        // Use tight margin (10px) to prevent floating zones
+        const maxRight = lastCandleX !== null ? lastCandleX + 10 : rect.width - priceScaleWidth;
+        if (left > maxRight) {
+          // Zone starts beyond last candle - skip it entirely
+          console.warn('[Zone] Skipping zone that starts beyond last candle:', zone.pattern_type, 'left:', left, 'maxRight:', maxRight);
           return;
         }
-
-        // Calculate zone width (limit max width)
-        let left = x1;
-        let right = x2 !== null ? x2 : (rect.width - priceScaleWidth);
-        let width = Math.min(right - left, 200); // Max 200px width
-        if (width < 30) width = 30; // Min 30px
+        if (left + width > maxRight) {
+          // Clip width to not extend beyond last candle
+          width = maxRight - left;
+          // If clipped width is too small, skip the zone instead of forcing minimum
+          if (width < 20) {
+            console.warn('[Zone] Skipping zone - clipped width too small:', width);
+            return;
+          }
+        }
 
         // Clip to chart area
         if (left + width > rect.width - priceScaleWidth) {
@@ -2066,29 +2481,45 @@ const TradingChart = ({
         }
         if (width <= 0) return;
 
-        // Determine SHORT vs LONG based on pattern_type or direction
-        const patternType = zone.pattern_type || zone.patternType || '';
-        const shortPatterns = ['UPD', 'DPD', 'Double Top', 'Head and Shoulders', 'HFZ', 'Bearish'];
-        const isShort = zone.direction === 'BEARISH' ||
-                        zone.direction === 'SHORT' ||
-                        zone.direction === 'sell' ||
-                        shortPatterns.some(p => patternType.toUpperCase().includes(p.toUpperCase()));
+        // ✅✅✅ CRITICAL FIX: Determine direction based on STOP LOSS position vs ENTRY
+        // - SL < Entry → LONG (MUA) - SL ở dưới bảo vệ lệnh mua
+        // - SL > Entry → SHORT (BÁN) - SL ở trên bảo vệ lệnh bán
+        // This is the ONLY correct way - SL position defines trade direction!
+        const entryForDir = parseFloat(zone.entry_price || zone.entryPrice || zone.zone_high || zone.zone_low || 0);
+        const slForDir = parseFloat(zone.stop_loss || zone.stopLoss || zone.stop_price || zone.sl || 0);
 
-        // Get price levels (check multiple naming conventions)
+        // Skip zones with invalid entry or SL
+        if (!entryForDir || entryForDir <= 0 || isNaN(entryForDir)) {
+          console.warn('[Zone] Skipping zone with invalid entry:', entryForDir);
+          return;
+        }
+
+        // ✅ CORRECT RULE: SL above entry = SHORT, SL below entry = LONG
+        const isShort = slForDir > 0 && slForDir > entryForDir;
+
+        // Get price levels
         const entryPrice = parseFloat(zone.entry_price || zone.entryPrice || zone.entry || zone.price_level || 0);
         const stopLoss = parseFloat(zone.stop_loss || zone.stopLoss || zone.stop_price || zone.sl || 0);
-        const takeProfit = parseFloat(zone.take_profit || zone.takeProfit || zone.target_1 || zone.tp || 0);
 
-        console.log('🔴 [DRAW] Zone[' + idx + '] levels:', {
-          isShort,
-          entryPrice,
-          stopLoss,
-          takeProfit
-        });
+        // ✅ Get TP from multiple sources + FALLBACK calculation
+        let takeProfit = parseFloat(zone.take_profit || zone.takeProfit || zone.target_1 || zone.tp || zone.target || zone.targetPrice || 0);
 
-        // Skip if missing entry price
+        // ✅ VALIDATE TP direction: For SHORT, TP must be BELOW entry. For LONG, TP must be ABOVE entry.
+        // If TP is on wrong side, recalculate it
+        const tpOnWrongSide = takeProfit > 0 && (
+          (isShort && takeProfit > entryPrice) ||  // SHORT but TP above entry = wrong
+          (!isShort && takeProfit < entryPrice)    // LONG but TP below entry = wrong
+        );
+
+        // ✅ CALCULATE TP if missing OR on wrong side (R:R = 1:2 default)
+        if ((!takeProfit || takeProfit <= 0 || tpOnWrongSide) && entryPrice > 0 && stopLoss > 0) {
+          const risk = Math.abs(entryPrice - stopLoss);
+          // BUY (not short) = TP above entry, SELL (short) = TP below entry
+          takeProfit = isShort ? entryPrice - (risk * 2) : entryPrice + (risk * 2);
+        }
+
+        // Fallback to zone_high/zone_low if no entry price
         if (!entryPrice || entryPrice <= 0) {
-          // Fallback to old zone_high/zone_low rendering
           const high = parseFloat(zone.zone_high || zone.zoneHigh || zone.high || 0);
           const low = parseFloat(zone.zone_low || zone.zoneLow || zone.low || 0);
           if (high > 0 && low > 0) {
@@ -2098,9 +2529,19 @@ const TradingChart = ({
               const top = Math.min(y1, y2);
               const height = Math.abs(y2 - y1);
               zoneCtx.fillStyle = isShort
-                ? 'rgba(220, 53, 69, 0.30)'
-                : 'rgba(14, 203, 129, 0.30)';
+                ? (isSelected ? SELECTED_RED : DARK_RED)
+                : (isSelected ? SELECTED_GREEN : DARK_GREEN);
               zoneCtx.fillRect(left, top, width, Math.max(height, 5));
+
+              // Store bounds for hit detection
+              zoneBounds.push({ index: idx, left, right: left + width, top, bottom: top + height });
+
+              // Draw border if selected
+              if (isSelected) {
+                zoneCtx.strokeStyle = isShort ? '#dc3545' : '#0ecb81';
+                zoneCtx.lineWidth = 2;
+                zoneCtx.strokeRect(left, top, width, height);
+              }
             }
           }
           return;
@@ -2111,91 +2552,187 @@ const TradingChart = ({
         const slY = stopLoss > 0 ? candleSeries.priceToCoordinate(stopLoss) : null;
         const tpY = takeProfit > 0 ? candleSeries.priceToCoordinate(takeProfit) : null;
 
-        if (entryY === null) {
-          console.log('🔴 [DRAW] Zone[' + idx + '] - Entry Y null, skipping');
-          return;
+        if (entryY === null) return;
+
+        // Calculate zone bounds for hit detection
+        let zoneTop = entryY;
+        let zoneBottom = entryY;
+        if (slY !== null) {
+          zoneTop = Math.min(zoneTop, slY);
+          zoneBottom = Math.max(zoneBottom, slY);
+        }
+        if (tpY !== null) {
+          zoneTop = Math.min(zoneTop, tpY);
+          zoneBottom = Math.max(zoneBottom, tpY);
         }
 
-        // ========== DRAW ZONES ==========
-        const RED = 'rgba(220, 53, 69, 0.35)';
-        const GREEN = 'rgba(14, 203, 129, 0.35)';
-        const RED_SOLID = 'rgba(220, 53, 69, 0.8)';
-        const GREEN_SOLID = 'rgba(14, 203, 129, 0.8)';
+        // Store bounds for hit detection
+        zoneBounds.push({
+          index: idx,
+          left,
+          right: left + width,
+          top: zoneTop,
+          bottom: zoneBottom
+        });
+
+        // ✅ Format price for labels - VIETNAMESE: 95.880,50
+        function formatPriceVN(price) {
+          if (!price && price !== 0) return '-';
+          const num = parseFloat(price);
+          if (isNaN(num)) return '-';
+          // Số nhỏ < 1: 0,2716
+          if (Math.abs(num) < 1) {
+            return num.toFixed(4).replace('.', ',');
+          }
+          // Số lớn: 95.880,50
+          const fixed = num.toFixed(2);
+          const [integer, decimal] = fixed.split('.');
+          const intFormatted = integer.replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');
+          return intFormatted + ',' + decimal;
+        }
+        const formatPrice = formatPriceVN;
+        const labelX = left + 4;
 
         if (isShort) {
           // === SHORT/SELL Pattern ===
           // SL above entry (RED), TP below entry (GREEN)
 
-          // 1. STOP LOSS Zone (RED - above entry)
+          // 1. STOP LOSS Zone (DARK RED - above entry)
           if (slY !== null && slY < entryY) {
-            zoneCtx.fillStyle = RED;
             const slTop = slY;
             const slHeight = entryY - slY;
+            zoneCtx.fillStyle = isSelected ? SELECTED_RED : DARK_RED;
             zoneCtx.fillRect(left, slTop, width, Math.max(slHeight, 3));
 
-            // SL Label
-            zoneCtx.fillStyle = 'rgba(220, 53, 69, 0.9)';
-            zoneCtx.font = '10px Arial';
-            zoneCtx.fillText('SL', left + 4, slTop + 12);
+            // SL Line (dashed) - dim when not selected
+            zoneCtx.globalAlpha = LABEL_ALPHA;
+            zoneCtx.setLineDash([4, 4]);
+            zoneCtx.strokeStyle = '#dc3545';
+            zoneCtx.lineWidth = 1;
+            zoneCtx.beginPath();
+            zoneCtx.moveTo(left, slTop);
+            zoneCtx.lineTo(left + width, slTop);
+            zoneCtx.stroke();
+            zoneCtx.setLineDash([]);
+
+            // ✅ SL Label - dim when not selected
+            zoneCtx.fillStyle = '#dc3545';
+            zoneCtx.font = 'bold 10px Arial';
+            zoneCtx.fillText('Cắt lỗ ' + formatPrice(stopLoss), labelX, slTop - 4);
+            zoneCtx.globalAlpha = 1.0;
           }
 
-          // 2. ENTRY LINE (Red solid line)
-          zoneCtx.fillStyle = RED_SOLID;
-          zoneCtx.fillRect(left, entryY - 2, width, 4);
+          // 2. ENTRY LINE - ✅ CYAN COLOR with "Bán" label
+          zoneCtx.globalAlpha = LABEL_ALPHA;
+          zoneCtx.fillStyle = CYAN_ENTRY;
+          zoneCtx.fillRect(left, entryY - 1, width, 2);
 
-          // Entry Label
-          zoneCtx.fillStyle = '#ffffff';
+          // Entry label - "Bán" for SHORT (VIETNAMESE)
+          zoneCtx.fillStyle = CYAN_ENTRY;
           zoneCtx.font = 'bold 11px Arial';
-          zoneCtx.fillText('Entry', left + 4, entryY - 6);
+          zoneCtx.fillText('Bán ' + formatPrice(entryPrice), labelX, entryY - 6);
+          zoneCtx.globalAlpha = 1.0;
 
-          // 3. TAKE PROFIT Zone (GREEN - below entry)
+          // 3. TAKE PROFIT Zone (DARK GREEN - below entry)
           if (tpY !== null && tpY > entryY) {
-            zoneCtx.fillStyle = GREEN;
             const tpHeight = tpY - entryY;
+            zoneCtx.fillStyle = isSelected ? SELECTED_GREEN : DARK_GREEN;
             zoneCtx.fillRect(left, entryY, width, Math.max(tpHeight, 3));
 
-            // TP Label
-            zoneCtx.fillStyle = 'rgba(14, 203, 129, 0.9)';
-            zoneCtx.font = '10px Arial';
-            zoneCtx.fillText('TP', left + 4, entryY + tpHeight / 2 + 4);
+            // TP Line (dashed) - dim when not selected
+            zoneCtx.globalAlpha = LABEL_ALPHA;
+            zoneCtx.setLineDash([4, 4]);
+            zoneCtx.strokeStyle = '#0ecb81';
+            zoneCtx.lineWidth = 1;
+            zoneCtx.beginPath();
+            zoneCtx.moveTo(left, tpY);
+            zoneCtx.lineTo(left + width, tpY);
+            zoneCtx.stroke();
+            zoneCtx.setLineDash([]);
+
+            // ✅ TP Label - dim when not selected
+            zoneCtx.fillStyle = '#0ecb81';
+            zoneCtx.font = 'bold 10px Arial';
+            zoneCtx.fillText('Chốt lời ' + formatPrice(takeProfit), labelX, tpY + 14);
+            zoneCtx.globalAlpha = 1.0;
+          }
+
+          // Draw border when selected
+          if (isSelected) {
+            zoneCtx.strokeStyle = '#dc3545';
+            zoneCtx.lineWidth = 2;
+            zoneCtx.strokeRect(left, zoneTop, width, zoneBottom - zoneTop);
           }
 
         } else {
           // === LONG/BUY Pattern ===
           // TP above entry (GREEN), SL below entry (RED)
 
-          // 1. TAKE PROFIT Zone (GREEN - above entry)
+          // 1. TAKE PROFIT Zone (DARK GREEN - above entry)
           if (tpY !== null && tpY < entryY) {
-            zoneCtx.fillStyle = GREEN;
             const tpTop = tpY;
             const tpHeight = entryY - tpY;
+            zoneCtx.fillStyle = isSelected ? SELECTED_GREEN : DARK_GREEN;
             zoneCtx.fillRect(left, tpTop, width, Math.max(tpHeight, 3));
 
-            // TP Label
-            zoneCtx.fillStyle = 'rgba(14, 203, 129, 0.9)';
-            zoneCtx.font = '10px Arial';
-            zoneCtx.fillText('TP', left + 4, tpTop + 12);
+            // TP Line (dashed)
+            zoneCtx.globalAlpha = LABEL_ALPHA;
+            zoneCtx.setLineDash([4, 4]);
+            zoneCtx.strokeStyle = '#0ecb81';
+            zoneCtx.lineWidth = 1;
+            zoneCtx.beginPath();
+            zoneCtx.moveTo(left, tpTop);
+            zoneCtx.lineTo(left + width, tpTop);
+            zoneCtx.stroke();
+            zoneCtx.setLineDash([]);
+
+            // ✅ TP Label - dim when not selected
+            zoneCtx.fillStyle = '#0ecb81';
+            zoneCtx.font = 'bold 10px Arial';
+            zoneCtx.fillText('Chốt lời ' + formatPrice(takeProfit), labelX, tpTop - 4);
+            zoneCtx.globalAlpha = 1.0;
           }
 
-          // 2. ENTRY LINE (Green solid line)
-          zoneCtx.fillStyle = GREEN_SOLID;
-          zoneCtx.fillRect(left, entryY - 2, width, 4);
+          // 2. ENTRY LINE - ✅ CYAN COLOR with "Mua" label
+          zoneCtx.globalAlpha = LABEL_ALPHA;
+          zoneCtx.fillStyle = CYAN_ENTRY;
+          zoneCtx.fillRect(left, entryY - 1, width, 2);
 
-          // Entry Label
-          zoneCtx.fillStyle = '#ffffff';
+          // Entry label - "Mua" for LONG (VIETNAMESE)
+          zoneCtx.fillStyle = CYAN_ENTRY;
           zoneCtx.font = 'bold 11px Arial';
-          zoneCtx.fillText('Entry', left + 4, entryY - 6);
+          zoneCtx.fillText('Mua ' + formatPrice(entryPrice), labelX, entryY - 6);
+          zoneCtx.globalAlpha = 1.0;
 
-          // 3. STOP LOSS Zone (RED - below entry)
+          // 3. STOP LOSS Zone (DARK RED - below entry)
           if (slY !== null && slY > entryY) {
-            zoneCtx.fillStyle = RED;
             const slHeight = slY - entryY;
+            zoneCtx.fillStyle = isSelected ? SELECTED_RED : DARK_RED;
             zoneCtx.fillRect(left, entryY, width, Math.max(slHeight, 3));
 
-            // SL Label
-            zoneCtx.fillStyle = 'rgba(220, 53, 69, 0.9)';
-            zoneCtx.font = '10px Arial';
-            zoneCtx.fillText('SL', left + 4, entryY + slHeight / 2 + 4);
+            // SL Line (dashed)
+            zoneCtx.globalAlpha = LABEL_ALPHA;
+            zoneCtx.setLineDash([4, 4]);
+            zoneCtx.strokeStyle = '#dc3545';
+            zoneCtx.lineWidth = 1;
+            zoneCtx.beginPath();
+            zoneCtx.moveTo(left, slY);
+            zoneCtx.lineTo(left + width, slY);
+            zoneCtx.stroke();
+            zoneCtx.setLineDash([]);
+
+            // ✅ SL Label - dim when not selected
+            zoneCtx.fillStyle = '#dc3545';
+            zoneCtx.font = 'bold 10px Arial';
+            zoneCtx.fillText('Cắt lỗ ' + formatPrice(stopLoss), labelX, slY + 14);
+            zoneCtx.globalAlpha = 1.0;
+          }
+
+          // Draw border when selected
+          if (isSelected) {
+            zoneCtx.strokeStyle = '#0ecb81';
+            zoneCtx.lineWidth = 2;
+            zoneCtx.strokeRect(left, zoneTop, width, zoneBottom - zoneTop);
           }
         }
       });
@@ -2230,6 +2767,7 @@ const TradingChart = ({
 
       if (!zones || !Array.isArray(zones) || zones.length === 0) {
         console.log('[Chart.updateZones] No zones to render');
+        updateZoneCanvasPointerEvents(); // Ensure pointer events are disabled
         return;
       }
 
@@ -2263,19 +2801,34 @@ const TradingChart = ({
         index: idx,
       }));
 
-      // Debug: Log zones being rendered
+      // Debug: Log zones being rendered - CHECK FOR CLUSTERING
+      console.log('🔴🔴🔴 [DEBUG] Zone time analysis:');
+      const startTimes = [];
       activeZones.forEach((z, i) => {
-        console.log('[Chart.updateZones] Zone ' + i + ':', {
-          type: z.zone_type || z.type || 'LFZ',
-          high: z.zone_high || z.high,
-          low: z.zone_low || z.low,
-          start_time: z.start_time || z.startTime,
-          pattern_type: z.pattern_type || z.patternType
+        const st = z.start_time || z.startTime || z.formation_time;
+        const et = z.end_time || z.endTime;
+        startTimes.push(st);
+        console.log('🔴 Zone[' + i + '] ' + (z.pattern_type || z.type) + ':', {
+          start_time: st,
+          end_time: et,
+          start_date: st ? new Date(st * 1000).toLocaleString() : 'N/A',
+          end_date: et ? new Date(et * 1000).toLocaleString() : 'N/A',
+          entry: z.entry_price || z.entryPrice,
         });
       });
 
+      // Check for duplicate start_times (clustering issue)
+      const uniqueTimes = [...new Set(startTimes.filter(t => t))];
+      console.log('🔴🔴🔴 Unique start_times:', uniqueTimes.length, '/', startTimes.length);
+      if (uniqueTimes.length < startTimes.length) {
+        console.warn('🔴🔴🔴 WARNING: Multiple zones have SAME start_time - causing clustering!');
+      }
+
       // Start animation loop (zones now move with chart pan/scroll)
       startZoneAnimation();
+
+      // Enable pointer events for tap-to-select now that we have zones
+      updateZoneCanvasPointerEvents();
 
       console.log('[Chart.updateZones] ✅ Done! Zones will move with chart (canvas-based).');
     };
@@ -2291,8 +2844,15 @@ const TradingChart = ({
         zoneCtx.clearRect(0, 0, rect.width, rect.height);
       }
 
-      // Clear zone data
+      // Clear zone data and selection
       activeZones = [];
+      zoneBounds = [];
+      selectedZoneIndex = null;
+      hideZoneTooltip(true); // Force hide when clearing all zones
+
+      // Disable pointer events since no zones to tap
+      updateZoneCanvasPointerEvents();
+
       console.log('[Chart.clearZones] ✅ Cleared all zones (canvas)');
     };
 
@@ -2510,10 +3070,47 @@ const TradingChart = ({
       return minPriceDiff < snapThreshold ? nearestPrice : price;
     }
 
-    // Handle chart click for drawing
+    // Handle chart click for drawing AND zone selection
     function setupDrawingClickHandler() {
       chart.subscribeClick(param => {
-        if (!currentDrawingMode || !param.point || !param.time) return;
+        console.log('[Zone] ===== CLICK EVENT =====', Date.now());
+        if (!param.point) return;
+
+        // ✅ ZONE SELECTION via chart.subscribeClick() (not canvas touch events)
+        // This allows pan/zoom to work while still enabling zone taps
+        if (!currentDrawingMode && activeZones && activeZones.length > 0) {
+          const clickedZoneIndex = findZoneAtPoint(param.point.x, param.point.y);
+          console.log('[Zone] Click at:', param.point.x, param.point.y, '-> zoneIndex:', clickedZoneIndex, 'zoneBounds:', zoneBounds.length);
+
+          if (clickedZoneIndex !== null && clickedZoneIndex < activeZones.length) {
+            selectedZoneIndex = clickedZoneIndex;
+            const zone = activeZones[clickedZoneIndex];
+            if (zone) {
+              console.log('[Zone] SHOWING tooltip for zone:', zone.pattern_type || zone.pattern_name);
+              showZoneTooltip(zone, param.point.x, param.point.y);
+            }
+            console.log('[Zone] chart.subscribeClick selected zone:', clickedZoneIndex);
+
+            // ⚠️ ZONE-PATTERN SYNC: Notify React Native of zone selection
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'zone_press',
+                zoneId: zone.id || zone.pattern_id,
+                zone: zone
+              }));
+            }
+          } else {
+            console.log('[Zone] HIDING tooltip - clicked outside zone, tooltipJustShown:', tooltipJustShown);
+            selectedZoneIndex = null;
+            hideZoneTooltip();
+            console.log('[Zone] chart.subscribeClick deselected');
+          }
+          drawZonesOnCanvas();
+          return; // Don't process as drawing when zone selection happened
+        }
+
+        // Drawing mode handling
+        if (!currentDrawingMode || !param.time) return;
 
         const price = candleSeries.coordinateToPrice(param.point.y);
         const time = param.time;
