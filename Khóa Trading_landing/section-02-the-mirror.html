@@ -1,7 +1,4 @@
-
-
-
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Section 2: The Mirror - Frequency Trading Method</title>
     
@@ -131,19 +128,43 @@
             border-radius: 30px;
             padding: 40px 35px;
             transition: all 0.5s ease;
-            animation: fadeInUp 0.8s ease-out backwards;
+            opacity: 0;
+            transform: translateY(40px);
         }
 
-        .mirror-card:nth-child(1) { animation-delay: 0.5s; }
-        .mirror-card:nth-child(2) { animation-delay: 0.6s; }
-        .mirror-card:nth-child(3) { animation-delay: 0.7s; }
-        .mirror-card:nth-child(4) { animation-delay: 0.8s; }
-        .mirror-card:nth-child(5) { animation-delay: 0.9s; }
+        /* Animation when scrolled into view */
+        .mirror-card.in-view {
+            animation: cardReveal 0.8s ease-out forwards;
+        }
+
+        .mirror-card.in-view.highlight {
+            border-color: var(--gold-accent);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7),
+                        0 0 50px rgba(255, 189, 89, 0.5);
+        }
+
+        @keyframes cardReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stagger animation delays */
+        .mirror-card:nth-child(1).in-view { animation-delay: 0s; }
+        .mirror-card:nth-child(2).in-view { animation-delay: 0.15s; }
+        .mirror-card:nth-child(3).in-view { animation-delay: 0.3s; }
+        .mirror-card:nth-child(4).in-view { animation-delay: 0.45s; }
+        .mirror-card:nth-child(5).in-view { animation-delay: 0.6s; }
 
         .mirror-card:hover {
             transform: translateY(-18px) scale(1.02);
             border-color: var(--gold-accent);
-            box-shadow: 0 35px 90px rgba(0, 0, 0, 0.9), 
+            box-shadow: 0 35px 90px rgba(0, 0, 0, 0.9),
                         0 0 70px rgba(255, 189, 89, 0.6);
         }
 
@@ -495,6 +516,68 @@
                 padding: 16px 35px;
                 font-size: 1rem;
             }
+
+            /* Quiz Modal - Mobile Compact */
+            .quiz-modal {
+                padding: 20px 15px;
+                max-height: 85vh;
+                border-radius: 20px;
+            }
+
+            .quiz-title {
+                font-size: 1.3rem;
+            }
+
+            .quiz-question-text {
+                font-size: 1.1rem;
+                margin-bottom: 15px;
+            }
+
+            .quiz-option {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+
+            /* Quiz Result - Mobile Compact */
+            .quiz-result {
+                padding: 10px 5px;
+            }
+
+            .result-emoji {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+
+            .result-title {
+                font-size: 1.3rem;
+                margin-bottom: 10px;
+            }
+
+            .result-description {
+                font-size: 0.95rem;
+                line-height: 1.5;
+                margin-bottom: 15px;
+            }
+
+            .result-recommendation {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .result-recommendation-title {
+                font-size: 0.95rem;
+                margin-bottom: 6px;
+            }
+
+            .result-recommendation-text {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+
+            .btn-result-cta {
+                font-size: 0.95rem;
+                padding: 14px 30px;
+            }
         }
     </style>
 
@@ -706,13 +789,51 @@
                     <div class="result-recommendation-title" id="resultRecommendationTitle">Khuyến nghị cho bạn</div>
                     <p class="result-recommendation-text" id="resultRecommendationText">Nội dung khuyến nghị</p>
                 </div>
-                <a href="#pricing" class="btn-result-cta" id="resultCTA">Xem Gói Phù Hợp</a>
+                <a href="#pricing" class="btn-result-cta" id="resultCTA" onclick="closeQuiz()">Xem Gói Phù Hợp</a>
             </div>
         </div>
     </div>
 
 <script>
     lucide.createIcons();
+
+    // ==================== SCROLL ANIMATION - Auto highlight cards ====================
+    (function initScrollAnimation() {
+        const cards = document.querySelectorAll('.mirror-card');
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -100px 0px',
+            threshold: 0.2
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    // Add in-view class to trigger animation
+                    card.classList.add('in-view');
+
+                    // Add highlight effect after card appears
+                    setTimeout(() => {
+                        card.classList.add('highlight');
+                    }, 800);
+
+                    // Remove highlight after 2 seconds (but keep visible)
+                    setTimeout(() => {
+                        card.classList.remove('highlight');
+                    }, 2800);
+
+                    // Stop observing this card
+                    observer.unobserve(card);
+                }
+            });
+        }, observerOptions);
+
+        cards.forEach(card => {
+            observer.observe(card);
+        });
+    })();
 
     // ==================== QUIZ FUNCTIONALITY ====================
     let currentQuestion = 1;
@@ -872,4 +993,3 @@
         }
     });
 </script>
-
