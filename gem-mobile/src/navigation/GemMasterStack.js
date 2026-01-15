@@ -2,6 +2,7 @@
  * Gemral - Gemral Stack Navigator
  * Stack for AI Chat, I Ching, Tarot, and Chat History screens
  * UPDATED: Added ProductDetail screen for in-stack navigation
+ * UPDATED: Added Rituals and Gamification screens for chatbot upgrade
  */
 
 import React from 'react';
@@ -16,6 +17,10 @@ import SpreadSelectionScreen from '../screens/GemMaster/SpreadSelectionScreen';
 import TarotReadingScreen from '../screens/GemMaster/TarotReadingScreen';
 import ReadingHistoryScreen from '../screens/GemMaster/ReadingHistoryScreen';
 import ReadingDetailScreen from '../screens/GemMaster/ReadingDetailScreen';
+
+// Chatbot Upgrade Screens
+import RitualsScreen from '../screens/GemMaster/RitualsScreen';
+import GamificationScreen from '../screens/GemMaster/GamificationScreen';
 
 // Shop screens (for crystal/product recommendations without cross-tab navigation)
 import { ProductDetailScreen } from '../screens/Shop';
@@ -52,6 +57,10 @@ export default function GemMasterStack() {
 
       {/* Shop screens - navigate within stack instead of switching tabs */}
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+
+      {/* Chatbot Upgrade - Rituals & Gamification */}
+      <Stack.Screen name="Rituals" component={RitualsScreen} />
+      <Stack.Screen name="Gamification" component={GamificationScreen} />
     </Stack.Navigator>
   );
 }

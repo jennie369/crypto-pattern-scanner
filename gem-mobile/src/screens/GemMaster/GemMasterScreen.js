@@ -89,6 +89,12 @@ import UpsellModal from '../../components/GemMaster/UpsellModal';
 // NEW: Binance-style FAQ Panel
 import FAQPanel from '../../components/GemMaster/FAQPanel';
 
+// NEW: Chatbot Upgrade UI Components (Memory, Emotion, Proactive, Gamification)
+import PersonalizedGreeting from '../../components/GemMaster/PersonalizedGreeting';
+import { EmotionIndicator, EmotionBadge } from '../../components/GemMaster/EmotionIndicator';
+import { StreakDisplay, MiniStreak } from '../../components/GemMaster/StreakDisplay';
+import { ProactiveMessageCard, ProactiveMessageList } from '../../components/GemMaster/ProactiveMessageCard';
+
 // NEW: Upgrade Banner for quota exhausted
 import { UpgradeBanner } from '../../components/upgrade';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
@@ -104,6 +110,15 @@ import widgetFactoryService from '../../services/widgetFactoryService';
 import RecommendationEngine from '../../services/recommendationEngine';
 import chatHistoryService from '../../services/chatHistoryService';
 import { supabase } from '../../services/supabase';
+
+// NEW: Chatbot Upgrade Services (Memory, Emotion, Proactive, etc.)
+import userMemoryService from '../../services/userMemoryService';
+import emotionDetectionService from '../../services/emotionDetectionService';
+import streakService from '../../services/streakService';
+import proactiveAIService from '../../services/proactiveAIService';
+import accessControlService from '../../services/accessControlService';
+import ritualTrackingService from '../../services/ritualTrackingService';
+import { isFeatureEnabled, FEATURES } from '../../config/featureFlags';
 // NEW: Widget and Crystal services
 import { detectWidgetTrigger } from '../../services/widgetDetectionService';
 import { shouldShowCrystalRecommendations, extractShopifyTags } from '../../services/crystalTagMappingService';
@@ -265,6 +280,27 @@ const GemMasterScreen = ({ navigation, route }) => {
     topicId: null,
   });
 
+  // ===== CHATBOT UPGRADE STATE =====
+  // Personalized memory & context
+  const [userProfile, setUserProfile] = useState(null);
+  const [personalizedContext, setPersonalizedContext] = useState(null);
+
+  // Emotion detection
+  const [currentEmotion, setCurrentEmotion] = useState(null);
+
+  // Proactive AI messages
+  const [pendingProactiveMessages, setPendingProactiveMessages] = useState([]);
+
+  // Streaks & Gamification
+  const [gamificationSummary, setGamificationSummary] = useState(null);
+
+  // Today's ritual status
+  const [todayRituals, setTodayRituals] = useState(null);
+
+  // Crisis alert state (for emergency emotion detection)
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [crisisInfo, setCrisisInfo] = useState(null);
+
   // Fetch user and tier on mount
   useEffect(() => {
     const fetchUserAndTier = async () => {
@@ -324,6 +360,62 @@ const GemMasterScreen = ({ navigation, route }) => {
       subscription?.unsubscribe();
     };
   }, []);
+
+  // ===== CHATBOT UPGRADE: Load Personalized Data =====
+  useEffect(() => {
+    const loadPersonalizedData = async () => {
+      if (!user?.id) return;
+
+      try {
+        // Load user profile for personalization
+        if (isFeatureEnabled(FEATURES.MEMORY)) {
+          const profile = await userMemoryService.getUserProfile(user.id);
+          setUserProfile(profile);
+          console.log('[GemMaster] Loaded user profile:', profile?.preferred_name || 'new user');
+        }
+
+        // Load pending proactive messages
+        if (isFeatureEnabled(FEATURES.PROACTIVE)) {
+          const pending = await proactiveAIService.getPendingMessages(user.id);
+          setPendingProactiveMessages(pending);
+          console.log('[GemMaster] Pending proactive messages:', pending?.length || 0);
+
+          // Generate daily insight if needed (once per day)
+          proactiveAIService.generateDailyInsight(user.id).catch(err => {
+            console.warn('[GemMaster] Daily insight error:', err);
+          });
+        }
+
+        // Load gamification summary
+        if (isFeatureEnabled(FEATURES.GAMIFICATION)) {
+          const summary = await streakService.getGamificationSummary(user.id);
+          setGamificationSummary(summary);
+          console.log('[GemMaster] Gamification:', summary?.level?.name, 'Level', summary?.level?.level);
+
+          // Check streak risk and generate alerts
+          proactiveAIService.checkStreaksAndAlert(user.id).catch(err => {
+            console.warn('[GemMaster] Streak alert error:', err);
+          });
+        }
+
+        // Load today's ritual status
+        if (isFeatureEnabled(FEATURES.RITUALS)) {
+          const rituals = await ritualTrackingService.getTodayStatus(user.id);
+          setTodayRituals(rituals);
+          console.log('[GemMaster] Today rituals:', rituals?.completedCount, '/', rituals?.totalCount);
+
+          // Generate ritual reminders
+          proactiveAIService.generateRitualReminders(user.id).catch(err => {
+            console.warn('[GemMaster] Ritual reminder error:', err);
+          });
+        }
+      } catch (error) {
+        console.error('[GemMaster] Error loading personalized data:', error);
+      }
+    };
+
+    loadPersonalizedData();
+  }, [user?.id]);
 
   // Hide tab bar when keyboard shows - INSTANT position change
   useEffect(() => {
@@ -714,6 +806,54 @@ const GemMasterScreen = ({ navigation, route }) => {
         return;
       }
 
+      // AUTO-CLOSE inline form if user sends a new message (ignoring the form)
+      if (inlineFormState.visible) {
+        console.log('[GemMaster] Auto-closing inline form - user sent new message');
+        setInlineFormState({
+          visible: false,
+          formType: 'goal',
+          preSelectedArea: null,
+          userInput: null,
+        });
+      }
+
+      // ===== CHATBOT UPGRADE: Emotion Detection & Crisis Check =====
+      let emotionData = null;
+      let personalizedCtx = null;
+
+      if (isFeatureEnabled(FEATURES.EMOTION) && user?.id) {
+        try {
+          // Detect emotions BEFORE processing message
+          emotionData = await emotionDetectionService.detectEmotions(text, user.id);
+          console.log('[GemMaster] Emotion detected:', emotionData?.primary, 'Frequency:', emotionData?.frequency?.hz);
+          setCurrentEmotion(emotionData);
+
+          // Check for crisis keywords - show immediate support
+          if (emotionData?.crisis) {
+            setCrisisInfo(emotionData.crisis);
+            setShowCrisisAlert(true);
+            // Don't block the message, but show crisis support modal
+          }
+        } catch (emotionError) {
+          console.warn('[GemMaster] Emotion detection error:', emotionError);
+        }
+      }
+
+      // ===== CHATBOT UPGRADE: Build Personalized Context =====
+      if (isFeatureEnabled(FEATURES.MEMORY_PERSONALIZATION) && user?.id) {
+        try {
+          personalizedCtx = await userMemoryService.buildPersonalizedContext(user.id, text);
+          setPersonalizedContext(personalizedCtx);
+          console.log('[GemMaster] Personalized context built:', {
+            hasProfile: !!personalizedCtx?.profile,
+            memoriesCount: personalizedCtx?.relevantMemories?.length || 0,
+            hasGoals: !!personalizedCtx?.goals?.length,
+          });
+        } catch (ctxError) {
+          console.warn('[GemMaster] Context building error:', ctxError);
+        }
+      }
+
       // NEW: Detect goal/affirmation intent → show INLINE form instead of modal
       const intentDetection = detectGoalAffirmationIntent(text);
       if (intentDetection.shouldShowForm) {
@@ -728,13 +868,49 @@ const GemMasterScreen = ({ navigation, route }) => {
         };
         setMessages((prev) => [...prev, userMessage]);
 
-        // Show INLINE form instead of modal (better UX - stays in chat)
-        setInlineFormState({
-          visible: true,
-          formType: intentDetection.formType,
-          preSelectedArea: intentDetection.preSelectedArea,
-          userInput: intentDetection.userInput,
-        });
+        // Determine brief message based on detected life area
+        const briefMessages = {
+          finance: '💰 Tôi sẽ hướng dẫn bạn manifest tiền bạc và thịnh vượng. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+          career: '💼 Tôi sẽ hướng dẫn bạn đặt mục tiêu sự nghiệp và phát triển công việc. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+          health: '🏃 Tôi sẽ hướng dẫn bạn đặt mục tiêu sức khỏe và lối sống lành mạnh. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+          relationships: '💕 Tôi sẽ hướng dẫn bạn manifest tình yêu và các mối quan hệ tốt đẹp. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+          personal: '✨ Tôi sẽ hướng dẫn bạn phát triển bản thân và nâng cao kỹ năng. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+          spiritual: '🙏 Tôi sẽ hướng dẫn bạn phát triển tâm thức và tìm thấy bình an nội tâm. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+        };
+
+        // Default message if no specific area detected
+        const defaultBrief = intentDetection.formType === 'affirmation'
+          ? '✨ Tôi sẽ giúp bạn tạo câu khẳng định tích cực. Để tạo affirmation phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.'
+          : '🎯 Tôi sẽ hướng dẫn bạn đặt mục tiêu hiệu quả. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.';
+
+        const briefText = intentDetection.preSelectedArea
+          ? briefMessages[intentDetection.preSelectedArea] || defaultBrief
+          : defaultBrief;
+
+        // Add AI brief message BEFORE showing form
+        const briefMsg = {
+          id: `brief_${Date.now()}`,
+          type: 'assistant',
+          text: briefText,
+          timestamp: new Date().toISOString(),
+          source: 'intent_brief',
+        };
+        setMessages((prev) => [...prev, briefMsg]);
+
+        // Auto-scroll to show messages
+        setTimeout(() => {
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }, 100);
+
+        // Show INLINE form after a small delay for better UX (gives user time to read brief)
+        setTimeout(() => {
+          setInlineFormState({
+            visible: true,
+            formType: intentDetection.formType,
+            preSelectedArea: intentDetection.preSelectedArea,
+            userInput: intentDetection.userInput,
+          });
+        }, 500);
         return; // Don't send to AI, show inline form instead
       }
 
@@ -784,8 +960,20 @@ const GemMasterScreen = ({ navigation, route }) => {
         const isQuestionnaireMode = response.mode === 'questionnaire' || response.isQuestionMessage;
 
         // STRICT keywords - only trigger for explicit mentions
-        // Course keywords: Only when user asks about learning/courses
-        const courseKeywords = ['khóa học', 'khoá học', 'course', 'học trading', 'học giao dịch', 'muốn học', 'dạy tôi', 'hướng dẫn học'];
+        // Course keywords: Only when user asks about learning/courses (both mindset & trading)
+        const courseKeywords = [
+          // General course terms
+          'khóa học', 'khoá học', 'course', 'học', 'muốn học', 'dạy tôi', 'hướng dẫn học', 'giáo trình',
+          // Trading courses
+          'học trading', 'học giao dịch', 'tier 1', 'tier 2', 'tier 3', 'tier1', 'tier2', 'tier3', 'starter',
+          '11 triệu', '21 triệu', '68 triệu', '11m', '21m', '68m', 'harmonic', 'elliott', 'wyckoff', 'smc',
+          'smart money', 'ai prediction', 'whale tracker',
+          // Mindset courses
+          '7 ngày', 'khai mở', 'tần số gốc', 'tần số', 'tình yêu', 'kích hoạt', '42 ngày', 'boss lady',
+          'triệu phú', 'tư duy', 'millionaire', 'mindset', '49 ngày', 'chữa lành', 'năng lượng', 'hawkins',
+          // Prices
+          '299k', '399k', '499k',
+        ];
         // Crystal keywords: Only when specifically asking about crystals/stones
         const crystalKeywords = ['thạch anh', 'crystal', 'đá phong thủy', 'gợi ý đá', 'đá nào', 'mua đá', 'tìm đá'];
 
@@ -800,10 +988,19 @@ const GemMasterScreen = ({ navigation, route }) => {
           (response.scenario?.crystal && response.text?.includes(response.scenario.crystal));
 
         // Only show courses if user explicitly asks OR AI explicitly recommends
+        // Course-related knowledge keys from gemKnowledge.json
+        const courseKnowledgeKeys = [
+          'courses_overview', 'courses_trading_overview', 'courses_mindset_overview',
+          'course_7_days', 'course_love', 'course_millionaire',
+          'course_starter', 'course_tier_1', 'course_tier_2', 'course_tier_3',
+          'trading_tier_comparison', 'tier_2_vs_tier_1', 'frequency_formulas',
+        ];
+        const isCourseKnowledgeResponse = response.source === 'knowledge' && courseKnowledgeKeys.includes(response.knowledgeKey);
+
         const shouldShowCourses = !isQuestionnaireMode && (
           courseKeywords.some(kw => text.toLowerCase().includes(kw)) ||
           aiRecommendsCourse ||
-          (response.source === 'knowledge' && response.knowledgeKey === 'frequency_formulas')
+          isCourseKnowledgeResponse
         );
 
         // Only show crystals if user explicitly asks OR AI explicitly recommends a specific crystal
@@ -817,7 +1014,31 @@ const GemMasterScreen = ({ navigation, route }) => {
 
         if (shouldShowCourses) {
           console.log('[GemMaster] Fetching courses for inline display...');
-          const courses = await shopifyService.getProductsByTags(['courses', 'khóa học', 'course'], 2, false);
+          // Detect course type from context for smarter tag selection
+          const lowerText = text.toLowerCase();
+          const lowerResponse = (response.text || '').toLowerCase();
+          const contextStr = lowerText + ' ' + lowerResponse;
+
+          // Trading course keywords
+          const isTradingCourse = ['trading', 'tier 1', 'tier 2', 'tier 3', 'tier1', 'tier2', 'tier3', 'starter',
+            '11 triệu', '21 triệu', '68 triệu', 'pattern', 'scanner', 'crypto', 'bitcoin', 'harmonic', 'elliott',
+            'wyckoff', 'smc', 'ai prediction', 'whale tracker', 'giao dịch', 'đầu tư'].some(kw => contextStr.includes(kw));
+
+          // Mindset course keywords
+          const isMindsetCourse = ['7 ngày', 'khai mở', 'tần số gốc', 'tình yêu', 'kích hoạt', '42 ngày',
+            'triệu phú', 'tư duy', 'mindset', '49 ngày', 'chữa lành', 'năng lượng', 'hawkins', 'boss lady',
+            '299k', '399k', '499k'].some(kw => contextStr.includes(kw));
+
+          // Select appropriate tags based on context
+          let courseTags = ['courses', 'khóa học', 'course'];
+          if (isTradingCourse && !isMindsetCourse) {
+            courseTags = ['trading', 'tier', 'scanner', 'crypto'];
+          } else if (isMindsetCourse && !isTradingCourse) {
+            courseTags = ['mindset', 'tần số', 'frequency', 'tư duy'];
+          }
+
+          console.log('[GemMaster] Course type:', isTradingCourse ? 'Trading' : isMindsetCourse ? 'Mindset' : 'General');
+          const courses = await shopifyService.getProductsByTags(courseTags, 2, false);
           if (courses && courses.length > 0) {
             inlineProducts = [...inlineProducts, ...courses];
             console.log('[GemMaster] Added', courses.length, 'courses to inline products');
@@ -1031,9 +1252,47 @@ const GemMasterScreen = ({ navigation, route }) => {
         } catch (saveError) {
           console.warn('[GemMaster] Auto-save error:', saveError);
         }
+
+        // ===== CHATBOT UPGRADE: Extract & Save Memories =====
+        if (isFeatureEnabled(FEATURES.MEMORY_EXTRACTION)) {
+          try {
+            // Extract memories from conversation (background, don't block UI)
+            userMemoryService.extractAndSaveMemories(
+              user.id,
+              text,
+              response.text,
+              response.category || 'general'
+            ).then(memories => {
+              if (memories?.length > 0) {
+                console.log('[GemMaster] Extracted memories:', memories.length);
+              }
+            }).catch(err => {
+              console.warn('[GemMaster] Memory extraction error:', err);
+            });
+          } catch (memError) {
+            console.warn('[GemMaster] Memory extraction error:', memError);
+          }
+        }
+
+        // ===== CHATBOT UPGRADE: Update Chat Streak =====
+        if (isFeatureEnabled(FEATURES.GAMIFICATION)) {
+          try {
+            // Record chat activity for streak (background)
+            streakService.recordActivity(user.id, 'chatbot').then(result => {
+              if (result?.milestone) {
+                console.log('[GemMaster] Streak milestone reached:', result.milestone);
+                // Could show a celebration toast here
+              }
+            }).catch(err => {
+              console.warn('[GemMaster] Streak update error:', err);
+            });
+          } catch (streakError) {
+            console.warn('[GemMaster] Streak error:', streakError);
+          }
+        }
       }
     },
-    [generateResponse, canQuery, user, refreshQuota, messages, currentConversationId]
+    [generateResponse, canQuery, user, refreshQuota, messages, currentConversationId, inlineFormState.visible]
   );
 
   // Handle quick action (from QuickActionBar)
@@ -1414,6 +1673,60 @@ const GemMasterScreen = ({ navigation, route }) => {
     }
   }, []);
 
+  // ===== CHATBOT UPGRADE: Proactive Message Handlers =====
+  const handleReadProactiveMessage = useCallback(async (message) => {
+    if (!user?.id || !message?.id) return;
+
+    try {
+      await proactiveAIService.markMessageRead(message.id);
+      setPendingProactiveMessages(prev =>
+        prev.filter(m => m.id !== message.id)
+      );
+      console.log('[GemMaster] Proactive message read:', message.id);
+    } catch (error) {
+      console.warn('[GemMaster] Error marking message read:', error);
+    }
+  }, [user?.id]);
+
+  const handleDismissProactiveMessage = useCallback(async (message) => {
+    if (!user?.id || !message?.id) return;
+
+    // Just remove from UI, mark as read in background
+    setPendingProactiveMessages(prev =>
+      prev.filter(m => m.id !== message.id)
+    );
+
+    proactiveAIService.markMessageRead(message.id).catch(err => {
+      console.warn('[GemMaster] Error dismissing message:', err);
+    });
+  }, [user?.id]);
+
+  const handleRespondToProactiveMessage = useCallback((message) => {
+    // Add the proactive message as a system message, then let user respond
+    const systemMessage = {
+      id: `proactive_${message.id}`,
+      type: 'assistant',
+      text: `${message.title}\n\n${message.content}`,
+      timestamp: new Date().toISOString(),
+      source: 'proactive',
+      proactiveType: message.message_type,
+    };
+    setMessages(prev => [...prev, systemMessage]);
+
+    // Mark as read
+    handleReadProactiveMessage(message);
+  }, [handleReadProactiveMessage]);
+
+  // Navigate to Rituals screen
+  const handleNavigateToRituals = useCallback(() => {
+    navigation.navigate('Rituals');
+  }, [navigation]);
+
+  // Navigate to Gamification screen
+  const handleNavigateToGamification = useCallback(() => {
+    navigation.navigate('Gamification');
+  }, [navigation]);
+
   // Handle option selection from questionnaire buttons
   const handleOptionSelect = useCallback((option, messageId) => {
     console.log('[GemMaster] Option selected:', option.label, option.text);
@@ -1436,13 +1749,38 @@ const GemMasterScreen = ({ navigation, route }) => {
   const keyExtractor = useCallback((item) => item.id, []);
 
   // Header component with tier badge and quota (inside FlatList)
+  // NOTE: In inverted FlatList, ListFooterComponent appears at TOP
   const ListHeaderComponent = useCallback(
     () => (
       <View style={styles.listHeader}>
-        {/* Tier and Quota Row */}
+        {/* ===== CHATBOT UPGRADE: Personalized Greeting ===== */}
+        {isFeatureEnabled(FEATURES.MEMORY) && user?.id && (
+          <PersonalizedGreeting userId={user.id} />
+        )}
+
+        {/* Tier, Quota, and Gamification Row */}
         <View style={styles.statusRow}>
           <TierBadge tier={userTier} size="sm" />
           <QuotaIndicator quota={quota} size="sm" showResetTime />
+
+          {/* Mini Streak Display - Tap to open Gamification */}
+          {isFeatureEnabled(FEATURES.GAMIFICATION) && gamificationSummary?.currentStreak > 0 && (
+            <TouchableOpacity onPress={handleNavigateToGamification}>
+              <MiniStreak
+                streak={gamificationSummary.currentStreak}
+                level={gamificationSummary.level?.level}
+              />
+            </TouchableOpacity>
+          )}
+
+          {/* Current Emotion Badge */}
+          {isFeatureEnabled(FEATURES.EMOTION) && currentEmotion && (
+            <EmotionBadge
+              emotion={currentEmotion.primary}
+              frequency={currentEmotion.frequency}
+            />
+          )}
+
           {/* WebSocket Connection Status - Only show in DEV mode (backend not deployed yet) */}
           {__DEV__ && (
             <ConnectionStatus
@@ -1456,6 +1794,39 @@ const GemMasterScreen = ({ navigation, route }) => {
             />
           )}
         </View>
+
+        {/* ===== CHATBOT UPGRADE: Proactive Messages ===== */}
+        {isFeatureEnabled(FEATURES.PROACTIVE) && pendingProactiveMessages.length > 0 && (
+          <ProactiveMessageList
+            messages={pendingProactiveMessages}
+            onReadMessage={handleReadProactiveMessage}
+            onDismissMessage={handleDismissProactiveMessage}
+            style={{ marginVertical: SPACING.sm }}
+          />
+        )}
+
+        {/* ===== CHATBOT UPGRADE: Ritual Status Banner ===== */}
+        {isFeatureEnabled(FEATURES.RITUALS) && todayRituals && todayRituals.totalCount > 0 && (
+          <TouchableOpacity
+            style={styles.ritualBanner}
+            onPress={handleNavigateToRituals}
+            activeOpacity={0.7}
+          >
+            <View style={styles.ritualBannerContent}>
+              <Text style={styles.ritualBannerText}>
+                Nghi thức hôm nay: {todayRituals.completedCount}/{todayRituals.totalCount}
+              </Text>
+              <View style={styles.ritualProgressBar}>
+                <View
+                  style={[
+                    styles.ritualProgressFill,
+                    { width: `${(todayRituals.completedCount / todayRituals.totalCount) * 100}%` }
+                  ]}
+                />
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* Logo and Title */}
         <LinearGradient
@@ -1486,13 +1857,14 @@ const GemMasterScreen = ({ navigation, route }) => {
                 navigation={navigation}
                 userId={bannerUserId}
                 onDismiss={dismissBanner}
+                showActions={false}
               />
             ))}
           </View>
         )}
       </View>
     ),
-    [userTier, quota, messages.length, handleClearChat, wsIsOnline, wsIsConnected, wsQueueSize, wsQueueSyncStatus, wsConnect, getConnectionStatusText, getConnectionStatusColor, sponsorBanners, bannerUserId, dismissBanner, navigation]
+    [userTier, quota, messages.length, handleClearChat, wsIsOnline, wsIsConnected, wsQueueSize, wsQueueSyncStatus, wsConnect, getConnectionStatusText, getConnectionStatusColor, sponsorBanners, bannerUserId, dismissBanner, navigation, user?.id, gamificationSummary, currentEmotion, pendingProactiveMessages, todayRituals, handleReadProactiveMessage, handleDismissProactiveMessage, handleNavigateToRituals, handleNavigateToGamification]
   );
 
   // Handle scroll event for showing scroll-to-bottom button ONLY
@@ -1522,12 +1894,50 @@ const GemMasterScreen = ({ navigation, route }) => {
   const handleShowInlineForm = useCallback((formData) => {
     console.log('[GemMaster] Showing InlineChatForm:', formData);
     setSuggestedWidgets(null); // Close the suggestion card
-    setInlineFormState({
-      visible: true,
-      formType: formData.formType || 'goal',
-      preSelectedArea: formData.preSelectedArea,
-      userInput: formData.userInput || '',
-    });
+
+    // Add brief message before showing form (if not already provided)
+    if (!formData.skipBriefMessage) {
+      const briefMessages = {
+        finance: '💰 Tôi sẽ hướng dẫn bạn manifest tiền bạc và thịnh vượng. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+        career: '💼 Tôi sẽ hướng dẫn bạn đặt mục tiêu sự nghiệp. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+        health: '🏃 Tôi sẽ hướng dẫn bạn đặt mục tiêu sức khỏe. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+        relationships: '💕 Tôi sẽ hướng dẫn bạn manifest tình yêu và mối quan hệ tốt đẹp. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+        personal: '✨ Tôi sẽ hướng dẫn bạn phát triển bản thân. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+        spiritual: '🙏 Tôi sẽ hướng dẫn bạn phát triển tâm linh. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+        crystal: '💎 Tôi sẽ giúp bạn tìm loại đá thạch anh phù hợp nhất. Để đưa ra gợi ý chính xác, hãy trả lời một vài câu hỏi ngắn.',
+        trading: '📈 Tôi sẽ giúp bạn đặt mục tiêu trading hiệu quả. Để tạo mục tiêu phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.',
+      };
+
+      const defaultBrief = '🎯 Để tạo mục tiêu phù hợp nhất với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.';
+      const briefText = briefMessages[formData.preSelectedArea] || briefMessages[formData.formType] || defaultBrief;
+
+      const briefMsg = {
+        id: `brief_widget_${Date.now()}`,
+        type: 'assistant',
+        text: briefText,
+        timestamp: new Date().toISOString(),
+        source: 'widget_brief',
+      };
+      setMessages((prev) => [...prev, briefMsg]);
+
+      // Show form after brief delay
+      setTimeout(() => {
+        setInlineFormState({
+          visible: true,
+          formType: formData.formType || 'goal',
+          preSelectedArea: formData.preSelectedArea,
+          userInput: formData.userInput || '',
+        });
+      }, 400);
+    } else {
+      // Skip brief message (form will show immediately)
+      setInlineFormState({
+        visible: true,
+        formType: formData.formType || 'goal',
+        preSelectedArea: formData.preSelectedArea,
+        userInput: formData.userInput || '',
+      });
+    }
   }, []);
 
   // Handler for course navigation
@@ -1855,6 +2265,32 @@ const GemMasterScreen = ({ navigation, route }) => {
           onSelectQuestion={handleFAQQuestionSelect}
         />
 
+        {/* ===== CHATBOT UPGRADE: Crisis Support Alert ===== */}
+        {showCrisisAlert && crisisInfo && (
+          <View style={styles.crisisOverlay}>
+            <View style={styles.crisisModal}>
+              <Text style={styles.crisisTitle}>Chúng tôi quan tâm đến bạn</Text>
+              <Text style={styles.crisisMessage}>
+                {crisisInfo.message || 'Nếu bạn đang trải qua thời điểm khó khăn, xin đừng ngại tìm kiếm sự hỗ trợ.'}
+              </Text>
+              <View style={styles.crisisHotline}>
+                <Text style={styles.crisisHotlineLabel}>Đường dây nóng hỗ trợ:</Text>
+                <Text style={styles.crisisHotlineNumber}>1800 599 920</Text>
+                <Text style={styles.crisisHotlineNote}>(Miễn phí, 24/7)</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.crisisCloseButton}
+                onPress={() => {
+                  setShowCrisisAlert(false);
+                  setCrisisInfo(null);
+                }}
+              >
+                <Text style={styles.crisisCloseText}>Tôi hiểu</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
       </SafeAreaView>
 
       {/* Bottom Input Area - OUTSIDE SafeAreaView for proper absolute positioning */}
@@ -2046,6 +2482,114 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 4,
+  },
+
+  // ===== CHATBOT UPGRADE STYLES =====
+
+  // Ritual Banner
+  ritualBanner: {
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    marginBottom: SPACING.md,
+    padding: SPACING.sm,
+    width: '100%',
+  },
+  ritualBannerContent: {
+    alignItems: 'center',
+  },
+  ritualBannerText: {
+    color: COLORS.gold,
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  ritualProgressBar: {
+    width: '80%',
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  ritualProgressFill: {
+    height: '100%',
+    backgroundColor: COLORS.gold,
+    borderRadius: 2,
+  },
+
+  // Crisis Support Modal
+  crisisOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  crisisModal: {
+    backgroundColor: COLORS.bgMid,
+    borderRadius: 20,
+    padding: SPACING.xl,
+    marginHorizontal: SPACING.lg,
+    borderWidth: 2,
+    borderColor: '#FF6B6B',
+    alignItems: 'center',
+    maxWidth: 350,
+  },
+  crisisTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: SPACING.md,
+    textAlign: 'center',
+  },
+  crisisMessage: {
+    fontSize: 15,
+    color: '#CCCCCC',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: SPACING.lg,
+  },
+  crisisHotline: {
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+    width: '100%',
+  },
+  crisisHotlineLabel: {
+    fontSize: 12,
+    color: '#A0A0A0',
+    marginBottom: 4,
+  },
+  crisisHotlineNumber: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FF6B6B',
+    letterSpacing: 1,
+  },
+  crisisHotlineNote: {
+    fontSize: 11,
+    color: '#808080',
+    marginTop: 4,
+  },
+  crisisCloseButton: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+  },
+  crisisCloseText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.gold,
   },
 });
 

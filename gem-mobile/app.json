@@ -45,7 +45,7 @@
         "backgroundColor": "#05040B"
       },
       "package": "com.gemral.mobile",
-      "softwareKeyboardLayoutMode": "pan",
+      "softwareKeyboardLayoutMode": "resize",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",

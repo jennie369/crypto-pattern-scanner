@@ -10,11 +10,12 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Dimensions,
+  Keyboard,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,11 +23,12 @@ import Animated, {
   withSpring,
   withDelay,
   withSequence,
+  withRepeat,
   runOnJS,
   Easing,
 } from 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Gift, Sparkles, Plus, X, Send, Check } from 'lucide-react-native';
+import { Gift, Sparkles, Plus, X, Send, Check, Star } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual } from '../../../services/ritualService';
@@ -53,45 +55,55 @@ import {
   COSMIC_TIMING,
 } from '../../../components/Rituals/cosmic';
 
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const THEME = COSMIC_COLORS.ritualThemes.gratitude;
 
 const CONFIG = {
   maxGratitudes: 5,
   minGratitudes: 3,
   xpReward: 30,
-  sendAnimationDuration: 3000,
+  sendAnimationDuration: 4000,
 };
 
 // ============================================
-// GRATITUDE ITEM COMPONENT
+// FLYING GRATITUDE ITEM (for sending phase)
 // ============================================
 
-const GratitudeItem = ({ text, index, onRemove, sending }) => {
-  const opacity = useSharedValue(0);
-  const translateX = useSharedValue(-30);
+const FlyingGratitudeItem = ({ text, index, totalItems }) => {
+  const opacity = useSharedValue(1);
   const translateY = useSharedValue(0);
+  const translateX = useSharedValue(0);
   const scale = useSharedValue(1);
+  const rotate = useSharedValue(0);
 
   useEffect(() => {
-    opacity.value = withDelay(index * 100, withTiming(1, { duration: 300 }));
-    translateX.value = withDelay(index * 100, withSpring(0, COSMIC_TIMING.spring.gentle));
+    const delay = index * 500;
+
+    // Random horizontal drift
+    const randomDrift = (Math.random() - 0.5) * 100;
+
+    // Animate flying up with star-like effect
+    translateY.value = withDelay(delay, withTiming(-SCREEN_HEIGHT * 0.7, {
+      duration: 3000,
+      easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+    }));
+
+    translateX.value = withDelay(delay, withTiming(randomDrift, {
+      duration: 3000,
+      easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+    }));
+
+    scale.value = withDelay(delay, withSequence(
+      withTiming(1.2, { duration: 300 }),
+      withTiming(0.2, { duration: 2700 })
+    ));
+
+    opacity.value = withDelay(delay + 2000, withTiming(0, { duration: 1000 }));
+
+    rotate.value = withDelay(delay, withTiming(randomDrift > 0 ? 15 : -15, {
+      duration: 3000,
+    }));
   }, []);
-
-  useEffect(() => {
-    if (sending) {
-      // Animate flying up like stars
-      const delay = index * 400;
-      opacity.value = withDelay(delay + 1500, withTiming(0, { duration: 500 }));
-      translateY.value = withDelay(delay, withTiming(-300, {
-        duration: 2000,
-        easing: COSMIC_TIMING.easing.smoothIn,
-      }));
-      scale.value = withDelay(delay, withSequence(
-        withTiming(1.1, { duration: 200 }),
-        withTiming(0.3, { duration: 1800 })
-      ));
-    }
-  }, [sending]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -99,16 +111,45 @@ const GratitudeItem = ({ text, index, onRemove, sending }) => {
       { translateX: translateX.value },
       { translateY: translateY.value },
       { scale: scale.value },
+      { rotate: `${rotate.value}deg` },
     ],
   }));
 
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View style={[styles.flyingItem, animatedStyle]}>
+      <View style={styles.flyingItemInner}>
+        <Star size={16} color={THEME.primary} fill={THEME.primary} />
+        <Text style={styles.flyingItemText} numberOfLines={1}>{text}</Text>
+      </View>
+    </Animated.View>
+  );
+};
+
+// ============================================
+// GRATITUDE ITEM COMPONENT (for input list)
+// ============================================
+
+const GratitudeItem = ({ text, index, onRemove }) => {
+  const opacity = useSharedValue(0);
+  const translateX = useSharedValue(-30);
+
+  useEffect(() => {
+    opacity.value = withDelay(index * 100, withTiming(1, { duration: 300 }));
+    translateX.value = withDelay(index * 100, withSpring(0, COSMIC_TIMING.spring.gentle));
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  return (
+    <Animated.View style={[styles.gratitudeItemWrapper, animatedStyle]}>
       <GlassCard variant="glow" glowColor={THEME.glow} padding={COSMIC_SPACING.md}>
         <View style={styles.gratitudeItemContent}>
           <Sparkles size={18} color={THEME.primary} strokeWidth={2} />
           <Text style={styles.gratitudeText}>{text}</Text>
-          {onRemove && !sending && (
+          {onRemove && (
             <GlowIconButton
               icon={<X />}
               variant="ghost"
@@ -163,6 +204,9 @@ const GoldenJar = ({ fillLevel, shimmer }) => {
 
 const GratitudeFlowRitual = ({ navigation }) => {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
+  const scrollViewRef = useRef(null);
+  const inputRef = useRef(null);
 
   // State
   const [phase, setPhase] = useState('start'); // start, input, sending, completed
@@ -173,10 +217,30 @@ const GratitudeFlowRitual = ({ navigation }) => {
   const [streak, setStreak] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   // Animation values
   const contentOpacity = useSharedValue(1);
   const jarShimmer = useSharedValue(0);
+
+  // Keyboard listeners - track keyboard height for manual offset
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   // Content animation style
   const contentAnimatedStyle = useAnimatedStyle(() => ({
@@ -199,6 +263,7 @@ const GratitudeFlowRitual = ({ navigation }) => {
     HAPTIC_PATTERNS.gratitude.add();
     setGratitudes(prev => [...prev, currentInput.trim()]);
     setCurrentInput('');
+    Keyboard.dismiss();
   }, [currentInput, gratitudes.length]);
 
   const handleRemoveGratitude = useCallback((index) => {
@@ -210,6 +275,8 @@ const GratitudeFlowRitual = ({ navigation }) => {
     if (gratitudes.length < CONFIG.minGratitudes) return;
 
     HAPTIC_PATTERNS.gratitude.send();
+    Keyboard.dismiss();
+
     contentOpacity.value = withTiming(0, { duration: 300 });
     setTimeout(() => {
       setPhase('sending');
@@ -287,45 +354,51 @@ const GratitudeFlowRitual = ({ navigation }) => {
     </Animated.View>
   );
 
-  // Render Input Phase
+  // Render Input Phase - Redesigned for better keyboard handling
   const renderInput = () => (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.keyboardAvoid}
+    <ScrollView
+      ref={scrollViewRef}
+      style={styles.inputScrollView}
+      contentContainerStyle={styles.inputScrollContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+      bounces={false}
     >
-      <Animated.View style={[styles.inputPhaseContainer, contentAnimatedStyle]}>
-        {/* Jar with progress */}
-        <View style={styles.jarContainer}>
+      <Animated.View style={contentAnimatedStyle}>
+        {/* Compact header with count - always visible */}
+        <View style={styles.inputHeader}>
+          <View style={styles.compactCountContainer}>
+            <Gift size={28} color={THEME.primary} strokeWidth={1.5} />
+            <Text style={styles.compactCountText}>
+              {gratitudes.length}/{CONFIG.maxGratitudes}
+            </Text>
+          </View>
           <ProgressRing
             progress={fillLevel}
-            size={200}
-            strokeWidth={6}
+            size={50}
+            strokeWidth={3}
             color={THEME.primary}
             secondaryColor={THEME.secondary}
             showPercentage={false}
-            showGlow={true}
-          >
-            <Gift size={60} color={THEME.primary} strokeWidth={1.5} />
-          </ProgressRing>
-          <Text style={styles.countText}>
-            {gratitudes.length}/{CONFIG.maxGratitudes}
-          </Text>
+            showGlow={false}
+          />
         </View>
 
         {/* Gratitude list */}
-        <ScrollView style={styles.gratitudeList} showsVerticalScrollIndicator={false}>
-          {gratitudes.map((text, index) => (
-            <GratitudeItem
-              key={index}
-              text={text}
-              index={index}
-              onRemove={() => handleRemoveGratitude(index)}
-              sending={false}
-            />
-          ))}
-        </ScrollView>
+        {gratitudes.length > 0 && (
+          <View style={styles.gratitudeListWrapper}>
+            {gratitudes.map((text, index) => (
+              <GratitudeItem
+                key={`gratitude-${index}`}
+                text={text}
+                index={index}
+                onRemove={() => handleRemoveGratitude(index)}
+              />
+            ))}
+          </View>
+        )}
 
-        {/* Input area */}
+        {/* Input area - positioned for visibility */}
         {gratitudes.length < CONFIG.maxGratitudes && (
           <GlassInputCard
             focused={inputFocused}
@@ -334,15 +407,23 @@ const GratitudeFlowRitual = ({ navigation }) => {
           >
             <View style={styles.inputRow}>
               <TextInput
+                ref={inputRef}
                 style={styles.input}
                 placeholder="Tôi biết ơn..."
                 placeholderTextColor={COSMIC_COLORS.text.hint}
                 value={currentInput}
                 onChangeText={setCurrentInput}
-                onFocus={() => setInputFocused(true)}
+                onFocus={() => {
+                  setInputFocused(true);
+                  // Scroll to input after a tiny delay to ensure keyboard is accounted for
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 100);
+                }}
                 onBlur={() => setInputFocused(false)}
                 onSubmitEditing={handleAddGratitude}
                 returnKeyType="done"
+                blurOnSubmit={false}
               />
               <GlowIconButton
                 icon={<Plus />}
@@ -366,33 +447,37 @@ const GratitudeFlowRitual = ({ navigation }) => {
           onPress={handleSendGratitudes}
           style={styles.sendButton}
         />
+
+        {/* Bottom padding - add keyboard height when keyboard is visible */}
+        <View style={{ height: keyboardHeight > 0 ? keyboardHeight + 20 : Math.max(insets.bottom, 20) + 80 }} />
       </Animated.View>
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 
   // Render Sending Phase
   const renderSending = () => (
-    <Animated.View style={[styles.phaseContainer, contentAnimatedStyle]}>
-      <View style={styles.sendingContainer}>
-        {/* Flying gratitudes */}
+    <Animated.View style={[styles.sendingPhaseContainer, contentAnimatedStyle]}>
+      {/* Flying gratitudes container - positioned at bottom, flying up */}
+      <View style={styles.flyingContainer}>
         {gratitudes.map((text, index) => (
-          <GratitudeItem
-            key={index}
+          <FlyingGratitudeItem
+            key={`flying-${index}`}
             text={text}
             index={index}
-            sending={true}
+            totalItems={gratitudes.length}
           />
         ))}
       </View>
 
-      <InstructionText
-        text="Lòng biết ơn đang bay đến vũ trụ..."
-        variant="large"
-        color={THEME.primary}
-        glowColor={THEME.glow}
-        pulse={true}
-        style={styles.sendingText}
-      />
+      {/* Text at center */}
+      <View style={styles.sendingTextContainer}>
+        <Text style={styles.sendingMainText}>
+          Lòng biết ơn đang bay đến vũ trụ...
+        </Text>
+        <Text style={styles.sendingSubText}>
+          {gratitudes.length} điều biết ơn từ trái tim bạn
+        </Text>
+      </View>
     </Animated.View>
   );
 
@@ -407,16 +492,15 @@ const GratitudeFlowRitual = ({ navigation }) => {
         spotlightIntensity={0.5}
       >
         {/* Golden particles */}
-        {/* OPTIMIZED: reduced particle counts */}
         <ParticleField
           variant="golden"
-          count={phase === 'sending' ? 25 : 12}
+          count={phase === 'sending' ? 30 : 12}
           speed={phase === 'sending' ? 'fast' : 'slow'}
           density="low"
           direction="up"
         />
 
-        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
           {/* Header */}
           <RitualHeader
             title="Dòng Chảy Biết Ơn"
@@ -433,6 +517,8 @@ const GratitudeFlowRitual = ({ navigation }) => {
             {phase === 'start' && renderStart()}
             {phase === 'input' && renderInput()}
             {phase === 'sending' && renderSending()}
+            {/* Bottom padding for tab bar */}
+            {phase !== 'input' && <View style={{ height: Math.max(insets.bottom, 20) + 80 }} />}
           </View>
         </SafeAreaView>
 
@@ -468,21 +554,14 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: COSMIC_SPACING.lg,
   },
+
+  // Start phase
   phaseContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: COSMIC_SPACING.xxl,
+    paddingBottom: 20,
   },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  inputPhaseContainer: {
-    flex: 1,
-    paddingTop: COSMIC_SPACING.lg,
-  },
-
-  // Start phase
   textContainer: {
     alignItems: 'center',
     marginTop: COSMIC_SPACING.xl,
@@ -501,20 +580,36 @@ const styles = StyleSheet.create({
     marginTop: COSMIC_SPACING.md,
   },
 
-  // Input phase
-  jarContainer: {
-    alignItems: 'center',
-    marginBottom: COSMIC_SPACING.lg,
-  },
-  countText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: THEME.primary,
-    marginTop: COSMIC_SPACING.sm,
-  },
-  gratitudeList: {
+  // Input phase - redesigned for keyboard
+  inputScrollView: {
     flex: 1,
+  },
+  inputScrollContent: {
+    flexGrow: 1,
+    paddingTop: COSMIC_SPACING.sm,
+  },
+  inputHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: COSMIC_SPACING.sm,
     marginBottom: COSMIC_SPACING.md,
+  },
+  compactCountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: COSMIC_SPACING.sm,
+  },
+  compactCountText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: THEME.primary,
+  },
+  gratitudeListWrapper: {
+    marginBottom: COSMIC_SPACING.sm,
+  },
+  gratitudeItemWrapper: {
+    marginBottom: COSMIC_SPACING.sm,
   },
   gratitudeItemContent: {
     flexDirection: 'row',
@@ -539,21 +634,64 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: COSMIC_COLORS.text.primary,
-    paddingVertical: COSMIC_SPACING.xs,
+    paddingVertical: COSMIC_SPACING.sm,
   },
   sendButton: {
-    marginBottom: COSMIC_SPACING.lg,
+    marginBottom: COSMIC_SPACING.md,
   },
 
   // Sending phase
-  sendingContainer: {
+  sendingPhaseContainer: {
     flex: 1,
     justifyContent: 'center',
-    width: '100%',
+    alignItems: 'center',
   },
-  sendingText: {
-    marginTop: COSMIC_SPACING.xl,
+  flyingContainer: {
+    position: 'absolute',
+    bottom: SCREEN_HEIGHT * 0.25,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  flyingItem: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+  },
+  flyingItemInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  flyingItemText: {
+    color: THEME.primary,
+    fontSize: 14,
+    fontWeight: '500',
+    maxWidth: 200,
+  },
+  sendingTextContainer: {
+    alignItems: 'center',
+    paddingHorizontal: COSMIC_SPACING.xl,
+    marginTop: SCREEN_HEIGHT * 0.1,
+  },
+  sendingMainText: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: THEME.primary,
     textAlign: 'center',
+    textShadowColor: 'rgba(255, 189, 89, 0.5)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  sendingSubText: {
+    fontSize: 15,
+    color: COSMIC_COLORS.text.secondary,
+    textAlign: 'center',
+    marginTop: COSMIC_SPACING.sm,
   },
 });
 

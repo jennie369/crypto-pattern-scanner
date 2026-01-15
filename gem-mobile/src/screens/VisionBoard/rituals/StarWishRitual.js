@@ -16,7 +16,7 @@ import {
   Platform,
   Pressable,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -249,30 +249,38 @@ const ShootingStarAnimation = memo(({ visible, onComplete }) => {
 });
 
 // ============================================
-// SELECTED STAR VISUAL
+// REALISTIC CELESTIAL STAR VISUAL
 // ============================================
 
-const SelectedStarVisual = memo(({ star }) => {
+const RealisticStar = memo(() => {
   const pulseScale = useSharedValue(1);
-  const rotateValue = useSharedValue(0);
-  const glowOpacity = useSharedValue(0.5);
+  const innerPulse = useSharedValue(1);
+  const rayOpacity = useSharedValue(0.6);
+  const shimmerRotate = useSharedValue(0);
 
   useEffect(() => {
+    // Main pulse
     pulseScale.value = withRepeat(
       withSequence(
-        withTiming(1.1, { duration: 1000 }),
-        withTiming(1, { duration: 1000 })
+        withTiming(1.08, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
+        withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.sin) })
       ),
       -1,
       true
     );
 
-    rotateValue.value = withRepeat(
-      withTiming(360, { duration: 20000, easing: Easing.linear }),
-      -1
+    // Inner core pulse (faster)
+    innerPulse.value = withRepeat(
+      withSequence(
+        withTiming(1.15, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0.95, { duration: 1200, easing: Easing.inOut(Easing.sin) })
+      ),
+      -1,
+      true
     );
 
-    glowOpacity.value = withRepeat(
+    // Ray shimmer
+    rayOpacity.value = withRepeat(
       withSequence(
         withTiming(0.8, { duration: 1500 }),
         withTiming(0.4, { duration: 1500 })
@@ -281,35 +289,123 @@ const SelectedStarVisual = memo(({ star }) => {
       true
     );
 
+    // Slow rotation for shimmer effect
+    shimmerRotate.value = withRepeat(
+      withTiming(360, { duration: 30000, easing: Easing.linear }),
+      -1
+    );
+
     return () => {
       cancelAnimation(pulseScale);
-      cancelAnimation(rotateValue);
-      cancelAnimation(glowOpacity);
+      cancelAnimation(innerPulse);
+      cancelAnimation(rayOpacity);
+      cancelAnimation(shimmerRotate);
     };
   }, []);
 
   const containerStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: pulseScale.value },
-      { rotate: `${rotateValue.value}deg` },
-    ],
+    transform: [{ scale: pulseScale.value }],
   }));
 
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: glowOpacity.value,
+  const innerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: innerPulse.value }],
   }));
+
+  const rayStyle = useAnimatedStyle(() => ({
+    opacity: rayOpacity.value,
+    transform: [{ rotate: `${shimmerRotate.value}deg` }],
+  }));
+
+  // Star point rays
+  const renderRays = () => {
+    const rays = [];
+    const rayCount = 8;
+    for (let i = 0; i < rayCount; i++) {
+      const angle = (i * 360) / rayCount;
+      const isLong = i % 2 === 0;
+      rays.push(
+        <View
+          key={i}
+          style={[
+            styles.starRay,
+            {
+              transform: [{ rotate: `${angle}deg` }],
+              height: isLong ? 90 : 60,
+            },
+          ]}
+        >
+          <LinearGradient
+            colors={['rgba(255, 248, 220, 0.9)', 'rgba(255, 215, 0, 0.4)', 'transparent']}
+            style={[styles.starRayGradient, { height: isLong ? 90 : 60 }]}
+          />
+        </View>
+      );
+    }
+    return rays;
+  };
 
   return (
-    <View style={styles.selectedStarContainer}>
-      <Animated.View style={[styles.selectedStarGlow, glowStyle]} />
-      <Animated.View style={containerStyle}>
-        <Star size={80} color="#FFD700" fill="#FFD700" strokeWidth={1} />
-      </Animated.View>
-      <View style={styles.selectedStarSparkles}>
-        <Sparkles size={24} color="#FFF" style={styles.sparkle1} />
-        <Sparkles size={18} color="#FFF" style={styles.sparkle2} />
-        <Sparkles size={20} color="#FFF" style={styles.sparkle3} />
+    <View style={styles.realisticStarContainer}>
+      {/* Outermost soft glow */}
+      <View style={styles.starOuterGlow}>
+        <LinearGradient
+          colors={['rgba(255, 215, 0, 0.25)', 'rgba(255, 215, 0, 0.08)', 'transparent']}
+          style={styles.starOuterGlowGradient}
+        />
       </View>
+
+      {/* Ray layer */}
+      <Animated.View style={[styles.starRayContainer, rayStyle]}>
+        {renderRays()}
+      </Animated.View>
+
+      {/* Main star body with gradient */}
+      <Animated.View style={[styles.starBodyOuter, containerStyle]}>
+        <LinearGradient
+          colors={['rgba(255, 250, 230, 0.3)', 'rgba(255, 223, 120, 0.5)', 'rgba(255, 180, 50, 0.3)']}
+          style={styles.starBodyGradient}
+          start={{ x: 0.2, y: 0.2 }}
+          end={{ x: 0.8, y: 0.8 }}
+        />
+      </Animated.View>
+
+      {/* Middle glow ring */}
+      <Animated.View style={containerStyle}>
+        <View style={styles.starMiddleGlow}>
+          <LinearGradient
+            colors={['transparent', 'rgba(255, 245, 200, 0.6)', 'rgba(255, 230, 150, 0.8)', 'rgba(255, 245, 200, 0.6)', 'transparent']}
+            style={styles.starMiddleGlowGradient}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+          />
+        </View>
+      </Animated.View>
+
+      {/* Inner bright core */}
+      <Animated.View style={[styles.starInnerCore, innerStyle]}>
+        <LinearGradient
+          colors={['#FFFEF8', '#FFF8E7', '#FFE4A0']}
+          style={styles.starInnerCoreGradient}
+          start={{ x: 0.3, y: 0.3 }}
+          end={{ x: 0.7, y: 0.7 }}
+        />
+      </Animated.View>
+
+      {/* Hottest white center */}
+      <View style={styles.starHotCenter} />
+
+      {/* Lens flare effect - small dots */}
+      <View style={[styles.lensFlare, { top: -25, left: 35 }]} />
+      <View style={[styles.lensFlare, styles.lensFlareMedium, { bottom: -20, right: 30 }]} />
+      <View style={[styles.lensFlare, styles.lensFlareSmall, { top: 20, right: -15 }]} />
+    </View>
+  );
+});
+
+const SelectedStarVisual = memo(({ star }) => {
+  return (
+    <View style={styles.selectedStarContainer}>
+      <RealisticStar />
     </View>
   );
 });
@@ -320,6 +416,7 @@ const SelectedStarVisual = memo(({ star }) => {
 
 const StarWishRitual = ({ navigation }) => {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // Generate stars
   const stars = useMemo(() => {
@@ -438,7 +535,7 @@ const StarWishRitual = ({ navigation }) => {
 
       {/* Selected star info */}
       {selectedStarId !== null && (
-        <View style={styles.selectedInfo}>
+        <View style={[styles.selectedInfo, { paddingBottom: Math.max(insets.bottom, 20) + 80 }]}>
           <GlassCard variant="glow" glowColor={THEME.glow} padding={COSMIC_SPACING.md}>
             <View style={styles.selectedInfoContent}>
               <Star size={20} color="#FFD700" fill="#FFD700" />
@@ -545,7 +642,7 @@ const StarWishRitual = ({ navigation }) => {
           direction="none"
         />
 
-        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
           {/* Header */}
           <RitualHeader
             title="Ước Nguyện Sao Băng"
@@ -657,38 +754,114 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: COSMIC_SPACING.lg,
     justifyContent: 'center',
-    paddingBottom: COSMIC_SPACING.xxl,
+    paddingBottom: 120,
   },
   selectedStarContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: COSMIC_SPACING.xl,
+    height: 200,
   },
-  selectedStarGlow: {
-    position: 'absolute',
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: 'rgba(255, 215, 0, 0.3)',
+
+  // Realistic Star Styles
+  realisticStarContainer: {
+    width: 200,
+    height: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  selectedStarSparkles: {
+  starOuterGlow: {
     position: 'absolute',
-    width: 120,
-    height: 120,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    overflow: 'hidden',
   },
-  sparkle1: {
-    position: 'absolute',
-    top: -10,
-    right: 0,
+  starOuterGlowGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 100,
   },
-  sparkle2: {
+  starRayContainer: {
     position: 'absolute',
-    bottom: 0,
-    left: -5,
+    width: 200,
+    height: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sparkle3: {
+  starRay: {
     position: 'absolute',
-    top: 20,
-    left: 10,
+    width: 6,
+    alignItems: 'center',
+  },
+  starRayGradient: {
+    width: 3,
+    borderRadius: 1.5,
+  },
+  starBodyOuter: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    overflow: 'hidden',
+  },
+  starBodyGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 40,
+  },
+  starMiddleGlow: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  starMiddleGlowGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 25,
+  },
+  starInnerCore: {
+    position: 'absolute',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    overflow: 'hidden',
+  },
+  starInnerCoreGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 15,
+  },
+  starHotCenter: {
+    position: 'absolute',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#FFFFF8',
+    shadowColor: '#FFFFF0',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+  },
+  lensFlare: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  },
+  lensFlareMedium: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 250, 220, 0.6)',
+  },
+  lensFlareSmall: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   wishTextContainer: {
     alignItems: 'center',

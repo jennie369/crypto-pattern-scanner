@@ -10,7 +10,9 @@ import {
   ActivityIndicator,
   Platform,
   BackHandler,
+  StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { useRoute, useNavigation, CommonActions } from '@react-navigation/native';
 import { useCart } from '../../contexts/CartContext';
@@ -52,48 +54,15 @@ const CheckoutWebView = () => {
     loadAffiliateCode();
   }, []);
 
-  // Helper function to navigate back safely without loop
+  // Helper function to navigate back safely
   const handleCancelCheckout = () => {
     if (cancelConfirmed) return; // Prevent multiple calls
     setCancelConfirmed(true);
 
-    // Determine which screen to return to based on productType
-    const { productType, returnScreen } = route.params || {};
+    console.log('[CheckoutWebView] Cancel checkout, going back to previous screen');
 
-    console.log('[CheckoutWebView] Cancel checkout, returning to:', returnScreen || 'Cart');
-
-    // Reset navigation stack to prevent loop
-    if (returnScreen) {
-      // If a specific return screen was provided
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: returnScreen }],
-        })
-      );
-    } else if (productType === 'gems') {
-      // For gem purchases, go back to BuyGems
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [
-            { name: 'ShopMain' },
-            { name: 'BuyGems' },
-          ],
-        })
-      );
-    } else {
-      // For regular shop, go to Cart
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [
-            { name: 'ShopMain' },
-            { name: 'Cart' },
-          ],
-        })
-      );
-    }
+    // Simply go back to the previous screen
+    navigation.goBack();
   };
 
   // Prevent back button during checkout
@@ -125,8 +94,11 @@ const CheckoutWebView = () => {
     return () => backHandler.remove();
   }, [checkoutCompleted, cancelConfirmed, navigation]);
 
+  // Get user email for auto-fill
+  const userEmail = profile?.email || user?.email || '';
+
   // JavaScript to inject into WebView
-  // Pass affiliate code and user_id via string interpolation
+  // Pass affiliate code, user_id, and email via string interpolation
   const injectedJavaScript = `
     (function() {
       console.log('[WebView] JavaScript injected successfully');
@@ -136,8 +108,93 @@ const CheckoutWebView = () => {
       // ============================================
       const affiliateCode = '${affiliateCode || ''}';
       const userId = '${userId || ''}';
+      const userEmail = '${userEmail || ''}';
 
-      console.log('[WebView] Tracking data:', { affiliateCode, userId });
+      console.log('[WebView] Tracking data:', { affiliateCode, userId, userEmail });
+
+      // ============================================
+      // PART 0.5: AUTO-COLLAPSE ORDER SUMMARY & AUTO-FILL EMAIL
+      // ============================================
+      function autoCollapseAndFillEmail() {
+        // Auto-collapse order summary (click the toggle to close it)
+        const orderSummaryToggle = document.querySelector('[data-order-summary-toggle]') ||
+                                   document.querySelector('.order-summary-toggle') ||
+                                   document.querySelector('.order-summary__toggle') ||
+                                   document.querySelector('[aria-controls*="order-summary"]') ||
+                                   document.querySelector('.order-summary-toggle-text');
+
+        if (orderSummaryToggle) {
+          // Check if it's currently expanded
+          const isExpanded = orderSummaryToggle.getAttribute('aria-expanded') === 'true' ||
+                            document.querySelector('.order-summary--is-expanded') ||
+                            document.querySelector('[data-order-summary-section]:not([hidden])');
+
+          if (isExpanded) {
+            console.log('[WebView] Collapsing order summary...');
+            orderSummaryToggle.click();
+          }
+        }
+
+        // Also try to collapse via CSS (backup method)
+        const collapseStyle = document.createElement('style');
+        collapseStyle.id = 'auto-collapse-summary';
+        collapseStyle.textContent = \`
+          /* Force collapse order summary on mobile */
+          .order-summary--is-expanded .order-summary__section,
+          .order-summary--is-expanded .order-summary__sections,
+          [data-order-summary-section] {
+            max-height: 0 !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            opacity: 0 !important;
+          }
+
+          /* Show collapsed state */
+          .order-summary-toggle[aria-expanded="true"] {
+            aria-expanded: false !important;
+          }
+        \`;
+
+        if (!document.getElementById('auto-collapse-summary')) {
+          document.head.appendChild(collapseStyle);
+        }
+
+        // Auto-fill email
+        if (userEmail) {
+          const emailInputs = document.querySelectorAll(
+            'input[type="email"], ' +
+            'input[name="checkout[email]"], ' +
+            'input[name="email"], ' +
+            'input[autocomplete="email"], ' +
+            '#checkout_email, ' +
+            '#email, ' +
+            'input[placeholder*="Email"], ' +
+            'input[placeholder*="email"]'
+          );
+
+          emailInputs.forEach(input => {
+            if (!input.value || input.value.trim() === '') {
+              input.value = userEmail;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+              input.dispatchEvent(new Event('blur', { bubbles: true }));
+              console.log('[WebView] ✅ Auto-filled email:', userEmail);
+            }
+          });
+        }
+      }
+
+      // Run immediately and after short delays
+      autoCollapseAndFillEmail();
+      setTimeout(autoCollapseAndFillEmail, 500);
+      setTimeout(autoCollapseAndFillEmail, 1000);
+      setTimeout(autoCollapseAndFillEmail, 2000);
+
+      // Also run on DOM changes
+      const emailObserver = new MutationObserver(() => {
+        autoCollapseAndFillEmail();
+      });
+      emailObserver.observe(document.body, { childList: true, subtree: true });
 
       // Try to inject tracking data into checkout attributes
       function injectTrackingData() {
@@ -634,7 +691,8 @@ const CheckoutWebView = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       {loading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.gold} />
@@ -667,7 +725,7 @@ const CheckoutWebView = () => {
 
         // iOS specific
         {...(Platform.OS === 'ios' && {
-          contentInsetAdjustmentBehavior: 'never',
+          contentInsetAdjustmentBehavior: 'automatic',
           bounces: false,
           scrollEnabled: true,
         })}
@@ -679,14 +737,14 @@ const CheckoutWebView = () => {
         })}
       />
       {AlertComponent}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#05040B',
+    backgroundColor: '#FFFFFF', // White background for Shopify checkout
   },
 
   loadingContainer: {
@@ -697,7 +755,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#05040B',
+    backgroundColor: '#FFFFFF',
     zIndex: 10,
   },
 

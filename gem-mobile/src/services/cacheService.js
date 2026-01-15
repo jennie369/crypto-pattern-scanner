@@ -31,6 +31,17 @@ const CACHE_KEYS = {
   PRODUCTS: '@gem_cache_products',
   COURSES: '@gem_cache_courses',
   ACHIEVEMENTS: '@gem_cache_achievements',
+  // GEM Master Chatbot Enhancement keys
+  CHATBOT_PROFILE: '@gem_cache_chatbot_profile',
+  RECENT_MEMORIES: '@gem_cache_memories',
+  RITUALS: '@gem_cache_rituals',
+  TODAY_RITUALS: '@gem_cache_today_rituals',
+  STREAKS: '@gem_cache_streaks',
+  GAMIFICATION: '@gem_cache_gamification',
+  PENDING_MESSAGES: '@gem_cache_pending_messages',
+  EMOTION_STATE: '@gem_cache_emotion',
+  TOOLTIPS_SEEN: '@gem_cache_tooltips',
+  FEATURE_USAGE: '@gem_cache_feature_usage',
 };
 
 // TTL (Time To Live) in milliseconds
@@ -44,6 +55,17 @@ const TTL_CONFIG = {
   PRODUCTS: 15 * 60 * 1000,              // 15 minutes
   COURSES: 1 * 60 * 60 * 1000,           // 1 hour
   ACHIEVEMENTS: 24 * 60 * 60 * 1000,     // 24 hours
+  // GEM Master Chatbot Enhancement TTLs
+  CHATBOT_PROFILE: 5 * 60 * 1000,        // 5 minutes
+  RECENT_MEMORIES: 2 * 60 * 1000,        // 2 minutes
+  RITUALS: 5 * 60 * 1000,                // 5 minutes
+  TODAY_RITUALS: 1 * 60 * 1000,          // 1 minute
+  STREAKS: 1 * 60 * 1000,                // 1 minute
+  GAMIFICATION: 2 * 60 * 1000,           // 2 minutes
+  PENDING_MESSAGES: 1 * 60 * 1000,       // 1 minute
+  EMOTION_STATE: 30 * 1000,              // 30 seconds
+  TOOLTIPS_SEEN: -1,                     // Permanent (no expiration)
+  FEATURE_USAGE: 30 * 1000,              // 30 seconds
 };
 
 // Network state
@@ -53,6 +75,9 @@ let networkListenerUnsubscribe = null;
 class CacheService {
   constructor() {
     this._initialized = false;
+    this._memoryCache = new Map(); // In-memory cache for fast access
+    this._hitCount = 0;
+    this._missCount = 0;
   }
 
   /**
@@ -322,6 +347,175 @@ class CacheService {
       console.log('[CacheService] User data preloaded');
     } catch (error) {
       console.error('[CacheService] Preload error:', error);
+    }
+  }
+
+  // ============================================================
+  // USER-SPECIFIC CACHE METHODS (for GEM Master Chatbot)
+  // ============================================================
+
+  /**
+   * Get user-specific data from cache
+   * @param {string} key - Cache key from CACHE_KEYS
+   * @param {string} userId - User ID
+   * @returns {any|null} Cached data or null
+   */
+  async getForUser(key, userId) {
+    if (!userId) return null;
+    const userKey = `${key}_${userId}`;
+    return this.get(userKey);
+  }
+
+  /**
+   * Set user-specific data in cache
+   * @param {string} key - Cache key from CACHE_KEYS
+   * @param {string} userId - User ID
+   * @param {any} data - Data to cache
+   */
+  async setForUser(key, userId, data) {
+    if (!userId) return;
+    const userKey = `${key}_${userId}`;
+    await this.set(userKey, data);
+  }
+
+  /**
+   * Remove user-specific data from cache
+   * @param {string} key - Cache key
+   * @param {string} userId - User ID
+   */
+  async removeForUser(key, userId) {
+    if (!userId) return;
+    const userKey = `${key}_${userId}`;
+    await this.remove(userKey);
+  }
+
+  /**
+   * Clear all cache for a specific user
+   * @param {string} userId - User ID
+   */
+  async clearUserCache(userId) {
+    if (!userId) return;
+
+    try {
+      const allKeys = await AsyncStorage.getAllKeys();
+      const userKeys = allKeys.filter(k => k.includes(`_${userId}`));
+      if (userKeys.length > 0) {
+        await AsyncStorage.multiRemove(userKeys);
+      }
+
+      // Also clear memory cache for user
+      for (const [key] of this._memoryCache) {
+        if (key.includes(`_${userId}`)) {
+          this._memoryCache.delete(key);
+        }
+      }
+
+      console.log(`[CacheService] Cleared cache for user ${userId}`);
+    } catch (error) {
+      console.error('[CacheService] Clear user cache error:', error);
+    }
+  }
+
+  /**
+   * Get from memory cache (ultra-fast, no async)
+   * @param {string} key - Cache key
+   * @param {string} userId - Optional user ID
+   * @returns {any|null} Cached data or null
+   */
+  getFromMemory(key, userId = null) {
+    const cacheKey = userId ? `${key}_${userId}` : key;
+    const cached = this._memoryCache.get(cacheKey);
+
+    if (!cached) {
+      this._missCount++;
+      return null;
+    }
+
+    const ttl = TTL_CONFIG[key] || 60 * 1000;
+    if (ttl !== -1 && Date.now() - cached.timestamp > ttl) {
+      this._memoryCache.delete(cacheKey);
+      this._missCount++;
+      return null;
+    }
+
+    this._hitCount++;
+    return cached.data;
+  }
+
+  /**
+   * Set in memory cache (ultra-fast, no async)
+   * @param {string} key - Cache key
+   * @param {any} data - Data to cache
+   * @param {string} userId - Optional user ID
+   */
+  setInMemory(key, data, userId = null) {
+    const cacheKey = userId ? `${key}_${userId}` : key;
+    this._memoryCache.set(cacheKey, {
+      data,
+      timestamp: Date.now(),
+    });
+  }
+
+  /**
+   * Invalidate memory cache
+   * @param {string} key - Cache key
+   * @param {string} userId - Optional user ID
+   */
+  invalidateMemory(key, userId = null) {
+    const cacheKey = userId ? `${key}_${userId}` : key;
+    this._memoryCache.delete(cacheKey);
+  }
+
+  /**
+   * Invalidate both memory and async cache for a key
+   * @param {string} key - Cache key
+   * @param {string} userId - Optional user ID
+   */
+  async invalidate(key, userId = null) {
+    // Invalidate memory cache
+    this.invalidateMemory(key, userId);
+
+    // Remove from async storage
+    if (userId) {
+      await this.removeForUser(key, userId);
+    } else {
+      await this.remove(key);
+    }
+  }
+
+  /**
+   * Get or fetch pattern with user-specific caching
+   * @param {string} key - Cache key
+   * @param {string} userId - User ID
+   * @param {function} fetcher - Async function to fetch data
+   * @returns {any} Data from cache or fetch
+   */
+  async getOrFetchForUser(key, userId, fetcher) {
+    // Try memory cache first
+    const memCached = this.getFromMemory(key, userId);
+    if (memCached !== null) {
+      return memCached;
+    }
+
+    // Try async cache
+    const cached = await this.getForUser(key, userId);
+    if (cached !== null) {
+      // Store in memory for faster subsequent access
+      this.setInMemory(key, cached, userId);
+      return cached;
+    }
+
+    // Fetch fresh data
+    try {
+      const data = await fetcher();
+      if (data !== null && data !== undefined) {
+        await this.setForUser(key, userId, data);
+        this.setInMemory(key, data, userId);
+      }
+      return data;
+    } catch (error) {
+      console.error(`[CacheService] Fetch error for ${key}:`, error);
+      return null;
     }
   }
 

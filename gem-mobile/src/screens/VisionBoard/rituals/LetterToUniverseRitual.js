@@ -15,7 +15,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -119,8 +119,102 @@ const ShootingStar = memo(({ delay, startX, startY, duration = 2500 }) => {
 });
 
 // ============================================
-// GOD RAYS COMPONENT
+// GOD RAYS COMPONENT WITH REALISTIC COSMIC ORB
 // ============================================
+
+const CosmicOrb = memo(() => {
+  const pulseScale = useSharedValue(1);
+  const innerGlow = useSharedValue(1);
+
+  useEffect(() => {
+    pulseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.05, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
+        withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.sin) })
+      ),
+      -1,
+      true
+    );
+
+    innerGlow.value = withRepeat(
+      withSequence(
+        withTiming(1.1, { duration: 1500, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0.9, { duration: 1500, easing: Easing.inOut(Easing.sin) })
+      ),
+      -1,
+      true
+    );
+
+    return () => {
+      cancelAnimation(pulseScale);
+      cancelAnimation(innerGlow);
+    };
+  }, []);
+
+  const outerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseScale.value }],
+  }));
+
+  const innerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: innerGlow.value }],
+  }));
+
+  return (
+    <View style={styles.cosmicOrbContainer}>
+      {/* Outermost halo */}
+      <View style={styles.orbOuterHalo}>
+        <LinearGradient
+          colors={['transparent', 'rgba(168, 85, 247, 0.15)', 'rgba(139, 92, 246, 0.25)', 'rgba(168, 85, 247, 0.15)', 'transparent']}
+          style={styles.orbHaloGradient}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+        />
+      </View>
+
+      {/* Outer glow ring */}
+      <Animated.View style={[styles.orbOuterGlow, outerStyle]}>
+        <LinearGradient
+          colors={['rgba(192, 132, 252, 0.1)', 'rgba(168, 85, 247, 0.3)', 'rgba(139, 92, 246, 0.4)', 'rgba(124, 58, 237, 0.3)']}
+          style={styles.orbGlowGradient}
+          start={{ x: 0.2, y: 0.2 }}
+          end={{ x: 0.8, y: 0.8 }}
+        />
+      </Animated.View>
+
+      {/* Main orb body */}
+      <Animated.View style={[styles.orbBody, outerStyle]}>
+        <LinearGradient
+          colors={['rgba(216, 180, 254, 0.6)', 'rgba(168, 85, 247, 0.8)', 'rgba(124, 58, 237, 0.9)', 'rgba(91, 33, 182, 0.8)']}
+          style={styles.orbBodyGradient}
+          start={{ x: 0.3, y: 0 }}
+          end={{ x: 0.7, y: 1 }}
+        />
+        {/* Inner highlight */}
+        <View style={styles.orbHighlight}>
+          <LinearGradient
+            colors={['rgba(255, 255, 255, 0.4)', 'rgba(233, 213, 255, 0.2)', 'transparent']}
+            style={styles.orbHighlightGradient}
+            start={{ x: 0.3, y: 0.1 }}
+            end={{ x: 0.7, y: 0.6 }}
+          />
+        </View>
+      </Animated.View>
+
+      {/* Inner core glow */}
+      <Animated.View style={[styles.orbInnerCore, innerStyle]}>
+        <LinearGradient
+          colors={['rgba(245, 240, 255, 0.9)', 'rgba(216, 180, 254, 0.8)', 'rgba(192, 132, 252, 0.6)']}
+          style={styles.orbCoreGradient}
+          start={{ x: 0.4, y: 0.3 }}
+          end={{ x: 0.6, y: 0.7 }}
+        />
+      </Animated.View>
+
+      {/* Center bright spot */}
+      <View style={styles.orbCenterSpot} />
+    </View>
+  );
+});
 
 const GodRays = memo(({ visible }) => {
   const rotation = useSharedValue(0);
@@ -160,17 +254,19 @@ const GodRays = memo(({ visible }) => {
       style={[styles.ray, { transform: [{ rotate: `${i * 30}deg` }] }]}
     >
       <LinearGradient
-        colors={['rgba(255,248,225,0.7)', 'rgba(255,248,225,0.2)', 'transparent']}
+        colors={['rgba(216, 180, 254, 0.7)', 'rgba(192, 132, 252, 0.3)', 'transparent']}
         style={styles.rayGradient}
       />
     </View>
   ));
 
   return (
-    <Animated.View style={[styles.godRaysContainer, containerStyle]}>
-      {rays}
-      <View style={styles.centerGlow} />
-    </Animated.View>
+    <View style={styles.godRaysWrapper}>
+      <Animated.View style={[styles.godRaysContainer, containerStyle]}>
+        {rays}
+      </Animated.View>
+      <CosmicOrb />
+    </View>
   );
 });
 
@@ -389,6 +485,7 @@ const TwinklingStar = memo(({ x, y, size, delay }) => {
 
 const LetterToUniverseRitual = ({ navigation }) => {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // State
   const [phase, setPhase] = useState('write'); // write, sending, received
@@ -619,7 +716,7 @@ const LetterToUniverseRitual = ({ navigation }) => {
           direction="up"
         />
 
-        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
           {/* Header */}
           <RitualHeader
             title="Thư Gửi Vũ Trụ"
@@ -635,6 +732,8 @@ const LetterToUniverseRitual = ({ navigation }) => {
           <View style={styles.content}>
             {phase === 'write' && renderWritePhase()}
             {(phase === 'sending' || phase === 'received') && renderSendingPhase()}
+            {/* Bottom padding for tab bar */}
+            <View style={{ height: Math.max(insets.bottom, 20) + 80 }} />
           </View>
         </SafeAreaView>
 
@@ -678,7 +777,7 @@ const styles = StyleSheet.create({
   writeContainer: {
     flex: 1,
     justifyContent: 'center',
-    paddingBottom: COSMIC_SPACING.xxl,
+    paddingBottom: 20,
   },
   iconContainer: {
     alignItems: 'center',
@@ -749,13 +848,20 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
 
-  // God rays
-  godRaysContainer: {
+  // God rays wrapper
+  godRaysWrapper: {
     position: 'absolute',
     width: 450,
     height: 450,
     left: SCREEN_WIDTH / 2 - 225,
     top: SCREEN_HEIGHT / 2 - 300,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  godRaysContainer: {
+    position: 'absolute',
+    width: 450,
+    height: 450,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -766,21 +872,88 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rayGradient: {
-    width: 5,
+    width: 4,
     height: 225,
-    borderRadius: 3,
+    borderRadius: 2,
   },
-  // OPTIMIZED: Reduced shadowRadius from 50 to 15
-  centerGlow: {
+
+  // Cosmic Orb Styles
+  cosmicOrbContainer: {
+    width: 120,
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orbOuterHalo: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: 'hidden',
+  },
+  orbHaloGradient: {
+    width: '100%',
+    height: '100%',
+  },
+  orbOuterGlow: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    overflow: 'hidden',
+  },
+  orbGlowGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 45,
+  },
+  orbBody: {
     position: 'absolute',
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: THEME.primary,
-    shadowColor: THEME.primary,
+    overflow: 'hidden',
+  },
+  orbBodyGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 35,
+  },
+  orbHighlight: {
+    position: 'absolute',
+    top: 5,
+    left: 8,
+    width: 40,
+    height: 30,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  orbHighlightGradient: {
+    width: '100%',
+    height: '100%',
+  },
+  orbInnerCore: {
+    position: 'absolute',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    overflow: 'hidden',
+  },
+  orbCoreGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 15,
+  },
+  orbCenterSpot: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#FFF',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
-    shadowRadius: 15,
+    shadowRadius: 6,
   },
 
   // Nebula cloud - OPTIMIZED: Removed heavy shadow
