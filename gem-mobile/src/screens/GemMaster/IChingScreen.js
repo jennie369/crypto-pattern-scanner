@@ -3,7 +3,7 @@
  * Interactive hexagram casting and interpretation
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -154,13 +154,13 @@ const IChingScreen = ({ navigation, route }) => {
           setUserTier(tier);
           const quotaData = await QuotaService.checkQuota(currentUser.id, tier);
           setQuota(quotaData);
-          console.log('[IChingScreen] User tier:', tier, 'Quota:', quotaData);
+          // Debug: console.log('[IChingScreen] User tier:', tier, 'Quota:', quotaData);
         } else {
           setUserTier('FREE');
           setQuota(QuotaService.getDefaultQuota());
         }
       } catch (error) {
-        console.error('[IChingScreen] Error loading quota:', error);
+        // Debug: console.error('[IChingScreen] Error loading quota:', error);
         setQuota(QuotaService.getDefaultQuota());
       } finally {
         setIsLoadingQuota(false);
@@ -183,7 +183,7 @@ const IChingScreen = ({ navigation, route }) => {
       const quotaData = await QuotaService.checkQuota(user.id, userTier);
       setQuota(quotaData);
     } catch (error) {
-      console.error('[IChingScreen] Error refreshing quota:', error);
+      // Debug: console.error('[IChingScreen] Error refreshing quota:', error);
     }
   }, [user, userTier]);
 
@@ -201,15 +201,15 @@ const IChingScreen = ({ navigation, route }) => {
   const fetchCrystalProducts = useCallback(async (crystals) => {
     try {
       setIsLoadingProducts(true);
-      console.log('[IChingScreen] Fetching crystal products for:', crystals.map(c => c.name));
+      // Debug: console.log('[IChingScreen] Fetching crystal products for:', crystals.map(c => c.name));
 
       // Get Shopify tags from crystal data
       const tags = getCrystalTagsForList(crystals);
-      console.log('[IChingScreen] Searching Shopify with tags:', tags);
+      // Debug: console.log('[IChingScreen] Searching Shopify with tags:', tags);
 
       // Fetch products from Shopify
       const products = await shopifyService.getProductsByTags(tags, 4, true);
-      console.log('[IChingScreen] Found', products.length, 'Shopify products');
+      // Debug: console.log('[IChingScreen] Found', products.length, 'Shopify products');
 
       if (products && products.length > 0) {
         // Merge static crystal data with Shopify product data
@@ -260,7 +260,7 @@ const IChingScreen = ({ navigation, route }) => {
         setShopifyProducts([...mergedCrystals, ...extraCrystals]);
       }
     } catch (error) {
-      console.error('[IChingScreen] Error fetching crystal products:', error);
+      // Debug: console.error('[IChingScreen] Error fetching crystal products:', error);
     } finally {
       setIsLoadingProducts(false);
     }
@@ -329,7 +329,7 @@ const IChingScreen = ({ navigation, route }) => {
 
     // NEW: Build crystal context for CrystalRecommendationNew
     const crystalNames = interp.crystals?.map(c => c.vietnameseName || c.name).join(', ') || '';
-    const ichingContext = `I Ching quẻ: ${selected.name} (${selected.chineseName}). Đá năng lượng: ${crystalNames}. Tâm linh, năng lượng, phong thủy.`;
+    const ichingContext = `I Ching quẻ: ${selected.name} (${selected.chineseName}). Đá năng lượng: ${crystalNames}. Tâm thức, năng lượng, phong thủy.`;
     setCrystalContext(ichingContext);
 
     // Detect widget trigger for "Add to Dashboard" suggestion
@@ -368,9 +368,9 @@ const IChingScreen = ({ navigation, route }) => {
           crystals: interp.crystals,
           area: selectedArea,
         });
-        console.log('[IChingScreen] Reading saved to history');
+        // Debug: console.log('[IChingScreen] Reading saved to history');
       } catch (err) {
-        console.error('[IChingScreen] Failed to save reading:', err);
+        // Debug: console.error('[IChingScreen] Failed to save reading:', err);
       }
     }
   }, [lineAnimations, canDivine, quota, user, refreshQuota, selectedArea]);
@@ -458,7 +458,7 @@ const IChingScreen = ({ navigation, route }) => {
    * Handle line completion from CoinCastAnimation
    */
   const handleLineComplete = useCallback(async (lineResult) => {
-    console.log('[IChingScreen] Line complete:', lineResult);
+    // Debug: console.log('[IChingScreen] Line complete:', lineResult);
 
     // Add line to hexagram
     const newLines = [...hexagramLines, {
@@ -489,7 +489,7 @@ const IChingScreen = ({ navigation, route }) => {
       }
 
       const crystalNames = interp.crystals?.map(c => c.vietnameseName || c.name).join(', ') || '';
-      const ichingContext = `I Ching quẻ: ${selected.name} (${selected.chineseName}). Đá năng lượng: ${crystalNames}. Tâm linh, năng lượng, phong thủy.`;
+      const ichingContext = `I Ching quẻ: ${selected.name} (${selected.chineseName}). Đá năng lượng: ${crystalNames}. Tâm thức, năng lượng, phong thủy.`;
       setCrystalContext(ichingContext);
 
       // Save to history
@@ -515,9 +515,9 @@ const IChingScreen = ({ navigation, route }) => {
             crystals: interp.crystals,
             area: selectedArea,
           });
-          console.log('[IChingScreen] Traditional reading saved');
+          // Debug: console.log('[IChingScreen] Traditional reading saved');
         } catch (err) {
-          console.error('[IChingScreen] Failed to save traditional reading:', err);
+          // Debug: console.error('[IChingScreen] Failed to save traditional reading:', err);
         }
       }
     } else {
@@ -540,14 +540,14 @@ const IChingScreen = ({ navigation, route }) => {
       if (hexagram.lines) {
         const hexPattern = hexagram.lines.join('');
         if (hexPattern === inputPattern) {
-          console.log(`[IChingScreen] Found matching hexagram: ${id} - ${hexagram.name}`);
+          // Debug: console.log(`[IChingScreen] Found matching hexagram: ${id} - ${hexagram.name}`);
           return parseInt(id);
         }
       }
     }
 
     // If no exact match, log warning and return random
-    console.warn(`[IChingScreen] No matching hexagram found for pattern: ${inputPattern}`);
+    // Debug: console.warn(`[IChingScreen] No matching hexagram found for pattern: ${inputPattern}`);
     return Math.floor(Math.random() * 64) + 1;
   };
 
@@ -578,12 +578,12 @@ const IChingScreen = ({ navigation, route }) => {
     finance: 'Tài chính',
     love: 'Tình yêu',
     health: 'Sức khỏe',
-    spiritual: 'Tâm linh',
+    spiritual: 'Tâm thức',
   };
 
   // NEW: Handler for quick buy from crystal recommendations
   const handleQuickBuy = useCallback((product) => {
-    console.log('[IChingScreen] Quick buy product:', product?.title);
+    // Debug: console.log('[IChingScreen] Quick buy product:', product?.title);
     setQuickBuyModal({
       visible: true,
       product,
@@ -592,7 +592,7 @@ const IChingScreen = ({ navigation, route }) => {
 
   // NEW: Handler for showing upsell modal after adding to cart
   const handleShowUpsell = useCallback((upsellData) => {
-    console.log('[IChingScreen] Show upsell:', upsellData?.upsells?.length, 'products');
+    // Debug: console.log('[IChingScreen] Show upsell:', upsellData?.upsells?.length, 'products');
     setUpsellModal({
       visible: true,
       upsellData,
@@ -601,7 +601,7 @@ const IChingScreen = ({ navigation, route }) => {
 
   // NEW: Handler for buy now (opens checkout after quick buy)
   const handleBuyNow = useCallback(async (purchaseData) => {
-    console.log('[IChingScreen] Buy now:', purchaseData?.product?.title);
+    // Debug: console.log('[IChingScreen] Buy now:', purchaseData?.product?.title);
     if (purchaseData?.upsells && purchaseData.upsells.length > 0) {
       setUpsellModal({
         visible: true,
@@ -666,6 +666,8 @@ const IChingScreen = ({ navigation, route }) => {
       source={ICHING_BACKGROUND}
       style={styles.gradientContainer}
       resizeMode="cover"
+      fadeDuration={0}
+      cachePolicy="memory-disk"
     >
       <LinearGradient
         colors={['rgba(10, 15, 28, 0.7)', 'rgba(10, 15, 28, 0.5)', 'rgba(10, 15, 28, 0.75)']}
@@ -690,6 +692,10 @@ const IChingScreen = ({ navigation, route }) => {
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        scrollEventThrottle={16}
+        decelerationRate="fast"
+        overScrollMode="never"
       >
         {/* MODE SELECTION - Show when no mode selected and no hexagram */}
         {!castingMode && !hexagram && (
@@ -867,7 +873,7 @@ const IChingScreen = ({ navigation, route }) => {
               pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
             ]}
             onPress={() => {
-              console.log('[IChingScreen] Cast button pressed');
+              // Debug: console.log('[IChingScreen] Cast button pressed');
               // If in traditional mode result, reset to mode selection
               if (castingMode === CASTING_MODE.TRADITIONAL && castingPhase === CASTING_PHASE.RESULT) {
                 resetCasting();
@@ -936,7 +942,14 @@ const IChingScreen = ({ navigation, route }) => {
             {interpretation.interpretations && Object.keys(interpretation.interpretations).length > 0 && (
               <>
                 <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>Theo lĩnh vực</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.areaTabs}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.areaTabs}
+                  scrollEventThrottle={16}
+                  decelerationRate="fast"
+                  overScrollMode="never"
+                >
                   {Object.keys(AREA_LABELS).map((area) => {
                     const AreaIcon = AREA_ICONS[area];
                     const isActive = selectedArea === area;
@@ -1179,7 +1192,7 @@ const IChingScreen = ({ navigation, route }) => {
                   pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
                 ]}
                 onPress={async () => {
-                  console.log('[IChingScreen] Claim pressed');
+                  // Debug: console.log('[IChingScreen] Claim pressed');
 
                   // Get the hexagram image asset for sending to chat
                   const hexagramImageAsset = getHexagramImage(hexagram.id);
@@ -1192,7 +1205,7 @@ const IChingScreen = ({ navigation, route }) => {
                       imageUri = asset.localUri || asset.uri;
                     }
                   } catch (error) {
-                    console.error('[IChingScreen] Error getting image URI:', error);
+                    // Debug: console.error('[IChingScreen] Error getting image URI:', error);
                   }
 
                   // Format result for chat
@@ -2034,11 +2047,11 @@ const styles = StyleSheet.create({
   // ========== ACTION PLAN SECTION ==========
   actionPlanContainer: {
     marginTop: SPACING.sm,
-    backgroundColor: 'rgba(0, 240, 255, 0.05)',
+    backgroundColor: 'rgba(0, 15, 20, 0.85)',
     borderRadius: 10,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.2)',
+    borderColor: 'rgba(0, 240, 255, 0.3)',
   },
   actionPlanItem: {
     flexDirection: 'row',
@@ -2088,11 +2101,11 @@ const styles = StyleSheet.create({
   // ========== RITUAL SECTION ==========
   ritualsContainer: {
     marginTop: SPACING.sm,
-    backgroundColor: 'rgba(106, 91, 255, 0.05)',
+    backgroundColor: 'rgba(10, 5, 25, 0.85)',
     borderRadius: 10,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(106, 91, 255, 0.3)',
   },
   ritualCard: {
     marginBottom: SPACING.md,
