@@ -633,11 +633,30 @@ export default function CourseLearning() {
           const bodyMatch = lessonContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
           if (bodyMatch && bodyMatch[1]) {
             // Remove any remaining <style> and <link stylesheet> tags from body content to prevent CSS leaking
-            displayContent = bodyMatch[1]
+            let rawBodyContent = bodyMatch[1]
               .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
               .replace(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi, '')
               .replace(/<link[^>]*href=["'][^"']*\.css["'][^>]*>/gi, '')
               .trim();
+
+            // Remove decorative elements that cause layout issues (position:fixed backgrounds, blur orbs)
+            // Use DOMParser for safe HTML manipulation
+            try {
+              const tempParser = new DOMParser();
+              const tempDoc = tempParser.parseFromString(`<div>${rawBodyContent}</div>`, 'text/html');
+              const decorativeSelectors = [
+                '.background-container', '.bg-container', '.bg-layer', '.bg-layer-base',
+                '.orb', '.orb-1', '.orb-2', '.orb-3'
+              ];
+              decorativeSelectors.forEach(selector => {
+                try {
+                  tempDoc.querySelectorAll(selector).forEach(el => el.remove());
+                } catch (e) { /* skip */ }
+              });
+              displayContent = tempDoc.body.firstChild?.innerHTML || rawBodyContent;
+            } catch (e) {
+              displayContent = rawBodyContent;
+            }
           }
         }
 

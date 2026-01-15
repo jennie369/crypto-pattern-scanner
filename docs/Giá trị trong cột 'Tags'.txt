@@ -1,0 +1,107 @@
+Giá trị trong cột 'Tags':
+
+GEM Chatbot
+
+Ebook
+
+Bestseller, Hot Product, Set, Special set, Tinh dầu nước hoa Jérie
+
+Hematite, Vòng Tay
+
+Thạch Anh Vàng, Vòng Tay
+
+Bestseller, Thạch Anh Hồng, Vòng Tay
+
+Bestseller, Cây Tài Lộc, Cụm, Hot Product, Huyền Kim Trụ, Set, Special set, Thạch Anh Tím, Thạch Anh Vàng, Trụ
+
+Cụm, Hematite, Set, Special set, Thạch Anh Trắng, Vòng Tay
+
+Hot Product, Set, Special set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Thạch Anh Vàng, viên
+
+Cụm, Hot Product, Special set, Thạch Anh Trắng
+
+Aquamarine, Bestseller, Cây Tài Lộc, Cụm, Hot Product, Set, Special set, Thạch Anh Vàng, Thạch Anh Xanh, Trụ
+
+Bestseller, Cụm, Hot Product, Set, Special set, Thạch Anh Hồng, Thạch Anh Trắng, Trụ, Vòng Tay
+
+crystals, Cây Tài Lộc, Special set, Thạch Anh Vàng
+
+Cây Tài Lộc, Special set, Thạch Anh Tím
+
+Aquamarine, Cây Tài Lộc, Special set, Thạch Anh Xanh
+
+Cây Tài Lộc, Special set, Thạch Anh Hồng
+
+Hematite, Hot Product, Set, Special set, Thạch Anh Tím, Thạch Anh Vàng, Vòng Tay
+
+Bestseller, Thạch Anh Tím, Vòng Tay
+
+Bestseller, Cụm, Hot Product, Set, Special set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Thạch Anh Vàng, Trụ
+
+Bestseller, Cụm, Thạch Anh Tím
+
+Bestseller, Hot Product, Khói Xám, Set, Thạch Anh Tím, Thạch Anh Vàng, Trụ, viên
+
+Bestseller, Cụm, Hot Product, Set, Thạch Anh Vàng, Trụ
+
+Hot Product, Khói Xám, Set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Thạch Anh Vàng, viên
+
+Bestseller, Hot Product, Huyền Kim Trụ, Khói Xám, Set, Special set, Thạch Anh Hồng, Thạch Anh Tím, Thạch Anh Vàng, Trụ, viên
+
+Bestseller, Cụm, Hot Product, Set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Thạch Anh Vàng, Trụ
+
+Bestseller, Thạch Anh Tím, Trụ
+
+Cụm, Hot Product, Set, Special set, Thạch Anh Hồng, Thạch Anh Tím, Thạch Anh Vàng, Trụ
+
+Bestseller, Hot Product, Set, Thạch Anh Hồng, Thạch Anh Tím, Thạch Anh Vàng, Trụ
+
+Bestseller, Khói Xám, Set, Thạch Anh Hồng, Thạch Anh Tím, Trụ, viên
+
+Bestseller, Cụm, Set, Thạch Anh Hồng, Thạch Anh Tím, Thạch Anh Vàng, Trụ
+
+Bestseller, Huyền Kim Trụ, Khói Xám, Thạch Anh Vàng, Trụ
+
+Bestseller, Hot Product, Huyền Kim Trụ, Khói Xám, Set, Thạch Anh Hồng, Thạch Anh Tím, Thạch Anh Vàng, Trụ, viên
+
+Bestseller, Hot Product, Khói Xám, Set, Special set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Trụ, viên
+
+Bestseller, Cụm, Hot Product, Khói Xám, Set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Trụ
+
+Thạch Anh Hồng, viên
+
+Thạch Anh Hồng, Trụ, viên
+
+Aura, Bestseller, Cụm, Set, Thạch Anh Hồng, Thạch Anh Tím, Trụ
+
+Bestseller, Khói Xám, Trụ
+
+Aura, Bestseller, Thạch Anh Hồng, Trụ
+
+Bestseller, Set, Thạch Anh Vàng, Trụ
+
+Thạch Anh Tím
+
+Bestseller, Cụm, Thạch Anh Vàng
+
+Thạch Anh Hồng
+
+Thạch Anh Trắng
+
+Thạch Anh Vàng, Trụ
+
+Thạch Anh Hồng, Trụ
+
+Cụm, Thạch Anh Trắng
+
+Thạch Anh Trắng, Trụ
+
+Bestseller, Thạch Anh Vàng, Trụ
+
+Thạch Anh Tím, Trụ
+
+Bestseller, Set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Trụ
+
+Bestseller, Cụm, Set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Thạch Anh Vàng, Trụ
+
+Bestseller, Set, Thạch Anh Hồng, Thạch Anh Trắng, Thạch Anh Tím, Thạch Anh Vàng, Trụ

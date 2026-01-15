@@ -501,3 +501,498 @@ async def process_nurturing_now(background_tasks: BackgroundTasks):
     background_tasks.add_task(waitlist_service.process_nurturing_queue, 50)
 
     return {"message": "Nurturing queue processing triggered"}
+
+
+# ============================================================
+# TRADING LEADS ENDPOINTS (for yinyangmasters.com landing page)
+# ============================================================
+
+class TradingLeadRequest(BaseModel):
+    """Trading course lead registration request"""
+    email: str = Field(..., description="Email address")
+    name: Optional[str] = Field(None, description="User name")
+    phone: Optional[str] = Field(None, description="Phone number")
+    source: Optional[str] = Field("fomo_popup", description="Lead source")
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    referrer_url: Optional[str] = None
+
+
+class TradingLeadResponse(BaseModel):
+    """Trading lead registration response"""
+    id: str
+    queue_number: int
+    email: str
+    discount_code: str
+    is_first_50: bool
+    benefits: dict
+
+
+class ValidateDiscountRequest(BaseModel):
+    """Validate discount code request"""
+    code: str
+
+
+@router.post("/api/trading-leads/register", response_model=TradingLeadResponse)
+async def register_trading_lead(request: TradingLeadRequest):
+    """
+    Register as trading course lead.
+    First 50 get: 500K discount + 30 days Pro Scanner.
+    Called by yinyangmasters.com FOMO popup.
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        # Validate email format
+        import re
+        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', request.email):
+            raise HTTPException(status_code=400, detail="Email khong hop le")
+
+        # Check for existing lead
+        existing = supabase.table('trading_leads').select(
+            'id, queue_number, email, discount_code'
+        ).eq('email', request.email.lower()).execute()
+
+        if existing.data and len(existing.data) > 0:
+            lead = existing.data[0]
+            is_first_50 = lead['queue_number'] <= 50
+
+            return TradingLeadResponse(
+                id=lead['id'],
+                queue_number=lead['queue_number'],
+                email=lead['email'],
+                discount_code=lead['discount_code'],
+                is_first_50=is_first_50,
+                benefits={
+                    "discount_amount": 500000 if is_first_50 else 0,
+                    "scanner_days": 30 if is_first_50 else 0,
+                    "already_registered": True,
+                }
+            )
+
+        # Create new lead
+        result = supabase.table('trading_leads').insert({
+            'email': request.email.lower(),
+            'name': request.name,
+            'phone': request.phone,
+            'source': request.source,
+            'utm_source': request.utm_source,
+            'utm_medium': request.utm_medium,
+            'utm_campaign': request.utm_campaign,
+            'referrer_url': request.referrer_url,
+        }).execute()
+
+        if result.data and len(result.data) > 0:
+            lead = result.data[0]
+            is_first_50 = lead['queue_number'] <= 50
+
+            return TradingLeadResponse(
+                id=lead['id'],
+                queue_number=lead['queue_number'],
+                email=lead['email'],
+                discount_code=lead['discount_code'],
+                is_first_50=is_first_50,
+                benefits={
+                    "discount_amount": 500000 if is_first_50 else 0,
+                    "scanner_days": 30 if is_first_50 else 0,
+                    "already_registered": False,
+                }
+            )
+
+        raise HTTPException(status_code=500, detail="Khong the dang ky")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Trading lead registration error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/api/trading-leads/stats")
+async def get_trading_leads_stats():
+    """
+    Get public stats for trading leads.
+    Shows remaining slots (of first 50).
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        result = supabase.rpc('get_trading_leads_stats').execute()
+
+        if result.data:
+            return result.data
+
+        return {
+            "total_leads": 0,
+            "first_50_remaining": 50,
+            "first_50_taken": 0,
+        }
+
+    except Exception as e:
+        logger.error(f"Get trading leads stats error: {e}")
+        return {
+            "total_leads": 0,
+            "first_50_remaining": 50,
+            "first_50_taken": 0,
+        }
+
+
+@router.post("/api/trading-leads/validate-discount")
+async def validate_discount_code(request: ValidateDiscountRequest):
+    """
+    Validate a trading discount code.
+    Called by Shopify checkout or payment page.
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        result = supabase.rpc('validate_trading_discount', {
+            'p_code': request.code
+        }).execute()
+
+        if result.data:
+            return result.data
+
+        return {"valid": False, "error": "Invalid code"}
+
+    except Exception as e:
+        logger.error(f"Validate discount error: {e}")
+        return {"valid": False, "error": str(e)}
+
+
+@router.post("/api/trading-leads/activate-scanner")
+async def activate_pro_scanner(email: str = Query(...)):
+    """
+    Activate Pro Scanner for trading lead.
+    Called when user creates Gemral account or manually.
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        result = supabase.rpc('activate_pro_scanner', {
+            'p_email': email
+        }).execute()
+
+        if result.data:
+            return result.data
+
+        return {"success": False, "error": "Activation failed"}
+
+    except Exception as e:
+        logger.error(f"Activate scanner error: {e}")
+        return {"success": False, "error": str(e)}
+
+
+@router.get("/api/admin/trading-leads")
+async def list_trading_leads(
+    status: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    """
+    List trading leads.
+    Admin only.
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        query = supabase.table('trading_leads').select(
+            'id, queue_number, email, name, phone, source, discount_code, '
+            'benefits_status, scanner_activated_at, scanner_expires_at, '
+            'converted_at, course_tier, created_at',
+            count='exact'
+        )
+
+        if status:
+            query = query.eq('benefits_status', status)
+
+        result = query.order('created_at', desc=True).range(
+            offset, offset + limit - 1
+        ).execute()
+
+        return {
+            "leads": result.data or [],
+            "total": result.count or 0,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    except Exception as e:
+        logger.error(f"List trading leads error: {e}")
+        return {"leads": [], "total": 0}
+
+
+# ============================================================
+# FREQUENCY LEADS ENDPOINTS (for yinyangmasters.com/pages/7ngaykhaimotansogoc)
+# Khóa 7 Ngày Khai Mở Tần Số Gốc
+# ============================================================
+
+class FrequencyLeadRequest(BaseModel):
+    """Frequency course lead registration request"""
+    email: str = Field(..., description="Email address")
+    name: Optional[str] = Field(None, description="User name")
+    phone: Optional[str] = Field(None, description="Phone number")
+    source: Optional[str] = Field("fomo_popup", description="Lead source")
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    referrer_url: Optional[str] = None
+
+
+class FrequencyLeadResponse(BaseModel):
+    """Frequency lead registration response"""
+    id: str
+    queue_number: int
+    email: str
+    discount_code: str
+    is_first_50: bool
+    benefits: dict
+
+
+@router.post("/api/frequency-leads/register", response_model=FrequencyLeadResponse)
+async def register_frequency_lead(request: FrequencyLeadRequest):
+    """
+    Register as frequency course lead.
+    First 50 get: 200K discount.
+    Called by yinyangmasters.com FOMO popup (Khóa 7 Ngày Khai Mở Tần Số Gốc).
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        # Validate email format
+        import re
+        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', request.email):
+            raise HTTPException(status_code=400, detail="Email khong hop le")
+
+        # Check for existing lead
+        existing = supabase.table('frequency_leads').select(
+            'id, queue_number, email, discount_code'
+        ).eq('email', request.email.lower()).execute()
+
+        if existing.data and len(existing.data) > 0:
+            lead = existing.data[0]
+            is_first_50 = lead['queue_number'] <= 50
+
+            return FrequencyLeadResponse(
+                id=lead['id'],
+                queue_number=lead['queue_number'],
+                email=lead['email'],
+                discount_code=lead['discount_code'],
+                is_first_50=is_first_50,
+                benefits={
+                    "discount_amount": 200000 if is_first_50 else 0,
+                    "already_registered": True,
+                }
+            )
+
+        # Create new lead
+        result = supabase.table('frequency_leads').insert({
+            'email': request.email.lower(),
+            'name': request.name,
+            'phone': request.phone,
+            'source': request.source,
+            'utm_source': request.utm_source,
+            'utm_medium': request.utm_medium,
+            'utm_campaign': request.utm_campaign,
+            'referrer_url': request.referrer_url,
+        }).execute()
+
+        if result.data and len(result.data) > 0:
+            lead = result.data[0]
+            is_first_50 = lead['queue_number'] <= 50
+
+            # Send push notification to admins
+            try:
+                await notify_admins_frequency_lead(lead)
+            except Exception as e:
+                logger.warning(f"Failed to send admin notification: {e}")
+
+            return FrequencyLeadResponse(
+                id=lead['id'],
+                queue_number=lead['queue_number'],
+                email=lead['email'],
+                discount_code=lead['discount_code'],
+                is_first_50=is_first_50,
+                benefits={
+                    "discount_amount": 200000 if is_first_50 else 0,
+                    "already_registered": False,
+                }
+            )
+
+        raise HTTPException(status_code=500, detail="Khong the dang ky")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Frequency lead registration error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/api/frequency-leads/stats")
+async def get_frequency_leads_stats():
+    """
+    Get public stats for frequency leads.
+    Shows remaining slots (of first 50).
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        result = supabase.rpc('get_frequency_leads_stats').execute()
+
+        if result.data:
+            return result.data
+
+        return {
+            "total_leads": 0,
+            "first_50_remaining": 50,
+            "first_50_taken": 0,
+        }
+
+    except Exception as e:
+        logger.error(f"Get frequency leads stats error: {e}")
+        return {
+            "total_leads": 0,
+            "first_50_remaining": 50,
+            "first_50_taken": 0,
+        }
+
+
+@router.post("/api/frequency-leads/validate-discount")
+async def validate_frequency_discount_code(request: ValidateDiscountRequest):
+    """
+    Validate a frequency discount code.
+    Called by Shopify checkout or payment page.
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        result = supabase.rpc('validate_frequency_discount', {
+            'p_code': request.code
+        }).execute()
+
+        if result.data:
+            return result.data
+
+        return {"valid": False, "error": "Invalid code"}
+
+    except Exception as e:
+        logger.error(f"Validate frequency discount error: {e}")
+        return {"valid": False, "error": str(e)}
+
+
+@router.get("/api/admin/frequency-leads")
+async def list_frequency_leads(
+    status: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    """
+    List frequency leads.
+    Admin only.
+    """
+    try:
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        query = supabase.table('frequency_leads').select(
+            'id, queue_number, email, name, phone, source, discount_code, '
+            'benefits_status, converted_at, order_id, created_at',
+            count='exact'
+        )
+
+        if status:
+            query = query.eq('benefits_status', status)
+
+        result = query.order('created_at', desc=True).range(
+            offset, offset + limit - 1
+        ).execute()
+
+        return {
+            "leads": result.data or [],
+            "total": result.count or 0,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    except Exception as e:
+        logger.error(f"List frequency leads error: {e}")
+        return {"leads": [], "total": 0}
+
+
+async def notify_admins_frequency_lead(lead: dict):
+    """
+    Send push notification to all admins about new frequency lead.
+    """
+    try:
+        import httpx
+
+        from ..core.database import get_supabase_admin
+
+        supabase = get_supabase_admin()
+
+        # Get admin push tokens
+        admins = supabase.table('profiles').select(
+            'id, push_token'
+        ).or_(
+            'role.eq.admin,is_admin.eq.true'
+        ).not_.is_('push_token', 'null').execute()
+
+        if not admins.data:
+            logger.info("No admin push tokens found")
+            return
+
+        push_tokens = [
+            admin['push_token'] for admin in admins.data
+            if admin.get('push_token')
+        ]
+
+        if not push_tokens:
+            return
+
+        # Prepare Expo push messages
+        is_first_50 = lead['queue_number'] <= 50
+        messages = [
+            {
+                "to": token,
+                "sound": "default",
+                "title": f"Lead Khóa 7 Ngày #{lead['queue_number']}",
+                "body": f"Email: {lead['email']}" + (" | 50 SLOTS" if is_first_50 else ""),
+                "data": {
+                    "type": "frequency_lead_new",
+                    "lead_id": lead['id'],
+                    "queue_number": lead['queue_number'],
+                }
+            }
+            for token in push_tokens
+        ]
+
+        # Send to Expo Push API
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://exp.host/--/api/v2/push/send",
+                json=messages,
+                headers={"Content-Type": "application/json"},
+                timeout=10.0
+            )
+            logger.info(f"Sent {len(messages)} push notifications to admins")
+
+    except Exception as e:
+        logger.error(f"Failed to notify admins: {e}")

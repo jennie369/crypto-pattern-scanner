@@ -1,0 +1,594 @@
+﻿Dưới đây là danh sách tên các thẻ (Tags) riêng lẻ và duy nhất cho mỗi sản phẩm, được nhóm và sắp xếp theo Tiêu đề (Title) sản phẩm, ở dạng văn bản thuần túy (text plain):
+Product URLs:
+Khóa học Trading
+* TIER 1: https://yinyangmasters.com/products/gem-tier1 (₫11,000,000)
+* TIER 2: https://yinyangmasters.com/products/gem-tier2 (₫21,000,000)
+* TIER 3: https://yinyangmasters.com/products/gem-tier3 (₫68,000,000)
+* TIER STARTER: https://yinyangmasters.com/products/gem-trading-course-tier-starter
+* Price: 299,000₫
+1. YinYang Chatbot AI - PREMIUM (₫59,000)
+   * URL: https://yinyangmasters.com/products/gem-chatbot-premium
+2. YinYang Chatbot AI - PRO (₫39,000)
+   * URL: https://yinyangmasters.com/products/yinyang-chatbot-ai-pro
+3. YinYang Chatbot AI - VIP(₫99,000)
+   * URL: https://yinyangmasters.com/products/yinyang-chatbot-ai-vip
+4. Scanner Dashboard - VIP (₫5,997,000)
+   * URL: https://yinyangmasters.com/products/scanner-dashboard-vip
+5. Scanner Dashboard - PREMIUM (₫1,997,000)
+   * URL: https://yinyangmasters.com/products/scanner-dashboard-premium
+6. Scanner Dashboard - PRO (₫997,000)
+   * URL: https://yinyangmasters.com/products/gem-scanner-pro
+7. Khóa học 7 NGÀY KHAI MỞ TẦN SỐ GỐC - Product ID: 8904651342001 Variant ID: 46448176758961
+   * URL: https://yinyangmasters.com/products/khoa-hoc-7-ngay-khai-mo-tan-so-goc
+   * Price: 1,990,000₫ 
+8. Khóa học KÍCH HOẠT TẦN SỐ TÌNH YÊU - Product ID: 8904653111473 Variant ID: 46448180166833
+   * URL: https://yinyangmasters.com/products/khoa-hoc-kich-hoat-tan-so-tinh-yeu
+   * Price: 399,000₫
+9. Khóa học TÁI TẠO TƯ DUY TRIỆU PHÚ - Product ID: 8904656257201 Variant ID: 46448192192689
+   * URL: https://yinyangmasters.com/products/khoa-hoc-tai-tao-tu-duy-trieu-phu
+   * Price: 499,000₫
+<a href="/cart/add?id=46351723331761" 
+
+
+● DANH SÁCH VARIANT IDs
+
+
+Khóa học Trading
+
+
+Sản phẩm
+	Variant ID
+	SKU
+	Giá
+	TIER 1
+	46351707898033
+	gem-course-tier1
+	₫11,000,000
+	TIER 2
+	46351719235761
+	gem-course-tier2
+	₫21,000,000
+	TIER 3
+	46351723331761
+	gem-course-tier3
+	₫68,000,000
+	TIER STARTER
+	46448154050737
+	gem-course-tierstarter
+	₫299,000
+	
+
+YinYang Chatbot AI
+
+
+Sản phẩm
+	Variant ID
+	SKU
+	Giá
+	PRO
+	46351763701937
+	gem-chatbot-pro
+	₫39,000/tháng
+	PREMIUM
+	46351771893937
+	gem-chatbot-premium
+	₫59,000/tháng
+	VIP
+	46421822832817
+	gem-chatbot-vip
+	₫99,000/tháng
+	
+
+Scanner Dashboard
+
+
+Sản phẩm
+	Variant ID
+	SKU
+	Giá
+	PRO
+	46351752069297
+	gem-scanner-pro
+	₫997,000/tháng
+	PREMIUM
+	46351759507633
+	gem-scanner-premium
+	₫1,997,000/tháng
+	VIP
+	46351760294065
+	gem-scanner-vip
+	₫5,997,000/tháng
+	
+
+
+
+
+
+
+
+Khóa học Tâm linh
+Sản phẩm
+	Variant ID
+	Giá
+	7 Ngày Khai Mở Tần Số Gốc
+	46448176758961
+	₫1,990,000
+	Kích Hoạt Tần Số Tình Yêu
+	46448180166833
+	₫399,000
+	Tái Tạo Tư Duy Triệu Phú
+	46448192192689
+	₫499,000
+	
+
+
+
+
+
+7 RITUAL - NGHI LỄ CHIÊU CẢM ĐIỀU TỐT ĐẸP
+* Ebook
+Bát Nhã Phù Sinh - Cây Thịnh Vượng
+* Cây Tài Lộc
+* Special set
+* Thạch Anh Tím
+BẢN ĐỒ CHỌN ĐÁ THEO TỪNG LOẠI NGHIỆP
+* Ebook
+Cụm Thạch Anh Trắng
+* Cụm
+* Thạch Anh Trắng
+Duyên Khởi Lộ - Tinh Dầu Nước Hoa JÉRIE
+* Bestseller
+* Hot Product
+* Set
+* Special set
+* Tinh dầu nước hoa Jérie
+Duyên Khởi Thạch
+* Thạch Anh Hồng
+* Trụ
+Dạ Minh Châu - Quả Cầu Thạch Anh Tím
+* Thạch Anh Tím
+Dạ Nguyệt - Vòng Thạch Anh Tím Charm Vô Cực
+* Bestseller
+* Thạch Anh Tím
+* Vòng Tay
+Dạ Thiên Thạch
+* Bestseller
+* Thạch Anh Tím
+* Trụ
+Dạ Tinh Thạch
+* Bestseller
+* Cụm
+* Thạch Anh Tím
+Dạ Tinh Trụ
+* Thạch Anh Tím
+* Trụ
+Ebook GIẢI MÃ 5 VÒNG LẶP NGHIỆP LỰC
+* Ebook
+GEM Trading Academy - Gói 1
+* Khóa học Trading
+* Tier 1
+GEM Trading Academy - Gói 2
+* Khóa học Trading
+* Tier 2
+GEM Trading Academy - Gói 3
+* Khóa học Trading
+* Tier 3
+Gem Pack - Popular (500 + 50 Bonus Gems)
+* Gem Pack
+Gem Pack - Pro (1000 + 150 Bonus Gems)
+* Gem Pack
+Gem Pack - Starter (100 Gems)
+* Gem Pack
+Gem Pack - VIP (5000 + 1000 Bonus Gems)
+* Gem Pack
+Hiên Viên - Vòng Thạch Anh Hồng Charm Vô Cực
+* Bestseller
+* Thạch Anh Hồng
+* Vòng Tay
+Hoàng Kim Trụ
+* Bestseller
+* Thạch Anh Vàng
+* Trụ
+Huyền Kim Trụ
+* Bestseller
+* Huyền Kim Trụ
+* Khói Xám
+* Thạch Anh Vàng
+* Trụ
+Huyền Linh - Nhẫn Tay Thần Chú OM
+* Hematite
+* Vòng Tay
+Huyền Vũ Thạch
+* Thạch Anh Tím
+* Trụ
+Huyền Ảnh - Vòng đá Hematite Charm Evil Eye
+* Hematite
+* Vòng Tay
+Hồng Ngự - Vòng Thạch Anh Hồng Charm Cá Koi
+* Bestseller
+* Thạch Anh Hồng
+* Vòng Tay
+KHAY VÀNG DECOR
+* Thạch Anh Vàng
+KHAY VÀNG DECOR (Gift)
+* Thạch Anh Vàng
+Kim Linh Thạch
+* Bestseller
+* Cụm
+* Thạch Anh Vàng
+Kim Ngân Trụ
+* Thạch Anh Vàng
+* Trụ
+Kích Hoạt Tần Số Tình Yêu
+* Khóa học 
+Linh Phù - Vòng Hematite Charm Thần Chú OM
+* Hematite
+* Vòng Tay
+Lôi Phong Thạch
+* Bestseller
+* Khói Xám
+* Trụ
+Ngũ Quang Thạch
+* Aura
+* Bestseller
+* Thạch Anh Hồng
+* Trụ
+Như Ý Lệnh - Cây Tình Ái
+* Cây Tài Lộc
+* Special set
+* Thạch Anh Hồng
+Quả Cầu Thạch Anh Hồng
+* Thạch Anh Hồng
+Quả Cầu Thạch Anh Trắng
+* Thạch Anh Trắng
+Scanner Dashboard - PREMIUM
+* Scanner
+Scanner Dashboard - PRO
+* Scanner
+Scanner Dashboard - VIP
+* Scanner
+Set Băng Vũ Thạch
+* Bestseller
+* Hot Product
+* Khói Xám
+* Set
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+* viên
+Set Chí Tôn Thạch V.I.P 2
+* Bestseller
+* Hot Product
+* Huyền Kim Trụ
+* Khói Xám
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+* viên
+Set Cửu Tinh Thạch
+* Hot Product
+* Khói Xám
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* viên
+Set Duyên Định Kim Sinh
+* Aura
+* Bestseller
+* Cụm
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Tím
+* Trụ
+Set Dạ Kim Tụ
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Giáng Long Thạch
+* Aquamarine
+* Bestseller
+* Cây Tài Lộc
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Vàng
+* Thạch Anh Xanh
+* Trụ
+Set Hỗn Nguyên Thạch
+* Bestseller
+* Hot Product
+* Khói Xám
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Trụ
+* viên
+Set Lưu Ly Thạch
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* viên
+Set Lục Bảo Thạch
+* Bestseller
+* Cụm
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Lục Thần Phù
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Mật Thiên Lệnh
+* Hematite
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Vòng Tay
+Set Mộng Hồi Thanh
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Ngũ Kim Thạch
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Ngũ Linh Thạch V.I.P 1
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Ngũ Đại Thạch
+* Bestseller
+* Cụm
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Ngự Linh Thạch
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Phượng Nghi Thạch
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Trụ
+* Vòng Tay
+Set Tam Bảo Thạch
+* Bestseller
+* Cây Tài Lộc
+* Cụm
+* Hot Product
+* Huyền Kim Trụ
+* Set
+* Special set
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Tam Hợp Trụ
+* Bestseller
+* Khói Xám
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Tím
+* Trụ
+* viên
+Set Tam Sinh - Tinh Dầu Nước Hoa JÉRIE
+* Bestseller
+* Hot Product
+* Set
+* Special set
+* Tinh dầu nước hoa Jérie
+Set Tam Sinh Thạch
+* Bestseller
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Trụ
+Set Tam Thiên Thạch
+* Bestseller
+* Hot Product
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Thanh Tâm Thạch
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Vàng
+* Trụ
+Set Thiên Nhãn - Vòng đá Sức Mạnh
+* Cụm
+* Hematite
+* Set
+* Special set
+* Thạch Anh Trắng
+* Vòng Tay
+Set Thiên Ý - Thông Điệp Từ Thượng Đế
+* Cụm
+* Hot Product
+* Special set
+* Thạch Anh Trắng
+Set Thất Tinh Bắc Đẩu
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Thập Bảo Thạch
+* Bestseller
+* Cụm
+* Hot Product
+* Khói Xám
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Trụ
+Set Tứ Trụ
+* Bestseller
+* Set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Set Vương Chi Thạch V.I.P 3
+* Bestseller
+* Hot Product
+* Huyền Kim Trụ
+* Khói Xám
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+* viên
+Set Ẩn Long Thạch Limited Edition
+* Bestseller
+* Cụm
+* Hot Product
+* Set
+* Special set
+* Thạch Anh Hồng
+* Thạch Anh Trắng
+* Thạch Anh Tím
+* Thạch Anh Vàng
+* Trụ
+Sky "Thiên Ngữ" - Tinh Dầu Nước Hoa JÉRIE
+* Bestseller
+* Hot Product
+* Set
+* Special set
+* Tinh dầu nước hoa Jérie
+Song Định Duyên Ngọc
+* Thạch Anh Hồng
+* viên
+Sổ Tay CHUYỂN HÓA TÂM LINH - 21 NGÀY SỐNG ĐÚNG PHÁP
+* Ebook
+Sổ Tay MANIFEST PHÚC KHÍ 2024 [ebook] BY JENNIE UYEN CHU
+* (Không có thẻ)
+Sổ Tay THỰC HÀNH LÒNG BIẾT ƠN BY JENNIE UYEN CHU
+* (Không có thẻ)
+Sổ Tay TINH THỂ TẦN SỐ CAO By JENNIE UYEN CHU
+* (Không có thẻ)
+Tam Hoàng Kim Trụ
+* Bestseller
+* Set
+* Thạch Anh Vàng
+* Trụ
+Thanh Hải Ngọc - Cây Tái Sinh
+* Aquamarine
+* Cây Tài Lộc
+* Special set
+* Thạch Anh Xanh
+Thiên Băng Trụ
+* Thạch Anh Trắng
+* Trụ
+Thiên Bảo Hương - Trầm Hương Cao Cấp
+* (Không có thẻ)
+Thiên Lộc - Vòng Thạch Anh Vàng Charm Tỳ Hưu
+* Thạch Anh Vàng
+* Vòng Tay
+Thiên Vượng - Vòng Thạch Anh Vàng Charm Tỳ Hưu
+* Thạch Anh Vàng
+* Vòng Tay
+Thạch Anh Vàng (M)
+* Thạch Anh Vàng
+Tinh Hà Thạch
+* Bestseller
+* Cụm
+* Thạch Anh Tím
+Tượng Phật
+* (Không có thẻ)
+Vàng Găm
+* (Không có thẻ)
+Vũ Âm - Vòng Hematite Charm Thần Chú OM
+* Hematite
+* Vòng Tay
+Xô Thơm Trắng Combo
+* (Không có thẻ)
+YinYang Chatbot AI - PREMIUM
+* GEM Chatbot
+YinYang Chatbot AI - PRO
+* GEM Chatbot
+YinYang Chatbot AI - VIP
+* GEM Chatbot
+Đế Vượng - Cây Đại Lộc
+* Cây Tài Lộc
+* Special set
+* Thạch Anh Vàng
+* crystals
+Định Duyên Ngọc
+* Thạch Anh Hồng
+* Trụ
+* viên

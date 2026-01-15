@@ -16,15 +16,40 @@ const corsHeaders = {
 
 // Product tag to tier mapping
 const PRODUCT_TAG_MAPPING: Record<string, { type: string; tier: number }> = {
+  // Scanner tiers
   'scanner-tier1': { type: 'scanner', tier: 1 },
   'scanner-tier2': { type: 'scanner', tier: 2 },
   'scanner-tier3': { type: 'scanner', tier: 3 },
+  'scanner-pro': { type: 'scanner', tier: 1 },
+  'scanner-premium': { type: 'scanner', tier: 2 },
+  'scanner-vip': { type: 'scanner', tier: 3 },
+
+  // Course tiers (Trading courses)
+  'course-starter': { type: 'course', tier: 0 }, // Starter = tier 0
   'course-tier1': { type: 'course', tier: 1 },
   'course-tier2': { type: 'course', tier: 2 },
   'course-tier3': { type: 'course', tier: 3 },
+  'tier-starter': { type: 'course', tier: 0 },
+  'tier 1': { type: 'course', tier: 1 },
+  'tier 2': { type: 'course', tier: 2 },
+  'tier 3': { type: 'course', tier: 3 },
+  'khóa học trading': { type: 'course', tier: 1 }, // Default to tier 1 for generic trading tag
+
+  // Individual mindset courses (no tier, just enrollment)
+  'khóa học': { type: 'individual_course', tier: 0 },
+  'tan-so-goc': { type: 'individual_course', tier: 0 },
+  'khai-mo': { type: 'individual_course', tier: 0 },
+
+  // Chatbot tiers
   'chatbot-tier1': { type: 'chatbot', tier: 1 },
   'chatbot-tier2': { type: 'chatbot', tier: 2 },
   'chatbot-tier3': { type: 'chatbot', tier: 3 },
+  'chatbot-pro': { type: 'chatbot', tier: 1 },
+  'chatbot-premium': { type: 'chatbot', tier: 2 },
+  'chatbot-vip': { type: 'chatbot', tier: 3 },
+  'gem chatbot': { type: 'chatbot', tier: 1 },
+
+  // Gem packs
   'gem-pack-100': { type: 'gems', tier: 100 },
   'gem-pack-500': { type: 'gems', tier: 500 },
   'gem-pack-1000': { type: 'gems', tier: 1000 },
@@ -72,11 +97,18 @@ function parseProductSku(sku: string): { type: string; tier: number } | null {
     if (tierMatch) {
       return { type: 'scanner', tier: parseInt(tierMatch[1]) };
     }
+    if (skuLower.includes('pro')) return { type: 'scanner', tier: 1 };
+    if (skuLower.includes('premium')) return { type: 'scanner', tier: 2 };
+    if (skuLower.includes('vip')) return { type: 'scanner', tier: 3 };
     return { type: 'scanner', tier: 1 };
   }
 
-  // Course tiers
-  if (skuLower.includes('course-tier')) {
+  // Course tiers (Trading courses)
+  if (skuLower.includes('gem-course') || skuLower.includes('course-tier')) {
+    // Check for starter first
+    if (skuLower.includes('starter')) {
+      return { type: 'course', tier: 0 };
+    }
     const tierMatch = skuLower.match(/tier(\d)/);
     if (tierMatch) {
       return { type: 'course', tier: parseInt(tierMatch[1]) };
@@ -90,6 +122,9 @@ function parseProductSku(sku: string): { type: string; tier: number } | null {
     if (tierMatch) {
       return { type: 'chatbot', tier: parseInt(tierMatch[1]) };
     }
+    if (skuLower.includes('pro')) return { type: 'chatbot', tier: 1 };
+    if (skuLower.includes('premium')) return { type: 'chatbot', tier: 2 };
+    if (skuLower.includes('vip')) return { type: 'chatbot', tier: 3 };
     return { type: 'chatbot', tier: 1 };
   }
 
@@ -99,6 +134,11 @@ function parseProductSku(sku: string): { type: string; tier: number } | null {
     if (amountMatch) {
       return { type: 'gems', tier: parseInt(amountMatch[1]) };
     }
+  }
+
+  // Individual courses (mindset/spiritual)
+  if (skuLower.includes('individual-course') || skuLower.includes('course-id')) {
+    return { type: 'individual_course', tier: 0 };
   }
 
   return null;
@@ -171,7 +211,14 @@ serve(async (req) => {
             scannerTier = Math.max(scannerTier, accessInfo.tier);
             break;
           case 'course':
+            // Trading courses: set tier AND enroll in course
             courseTier = Math.max(courseTier, accessInfo.tier);
+            if (item.product_id) {
+              enrolledCourses.push(item.product_id.toString());
+            }
+            break;
+          case 'individual_course':
+            // Individual/mindset courses: just enroll (no tier upgrade)
             if (item.product_id) {
               enrolledCourses.push(item.product_id.toString());
             }
@@ -185,12 +232,20 @@ serve(async (req) => {
         }
       }
 
-      // Check for individual course purchase
+      // ALWAYS add product_id to enrolledCourses if it looks like a course
+      // This ensures all course purchases are tracked
       const sku = item.sku?.toLowerCase() || '';
-      const courseMatch = sku.match(/(?:gem-)?individual-course-(\w+)/i) ||
-                          sku.match(/course-id-(\w+)/i);
-      if (courseMatch && item.product_id) {
-        enrolledCourses.push(item.product_id.toString());
+      const productTitle = (item.title || '').toLowerCase();
+      const isCourseProduct = sku.includes('course') ||
+                              productTitle.includes('khóa học') ||
+                              productTitle.includes('khoa hoc');
+
+      if (isCourseProduct && item.product_id) {
+        const productIdStr = item.product_id.toString();
+        if (!enrolledCourses.includes(productIdStr)) {
+          enrolledCourses.push(productIdStr);
+          console.log('[Shopify Paid Webhook] Added course to enrollment:', item.title, productIdStr);
+        }
       }
     }
 
@@ -226,9 +281,9 @@ serve(async (req) => {
       }
     }
 
-    // Add enrolled courses
+    // Add enrolled courses - store in BOTH user_access AND course_enrollments
     if (enrolledCourses.length > 0) {
-      // Get existing user_access
+      // 1. Store in user_access (legacy/backup)
       const { data: existingAccess } = await supabase
         .from('user_access')
         .select('enrolled_courses')
@@ -247,6 +302,51 @@ serve(async (req) => {
         }, {
           onConflict: 'user_email',
         });
+
+      // 2. ALSO create course_enrollments for each course (primary source)
+      // First, find the user by email
+      const { data: userData } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', customerEmail)
+        .single();
+
+      if (userData?.id) {
+        for (const shopifyProductId of enrolledCourses) {
+          // Find course by shopify_product_id
+          const { data: courseData } = await supabase
+            .from('courses')
+            .select('id, title')
+            .or(`shopify_product_id.eq.${shopifyProductId},shopify_product_id.eq."${shopifyProductId}"`)
+            .single();
+
+          if (courseData?.id) {
+            // Create enrollment record
+            const { error: enrollError } = await supabase
+              .from('course_enrollments')
+              .upsert({
+                user_id: userData.id,
+                course_id: courseData.id,
+                enrolled_at: new Date().toISOString(),
+                progress_percentage: 0,
+                is_active: true,
+                access_source: 'shopify_purchase',
+              }, {
+                onConflict: 'user_id,course_id',
+              });
+
+            if (enrollError) {
+              console.error('[Shopify Paid Webhook] course_enrollment error:', enrollError);
+            } else {
+              console.log('[Shopify Paid Webhook] Enrolled user in course:', courseData.title);
+            }
+          } else {
+            console.warn('[Shopify Paid Webhook] Course not found for shopify_product_id:', shopifyProductId);
+          }
+        }
+      } else {
+        console.warn('[Shopify Paid Webhook] User not found for email:', customerEmail);
+      }
     }
 
     // Log event

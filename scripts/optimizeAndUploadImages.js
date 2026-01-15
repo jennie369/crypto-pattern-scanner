@@ -135,8 +135,18 @@ async function updateLessonWithImages(lessonId, imageUrls, chapter, lessonNum) {
     return false;
   }
 
+  console.log(`      📍 Tìm thấy lesson: ${lesson.id} - "${lesson.title}"`);
+
   let htmlContent = lesson.html_content;
   let replacedCount = 0;
+
+  // DEBUG: Show what image patterns exist in the content
+  const imgTags = htmlContent.match(/<img[^>]*src="([^"]+)"/gi) || [];
+  console.log(`      🔍 Tìm thấy ${imgTags.length} thẻ <img> trong database:`);
+  imgTags.slice(0, 5).forEach((tag, i) => {
+    const srcMatch = tag.match(/src="([^"]+)"/);
+    if (srcMatch) console.log(`         ${i + 1}. ${srcMatch[1].substring(0, 80)}...`);
+  });
 
   const sortedImages = Object.entries(imageUrls)
     .map(([num, url]) => ({ num: parseInt(num), url }))
@@ -150,16 +160,30 @@ async function updateLessonWithImages(lessonId, imageUrls, chapter, lessonNum) {
     );
 
     if (captionPattern.test(htmlContent)) {
+      console.log(`         ✓ Method 1 matched for image ${num}`);
       htmlContent = htmlContent.replace(captionPattern, `$1${url}$3`);
       replacedCount++;
       continue;
     }
 
-    // Method 2: Find nth placehold.co image
+    // Method 2: Find local image path with matching image number (e.g., images/bai-6.4-hinh-1-*.jpg)
+    const localImagePattern = new RegExp(
+      `(<img[^>]*src=")images\\/bai-[\\d.]+-hinh-${num}-[^"]*\\.(jpg|jpeg|png|webp)("[^>]*>)`,
+      'i'
+    );
+    if (localImagePattern.test(htmlContent)) {
+      console.log(`         ✓ Method 2 matched for image ${num}`);
+      htmlContent = htmlContent.replace(localImagePattern, `$1${url}$3`);
+      replacedCount++;
+      continue;
+    }
+
+    // Method 3: Find nth placehold.co image
     const placeholderPattern = /(<img[^>]*src=")(https:\/\/placehold\.co\/[^"]+)("[^>]*>)/gi;
     let matches = [...htmlContent.matchAll(placeholderPattern)];
 
     if (matches.length >= num && matches[num - 1]) {
+      console.log(`         ✓ Method 3 matched for image ${num}`);
       const match = matches[num - 1];
       const oldImgTag = match[0];
       const newImgTag = `${match[1]}${url}${match[3]}`;
@@ -168,10 +192,25 @@ async function updateLessonWithImages(lessonId, imageUrls, chapter, lessonNum) {
       continue;
     }
 
-    // Method 3: Replace any remaining placehold.co
+    // Method 4: Replace any remaining placehold.co
     const singlePlaceholder = /<img([^>]*)src="https:\/\/placehold\.co\/[^"]+"/i;
     if (singlePlaceholder.test(htmlContent)) {
+      console.log(`         ✓ Method 4 matched for image ${num}`);
       htmlContent = htmlContent.replace(singlePlaceholder, `<img$1src="${url}"`);
+      replacedCount++;
+      continue;
+    }
+
+    // Method 5: Replace nth existing Supabase storage URL (for re-uploading images)
+    const supabasePattern = /(<img[^>]*src=")(https:\/\/[^"]*supabase[^"]*\/course-images\/[^"]+)("[^>]*>)/gi;
+    let supabaseMatches = [...htmlContent.matchAll(supabasePattern)];
+
+    if (supabaseMatches.length >= num && supabaseMatches[num - 1]) {
+      console.log(`         ✓ Method 5 matched for image ${num} (replacing old Supabase URL)`);
+      const match = supabaseMatches[num - 1];
+      const oldImgTag = match[0];
+      const newImgTag = `${match[1]}${url}${match[3]}`;
+      htmlContent = htmlContent.replace(oldImgTag, newImgTag);
       replacedCount++;
     }
   }
@@ -198,7 +237,7 @@ async function updateLessonWithImages(lessonId, imageUrls, chapter, lessonNum) {
   return replacedCount;
 }
 
-async function processChapterFolder(chapterFolder) {
+async function processChapterFolder(chapterFolder, specificLesson = null) {
   const projectRoot = path.resolve(__dirname, '..');
   const folderPath = path.join(projectRoot, IMAGES_FOLDER, chapterFolder);
 
@@ -207,7 +246,7 @@ async function processChapterFolder(chapterFolder) {
     return { uploaded: 0, updated: 0, saved: 0 };
   }
 
-  const files = fs.readdirSync(folderPath)
+  let files = fs.readdirSync(folderPath)
     .filter(f => {
       const ext = path.extname(f).toLowerCase();
       // Handle double extensions like .png.png
@@ -216,12 +255,21 @@ async function processChapterFolder(chapterFolder) {
     })
     .sort();
 
+  // Filter by specific lesson if provided
+  if (specificLesson) {
+    files = files.filter(f => f.startsWith(`${specificLesson}-`));
+    if (files.length === 0) {
+      console.log(`   ⚠️  Không tìm thấy hình ảnh cho bài ${specificLesson}`);
+      return { uploaded: 0, updated: 0, saved: 0 };
+    }
+  }
+
   if (files.length === 0) {
     console.log(`   ⚠️  Không có hình ảnh trong thư mục`);
     return { uploaded: 0, updated: 0, saved: 0 };
   }
 
-  console.log(`   📷 Tìm thấy ${files.length} hình ảnh`);
+  console.log(`   📷 Tìm thấy ${files.length} hình ảnh${specificLesson ? ` cho bài ${specificLesson}` : ''}`);
 
   // Group files by lesson
   const lessonImages = {};
@@ -293,6 +341,7 @@ async function processChapterFolder(chapterFolder) {
 async function main() {
   const args = process.argv.slice(2);
   const specificFolder = args[0];
+  const specificLesson = args[1]; // e.g., "6.4" for bài 6.4
 
   console.log('='.repeat(60));
   console.log('GEM Academy - Optimize & Upload Images');
@@ -301,6 +350,11 @@ async function main() {
   console.log(`📐 Max width: ${MAX_WIDTH}px`);
   console.log(`📦 Format: WebP`);
   console.log(`🎨 Quality: ${QUALITY}%`);
+  console.log('');
+  console.log('USAGE:');
+  console.log('  node scripts/optimizeAndUploadImages.js                    (tất cả)');
+  console.log('  node scripts/optimizeAndUploadImages.js tier1-ch6          (cả chapter)');
+  console.log('  node scripts/optimizeAndUploadImages.js tier1-ch6 6.4      (chỉ bài 6.4)');
   console.log('');
 
   const projectRoot = path.resolve(__dirname, '..');
@@ -319,7 +373,11 @@ async function main() {
       return;
     }
     chapterFolders = [specificFolder];
-    console.log(`📁 Chỉ xử lý: ${specificFolder}`);
+    if (specificLesson) {
+      console.log(`📁 Chỉ xử lý: ${specificFolder} → Bài ${specificLesson}`);
+    } else {
+      console.log(`📁 Chỉ xử lý: ${specificFolder} (tất cả bài)`);
+    }
   } else {
     chapterFolders = fs.readdirSync(imagesRoot)
       .filter(f => fs.statSync(path.join(imagesRoot, f)).isDirectory());
@@ -338,7 +396,7 @@ async function main() {
     console.log(`\n📁 ${folder}`);
     console.log('-'.repeat(50));
 
-    const { uploaded, updated, saved } = await processChapterFolder(folder);
+    const { uploaded, updated, saved } = await processChapterFolder(folder, specificLesson);
     totalUploaded += uploaded;
     totalUpdated += updated;
     totalSaved += saved;

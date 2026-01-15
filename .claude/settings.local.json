@@ -101,7 +101,14 @@
       "Bash(python3:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Full WYSIWYG editor + GEM Mobile comprehensive update\n\nWeb Frontend:\n- LessonEditor: Full WYSIWYG with DraggableBlockEditor\n- Floating sidebars \\(Course Outline, Toolbox\\) - toggle on/off\n- Visual/Code mode switch\n- Media Library integration\n- Full-width editor layout\n- CourseAdmin UI improvements\n\nGEM Mobile App:\n- Complete app-wide enhancements\n- AITrader components\n- VisionBoard features\n- Scanner improvements\n- Forum/Messages updates\n- Admin screens\n- Course system\n- Shop integration\n- All services updated\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git stash push:*)",
+      "Bash(git stash:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(cd:*)",
+      "Bash(git reset:*)",
+      "Bash(git status:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,239 @@
+
+**Product URLs:**
+
+**Khóa học Trading**
+
+* TIER 1: [https://yinyangmasters.com/products/gem-tier1](https://yinyangmasters.com/products/gem-tier1**) (₫11,000,000)  
+* TIER 2: [https://yinyangmasters.com/products/gem-tier2](https://yinyangmasters.com/products/gem-tier2**) (₫21,000,000)  
+* TIER 3: [https://yinyangmasters.com/products/gem-tier3](https://yinyangmasters.com/products/gem-tier3**) (₫68,000,000)  
+* TIER STARTER: [https://yinyangmasters.com/products/gem-trading-course-tier-starter](https://yinyangmasters.com/products/gem-trading-course-tier-starter)  
+* Price: 299,000₫  
+1. **YinYang Chatbot AI \- PREMIUM** (₫59,000)  
+   * URL: [https://yinyangmasters.com/products/gem-chatbot-premium](https://yinyangmasters.com/products/gem-chatbot-premium)  
+2. **YinYang Chatbot AI \- PRO** (₫39,000)  
+   * URL: [https://yinyangmasters.com/products/yinyang-chatbot-ai-pro](https://yinyangmasters.com/products/yinyang-chatbot-ai-pro)  
+3. **YinYang Chatbot AI \- VIP**(₫99,000)  
+   * URL: https://yinyangmasters.com/products/yinyang-chatbot-ai-vip  
+4. **Scanner Dashboard \- VIP** (₫5,997,000)  
+   * URL: [https://yinyangmasters.com/products/scanner-dashboard-vip](https://yinyangmasters.com/products/scanner-dashboard-vip)  
+5. **Scanner Dashboard \- PREMIUM** (₫1,997,000)  
+   * URL: [https://yinyangmasters.com/products/scanner-dashboard-premium](https://yinyangmasters.com/products/scanner-dashboard-premium)  
+6. **Scanner Dashboard \- PRO** (₫997,000)  
+   * URL: [https://yinyangmasters.com/products/gem-scanner-pro](https://yinyangmasters.com/products/gem-scanner-pro)  
+7. Khóa học 7 NGÀY KHAI MỞ TẦN SỐ GỐC \- Product ID: 8904651342001 Variant ID: 46448176758961  
+   * URL: [https://yinyangmasters.com/products/khoa-hoc-7-ngay-khai-mo-tan-so-goc](https://yinyangmasters.com/products/khoa-hoc-7-ngay-khai-mo-tan-so-goc)  
+   * Price: 1,990,000₫   
+8. Khóa học KÍCH HOẠT TẦN SỐ TÌNH YÊU \- Product ID: 8904653111473 Variant ID: 46448180166833  
+   * URL: [https://yinyangmasters.com/products/khoa-hoc-kich-hoat-tan-so-tinh-yeu](https://yinyangmasters.com/products/khoa-hoc-kich-hoat-tan-so-tinh-yeu)  
+   * Price: 399,000₫  
+9. Khóa học TÁI TẠO TƯ DUY TRIỆU PHÚ \- Product ID: 8904656257201 Variant ID: 46448192192689  
+   * URL: [https://yinyangmasters.com/products/khoa-hoc-tai-tao-tu-duy-trieu-phu](https://yinyangmasters.com/products/khoa-hoc-tai-tao-tu-duy-trieu-phu)  
+   * Price: 499,000₫
+
+   
+
+● DANH SÁCH VARIANT IDs
+
+Khóa học Trading
+
+| Sản phẩm | Variant ID | SKU | Giá |
+| :---- | :---- | :---- | :---- |
+| TIER 1 | 46351707898033 | gem-course-tier1 | ₫11,000,000 |
+| TIER 2 | 46351719235761 | gem-course-tier2 | ₫21,000,000 |
+| TIER 3 | 46351723331761 | gem-course-tier3 | ₫68,000,000 |
+| TIER STARTER | 46448154050737 | gem-course-tierstarter | ₫299,000 |
+
+YinYang Chatbot AI
+
+| Sản phẩm | Variant ID | SKU | Giá |
+| :---- | :---- | :---- | :---- |
+| PRO | 46351763701937 | gem-chatbot-pro | ₫39,000/tháng |
+| PREMIUM | 46351771893937 | gem-chatbot-premium | ₫59,000/tháng |
+| VIP | 46421822832817 | gem-chatbot-vip | ₫99,000/tháng |
+
+Scanner Dashboard
+
+| Sản phẩm | Variant ID | SKU | Giá |
+| :---- | :---- | :---- | :---- |
+| PRO | 46351752069297 | gem-scanner-pro | ₫997,000/tháng |
+| PREMIUM | 46351759507633 | gem-scanner-premium | ₫1,997,000/tháng |
+| VIP | 46351760294065 | gem-scanner-vip | ₫5,997,000/tháng |
+
+Khóa học Tâm linh
+
+| Sản phẩm | Variant ID | Giá |
+| :---- | :---- | :---- |
+| 7 Ngày Khai Mở Tần Số Gốc | 46448176758961 | ₫1,990,000 |
+| Kích Hoạt Tần Số Tình Yêu | 46448180166833 | ₫399,000 |
+| Tái Tạo Tư Duy Triệu Phú | 46448192192689 | ₫499,000 |
+
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Khóa học TÁI TẠO TƯ DUY TRIỆU PHÚ
+
+Handle: khoa-học-tai-tạo-tư-duy-triệu-phu
+
+Tags: course, digital, Ebook, gem-academy, healing, khoa-hoc, Khóa học, mindset, tan-so-goc, trading, trading-course
+
+Giá (Variant Price): 499.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Khóa học KÍCH HOẠT TẦN SỐ TÌNH YÊU
+
+Handle: khoa-học-kich-hoạt-tần-số-tinh-yeu
+
+Tags: course, digital, Ebook, gem-academy, healing, khai-mo, khoa-hoc, Khóa học, mindset, spiritual, tan-so-goc
+
+Giá (Variant Price): 399.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Khóa học 7 NGÀY KHAI MỞ TẦN SỐ GỐC
+
+Handle: khoa-học-7-ngay-khai-mở-tần-số-gốc
+
+Tags: 7-ngay, course, digital, Ebook, gem-academy, healing, khai-mo, khoa-hoc, Khóa học tư duy, mindset, spiritual, tan-so-goc, tier-starter, trading, trading-course
+
+Giá (Variant Price): 1.990.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): GEM Trading Academy - GÓI STARTER
+
+Handle: gem-trading-course-tier-starter
+
+Tags: beginner, course, digital, Gem Trading, gem-academy, khoa-hoc, Khóa học, mindset, Tier 1, Tier 2, Tier 3, tier-starter, trading, trading-course
+
+Giá (Variant Price): 299.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Gem Pack - VIP (5000 + 1000 Bonus Gems)
+
+Handle: gem-pack-vip-5000-1000-bonus-gems
+
+Tags: gem pack, gems, in-app, virtual-currency
+
+Giá (Variant Price): 890.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Gem Pack - Pro (1000 + 150 Bonus Gems)
+
+Handle: gem-pack-pro-1000-150-bonus-gems
+
+Tags: gem pack, gems, in-app, virtual-currency
+
+Giá (Variant Price): 189.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Gem Pack - Popular (500 + 50 Bonus Gems)
+
+Handle: gem-pack-popular-500-50-bonus-gems
+
+Tags: gem pack, gems, in-app, virtual-currency
+
+Giá (Variant Price): 99.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Gem Pack - Starter (100 Gems)
+
+Handle: gem-pack-starter-100-gems
+
+Tags: gem pack, gems, in-app, virtual-currency
+
+Giá (Variant Price): 22.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): YinYang Chatbot AI - VIP
+
+Handle: yinyang-chatbot-ai-vip
+
+Tags: GEM Chatbot
+
+Giá (Variant Price): 99.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): YinYang Chatbot AI - PREMIUM
+
+Handle: gem-chatbot-premium
+
+Tags: GEM Chatbot
+
+Giá (Variant Price): 59.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): YinYang Chatbot AI - PRO
+
+Handle: yinyang-chatbot-ai-pro
+
+Tags: GEM Chatbot
+
+Giá (Variant Price): 39.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Scanner Dashboard - VIP
+
+Handle: scanner-dashboard-vip
+
+Tags: Scanner
+
+Giá (Variant Price): 5.997.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Scanner Dashboard - PREMIUM
+
+Handle: scanner-dashboard-premium
+
+Tags: Scanner
+
+Giá (Variant Price): 1.997.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): Scanner Dashboard - PRO
+
+Handle: gem-scanner-pro
+
+Tags: Scanner
+
+Giá (Variant Price): 997.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): GEM Trading Academy - Gói 3
+
+Handle: gem-tier3
+
+Tags: course, digital, Ebook, Gem Trading, gem-academy, khoa-hoc, Khóa học, Khóa học Trading, mindset, Tier 1, Tier 2, Tier 3, tier-starter, trading, trading-course
+
+Giá (Variant Price): 68.000.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): GEM Trading Academy - Gói 2
+
+Handle: gem-tier2
+
+Tags: course, digital, Ebook, Gem Trading, gem-academy, khoa-hoc, Khóa học, Khóa học Trading, mindset, Tier 1, Tier 2, Tier 3, tier-starter, trading, trading-course
+
+Giá (Variant Price): 21.000.000 VND
+
+--- SẢN PHẨM ---
+
+Tên sản phẩm (Title): GEM Trading Academy - Gói 1
+
+Handle: gem-tier1
+
+Tags: course, digital, Ebook, Gem Trading, gem-academy, khoa-hoc, Khóa học, Khóa học Trading, mindset, Tier 1, Tier 2, Tier 3, tier-starter, trading, trading-course
+
+Giá (Variant Price): 11.000.000 VND
