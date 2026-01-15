@@ -192,7 +192,7 @@ const infoTooltipStyles = StyleSheet.create({
 // Tooltip definitions for each section
 const SECTION_TOOLTIPS = {
   calendar: 'Lịch hiển thị các sự kiện từ mục tiêu, deadline và thói quen của bạn. Chấm màu cho biết có hoạt động vào ngày đó. Bấm vào ngày để xem chi tiết.',
-  radar: 'Biểu đồ radar hiển thị mức độ cân bằng giữa 6 lĩnh vực cuộc sống: Tài chính, Sự nghiệp, Sức khỏe, Mối quan hệ, Phát triển cá nhân và Tâm linh. Điểm càng cao = càng cân bằng.',
+  radar: 'Biểu đồ radar hiển thị mức độ cân bằng giữa 6 lĩnh vực cuộc sống: Tài chính, Sự nghiệp, Sức khỏe, Mối quan hệ, Phát triển cá nhân và Tâm thức. Điểm càng cao = càng cân bằng.',
   weekly: 'Biểu đồ cột hiển thị điểm tiến độ của bạn trong 7 ngày qua. Điểm được tính từ: Hoàn thành mục tiêu (40%), Khẳng định (30%), Thói quen (30%).',
   xp: 'XP (Experience Points) được tích lũy khi bạn hoàn thành mục tiêu (+50 XP), đọc khẳng định (+10 XP), hoàn thành thói quen (+5 XP) và duy trì streak (+5 XP/ngày). Mỗi 100 XP = 1 Level.',
 };
@@ -257,7 +257,7 @@ const LIFE_AREAS = [
   { key: 'career', label: 'Sự nghiệp', Icon: BriefcaseIcon, color: '#6366F1' },
   { key: 'health', label: 'Sức khỏe', Icon: ActivityIcon, color: '#14B8A6' },
   { key: 'personal', label: 'Phát triển cá nhân', Icon: StarIcon, color: '#F59E0B' },
-  { key: 'spiritual', label: 'Tâm linh', Icon: SpiritualIcon, color: '#8B5CF6' },
+  { key: 'spiritual', label: 'Tâm thức', Icon: SpiritualIcon, color: '#8B5CF6' },
 ];
 
 // Ritual icon mapping for displaying rituals in goal cards
@@ -458,7 +458,7 @@ const LIFE_AREA_LABELS = {
   health: { label: 'Sức khỏe', color: '#EF4444' },
   relationships: { label: 'Mối quan hệ', color: '#EC4899' },
   personal: { label: 'Phát triển bản thân', color: '#8B5CF6' },
-  spiritual: { label: 'Tâm linh', color: '#F59E0B' },
+  spiritual: { label: 'Tâm thức', color: '#F59E0B' },
 };
 
 /**

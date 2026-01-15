@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Keyboard,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -52,6 +53,7 @@ const SearchScreen = ({ navigation }) => {
   // Search state
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
+  const [userResults, setUserResults] = useState([]); // NEW: Users matching search
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -129,6 +131,10 @@ const SearchScreen = ({ navigation }) => {
           currentPage,
           20
         );
+        // Hashtag search doesn't return users
+        if (resetResults) {
+          setUserResults([]);
+        }
       } else {
         result = await searchService.searchPosts(
           searchQuery,
@@ -136,6 +142,10 @@ const SearchScreen = ({ navigation }) => {
           currentPage,
           20
         );
+        // Update user results (only on reset/new search)
+        if (resetResults && result.users) {
+          setUserResults(result.users);
+        }
       }
 
       // Save to recent searches
@@ -400,21 +410,82 @@ const SearchScreen = ({ navigation }) => {
     );
   };
 
-  // Render header with result count
-  const renderListHeader = () => {
-    if (results.length === 0) return null;
+  // Render user card for user results
+  const renderUserCard = (user) => {
+    const displayName = user.full_name || user.email?.split('@')[0] || 'User';
+    const username = user.email?.split('@')[0] || '';
 
     return (
-      <View style={styles.resultsHeader}>
-        <Text style={styles.resultsCount}>
-          {totalCount} kết quả cho "{query}"
-        </Text>
+      <TouchableOpacity
+        key={user.id}
+        style={styles.userCard}
+        onPress={() => navigation.navigate('UserProfile', { userId: user.id })}
+      >
+        <Image
+          source={{ uri: user.avatar_url || 'https://via.placeholder.com/50' }}
+          style={styles.userAvatar}
+        />
+        <View style={styles.userInfo}>
+          <Text style={styles.userName} numberOfLines={1}>{displayName}</Text>
+          <Text style={styles.userHandle} numberOfLines={1}>@{username}</Text>
+        </View>
         <TouchableOpacity
-          style={[styles.filterButton, showFilters && styles.filterButtonActive]}
-          onPress={() => setShowFilters(!showFilters)}
+          style={styles.viewProfileButton}
+          onPress={() => navigation.navigate('UserProfile', { userId: user.id })}
         >
-          <Filter size={18} color={showFilters ? COLORS.gold : COLORS.textMuted} />
+          <Text style={styles.viewProfileText}>Xem</Text>
         </TouchableOpacity>
+      </TouchableOpacity>
+    );
+  };
+
+  // Render user results section
+  const renderUserResults = () => {
+    if (userResults.length === 0) return null;
+
+    return (
+      <View style={styles.userResultsSection}>
+        <View style={styles.sectionTitleRow}>
+          <User size={16} color={COLORS.cyan} />
+          <Text style={styles.sectionTitle}>Người dùng ({userResults.length})</Text>
+        </View>
+        {userResults.slice(0, 3).map(renderUserCard)}
+        {userResults.length > 3 && (
+          <TouchableOpacity
+            style={styles.showMoreUsers}
+            onPress={() => {
+              // Could navigate to a full user search screen
+              // For now, just show all inline
+            }}
+          >
+            <Text style={styles.showMoreText}>+{userResults.length - 3} người dùng khác</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  // Render header with result count
+  const renderListHeader = () => {
+    return (
+      <View>
+        {/* User results (if any) */}
+        {renderUserResults()}
+
+        {/* Post results header */}
+        {results.length > 0 && (
+          <View style={styles.resultsHeader}>
+            <Text style={styles.resultsCount}>
+              {totalCount} bài viết cho "{query}"
+            </Text>
+            <TouchableOpacity
+              style={[styles.filterButton, showFilters && styles.filterButtonActive]}
+              onPress={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={18} color={showFilters ? COLORS.gold : COLORS.textMuted} />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     );
   };
@@ -446,12 +517,12 @@ const SearchScreen = ({ navigation }) => {
         {renderFilters()}
 
         {/* Results or Empty State */}
-        {loading && results.length === 0 ? (
+        {loading && results.length === 0 && userResults.length === 0 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={COLORS.gold} />
             <Text style={styles.loadingText}>Đang tìm kiếm...</Text>
           </View>
-        ) : results.length > 0 ? (
+        ) : (results.length > 0 || userResults.length > 0) ? (
           <FlatList
             data={results}
             renderItem={renderPost}
@@ -462,6 +533,13 @@ const SearchScreen = ({ navigation }) => {
             onEndReachedThreshold={0.5}
             ListHeaderComponent={renderListHeader}
             ListFooterComponent={renderFooter}
+            ListEmptyComponent={
+              userResults.length > 0 ? (
+                <View style={styles.noPostsHint}>
+                  <Text style={styles.noPostsText}>Không có bài viết nào từ người dùng này</Text>
+                </View>
+              ) : null
+            }
           />
         ) : (
           renderEmptyState()
@@ -670,6 +748,71 @@ const styles = StyleSheet.create({
   // Initial state
   initialState: {
     flex: 1,
+  },
+  // User results section
+  userResultsSection: {
+    marginBottom: SPACING.lg,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  userCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  userAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  userInfo: {
+    flex: 1,
+    marginLeft: SPACING.md,
+  },
+  userName: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  userHandle: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  viewProfileButton: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    backgroundColor: 'rgba(0, 200, 255, 0.2)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.cyan,
+  },
+  viewProfileText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.cyan,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  showMoreUsers: {
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  showMoreText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.cyan,
+  },
+  noPostsHint: {
+    padding: SPACING.xl,
+    alignItems: 'center',
+  },
+  noPostsText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textMuted,
+    textAlign: 'center',
   },
 });
 

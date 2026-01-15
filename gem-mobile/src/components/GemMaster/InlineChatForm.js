@@ -59,7 +59,7 @@ const LIFE_AREAS = [
   { id: 'health', label: 'Sức khỏe', icon: Heart, color: '#EF4444', gradient: ['#EF4444', '#DC2626'] },
   { id: 'relationships', label: 'Mối quan hệ', icon: Users, color: '#EC4899', gradient: ['#EC4899', '#DB2777'] },
   { id: 'personal', label: 'Phát triển', icon: Brain, color: '#8B5CF6', gradient: ['#8B5CF6', '#7C3AED'] },
-  { id: 'spiritual', label: 'Tâm linh', icon: Sparkles, color: '#F59E0B', gradient: ['#F59E0B', '#D97706'] },
+  { id: 'spiritual', label: 'Tâm thức', icon: Sparkles, color: '#F59E0B', gradient: ['#F59E0B', '#D97706'] },
 ];
 
 // Goal suggestions by life area - quick select options
@@ -430,10 +430,10 @@ const ACTION_PLAN_TEMPLATES = {
     'Thực hành mindfulness khi ăn',
     'Đeo crystal hoặc đá phong thủy',
     'Dành 10 phút tĩnh lặng mỗi tối',
-    'Đọc sách tâm linh/triết học mỗi tuần',
+    'Đọc sách tâm thức/triết học mỗi tuần',
     'Thực hành yoga hoặc khí công',
     'Kết nối với thiên nhiên mỗi tuần',
-    'Tham gia nhóm thiền định hoặc tâm linh',
+    'Tham gia nhóm thiền định hoặc tâm thức',
     'Thực hành từ bi và tha thứ hàng ngày',
   ],
 };
@@ -1335,7 +1335,7 @@ const InlineChatForm = ({
           {/* Step 7: RITUAL SELECTION - Based on life area */}
           {step === 7 && (
             <>
-              <Text style={styles.stepQuestion}>Nghi thức tâm linh hỗ trợ</Text>
+              <Text style={styles.stepQuestion}>Nghi thức tâm thức hỗ trợ</Text>
               <Text style={styles.stepHint}>
                 Chọn nghi thức để tăng cường năng lượng cho mục tiêu (không bắt buộc)
               </Text>

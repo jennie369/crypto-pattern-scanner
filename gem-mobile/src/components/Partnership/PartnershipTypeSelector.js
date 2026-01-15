@@ -183,7 +183,8 @@ const PartnershipTypeSelector = ({ onSelectCTV, onSelectKOL, isCTV, ctvTier }) =
         </View>
       </View>
 
-      <View style={{ height: 40 }} />
+      {/* Extra padding for tab bar */}
+      <View style={{ height: 120 }} />
     </ScrollView>
   );
 };

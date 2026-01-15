@@ -520,9 +520,8 @@ const ForumScreen = ({ navigation }) => {
     lastCreatedAtRef.current = null;
     setSessionId(null); // Force new session for hybrid feed
     trackedPostIds.current.clear(); // Clear local impression tracking
-    // Clear existing data first to show loading state
-    setPosts([]);
-    setFeedItems([]);
+    // DON'T clear existing data - keep showing old content while loading
+    // New data will replace old data when loadPosts completes with reset=true
     await loadPosts(true);
     setRefreshing(false);
   }, [selectedFeed, selectedTopic]);
@@ -557,8 +556,7 @@ const ForumScreen = ({ navigation }) => {
               lastCreatedAtRef.current = null;
               setSessionId(null);
               trackedPostIds.current.clear(); // Clear local impression tracking
-              setPosts([]);
-              setFeedItems([]);
+              // DON'T clear data - keep showing old content while loading
               await loadPosts(true);
               setRefreshing(false);
 
@@ -868,14 +866,19 @@ const ForumScreen = ({ navigation }) => {
   };
 
   // Memoized feed data with sponsor banners injected
+  // FIXED: Don't inject banners during loading/refreshing states
   const feedDataWithBanners = useMemo(() => {
+    // Don't show banners when loading or refreshing (no content to mix with)
+    if (loading || refreshing) {
+      return [];
+    }
     const baseFeed = feedItems.length > 0 ? feedItems : posts.map(p => ({ type: 'post', data: p }));
     // Inject sponsor banners between posts (after 3rd item, then every 8 items)
     return injectBannersIntoFeed(baseFeed, sponsorBanners, {
       firstBannerAfter: 3,
       bannerInterval: 8,
     });
-  }, [feedItems, posts, sponsorBanners]);
+  }, [feedItems, posts, sponsorBanners, loading, refreshing]);
 
   const getFeedTitle = () => {
     const titles = {
@@ -942,6 +945,10 @@ const ForumScreen = ({ navigation }) => {
 
   // INFINITE SCROLL: Show loading indicator when loading more
   const renderFooter = () => {
+    // Don't show footer during refresh - let RefreshControl handle it
+    if (refreshing) {
+      return null;
+    }
     // Show loading indicator when loading more posts
     if (loadingMore) {
       return (
@@ -1166,6 +1173,7 @@ const ForumScreen = ({ navigation }) => {
                 onRefresh={onRefresh}
                 tintColor={COLORS.gold}
                 colors={[COLORS.gold]}
+                progressViewOffset={HEADER_MAX_HEIGHT}
               />
             }
             onScroll={handleScroll}

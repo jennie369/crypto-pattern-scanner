@@ -77,6 +77,7 @@ import {
   Scan,
   X,
   Globe,
+  Radio,
 } from 'lucide-react-native';
 import { Switch } from 'react-native';
 
@@ -531,7 +532,13 @@ export default function AccountScreen() {
           text: 'Đăng xuất',
           style: 'destructive',
           onPress: async () => {
-            await signOut();
+            console.log('[AccountScreen] Logout button pressed, calling signOut...');
+            try {
+              const result = await signOut();
+              console.log('[AccountScreen] SignOut result:', result);
+            } catch (error) {
+              console.error('[AccountScreen] SignOut error:', error);
+            }
           }
         },
       ],
@@ -720,6 +727,36 @@ export default function AccountScreen() {
                     <Text style={styles.visionBoardStatText}>Daily</Text>
                   </View>
                 </View>
+                <ChevronRight size={20} color={COLORS.textMuted} />
+              </View>
+            </View>
+          </Pressable>
+
+          {/* ═══════════════════════════════════════════ */}
+          {/* AI LIVESTREAM - Avatar AI bán hàng tự động */}
+          {/* ═══════════════════════════════════════════ */}
+          <Pressable
+            style={({ pressed }) => [
+              styles.livestreamCard,
+              pressed && { opacity: 0.8 },
+            ]}
+            onPress={() => {
+              console.log('[AccountScreen] Livestream card pressed');
+              navigation.navigate('LivestreamList');
+            }}
+          >
+            <View style={styles.livestreamContent}>
+              <View style={styles.livestreamLeft}>
+                <View style={styles.livestreamIconRow}>
+                  <Radio size={20} color={COLORS.error} />
+                  <View style={styles.liveBadge}>
+                    <Text style={styles.liveBadgeText}>AI</Text>
+                  </View>
+                </View>
+                <Text style={styles.livestreamTitle}>AI Livestream</Text>
+                <Text style={styles.livestreamSubtitle}>Avatar AI bán hàng tự động</Text>
+              </View>
+              <View style={styles.livestreamRight}>
                 <ChevronRight size={20} color={COLORS.textMuted} />
               </View>
             </View>
@@ -1684,6 +1721,58 @@ const styles = StyleSheet.create({
   visionBoardStatText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
+  },
+
+  // ═══════════════════════════════════════════
+  // AI Livestream Card Styles
+  // ═══════════════════════════════════════════
+  livestreamCard: {
+    marginBottom: SPACING.lg,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: GLASS.background,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.3)',
+  },
+  livestreamContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  livestreamLeft: {
+    flex: 1,
+  },
+  livestreamIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  liveBadge: {
+    backgroundColor: COLORS.error,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  liveBadgeText: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.white,
+  },
+  livestreamTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginBottom: 2,
+  },
+  livestreamSubtitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  livestreamRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   // ═══════════════════════════════════════════

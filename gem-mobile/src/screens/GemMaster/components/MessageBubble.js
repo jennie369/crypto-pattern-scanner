@@ -39,7 +39,7 @@ const ICON_MAP = {
 };
 
 const ICON_SIZE = 16;
-const ICON_COLOR = COLORS.primary;
+const ICON_COLOR = COLORS.gold; // Gold for visibility on dark background
 
 /**
  * Simple markdown text renderer
@@ -161,8 +161,9 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
   // State for selected option (to show visual feedback)
   const [selectedOption, setSelectedOption] = useState(null);
 
-  // Get products from recommendations or message
-  const products = message.products || recommendations?.crystals?.slice(0, 2) || [];
+  // Get products from message only (not from recommendations - those are handled by ProductRecommendations component)
+  // Removed crystal fallback to avoid showing unrelated products for course/mindset messages
+  const products = message.products || [];
 
   // Check if this message has interactive options (questionnaire)
   const hasOptions = !isUser && message.options && Array.isArray(message.options) && message.options.length > 0;
@@ -507,10 +508,10 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     gap: SPACING.xs,
   },
-  // Long press states
+  // Long press states - removed scale animation to prevent sensitive touch response
   bubblePressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.98 }],
+    // No visual feedback on light touch - only on long press
+    // opacity and scale removed to avoid "shrinking" effect on every touch
   },
   bubbleCopied: {
     borderColor: '#10B981',

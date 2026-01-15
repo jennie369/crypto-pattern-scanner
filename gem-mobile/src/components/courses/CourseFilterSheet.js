@@ -24,7 +24,7 @@ const COURSE_CATEGORIES = [
   { id: 'astrology', name: 'Chiêm Tinh' },
   { id: 'meditation', name: 'Thiền' },
   { id: 'crystals', name: 'Đá Quý' },
-  { id: 'spiritual', name: 'Tâm Linh' },
+  { id: 'spiritual', name: 'Tâm Thức' },
   { id: 'analysis', name: 'Phân Tích' },
 ];
 

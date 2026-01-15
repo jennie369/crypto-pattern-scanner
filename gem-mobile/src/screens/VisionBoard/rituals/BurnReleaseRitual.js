@@ -15,7 +15,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -444,6 +444,7 @@ const BurningPaper = memo(({ text, onBurnComplete }) => {
 
 const BurnReleaseRitual = ({ navigation }) => {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // State
   const [phase, setPhase] = useState('write'); // write, burning, completed
@@ -622,7 +623,7 @@ const BurnReleaseRitual = ({ navigation }) => {
           direction="up"
         />
 
-        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
           {/* Header */}
           <RitualHeader
             title="Đốt & Buông Bỏ"
@@ -638,6 +639,8 @@ const BurnReleaseRitual = ({ navigation }) => {
           <View style={styles.content}>
             {phase === 'write' && renderWritePhase()}
             {(phase === 'burning' || phase === 'completed') && renderBurningPhase()}
+            {/* Bottom padding for tab bar */}
+            <View style={{ height: Math.max(insets.bottom, 20) + 80 }} />
           </View>
         </SafeAreaView>
 
@@ -681,7 +684,7 @@ const styles = StyleSheet.create({
   writeContainer: {
     flex: 1,
     justifyContent: 'center',
-    paddingBottom: COSMIC_SPACING.xxl,
+    paddingBottom: 20,
   },
   iconContainer: {
     alignItems: 'center',

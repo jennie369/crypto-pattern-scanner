@@ -14,7 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -149,6 +149,7 @@ const ExpandingRing = ({ index, active, color }) => {
 
 const HeartExpansionRitual = ({ navigation }) => {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // ===== STATE =====
   const [phase, setPhase] = useState('intro'); // intro, breath, expansion, completion
@@ -530,7 +531,7 @@ const HeartExpansionRitual = ({ navigation }) => {
           />
         )}
 
-        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
           {/* Header */}
           <RitualHeader
             title="Mở Rộng Trái Tim"
@@ -549,6 +550,8 @@ const HeartExpansionRitual = ({ navigation }) => {
             {phase === 'intro' && renderIntro()}
             {phase === 'breath' && renderBreath()}
             {phase === 'expansion' && renderExpansion()}
+            {/* Bottom padding for tab bar */}
+            <View style={{ height: Math.max(insets.bottom, 20) + 80 }} />
           </View>
         </SafeAreaView>
 
@@ -589,7 +592,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: COSMIC_SPACING.xxl,
+    paddingBottom: 20,
   },
 
   // Intro

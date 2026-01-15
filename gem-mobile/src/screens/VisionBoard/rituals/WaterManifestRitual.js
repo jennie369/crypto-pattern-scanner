@@ -13,7 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -433,6 +433,7 @@ const RITUAL_STEPS = [
 
 const WaterManifestRitual = ({ navigation }) => {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // State
   const [phase, setPhase] = useState('start'); // start, ritual, completed
@@ -727,7 +728,7 @@ const WaterManifestRitual = ({ navigation }) => {
           direction="up"
         />
 
-        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
           {/* Header */}
           <RitualHeader
             title="Hiện Thực Hóa Bằng Nước"
@@ -743,6 +744,8 @@ const WaterManifestRitual = ({ navigation }) => {
           <View style={styles.content}>
             {phase === 'start' && renderStart()}
             {phase === 'ritual' && renderRitual()}
+            {/* Bottom padding for tab bar */}
+            <View style={{ height: Math.max(insets.bottom, 20) + 80 }} />
           </View>
         </SafeAreaView>
 
@@ -785,7 +788,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: COSMIC_SPACING.xxl,
+    paddingBottom: 20,
   },
   ritualContainer: {
     flex: 1,

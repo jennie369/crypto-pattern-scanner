@@ -5,6 +5,12 @@
 
 import { supabase } from './supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  COURSE_BUNDLES,
+  SCANNER_PRODUCTS,
+  CHATBOT_PRODUCTS,
+  getCheckoutUrl as getProductCheckoutUrl,
+} from '../constants/productConfig';
 
 // ============================================================
 // CONSTANTS
@@ -356,21 +362,39 @@ export const trackCheckoutStart = async (tierType, tierLevel, screenName) => {
 
 /**
  * Lấy checkout URL cho tier
+ * Uses cart URL format: yinyangmasters.com/cart/{variantId}:1
  */
 export const getCheckoutUrl = async (tierType, tierLevel) => {
   try {
     const tier = await getTier(tierType, tierLevel);
-    if (!tier) return null;
 
-    // Nếu có checkout_url trực tiếp
-    if (tier.checkout_url) {
+    // 1. Nếu có checkout_url trực tiếp từ database
+    if (tier?.checkout_url) {
       return tier.checkout_url;
     }
 
-    // Build Shopify checkout URL
-    if (tier.shopify_variant_id) {
-      const baseUrl = 'https://yinyangmasters.myshopify.com/cart';
-      return `${baseUrl}/${tier.shopify_variant_id}:1?checkout[email]=`;
+    // 2. Build Shopify checkout URL from database variant_id
+    if (tier?.shopify_variant_id) {
+      return getProductCheckoutUrl(tier.shopify_variant_id);
+    }
+
+    // 3. Fallback: Use productConfig.js mappings
+    if (tierType === TIER_TYPES.CHATBOT) {
+      const tierName = getTierNameFromLevel(tierLevel, 'subscription');
+      const product = CHATBOT_PRODUCTS[tierName];
+      if (product) return product.cartUrl;
+    }
+
+    if (tierType === TIER_TYPES.SCANNER) {
+      const tierName = getTierNameFromLevel(tierLevel, 'subscription');
+      const product = SCANNER_PRODUCTS[tierName];
+      if (product) return product.cartUrl;
+    }
+
+    if (tierType === TIER_TYPES.COURSE) {
+      const tierName = getTierNameFromLevel(tierLevel, 'course');
+      const product = COURSE_BUNDLES[tierName];
+      if (product) return product.cartUrl;
     }
 
     return null;
@@ -378,6 +402,21 @@ export const getCheckoutUrl = async (tierType, tierLevel) => {
     console.error('[upgradeService] getCheckoutUrl error:', error);
     return null;
   }
+};
+
+/**
+ * Convert tier level to tier name
+ * @param {number} tierLevel - 1, 2, or 3
+ * @param {string} type - 'subscription' (PRO/PREMIUM/VIP) or 'course' (TIER1/TIER2/TIER3)
+ */
+const getTierNameFromLevel = (tierLevel, type = 'subscription') => {
+  if (type === 'course') {
+    const mapping = { 1: 'TIER1', 2: 'TIER2', 3: 'TIER3' };
+    return mapping[tierLevel] || 'TIER1';
+  }
+  // Subscription (chatbot/scanner)
+  const mapping = { 1: 'PRO', 2: 'PREMIUM', 3: 'VIP' };
+  return mapping[tierLevel] || 'PRO';
 };
 
 /**

@@ -48,7 +48,7 @@ const MAX_RECENT_SEARCHES = 10;
 
 export const searchService = {
   /**
-   * Full-text search posts
+   * Full-text search posts (searches title, content, AND author name)
    * @param {string} query - Search query
    * @param {object} filters - Optional filters (topic, dateRange, authorId)
    * @param {number} page - Page number
@@ -57,91 +57,149 @@ export const searchService = {
   async searchPosts(query, filters = {}, page = 1, limit = 20) {
     try {
       if (!query || query.trim().length < 2) {
-        return { data: [], count: 0 };
+        return { data: [], count: 0, users: [] };
       }
 
       const { topic, dateRange, authorId, hasMedia } = filters;
       const offset = (page - 1) * limit;
       const searchTerm = query.trim().toLowerCase();
 
-      // Build query with full-text search
-      let queryBuilder = supabase
-        .from('forum_posts')
-        .select(`
-          *,
-          author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
-          category:forum_categories(id, name, color),
-          likes:forum_likes(user_id),
-          saved:forum_saved(user_id)
-        `, { count: 'exact' })
-        .eq('status', 'published')
-        .or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%`);
-
-      // Apply topic filter
-      if (topic) {
-        queryBuilder = queryBuilder.eq('topic', topic);
-      }
-
-      // Apply date range filter
-      if (dateRange) {
-        const now = new Date();
-        let startDate;
-
-        switch (dateRange) {
-          case 'today':
-            startDate = new Date(now.setHours(0, 0, 0, 0));
-            break;
-          case 'week':
-            startDate = new Date(now.setDate(now.getDate() - 7));
-            break;
-          case 'month':
-            startDate = new Date(now.setMonth(now.getMonth() - 1));
-            break;
-          case 'year':
-            startDate = new Date(now.setFullYear(now.getFullYear() - 1));
-            break;
+      // Helper function to apply common filters
+      const applyFilters = (queryBuilder) => {
+        if (topic) {
+          queryBuilder = queryBuilder.eq('topic', topic);
         }
+        if (dateRange) {
+          const now = new Date();
+          let startDate;
+          switch (dateRange) {
+            case 'today':
+              startDate = new Date(now.setHours(0, 0, 0, 0));
+              break;
+            case 'week':
+              startDate = new Date(now.setDate(now.getDate() - 7));
+              break;
+            case 'month':
+              startDate = new Date(now.setMonth(now.getMonth() - 1));
+              break;
+            case 'year':
+              startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+              break;
+          }
+          if (startDate) {
+            queryBuilder = queryBuilder.gte('created_at', startDate.toISOString());
+          }
+        }
+        if (authorId) {
+          queryBuilder = queryBuilder.eq('user_id', authorId);
+        }
+        if (hasMedia === true) {
+          queryBuilder = queryBuilder.not('image_url', 'is', null);
+        } else if (hasMedia === false) {
+          queryBuilder = queryBuilder.is('image_url', null);
+        }
+        return queryBuilder;
+      };
 
-        if (startDate) {
-          queryBuilder = queryBuilder.gte('created_at', startDate.toISOString());
+      // PARALLEL SEARCH: Search by content AND by author name simultaneously
+      const [contentResult, usersResult] = await Promise.all([
+        // 1. Search posts by title/content
+        (async () => {
+          let queryBuilder = supabase
+            .from('forum_posts')
+            .select(`
+              *,
+              author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
+              category:forum_categories(id, name, color),
+              likes:forum_likes(user_id),
+              saved:forum_saved(user_id)
+            `, { count: 'exact' })
+            .eq('status', 'published')
+            .or(`title.ilike.%${searchTerm}%,content.ilike.%${searchTerm}%`);
+
+          queryBuilder = applyFilters(queryBuilder);
+          queryBuilder = queryBuilder
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+          return queryBuilder;
+        })(),
+
+        // 2. Search users matching query (for author-based results)
+        supabase
+          .from('profiles')
+          .select('id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role')
+          .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+          .limit(10)
+      ]);
+
+      const { data: contentPosts, error: contentError, count: contentCount } = contentResult;
+      const { data: matchingUsers, error: usersError } = usersResult;
+
+      if (contentError) throw contentError;
+
+      let allPosts = contentPosts || [];
+      let totalCount = contentCount || 0;
+      const foundUsers = matchingUsers || [];
+
+      // 3. If we found matching users, also get their posts
+      if (foundUsers.length > 0 && !authorId) {
+        const userIds = foundUsers.map(u => u.id);
+
+        let authorQueryBuilder = supabase
+          .from('forum_posts')
+          .select(`
+            *,
+            author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
+            category:forum_categories(id, name, color),
+            likes:forum_likes(user_id),
+            saved:forum_saved(user_id)
+          `)
+          .eq('status', 'published')
+          .in('user_id', userIds)
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        authorQueryBuilder = applyFilters(authorQueryBuilder);
+
+        const { data: authorPosts, error: authorError } = await authorQueryBuilder;
+
+        if (!authorError && authorPosts) {
+          // Merge and deduplicate posts
+          const existingIds = new Set(allPosts.map(p => p.id));
+          const newPosts = authorPosts.filter(p => !existingIds.has(p.id));
+          allPosts = [...allPosts, ...newPosts];
+          totalCount += newPosts.length;
         }
       }
 
-      // Apply author filter
-      if (authorId) {
-        queryBuilder = queryBuilder.eq('user_id', authorId);
-      }
-
-      // Apply media filter
-      if (hasMedia === true) {
-        queryBuilder = queryBuilder.not('image_url', 'is', null);
-      } else if (hasMedia === false) {
-        queryBuilder = queryBuilder.is('image_url', null);
-      }
-
-      // Order by relevance (posts with search term in title first, then by date)
-      queryBuilder = queryBuilder
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-
-      const { data, error, count } = await queryBuilder;
-
-      if (error) throw error;
-
-      // Sort results to prioritize title matches
-      const sortedData = (data || []).sort((a, b) => {
+      // Sort results: author name matches first, then title matches, then content
+      const sortedData = allPosts.sort((a, b) => {
+        const aAuthorMatch = a.author?.full_name?.toLowerCase().includes(searchTerm) ||
+                            a.author?.email?.toLowerCase().includes(searchTerm);
+        const bAuthorMatch = b.author?.full_name?.toLowerCase().includes(searchTerm) ||
+                            b.author?.email?.toLowerCase().includes(searchTerm);
         const aInTitle = a.title?.toLowerCase().includes(searchTerm);
         const bInTitle = b.title?.toLowerCase().includes(searchTerm);
 
+        // Priority: author match > title match > content match
+        if (aAuthorMatch && !bAuthorMatch) return -1;
+        if (!aAuthorMatch && bAuthorMatch) return 1;
         if (aInTitle && !bInTitle) return -1;
         if (!aInTitle && bInTitle) return 1;
-        return 0;
+
+        // Same priority, sort by date
+        return new Date(b.created_at) - new Date(a.created_at);
       });
 
-      return { data: sortedData, count: count || 0 };
+      return {
+        data: sortedData.slice(0, limit),
+        count: totalCount,
+        users: foundUsers // Return matching users for display
+      };
     } catch (error) {
       console.error('[SearchService] Search error:', error);
-      return { data: [], count: 0 };
+      return { data: [], count: 0, users: [] };
     }
   },
 

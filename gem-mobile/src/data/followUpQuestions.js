@@ -77,7 +77,7 @@ export const FOLLOW_UP_QUESTIONS = {
     'Bạn đã có viên đá nào chưa, hay cần tôi gợi ý?',
     'Bạn có muốn tôi hướng dẫn cách sạc và kích hoạt đá không?',
     'Bạn thường thiền vào lúc nào? Tôi sẽ gợi ý cách kết hợp đá.',
-    'Bạn muốn dùng đá cho mục đích gì - tiền bạc, tình yêu, hay tâm linh?',
+    'Bạn muốn dùng đá cho mục đích gì - tiền bạc, tình yêu, hay tâm thức?',
     'Bạn có biết chakra nào của mình đang cần được kích hoạt không?',
   ],
 

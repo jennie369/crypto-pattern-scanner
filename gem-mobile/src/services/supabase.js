@@ -109,9 +109,23 @@ export const signOut = async () => {
 export const getCurrentUser = async () => {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
+
+    // Check for invalid refresh token error
+    if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
+      console.warn('[Supabase] Invalid refresh token detected');
+      // Clear stored session
+      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      return { user: null, error: { ...error, isInvalidRefreshToken: true } };
+    }
+
     return { user, error };
   } catch (error) {
     console.error('GetCurrentUser error:', error);
+    // Check for invalid refresh token in catch
+    if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
+      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      return { user: null, error: { message: error.message, isInvalidRefreshToken: true } };
+    }
     return { user: null, error };
   }
 };
@@ -119,9 +133,21 @@ export const getCurrentUser = async () => {
 export const getSession = async () => {
   try {
     const { data: { session }, error } = await supabase.auth.getSession();
+
+    // Check for invalid refresh token error
+    if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
+      console.warn('[Supabase] Invalid refresh token in getSession');
+      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      return { session: null, error: { ...error, isInvalidRefreshToken: true } };
+    }
+
     return { session, error };
   } catch (error) {
     console.error('GetSession error:', error);
+    if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
+      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      return { session: null, error: { message: error.message, isInvalidRefreshToken: true } };
+    }
     return { session: null, error };
   }
 };
@@ -166,9 +192,21 @@ export const setSessionFromToken = async (refreshToken) => {
       refresh_token: refreshToken,
       access_token: '', // Supabase will generate new access token
     });
+
+    // Check for invalid refresh token
+    if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
+      console.warn('[Supabase] Biometric login failed - invalid refresh token');
+      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      return { data: null, error: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại bằng email/mật khẩu.', isInvalidRefreshToken: true } };
+    }
+
     return { data, error };
   } catch (error) {
     console.error('SetSessionFromToken error:', error);
+    if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
+      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      return { data: null, error: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', isInvalidRefreshToken: true } };
+    }
     return { data: null, error: { message: error.message || 'Lỗi khôi phục phiên đăng nhập' } };
   }
 };

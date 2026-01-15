@@ -25,8 +25,11 @@ import {
   CheckCircle,
   AlertTriangle,
   ShoppingCart,
+  ExternalLink,
 } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import { COURSE_BUNDLES, MINDSET_COURSES } from '../../constants/productConfig';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -54,6 +57,8 @@ const EnrollmentModal = ({
   userTier = 'FREE',
   enrolling = false,
 }) => {
+  const navigation = useNavigation();
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -98,9 +103,82 @@ const EnrollmentModal = ({
   const isPaidCourse = course.shopify_product_id || (course.price && course.price > 0);
   const isFreeCoure = !isPaidCourse && course.tier_required === 'FREE';
 
+  // ============================================
+  // Get product info from productConfig.js
+  // ============================================
+  const getProductInfo = () => {
+    const requiredTier = course.tier_required?.toUpperCase();
+
+    // Check if it's a Trading course (by tier requirement or course type)
+    if (requiredTier && COURSE_BUNDLES[requiredTier]) {
+      return COURSE_BUNDLES[requiredTier];
+    }
+
+    // Check if it's a Mindset course (by name matching)
+    const courseTitle = course.title?.toLowerCase() || '';
+    if (courseTitle.includes('tần số gốc') || courseTitle.includes('tan so goc')) {
+      return MINDSET_COURSES.TAN_SO_GOC;
+    }
+    if (courseTitle.includes('tình yêu') || courseTitle.includes('tinh yeu')) {
+      return MINDSET_COURSES.TINH_YEU;
+    }
+    if (courseTitle.includes('triệu phú') || courseTitle.includes('trieu phu')) {
+      return MINDSET_COURSES.TRIEU_PHU;
+    }
+
+    // Default to TIER1 for generic locked courses
+    return COURSE_BUNDLES.TIER1;
+  };
+
+  const productInfo = getProductInfo();
+
+  // ============================================
+  // Handle "Tìm hiểu thêm" - Navigate to landing page
+  // ============================================
+  const handleLearnMore = () => {
+    onClose();
+    const landingUrl = productInfo?.landingPage || 'https://yinyangmasters.com/pages/khoatradingtansodocquyen';
+
+    // Navigate to WebView with landing page
+    navigation.navigate('Shop', {
+      screen: 'CheckoutWebView',
+      params: {
+        checkoutUrl: landingUrl,
+        title: 'Tìm hiểu thêm',
+        productName: course.title,
+        returnScreen: 'CourseDetail',
+      },
+    });
+  };
+
+  // ============================================
+  // Handle "Nâng cấp ngay" - Navigate to checkout
+  // ============================================
+  const handleUpgradeNow = () => {
+    onClose();
+    const cartUrl = productInfo?.cartUrl;
+
+    if (cartUrl) {
+      // Navigate directly to Shopify checkout with variant ID
+      navigation.navigate('Shop', {
+        screen: 'CheckoutWebView',
+        params: {
+          checkoutUrl: cartUrl,
+          title: productInfo?.name || 'Nâng cấp',
+          productName: productInfo?.name,
+          variantId: productInfo?.variantId,
+          returnScreen: 'CourseDetail',
+        },
+      });
+    } else {
+      // Fallback to upgrade screen
+      onUpgrade?.();
+    }
+  };
+
   const handleEnroll = () => {
     if (isLocked) {
-      onUpgrade?.();
+      handleUpgradeNow();
     } else {
       onEnroll?.();
     }
@@ -231,11 +309,12 @@ const EnrollmentModal = ({
           {/* Action Buttons */}
           <View style={styles.actions}>
             <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={onClose}
+              style={styles.learnMoreBtn}
+              onPress={handleLearnMore}
               disabled={enrolling}
             >
-              <Text style={styles.cancelBtnText}>Để sau</Text>
+              <ExternalLink size={16} color={COLORS.gold} />
+              <Text style={styles.learnMoreBtnText}>Tìm hiểu thêm</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -443,19 +522,22 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     paddingTop: 0,
   },
-  cancelBtn: {
+  learnMoreBtn: {
     flex: 1,
+    flexDirection: 'row',
     paddingVertical: SPACING.md,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: SPACING.xs,
   },
-  cancelBtnText: {
+  learnMoreBtnText: {
     fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textMuted,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
   },
   enrollBtn: {
     flex: 2,

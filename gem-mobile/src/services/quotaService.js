@@ -479,7 +479,7 @@ class QuotaService {
   }
 
   /**
-   * Get default quotas
+   * Get default quotas (all)
    */
   static getDefaultAllQuotas() {
     const resetAt = this.getNextResetTime().toISOString();
@@ -499,6 +499,21 @@ class QuotaService {
         unlimited: false,
       },
       todayDate: this.getVietnamDate(),
+      resetAt,
+    };
+  }
+
+  /**
+   * Get default chatbot quota (for backward compatibility)
+   */
+  static getDefaultQuota() {
+    const resetAt = this.getNextResetTime().toISOString();
+    return {
+      tier: 'FREE',
+      limit: 5,
+      used: 0,
+      remaining: 5,
+      unlimited: false,
       resetAt,
     };
   }

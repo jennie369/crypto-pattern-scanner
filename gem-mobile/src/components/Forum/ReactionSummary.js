@@ -138,6 +138,7 @@ const ReactionSummary = ({
                 style={[
                   styles.iconWrapper,
                   {
+                    // Small container for stacked reaction icons
                     width: dimensions.icon + 4,
                     height: dimensions.icon + 4,
                     marginLeft: index === 0 ? 0 : -dimensions.overlap,

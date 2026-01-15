@@ -358,7 +358,7 @@ export const FAQ_QUESTIONS = {
       id: 'crystals_amethyst',
       text: 'Thạch Anh Tím - Tâm linh',
       action: 'message_crystal',
-      prompt: 'Giới thiệu Thạch Anh Tím (Amethyst) - Đá tâm linh',
+      prompt: 'Giới thiệu Thạch Anh Tím (Amethyst) - Đá tâm thức',
       crystalTags: ['Amethyst', 'Thạch Anh Tím'],
     },
   ],

@@ -331,8 +331,11 @@ export const CourseProvider = ({ children }) => {
 
       // Try to load enrollments from Supabase first, fallback to AsyncStorage
       let enrollments = [];
+      const progressFromDb = {};
+
       if (user?.id) {
         try {
+          // 1. Check course_enrollments table first
           const { data: dbEnrollments } = await supabase
             .from('course_enrollments')
             .select('course_id, progress_percentage')
@@ -341,16 +344,65 @@ export const CourseProvider = ({ children }) => {
 
           if (dbEnrollments && dbEnrollments.length > 0) {
             enrollments = dbEnrollments.map(e => e.course_id);
-            // Also sync progress from DB
-            const progressFromDb = {};
             dbEnrollments.forEach(e => {
               progressFromDb[e.course_id] = e.progress_percentage || 0;
             });
-            setCourseProgress(progressFromDb);
-            await AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(progressFromDb));
+            console.log('[CourseContext] Loaded', enrollments.length, 'enrollments from course_enrollments');
           }
         } catch (dbErr) {
           console.warn('[CourseContext] Failed to load enrollments from DB:', dbErr);
+        }
+
+        // 2. ALSO check user_access.enrolled_courses (from Shopify purchases)
+        // This is where webhook stores purchased course product_ids
+        try {
+          const userEmail = profile?.email || user?.email;
+          if (userEmail) {
+            const { data: userAccess } = await supabase
+              .from('user_access')
+              .select('enrolled_courses')
+              .eq('user_email', userEmail)
+              .single();
+
+            if (userAccess?.enrolled_courses?.length > 0) {
+              console.log('[CourseContext] Found', userAccess.enrolled_courses.length, 'courses in user_access');
+
+              // Map Shopify product_ids to course_ids using shopify_product_id field
+              for (const shopifyProductId of userAccess.enrolled_courses) {
+                // Find course by shopify_product_id
+                const matchingCourse = coursesData.find(c =>
+                  c.shopify_product_id === shopifyProductId ||
+                  c.shopify_product_id === String(shopifyProductId)
+                );
+
+                if (matchingCourse && !enrollments.includes(matchingCourse.id)) {
+                  enrollments.push(matchingCourse.id);
+                  console.log('[CourseContext] Mapped Shopify product', shopifyProductId, 'to course:', matchingCourse.title);
+
+                  // Auto-sync to course_enrollments for consistency
+                  try {
+                    await supabase.from('course_enrollments').upsert({
+                      user_id: user.id,
+                      course_id: matchingCourse.id,
+                      enrolled_at: new Date().toISOString(),
+                      progress_percentage: 0,
+                      is_active: true,
+                      access_source: 'shopify_purchase',
+                    }, { onConflict: 'user_id,course_id' });
+                  } catch (syncErr) {
+                    console.warn('[CourseContext] Failed to sync enrollment:', syncErr);
+                  }
+                }
+              }
+            }
+          }
+        } catch (accessErr) {
+          console.warn('[CourseContext] Failed to check user_access:', accessErr);
+        }
+
+        if (Object.keys(progressFromDb).length > 0) {
+          setCourseProgress(progressFromDb);
+          await AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(progressFromDb));
         }
       }
 
@@ -368,6 +420,7 @@ export const CourseProvider = ({ children }) => {
         }
       }
 
+      console.log('[CourseContext] Total enrolled courses:', enrollments.length);
       setEnrolledCourseIds(enrollments);
       await AsyncStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(enrollments));
 
@@ -453,7 +506,8 @@ export const CourseProvider = ({ children }) => {
     // Handle null/undefined tier_required as FREE
     const courseTier = course?.tier_required || 'FREE';
 
-    const tierOrder = ['FREE', 'TIER1', 'TIER2', 'TIER3'];
+    // Tier hierarchy: FREE < STARTER < TIER1 < TIER2 < TIER3
+    const tierOrder = ['FREE', 'STARTER', 'TIER1', 'TIER2', 'TIER3'];
 
     // If tier not in list, treat as FREE (most permissive)
     let userTierIdx = tierOrder.indexOf(userTier || 'FREE');

@@ -30,7 +30,7 @@ export const AI_PERSONAS = {
     id: 'sufu',
     name: 'Sư Phụ',
     nameShort: 'Sư Phụ',
-    description: 'Người thầy tâm linh, trí tuệ và sâu sắc',
+    description: 'Người thầy tâm thức, trí tuệ và sâu sắc',
     avatar: 'sufu',
     voice: 'banmai', // FPT.AI voice
     style: {
@@ -41,7 +41,7 @@ export const AI_PERSONAS = {
       emojis: ['🙏', '✨', '💎', '☯️'],
       traits: ['Sâu sắc', 'Từ bi', 'Hướng dẫn nhẹ nhàng'],
     },
-    expertise: ['ngũ hành', 'phong thủy', 'tâm linh', 'triết lý'],
+    expertise: ['ngũ hành', 'phong thủy', 'tâm thức', 'triết lý'],
   },
 
   cogiao: {

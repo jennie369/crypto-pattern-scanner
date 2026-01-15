@@ -6,7 +6,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -168,6 +168,7 @@ const BreathingCircle = ({ phase, timer, isActive }) => {
 
 const CleansingBreathRitual = ({ navigation }) => {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // State
   const [ritualPhase, setRitualPhase] = useState('intro'); // intro, breathing, completed
@@ -429,7 +430,7 @@ const CleansingBreathRitual = ({ navigation }) => {
           color={THEME.primary}
         />
 
-        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
           {/* Header */}
           <RitualHeader
             title="Hơi Thở Thanh Lọc"
@@ -445,6 +446,8 @@ const CleansingBreathRitual = ({ navigation }) => {
           <View style={styles.content}>
             {ritualPhase === 'intro' && renderIntro()}
             {ritualPhase === 'breathing' && renderBreathing()}
+            {/* Bottom padding for tab bar */}
+            <View style={{ height: Math.max(insets.bottom, 20) + 80 }} />
           </View>
         </SafeAreaView>
 
@@ -484,7 +487,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: COSMIC_SPACING.xxl,
+    paddingBottom: 20,
   },
 
   // Intro

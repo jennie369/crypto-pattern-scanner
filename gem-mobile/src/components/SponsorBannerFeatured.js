@@ -121,10 +121,13 @@ export default function SponsorBannerFeatured({
   };
 
   const handleDismiss = async () => {
+    // Always call onDismiss to remove from UI
+    // Only persist to DB if userId exists
     if (userId) {
       await sponsorBannerService.dismissBanner(userId, banner.id);
-      onDismiss?.(banner.id);
     }
+    // Always trigger parent callback to remove banner from list
+    onDismiss?.(banner.id);
   };
 
   // Get accent color or use default gold

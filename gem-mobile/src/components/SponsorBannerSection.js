@@ -65,9 +65,11 @@ export function useSponsorBanners(screenName, refreshTrigger) {
   const activeBanners = banners.filter(b => !dismissedIds.has(b.id));
 
   const dismissBanner = useCallback(async (bannerId) => {
+    // Always update local state to remove banner from UI
+    setDismissedIds(prev => new Set([...prev, bannerId]));
+    // Only persist to DB if user is logged in
     if (user?.id) {
       await sponsorBannerService.dismissBanner(user.id, bannerId);
-      setDismissedIds(prev => new Set([...prev, bannerId]));
     }
   }, [user?.id]);
 

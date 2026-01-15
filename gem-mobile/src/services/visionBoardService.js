@@ -15,7 +15,7 @@ export const LIFE_AREAS = {
   health: { label: 'Sức khỏe', icon: 'heart', color: '#3AF7A6' },
   relationships: { label: 'Quan hệ', icon: 'users', color: '#FF6B9D' },
   personal: { label: 'Cá nhân', icon: 'user', color: '#00F0FF' },
-  spiritual: { label: 'Tâm linh', icon: 'sparkles', color: '#9C0612' },
+  spiritual: { label: 'Tâm thức', icon: 'sparkles', color: '#9C0612' },
 };
 
 // Widget types

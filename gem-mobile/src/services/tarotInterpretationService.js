@@ -464,161 +464,155 @@ class TarotInterpretationService {
   }
 
   /**
-   * Build detailed trading narrative
+   * Build synthesized trading narrative (no per-card breakdown)
    */
   buildTradingNarrative(cards) {
-    let narrative = '📈 PHÂN TÍCH CHI TIẾT CHO GIAO DỊCH:\n\n';
+    const interpretations = cards.map(c => c.interpretation || '').join(' ');
+    const hasPositive = interpretations.match(/thuận lợi|tăng|cơ hội|thành công|đột phá|tích cực/gi);
+    const hasNegative = interpretations.match(/thận trọng|giảm|rủi ro|cẩn thận|chờ đợi|khó khăn/gi);
 
-    cards.forEach((card, i) => {
-      const positionMeaning = this.getTradingPositionMeaning(i, cards.length);
-      narrative += `【Lá ${i + 1} - ${positionMeaning}】\n`;
-      narrative += `${card.name}\n`;
-      narrative += `${card.interpretation}\n`;
-      if (card.keywords?.length > 0) {
-        narrative += `→ Từ khóa: ${card.keywords.slice(0, 3).join(', ')}\n`;
-      }
-      narrative += '\n';
-    });
-
-    narrative += '💡 GỢI Ý HÀNH ĐỘNG:\n';
-    narrative += '• Xem xét kỹ các tín hiệu từ thị trường trước khi quyết định\n';
-    narrative += '• Đặt stop-loss và take-profit rõ ràng\n';
-    narrative += '• Không FOMO, tuân thủ kế hoạch giao dịch đã đề ra\n';
-
-    return narrative;
-  }
-
-  /**
-   * Build detailed love narrative
-   */
-  buildLoveNarrative(cards) {
-    let narrative = '💕 PHÂN TÍCH CHI TIẾT VỀ TÌNH YÊU:\n\n';
-
-    cards.forEach((card, i) => {
-      const positionMeaning = this.getLovePositionMeaning(i, cards.length);
-      narrative += `【Lá ${i + 1} - ${positionMeaning}】\n`;
-      narrative += `${card.name}\n`;
-      narrative += `${card.interpretation}\n`;
-      if (card.keywords?.length > 0) {
-        narrative += `→ Cảm xúc: ${card.keywords.slice(0, 3).join(', ')}\n`;
-      }
-      narrative += '\n';
-    });
-
-    narrative += '💝 LỜI KHUYÊN TÌNH CẢM:\n';
-    narrative += '• Lắng nghe trái tim nhưng cũng cần sự sáng suốt\n';
-    narrative += '• Giao tiếp chân thành và cởi mở với đối phương\n';
-    narrative += '• Yêu thương bản thân trước khi trao yêu thương cho người khác\n';
-
-    return narrative;
-  }
-
-  /**
-   * Build detailed career narrative
-   */
-  buildCareerNarrative(cards) {
-    let narrative = '💼 PHÂN TÍCH CHI TIẾT VỀ SỰ NGHIỆP:\n\n';
-
-    cards.forEach((card, i) => {
-      const positionMeaning = this.getCareerPositionMeaning(i, cards.length);
-      narrative += `【Lá ${i + 1} - ${positionMeaning}】\n`;
-      narrative += `${card.name}\n`;
-      narrative += `${card.interpretation}\n`;
-      if (card.keywords?.length > 0) {
-        narrative += `→ Định hướng: ${card.keywords.slice(0, 3).join(', ')}\n`;
-      }
-      narrative += '\n';
-    });
-
-    narrative += '🎯 LỜI KHUYÊN SỰ NGHIỆP:\n';
-    narrative += '• Xác định mục tiêu rõ ràng và lập kế hoạch cụ thể\n';
-    narrative += '• Phát triển kỹ năng và mở rộng mối quan hệ\n';
-    narrative += '• Kiên nhẫn và bền bỉ với hành trình của mình\n';
-
-    return narrative;
-  }
-
-  /**
-   * Build detailed health narrative
-   */
-  buildHealthNarrative(cards) {
-    let narrative = '🌿 PHÂN TÍCH CHI TIẾT VỀ SỨC KHỎE:\n\n';
-
-    cards.forEach((card, i) => {
-      narrative += `【Lá ${i + 1}】${card.name}\n`;
-      narrative += `${card.interpretation}\n\n`;
-    });
-
-    narrative += '🏃 LỜI KHUYÊN SỨC KHỎE:\n';
-    narrative += '• Cân bằng giữa công việc và nghỉ ngơi\n';
-    narrative += '• Chú ý đến dinh dưỡng và giấc ngủ\n';
-    narrative += '• Thực hành thiền định hoặc yoga để giảm stress\n';
-
-    return narrative;
-  }
-
-  /**
-   * Build detailed finance narrative
-   */
-  buildFinanceNarrative(cards) {
-    let narrative = '💰 PHÂN TÍCH CHI TIẾT VỀ TÀI CHÍNH:\n\n';
-
-    cards.forEach((card, i) => {
-      narrative += `【Lá ${i + 1}】${card.name}\n`;
-      narrative += `${card.interpretation}\n\n`;
-    });
-
-    narrative += '📊 LỜI KHUYÊN TÀI CHÍNH:\n';
-    narrative += '• Lập ngân sách và theo dõi chi tiêu hàng tháng\n';
-    narrative += '• Đa dạng hóa nguồn thu nhập và đầu tư\n';
-    narrative += '• Xây dựng quỹ dự phòng cho tình huống khẩn cấp\n';
-
-    return narrative;
-  }
-
-  /**
-   * Build detailed decision narrative
-   */
-  buildDecisionNarrative(cards) {
-    let narrative = '🎯 PHÂN TÍCH CHI TIẾT CHO QUYẾT ĐỊNH:\n\n';
-
-    if (cards.length >= 3) {
-      narrative += `【Lựa chọn thứ nhất】\n${cards[0].name}\n${cards[0].interpretation}\n\n`;
-      narrative += `【Lựa chọn thứ hai】\n${cards[1].name}\n${cards[1].interpretation}\n\n`;
-      narrative += `【Lời khuyên tổng hợp】\n${cards[2].name}\n${cards[2].interpretation}\n\n`;
+    let tradingAdvice = '';
+    if (hasPositive && !hasNegative) {
+      tradingAdvice = 'Năng lượng đang ủng hộ cho các quyết định giao dịch. Tuy nhiên, vẫn cần tuân thủ kế hoạch và quản lý rủi ro chặt chẽ.';
+    } else if (hasNegative && !hasPositive) {
+      tradingAdvice = 'Năng lượng gợi ý nên thận trọng. Đây có thể không phải thời điểm tốt nhất để vào lệnh mới. Hãy quan sát thêm và chờ đợi.';
     } else {
-      cards.forEach((card, i) => {
-        narrative += `【Lá ${i + 1}】${card.name}\n${card.interpretation}\n\n`;
-      });
+      tradingAdvice = 'Năng lượng cho thấy cần cân nhắc kỹ lưỡng. Hãy chờ tín hiệu rõ ràng hơn từ thị trường trước khi hành động.';
     }
 
-    narrative += '⚖️ HƯỚNG DẪN QUYẾT ĐỊNH:\n';
-    narrative += '• Cân nhắc ưu và nhược điểm của mỗi lựa chọn\n';
-    narrative += '• Lắng nghe trực giác nhưng cũng xem xét logic\n';
-    narrative += '• Quyết định nào phù hợp với giá trị cốt lõi của bạn?\n';
-
-    return narrative;
+    return `${tradingAdvice}\n\nLưu ý: Tarot chỉ mang tính tham khảo về năng lượng, không phải lời khuyên đầu tư. Luôn kết hợp với phân tích kỹ thuật và quản lý vốn.`;
   }
 
   /**
-   * Build detailed general narrative
+   * Build synthesized love narrative (no per-card breakdown)
+   */
+  buildLoveNarrative(cards) {
+    const interpretations = cards.map(c => c.interpretation || '').join(' ');
+    const hasPositive = interpretations.match(/yêu thương|hạnh phúc|gắn kết|hòa hợp|may mắn|tích cực/gi);
+    const hasNegative = interpretations.match(/thận trọng|xa cách|khó khăn|mâu thuẫn|chờ đợi/gi);
+
+    let loveAdvice = '';
+    if (hasPositive && !hasNegative) {
+      loveAdvice = 'Năng lượng tình cảm đang rất tích cực. Đây là thời điểm tốt để mở lòng, kết nối và nuôi dưỡng tình yêu.';
+    } else if (hasNegative && !hasPositive) {
+      loveAdvice = 'Cần dành thời gian để chữa lành và suy ngẫm. Đừng vội vàng trong các quyết định tình cảm quan trọng.';
+    } else {
+      loveAdvice = 'Tình cảm đang ở giai đoạn cần sự kiên nhẫn và thấu hiểu. Hãy lắng nghe cả trái tim và lý trí.';
+    }
+
+    return `${loveAdvice}\n\nHãy yêu thương bản thân trước khi trao yêu thương cho người khác. Giao tiếp chân thành là chìa khóa của mọi mối quan hệ.`;
+  }
+
+  /**
+   * Build synthesized career narrative (no per-card breakdown)
+   */
+  buildCareerNarrative(cards) {
+    const interpretations = cards.map(c => c.interpretation || '').join(' ');
+    const hasPositive = interpretations.match(/thành công|cơ hội|phát triển|tiến bộ|thăng tiến|thuận lợi/gi);
+    const hasNegative = interpretations.match(/thận trọng|thách thức|khó khăn|cản trở|chờ đợi/gi);
+
+    let careerAdvice = '';
+    if (hasPositive && !hasNegative) {
+      careerAdvice = 'Sự nghiệp đang có nhiều năng lượng tích cực. Đây là thời điểm tốt để nắm bắt cơ hội và mở rộng tầm nhìn.';
+    } else if (hasNegative && !hasPositive) {
+      careerAdvice = 'Cần chuẩn bị kỹ lưỡng và xây dựng nền tảng vững chắc trước khi thực hiện các bước đi lớn trong sự nghiệp.';
+    } else {
+      careerAdvice = 'Sự nghiệp đang ở giai đoạn cần sự cân bằng. Hãy phát triển bản thân đồng thời giữ vững những gì đã có.';
+    }
+
+    return `${careerAdvice}\n\nXác định mục tiêu rõ ràng, phát triển kỹ năng liên tục và kiên nhẫn với hành trình của mình.`;
+  }
+
+  /**
+   * Build synthesized health narrative (no per-card breakdown)
+   */
+  buildHealthNarrative(cards) {
+    const interpretations = cards.map(c => c.interpretation || '').join(' ');
+    const hasPositive = interpretations.match(/khỏe mạnh|cân bằng|năng lượng|hồi phục|tích cực/gi);
+    const hasNegative = interpretations.match(/mệt mỏi|stress|kiệt sức|cẩn thận|nghỉ ngơi/gi);
+
+    let healthAdvice = '';
+    if (hasPositive && !hasNegative) {
+      healthAdvice = 'Năng lượng sức khỏe đang ổn định và tích cực. Tiếp tục duy trì những thói quen tốt hiện có.';
+    } else if (hasNegative && !hasPositive) {
+      healthAdvice = 'Cơ thể đang cần được nghỉ ngơi và chăm sóc nhiều hơn. Đừng bỏ qua những tín hiệu từ cơ thể.';
+    } else {
+      healthAdvice = 'Sức khỏe cần sự cân bằng tốt hơn giữa công việc và nghỉ ngơi. Hãy lắng nghe cơ thể của bạn.';
+    }
+
+    return `${healthAdvice}\n\nChú ý đến dinh dưỡng, giấc ngủ và thực hành thiền định hoặc yoga để giảm stress.`;
+  }
+
+  /**
+   * Build synthesized finance narrative (no per-card breakdown)
+   */
+  buildFinanceNarrative(cards) {
+    const interpretations = cards.map(c => c.interpretation || '').join(' ');
+    const hasPositive = interpretations.match(/thịnh vượng|tăng trưởng|cơ hội|thành công|thuận lợi/gi);
+    const hasNegative = interpretations.match(/thận trọng|tiết kiệm|rủi ro|cẩn thận|kiểm soát/gi);
+
+    let financeAdvice = '';
+    if (hasPositive && !hasNegative) {
+      financeAdvice = 'Tài chính đang có xu hướng tích cực. Đây có thể là thời điểm tốt để đầu tư và mở rộng nguồn thu nhập.';
+    } else if (hasNegative && !hasPositive) {
+      financeAdvice = 'Cần cẩn trọng với chi tiêu và đầu tư. Ưu tiên tiết kiệm và xây dựng quỹ dự phòng.';
+    } else {
+      financeAdvice = 'Tài chính đang ở mức ổn định. Tiếp tục duy trì quản lý tài chính hiện tại và tìm kiếm cơ hội phù hợp.';
+    }
+
+    return `${financeAdvice}\n\nLập ngân sách, đa dạng hóa nguồn thu nhập và luôn có quỹ dự phòng cho tình huống khẩn cấp.`;
+  }
+
+  /**
+   * Build synthesized decision narrative (no per-card breakdown)
+   */
+  buildDecisionNarrative(cards) {
+    const interpretations = cards.map(c => c.interpretation || '').join(' ');
+    const hasPositive = interpretations.match(/thuận lợi|đúng đắn|tốt|thành công|tiến lên/gi);
+    const hasNegative = interpretations.match(/thận trọng|chờ đợi|xem xét|cân nhắc|không vội/gi);
+
+    let decisionAdvice = '';
+    if (hasPositive && !hasNegative) {
+      decisionAdvice = 'Năng lượng đang ủng hộ quyết định này. Nếu đã suy nghĩ kỹ lưỡng, hãy tự tin tiến bước.';
+    } else if (hasNegative && !hasPositive) {
+      decisionAdvice = 'Có thể chưa phải thời điểm tốt nhất để đưa ra quyết định. Hãy thu thập thêm thông tin và cân nhắc kỹ hơn.';
+    } else {
+      decisionAdvice = 'Cả hai lựa chọn đều có ưu và nhược điểm riêng. Hãy lắng nghe trực giác và chọn điều phù hợp với giá trị của bạn.';
+    }
+
+    return `${decisionAdvice}\n\nDù quyết định là gì, hãy chịu trách nhiệm với lựa chọn của mình và tin vào hành trình phía trước.`;
+  }
+
+  /**
+   * Build synthesized general narrative (no per-card breakdown - that's in cardAnalysis)
    */
   buildGeneralNarrative(cards) {
-    let narrative = '🔮 PHÂN TÍCH CHI TIẾT TỪNG LÁ BÀI:\n\n';
+    // Extract key themes from all cards
+    const allKeywords = cards.flatMap(c => c.keywords || []);
+    const uniqueThemes = [...new Set(allKeywords)].slice(0, 5);
 
-    cards.forEach((card, i) => {
-      narrative += `【Lá ${i + 1}】${card.name}\n`;
-      narrative += `${card.interpretation}\n`;
-      if (card.keywords?.length > 0) {
-        narrative += `→ Thông điệp: ${card.keywords.slice(0, 4).join(', ')}\n`;
-      }
-      narrative += '\n';
-    });
+    // Determine overall energy from card interpretations
+    const interpretations = cards.map(c => c.interpretation || '').join(' ');
+    const hasPositive = interpretations.match(/tích cực|may mắn|thành công|cơ hội|phát triển/gi);
+    const hasNegative = interpretations.match(/thận trọng|cẩn thận|thách thức|khó khăn|cản trở/gi);
 
-    narrative += '✨ THÔNG ĐIỆP CHUNG:\n';
-    narrative += '• Tin tưởng vào hành trình và quá trình của bạn\n';
-    narrative += '• Mỗi thử thách là cơ hội để trưởng thành\n';
-    narrative += '• Hãy sống với sự tỉnh thức và lòng biết ơn\n';
+    let energyDescription = '';
+    if (hasPositive && !hasNegative) {
+      energyDescription = 'Năng lượng đang rất thuận lợi. Đây là thời điểm tốt để hành động và theo đuổi mục tiêu.';
+    } else if (hasNegative && !hasPositive) {
+      energyDescription = 'Năng lượng cần sự cẩn trọng. Hãy dành thời gian suy ngẫm trước khi đưa ra quyết định quan trọng.';
+    } else {
+      energyDescription = 'Năng lượng đang cân bằng. Hãy lắng nghe trực giác và hành động với sự tỉnh thức.';
+    }
+
+    let narrative = `${energyDescription}\n\n`;
+
+    if (uniqueThemes.length > 0) {
+      narrative += `Các chủ đề nổi bật: ${uniqueThemes.join(', ')}.\n\n`;
+    }
+
+    narrative += 'Hãy để thông điệp từ các lá bài hướng dẫn bạn trên hành trình phía trước. ';
+    narrative += 'Tin tưởng vào quá trình và giữ tâm thế cởi mở với những cơ hội mới.';
 
     return narrative;
   }

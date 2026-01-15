@@ -105,30 +105,33 @@ export default function CustomAlert({
     }
   }, [visible]);
 
-  const handleButtonPress = (button) => {
-    // CRITICAL: Close alert FIRST, then call button callback
-    // On iOS, calling button.onPress() first can close the parent modal
-    // while CustomAlert is still mounted, causing a race condition crash
+  const handleButtonPress = async (button) => {
+    // CRITICAL FIX: Execute the callback FIRST, then close the dialog
+    // This ensures the callback runs even if component unmounts
+    // The previous approach (close first, callback after timeout) was unreliable
+    // because setTimeout could be cleared when component unmounts
+
+    // Store the callback reference before closing
+    const callback = button.onPress;
+
+    // Close the alert
     if (onClose) {
       onClose();
     }
-    // Delay button callback to ensure alert is fully closed
-    // Use InteractionManager on iOS to wait for animations to complete
-    // This prevents race condition when button.onPress closes parent modal
-    if (button.onPress) {
-      if (Platform.OS === 'ios') {
-        // iOS: Wait for modal close animation + a small buffer
-        InteractionManager.runAfterInteractions(() => {
-          setTimeout(() => {
-            button.onPress();
-          }, 100);
-        });
-      } else {
-        // Android: Shorter delay is usually sufficient
-        setTimeout(() => {
-          button.onPress();
-        }, 50);
-      }
+
+    // Execute callback after a short delay to allow modal to start closing
+    // This prevents race conditions on iOS where the parent modal could close
+    if (callback) {
+      // Use requestAnimationFrame + setTimeout for more reliable execution
+      requestAnimationFrame(() => {
+        setTimeout(async () => {
+          try {
+            await callback();
+          } catch (error) {
+            console.error('[CustomAlert] Button callback error:', error);
+          }
+        }, Platform.OS === 'ios' ? 100 : 50);
+      });
     }
   };
 

@@ -47,12 +47,14 @@ export const BANNER_LAYOUT_OPTIONS = [
  * @param {object} navigation - React Navigation object
  * @param {string} userId - Current user ID (for dismiss tracking)
  * @param {function} onDismiss - Callback when banner is dismissed
+ * @param {boolean} showActions - Whether to show action bar (like, comment, share) for Post layout. Default: true
  */
 export default function SponsorBanner({
   banner,
   navigation,
   userId,
   onDismiss,
+  showActions = true, // Pass to SponsorBannerPost
 }) {
   if (!banner) return null;
 
@@ -84,7 +86,7 @@ export default function SponsorBanner({
   switch (layoutType) {
     case BANNER_LAYOUT_TYPES.POST:
       console.log('[SponsorBanner] ✅ Returning SponsorBannerPost component');
-      return <SponsorBannerPost {...commonProps} />;
+      return <SponsorBannerPost {...commonProps} showActions={showActions} />;
 
     case BANNER_LAYOUT_TYPES.FEATURED:
       console.log('[SponsorBanner] ✅ Returning SponsorBannerFeatured component');

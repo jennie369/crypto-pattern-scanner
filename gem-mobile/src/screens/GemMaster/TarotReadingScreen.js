@@ -648,7 +648,7 @@ const TarotReadingScreen = () => {
               `💡 ${interpretation?.advice?.join('\n• ') || ''}`;
 
             navigation.navigate('GemMaster', {
-              initialMessage: chatMessage,
+              initialPrompt: chatMessage,
               fromReading: true,
             });
           }}
@@ -949,11 +949,11 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   affirmationContainer: {
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    backgroundColor: 'rgba(25, 15, 5, 0.85)',
     borderRadius: 16,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderColor: 'rgba(255, 189, 89, 0.35)',
     marginBottom: SPACING.lg,
   },
   affirmationLabel: {
@@ -982,11 +982,11 @@ const styles = StyleSheet.create({
   // Action Steps styles
   guidanceSection: {
     marginBottom: SPACING.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(10, 5, 25, 0.85)',
     borderRadius: 16,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(106, 91, 255, 0.25)',
   },
   guidanceSectionTitle: {
     fontSize: TYPOGRAPHY.fontSize.md,

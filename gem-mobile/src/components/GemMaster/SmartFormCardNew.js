@@ -171,7 +171,7 @@ const SmartFormCardNew = ({ widget, onDismiss }) => {
           {/* Rituals Preview */}
           {widget.rituals?.length > 0 && (
             <View style={styles.previewBox}>
-              <Text style={styles.previewLabel}>💎 Nghi thức tâm linh ({widget.rituals.length}):</Text>
+              <Text style={styles.previewLabel}>💎 Nghi thức tâm thức ({widget.rituals.length}):</Text>
               {widget.rituals.slice(0, 2).map((ritual, index) => (
                 <Text key={index} style={styles.previewItem}>
                   • {typeof ritual === 'string' ? ritual : (ritual.name || ritual.title || `Nghi thức ${index + 1}`)}
@@ -273,7 +273,7 @@ const SmartFormCardNew = ({ widget, onDismiss }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'rgba(255, 189, 89, 0.08)',
+    backgroundColor: 'rgba(15, 10, 30, 0.92)',
     borderRadius: 16,
     padding: 16,
     marginVertical: 8,
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   explanationBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,

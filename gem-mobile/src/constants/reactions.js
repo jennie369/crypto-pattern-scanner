@@ -130,13 +130,17 @@ export const REACTION_ANIMATIONS = {
  * Optimized for 6 reactions with proper spacing
  */
 export const REACTION_SIZES = {
-  PICKER_WIDTH: 292,           // Slightly narrower for tighter spacing
-  PICKER_HEIGHT: 50,           // Taller container for proper padding
-  PICKER_BORDER_RADIUS: 25,    // Half of height for pill shape
-  ICON_SIZE: 32,               // Smaller icons (was 40)
+  // Picker dimensions
+  PICKER_WIDTH: 280,           // Width to fit 6 icons with proper spacing
+  PICKER_HEIGHT: 48,           // Height for picker bar
+  PICKER_BORDER_RADIUS: 24,    // Half of height for pill shape
+  PICKER_EMOJI_SIZE: 24,       // Emoji size in picker (larger for selection)
+  // Button dimensions (Facebook-like small size)
+  ICON_SIZE: 20,               // Base icon size for buttons
   ICON_SPACING: 6,             // Spacing between icons
-  PADDING_HORIZONTAL: 12,      // More horizontal padding
-  EMOJI_FONT_SIZE: 26,         // Direct font size control (was size-8=32)
+  PADDING_HORIZONTAL: 12,      // Horizontal padding
+  EMOJI_FONT_SIZE: 18,         // Small emoji for button display (matches other icons)
+  // Note: Container needs ~fontSize * 1.2 to prevent clipping on mobile
 };
 
 /**

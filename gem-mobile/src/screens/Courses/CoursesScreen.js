@@ -65,11 +65,10 @@ const FILTER_TABS = [
 
 // Quick filter pills
 const QUICK_FILTERS = [
-  { id: 'free', label: 'Miễn phí' },
   { id: 'popular', label: 'Phổ biến' },
   { id: 'new', label: 'Mới nhất' },
   { id: 'trading', label: 'Trading' },
-  { id: 'spiritual', label: 'Tâm linh' },
+  { id: 'mindset', label: 'Tư duy' },
 ];
 
 const HEADER_HEIGHT = 60;
@@ -109,10 +108,10 @@ const CoursesScreen = ({ navigation, route }) => {
 
   const [activeFilter, setActiveFilter] = useState(routeFilter);
   const [activeFilterTags, setActiveFilterTags] = useState(routeFilterTags);
+  const [pageTitleOverride, setPageTitleOverride] = useState(null); // For category card selection
   const [activeQuickFilters, setActiveQuickFilters] = useState(
     routeCategory === 'trading' ? ['trading'] :
-    routeCategory === 'spiritual' ? ['spiritual'] :
-    routeFilter === 'free' ? ['free'] :
+    routeCategory === 'mindset' || routeCategory === 'spiritual' ? ['mindset'] :
     routeFilter === 'popular' ? ['popular'] :
     routeFilter === 'new' ? ['new'] : []
   );
@@ -223,19 +222,30 @@ const CoursesScreen = ({ navigation, route }) => {
       const normalizedFilterTags = activeFilterTags.map(t => t.toLowerCase().trim());
 
       result = result.filter(c => {
-        // Get course tags (normalize for comparison)
+        // Get course fields (normalize for comparison)
         const courseTags = (c.tags || []).map(t => t.toLowerCase().trim());
         const courseCategory = (c.category || '').toLowerCase().trim();
         const courseTitle = (c.title || '').toLowerCase();
+        const courseDescription = (c.description || '').toLowerCase();
+        const courseTier = (c.tier_required || '').toLowerCase();
 
-        // Match if course has ANY of the filter tags
-        return normalizedFilterTags.some(filterTag =>
-          courseTags.includes(filterTag) ||
-          courseTags.some(ct => ct.includes(filterTag) || filterTag.includes(ct)) ||
-          courseCategory === filterTag ||
-          courseCategory.includes(filterTag) ||
-          courseTitle.includes(filterTag)
-        );
+        // Match if course has ANY of the filter tags in title, description, tags, or category
+        return normalizedFilterTags.some(filterTag => {
+          // Check tags array
+          if (courseTags.includes(filterTag)) return true;
+          if (courseTags.some(ct => ct.includes(filterTag) || filterTag.includes(ct))) return true;
+          // Check category
+          if (courseCategory === filterTag || courseCategory.includes(filterTag)) return true;
+          // Check title (most important for matching)
+          if (courseTitle.includes(filterTag)) return true;
+          // Check description
+          if (courseDescription.includes(filterTag)) return true;
+          // Special matching for common keywords
+          if (filterTag === 'trading' && (courseTitle.includes('trading') || courseTitle.includes('giao dịch'))) return true;
+          if (filterTag === 'mindset' && (courseTitle.includes('tư duy') || courseTitle.includes('mindset'))) return true;
+          if (filterTag === 'spiritual' && (courseTitle.includes('tâm thức') || courseTitle.includes('healing') || courseTitle.includes('tần số'))) return true;
+          return false;
+        });
       });
     }
 
@@ -257,23 +267,40 @@ const CoursesScreen = ({ navigation, route }) => {
       result = [...result].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     }
     if (activeQuickFilters.includes('trading')) {
-      result = result.filter(c =>
-        c.category === 'trading' ||
-        c.tags?.includes('trading') ||
-        (c.title || '').toLowerCase().includes('trading') ||
-        (c.collection || '').toLowerCase().includes('trading')
-      );
+      result = result.filter(c => {
+        const title = (c.title || '').toLowerCase();
+        const description = (c.description || '').toLowerCase();
+        return (
+          c.category === 'trading' ||
+          c.tags?.includes('trading') ||
+          title.includes('trading') ||
+          title.includes('giao dịch') ||
+          title.includes('gem trading') ||
+          description.includes('trading') ||
+          description.includes('giao dịch')
+        );
+      });
     }
-    if (activeQuickFilters.includes('spiritual')) {
-      result = result.filter(c =>
-        c.category === 'spiritual' ||
-        c.category === 'mindset' ||
-        c.tags?.includes('spiritual') ||
-        c.tags?.includes('tarot') ||
-        c.tags?.includes('mindset') ||
-        (c.title || '').toLowerCase().includes('tư duy') ||
-        (c.collection || '').toLowerCase().includes('tư duy')
-      );
+    if (activeQuickFilters.includes('mindset')) {
+      result = result.filter(c => {
+        const title = (c.title || '').toLowerCase();
+        const description = (c.description || '').toLowerCase();
+        return (
+          c.category === 'mindset' ||
+          c.category === 'spiritual' || // Legacy support
+          c.tags?.includes('mindset') ||
+          c.tags?.includes('spiritual') ||
+          c.tags?.includes('tarot') ||
+          title.includes('tư duy') ||
+          title.includes('mindset') ||
+          title.includes('tâm thức') ||
+          title.includes('tần số') ||
+          title.includes('healing') ||
+          description.includes('tư duy') ||
+          description.includes('mindset') ||
+          description.includes('tâm thức')
+        );
+      });
     }
 
     // Apply advanced filters from filter sheet
@@ -347,12 +374,18 @@ const CoursesScreen = ({ navigation, route }) => {
   );
 
   const tradingCourses = useMemo(() =>
-    courses.filter(c =>
-      c.category === 'trading' ||
-      c.tags?.includes('trading') ||
-      (c.title || '').toLowerCase().includes('trading') ||
-      (c.collection || '').toLowerCase().includes('trading')
-    ).slice(0, 10),
+    courses.filter(c => {
+      const title = (c.title || '').toLowerCase();
+      const description = (c.description || '').toLowerCase();
+      return (
+        c.category === 'trading' ||
+        c.tags?.includes('trading') ||
+        title.includes('trading') ||
+        title.includes('giao dịch') ||
+        title.includes('gem trading') ||
+        description.includes('trading')
+      );
+    }).slice(0, 10),
     [courses]
   );
 
@@ -541,9 +574,21 @@ const CoursesScreen = ({ navigation, route }) => {
   // Clear tag filter
   const handleClearTagFilter = useCallback(() => {
     setActiveFilterTags(null);
+    setPageTitleOverride(null);
     // Reset navigation params
     navigation.setParams({ filterTags: null, title: null, categoryId: null });
   }, [navigation]);
+
+  // Handle category card press - update filter directly without navigation
+  const handleCategoryPress = useCallback((category) => {
+    console.log('[CoursesScreen] Category pressed:', category.name, category.filterTags);
+    setActiveFilterTags(category.filterTags);
+    setPageTitleOverride(category.name);
+    // Reset other filters when selecting category
+    setActiveFilter('all');
+    setActiveQuickFilters([]);
+    setAppliedFilters({});
+  }, []);
 
   // Render list header with all sections - MEMOIZED to prevent re-renders
   const renderListHeader = useCallback(() => {
@@ -553,7 +598,7 @@ const CoursesScreen = ({ navigation, route }) => {
         {activeFilterTags && activeFilterTags.length > 0 && (
           <View style={styles.collectionHeader}>
             <View style={styles.collectionInfo}>
-              <Text style={styles.collectionTitle}>{pageTitle || 'Khóa học'}</Text>
+              <Text style={styles.collectionTitle}>{pageTitleOverride || pageTitle || 'Khóa học'}</Text>
               <Text style={styles.collectionCount}>
                 {filteredCourses.length} khóa học
               </Text>
@@ -572,11 +617,11 @@ const CoursesScreen = ({ navigation, route }) => {
           {renderFilterTabs()}
         </Animated.View>
 
-        {/* Quick Filters - Only show on "All" tab */}
-        {activeFilter === 'all' && renderQuickFilters()}
+        {/* Quick Filters - Only show on "All" tab and when no category filter active */}
+        {activeFilter === 'all' && !activeFilterTags && renderQuickFilters()}
 
-        {/* === PROMOTIONAL SECTIONS - Only show on "All" tab === */}
-        {activeFilter === 'all' && (
+        {/* === PROMOTIONAL SECTIONS - Only show on "All" tab and when no category filter active === */}
+        {activeFilter === 'all' && !activeFilterTags && (
           <>
             {/* Promo Bar - shows if promo_bar_config has active data */}
             <PromoBar style={styles.promoBar} />
@@ -587,7 +632,10 @@ const CoursesScreen = ({ navigation, route }) => {
             {/* Category Grid with Header - always shows (hardcoded categories) */}
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Danh mục khóa học</Text>
-              <CourseCategoryGrid style={styles.categoryGrid} />
+              <CourseCategoryGrid
+                style={styles.categoryGrid}
+                onCategoryPress={handleCategoryPress}
+              />
             </View>
 
             {/* Flash Sale Section - shows if course_flash_sales has active data */}
@@ -696,6 +744,7 @@ const CoursesScreen = ({ navigation, route }) => {
     activeFilterTags,
     activeFilter,
     pageTitle,
+    pageTitleOverride,
     filteredCourses.length,
     filterFadeAnim,
     sponsorBanners,
@@ -708,6 +757,7 @@ const CoursesScreen = ({ navigation, route }) => {
     enrolledCourseIds,
     completedCourseIds,
     handleCoursePress,
+    handleCategoryPress,
     navigation,
     handleClearTagFilter,
   ]);
@@ -750,7 +800,7 @@ const CoursesScreen = ({ navigation, route }) => {
           >
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{pageTitle || 'Khóa Học'}</Text>
+          <Text style={styles.headerTitle}>{pageTitleOverride || pageTitle || 'Khóa Học'}</Text>
           <TouchableOpacity
             style={styles.searchBtn}
             onPress={() => navigation.navigate('CourseSearch')}

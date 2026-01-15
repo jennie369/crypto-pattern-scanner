@@ -30,23 +30,26 @@ import {
   AlertCircle,
   ShoppingCart,
   Infinity,
+  ExternalLink,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, GLASS } from '../../utils/tokens';
+import { CHATBOT_PRODUCTS } from '../../constants/productConfig';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 /**
- * Chatbot tier packages - synced with Shopify products
+ * Chatbot tier packages - synced with Shopify products via productConfig.js
  * NOTE: These use chatbot_tier naming (PRO/PREMIUM/VIP), NOT scanner_tier (TIER1/2/3)
+ * IMPORTANT: All URLs use cart format with variant ID for proper checkout
  */
 const CHATBOT_TIERS = [
   {
     id: 'pro',
     name: 'PRO',
     tier: 'PRO',
-    price: 39000,
-    priceDisplay: '39.000đ',
+    price: CHATBOT_PRODUCTS.PRO.price,
+    priceDisplay: CHATBOT_PRODUCTS.PRO.priceFormatted,
     period: '/tháng',
     queries: 15,
     queriesDisplay: '15 lượt/ngày',
@@ -58,15 +61,15 @@ const CHATBOT_TIERS = [
       'Gợi ý trading',
       'Hỗ trợ email',
     ],
-    shopifyProductHandle: 'gem-chatbot-pro',
-    shopifyUrl: 'https://shop.gemcrypto.vn/products/gem-chatbot-pro',
+    variantId: CHATBOT_PRODUCTS.PRO.variantId,
+    shopifyUrl: CHATBOT_PRODUCTS.PRO.cartUrl, // Cart URL with variant ID
   },
   {
     id: 'premium',
     name: 'PREMIUM',
     tier: 'PREMIUM',
-    price: 59000,
-    priceDisplay: '59.000đ',
+    price: CHATBOT_PRODUCTS.PREMIUM.price,
+    priceDisplay: CHATBOT_PRODUCTS.PREMIUM.priceFormatted,
     period: '/tháng',
     queries: 50,
     queriesDisplay: '50 lượt/ngày',
@@ -79,15 +82,15 @@ const CHATBOT_TIERS = [
       'Hỗ trợ ưu tiên',
     ],
     popular: true,
-    shopifyProductHandle: 'gem-chatbot-premium',
-    shopifyUrl: 'https://shop.gemcrypto.vn/products/gem-chatbot-premium',
+    variantId: CHATBOT_PRODUCTS.PREMIUM.variantId,
+    shopifyUrl: CHATBOT_PRODUCTS.PREMIUM.cartUrl, // Cart URL with variant ID
   },
   {
     id: 'vip',
     name: 'VIP',
     tier: 'VIP',
-    price: 99000,
-    priceDisplay: '99.000đ',
+    price: CHATBOT_PRODUCTS.VIP.price,
+    priceDisplay: CHATBOT_PRODUCTS.VIP.priceFormatted,
     period: '/tháng',
     queries: -1, // Unlimited
     queriesDisplay: 'Không giới hạn',
@@ -99,8 +102,8 @@ const CHATBOT_TIERS = [
       'Chiến lược độc quyền',
       'Hỗ trợ 24/7 VIP',
     ],
-    shopifyProductHandle: 'gem-chatbot-vip',
-    shopifyUrl: 'https://shop.gemcrypto.vn/products/gem-chatbot-vip',
+    variantId: CHATBOT_PRODUCTS.VIP.variantId,
+    shopifyUrl: CHATBOT_PRODUCTS.VIP.cartUrl, // Cart URL with variant ID
   },
 ];
 
@@ -143,6 +146,22 @@ const ChatbotPricingModal = ({
         checkoutUrl: tier.shopifyUrl,
         title: `GEM Chatbot ${tier.name}`,
         productName: `GEM Chatbot ${tier.name}`,
+        returnScreen: 'Home',
+      },
+    });
+  }, [navigation, onClose]);
+
+  /**
+   * Handle learn more - Navigate to landing page
+   */
+  const handleLearnMore = useCallback(() => {
+    onClose();
+    navigation.navigate('Shop', {
+      screen: 'CheckoutWebView',
+      params: {
+        checkoutUrl: 'https://gemral.com',
+        title: 'Tìm hiểu thêm',
+        productName: 'GEM Chatbot',
         returnScreen: 'Home',
       },
     });
@@ -201,28 +220,42 @@ const ChatbotPricingModal = ({
           ))}
         </View>
 
-        {/* Upgrade Button */}
-        <TouchableOpacity
-          onPress={() => handleUpgrade(tier)}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={isLoading ? ['#666', '#555'] : [tier.color, `${tier.color}BB`]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.upgradeButton}
+        {/* Button Row */}
+        <View style={styles.buttonRow}>
+          {/* Learn More Button */}
+          <TouchableOpacity
+            style={styles.learnMoreButton}
+            onPress={handleLearnMore}
+            activeOpacity={0.7}
           >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <ShoppingCart size={16} color="#fff" />
-                <Text style={styles.upgradeButtonText}>Mua ngay</Text>
-              </>
-            )}
-          </LinearGradient>
-        </TouchableOpacity>
+            <ExternalLink size={14} color={COLORS.gold} />
+            <Text style={styles.learnMoreText}>Tìm hiểu</Text>
+          </TouchableOpacity>
+
+          {/* Upgrade Button */}
+          <TouchableOpacity
+            style={styles.upgradeButtonContainer}
+            onPress={() => handleUpgrade(tier)}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={isLoading ? ['#666', '#555'] : [tier.color, `${tier.color}BB`]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.upgradeButton}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <ShoppingCart size={16} color="#fff" />
+                  <Text style={styles.upgradeButtonText}>Mua ngay</Text>
+                </>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   };
@@ -465,6 +498,32 @@ const styles = StyleSheet.create({
   featureText: {
     color: COLORS.textSecondary,
     fontSize: 12,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  learnMoreButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    gap: 4,
+  },
+  learnMoreText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.gold,
+  },
+  upgradeButtonContainer: {
+    flex: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   upgradeButton: {
     flexDirection: 'row',

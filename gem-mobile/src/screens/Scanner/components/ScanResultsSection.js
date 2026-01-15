@@ -21,6 +21,9 @@ import {
   BarChart2,
   ChevronDown,
   ChevronUp,
+  Layers,
+  EyeOff,
+  Eye,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import { formatConfidence } from '../../../utils/formatters';
@@ -35,6 +38,10 @@ const ScanResultsSection = ({
   selectedCoin,
   selectedPatternId,
   userTier = 'FREE',
+  // ⚠️ ZONE TOGGLE PROPS
+  zoneDisplayMode = 'all', // 'all' | 'selected' | 'hidden'
+  onZoneDisplayModeChange,
+  onClearZoneSelection,
 }) => {
   const [showOnlyWithPatterns, setShowOnlyWithPatterns] = useState(true);
   // Changed: Only ONE coin can be expanded at a time (string instead of Set)
@@ -219,6 +226,68 @@ const ScanResultsSection = ({
         <Text style={styles.patternTotal}>
           {stats.totalPatterns} patterns
         </Text>
+      </View>
+
+      {/* =====================================================
+          ZONE TOGGLE BUTTONS (2-way sync)
+          ===================================================== */}
+      <View style={styles.zoneToggleRow}>
+        {/* Tất cả zones */}
+        <TouchableOpacity
+          style={[
+            styles.zoneToggleBtn,
+            zoneDisplayMode === 'all' && styles.zoneToggleBtnActive,
+          ]}
+          onPress={() => {
+            onZoneDisplayModeChange?.('all');
+            onClearZoneSelection?.();
+          }}
+        >
+          <Layers size={14} color={zoneDisplayMode === 'all' ? COLORS.gold : COLORS.textMuted} />
+          <Text style={[
+            styles.zoneToggleText,
+            zoneDisplayMode === 'all' && styles.zoneToggleTextActive,
+          ]}>
+            Tất cả zones
+          </Text>
+        </TouchableOpacity>
+
+        {/* Ẩn zones */}
+        <TouchableOpacity
+          style={[
+            styles.zoneToggleBtn,
+            zoneDisplayMode === 'hidden' && styles.zoneToggleBtnActive,
+          ]}
+          onPress={() => {
+            onZoneDisplayModeChange?.('hidden');
+            onClearZoneSelection?.();
+          }}
+        >
+          <EyeOff size={14} color={zoneDisplayMode === 'hidden' ? COLORS.gold : COLORS.textMuted} />
+          <Text style={[
+            styles.zoneToggleText,
+            zoneDisplayMode === 'hidden' && styles.zoneToggleTextActive,
+          ]}>
+            Ẩn zones
+          </Text>
+        </TouchableOpacity>
+
+        {/* Chỉ zone đã chọn */}
+        <TouchableOpacity
+          style={[
+            styles.zoneToggleBtn,
+            zoneDisplayMode === 'selected' && styles.zoneToggleBtnActive,
+          ]}
+          onPress={() => onZoneDisplayModeChange?.('selected')}
+        >
+          <Eye size={14} color={zoneDisplayMode === 'selected' ? COLORS.gold : COLORS.textMuted} />
+          <Text style={[
+            styles.zoneToggleText,
+            zoneDisplayMode === 'selected' && styles.zoneToggleTextActive,
+          ]}>
+            Đã chọn
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Coin Accordions - Inline ScrollView for independent scrolling */}
@@ -425,6 +494,48 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textMuted,
+  },
+
+  // =====================================================
+  // ZONE TOGGLE STYLES
+  // =====================================================
+  zoneToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+
+  zoneToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 5,
+    paddingHorizontal: SPACING.sm,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+
+  zoneToggleBtnActive: {
+    backgroundColor: 'rgba(255, 193, 7, 0.15)',
+    borderColor: 'rgba(255, 193, 7, 0.5)',
+  },
+
+  zoneToggleText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+
+  zoneToggleTextActive: {
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
   },
 
   accordionScrollView: {

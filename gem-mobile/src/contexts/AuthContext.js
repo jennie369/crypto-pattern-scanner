@@ -3,12 +3,39 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, getCurrentUser, getUserProfile } from '../services/supabase';
+import { Alert } from 'react-native';
+import { supabase, getCurrentUser, getUserProfile, signOut } from '../services/supabase';
 import presenceService from '../services/presenceService';
 import biometricService from '../services/biometricService';
 import notificationScheduler from '../services/notificationScheduler';
 import QuotaService from '../services/quotaService';
 import paperTradeService from '../services/paperTradeService';
+
+// Helper: Handle invalid refresh token by clearing session
+const handleInvalidRefreshToken = async (setUser, setProfile) => {
+  console.warn('[AuthContext] ⚠️ Invalid refresh token detected, clearing session...');
+  try {
+    // Clear biometric stored credentials
+    await biometricService.disable();
+    // Sign out to clear invalid session
+    await signOut();
+    // Clear state
+    setUser(null);
+    setProfile(null);
+    // Cleanup services
+    presenceService.cleanup();
+    QuotaService.clearCache();
+    paperTradeService.stopGlobalMonitoring();
+
+    Alert.alert(
+      'Phiên đăng nhập hết hạn',
+      'Vui lòng đăng nhập lại để tiếp tục sử dụng app.',
+      [{ text: 'OK' }]
+    );
+  } catch (err) {
+    console.error('[AuthContext] Error clearing invalid session:', err);
+  }
+};
 
 const AuthContext = createContext({});
 
@@ -58,11 +85,124 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
+  // =====================================================
+  // UPGRADE STATE - For showing UpgradeSuccessModal
+  // =====================================================
+  const [upgradeState, setUpgradeState] = useState({
+    showModal: false,
+    tierType: null,
+    tierName: null,
+    previousTier: null,
+  });
+
+  /**
+   * Refresh user tier from database
+   * Call this after successful purchase to update tier immediately
+   * @param {boolean} showUpgradeModal - Show congratulations modal if tier changed
+   * @returns {Object} { success, newProfile, tierChanged }
+   */
+  const refreshUserTier = async (showUpgradeModal = true) => {
+    if (!user?.id) {
+      console.warn('[AuthContext] refreshUserTier called without user');
+      return { success: false, error: 'No user logged in' };
+    }
+
+    try {
+      console.log('[AuthContext] Refreshing user tier...');
+      const previousProfile = profile;
+
+      // Fetch fresh profile from database
+      const { data: newProfile, error } = await getUserProfile(user.id);
+
+      if (error) {
+        console.error('[AuthContext] Failed to refresh profile:', error);
+        return { success: false, error: error.message };
+      }
+
+      // Update profile state
+      setProfile(newProfile);
+
+      // Check if any tier changed
+      const tierChanged = {
+        course: previousProfile?.subscription_tier !== newProfile?.subscription_tier,
+        scanner: previousProfile?.scanner_tier !== newProfile?.scanner_tier,
+        chatbot: previousProfile?.chatbot_tier !== newProfile?.chatbot_tier,
+      };
+
+      const anyTierChanged = tierChanged.course || tierChanged.scanner || tierChanged.chatbot;
+
+      console.log('[AuthContext] Tier refresh result:', {
+        anyTierChanged,
+        changes: tierChanged,
+        newTiers: {
+          course: newProfile?.subscription_tier,
+          scanner: newProfile?.scanner_tier,
+          chatbot: newProfile?.chatbot_tier,
+        },
+      });
+
+      // Show upgrade modal if tier changed and modal requested
+      if (anyTierChanged && showUpgradeModal) {
+        // Determine which tier type changed and to what
+        let tierType = 'course';
+        let tierName = newProfile?.subscription_tier;
+
+        if (tierChanged.scanner && newProfile?.scanner_tier !== 'FREE') {
+          tierType = 'scanner';
+          tierName = newProfile?.scanner_tier;
+        } else if (tierChanged.chatbot && newProfile?.chatbot_tier !== 'FREE') {
+          tierType = 'chatbot';
+          tierName = newProfile?.chatbot_tier;
+        }
+
+        setUpgradeState({
+          showModal: true,
+          tierType,
+          tierName,
+          previousTier: previousProfile?.subscription_tier || previousProfile?.scanner_tier || 'FREE',
+        });
+      }
+
+      // Refresh quota cache to reflect new tier limits
+      QuotaService.clearCache();
+      QuotaService.checkAllQuotas(user.id, true).catch(err => {
+        console.warn('[AuthContext] Quota refresh after tier update failed:', err?.message);
+      });
+
+      return {
+        success: true,
+        newProfile,
+        tierChanged: anyTierChanged,
+        changes: tierChanged,
+      };
+
+    } catch (error) {
+      console.error('[AuthContext] refreshUserTier error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  /**
+   * Close the upgrade success modal
+   */
+  const closeUpgradeModal = () => {
+    setUpgradeState(prev => ({ ...prev, showModal: false }));
+  };
+
   // Load initial session
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const { user } = await getCurrentUser();
+        const { user, error } = await getCurrentUser();
+
+        // Check for invalid refresh token error
+        if (error?.isInvalidRefreshToken || error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
+          await handleInvalidRefreshToken(setUser, setProfile);
+          setLoading(false);
+          setInitialized(true);
+          return;
+        }
+
         if (user) {
           setUser(user);
           const { data: profileData } = await getUserProfile(user.id);
@@ -112,6 +252,10 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Error loading session:', error);
+        // Handle invalid refresh token in catch block
+        if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
+          await handleInvalidRefreshToken(setUser, setProfile);
+        }
       } finally {
         setLoading(false);
         setInitialized(true);
@@ -124,6 +268,14 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('[AuthContext] Auth event:', event);
+
+        // Handle token refresh failure
+        if (event === 'TOKEN_REFRESH_FAILED' || event === 'SIGNED_OUT') {
+          // Check if this was due to invalid refresh token
+          if (!session) {
+            console.warn('[AuthContext] Session ended, checking if refresh token issue...');
+          }
+        }
 
         // Update biometric stored token when token is refreshed
         if (event === 'TOKEN_REFRESHED' && session?.refresh_token) {
@@ -294,6 +446,11 @@ export const AuthProvider = ({ children }) => {
     userTier, // Normalized tier (uppercase)
     isAdmin,  // Admin flag for bypassing restrictions
     isManager, // Manager flag for limited admin access
+
+    // Tier refresh & upgrade modal
+    refreshUserTier, // Call after purchase to refresh tier and show modal
+    upgradeState, // { showModal, tierType, tierName, previousTier }
+    closeUpgradeModal, // Close the upgrade success modal
   };
 
   return (

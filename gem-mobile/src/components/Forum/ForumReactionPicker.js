@@ -281,6 +281,8 @@ const ForumReactionPicker = ({
                     >
                       <ReactionIcon
                         type={type}
+                        size={REACTION_SIZES.PICKER_EMOJI_SIZE}
+                        emojiSize={REACTION_SIZES.PICKER_EMOJI_SIZE}
                         index={index}
                         isHovered={isHovered}
                         showAnimation={visible}
@@ -341,9 +343,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconWrapper: {
-    width: REACTION_SIZES.ICON_SIZE,
-    height: REACTION_SIZES.ICON_SIZE,
-    borderRadius: REACTION_SIZES.ICON_SIZE / 2,
+    // Picker emoji size (larger than button emoji for easy selection)
+    width: REACTION_SIZES.PICKER_EMOJI_SIZE + 8,
+    height: REACTION_SIZES.PICKER_EMOJI_SIZE + 8,
+    borderRadius: (REACTION_SIZES.PICKER_EMOJI_SIZE + 8) / 2,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -31,6 +31,7 @@ const isValidReactionType = (type) => {
 class ReactionService {
   /**
    * Get user's reaction for a specific post
+   * Supports both forum_posts and seed_posts
    * @param {string} postId - Post ID
    * @param {string} userId - User ID
    * @returns {Object|null} Reaction object or null
@@ -42,12 +43,26 @@ class ReactionService {
     }
 
     try {
-      const { data, error } = await supabase
+      // Try to find reaction by post_id first
+      let { data, error } = await supabase
         .from('post_reactions')
         .select('*')
         .eq('post_id', postId)
         .eq('user_id', userId)
         .maybeSingle();
+
+      // If not found, try seed_post_id
+      if (!data && !error) {
+        const result = await supabase
+          .from('post_reactions')
+          .select('*')
+          .eq('seed_post_id', postId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) {
         console.error('[ReactionService] getUserReaction error:', error);
@@ -63,12 +78,14 @@ class ReactionService {
 
   /**
    * Add or update a reaction (upsert)
+   * Supports both forum_posts and seed_posts
    * @param {string} postId - Post ID
    * @param {string} userId - User ID
    * @param {string} reactionType - Reaction type (like, love, haha, wow, sad, angry)
+   * @param {boolean} isSeedPost - Whether this is a seed post (optional, auto-detected)
    * @returns {Object} Created/updated reaction
    */
-  async addReaction(postId, userId, reactionType) {
+  async addReaction(postId, userId, reactionType, isSeedPost = null) {
     if (!postId || !userId) {
       throw new Error('Thiếu thông tin bài viết hoặc người dùng');
     }
@@ -79,28 +96,72 @@ class ReactionService {
     }
 
     try {
-      // Directly try to upsert - let database handle FK constraint
-      // (Don't pre-check post existence as RLS might block the SELECT query)
+      // Auto-detect if it's a seed post by checking both tables
+      let detectedIsSeedPost = isSeedPost;
+
+      if (detectedIsSeedPost === null) {
+        // Check if post exists in forum_posts
+        const { data: forumPost } = await supabase
+          .from('forum_posts')
+          .select('id')
+          .eq('id', postId)
+          .maybeSingle();
+
+        if (forumPost) {
+          detectedIsSeedPost = false;
+        } else {
+          // Check if post exists in seed_posts
+          const { data: seedPost } = await supabase
+            .from('seed_posts')
+            .select('id')
+            .eq('id', postId)
+            .maybeSingle();
+
+          if (seedPost) {
+            detectedIsSeedPost = true;
+          } else {
+            throw new Error('Bài viết không tồn tại hoặc đã bị xóa');
+          }
+        }
+      }
+
+      // Build upsert data based on post type
+      const upsertData = {
+        user_id: userId,
+        reaction_type: normalizedType,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Use correct column based on post type
+      if (detectedIsSeedPost) {
+        upsertData.seed_post_id = postId;
+        upsertData.post_id = null;
+      } else {
+        upsertData.post_id = postId;
+        upsertData.seed_post_id = null;
+      }
+
+      // Determine conflict constraint
+      const onConflict = detectedIsSeedPost
+        ? 'seed_post_id,user_id'
+        : 'post_id,user_id';
+
+      console.log('[ReactionService] Adding reaction:', {
+        postId,
+        isSeedPost: detectedIsSeedPost,
+        onConflict,
+      });
+
       const { data, error } = await supabase
         .from('post_reactions')
-        .upsert(
-          {
-            post_id: postId,
-            user_id: userId,
-            reaction_type: normalizedType,
-            updated_at: new Date().toISOString(),
-          },
-          {
-            onConflict: 'post_id,user_id',
-          }
-        )
+        .upsert(upsertData, { onConflict })
         .select()
         .single();
 
       if (error) {
-        // Handle foreign key violation (post doesn't exist)
+        // Handle foreign key violation
         if (error.code === '23503') {
-          console.warn('[ReactionService] Post not found (FK violation):', postId);
+          console.warn('[ReactionService] FK violation:', postId, error);
           throw new Error('Bài viết không tồn tại hoặc đã bị xóa');
         }
         console.error('[ReactionService] addReaction error:', error);
@@ -117,6 +178,7 @@ class ReactionService {
 
   /**
    * Remove a reaction
+   * Supports both forum_posts and seed_posts
    * @param {string} postId - Post ID
    * @param {string} userId - User ID
    * @returns {boolean} Success status
@@ -127,11 +189,23 @@ class ReactionService {
     }
 
     try {
-      const { error } = await supabase
+      // Try to delete by post_id first
+      let { error, count } = await supabase
         .from('post_reactions')
         .delete()
         .eq('post_id', postId)
         .eq('user_id', userId);
+
+      // If nothing deleted, try seed_post_id
+      if (!error && count === 0) {
+        const result = await supabase
+          .from('post_reactions')
+          .delete()
+          .eq('seed_post_id', postId)
+          .eq('user_id', userId);
+
+        error = result.error;
+      }
 
       if (error) {
         console.error('[ReactionService] removeReaction error:', error);
@@ -191,6 +265,7 @@ class ReactionService {
 
   /**
    * Get reaction counts for a post
+   * Supports both forum_posts and seed_posts
    * @param {string} postId - Post ID
    * @returns {Object} Reaction counts object
    */
@@ -200,11 +275,24 @@ class ReactionService {
     }
 
     try {
-      const { data, error } = await supabase
+      // Try forum_posts first
+      let { data, error } = await supabase
         .from('forum_posts')
         .select('reaction_counts')
         .eq('id', postId)
-        .single();
+        .maybeSingle();
+
+      // If not found, try seed_posts
+      if (!data && !error) {
+        const result = await supabase
+          .from('seed_posts')
+          .select('reaction_counts')
+          .eq('id', postId)
+          .maybeSingle();
+
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) {
         console.error('[ReactionService] getReactionCounts error:', error);
@@ -220,6 +308,7 @@ class ReactionService {
 
   /**
    * Get user's reactions across multiple posts (for feed optimization)
+   * Supports both forum_posts and seed_posts
    * @param {string} userId - User ID
    * @param {Array<string>} postIds - Array of post IDs
    * @returns {Object} Map of postId -> reaction_type
@@ -230,21 +319,43 @@ class ReactionService {
     }
 
     try {
-      const { data, error } = await supabase
+      // Get reactions by post_id
+      const { data: forumReactions, error: forumError } = await supabase
         .from('post_reactions')
         .select('post_id, reaction_type')
         .eq('user_id', userId)
         .in('post_id', postIds);
 
-      if (error) {
-        console.error('[ReactionService] getUserReactionsForPosts error:', error);
-        throw error;
+      if (forumError) {
+        console.error('[ReactionService] getUserReactionsForPosts forum error:', forumError);
+      }
+
+      // Get reactions by seed_post_id
+      const { data: seedReactions, error: seedError } = await supabase
+        .from('post_reactions')
+        .select('seed_post_id, reaction_type')
+        .eq('user_id', userId)
+        .in('seed_post_id', postIds);
+
+      if (seedError) {
+        console.error('[ReactionService] getUserReactionsForPosts seed error:', seedError);
       }
 
       // Convert to map for easy lookup
       const reactionsMap = {};
-      (data || []).forEach((item) => {
-        reactionsMap[item.post_id] = item.reaction_type;
+
+      // Add forum post reactions
+      (forumReactions || []).forEach((item) => {
+        if (item.post_id) {
+          reactionsMap[item.post_id] = item.reaction_type;
+        }
+      });
+
+      // Add seed post reactions
+      (seedReactions || []).forEach((item) => {
+        if (item.seed_post_id) {
+          reactionsMap[item.seed_post_id] = item.reaction_type;
+        }
       });
 
       return reactionsMap;

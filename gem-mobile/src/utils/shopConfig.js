@@ -205,7 +205,7 @@ export const SHOP_SECTIONS = [
   },
   {
     id: 'courses',
-    title: 'Khóa Học Trading & Tâm Linh',
+    title: 'Khóa Học Trading & Tư Duy',
     subtitle: 'Nâng cao kiến thức, làm chủ tài chính',
     icon: GraduationCap,
     type: 'courses',

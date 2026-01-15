@@ -174,7 +174,7 @@ const RITUAL_SUGGESTIONS = {
   spiritual: [
     { id: 'moon-ritual', title: 'Nghi Thức Trăng', subtitle: 'Kết nối năng lượng', icon: Moon, color: '#8B5CF6' },
     { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Biết ơn vũ trụ', icon: Sparkles, color: '#FFB800' },
-    { id: 'water-manifest', title: 'Nghi Thức Nước', subtitle: 'Thanh tẩy tâm linh', icon: Droplets, color: '#00BCD4' },
+    { id: 'water-manifest', title: 'Nghi Thức Nước', subtitle: 'Thanh tẩy tâm thức', icon: Droplets, color: '#00BCD4' },
     { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Giao tiếp với vũ trụ', icon: Mail, color: '#9D4EDD' },
   ],
 };

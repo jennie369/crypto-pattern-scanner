@@ -78,7 +78,7 @@ export const HELP_ARTICLES = {
         },
         {
           type: 'paragraph',
-          content: 'Gems là tiền tệ nội bộ của Gemral - nền tảng kết hợp giao dịch và tâm linh. Không giống các mạng xã hội khác chỉ có "likes" vô nghĩa, Gems có giá trị thực sự:\n\n• 1 Gem = 1.000 VNĐ (cố định)\n• Có thể quy đổi thành tiền thật\n• Dùng để tip creators, mua services',
+          content: 'Gems là tiền tệ nội bộ của Gemral - nền tảng kết hợp giao dịch và tâm thức. Không giống các mạng xã hội khác chỉ có "likes" vô nghĩa, Gems có giá trị thực sự:\n\n• 1 Gem = 1.000 VNĐ (cố định)\n• Có thể quy đổi thành tiền thật\n• Dùng để tip creators, mua services',
         },
         {
           type: 'callout',

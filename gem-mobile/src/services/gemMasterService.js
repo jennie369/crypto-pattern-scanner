@@ -725,6 +725,368 @@ const detectTopics = (msg) => {
   return topics.length > 0 ? topics : ['general'];
 };
 
+// ========== PREMIUM CONTENT GATING ==========
+// Protect premium course content and trading formulas
+
+/**
+ * Keywords indicating user is asking for DETAILED premium content
+ * Must include both topic keyword + detail indicator
+ */
+const PREMIUM_DETAIL_INDICATORS = [
+  'chi tiết', 'cụ thể', 'giải thích', 'hướng dẫn', 'cách dùng', 'cách sử dụng',
+  'làm sao', 'làm thế nào', 'như thế nào', 'step by step', 'từng bước',
+  'ví dụ', 'case study', 'thực hành', 'áp dụng', 'setup', 'entry', 'exit',
+  'backtest', 'kết quả', 'win rate', 'công thức', 'formula', 'bí quyết',
+  'secret', 'độc quyền', 'nội dung', 'bài học', 'lesson', 'module',
+  'dạy tôi', 'teach me', 'show me', 'chỉ cho tôi',
+];
+
+/**
+ * Premium content by tier - what content requires which tier
+ */
+const PREMIUM_CONTENT_MAP = {
+  // TIER 1 Content (11M)
+  tier1: {
+    keywords: [
+      'tier 1', 'tier1', '7 pattern', 'bảy pattern', '7 mô hình',
+      'harmonic pattern', 'elliott wave', 'wyckoff', 'volume profile',
+      'market structure', 'fibonacci', 'divergence',
+      'khóa 11 triệu', 'khóa 11tr', 'course tier 1',
+    ],
+    features: [
+      '7 Patterns cốt lõi (Harmonic, Elliott, Wyckoff...)',
+      'Win rate 50-55%',
+      'GEM Scanner 1 tháng',
+      'Cộng đồng VIP Discord',
+    ],
+    price: '11.000.000đ',
+    originalPrice: '15.000.000đ',
+    discount: '27%',
+  },
+
+  // TIER 2 Content (21M)
+  tier2: {
+    keywords: [
+      'tier 2', 'tier2', '15 pattern', 'mười lăm pattern',
+      '6 công thức', 'sáu công thức', '6 formula',
+      'dpd', 'upu', 'upd', 'dpu', 'hfz', 'lfz',
+      'down pause down', 'up pause up', 'frequency formula',
+      'smart money', 'smc', 'liquidity', 'order block', 'fvg',
+      'institutional', 'market maker', 'manipulation',
+      'khóa 21 triệu', 'khóa 21tr', 'course tier 2',
+    ],
+    features: [
+      'Tất cả TIER 1 + 8 Patterns nâng cao',
+      '6 Công thức Frequency độc quyền (DPD, UPU, HFZ...)',
+      'Smart Money Concepts (SMC)',
+      'Win rate 70-75%',
+      'GEM Scanner 3 tháng',
+      'Mentorship group riêng',
+    ],
+    price: '21.000.000đ',
+    originalPrice: '35.000.000đ',
+    discount: '40%',
+  },
+
+  // TIER 3 Content (68M)
+  tier3: {
+    keywords: [
+      'tier 3', 'tier3', '11 công thức', 'mười một công thức',
+      '5 công thức nâng cao', 'advanced formula',
+      'ai prediction', 'whale tracker', 'institutional flow',
+      'market manipulation', 'liquidity hunt', 'stop hunt',
+      'wyckoff accumulation', 'wyckoff distribution',
+      'order flow', 'tape reading', 'delta', 'cvd',
+      'khóa 68 triệu', 'khóa 68tr', 'course tier 3', 'elite',
+      'full package', 'trọn bộ', 'tất cả công thức',
+    ],
+    features: [
+      'Tất cả TIER 1 + TIER 2',
+      '11 Công thức Frequency hoàn chỉnh',
+      'AI Prediction System',
+      'Whale Tracker (theo dõi cá mập)',
+      'Win rate 80-90%',
+      'GEM Scanner TRỌN ĐỜI',
+      '1-on-1 với Founder (4 sessions)',
+      'Private Telegram signals',
+    ],
+    price: '68.000.000đ',
+    originalPrice: '120.000.000đ',
+    discount: '43%',
+  },
+
+  // Frequency Formulas (protected content)
+  formulas: {
+    keywords: [
+      'công thức frequency', 'frequency formula', 'công thức độc quyền',
+      'dpd là gì', 'upu là gì', 'upd là gì', 'dpu là gì', 'hfz là gì', 'lfz là gì',
+      'cách dùng dpd', 'cách dùng upu', 'cách trade dpd', 'cách trade upu',
+      'setup dpd', 'setup upu', 'entry dpd', 'entry upu',
+      'down pause down chi tiết', 'up pause up chi tiết',
+      'giải thích công thức', 'explain formula',
+    ],
+    requiredTier: 'tier2', // Minimum tier to access
+  },
+};
+
+/**
+ * FOMO Teaser responses - tạo tò mò và urgency
+ */
+const FOMO_TEASERS = {
+  tier1: [
+    `🔒 **NỘI DUNG TIER 1 - PREMIUM**
+
+Bạn đang hỏi về nội dung thuộc **Khóa Trading TIER 1** (11 triệu).
+
+**Những gì bạn sẽ được học:**
+• 7 Patterns cốt lõi được backtest trên 686 trades
+• Win rate thực tế: 50-55% (gấp đôi trader bình thường)
+• Harmonic, Elliott Wave, Wyckoff, Volume Profile...
+
+💡 **Tại sao ta không thể chia sẻ chi tiết?**
+Đây là kiến thức độc quyền mà team GEM đã nghiên cứu 10+ năm. Nếu ai cũng biết, nó sẽ không còn hiệu quả.
+
+📊 **Thực tế:** 89% học viên TIER 1 đã profitable sau 3 tháng.
+
+🔥 **Ưu đãi hiện tại:** Giảm 27% còn **11 triệu** (gốc 15 triệu)
+⏰ Chỉ còn 3 slot cho tháng này.
+
+Bạn có muốn xem chi tiết khóa học không?`,
+
+    `⚡ **BẠN ĐANG CHẠM VÀO KIẾN THỨC TIER 1**
+
+Ta hiểu sự tò mò của bạn. Nhưng đây là nội dung mà học viên đã đầu tư **11 triệu** để sở hữu.
+
+**Sneak peek nhỏ:**
+• Pattern này có win rate 52% trên BTC/ETH
+• Kết hợp với Frequency Method → tăng lên 65%
+• Có video hướng dẫn chi tiết từng setup
+
+💰 **ROI thực tế:** Nhiều học viên đã gỡ vốn chỉ sau 2-3 trades đầu tiên.
+
+Nếu bạn nghiêm túc với trading, đây là đầu tư nhỏ nhất cho kiến thức lớn nhất.
+
+Muốn ta tư vấn thêm về khóa học?`,
+  ],
+
+  tier2: [
+    `🔐 **NỘI DUNG TIER 2 - ADVANCED**
+
+Bạn đang hỏi về **6 Công thức Frequency** - kiến thức độc quyền chỉ có ở TIER 2.
+
+**Đây là gì?**
+• DPD, UPU, UPD, DPU, HFZ, LFZ
+• Công thức dự đoán xu hướng với độ chính xác 70-75%
+• Được nghiên cứu 10+ năm bởi Founder Jennie Chu
+
+🤫 **Bí mật:** Những công thức này KHÔNG có trên Google, YouTube hay bất kỳ khóa học nào khác. Đây là intellectual property của GEM.
+
+📈 **Kết quả học viên TIER 2:**
+• Win rate trung bình: 72%
+• Thời gian gỡ vốn: 1-2 tháng
+• 94% hài lòng với khóa học
+
+💎 **Giá trị:** 21 triệu cho kiến thức đáng giá 100 triệu+
+
+Bạn đã sẵn sàng nâng cấp lên TIER 2 chưa?`,
+
+    `⚡ **CÔNG THỨC FREQUENCY - TOP SECRET**
+
+Ta sẽ không nói dối bạn: Công thức DPD/UPU/HFZ là "vũ khí bí mật" của GEM traders.
+
+**Tại sao ta không thể share free?**
+1. Mất 10 năm để nghiên cứu và backtest
+2. Nếu ai cũng biết → market sẽ arbitrage hết
+3. Học viên TIER 2 đã trả 21 triệu cho kiến thức này
+
+**Ta có thể hint nhỏ:**
+• DPD = Down-Pause-Down → Dấu hiệu continuation giảm
+• UPU = Up-Pause-Up → Dấu hiệu continuation tăng
+• Nhưng CÁCH ĐỌC và ENTRY thì... chỉ có trong khóa học 😉
+
+🔥 **FOMO thật:** Tháng này chỉ nhận 5 học viên TIER 2 mới.
+
+Upgrade ngay?`,
+  ],
+
+  tier3: [
+    `👑 **TIER 3 ELITE - KIẾN THỨC TỐI THƯỢNG**
+
+Bạn đang hỏi về nội dung **TIER 3 Elite** - cấp độ cao nhất của GEM Trading.
+
+**Đây là những gì chỉ TIER 3 mới có:**
+• 11 Công thức Frequency hoàn chỉnh (5 công thức nâng cao)
+• **AI Prediction System** - dự đoán bằng machine learning
+• **Whale Tracker** - theo dõi giao dịch cá mập real-time
+• Win rate: 80-90%
+
+🐋 **Whale Tracker là gì?**
+Công cụ theo dõi các ví lớn (>1000 BTC) đang mua/bán. Khi cá mập accumulate, bạn biết trước.
+
+💰 **Giá trị thực:**
+• 68 triệu nghe có vẻ nhiều
+• Nhưng 1 trade với Whale Tracker có thể lãi 50-200 triệu
+• ROI trung bình của học viên TIER 3: 500% trong năm đầu
+
+👤 **Bonus:** 4 sessions 1-on-1 với Founder Jennie Chu
+
+Đây là investment, không phải expense. Bạn sẵn sàng chưa?`,
+
+    `🏆 **BẠN ĐANG HỎI VỀ "HOLY GRAIL" CỦA TRADING**
+
+AI Prediction và Whale Tracker là 2 công cụ mà 99% traders không biết tồn tại.
+
+**Tại sao TIER 3 đắt nhất?**
+• Vì nó ĐÁNG GIÁ nhất
+• Học viên TIER 3 có win rate 85%+
+• Nhiều người đã quit job để trade full-time
+
+**Ta không thể share chi tiết vì:**
+1. Đây là competitive advantage
+2. Số lượng học viên TIER 3 được giới hạn (để không làm loãng edge)
+3. NDA - học viên ký cam kết không share
+
+📊 **Fun fact:** 78% học viên TIER 3 đã refer thêm bạn bè vì kết quả quá tốt.
+
+Muốn được tư vấn 1-1 về TIER 3?`,
+  ],
+
+  formulas: [
+    `🔒 **CÔNG THỨC ĐỘC QUYỀN - PROTECTED**
+
+Bạn đang hỏi chi tiết về công thức Frequency - đây là **intellectual property** của GEM.
+
+**Ta có thể nói:**
+• Có 6 công thức core (TIER 2) và 5 công thức advanced (TIER 3)
+• Win rate từ 68-90% tùy công thức
+• Được backtest trên 686+ trades trong 3 năm
+
+**Ta KHÔNG thể nói:**
+• Cách setup cụ thể
+• Entry/Exit rules
+• Risk management cho từng công thức
+
+💡 **Lý do:** Nếu công thức bị lan truyền free, market makers sẽ counter và nó mất hiệu quả.
+
+Học viên TIER 2+ được quyền truy cập đầy đủ.
+
+Bạn đang ở tier nào? Muốn upgrade không?`,
+  ],
+
+  // Generic teaser for unknown tier requests
+  generic: [
+    `🔐 **NỘI DUNG PREMIUM**
+
+Câu hỏi của bạn liên quan đến kiến thức trong các khóa học TIER cao hơn.
+
+**Hệ thống GEM Trading có 4 cấp độ:**
+• **FREE** - Kiến thức cơ bản, win rate ~38%
+• **TIER 1** (11tr) - 7 Patterns, win rate 50-55%
+• **TIER 2** (21tr) - 6 Công thức Frequency, win rate 70-75%
+• **TIER 3** (68tr) - AI Prediction + Whale Tracker, win rate 80-90%
+
+Mỗi tier là một bước nhảy vọt về kiến thức và kết quả.
+
+📈 Bạn đang ở tier nào? Ta sẽ tư vấn lộ trình phù hợp.`,
+  ],
+};
+
+/**
+ * Detect if user is asking for premium content details
+ * Returns { isPremium: true, tier: 'tier2', ... } or { isPremium: false }
+ */
+const detectPremiumContentRequest = (message) => {
+  const m = message.toLowerCase();
+
+  // Check if message contains detail indicators
+  const hasDetailIndicator = PREMIUM_DETAIL_INDICATORS.some(ind => m.includes(ind));
+
+  // If no detail indicator, might just be asking overview (OK to answer)
+  if (!hasDetailIndicator) {
+    return { isPremium: false };
+  }
+
+  // Check which premium content they're asking about
+  for (const [tierKey, tierData] of Object.entries(PREMIUM_CONTENT_MAP)) {
+    const matchCount = tierData.keywords.filter(kw => m.includes(kw)).length;
+
+    if (matchCount >= 1) {
+      return {
+        isPremium: true,
+        tier: tierKey,
+        matchedKeywords: tierData.keywords.filter(kw => m.includes(kw)),
+        requiredTier: tierData.requiredTier || tierKey,
+        features: tierData.features,
+        price: tierData.price,
+        discount: tierData.discount,
+      };
+    }
+  }
+
+  return { isPremium: false };
+};
+
+/**
+ * Generate FOMO teaser response based on tier
+ */
+const generateFOMOTeaser = (tierKey, userTier = 'FREE') => {
+  const teasers = FOMO_TEASERS[tierKey] || FOMO_TEASERS.generic;
+  const randomTeaser = teasers[Math.floor(Math.random() * teasers.length)];
+
+  return {
+    text: randomTeaser,
+    isPremiumGated: true,
+    requiredTier: tierKey,
+    userTier: userTier,
+    showUpgradeButton: true,
+    upgradeUrl: tierKey === 'tier1' ? 'tier1' : tierKey === 'tier2' ? 'tier2' : 'tier3',
+  };
+};
+
+/**
+ * Get user's current tier from profile
+ * Returns: 'FREE' | 'STARTER' | 'TIER1' | 'TIER2' | 'TIER3'
+ */
+const getUserTier = async (userId) => {
+  if (!userId) return 'FREE';
+
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('subscription_tier, purchased_tiers')
+      .eq('id', userId)
+      .single();
+
+    if (error || !profile) return 'FREE';
+
+    // Check purchased_tiers array or subscription_tier
+    const purchasedTiers = profile.purchased_tiers || [];
+    const subTier = profile.subscription_tier || 'FREE';
+
+    // Return highest tier
+    if (purchasedTiers.includes('TIER3') || subTier === 'TIER3') return 'TIER3';
+    if (purchasedTiers.includes('TIER2') || subTier === 'TIER2') return 'TIER2';
+    if (purchasedTiers.includes('TIER1') || subTier === 'TIER1') return 'TIER1';
+    if (purchasedTiers.includes('STARTER') || subTier === 'STARTER') return 'STARTER';
+
+    return 'FREE';
+  } catch (error) {
+    console.error('[GEM] Error getting user tier:', error);
+    return 'FREE';
+  }
+};
+
+/**
+ * Check if user has access to content tier
+ */
+const hasAccessToTier = (userTier, requiredTier) => {
+  const tierHierarchy = ['FREE', 'STARTER', 'TIER1', 'TIER2', 'TIER3'];
+  const userLevel = tierHierarchy.indexOf(userTier.toUpperCase());
+  const requiredLevel = tierHierarchy.indexOf(requiredTier.toUpperCase().replace('tier', 'TIER'));
+
+  return userLevel >= requiredLevel;
+};
+
 // ========== LOCAL KNOWLEDGE LOOKUP ==========
 const MATCH_THRESHOLD = 0.5; // Minimum confidence to use local answer (lowered for better matching)
 
@@ -854,7 +1216,7 @@ const KNOWLEDGE_KEYWORDS = {
     'sợ thành công', 'fear of success', 'tự sabotage',
     'tê liệt hoàn hảo', 'perfectionism', 'cầu toàn',
     'vòng lặp thiếu thốn', 'scarcity loop',
-    'mất kết nối', 'disconnection', 'cô đơn tâm linh',
+    'mất kết nối', 'disconnection', 'cô đơn tâm thức',
     'niềm tin gốc', 'niềm tin sai', 'belief system',
   ],
   healing_exercises: [
@@ -1208,8 +1570,56 @@ export const processMessage = async (userMessage, history = []) => {
       };
     }
 
+    // ========== STEP 1.5: PREMIUM CONTENT GATING ==========
+    // Check if user is asking for DETAILED premium content (courses, formulas)
+    // If so, return FOMO teaser instead of revealing protected content
+    const premiumCheck = detectPremiumContentRequest(userMessage);
+
+    if (premiumCheck.isPremium) {
+      console.log('[GEM] Premium content request detected:', premiumCheck.tier, 'Keywords:', premiumCheck.matchedKeywords);
+
+      // Get user's current tier
+      const { data: { user } } = await supabase.auth.getUser();
+      const userTier = await getUserTier(user?.id);
+
+      console.log('[GEM] User tier:', userTier, 'Required tier:', premiumCheck.requiredTier);
+
+      // Check if user has access
+      if (!hasAccessToTier(userTier, premiumCheck.requiredTier)) {
+        console.log('[GEM] User does NOT have access - returning FOMO teaser');
+
+        const fomoResponse = generateFOMOTeaser(premiumCheck.tier, userTier);
+
+        return {
+          text: fomoResponse.text,
+          topics: ['trading'],
+          mode: 'chat',
+          source: 'premium_gated',
+          isPremiumGated: true,
+          requiredTier: premiumCheck.requiredTier,
+          userTier: userTier,
+          showUpgradeButton: true,
+          courseRecommendation: COURSE_RECOMMENDATIONS.trading || null,
+          quickActions: [
+            { label: 'Xem chi tiết khóa học', action: 'view_courses' },
+            { label: 'So sánh các TIER', action: 'compare_tiers' },
+          ],
+        };
+      } else {
+        console.log('[GEM] User HAS access - proceeding to answer');
+        // User has access, continue to normal processing
+      }
+    }
+
     // ========== STEP 2: CHECK LOCAL KNOWLEDGE BASE ==========
     const localMatch = matchLocalKnowledge(userMessage);
+    const isContinuation = history.length > 0;
+
+    // IMPORTANT: Skip greeting FAQ if already in conversation (avoid repeated intros)
+    if (localMatch.matched && localMatch.faqKey === 'greeting' && isContinuation) {
+      console.log('[GEM] Skipping greeting FAQ - already in conversation');
+      localMatch.matched = false; // Force to use AI for natural response
+    }
 
     if (localMatch.matched) {
       console.log('[GEM] Using LOCAL knowledge:', localMatch.faqKey);
@@ -1270,11 +1680,61 @@ export const processMessage = async (userMessage, history = []) => {
                           localMatch.faqKey === 'crystals' ||
                           mainTopic === 'crystal';
 
+      // ========== CONVERSATIONAL WRAPPER FOR FAQ RESPONSES ==========
+      // Make FAQ answers feel natural in conversation context
+      let finalAnswer = localMatch.answer;
+
+      if (isContinuation) {
+        // Check last message context for relevance
+        const lastUserMsg = history.filter(m => m.isUser).pop()?.text?.toLowerCase() || '';
+        const lastAssistantMsg = history.filter(m => !m.isUser).pop()?.text?.toLowerCase() || '';
+
+        // Check if there was divination context (I Ching/Tarot)
+        const hasDivinationContext = history.some(m =>
+          m.divinationType === 'iching' || m.divinationType === 'tarot' ||
+          m.hexagram || m.cards
+        );
+
+        // Build natural transition phrase based on context
+        let transitionPhrase = '';
+
+        // If user is asking follow-up to divination
+        if (hasDivinationContext && (lastUserMsg.includes('quẻ') || lastUserMsg.includes('bài') || lastUserMsg.includes('kết quả'))) {
+          transitionPhrase = 'Dựa trên kết quả bói của bạn, ';
+        }
+        // If user is continuing a topic already discussed
+        else if (localMatch.faqKey.includes('money') && lastAssistantMsg.includes('tiền')) {
+          transitionPhrase = 'Về vấn đề tiền bạc bạn đang hỏi, ';
+        }
+        else if (localMatch.faqKey.includes('love') && lastAssistantMsg.includes('yêu')) {
+          transitionPhrase = 'Về tình yêu bạn đang thắc mắc, ';
+        }
+        else if (localMatch.faqKey.includes('course') || localMatch.faqKey.includes('tier')) {
+          transitionPhrase = 'Về khóa học bạn quan tâm, ';
+        }
+        else if (localMatch.faqKey.includes('trading') || localMatch.faqKey.includes('scanner')) {
+          transitionPhrase = 'Về trading mà bạn hỏi, ';
+        }
+        // Generic transition for continuation
+        else if (history.length > 2) {
+          // Don't add transition if answer already starts with analysis header
+          if (!finalAnswer.startsWith('**') && !finalAnswer.startsWith('🔮') && !finalAnswer.startsWith('💰')) {
+            transitionPhrase = '';
+          }
+        }
+
+        // Only add transition if not empty and answer doesn't already have intro
+        if (transitionPhrase && !finalAnswer.toLowerCase().startsWith('ta ') && !finalAnswer.toLowerCase().startsWith('dựa trên')) {
+          finalAnswer = transitionPhrase + finalAnswer.charAt(0).toLowerCase() + finalAnswer.slice(1);
+        }
+      }
+
       return {
-        text: localMatch.answer,
+        text: finalAnswer,
         topics: [mainTopic, ...topics.filter(t => t !== mainTopic)],
         mode: 'chat',
         source: 'local', // Mark as local knowledge
+        knowledgeKey: localMatch.faqKey,
         widgetSuggestion: WIDGET_SUGGESTIONS[mainTopic] || null,
         courseRecommendation: COURSE_RECOMMENDATIONS[mainTopic] || null,
         showCrystals,
@@ -1348,10 +1808,24 @@ export const processMessage = async (userMessage, history = []) => {
     if (USE_RAG) {
       try {
         // Convert history format for RAG service - send up to 8 messages for better context
-        const conversationHistory = history.slice(-8).map(m => ({
-          role: m.isUser ? 'user' : 'assistant',
-          content: m.text,
-        }));
+        // IMPORTANT: Include divination context (I Ching/Tarot) in message content
+        const conversationHistory = history.slice(-8).map(m => {
+          let content = m.text || '';
+
+          // Add divination context if present
+          if (m.divinationType === 'iching' && m.hexagram) {
+            content += `\n[Context: Quẻ Kinh Dịch #${m.hexagram.id} - ${m.hexagram.name} (${m.hexagram.vietnamese || ''})]`;
+          }
+          if (m.divinationType === 'tarot' && m.cards) {
+            const cardNames = m.cards.map(c => c.name || c.title).join(', ');
+            content += `\n[Context: Bài Tarot - ${cardNames}]`;
+          }
+
+          return {
+            role: m.isUser ? 'user' : 'assistant',
+            content,
+          };
+        });
 
         // Get current user from supabase (if available)
         const { data: { user } } = await supabase.auth.getUser();
@@ -1408,29 +1882,46 @@ export const processMessage = async (userMessage, history = []) => {
       return { text: '⚠️ Thiếu API key trong .env', error: 'no-key' };
     }
 
-    // Determine if this is a continuation of existing conversation
-    const isContinuation = history.length > 0;
+    // isContinuation already defined above (line 1213)
     const historyCount = Math.min(history.length, 8); // Send up to 8 recent messages for context
 
     // Build prompt - Different for first message vs continuation
     let prompt = '';
 
     if (isContinuation) {
-      // CONTINUATION: Do NOT introduce, go straight to answering
+      // CONTINUATION: Natural opener + content (no self-intro)
       prompt = `Bạn là GEM MASTER - AI trading mentor đanh thép. Xưng "Ta - Bạn".
 
 **QUY TẮC BẮT BUỘC (VI PHẠM = THẤT BẠI):**
 1. TUYỆT ĐỐI KHÔNG giới thiệu bản thân (KHÔNG "Ta là GEM Master", KHÔNG "Người Bảo Hộ...")
 2. TUYỆT ĐỐI KHÔNG hỏi "Bạn muốn khám phá điều gì hôm nay" hoặc câu hỏi mở chung chung
-3. ĐI THẲNG VÀO TRẢ LỜI CÂU HỎI của user - đây là yêu cầu QUAN TRỌNG NHẤT
-4. KHÔNG emoji
-5. Tối đa 200 từ
-6. Câu hỏi cuối phải LIÊN QUAN TRỰC TIẾP đến câu hỏi user đã hỏi
+3. LUÔN BẮT ĐẦU bằng 1 CÂU DẪN TỰ NHIÊN (ví dụ: "Đây là những gì bạn cần biết về...", "Ta sẽ hướng dẫn bạn...", "Một câu hỏi hay. Về vấn đề này...")
+4. SAU CÂU DẪN mới đi vào nội dung chi tiết
+5. KHÔNG emoji
+6. Tối đa 250 từ
+7. Câu hỏi cuối phải LIÊN QUAN TRỰC TIẾP đến câu hỏi user đã hỏi
 
-**KIẾN THỨC:**
+**VÍ DỤ CÂU DẪN TỰ NHIÊN:**
+- "Ta sẽ hướng dẫn bạn về thiền kết nối Higher Self."
+- "Đây là phân tích chi tiết về BTC mà bạn cần biết."
+- "Một câu hỏi sâu sắc. Về nghiệp tài chính..."
+- "Ta sẽ giải thích cho bạn về tần số năng lượng."
+
+**BẢO VỆ NỘI DUNG PREMIUM (RẤT QUAN TRỌNG):**
+Nếu user hỏi CHI TIẾT về:
+- Công thức Frequency (DPD, UPU, HFZ...) - cách setup, entry, exit cụ thể
+- Nội dung khóa học TIER 1/2/3 - bài học chi tiết, video content
+- AI Prediction, Whale Tracker - cách hoạt động chi tiết
+→ KHÔNG được tiết lộ. Thay vào đó:
+1. Nói đây là "kiến thức độc quyền" của GEM
+2. Gợi ý user upgrade tier để truy cập
+3. Tạo tò mò bằng hint nhỏ (VD: "DPD giúp xác nhận downtrend với độ chính xác 72%...")
+4. Nhấn mạnh giá trị: win rate, ROI của học viên
+
+**KIẾN THỨC (chỉ overview, KHÔNG chi tiết setup):**
 - GEM Frequency Method: Zone Retest > Breakout (68% win rate)
-- Patterns: DPD, UPU, UPD, DPU, HFZ, LFZ
-- TIER: FREE (38%), TIER 1 11tr (50-55%), TIER 2 21tr (70-75%), TIER 3 68tr (80-90%) - Khóa học trọn đời, Scanner/Chat có hạn
+- Patterns: DPD, UPU, UPD, DPU, HFZ, LFZ (tên, KHÔNG cách dùng cụ thể)
+- TIER: FREE (38%), TIER 1 11tr (50-55%), TIER 2 21tr (70-75%), TIER 3 68tr (80-90%)
 - Stop Loss: 2-3% max, Position size: 1-2% account
 
 **LỊCH SỬ HỘI THOẠI:**
@@ -1438,14 +1929,24 @@ export const processMessage = async (userMessage, history = []) => {
 `;
       history.slice(-historyCount).forEach((m, idx) => {
         const role = m.isUser ? 'User' : 'GEM Master';
-        const msgText = m.text?.length > 400 ? m.text.substring(0, 400) + '...' : m.text;
+        let msgText = m.text?.length > 400 ? m.text.substring(0, 400) + '...' : m.text;
+
+        // IMPORTANT: Include divination context (I Ching/Tarot) in history
+        if (m.divinationType === 'iching' && m.hexagram) {
+          msgText += `\n[Context: Quẻ Kinh Dịch #${m.hexagram.id} - ${m.hexagram.name}]`;
+        }
+        if (m.divinationType === 'tarot' && m.cards) {
+          const cardNames = m.cards.map(c => c.name || c.title).join(', ');
+          msgText += `\n[Context: Bài Tarot - ${cardNames}]`;
+        }
+
         prompt += `[${idx + 1}] ${role}: ${msgText}\n`;
       });
       prompt += `---
 
 **CÂU HỎI MỚI TỪ USER:** ${userMessage}
 
-**TRẢ LỜI TRỰC TIẾP (KHÔNG giới thiệu, ĐI THẲNG vào nội dung):**`;
+**TRẢ LỜI (bắt đầu bằng 1 câu dẫn tự nhiên, sau đó vào nội dung):**`;
 
     } else {
       // FIRST MESSAGE: Can introduce briefly
@@ -1459,16 +1960,20 @@ export const processMessage = async (userMessage, history = []) => {
 - Ngôn ngữ lùa gà: "Kèo ngon", "Múc mạnh", "To the moon"
 - Sự phục tùng: "Dạ thưa", "Em xin phép"
 
-**SỬ DỤNG:** Xưng "Ta - Bạn", ngôn ngữ quân sự/tâm linh.
+**BẢO VỆ NỘI DUNG PREMIUM:**
+Nếu user hỏi CHI TIẾT về công thức Frequency, khóa học TIER 1/2/3, AI Prediction, Whale Tracker:
+→ KHÔNG tiết lộ chi tiết. Chỉ hint nhỏ + gợi ý upgrade tier.
+
+**SỬ DỤNG:** Xưng "Ta - Bạn", ngôn ngữ quân sự/tâm thức.
 
 **QUY TẮC:**
 1. Chào ngắn gọn uy nghiêm: "Ta là GEM Master. Bạn cần điều gì?"
 2. Trả lời ngắn gọn, tối đa 150-200 từ
 3. Không emoji - giữ sự uy nghiêm
 
-**KIẾN THỨC:**
+**KIẾN THỨC (overview only):**
 - GEM Frequency: DPD, UPU, UPD, DPU, HFZ, LFZ (68% win rate)
-- TIER: FREE (38%), TIER 1 11tr (50-55%), TIER 2 21tr (70-75%), TIER 3 68tr (80-90%) - Khóa học trọn đời, Scanner/Chat có hạn
+- TIER: FREE (38%), TIER 1 11tr (50-55%), TIER 2 21tr (70-75%), TIER 3 68tr (80-90%)
 - Hawkins: 20-100Hz (thấp), 200Hz+ (can đảm), 500Hz+ (tình yêu)
 
 **TIN NHẮN TỪ USER:** ${userMessage}
@@ -1576,13 +2081,24 @@ export const saveWidgetToVisionBoard = async (widget, userId, linkedGoalId = nul
         : (Array.isArray(widget.affirmations) ? widget.affirmations : []);
 
       // Extract action steps (from various sources)
-      const rawSteps = widgetData.steps || widgetData.actionSteps || widgetData.habits || widget.steps || [];
+      const rawSteps = widgetData.steps || widgetData.actionSteps || widgetData.habits || widget.steps || widget.actionSteps || [];
       const steps = Array.isArray(rawSteps)
         ? rawSteps.map((step, idx) => ({
             id: `step_${Date.now()}_${idx}`,
             title: typeof step === 'string' ? step : (step.text || step.title || step.name || ''),
             action_type: step.action_type || (idx < 2 ? 'daily' : idx < 3 ? 'weekly' : 'monthly'),
             completed: step.completed || false,
+          }))
+        : [];
+
+      // Extract rituals (for Tarot/I Ching integration)
+      const rawRituals = widgetData.rituals || widget.rituals || [];
+      const rituals = Array.isArray(rawRituals)
+        ? rawRituals.map((ritual, idx) => ({
+            id: `ritual_${Date.now()}_${idx}`,
+            name: typeof ritual === 'string' ? ritual : (ritual.name || ritual.title || `Nghi thức ${idx + 1}`),
+            description: typeof ritual === 'string' ? '' : (ritual.description || ''),
+            completed: false,
           }))
         : [];
 
@@ -1600,6 +2116,7 @@ export const saveWidgetToVisionBoard = async (widget, userId, linkedGoalId = nul
         }],
         affirmations: affirmations.length > 0 ? affirmations : undefined,
         steps: steps.length > 0 ? steps : undefined,
+        rituals: rituals.length > 0 ? rituals : undefined,
         crystals: widgetData.crystals || widget.crystals || undefined,
       };
     } else if (widget.type === 'affirmation') {

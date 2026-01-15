@@ -44,6 +44,7 @@ const ReactionIcon = ({
   index = 0,
   selected = false,
   onLayout,
+  emojiSize = null, // Optional: override emoji font size
 }) => {
   const [useFallback, setUseFallback] = useState(false);
 
@@ -55,8 +56,9 @@ const ReactionIcon = ({
     return null;
   }
 
-  // Use configured font size or calculate based on icon size
-  const fontSize = REACTION_SIZES.EMOJI_FONT_SIZE || (size * 0.75);
+  // Calculate emoji font size based on icon size (90% of size for proper fit)
+  // Or use emojiSize override if provided
+  const fontSize = emojiSize || Math.round(size * 0.9);
 
   // Animated style for hover effect
   const hoverStyle = useAnimatedStyle(() => {
@@ -125,11 +127,15 @@ const ReactionIcon = ({
     };
   }, [selected]);
 
+  // Calculate container size to prevent emoji clipping
+  // Container needs to be slightly larger than fontSize to prevent clipping on mobile
+  const containerSize = Math.max(size, Math.round(fontSize * 1.15));
+
   return (
     <Animated.View
       style={[
         styles.container,
-        { width: size, height: size },
+        { width: containerSize, height: containerSize },
         entranceStyle,
         hoverStyle,
         selectionStyle,

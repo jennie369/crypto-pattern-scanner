@@ -391,24 +391,24 @@ const PulsingCircle = ({
 // ============================================
 
 const AnimatedTimer = React.memo(({ duration, progress }) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    // Calculate remaining seconds based on progress
-    const remaining = Math.ceil((duration * (1 - progress.value)) / 1000);
-    return {
-      // We can't directly render text in worklet, but we use this for potential future optimization
-    };
-  });
-
-  // For now, use derived value approach
   const [displayTime, setDisplayTime] = useState(Math.ceil(duration / 1000));
+  const durationRef = useRef(duration);
 
+  // Reset display time when duration changes (new phase)
+  useEffect(() => {
+    durationRef.current = duration;
+    setDisplayTime(Math.ceil(duration / 1000));
+  }, [duration]);
+
+  // Update timer based on progress
   useAnimatedReaction(
     () => progress.value,
     (prog) => {
-      const remaining = Math.max(0, Math.ceil((duration * (1 - prog)) / 1000));
+      const currentDuration = durationRef.current;
+      const remaining = Math.max(0, Math.ceil((currentDuration * (1 - prog)) / 1000));
       runOnJS(setDisplayTime)(remaining);
     },
-    [duration]
+    []
   );
 
   return (

@@ -31,7 +31,7 @@ export const AVATARS = {
     id: 'sufu',
     name: 'Su Phu',
     displayName: 'Sư Phụ',
-    description: 'Avatar Sư Phụ - Người hướng dẫn tâm linh',
+    description: 'Avatar Sư Phụ - Người hướng dẫn tâm thức',
   },
   cogiao: {
     id: 'cogiao',

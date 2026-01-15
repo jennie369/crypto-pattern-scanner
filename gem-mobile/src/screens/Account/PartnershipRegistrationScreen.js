@@ -116,54 +116,76 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
 
   // CTV Submit Handler
   const handleCTVSubmit = async (formData) => {
-    const result = await partnershipService.submitCTVApplication(formData);
+    try {
+      console.log('[Partnership] Submitting CTV application:', formData);
+      const result = await partnershipService.submitCTVApplication(formData);
+      console.log('[Partnership] CTV submit result:', result);
 
-    if (result.success) {
-      Alert.alert(
-        '🎉 Đăng ký thành công!',
-        'Đơn đăng ký CTV của bạn sẽ được tự động duyệt sau 3 ngày.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              if (fromGemMaster) {
-                navigation.navigate('GemMaster');
-              } else {
-                navigation.navigate('AffiliateDetail');
-              }
+      if (result.success) {
+        Alert.alert(
+          '🎉 Đăng ký thành công!',
+          'Đơn đăng ký CTV của bạn sẽ được tự động duyệt sau 3 ngày.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                if (fromGemMaster) {
+                  navigation.navigate('GemMaster');
+                } else {
+                  navigation.navigate('AffiliateDetail');
+                }
+              },
             },
-          },
-        ]
-      );
-    }
+          ]
+        );
+      } else {
+        // Show error in alert if submit fails
+        Alert.alert('Lỗi', result.error || 'Không thể gửi đơn đăng ký. Vui lòng thử lại.');
+      }
 
-    return result;
+      return result;
+    } catch (err) {
+      console.error('[Partnership] CTV submit error:', err);
+      Alert.alert('Lỗi', err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+      return { success: false, error: err.message };
+    }
   };
 
   // KOL Submit Handler
   const handleKOLSubmit = async (formData) => {
-    const result = await kolVerificationService.createVerification(formData);
+    try {
+      console.log('[Partnership] Submitting KOL application');
+      const result = await kolVerificationService.createVerification(formData);
+      console.log('[Partnership] KOL submit result:', result);
 
-    if (result.success) {
-      Alert.alert(
-        '📝 Đã gửi đơn đăng ký',
-        'Đơn đăng ký KOL của bạn đang được xem xét. Chúng tôi sẽ thông báo khi có kết quả.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              if (fromGemMaster) {
-                navigation.navigate('GemMaster');
-              } else {
-                navigation.navigate('AffiliateDetail');
-              }
+      if (result.success) {
+        Alert.alert(
+          '📝 Đã gửi đơn đăng ký',
+          'Đơn đăng ký KOL của bạn đang được xem xét. Chúng tôi sẽ thông báo khi có kết quả.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                if (fromGemMaster) {
+                  navigation.navigate('GemMaster');
+                } else {
+                  navigation.navigate('AffiliateDetail');
+                }
+              },
             },
-          },
-        ]
-      );
-    }
+          ]
+        );
+      } else {
+        // Show error in alert if submit fails
+        Alert.alert('Lỗi', result.error || 'Không thể gửi đơn đăng ký. Vui lòng thử lại.');
+      }
 
-    return result;
+      return result;
+    } catch (err) {
+      console.error('[Partnership] KOL submit error:', err);
+      Alert.alert('Lỗi', err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+      return { success: false, error: err.message };
+    }
   };
 
   // Get header title based on state
@@ -181,7 +203,7 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
         locations={GRADIENTS.backgroundLocations}
         style={styles.gradient}
       >
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={COLORS.gold} />
             <Text style={styles.loadingText}>Đang tải...</Text>
@@ -199,7 +221,7 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
         locations={GRADIENTS.backgroundLocations}
         style={styles.gradient}
       >
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -251,7 +273,7 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
       locations={GRADIENTS.backgroundLocations}
       style={styles.gradient}
     >
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>

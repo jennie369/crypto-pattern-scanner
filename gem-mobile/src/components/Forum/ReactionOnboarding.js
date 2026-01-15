@@ -33,7 +33,7 @@ import { BlurView } from 'expo-blur';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { X, ChevronRight, Hand, MousePointer } from 'lucide-react-native';
 import ReactionIcon from './ReactionIcon';
-import { REACTION_ORDER, REACTION_CONFIG } from '../../constants/reactions';
+import { REACTION_ORDER, REACTION_CONFIG, REACTION_SIZES } from '../../constants/reactions';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');

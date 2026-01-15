@@ -163,7 +163,7 @@ const getLifeAreaLabel = (area) => {
     health: 'Sức khỏe',
     relationships: 'Quan hệ',
     personal: 'Cá nhân',
-    spiritual: 'Tâm linh',
+    spiritual: 'Tâm thức',
   };
   return labels[area] || area;
 };

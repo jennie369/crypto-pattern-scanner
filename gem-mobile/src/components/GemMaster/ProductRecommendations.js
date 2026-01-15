@@ -31,9 +31,31 @@ import { useAuth } from '../../contexts/AuthContext';
 
 // Keywords to detect what to recommend
 const KEYWORDS = {
-  course: ['khóa học', 'course', 'học', 'tần số', 'năng lượng', 'hawkins', 'chữa lành', 'manifest', 'tâm linh', 'spiritual'],
-  trading: ['trading', 'crypto', 'bitcoin', 'btc', 'eth', 'coin', 'đầu tư', 'giao dịch', 'scanner', 'pattern'],
-  affiliate: ['kiếm thêm', 'thu nhập thụ động', 'cộng tác', 'affiliate', 'ctv', 'hoa hồng', 'partner'],
+  // Mindset/Spiritual courses
+  course: [
+    'khóa học', 'course', 'học', 'tần số', 'năng lượng', 'hawkins', 'chữa lành', 'manifest', 'tâm thức', 'spiritual',
+    // Khóa 7 Ngày Khai Mở Tần Số Gốc
+    '7 ngày', 'khai mở', 'tần số gốc', 'frequency', '299k', '299.000',
+    // Khóa Kích Hoạt Tần Số Tình Yêu
+    'tình yêu', 'kích hoạt', '42 ngày', 'love', 'boss lady', '399k', '399.000',
+    // Khóa Tái Tạo Tư Duy Triệu Phú
+    'triệu phú', 'tư duy', 'millionaire', 'mindset', '49 ngày', '499k', '499.000',
+    // General course terms
+    'giáo trình', 'bài học', 'lesson', 'module', 'curriculum',
+  ],
+  // Trading courses
+  trading: [
+    'trading', 'crypto', 'bitcoin', 'btc', 'eth', 'coin', 'đầu tư', 'giao dịch', 'scanner', 'pattern',
+    // Trading course tiers
+    'tier 1', 'tier 2', 'tier 3', 'tier1', 'tier2', 'tier3', 'starter',
+    '11 triệu', '21 triệu', '68 triệu', '11m', '21m', '68m',
+    // Pattern names
+    'harmonic', 'elliott', 'wyckoff', 'smc', 'smart money', 'liquidity', 'order block',
+    'volume profile', 'market structure', 'fibonacci', 'divergence',
+    // Course features
+    'ai prediction', 'whale tracker', 'backtest', 'formulas', 'công thức',
+  ],
+  affiliate: ['kiếm thêm', 'thu nhập thụ động', 'cộng tác', 'affiliate', 'ctv', 'hoa hồng', 'partner', 'giới thiệu', 'referral'],
 };
 
 // Affiliate info (not in Shopify)

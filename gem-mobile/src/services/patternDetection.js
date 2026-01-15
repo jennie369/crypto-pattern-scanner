@@ -347,11 +347,27 @@ class PatternDetectionService {
       );
 
       if (!zone) {
-        // ⚠️ CRITICAL FIX: Even if zone calc fails, STILL extract time data for positioning!
-        const startTime = this._extractPatternStartTime(pattern, candles);
-        const endTime = this._extractPatternEndTime(pattern, candles);
+        // ⚠️ FIX: Even if zone calc fails, use pauseCandles timestamps for positioning
+        let startTime = null;
+        let endTime = null;
 
-        console.log(`[enrichWithZoneData] Zone calc failed for ${pattern.patternType}, but extracted times: startTime=${startTime}, endTime=${endTime}`);
+        // Try pauseCandles first
+        if (pauseCandles[0]?.timestamp) {
+          startTime = pauseCandles[0].timestamp;
+          if (startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+        } else {
+          startTime = this._extractPatternStartTime(pattern, candles);
+        }
+
+        const lastIdx = pauseCandles.length - 1;
+        if (lastIdx >= 0 && pauseCandles[lastIdx]?.timestamp) {
+          endTime = pauseCandles[lastIdx].timestamp;
+          if (endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+        } else {
+          endTime = this._extractPatternEndTime(pattern, candles);
+        }
+
+        console.log(`[enrichWithZoneData] Zone calc failed for ${pattern.patternType}, pauseCandles times: startTime=${startTime}, endTime=${endTime}`);
 
         // Return pattern with patternConfig enrichment AND time data
         return {
@@ -373,11 +389,11 @@ class PatternDetectionService {
             vietnameseName: zoneTypeConfig.vietnameseName,
             color: zoneTypeConfig.color,
           },
-          // ⚠️ CRITICAL: ALWAYS include time data for zone positioning
+          // ⚠️ FIX: Use actual pause candle indices for consistency
           startTime,
           endTime,
-          startCandleIndex: this._extractPatternStartIndex(pattern, candles),
-          endCandleIndex: this._extractPatternEndIndex(pattern, candles),
+          startCandleIndex: Math.max(0, pauseStartIndex - 3),
+          endCandleIndex: pauseEndIndex,
           hasZoneData: false, // Zone boundaries failed, but time data is available
         };
       }
@@ -434,19 +450,39 @@ class PatternDetectionService {
         // For UI display - use zone entry instead of old entry
         zoneEntry: zone.entryPrice,
         zoneStop: zone.stopPrice,
-        // ⚠️ CRITICAL: Time fields for zone positioning on chart
+        // ⚠️ FIX: Use pauseCandles timestamps instead of pattern.points
+        // This ensures zone time position matches where zone prices were calculated
+        // Without this fix, zones would float in areas with no candles
         startTime: (() => {
+          // FIRST: Use FIRST pause candle timestamp (where zone prices come from)
+          if (pauseCandles[0]?.timestamp) {
+            let ts = pauseCandles[0].timestamp;
+            if (ts > 9999999999) ts = Math.floor(ts / 1000);
+            console.log(`[enrichWithZoneData] ${pattern.patternType} startTime from pauseCandles[0]: ${ts} (${new Date(ts * 1000).toISOString()})`);
+            return ts;
+          }
+          // FALLBACK: Use pattern points timestamp (may cause floating zones)
           const st = this._extractPatternStartTime(pattern, candles);
-          console.log(`[enrichWithZoneData] ${pattern.patternType} startTime: ${st} (${st ? new Date(st * 1000).toISOString() : 'NULL'})`);
+          console.log(`[enrichWithZoneData] ${pattern.patternType} startTime FALLBACK from points: ${st}`);
           return st;
         })(),
         endTime: (() => {
+          // FIRST: Use LAST pause candle timestamp
+          const lastIdx = pauseCandles.length - 1;
+          if (lastIdx >= 0 && pauseCandles[lastIdx]?.timestamp) {
+            let ts = pauseCandles[lastIdx].timestamp;
+            if (ts > 9999999999) ts = Math.floor(ts / 1000);
+            console.log(`[enrichWithZoneData] ${pattern.patternType} endTime from pauseCandles[${lastIdx}]: ${ts}`);
+            return ts;
+          }
+          // FALLBACK: Use pattern points timestamp
           const et = this._extractPatternEndTime(pattern, candles);
-          console.log(`[enrichWithZoneData] ${pattern.patternType} endTime: ${et}`);
+          console.log(`[enrichWithZoneData] ${pattern.patternType} endTime FALLBACK from points: ${et}`);
           return et;
         })(),
-        startCandleIndex: this._extractPatternStartIndex(pattern, candles),
-        endCandleIndex: this._extractPatternEndIndex(pattern, candles),
+        // ⚠️ FIX: Use actual pause candle indices for consistency
+        startCandleIndex: Math.max(0, pauseStartIndex - 3),
+        endCandleIndex: pauseEndIndex,
         // Flags
         hasZoneData: true,
       };

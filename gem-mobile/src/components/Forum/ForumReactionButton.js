@@ -184,14 +184,14 @@ const ForumReactionButton = ({
           {...handlers}
           style={[
             styles.button,
-            { paddingVertical: dimensions.padding, paddingHorizontal: dimensions.padding + 4 },
-            userReaction && styles.buttonActive,
+            // Only add padding if showing label or count
+            (showLabel || showCount) && { paddingVertical: dimensions.padding, paddingHorizontal: dimensions.padding + 4 },
             disabled && styles.buttonDisabled,
           ]}
           disabled={disabled}
         >
-          {/* Reaction Icon or Default ThumbsUp */}
-          <View style={[styles.iconContainer, { width: dimensions.icon + 4, height: dimensions.icon + 4 }]}>
+          {/* Reaction Icon or Default ThumbsUp - Facebook-like small size */}
+          <View style={styles.iconContainer}>
             {userReaction ? (
               <ReactionIcon
                 type={userReaction}
@@ -257,19 +257,20 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 20,
     backgroundColor: 'transparent',
   },
   buttonActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    // No background - keep it clean like Facebook
   },
   buttonDisabled: {
     opacity: 0.5,
   },
   iconContainer: {
+    // Fixed size container for emoji - small like other action buttons
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SPACING.xs,
   },
   label: {
     fontWeight: '500',

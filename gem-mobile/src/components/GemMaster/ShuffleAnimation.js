@@ -18,11 +18,13 @@ import Animated, {
   runOnJS,
   Easing,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { CARD_BACK } from '../../assets/tarot';
 
 const NUM_CARDS = 7; // Number of cards in shuffle animation
+const NUM_PARTICLES = 12; // Number of mystical particles
 
 const ShuffleAnimation = ({
   onComplete,

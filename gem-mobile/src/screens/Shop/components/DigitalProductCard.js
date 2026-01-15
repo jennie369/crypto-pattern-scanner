@@ -202,7 +202,8 @@ const DigitalProductCard = ({
 const getTypeLabel = (type) => {
   const labels = {
     'trading-course': 'Khóa học Trading',
-    'spiritual-course': 'Khóa học Tâm Linh',
+    'mindset-course': 'Khóa học Tư duy',
+    'spiritual-course': 'Khóa học Tư duy', // Legacy support
     'course': 'Khóa học',
     'chatbot': 'Chatbot AI',
     'scanner': 'Scanner',

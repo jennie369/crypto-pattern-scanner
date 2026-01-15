@@ -34,12 +34,14 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /**
  * SponsorBannerPost - Mimics PostCard layout for seamless ad experience
+ * @param {boolean} showActions - Whether to show action bar (like, comment, share). Default: true
  */
 export default function SponsorBannerPost({
   banner,
   navigation,
   userId,
   onDismiss,
+  showActions = true, // Hide actions in non-forum contexts (e.g., GemMaster chat)
 }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -160,10 +162,13 @@ export default function SponsorBannerPost({
   };
 
   const handleDismiss = async () => {
+    // Always call onDismiss to remove from UI
+    // Only persist to DB if userId exists
     if (userId) {
       await sponsorBannerService.dismissBanner(userId, banner.id);
-      onDismiss?.(banner.id);
     }
+    // Always trigger parent callback to remove banner from list
+    onDismiss?.(banner.id);
   };
 
   // Fake engagement actions (for visual only)
@@ -289,41 +294,43 @@ export default function SponsorBannerPost({
         </TouchableOpacity>
       )}
 
-      {/* Action Bar - Mimics PostCard but simplified */}
-      <View style={styles.actionBar}>
-        <View style={styles.actionBarLeft}>
-          {/* Like Button (visual only) */}
-          <TouchableOpacity style={styles.actionBtn} onPress={handleLike} activeOpacity={0.7}>
-            <Heart
-              size={22}
-              color={isLiked ? '#FF6B6B' : COLORS.textMuted}
-              fill={isLiked ? '#FF6B6B' : 'transparent'}
-              strokeWidth={2}
-            />
-          </TouchableOpacity>
+      {/* Action Bar - Mimics PostCard but simplified (only show in forum context) */}
+      {showActions && (
+        <View style={styles.actionBar}>
+          <View style={styles.actionBarLeft}>
+            {/* Like Button (visual only) */}
+            <TouchableOpacity style={styles.actionBtn} onPress={handleLike} activeOpacity={0.7}>
+              <Heart
+                size={22}
+                color={isLiked ? '#FF6B6B' : COLORS.textMuted}
+                fill={isLiked ? '#FF6B6B' : 'transparent'}
+                strokeWidth={2}
+              />
+            </TouchableOpacity>
 
-          {/* Comment Button (navigates to banner action) */}
-          <TouchableOpacity style={styles.actionBtn} onPress={handleBannerClick} activeOpacity={0.7}>
-            <MessageCircle size={22} color={COLORS.textMuted} />
-          </TouchableOpacity>
+            {/* Comment Button (navigates to banner action) */}
+            <TouchableOpacity style={styles.actionBtn} onPress={handleBannerClick} activeOpacity={0.7}>
+              <MessageCircle size={22} color={COLORS.textMuted} />
+            </TouchableOpacity>
 
-          {/* Share Button */}
-          <TouchableOpacity style={styles.actionBtn} onPress={handleBannerClick} activeOpacity={0.7}>
-            <Send size={20} color={COLORS.textMuted} />
-          </TouchableOpacity>
+            {/* Share Button */}
+            <TouchableOpacity style={styles.actionBtn} onPress={handleBannerClick} activeOpacity={0.7}>
+              <Send size={20} color={COLORS.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.actionBarRight}>
+            {/* Save Button (visual only) */}
+            <TouchableOpacity style={styles.actionBtn} onPress={handleSave}>
+              <Bookmark
+                size={20}
+                color={isSaved ? COLORS.gold : COLORS.textMuted}
+                fill={isSaved ? COLORS.gold : 'transparent'}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
-
-        <View style={styles.actionBarRight}>
-          {/* Save Button (visual only) */}
-          <TouchableOpacity style={styles.actionBtn} onPress={handleSave}>
-            <Bookmark
-              size={20}
-              color={isSaved ? COLORS.gold : COLORS.textMuted}
-              fill={isSaved ? COLORS.gold : 'transparent'}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+      )}
     </View>
   );
 }

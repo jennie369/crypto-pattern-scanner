@@ -85,9 +85,11 @@ const ProductSection = ({
   );
 
   // Footer component cho infinite scroll
+  // FIX: Only show ONE state at a time, prioritize loading state
   const renderFooter = () => {
     if (!hasInfiniteScroll) return null;
 
+    // Priority 1: Loading more
     if (loadingMore) {
       return (
         <View style={styles.loadingFooter}>
@@ -97,7 +99,17 @@ const ProductSection = ({
       );
     }
 
-    if (!hasMore && products.length > 0) {
+    // Priority 2: Has more items - show hint to scroll
+    if (hasMore && products.length > 0) {
+      return (
+        <View style={styles.loadingFooter}>
+          <Text style={styles.loadingFooterText}>Kéo xuống để xem thêm</Text>
+        </View>
+      );
+    }
+
+    // Priority 3: No more items - only show if we have products and NOT loading
+    if (!hasMore && products.length > 0 && !loadingMore) {
       return (
         <View style={styles.loadingFooter}>
           <Text style={styles.loadingFooterText}>Đã hiển thị tất cả sản phẩm</Text>
@@ -257,6 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg, // 16
   },
   infiniteGridRow: {
+    flexDirection: 'row', // FIX: Added missing flexDirection for 2-column layout
     justifyContent: 'space-between',
     marginBottom: SPACING.md, // 12
   },

@@ -46,7 +46,7 @@ const PURPOSE_TO_TAGS = {
   'prosperity': ['Thạch Anh Vàng'],
 
   'spiritual': ['Thạch Anh Tím'],
-  'tâm linh': ['Thạch Anh Tím'],
+  'tâm thức': ['Thạch Anh Tím'],
   'intuition': ['Thạch Anh Tím'],
   'meditation': ['Thạch Anh Tím', 'Thạch Anh Trắng'],
   'thiền': ['Thạch Anh Tím', 'Thạch Anh Trắng'],

@@ -34,8 +34,8 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Thử một môn thể thao mới', 'Bắt đầu thói quen thiền định', 'Khám phá chế độ ăn uống lành mạnh']
       },
       spiritual: {
-        reading: 'Bạn đang bắt đầu hành trình tâm linh mới. Hãy cởi mở với những bài học và trải nghiệm mà vũ trụ gửi đến.',
-        actionSteps: ['Bắt đầu viết nhật ký tâm linh', 'Tham gia workshop hoặc khóa tu', 'Khám phá những triết lý mới']
+        reading: 'Bạn đang bắt đầu hành trình tâm thức mới. Hãy cởi mở với những bài học và trải nghiệm mà vũ trụ gửi đến.',
+        actionSteps: ['Bắt đầu viết nhật ký tâm thức', 'Tham gia workshop hoặc khóa tu', 'Khám phá những triết lý mới']
       }
     },
 
@@ -142,7 +142,7 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Theo dõi chu kỳ cơ thể', 'Thực hành thiền định thường xuyên', 'Khám phá các phương pháp chữa lành toàn diện']
       },
       spiritual: {
-        reading: 'Bạn đang được mời gọi đi sâu hơn vào hành trình tâm linh. Thực hành với mặt trăng và nước sẽ có lợi.',
+        reading: 'Bạn đang được mời gọi đi sâu hơn vào hành trình tâm thức. Thực hành với mặt trăng và nước sẽ có lợi.',
         actionSteps: ['Thực hành moon rituals', 'Phát triển khả năng psychic', 'Ghi chép và phân tích giấc mơ']
       }
     },
@@ -155,7 +155,7 @@ export const MAJOR_ARCANA = [
 
     crystals: [
       { name: 'Moonstone', vietnameseName: 'Đá Mặt Trăng', reason: 'Tăng cường trực giác và kết nối với năng lượng mặt trăng', shopHandle: 'moonstone' },
-      { name: 'Amethyst', vietnameseName: 'Thạch Anh Tím', reason: 'Mở third eye và phát triển tâm linh', shopHandle: 'amethyst' },
+      { name: 'Amethyst', vietnameseName: 'Thạch Anh Tím', reason: 'Mở third eye và phát triển tâm thức', shopHandle: 'amethyst' },
       { name: 'Lapis Lazuli', vietnameseName: 'Thanh Kim Thạch', reason: 'Tiếp cận tri thức ẩn giấu', shopHandle: 'lapis-lazuli' }
     ],
 
@@ -250,7 +250,7 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Lập lịch tập luyện cố định', 'Tuân thủ chế độ ăn uống', 'Khám sức khỏe định kỳ']
       },
       spiritual: {
-        reading: 'Xây dựng thực hành tâm linh có cấu trúc. Kỷ luật trong thiền định mang lại kết quả.',
+        reading: 'Xây dựng thực hành tâm thức có cấu trúc. Kỷ luật trong thiền định mang lại kết quả.',
         actionSteps: ['Thiết lập routine thiền định cố định', 'Học hỏi từ các thầy/sư phụ', 'Xây dựng không gian thiêng liêng cá nhân']
       }
     },
@@ -283,7 +283,7 @@ export const MAJOR_ARCANA = [
     element: 'Earth',
     planet: null,
     zodiac: 'Taurus',
-    keywords: ['truyền thống', 'tâm linh', 'giáo dục', 'hướng dẫn', 'đức tin'],
+    keywords: ['truyền thống', 'tâm thức', 'giáo dục', 'hướng dẫn', 'đức tin'],
 
     upright: {
       overview: 'The Hierophant đại diện cho truyền thống, tri thức thiêng liêng và sự hướng dẫn từ người thầy. Đây là thời điểm để học hỏi từ truyền thống và tìm kiếm mentor.',
@@ -304,8 +304,8 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Khám bác sĩ định kỳ', 'Tuân thủ hướng dẫn y tế', 'Kết hợp y học cổ truyền và hiện đại']
       },
       spiritual: {
-        reading: 'Tìm kiếm sự hướng dẫn từ các tradition tâm linh. Học hỏi từ các vị thầy sẽ có lợi.',
-        actionSteps: ['Khám phá một truyền thống tâm linh cụ thể', 'Tìm thầy hoặc cộng đồng tâm linh', 'Nghiên cứu kinh điển và văn bản thiêng liêng']
+        reading: 'Tìm kiếm sự hướng dẫn từ các tradition tâm thức. Học hỏi từ các vị thầy sẽ có lợi.',
+        actionSteps: ['Khám phá một truyền thống tâm thức cụ thể', 'Tìm thầy hoặc cộng đồng tâm thức', 'Nghiên cứu kinh điển và văn bản thiêng liêng']
       }
     },
 
@@ -318,7 +318,7 @@ export const MAJOR_ARCANA = [
     crystals: [
       { name: 'Lapis Lazuli', vietnameseName: 'Thanh Kim Thạch', reason: 'Kết nối với tri thức thiêng liêng', shopHandle: 'lapis-lazuli' },
       { name: 'Blue Sapphire', vietnameseName: 'Saphire Xanh', reason: 'Trí tuệ và đức tin', shopHandle: 'blue-sapphire' },
-      { name: 'Turquoise', vietnameseName: 'Ngọc Lam', reason: 'Bảo vệ và hướng dẫn tâm linh', shopHandle: 'turquoise' }
+      { name: 'Turquoise', vietnameseName: 'Ngọc Lam', reason: 'Bảo vệ và hướng dẫn tâm thức', shopHandle: 'turquoise' }
     ],
 
     affirmations: [
@@ -466,7 +466,7 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Thực hành yoga hoặc tai chi', 'Nuôi dưỡng sức mạnh tinh thần', 'Đối mặt với bệnh tật bằng thái độ tích cực']
       },
       spiritual: {
-        reading: 'Làm chủ những cảm xúc và bản năng thấp hơn. Sức mạnh tâm linh thực sự là sự từ bi.',
+        reading: 'Làm chủ những cảm xúc và bản năng thấp hơn. Sức mạnh tâm thức thực sự là sự từ bi.',
         actionSteps: ['Thực hành self-compassion', 'Làm việc với inner animal/shadow self', 'Phát triển lòng kiên nhẫn vô hạn']
       }
     },
@@ -521,7 +521,7 @@ export const MAJOR_ARCANA = [
       },
       spiritual: {
         reading: 'Hành trình tìm kiếm nội tâm sâu sắc. Thiền định và cô độc mang lại giác ngộ.',
-        actionSteps: ['Thiền định trong im lặng', 'Viết nhật ký tâm linh', 'Tìm kiếm hướng dẫn từ bên trong']
+        actionSteps: ['Thiền định trong im lặng', 'Viết nhật ký tâm thức', 'Tìm kiếm hướng dẫn từ bên trong']
       }
     },
 
@@ -532,7 +532,7 @@ export const MAJOR_ARCANA = [
     },
 
     crystals: [
-      { name: 'Amethyst', vietnameseName: 'Thạch Anh Tím', reason: 'Hỗ trợ thiền định và trí tuệ tâm linh', shopHandle: 'amethyst' },
+      { name: 'Amethyst', vietnameseName: 'Thạch Anh Tím', reason: 'Hỗ trợ thiền định và trí tuệ tâm thức', shopHandle: 'amethyst' },
       { name: 'Smoky Quartz', vietnameseName: 'Thạch Anh Khói', reason: 'Grounding trong thời gian cô độc', shopHandle: 'smoky-quartz' },
       { name: 'Blue Kyanite', vietnameseName: 'Kyanite Xanh', reason: 'Kết nối với higher self', shopHandle: 'blue-kyanite' }
     ],
@@ -574,7 +574,7 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Bắt đầu thói quen sức khỏe mới', 'Tin vào khả năng phục hồi', 'Đón nhận thay đổi tích cực']
       },
       spiritual: {
-        reading: 'Bài học karma đang được hoàn thành. Cánh cửa mới mở ra trong hành trình tâm linh.',
+        reading: 'Bài học karma đang được hoàn thành. Cánh cửa mới mở ra trong hành trình tâm thức.',
         actionSteps: ['Suy ngẫm về các bài học cuộc sống', 'Tin vào kế hoạch của vũ trụ', 'Thực hành gratitude']
       }
     },
@@ -736,8 +736,8 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Từ bỏ thói quen có hại', 'Detox cơ thể và tâm trí', 'Bắt đầu lối sống hoàn toàn mới']
       },
       spiritual: {
-        reading: 'Ego death và tái sinh tâm linh. Sự chuyển hóa sâu sắc đang diễn ra.',
-        actionSteps: ['Thực hành shadow work', 'Buông bỏ identity cũ', 'Đón nhận sự tái sinh tâm linh']
+        reading: 'Ego death và tái sinh tâm thức. Sự chuyển hóa sâu sắc đang diễn ra.',
+        actionSteps: ['Thực hành shadow work', 'Buông bỏ identity cũ', 'Đón nhận sự tái sinh tâm thức']
       }
     },
 
@@ -899,7 +899,7 @@ export const MAJOR_ARCANA = [
       },
       spiritual: {
         reading: 'Dark night of the soul dẫn đến thức tỉnh. Ego đang sụp đổ để cho higher self emerge.',
-        actionSteps: ['Chấp nhận quá trình breakdown to breakthrough', 'Tin vào sự tái sinh tâm linh', 'Buông bỏ niềm tin không còn phục vụ']
+        actionSteps: ['Chấp nhận quá trình breakdown to breakthrough', 'Tin vào sự tái sinh tâm thức', 'Buông bỏ niềm tin không còn phục vụ']
       }
     },
 
@@ -1060,7 +1060,7 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Dành thời gian ngoài trời', 'Tận hưởng hoạt động thể chất', 'Lan tỏa năng lượng tích cực']
       },
       spiritual: {
-        reading: 'Giác ngộ và sự rõ ràng tâm linh. Kết nối với inner child và niềm vui thuần khiết.',
+        reading: 'Giác ngộ và sự rõ ràng tâm thức. Kết nối với inner child và niềm vui thuần khiết.',
         actionSteps: ['Kết nối với inner child', 'Thực hành joy meditation', 'Lan tỏa ánh sáng cho người khác']
       }
     },
@@ -1114,7 +1114,7 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Đánh giá toàn diện sức khỏe', 'Quyết tâm thay đổi thói quen', 'Đón nhận sự tái sinh']
       },
       spiritual: {
-        reading: 'Thức tỉnh tâm linh và đáp lại tiếng gọi của linh hồn. Karma đang được giải quyết.',
+        reading: 'Thức tỉnh tâm thức và đáp lại tiếng gọi của linh hồn. Karma đang được giải quyết.',
         actionSteps: ['Lắng nghe tiếng gọi của linh hồn', 'Giải quyết karma còn tồn đọng', 'Chuẩn bị cho sự thức tỉnh lớn']
       }
     },
@@ -1168,8 +1168,8 @@ export const MAJOR_ARCANA = [
         actionSteps: ['Duy trì sự cân bằng đạt được', 'Tích hợp mind-body-spirit', 'Du lịch chữa lành']
       },
       spiritual: {
-        reading: 'Hoàn thành một giai đoạn tiến hóa tâm linh. Sự tích hợp và toàn vẹn đạt được.',
-        actionSteps: ['Ăn mừng hành trình tâm linh', 'Chia sẻ trí tuệ với người khác', 'Chuẩn bị cho level tiếp theo']
+        reading: 'Hoàn thành một giai đoạn tiến hóa tâm thức. Sự tích hợp và toàn vẹn đạt được.',
+        actionSteps: ['Ăn mừng hành trình tâm thức', 'Chia sẻ trí tuệ với người khác', 'Chuẩn bị cho level tiếp theo']
       }
     },
 

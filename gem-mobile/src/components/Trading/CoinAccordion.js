@@ -307,9 +307,9 @@ const CoinAccordion = ({
         <View style={styles.patternsContainer}>
           {patterns.map((pattern, index) => (
             <PatternItem
-              key={pattern.id || `${pattern.symbol}-${pattern.name}-${index}`}
+              key={pattern.pattern_id || pattern.id || `${pattern.symbol}-${pattern.name}-${index}`}
               pattern={pattern}
-              isSelected={selectedPatternId === pattern.id}
+              isSelected={selectedPatternId === pattern.pattern_id || selectedPatternId === pattern.id}
               onSelect={onSelectPattern}
               userTier={userTier}
               onPaperTrade={onPaperTrade}

@@ -101,7 +101,7 @@ const INTENT_KEYWORDS = {
 
   // Spiritual
   [INTENT_TYPES.SPIRITUAL]: [
-    'tâm linh', 'spiritual', 'tinh thần', 'mental',
+    'tâm thức', 'spiritual', 'tinh thần', 'mental',
     'thiền', 'meditation', 'meditate', 'chakra', 'luân xa',
     'năng lượng', 'energy', 'aura', 'karma', 'nghiệp',
     'giác ngộ', 'enlightenment', 'vũ trụ', 'universe',

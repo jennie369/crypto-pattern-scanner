@@ -1,6 +1,7 @@
 // ============================================================
-// UPGRADE SCREEN
-// Purpose: Full screen hiển thị tất cả tiers để user chọn
+// UPGRADE SCREEN - Restructured with Product Category Tabs
+// Purpose: Full screen hiển thị tất cả sản phẩm theo category
+// Categories: Bundle Courses | Scanner | Chatbot | Mindset Courses
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -28,270 +29,369 @@ import {
   Star,
   AlertCircle,
   Sparkles,
+  BookOpen,
+  BarChart3,
+  MessageCircle,
+  Heart,
+  Package,
+  ExternalLink,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
-import upgradeService from '../../services/upgradeService';
+import {
+  COURSE_BUNDLES,
+  SCANNER_PRODUCTS,
+  CHATBOT_PRODUCTS,
+  MINDSET_COURSES,
+  formatPrice,
+} from '../../constants/productConfig';
 import { useAuth } from '../../contexts/AuthContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+// ============================================================
+// TAB CONFIGURATION
+// ============================================================
+const TABS = [
+  {
+    id: 'bundles',
+    label: 'Khóa Trading',
+    icon: Package,
+    description: 'Bundle khóa học + Scanner + Chatbot',
+  },
+  {
+    id: 'scanner',
+    label: 'Scanner',
+    icon: BarChart3,
+    description: 'Subscription quét coin',
+  },
+  {
+    id: 'chatbot',
+    label: 'Chatbot',
+    icon: MessageCircle,
+    description: 'AI trợ lý trading',
+  },
+  {
+    id: 'mindset',
+    label: 'Tư Duy',
+    icon: Heart,
+    description: 'Khóa học mindset',
+  },
+];
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 const UpgradeScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { profile } = useAuth();
-  const { tierType = 'scanner', source, requiredLevel } = route.params || {};
 
-  // State
-  const [tiers, setTiers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Get initial tab from route params or default to 'bundles'
+  const initialTab = route.params?.category || route.params?.tierType || 'bundles';
+  const [activeTab, setActiveTab] = useState(
+    initialTab === 'scanner' ? 'scanner' :
+    initialTab === 'chatbot' ? 'chatbot' :
+    initialTab === 'mindset' ? 'mindset' : 'bundles'
+  );
+
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedTier, setSelectedTier] = useState(null);
-  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(null);
 
-  // Get current user tier level
-  const getCurrentTierLevel = () => {
-    if (!profile) return 0;
-    const tierKey = tierType === 'scanner' ? 'scanner_tier' : 'chatbot_tier';
-    return upgradeService.getTierLevelFromString(profile[tierKey]);
-  };
+  // Get current user tiers
+  const userCourseTier = profile?.subscription_tier || profile?.course_tier || 'FREE';
+  const userScannerTier = profile?.scanner_tier || 'FREE';
+  const userChatbotTier = profile?.chatbot_tier || 'FREE';
 
-  const currentLevel = getCurrentTierLevel();
+  // ============================================================
+  // DATA PREPARATION
+  // ============================================================
 
-  // Fetch tiers
-  const fetchTiers = useCallback(async () => {
-    try {
-      setError(null);
-      const data = await upgradeService.getTiersByType(tierType);
-      // Filter to show only upgradeable tiers (higher than current)
-      const upgradeable = data.filter(t => t.tier_level > currentLevel);
-      setTiers(upgradeable);
+  // Convert product objects to arrays with additional display info
+  const bundleProducts = Object.entries(COURSE_BUNDLES).map(([key, product]) => ({
+    ...product,
+    key,
+    type: 'bundle',
+    isOwned: isTierOwned(key, userCourseTier),
+  }));
 
-      // Auto-select featured tier or first available
-      const featured = upgradeable.find(t => t.is_featured || t.is_popular);
-      if (featured) {
-        setSelectedTier(featured.id);
-      } else if (upgradeable.length > 0) {
-        setSelectedTier(upgradeable[0].id);
-      }
-    } catch (err) {
-      console.error('[UpgradeScreen] Fetch error:', err);
-      setError('Không thể tải dữ liệu. Vui lòng thử lại.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [tierType, currentLevel]);
+  const scannerProducts = Object.entries(SCANNER_PRODUCTS).map(([key, product]) => ({
+    ...product,
+    key,
+    type: 'scanner',
+    isOwned: isTierOwned(key, userScannerTier),
+  }));
 
-  useEffect(() => {
-    fetchTiers();
-  }, [fetchTiers]);
+  const chatbotProducts = Object.entries(CHATBOT_PRODUCTS).map(([key, product]) => ({
+    ...product,
+    key,
+    type: 'chatbot',
+    isOwned: isTierOwned(key, userChatbotTier),
+  }));
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchTiers();
-  }, [fetchTiers]);
+  const mindsetProducts = Object.entries(MINDSET_COURSES).map(([key, product]) => ({
+    ...product,
+    key,
+    type: 'mindset',
+    isOwned: false, // Mindset courses are one-time purchase
+  }));
 
-  // Handle checkout
-  const handleCheckout = async (tier) => {
-    try {
-      setCheckingOut(true);
-
-      // Track checkout start
-      await upgradeService.trackCheckoutStart(tierType, tier.tier_level, 'UpgradeScreen');
-
-      const checkoutUrl = await upgradeService.getCheckoutUrl(tierType, tier.tier_level);
-
-      if (checkoutUrl) {
-        await Linking.openURL(checkoutUrl);
-      } else {
-        // Navigate to in-app shop (Shop is the tab name in TabNavigator)
-        // ProductDetailScreen expects 'handle' and 'fromDeepLink: true' to fetch product
-        navigation.navigate('Shop', {
-          screen: 'ProductDetail',
-          params: {
-            handle: tier.tier_slug,
-            fromDeepLink: true,
-          },
-        });
-      }
-    } catch (err) {
-      console.error('[UpgradeScreen] Checkout error:', err);
-    } finally {
-      setCheckingOut(false);
+  // Get products for current tab
+  const getProductsForTab = () => {
+    switch (activeTab) {
+      case 'scanner': return scannerProducts;
+      case 'chatbot': return chatbotProducts;
+      case 'mindset': return mindsetProducts;
+      default: return bundleProducts;
     }
   };
 
-  // Get tier icon
-  const getTierIcon = (tier) => {
-    if (tier.tier_level === 3) return Crown;
-    if (tier.tier_level === 2) return Star;
-    if (tier.tier_level === 1) return Zap;
+  // ============================================================
+  // HELPER FUNCTIONS
+  // ============================================================
+
+  function isTierOwned(tierKey, userTier) {
+    const tierHierarchy = {
+      'FREE': 0,
+      'STARTER': 1,
+      'TIER1': 2, 'PRO': 2,
+      'TIER2': 3, 'PREMIUM': 3,
+      'TIER3': 4, 'VIP': 4,
+    };
+
+    const userLevel = tierHierarchy[userTier?.toUpperCase()] || 0;
+    const productLevel = tierHierarchy[tierKey] || 0;
+
+    return userLevel >= productLevel;
+  }
+
+  const getTierIcon = (product) => {
+    if (product.tier === 'VIP' || product.tier === 'TIER3') return Crown;
+    if (product.tier === 'PREMIUM' || product.tier === 'TIER2') return Star;
+    if (product.tier === 'PRO' || product.tier === 'TIER1') return Zap;
     return Sparkles;
   };
 
-  // Render tier card
-  const renderTierCard = (tier) => {
-    const isSelected = selectedTier === tier.id;
-    const features = upgradeService.parseFeatures(tier.features_json);
-    const TierIcon = getTierIcon(tier);
+  const getTierColor = (product) => {
+    if (product.tier === 'VIP' || product.tier === 'TIER3') return '#FFD700';
+    if (product.tier === 'PREMIUM' || product.tier === 'TIER2') return '#6A5BFF';
+    if (product.tier === 'PRO' || product.tier === 'TIER1') return '#FFB800';
+    return COLORS.gold;
+  };
+
+  // ============================================================
+  // CHECKOUT HANDLER
+  // ============================================================
+
+  const handleCheckout = async (product) => {
+    try {
+      setCheckingOut(product.variantId);
+
+      // Navigate to Shop CheckoutWebView with cart URL
+      navigation.navigate('Shop', {
+        screen: 'CheckoutWebView',
+        params: {
+          checkoutUrl: product.cartUrl,
+          title: product.name,
+          productName: product.name,
+          variantId: product.variantId,
+          returnScreen: 'Upgrade',
+        },
+      });
+    } catch (err) {
+      console.error('[UpgradeScreen] Checkout error:', err);
+    } finally {
+      setCheckingOut(null);
+    }
+  };
+
+  const handleLearnMore = (product) => {
+    // Navigate to landing page in WebView
+    const landingUrl = product.landingPage || 'https://gemral.com';
+
+    navigation.navigate('Shop', {
+      screen: 'CheckoutWebView',
+      params: {
+        checkoutUrl: landingUrl,
+        title: 'Tìm hiểu thêm',
+        productName: product.name,
+        returnScreen: 'Upgrade',
+      },
+    });
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Simulate refresh
+    setTimeout(() => setRefreshing(false), 1000);
+  }, []);
+
+  // ============================================================
+  // RENDER FUNCTIONS
+  // ============================================================
+
+  const renderTabBar = () => (
+    <View style={styles.tabBar}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabBarContent}
+      >
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const TabIcon = tab.icon;
+
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              style={[styles.tab, isActive && styles.tabActive]}
+              onPress={() => setActiveTab(tab.id)}
+              activeOpacity={0.7}
+            >
+              <TabIcon
+                size={18}
+                color={isActive ? COLORS.bgDarkest : COLORS.textSecondary}
+              />
+              <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+
+  const renderProductCard = (product, index) => {
+    const TierIcon = getTierIcon(product);
+    const tierColor = getTierColor(product);
+    const isLoading = checkingOut === product.variantId;
+    const isPopular = product.tier === 'PREMIUM' || product.tier === 'TIER2';
 
     return (
-      <TouchableOpacity
-        key={tier.id}
+      <View
+        key={product.variantId || product.key}
         style={[
-          styles.tierCard,
-          isSelected && styles.tierCardSelected,
-          tier.is_popular && styles.tierCardPopular,
+          styles.productCard,
+          isPopular && styles.productCardPopular,
+          product.isOwned && styles.productCardOwned,
         ]}
-        onPress={() => setSelectedTier(tier.id)}
-        activeOpacity={0.8}
       >
         {/* Badge */}
-        {tier.badge_text && (
-          <View style={[
-            styles.badgeContainer,
-            { backgroundColor: tier.badge_color || COLORS.gold }
-          ]}>
-            <Text style={styles.badgeText}>{tier.badge_text}</Text>
+        {isPopular && !product.isOwned && (
+          <View style={[styles.badgeContainer, { backgroundColor: tierColor }]}>
+            <Text style={styles.badgeText}>PHỔ BIẾN NHẤT</Text>
+          </View>
+        )}
+        {product.isOwned && (
+          <View style={[styles.badgeContainer, { backgroundColor: COLORS.success }]}>
+            <Text style={styles.badgeText}>ĐÃ SỞ HỮU</Text>
           </View>
         )}
 
         {/* Header */}
-        <View style={styles.tierHeader}>
-          <View style={[styles.tierIconContainer, { backgroundColor: `${tier.color_primary || COLORS.gold}20` }]}>
-            <TierIcon size={24} color={tier.color_primary || COLORS.gold} />
+        <View style={styles.productHeader}>
+          <View style={[styles.productIconContainer, { backgroundColor: `${tierColor}20` }]}>
+            <TierIcon size={24} color={tierColor} />
           </View>
-          <View style={styles.tierInfo}>
-            <Text style={[styles.tierName, { color: tier.color_primary || COLORS.gold }]}>
-              {tier.display_name || tier.tier_name}
+          <View style={styles.productInfo}>
+            <Text style={[styles.productName, { color: tierColor }]}>
+              {product.name}
             </Text>
-            <Text style={styles.tierDescription}>{tier.short_description}</Text>
+            <Text style={styles.productDescription} numberOfLines={2}>
+              {product.description}
+            </Text>
           </View>
         </View>
 
         {/* Price */}
         <View style={styles.priceContainer}>
-          {tier.original_price_vnd && tier.original_price_vnd > tier.price_vnd && (
-            <Text style={styles.originalPrice}>
-              {upgradeService.formatPrice(tier.original_price_vnd)}
-            </Text>
+          <Text style={styles.price}>{product.priceFormatted || formatPrice(product.price)}</Text>
+          {product.period && (
+            <Text style={styles.pricePeriod}>/{product.period}</Text>
           )}
-          <Text style={styles.price}>
-            {upgradeService.formatPrice(tier.price_vnd)}
-          </Text>
-          <Text style={styles.priceNote}>/ trọn đời</Text>
+          {!product.period && product.type === 'bundle' && (
+            <Text style={styles.pricePeriod}>/trọn đời</Text>
+          )}
         </View>
 
-        {/* Features */}
-        <View style={styles.featuresContainer}>
-          {features.map((feature, idx) => (
-            <View key={idx} style={styles.featureRow}>
-              {feature.included ? (
-                <Check size={16} color={COLORS.success} />
+        {/* Features/Includes */}
+        {product.includes && product.includes.length > 0 && (
+          <View style={styles.featuresContainer}>
+            <Text style={styles.featuresTitle}>Bao gồm:</Text>
+            {product.includes.map((item, idx) => (
+              <View key={idx} style={styles.featureRow}>
+                <Check size={14} color={COLORS.success} />
+                <Text style={styles.featureText}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {product.features && product.features.length > 0 && (
+          <View style={styles.featuresContainer}>
+            {product.features.map((feature, idx) => (
+              <View key={idx} style={styles.featureRow}>
+                <Check size={14} color={COLORS.success} />
+                <Text style={styles.featureText}>{feature}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Button Row */}
+        <View style={styles.buttonRow}>
+          {/* Tìm hiểu thêm Button */}
+          <TouchableOpacity
+            style={styles.learnMoreButton}
+            onPress={() => handleLearnMore(product)}
+            activeOpacity={0.7}
+          >
+            <ExternalLink size={16} color={COLORS.gold} />
+            <Text style={styles.learnMoreText}>Tìm hiểu thêm</Text>
+          </TouchableOpacity>
+
+          {/* CTA Button */}
+          <TouchableOpacity
+            style={[
+              styles.ctaButton,
+              product.isOwned && styles.ctaButtonDisabled,
+            ]}
+            onPress={() => handleCheckout(product)}
+            disabled={product.isOwned || isLoading}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={product.isOwned ? ['#444', '#333'] : [tierColor, `${tierColor}CC`]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.ctaGradient}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <X size={16} color={COLORS.textMuted} />
+                <Text style={styles.ctaText}>
+                  {product.isOwned ? 'Đã sở hữu' : 'Mua ngay'}
+                </Text>
               )}
-              <Text
-                style={[
-                  styles.featureText,
-                  !feature.included && styles.featureTextDisabled,
-                ]}
-              >
-                {feature.label}
-              </Text>
-            </View>
-          ))}
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
-
-        {/* CTA */}
-        <TouchableOpacity
-          style={[
-            styles.ctaButton,
-            isSelected && styles.ctaButtonSelected,
-          ]}
-          onPress={() => handleCheckout(tier)}
-          disabled={checkingOut}
-        >
-          {checkingOut && isSelected ? (
-            <ActivityIndicator size="small" color={COLORS.bgDarkest} />
-          ) : (
-            <Text style={[
-              styles.ctaText,
-              isSelected && styles.ctaTextSelected,
-            ]}>
-              {isSelected ? 'Mua ngay' : 'Chọn gói'}
-            </Text>
-          )}
-        </TouchableOpacity>
-      </TouchableOpacity>
+      </View>
     );
   };
 
-  // Loading state
-  if (loading) {
+  const renderTabDescription = () => {
+    const currentTab = TABS.find(t => t.id === activeTab);
     return (
-      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.gold} />
-            <Text style={styles.loadingText}>Đang tải...</Text>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
+      <View style={styles.tabDescription}>
+        <Text style={styles.tabDescriptionText}>{currentTab?.description}</Text>
+      </View>
     );
-  }
+  };
 
-  // Error state
-  if (error) {
-    return (
-      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.errorContainer}>
-            <AlertCircle size={48} color={COLORS.error} />
-            <Text style={styles.errorTitle}>Đã có lỗi xảy ra</Text>
-            <Text style={styles.errorMessage}>{error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={fetchTiers}>
-              <Text style={styles.retryText}>Thử lại</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
-
-  // Empty state
-  if (tiers.length === 0) {
-    return (
-      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <ArrowLeft size={24} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Nâng cấp</Text>
-            <View style={{ width: 40 }} />
-          </View>
-          <View style={styles.emptyContainer}>
-            <Crown size={64} color={COLORS.gold} />
-            <Text style={styles.emptyTitle}>Bạn đang ở gói cao nhất!</Text>
-            <Text style={styles.emptyMessage}>
-              Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của chúng tôi.
-            </Text>
-            <TouchableOpacity
-              style={styles.backToHomeButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={styles.backToHomeText}>Quay lại</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
+  // ============================================================
+  // MAIN RENDER
+  // ============================================================
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
@@ -304,10 +404,14 @@ const UpgradeScreen = () => {
           >
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chọn gói nâng cấp</Text>
+          <Text style={styles.headerTitle}>Nâng cấp</Text>
           <View style={{ width: 40 }} />
         </View>
 
+        {/* Tab Bar */}
+        {renderTabBar()}
+
+        {/* Content */}
         <ScrollView
           contentContainerStyle={styles.content}
           refreshControl={
@@ -319,21 +423,15 @@ const UpgradeScreen = () => {
           }
           showsVerticalScrollIndicator={false}
         >
-          {/* Hero */}
-          <View style={styles.heroSection}>
-            <Crown size={48} color={COLORS.gold} />
-            <Text style={styles.heroTitle}>Mở khóa toàn bộ tiềm năng</Text>
-            <Text style={styles.heroSubtitle}>
-              Nâng cấp để truy cập tất cả tính năng premium
-            </Text>
+          {/* Tab Description */}
+          {renderTabDescription()}
+
+          {/* Products */}
+          <View style={styles.productsContainer}>
+            {getProductsForTab().map((product, index) => renderProductCard(product, index))}
           </View>
 
-          {/* Tiers */}
-          <View style={styles.tiersContainer}>
-            {tiers.map(renderTierCard)}
-          </View>
-
-          {/* Trust badges */}
+          {/* Trust Section */}
           <View style={styles.trustSection}>
             <View style={styles.trustItem}>
               <Shield size={20} color={COLORS.success} />
@@ -354,6 +452,9 @@ const UpgradeScreen = () => {
   );
 };
 
+// ============================================================
+// STYLES
+// ============================================================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -375,101 +476,58 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
+
+  // Tab Bar
+  tabBar: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  tabBarContent: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  tab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    gap: SPACING.xs,
+  },
+  tabActive: {
+    backgroundColor: COLORS.gold,
+  },
+  tabLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textSecondary,
+  },
+  tabLabelActive: {
+    color: COLORS.bgDarkest,
+  },
+
+  // Content
   content: {
     padding: SPACING.lg,
     paddingBottom: SPACING.xl * 2,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  tabDescription: {
+    marginBottom: SPACING.lg,
+    paddingHorizontal: SPACING.sm,
   },
-  loadingText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-    marginTop: SPACING.md,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-  errorTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginTop: SPACING.md,
-  },
-  errorMessage: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
+  tabDescriptionText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
     textAlign: 'center',
-    marginTop: SPACING.sm,
   },
-  retryButton: {
-    backgroundColor: COLORS.gold,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.xl,
-    borderRadius: 8,
-    marginTop: SPACING.lg,
-  },
-  retryText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDarkest,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-  emptyTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-    marginTop: SPACING.lg,
-  },
-  emptyMessage: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-  },
-  backToHomeButton: {
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.xl,
-    borderRadius: 8,
-    marginTop: SPACING.lg,
-  },
-  backToHomeText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.gold,
-  },
-  heroSection: {
-    alignItems: 'center',
-    marginBottom: SPACING.xl,
-  },
-  heroTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginTop: SPACING.md,
-  },
-  heroSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginTop: SPACING.xs,
-  },
-  tiersContainer: {
+
+  // Products
+  productsContainer: {
     gap: SPACING.lg,
   },
-  tierCard: {
+  productCard: {
     backgroundColor: COLORS.glassBg,
     borderRadius: 16,
     padding: SPACING.lg,
@@ -481,11 +539,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  tierCardSelected: {
-    borderColor: COLORS.gold,
+  productCardPopular: {
+    borderColor: '#6A5BFF',
   },
-  tierCardPopular: {
-    borderColor: COLORS.purple,
+  productCardOwned: {
+    borderColor: COLORS.success,
+    opacity: 0.7,
   },
   badgeContainer: {
     position: 'absolute',
@@ -501,27 +560,27 @@ const styles = StyleSheet.create({
     color: COLORS.bgDarkest,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
-  tierHeader: {
+  productHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.md,
   },
-  tierIconContainer: {
+  productIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  tierInfo: {
+  productInfo: {
     flex: 1,
     marginLeft: SPACING.sm,
   },
-  tierName: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
+  productName: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
-  tierDescription: {
+  productDescription: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textSecondary,
     marginTop: 2,
@@ -531,59 +590,76 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
     marginBottom: SPACING.md,
   },
-  originalPrice: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    textDecorationLine: 'line-through',
-    marginRight: SPACING.sm,
-  },
   price: {
-    fontSize: TYPOGRAPHY.fontSize.hero,
+    fontSize: TYPOGRAPHY.fontSize.hero || 28,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.gold,
   },
-  priceNote: {
+  pricePeriod: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textSecondary,
     marginLeft: SPACING.xs,
   },
   featuresContainer: {
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  featuresTitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.xs,
+    paddingVertical: 4,
   },
   featureText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
+    fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textPrimary,
     marginLeft: SPACING.sm,
   },
-  featureTextDisabled: {
-    color: COLORS.textMuted,
-    textDecorationLine: 'line-through',
+  buttonRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
   },
-  ctaButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: COLORS.gold,
+  learnMoreButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: SPACING.md,
     borderRadius: 12,
-    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    gap: SPACING.xs,
   },
-  ctaButtonSelected: {
-    backgroundColor: COLORS.gold,
-    borderColor: COLORS.gold,
-  },
-  ctaText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  learnMoreText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.gold,
   },
-  ctaTextSelected: {
-    color: COLORS.bgDarkest,
+  ctaButton: {
+    flex: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
+  ctaButtonDisabled: {
+    opacity: 0.6,
+  },
+  ctaGradient: {
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctaText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#fff',
+  },
+
+  // Trust Section
   trustSection: {
     flexDirection: 'row',
     justifyContent: 'space-around',

@@ -20,39 +20,22 @@ import { COLORS } from './tokens';
 // ═══════════════════════════════════════════════════════════
 
 export const DIGITAL_PRODUCT_TAGS = [
-  // Trading Courses
+  // Trading Courses (from Shopify tags)
+  'Khóa học Trading',
   'Khoa hoc Trading',
-  'trading-course',
-  'Gem Trading',
-  'tier-starter',
   'Tier 1',
   'Tier 2',
   'Tier 3',
-  // Spiritual Courses
-  'tan-so-goc',
-  'khai-mo',
-  'Gem Academy',
-  'spiritual-course',
+  // Mindset/Spiritual Courses
+  'Khóa học',
+  'Khóa học Tâm Thức',
   // Chatbot
   'GEM Chatbot',
-  'chatbot-pro',
-  'chatbot-premium',
-  'chatbot-vip',
   // Scanner
   'Scanner',
-  'scanner-pro',
-  'scanner-premium',
-  'scanner-vip',
-  // Gems
+  // Gem Packs
   'Gem Pack',
-  'gems',
-  'virtual-currency',
-  // Digital generic
-  'digital',
-  'digital-product',
-  'course',
-  'subscription',
-  'membership',
+  // Ebooks (optional)
   'Ebook',
 ];
 
@@ -71,31 +54,33 @@ export const DIGITAL_CATEGORIES = [
     id: 'trading',
     label: 'Trading',
     icon: TrendingUp,
-    tags: ['Khoa hoc Trading', 'trading-course', 'Gem Trading', 'tier-starter', 'Tier 1', 'Tier 2', 'Tier 3'],
+    // Match: "Khóa học Trading" tag from products
+    tags: ['Khóa học Trading', 'Khoa hoc Trading', 'trading-course', 'Tier 1', 'Tier 2', 'Tier 3'],
   },
   {
-    id: 'spiritual',
-    label: 'Tâm Linh',
+    id: 'mindset',
+    label: 'Tư duy',
     icon: Sparkles,
-    tags: ['tan-so-goc', 'khai-mo', 'Gem Academy', 'spiritual-course'],
+    // Match: "Khóa học" tag (without "Trading") - for mindset/spiritual courses
+    tags: ['Khóa học', 'Khóa học Tâm Thức', 'tan-so-goc', 'khai-mo'],
   },
   {
     id: 'chatbot',
     label: 'Chatbot',
     icon: Bot,
-    tags: ['GEM Chatbot', 'chatbot-pro', 'chatbot-premium', 'chatbot-vip'],
+    tags: ['GEM Chatbot'],
   },
   {
     id: 'scanner',
     label: 'Scanner',
     icon: BarChart3,
-    tags: ['Scanner', 'scanner-pro', 'scanner-premium', 'scanner-vip'],
+    tags: ['Scanner'],
   },
   {
     id: 'gems',
-    label: 'Gems',
+    label: 'Gem Packs',
     icon: Gem,
-    tags: ['Gem Pack', 'gems', 'virtual-currency'],
+    tags: ['Gem Pack'],
   },
 ];
 
@@ -257,7 +242,7 @@ export const TOOLTIP_CONTENT = {
   'category-pills': {
     id: 'category-pills',
     title: 'Bộ lọc danh mục',
-    content: 'Nhấn vào các nút để lọc sản phẩm theo danh mục: Trading, Tâm Linh, Chatbot, Scanner, Gems.',
+    content: 'Nhấn vào các nút để lọc sản phẩm theo danh mục: Trading, Tư duy, Chatbot, Scanner, Gem Packs.',
     position: 'bottom',
     showOnce: true,
   },
@@ -309,19 +294,23 @@ export const PRICE_CONFIG = {
 /**
  * Get tier from product tags
  * @param {string[]} tags - Product tags
- * @returns {string|null} - Tier identifier
+ * @returns {string|null} - Tier identifier (null = no tier badge shown)
  */
 export const getTierFromTags = (tags = []) => {
   if (!Array.isArray(tags)) return null;
 
   const normalizedTags = tags.map(t => (typeof t === 'string' ? t.toLowerCase().trim() : ''));
 
-  // Check for specific tier tags
-  if (normalizedTags.some(t => t === 'tier 3' || t === 'tier3' || t === 'vip')) return 'tier3';
-  if (normalizedTags.some(t => t === 'tier 2' || t === 'tier2' || t === 'premium')) return 'tier2';
-  if (normalizedTags.some(t => t === 'tier 1' || t === 'tier1' || t === 'pro')) return 'tier1';
+  // Check for specific tier tags - ONLY for Trading courses
+  // Products without tier tags should NOT show any tier badge
+  if (normalizedTags.some(t => t === 'tier 3' || t === 'tier3')) return 'tier3';
+  if (normalizedTags.some(t => t === 'tier 2' || t === 'tier2')) return 'tier2';
+  if (normalizedTags.some(t => t === 'tier 1' || t === 'tier1')) return 'tier1';
   if (normalizedTags.some(t => t === 'tier-starter' || t === 'starter')) return 'starter';
-  if (normalizedTags.some(t => t === 'free' || t === 'free-course' || t === 'ebook')) return 'free';
+
+  // Note: 'free', 'vip', 'pro', 'premium' removed from tier detection
+  // These are NOT tier indicators - they are product types or pricing
+  // Products like Chatbot VIP, Scanner PRO are subscriptions, not course tiers
 
   return null;
 };
@@ -332,16 +321,18 @@ export const getTierFromTags = (tags = []) => {
  * @returns {string} - Product type
  */
 export const getSubscriptionType = (tags = []) => {
-  if (!Array.isArray(tags)) return 'course';
+  if (!Array.isArray(tags)) return 'digital';
 
   const normalizedTags = tags.map(t => (typeof t === 'string' ? t.toLowerCase().trim() : ''));
 
-  if (normalizedTags.some(t => t.includes('chatbot'))) return 'chatbot';
-  if (normalizedTags.some(t => t.includes('scanner'))) return 'scanner';
-  if (normalizedTags.some(t => t.includes('gem pack') || t === 'gems' || t.includes('virtual-currency'))) return 'gems';
-  if (normalizedTags.some(t => t.includes('spiritual') || t.includes('tan-so') || t.includes('khai-mo'))) return 'spiritual-course';
-  if (normalizedTags.some(t => t.includes('trading') || t.includes('tier'))) return 'trading-course';
-  if (normalizedTags.some(t => t.includes('course'))) return 'course';
+  // Check in order of specificity
+  if (normalizedTags.some(t => t.includes('gem chatbot') || t === 'gem chatbot')) return 'chatbot';
+  if (normalizedTags.some(t => t === 'scanner')) return 'scanner';
+  if (normalizedTags.some(t => t === 'gem pack')) return 'gems';
+  // Trading courses have "Khóa học Trading" tag
+  if (normalizedTags.some(t => t.includes('khóa học trading') || t.includes('khoa hoc trading'))) return 'trading-course';
+  // Mindset courses have "Khóa học" (without Trading) or "Khóa học Tâm Thức"
+  if (normalizedTags.some(t => t === 'khóa học' || t === 'khóa học tâm thức')) return 'mindset-course';
 
   return 'digital';
 };

@@ -68,7 +68,9 @@ export function interleaveBannersWithContent(content, banners, options = {}) {
   }
 
   if (!content || content.length === 0) {
-    return banners.map(banner => ({ type: 'banner', data: banner }));
+    // DON'T show banners when content is empty (e.g., during loading/refresh)
+    // Banners should only appear mixed with actual content
+    return [];
   }
 
   const positions = calculateBannerPositions(content.length, banners.length, options);
@@ -153,11 +155,9 @@ export function getScreenBannerPositions(screenType, contentCount, bannerCount) 
  */
 export function createDistributedRenderList(sections, banners, screenType = 'default') {
   if (!sections || sections.length === 0) {
-    return (banners || []).map((banner, index) => ({
-      type: 'banner',
-      data: banner,
-      key: `banner-${banner.id || index}`,
-    }));
+    // DON'T show banners when sections are empty (e.g., during loading/refresh)
+    // Banners should only appear mixed with actual content
+    return [];
   }
 
   if (!banners || banners.length === 0) {
@@ -222,12 +222,9 @@ export function injectBannersIntoFeed(feedItems, banners, options = {}) {
   }
 
   if (!feedItems || feedItems.length === 0) {
-    // Return banners as feed items if no content
-    return banners.map((banner, index) => ({
-      type: 'sponsor_banner',
-      data: banner,
-      key: `sponsor-banner-${banner.id || index}`,
-    }));
+    // DON'T show banners when feed is empty (e.g., during loading/refresh)
+    // Banners should only appear mixed with actual content
+    return [];
   }
 
   const result = [...feedItems];
@@ -271,11 +268,9 @@ export function distributeBannersAmongSections(sections, banners, options = {}) 
   const { minGap = 1, maxBannersPerGap = 2 } = options;
 
   if (!sections || sections.length === 0) {
-    return (banners || []).map((banner, index) => ({
-      type: 'banner',
-      data: banner,
-      key: `banner-${banner.id || index}`,
-    }));
+    // DON'T show banners when sections are empty (e.g., during loading/refresh)
+    // Banners should only appear mixed with actual content
+    return [];
   }
 
   if (!banners || banners.length === 0) {

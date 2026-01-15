@@ -11,7 +11,8 @@ export const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/400x400/1a0b2e/FFB
 // Fallback images for different categories
 export const FALLBACK_IMAGES = {
   trading: 'https://via.placeholder.com/400x400/1a0b2e/00D9FF?text=Trading',
-  spiritual: 'https://via.placeholder.com/400x400/1a0b2e/9C0612?text=Tam+Linh',
+  mindset: 'https://via.placeholder.com/400x400/1a0b2e/9C0612?text=Tu+Duy',
+  spiritual: 'https://via.placeholder.com/400x400/1a0b2e/9C0612?text=Tu+Duy', // Legacy alias
   chatbot: 'https://via.placeholder.com/400x400/1a0b2e/6A5BFF?text=Chatbot',
   scanner: 'https://via.placeholder.com/400x400/1a0b2e/3AF7A6?text=Scanner',
   gems: 'https://via.placeholder.com/400x400/1a0b2e/FFBD59?text=Gems',

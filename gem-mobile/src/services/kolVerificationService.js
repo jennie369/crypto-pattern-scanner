@@ -5,12 +5,16 @@
  */
 
 import { supabase } from './supabase';
-import imageService from './imageService';
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 import {
   KOL_CONFIG,
   calculateTotalFollowers,
   checkKOLEligibility,
 } from '../constants/partnershipConstants';
+
+// KOL verification bucket - uses same as forum-images but dedicated path
+const VERIFICATION_BUCKET = 'forum-images';
 
 const kolVerificationService = {
   /**
@@ -51,26 +55,68 @@ const kolVerificationService = {
    */
   async uploadVerificationImage(userId, imageUri, type) {
     try {
+      if (!imageUri) {
+        throw new Error('No image URI provided');
+      }
+
+      console.log('[KOLVerificationService] Uploading:', type, imageUri.substring(0, 50));
+
+      // Compress image first
+      const manipResult = await ImageManipulator.manipulateAsync(
+        imageUri,
+        [{ resize: { width: 1200 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+      );
+
+      // Read file as base64
+      const base64 = await FileSystem.readAsStringAsync(manipResult.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert to ArrayBuffer
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const arrayBuffer = bytes.buffer;
+
+      // Generate file path
       const timestamp = Date.now();
       const fileName = `kol_verification/${userId}/${type}_${timestamp}.jpg`;
 
-      // Use imageService's uploadToStorage method
-      const url = await imageService.uploadToStorage(imageUri, fileName);
+      console.log('[KOLVerificationService] Uploading to:', VERIFICATION_BUCKET, fileName);
 
-      if (!url) {
-        throw new Error('Upload failed - no URL returned');
+      // Upload to Supabase storage
+      const { data, error } = await supabase.storage
+        .from(VERIFICATION_BUCKET)
+        .upload(fileName, arrayBuffer, {
+          contentType: 'image/jpeg',
+          upsert: true, // Allow overwrite in case of retry
+        });
+
+      if (error) {
+        console.error('[KOLVerificationService] Storage error:', error);
+        throw new Error(error.message || 'Storage upload failed');
       }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from(VERIFICATION_BUCKET)
+        .getPublicUrl(data.path);
+
+      console.log('[KOLVerificationService] Upload success:', urlData.publicUrl);
 
       return {
         success: true,
-        url,
+        url: urlData.publicUrl,
         path: fileName,
       };
     } catch (err) {
       console.error('[KOLVerificationService] uploadVerificationImage error:', err);
       return {
         success: false,
-        error: err.message || 'Upload failed',
+        error: err.message || 'Upload thất bại. Vui lòng thử lại.',
       };
     }
   },

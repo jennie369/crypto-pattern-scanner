@@ -8,7 +8,7 @@
  * - Navigation to Shopify purchase
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,9 +16,9 @@ import {
   Modal,
   Pressable,
   TouchableOpacity,
-  Linking,
   ScrollView
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import {
   X,
   Crown,
@@ -31,16 +31,18 @@ import {
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, GLASS } from '../../utils/tokens';
+import { CHATBOT_PRODUCTS } from '../../constants/productConfig';
 
 /**
- * Tier upgrade options
+ * Tier upgrade options - Chatbot subscriptions
+ * IMPORTANT: Using cart URLs with variant ID for proper checkout
  */
 const UPGRADE_TIERS = [
   {
     id: 'tier1',
     name: 'PRO',
     tier: 'TIER1',
-    price: '39.000đ',
+    price: CHATBOT_PRODUCTS.PRO.priceFormatted,
     period: '/tháng',
     queries: '15 câu/ngày',
     color: '#FFB800',
@@ -51,13 +53,14 @@ const UPGRADE_TIERS = [
       'Gợi ý trading',
       'Hỗ trợ email'
     ],
-    shopifyUrl: 'https://shop.gemcrypto.vn/products/gem-chatbot-pro'
+    variantId: CHATBOT_PRODUCTS.PRO.variantId,
+    shopifyUrl: CHATBOT_PRODUCTS.PRO.cartUrl
   },
   {
     id: 'tier2',
     name: 'PREMIUM',
     tier: 'TIER2',
-    price: '59.000đ',
+    price: CHATBOT_PRODUCTS.PREMIUM.priceFormatted,
     period: '/tháng',
     queries: '50 câu/ngày',
     color: '#6A5BFF',
@@ -69,13 +72,14 @@ const UPGRADE_TIERS = [
       'Hỗ trợ ưu tiên'
     ],
     popular: true,
-    shopifyUrl: 'https://shop.gemcrypto.vn/products/gem-chatbot-premium'
+    variantId: CHATBOT_PRODUCTS.PREMIUM.variantId,
+    shopifyUrl: CHATBOT_PRODUCTS.PREMIUM.cartUrl
   },
   {
     id: 'tier3',
     name: 'VIP',
     tier: 'TIER3',
-    price: '99.000đ',
+    price: CHATBOT_PRODUCTS.VIP.priceFormatted,
     period: '/tháng',
     queries: 'Không giới hạn',
     color: '#FFD700',
@@ -86,7 +90,8 @@ const UPGRADE_TIERS = [
       'Chiến lược độc quyền',
       'Hỗ trợ 24/7 VIP'
     ],
-    shopifyUrl: 'https://shop.gemcrypto.vn/products/gem-chatbot-vip'
+    variantId: CHATBOT_PRODUCTS.VIP.variantId,
+    shopifyUrl: CHATBOT_PRODUCTS.VIP.cartUrl
   }
 ];
 
@@ -104,13 +109,40 @@ const UpgradeModal = ({
   quota,
   currentTier = 'FREE'
 }) => {
-  const handleUpgrade = async (tier) => {
-    try {
-      await Linking.openURL(tier.shopifyUrl);
-    } catch (error) {
-      console.error('[UpgradeModal] Error opening URL:', error);
-    }
-  };
+  const navigation = useNavigation();
+
+  /**
+   * Handle upgrade - Navigate to checkout WebView
+   */
+  const handleUpgrade = useCallback((tier) => {
+    onClose();
+    navigation.navigate('Shop', {
+      screen: 'CheckoutWebView',
+      params: {
+        checkoutUrl: tier.shopifyUrl,
+        title: `GEM ${tier.name}`,
+        productName: `GEM Chatbot ${tier.name}`,
+        variantId: tier.variantId,
+        returnScreen: 'Home',
+      },
+    });
+  }, [navigation, onClose]);
+
+  /**
+   * Handle learn more - Navigate to landing page
+   */
+  const handleLearnMore = useCallback(() => {
+    onClose();
+    navigation.navigate('Shop', {
+      screen: 'CheckoutWebView',
+      params: {
+        checkoutUrl: 'https://gemral.com',
+        title: 'Tìm hiểu thêm',
+        productName: 'GEM Chatbot',
+        returnScreen: 'Home',
+      },
+    });
+  }, [navigation, onClose]);
 
   // Filter out current tier and below
   const getTierLevel = (tier) => {
@@ -224,20 +256,34 @@ const UpgradeModal = ({
                     ))}
                   </View>
 
-                  <TouchableOpacity
-                    onPress={() => handleUpgrade(tier)}
-                    activeOpacity={0.8}
-                  >
-                    <LinearGradient
-                      colors={[tier.color, `${tier.color}CC`]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.upgradeButton}
+                  {/* Button Row */}
+                  <View style={styles.buttonRow}>
+                    {/* Learn More Button */}
+                    <TouchableOpacity
+                      style={styles.learnMoreButton}
+                      onPress={handleLearnMore}
+                      activeOpacity={0.7}
                     >
-                      <Text style={styles.upgradeButtonText}>Nâng cấp</Text>
-                      <ExternalLink size={16} color="#FFFFFF" />
-                    </LinearGradient>
-                  </TouchableOpacity>
+                      <ExternalLink size={14} color={COLORS.gold} />
+                      <Text style={styles.learnMoreText}>Tìm hiểu</Text>
+                    </TouchableOpacity>
+
+                    {/* Upgrade Button */}
+                    <TouchableOpacity
+                      style={styles.upgradeButtonContainer}
+                      onPress={() => handleUpgrade(tier)}
+                      activeOpacity={0.8}
+                    >
+                      <LinearGradient
+                        colors={[tier.color, `${tier.color}CC`]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.upgradeButton}
+                      >
+                        <Text style={styles.upgradeButtonText}>Nâng cấp</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               );
             })}
@@ -428,7 +474,33 @@ const styles = StyleSheet.create({
     fontSize: 12
   },
 
-  // Upgrade button
+  // Button row
+  buttonRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm
+  },
+  learnMoreButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    gap: 4
+  },
+  learnMoreText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.gold
+  },
+  upgradeButtonContainer: {
+    flex: 2,
+    borderRadius: 12,
+    overflow: 'hidden'
+  },
   upgradeButton: {
     flexDirection: 'row',
     alignItems: 'center',

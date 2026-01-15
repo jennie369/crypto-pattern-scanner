@@ -5114,25 +5114,57 @@ const generatePostImages = (topic, gender = 'male') => {
   }
 
   // Determine number of images for this post:
-  // 60% have 1 image, 25% have 2 images, 10% have 3 images, 5% have 4 images
+  // UPDATED: Always 2-4 images (no single image posts)
+  // 40% have 2 images, 35% have 3 images, 25% have 4 images
   const rand = Math.random();
   let imageCount;
-  if (rand < 0.60) {
-    imageCount = 1;
-  } else if (rand < 0.85) {
+  if (rand < 0.40) {
     imageCount = 2;
-  } else if (rand < 0.95) {
+  } else if (rand < 0.75) {
     imageCount = 3;
   } else {
     imageCount = 4;
   }
 
-  // Don't exceed available images
-  imageCount = Math.min(imageCount, imagePool.length);
+  // Don't exceed available images (but ensure minimum 2)
+  imageCount = Math.min(imageCount, Math.max(2, imagePool.length));
 
   // Shuffle and select images
   const shuffled = [...imagePool].sort(() => Math.random() - 0.5);
-  const selectedImages = shuffled.slice(0, imageCount);
+  let selectedImages = shuffled.slice(0, imageCount);
+
+  // SPECIAL RULE: Crystal and LOA (law of attraction) topics must include at least 1 crystal image
+  // This ensures visual consistency for spiritual/crystal content for BOTH genders
+  const crystalRelatedTopics = ['crystal', 'loa'];
+  if (crystalRelatedTopics.includes(normalizedTopic)) {
+    // Get crystal images for this SPECIFIC gender (male or female)
+    const crystalImages = GENDER_POST_IMAGES.crystal?.[normalizedGender] || [];
+
+    console.log(`[SeedPostGenerator] Crystal check for ${normalizedTopic} (${normalizedGender}): ${crystalImages.length} crystal images available`);
+
+    // Check if we already have a crystal image (for 'crystal' topic, all images are already crystal)
+    const hasCrystalImage = selectedImages.some(url => crystalImages.includes(url));
+
+    // If no crystal image and crystal images are available, add one
+    if (!hasCrystalImage && crystalImages.length > 0) {
+      // Get crystal images not already selected
+      const availableCrystalImages = crystalImages.filter(url => !selectedImages.includes(url) && !usedImageUrls.has(url));
+
+      // Fallback to all crystal images if all are used
+      const crystalPool = availableCrystalImages.length > 0 ? availableCrystalImages : crystalImages;
+
+      // Pick a random crystal image
+      const randomCrystalImage = crystalPool[Math.floor(Math.random() * crystalPool.length)];
+
+      // Replace a random position (not always last) for more natural appearance
+      const replaceIndex = Math.floor(Math.random() * selectedImages.length);
+      selectedImages[replaceIndex] = randomCrystalImage;
+
+      console.log(`[SeedPostGenerator] ✅ Added crystal image to ${normalizedTopic} post (${normalizedGender}) at position ${replaceIndex + 1}/${selectedImages.length}`);
+    } else if (hasCrystalImage) {
+      console.log(`[SeedPostGenerator] ✅ ${normalizedTopic} post (${normalizedGender}) already has crystal image`);
+    }
+  }
 
   // Mark all selected as used
   selectedImages.forEach(url => usedImageUrls.add(url));

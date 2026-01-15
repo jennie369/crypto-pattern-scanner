@@ -15,7 +15,7 @@ export const LIFE_AREAS = [
   { id: 'health', label: 'Sức khỏe', icon: 'heart', color: '#FF6B6B' },
   { id: 'relationships', label: 'Quan hệ', icon: 'users', color: '#FF69B4' },
   { id: 'personal', label: 'Bản thân', icon: 'user', color: '#9B59B6' },
-  { id: 'spiritual', label: 'Tâm linh', icon: 'moon', color: '#00CED1' },
+  { id: 'spiritual', label: 'Tâm thức', icon: 'moon', color: '#00CED1' },
 ];
 
 // ============ XP REWARDS ============

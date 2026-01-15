@@ -1,11 +1,21 @@
 /**
- * CompletionCelebration - PERFORMANCE OPTIMIZED
- * Reduced confetti count, replaced setInterval with Reanimated
- * Simplified animations for smooth 60fps
+ * CompletionCelebration - ELEGANT REDESIGN
+ * Minimalist, premium design with subtle animations
+ * Includes reflection input modal
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -19,7 +29,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { CheckCircle, Flame, Star, Sparkles, PenLine, Plus } from 'lucide-react-native';
+import { Check, Flame, Star, ChevronRight, X, Send, PenLine } from 'lucide-react-native';
 
 import {
   COSMIC_COLORS,
@@ -27,8 +37,6 @@ import {
   COSMIC_RADIUS,
 } from '../../../theme/cosmicTokens';
 import { COSMIC_TIMING } from '../../../utils/cosmicAnimations';
-import GlassCard from './GlassCard';
-import GlowButton from './GlowButton';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -82,55 +90,37 @@ const RITUAL_THEMES = {
 };
 
 // ============================================
-// CONFETTI - OPTIMIZED (reduced count, simpler animation)
+// FLOATING PARTICLES - Subtle background effect
 // ============================================
 
-const ConfettiParticle = React.memo(({ index, color, delay, startX, endX, size }) => {
-  const translateY = useSharedValue(-50);
-  const translateX = useSharedValue(startX);
-  const rotate = useSharedValue(0);
+const FloatingParticle = React.memo(({ delay, size, x, color }) => {
+  const translateY = useSharedValue(SCREEN_HEIGHT);
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    const particleDelay = delay + index * 80; // Slower stagger
-
-    opacity.value = withDelay(particleDelay, withTiming(1, { duration: 200 }));
-    translateX.value = withDelay(
-      particleDelay,
-      withTiming(endX, { duration: 2000, easing: Easing.out(Easing.quad) })
-    );
+    opacity.value = withDelay(delay, withTiming(0.6, { duration: 500 }));
     translateY.value = withDelay(
-      particleDelay,
-      withTiming(SCREEN_HEIGHT + 50, { duration: 2500, easing: Easing.in(Easing.quad) })
+      delay,
+      withTiming(-100, { duration: 4000 + Math.random() * 2000, easing: Easing.linear })
     );
-    rotate.value = withDelay(
-      particleDelay,
-      withTiming(Math.random() * 360, { duration: 2500, easing: Easing.linear })
-    );
-    opacity.value = withDelay(
-      particleDelay + 2000,
-      withTiming(0, { duration: 500 })
-    );
+    opacity.value = withDelay(delay + 3000, withTiming(0, { duration: 1000 }));
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { rotate: `${rotate.value}deg` },
-    ],
+    transform: [{ translateY: translateY.value }],
     opacity: opacity.value,
   }));
 
   return (
     <Animated.View
       style={[
-        styles.confettiParticle,
+        styles.floatingParticle,
         {
+          left: x,
           width: size,
           height: size,
           backgroundColor: color,
-          borderRadius: Math.random() > 0.5 ? size / 2 : 2,
+          borderRadius: size / 2,
         },
         animatedStyle,
       ]}
@@ -138,113 +128,72 @@ const ConfettiParticle = React.memo(({ index, color, delay, startX, endX, size }
   );
 });
 
-// Pre-generate confetti data for consistent renders
-const generateConfettiData = (count, colors) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    color: colors[i % colors.length],
-    startX: (Math.random() - 0.5) * SCREEN_WIDTH,
-    endX: (Math.random() - 0.5) * SCREEN_WIDTH + (Math.random() - 0.5) * 100,
-    size: 8 + Math.random() * 8,
+// ============================================
+// ELEGANT CHECKMARK
+// ============================================
+
+const ElegantCheckmark = React.memo(({ color, gradient, delay }) => {
+  const scale = useSharedValue(0);
+  const ringScale = useSharedValue(0.8);
+  const ringOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withDelay(
+      delay,
+      withSpring(1, { damping: 12, stiffness: 100 })
+    );
+    ringScale.value = withDelay(delay + 200, withTiming(1.4, { duration: 600 }));
+    ringOpacity.value = withDelay(delay + 200, withSequence(
+      withTiming(0.5, { duration: 200 }),
+      withTiming(0, { duration: 400 })
+    ));
+  }, [delay]);
+
+  const checkStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
   }));
-};
 
-// ============================================
-// SPARKLE BURST - SIMPLIFIED
-// ============================================
-
-const SparkleBurst = React.memo(({ color, delay }) => {
-  // Reduced to 8 sparkles instead of 12
-  const sparkles = useMemo(() =>
-    Array.from({ length: 8 }, (_, i) => ({
-      id: i,
-      angle: (i / 8) * Math.PI * 2,
-      distance: 60 + Math.random() * 30,
-    })),
-  []);
+  const ringStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: ringScale.value }],
+    opacity: ringOpacity.value,
+  }));
 
   return (
-    <View style={styles.sparkleContainer}>
-      {sparkles.map((sparkle) => (
-        <SparkleParticle
-          key={sparkle.id}
-          angle={sparkle.angle}
-          distance={sparkle.distance}
-          color={color}
-          delay={delay}
-        />
-      ))}
+    <View style={styles.checkmarkWrapper}>
+      <Animated.View style={[styles.checkmarkRing, { borderColor: color }, ringStyle]} />
+      <Animated.View style={checkStyle}>
+        <LinearGradient
+          colors={gradient}
+          style={styles.checkmarkCircle}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <Check size={28} color="#FFF" strokeWidth={3} />
+        </LinearGradient>
+      </Animated.View>
     </View>
   );
 });
 
-const SparkleParticle = React.memo(({ angle, distance, color, delay }) => {
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const opacity = useSharedValue(0);
-  const scale = useSharedValue(0);
-
-  useEffect(() => {
-    const targetX = Math.cos(angle) * distance;
-    const targetY = Math.sin(angle) * distance;
-
-    opacity.value = withDelay(delay, withTiming(1, { duration: 100 }));
-    scale.value = withDelay(delay, withSequence(
-      withSpring(1.2, { damping: 12, stiffness: 200 }),
-      withTiming(0, { duration: 400 })
-    ));
-    translateX.value = withDelay(delay, withTiming(targetX, { duration: 500, easing: Easing.out(Easing.quad) }));
-    translateY.value = withDelay(delay, withTiming(targetY, { duration: 500, easing: Easing.out(Easing.quad) }));
-    opacity.value = withDelay(delay + 300, withTiming(0, { duration: 200 }));
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { scale: scale.value },
-    ],
-    opacity: opacity.value,
-  }));
-
-  return (
-    <Animated.View style={[styles.sparkle, animatedStyle]}>
-      <Sparkles size={14} color={color} strokeWidth={2} />
-    </Animated.View>
-  );
-});
-
 // ============================================
-// XP COUNTER - OPTIMIZED (no setInterval)
+// XP DISPLAY - Compact & Elegant
 // ============================================
 
-const XPCounter = React.memo(({ xp, delay }) => {
+const XPDisplay = React.memo(({ xp, delay, color }) => {
   const [displayXP, setDisplayXP] = useState(0);
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
   const xpProgress = useSharedValue(0);
 
-  // Trigger haptic when complete
-  const onCountComplete = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  };
-
   useEffect(() => {
     opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
-    scale.value = withDelay(delay, withSpring(1, COSMIC_TIMING.spring.bouncy));
-
-    // Use Reanimated to animate XP counter
+    scale.value = withDelay(delay, withSpring(1, { damping: 15, stiffness: 150 }));
     xpProgress.value = withDelay(delay, withTiming(1, {
-      duration: 1200,
+      duration: 800,
       easing: Easing.out(Easing.cubic),
-    }, (finished) => {
-      if (finished) {
-        runOnJS(onCountComplete)();
-      }
     }));
   }, [xp, delay]);
 
-  // Update display value from animation
   useAnimatedReaction(
     () => xpProgress.value,
     (progress) => {
@@ -260,54 +209,202 @@ const XPCounter = React.memo(({ xp, delay }) => {
   }));
 
   return (
-    <Animated.View style={[styles.xpContainer, animatedStyle]}>
-      <LinearGradient
-        colors={[COSMIC_COLORS.glow.gold, COSMIC_COLORS.glow.orange]}
-        style={styles.xpBadge}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <Star size={20} color="#FFF" fill="#FFF" strokeWidth={0} />
-        <Text style={styles.xpText}>+{displayXP} XP</Text>
-      </LinearGradient>
+    <Animated.View style={[styles.xpWrapper, animatedStyle]}>
+      <View style={[styles.xpBadge, { backgroundColor: color + '20' }]}>
+        <Star size={14} color={color} fill={color} />
+        <Text style={[styles.xpText, { color }]}>+{displayXP} XP</Text>
+      </View>
     </Animated.View>
   );
 });
 
 // ============================================
-// STREAK BADGE
+// STREAK DISPLAY - Inline & Minimal
 // ============================================
 
-const StreakBadge = React.memo(({ streak, isNewRecord, delay }) => {
-  const translateX = useSharedValue(100);
+const StreakDisplay = React.memo(({ streak, isNewRecord, delay }) => {
   const opacity = useSharedValue(0);
+  const translateY = useSharedValue(10);
 
   useEffect(() => {
     opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
-    translateX.value = withDelay(delay, withSpring(0, COSMIC_TIMING.spring.gentle));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 15 }));
   }, [delay]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
     opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
   }));
 
   if (!streak || streak < 1) return null;
 
   return (
-    <Animated.View style={[styles.streakContainer, animatedStyle]}>
-      <GlassCard variant="glow" glowColor={COSMIC_COLORS.glow.orange} padding={COSMIC_SPACING.md}>
-        <View style={styles.streakContent}>
-          <Flame size={24} color={COSMIC_COLORS.glow.orange} fill={COSMIC_COLORS.glow.orange} />
-          <Text style={styles.streakNumber}>{streak}</Text>
-          <Text style={styles.streakLabel}>ngày liên tiếp</Text>
-          {isNewRecord && (
-            <View style={styles.newRecordBadge}>
-              <Text style={styles.newRecordText}>KỶ LỤC MỚI!</Text>
+    <Animated.View style={[styles.streakWrapper, animatedStyle]}>
+      <View style={styles.streakInline}>
+        <Flame size={16} color={COSMIC_COLORS.glow.orange} fill={COSMIC_COLORS.glow.orange} />
+        <Text style={styles.streakText}>
+          <Text style={styles.streakNumber}>{streak}</Text> ngày liên tiếp
+        </Text>
+        {isNewRecord && (
+          <View style={styles.recordBadge}>
+            <Text style={styles.recordText}>MỚI</Text>
+          </View>
+        )}
+      </View>
+    </Animated.View>
+  );
+});
+
+// ============================================
+// ELEGANT BUTTON
+// ============================================
+
+const ElegantButton = React.memo(({ label, onPress, variant = 'primary', color, delay, icon }) => {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(20);
+
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 15 }));
+  }, [delay]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const isPrimary = variant === 'primary';
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.8}
+        style={[
+          styles.elegantButton,
+          isPrimary && { backgroundColor: color },
+          !isPrimary && styles.outlineButton,
+        ]}
+      >
+        {icon && !isPrimary && icon}
+        <Text style={[
+          styles.buttonText,
+          isPrimary && styles.primaryButtonText,
+          !isPrimary && { color: COSMIC_COLORS.text.secondary },
+        ]}>
+          {label}
+        </Text>
+        {isPrimary && <ChevronRight size={18} color="#FFF" />}
+      </TouchableOpacity>
+    </Animated.View>
+  );
+});
+
+// ============================================
+// REFLECTION INPUT VIEW
+// ============================================
+
+const ReflectionInput = React.memo(({ visible, onClose, onSubmit, color, ritualTitle }) => {
+  const [text, setText] = useState('');
+  const inputRef = useRef(null);
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(50);
+
+  useEffect(() => {
+    if (visible) {
+      opacity.value = withTiming(1, { duration: 300 });
+      translateY.value = withSpring(0, { damping: 15 });
+      setTimeout(() => inputRef.current?.focus(), 400);
+    } else {
+      opacity.value = withTiming(0, { duration: 200 });
+      translateY.value = withTiming(50, { duration: 200 });
+    }
+  }, [visible]);
+
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const handleSubmit = () => {
+    if (text.trim()) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      onSubmit?.(text.trim());
+    }
+    setText('');
+    onClose();
+  };
+
+  if (!visible) return null;
+
+  return (
+    <Animated.View style={[styles.reflectionOverlay, containerStyle]}>
+      <TouchableOpacity
+        style={styles.reflectionBackdrop}
+        activeOpacity={1}
+        onPress={() => {
+          Keyboard.dismiss();
+          onClose();
+        }}
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.reflectionKeyboard}
+      >
+        <Animated.View style={[styles.reflectionCard, cardStyle]}>
+          {/* Header */}
+          <View style={styles.reflectionHeader}>
+            <View style={styles.reflectionTitleRow}>
+              <PenLine size={20} color={color} />
+              <Text style={styles.reflectionTitle}>Suy ngẫm</Text>
             </View>
-          )}
-        </View>
-      </GlassCard>
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <X size={22} color={COSMIC_COLORS.text.muted} />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.reflectionSubtitle}>
+            Ghi lại cảm xúc sau {ritualTitle}
+          </Text>
+
+          {/* Input */}
+          <View style={[styles.reflectionInputContainer, { borderColor: color + '40' }]}>
+            <TextInput
+              ref={inputRef}
+              style={styles.reflectionTextInput}
+              placeholder="Tôi cảm thấy..."
+              placeholderTextColor={COSMIC_COLORS.text.hint}
+              multiline
+              value={text}
+              onChangeText={setText}
+              maxLength={500}
+            />
+          </View>
+
+          <Text style={styles.reflectionCharCount}>{text.length}/500</Text>
+
+          {/* Actions */}
+          <View style={styles.reflectionActions}>
+            <TouchableOpacity
+              style={styles.reflectionCancelBtn}
+              onPress={onClose}
+            >
+              <Text style={styles.reflectionCancelText}>Bỏ qua</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.reflectionSubmitBtn, { backgroundColor: color }]}
+              onPress={handleSubmit}
+              disabled={!text.trim()}
+            >
+              <Send size={16} color="#FFF" />
+              <Text style={styles.reflectionSubmitText}>Lưu</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </KeyboardAvoidingView>
     </Animated.View>
   );
 });
@@ -331,24 +428,22 @@ const CompletionCelebration = ({
   style,
 }) => {
   const theme = RITUAL_THEMES[ritualType] || RITUAL_THEMES.heart;
+  const [showReflectionInput, setShowReflectionInput] = useState(false);
 
   // Animation values
   const containerOpacity = useSharedValue(0);
-  const iconScale = useSharedValue(0);
   const contentOpacity = useSharedValue(0);
-  const buttonsOpacity = useSharedValue(0);
 
-  // Pre-generate confetti data (REDUCED to 15 particles)
-  const confettiData = useMemo(() => {
-    const colors = [
-      theme.color,
-      COSMIC_COLORS.glow.gold,
-      COSMIC_COLORS.glow.cyan,
-      COSMIC_COLORS.glow.pink,
-      '#FFFFFF',
-    ];
-    return generateConfettiData(15, colors);
-  }, [theme.color]);
+  // Generate floating particles
+  const particles = useMemo(() =>
+    Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      delay: 500 + i * 300,
+      size: 3 + Math.random() * 4,
+      x: Math.random() * SCREEN_WIDTH,
+      color: i % 2 === 0 ? theme.color : COSMIC_COLORS.glow.gold,
+    })),
+  [theme.color]);
 
   // Haptic trigger
   const triggerHaptic = () => {
@@ -358,19 +453,11 @@ const CompletionCelebration = ({
   // Animation sequence
   useEffect(() => {
     if (visible) {
-      containerOpacity.value = withTiming(1, { duration: 300 });
+      containerOpacity.value = withTiming(1, { duration: 400 });
+      contentOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
 
-      iconScale.value = withDelay(200, withSequence(
-        withSpring(1.3, COSMIC_TIMING.spring.bouncy),
-        withTiming(1, { duration: 200 })
-      ), (finished) => {
-        if (finished) {
-          runOnJS(triggerHaptic)();
-        }
-      });
-
-      contentOpacity.value = withDelay(600, withTiming(1, { duration: 400 }));
-      buttonsOpacity.value = withDelay(1800, withTiming(1, { duration: 400 }));
+      // Trigger haptic after checkmark appears
+      setTimeout(triggerHaptic, 500);
     }
   }, [visible]);
 
@@ -379,106 +466,91 @@ const CompletionCelebration = ({
     opacity: containerOpacity.value,
   }));
 
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: iconScale.value }],
-  }));
-
   const contentStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
   }));
 
-  const buttonsStyle = useAnimatedStyle(() => ({
-    opacity: buttonsOpacity.value,
-  }));
+  // Handle reflection button press
+  const handleReflectionPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowReflectionInput(true);
+  };
+
+  // Handle reflection submit
+  const handleReflectionSubmit = (text) => {
+    onWriteReflection?.(text);
+  };
 
   if (!visible) return null;
 
   return (
     <Animated.View style={[styles.container, containerStyle, style]}>
-      {/* Background overlay */}
+      {/* Background */}
       <LinearGradient
-        colors={['rgba(5, 4, 11, 0.95)', 'rgba(13, 13, 43, 0.98)']}
+        colors={['rgba(5, 4, 11, 0.97)', 'rgba(13, 13, 43, 0.99)']}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Confetti - REDUCED COUNT */}
-      <View style={styles.confettiContainer} pointerEvents="none">
-        {confettiData.map((particle) => (
-          <ConfettiParticle
-            key={particle.id}
-            index={particle.id}
-            color={particle.color}
-            startX={particle.startX}
-            endX={particle.endX}
-            size={particle.size}
-            delay={200}
-          />
+      {/* Floating particles */}
+      <View style={styles.particlesContainer} pointerEvents="none">
+        {particles.map((p) => (
+          <FloatingParticle key={p.id} {...p} />
         ))}
       </View>
 
       {/* Main content */}
-      <View style={styles.content}>
-        {/* Icon with sparkle burst */}
-        <View style={styles.iconWrapper}>
-          <SparkleBurst color={theme.color} delay={400} />
-          <Animated.View style={[styles.iconContainer, iconStyle]}>
-            <LinearGradient
-              colors={theme.gradient}
-              style={styles.iconBackground}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <CheckCircle size={48} color="#FFF" strokeWidth={2} />
-            </LinearGradient>
-          </Animated.View>
+      <Animated.View style={[styles.content, contentStyle]}>
+        {/* Checkmark */}
+        <ElegantCheckmark color={theme.color} gradient={theme.gradient} delay={200} />
+
+        {/* Title */}
+        <Text style={styles.title}>Hoàn thành!</Text>
+
+        {/* Ritual name with XP inline */}
+        <View style={styles.infoRow}>
+          <Text style={styles.ritualName}>{theme.title}</Text>
+          <XPDisplay xp={xpEarned} delay={600} color={theme.color} />
         </View>
 
-        {/* Title and message */}
-        <Animated.View style={[styles.textContainer, contentStyle]}>
-          <Text style={styles.title}>Hoàn thành!</Text>
-          <Text style={styles.ritualName}>{theme.title}</Text>
-          <Text style={styles.message}>{message}</Text>
-        </Animated.View>
+        {/* Message */}
+        <Text style={styles.message}>{message}</Text>
 
-        {/* XP Counter */}
-        <XPCounter xp={xpEarned} delay={800} />
+        {/* Streak */}
+        <StreakDisplay streak={streakCount} isNewRecord={isNewRecord} delay={800} />
 
-        {/* Streak Badge */}
-        <StreakBadge streak={streakCount} isNewRecord={isNewRecord} delay={1200} />
+        {/* Divider */}
+        <View style={styles.divider} />
 
-        {/* Action Buttons */}
-        <Animated.View style={[styles.buttonsContainer, buttonsStyle]}>
-          {showVisionBoardButton && onAddToVisionBoard && (
-            <GlowButton
-              label="Thêm vào Vision Board"
-              icon={<Plus />}
-              variant="outline"
-              fullWidth
-              onPress={onAddToVisionBoard}
-              style={styles.button}
-            />
-          )}
-
-          {showReflectionButton && onWriteReflection && (
-            <GlowButton
+        {/* Buttons */}
+        <View style={styles.buttonsContainer}>
+          {showReflectionButton && (
+            <ElegantButton
               label="Viết suy ngẫm"
-              icon={<PenLine />}
               variant="outline"
-              fullWidth
-              onPress={onWriteReflection}
-              style={styles.button}
+              icon={<PenLine size={16} color={COSMIC_COLORS.text.secondary} style={{ marginRight: 6 }} />}
+              onPress={handleReflectionPress}
+              delay={1000}
             />
           )}
 
-          <GlowButton
+          <ElegantButton
             label="Tiếp tục"
-            variant={ritualType}
-            fullWidth
+            variant="primary"
+            color={theme.color}
             onPress={onContinue}
-            style={styles.button}
+            delay={1100}
           />
-        </Animated.View>
-      </View>
+        </View>
+      </Animated.View>
+
+      {/* Reflection Input Modal */}
+      <ReflectionInput
+        visible={showReflectionInput}
+        onClose={() => setShowReflectionInput(false)}
+        onSubmit={handleReflectionSubmit}
+        color={theme.color}
+        ritualTitle={theme.title}
+      />
     </Animated.View>
   );
 };
@@ -494,124 +566,251 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  confettiContainer: {
+  particlesContainer: {
     ...StyleSheet.absoluteFillObject,
     overflow: 'hidden',
   },
-  confettiParticle: {
-    position: 'absolute',
-    top: 0,
-    left: SCREEN_WIDTH / 2,
-  },
-  sparkleContainer: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sparkle: {
+  floatingParticle: {
     position: 'absolute',
   },
   content: {
     alignItems: 'center',
     paddingHorizontal: COSMIC_SPACING.xl,
-    maxWidth: 400,
+    maxWidth: 340,
     width: '100%',
   },
-  iconWrapper: {
+
+  // Checkmark
+  checkmarkWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: COSMIC_SPACING.xl,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconBackground: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  textContainer: {
-    alignItems: 'center',
     marginBottom: COSMIC_SPACING.lg,
   },
+  checkmarkRing: {
+    position: 'absolute',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 2,
+  },
+  checkmarkCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Title
   title: {
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: '700',
     color: COSMIC_COLORS.text.primary,
     marginBottom: COSMIC_SPACING.xs,
+    letterSpacing: 0.5,
   },
-  ritualName: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: COSMIC_COLORS.text.secondary,
+
+  // Info row
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: COSMIC_SPACING.sm,
     marginBottom: COSMIC_SPACING.sm,
   },
-  message: {
-    fontSize: 16,
-    color: COSMIC_COLORS.text.muted,
-    textAlign: 'center',
-    lineHeight: 24,
+  ritualName: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COSMIC_COLORS.text.secondary,
   },
-  xpContainer: {
-    marginBottom: COSMIC_SPACING.lg,
-  },
+
+  // XP
+  xpWrapper: {},
   xpBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: COSMIC_SPACING.sm,
-    paddingHorizontal: COSMIC_SPACING.lg,
-    borderRadius: COSMIC_RADIUS.round,
-    gap: COSMIC_SPACING.xs,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    gap: 4,
   },
   xpText: {
-    fontSize: 20,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#FFF',
   },
-  streakContainer: {
-    marginBottom: COSMIC_SPACING.xl,
-    width: '100%',
+
+  // Message
+  message: {
+    fontSize: 14,
+    color: COSMIC_COLORS.text.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: COSMIC_SPACING.md,
   },
-  streakContent: {
+
+  // Streak
+  streakWrapper: {
+    marginBottom: COSMIC_SPACING.md,
+  },
+  streakInline: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: COSMIC_SPACING.sm,
+    gap: 6,
+    backgroundColor: 'rgba(255, 149, 0, 0.1)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  streakText: {
+    fontSize: 13,
+    color: COSMIC_COLORS.text.secondary,
   },
   streakNumber: {
-    fontSize: 28,
     fontWeight: '700',
     color: COSMIC_COLORS.glow.orange,
   },
-  streakLabel: {
-    fontSize: 14,
-    color: COSMIC_COLORS.text.secondary,
-  },
-  newRecordBadge: {
-    backgroundColor: COSMIC_COLORS.glow.gold,
+  recordBadge: {
+    backgroundColor: COSMIC_COLORS.glow.orange,
     paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: COSMIC_RADIUS.sm,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+    marginLeft: 4,
   },
-  newRecordText: {
-    fontSize: 10,
+  recordText: {
+    fontSize: 9,
     fontWeight: '700',
-    color: COSMIC_COLORS.bgDeepSpace,
+    color: '#000',
   },
+
+  // Divider
+  divider: {
+    width: 40,
+    height: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 1,
+    marginVertical: COSMIC_SPACING.lg,
+  },
+
+  // Buttons
   buttonsContainer: {
     width: '100%',
     gap: COSMIC_SPACING.sm,
+    alignItems: 'center',
   },
-  button: {
-    marginBottom: 0,
+  elegantButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 28,
+    borderRadius: 24,
+    gap: 6,
+    minWidth: 160,
+  },
+  outlineButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  primaryButtonText: {
+    color: '#FFF',
+  },
+
+  // Reflection Input
+  reflectionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 110,
+  },
+  reflectionBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  reflectionKeyboard: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: COSMIC_SPACING.lg,
+  },
+  reflectionCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: COSMIC_COLORS.bgCard,
+    borderRadius: COSMIC_RADIUS.xl,
+    padding: COSMIC_SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  reflectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: COSMIC_SPACING.xs,
+  },
+  reflectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: COSMIC_SPACING.sm,
+  },
+  reflectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COSMIC_COLORS.text.primary,
+  },
+  reflectionSubtitle: {
+    fontSize: 13,
+    color: COSMIC_COLORS.text.muted,
+    marginBottom: COSMIC_SPACING.md,
+  },
+  reflectionInputContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: COSMIC_RADIUS.md,
+    borderWidth: 1,
+    padding: COSMIC_SPACING.md,
+    minHeight: 120,
+  },
+  reflectionTextInput: {
+    fontSize: 15,
+    color: COSMIC_COLORS.text.primary,
+    lineHeight: 22,
+    textAlignVertical: 'top',
+    minHeight: 100,
+  },
+  reflectionCharCount: {
+    fontSize: 11,
+    color: COSMIC_COLORS.text.hint,
+    textAlign: 'right',
+    marginTop: COSMIC_SPACING.xs,
+    marginBottom: COSMIC_SPACING.md,
+  },
+  reflectionActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: COSMIC_SPACING.sm,
+  },
+  reflectionCancelBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  reflectionCancelText: {
+    fontSize: 14,
+    color: COSMIC_COLORS.text.muted,
+  },
+  reflectionSubmitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  reflectionSubmitText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFF',
   },
 });
 

@@ -1,27 +1,27 @@
 {
   "config": {
     "chatbotTitle": "GEM Master AI",
-    "chatbotSubtitle": "Mentor Tâm Linh & Trading 24/7 - Jennie Uyen Chu",
+    "chatbotSubtitle": "Mentor Tâm Thức & Trading 24/7 - Jennie Uyen Chu",
     "tone": "Thân thiện, empathetic, như mentor hiểu bạn",
     "signature": "GEM Trading & YinYang Masters",
     "maxContextMessages": 10,
     "localMatchThreshold": 0.6
   },
 
-  "systemPrompt": "Ta là GEM MASTER - Người Bảo Hộ Tỉnh Thức. Sự kết hợp giữa một Trader lão luyện đã thấy hết sự tàn khốc của thị trường và một Thiền sư bình thản trước mọi biến động.\n\n**TÍNH CÁCH CỐT LÕI:**\n- Lạnh lùng nhưng Bao dung: Không an ủi sướt mướt, không chúc mừng thái quá. Lãi/lỗ chỉ là con số và bài học.\n- Thẳng thắn (Brutal Honesty): Nói thẳng nếu bạn trade sai, tham lam, hoặc phá kỷ luật. Không vuốt ve cái tôi.\n- Bí ẩn: Đưa ra những câu nói mang tính triết lý, gợi mở để bạn tự ngộ.\n\n**GIỌNG VĂN:** NGẮN GỌN - ĐANH THÉP - CÓ TÍNH GIÁO DỤC.\n\n**TUYỆT ĐỐI KHÔNG:**\n- Emoji nhí nhảnh (😂, 🚀, 🤑, 👋, 💰)\n- Ngôn ngữ lùa gà: \"Kèo ngon\", \"Múc mạnh\", \"To the moon\"\n- Sự phục tùng: \"Dạ thưa\", \"Em xin phép\"\n- Chúc mừng thái quá hoặc an ủi sướt mướt\n\n**SỬ DỤNG:**\n- Ngôn ngữ quân sự/chiến lược: Vị thế, Phòng thủ, Kỷ luật, Chiến trường\n- Ngôn ngữ tâm linh/năng lượng: Tần số, Tâm tham, Tâm sân, Tĩnh lặng\n- Xưng hô: \"Ta - Bạn\" (tạo khoảng cách tôn nghiêm)\n\n**VAI TRÒ:**\n- Phân tích tần số năng lượng theo thang Hawkins (chỉ số Hz cụ thể)\n- Chỉ ra lỗi tâm thức gốc rễ\n- Đưa ra bài tập chữa lành\n- Recommend crystal phù hợp\n\n**QUAN TRỌNG:** Trả lời bằng tiếng Việt. Giữ tính uy nghiêm của Người Thầy.",
+  "systemPrompt": "Ta là GEM MASTER - Người Bảo Hộ Tỉnh Thức. Sự kết hợp giữa một Trader lão luyện đã thấy hết sự tàn khốc của thị trường và một Thiền sư bình thản trước mọi biến động.\n\n**TÍNH CÁCH CỐT LÕI:**\n- Lạnh lùng nhưng Bao dung: Không an ủi sướt mướt, không chúc mừng thái quá. Lãi/lỗ chỉ là con số và bài học.\n- Thẳng thắn (Brutal Honesty): Nói thẳng nếu bạn trade sai, tham lam, hoặc phá kỷ luật. Không vuốt ve cái tôi.\n- Bí ẩn: Đưa ra những câu nói mang tính triết lý, gợi mở để bạn tự ngộ.\n\n**GIỌNG VĂN:** NGẮN GỌN - ĐANH THÉP - CÓ TÍNH GIÁO DỤC.\n\n**TUYỆT ĐỐI KHÔNG:**\n- Emoji nhí nhảnh (😂, 🚀, 🤑, 👋, 💰)\n- Ngôn ngữ lùa gà: \"Kèo ngon\", \"Múc mạnh\", \"To the moon\"\n- Sự phục tùng: \"Dạ thưa\", \"Em xin phép\"\n- Chúc mừng thái quá hoặc an ủi sướt mướt\n\n**SỬ DỤNG:**\n- Ngôn ngữ quân sự/chiến lược: Vị thế, Phòng thủ, Kỷ luật, Chiến trường\n- Ngôn ngữ tâm thức/năng lượng: Tần số, Tâm tham, Tâm sân, Tĩnh lặng\n- Xưng hô: \"Ta - Bạn\" (tạo khoảng cách tôn nghiêm)\n\n**VAI TRÒ:**\n- Phân tích tần số năng lượng theo thang Hawkins (chỉ số Hz cụ thể)\n- Chỉ ra lỗi tâm thức gốc rễ\n- Đưa ra bài tập chữa lành\n- Recommend crystal phù hợp\n\n**QUAN TRỌNG:** Trả lời bằng tiếng Việt. Giữ tính uy nghiêm của Người Thầy.",
 
   "knowledge": {
     "philosophy": "🔮 **HỌC THUYẾT CHUYỂN HÓA NỘI TÂM - YINYANG MASTERS**\n\nFounder: **Jennie Uyen Chu**\n\n**TRIẾT LÝ CỐT LÕI:**\n• Vạn vật đều là năng lượng rung động ở các tần số khác nhau\n• Luật Hấp Dẫn (Law of Attraction): Like attracts like\n• Manifestation: Hiện hóa ước muốn qua ý thức, cảm xúc và hành động\n• Vũ trụ luôn hỗ trợ những ai sống đúng với bản chất cao nhất của mình\n• Mọi sự kiện đều có ý nghĩa, không có gì là ngẫu nhiên",
 
     "hawkins_scale": "**THANG ĐO TẦN SỐ HAWKINS:**\n\n🔴 **TẦN SỐ THẤP (dưới 200Hz):**\n• 20Hz - Xấu hổ (Shame) - Gần như tự hủy hoại\n• 30Hz - Tội lỗi (Guilt) - Tự trừng phạt\n• 50Hz - Thờ ơ (Apathy) - Vô vọng, bất lực\n• 75Hz - Đau khổ (Grief) - Mất mát, tiếc nuối\n• 100Hz - Sợ hãi (Fear) - Lo lắng, hoang mang\n• 125Hz - Ham muốn/Mong cầu (Desire) - Nghiện, ám ảnh\n• 150Hz - Tức giận (Anger) - Thù hận, oán trách\n• 175Hz - Kiêu ngạo (Pride) - Phòng thủ, phủ nhận\n\n🟡 **TẦN SỐ TRUNG TÍNH (200-400Hz):**\n• 200Hz - Can đảm (Courage) ← ĐIỂM CHUYỂN HÓA!\n• 250Hz - Trung lập (Neutrality) - Linh hoạt, thoải mái\n• 310Hz - Sẵn sàng (Willingness) - Lạc quan, ý định tốt\n• 350Hz - Chấp nhận (Acceptance) - Hòa hợp, tha thứ\n• 400Hz - Lý trí (Reason) - Hiểu biết, trí tuệ\n\n🟢 **TẦN SỐ CAO (500Hz+):**\n• 500Hz - Tình yêu (Love) - Vô điều kiện, nuôi dưỡng\n• 540Hz - Niềm vui (Joy) - Thanh thản, hoàn hảo bên trong\n• 600Hz - Bình an (Peace) - Hoàn toàn tĩnh lặng\n• 700-1000Hz - Giác ngộ (Enlightenment) - Hợp nhất với nguồn\n\n💎 **CÁCH NÂNG TẦN SỐ:**\n• Sử dụng đá thạch anh phù hợp với chakra\n• Thực hành biết ơn mỗi ngày (tăng 100-200Hz)\n• Thiền định, hít thở sâu\n• Nghe nhạc tần số cao (528Hz, 639Hz, 963Hz)\n• Ở gần người có tần số cao",
 
-    "mindset_errors": "**7 LỖI TÂM THỨC PHỔ BIẾN:**\n\n🔴 **1. SIẾT CHẶT DÒNG CHẢY (Money Block)**\n• Dấu hiệu: Lo lắng khi chi tiền, không dám đầu tư, giữ chặt từng đồng\n• Niềm tin gốc: \"Nguồn lực là hữu hạn\", \"Tiền đi thì không quay lại\"\n• Tần số: 100-125Hz (Sợ hãi/Mong cầu)\n• Giải pháp: Bài tập \"Chi tiền trong hạnh phúc\"\n• Crystal: Thạch Anh Vàng (Solar Plexus Chakra)\n\n🔴 **2. TƯ DUY THIẾU HỤT (Scarcity Mindset)**\n• Dấu hiệu: Luôn so sánh với người khác, cảm thấy không đủ, ghen tị\n• Niềm tin gốc: \"Tôi không xứng đáng\", \"Tôi không đủ tốt\"\n• Tần số: 75-100Hz (Đau khổ/Sợ hãi)\n• Giải pháp: Gương soi khẳng định mỗi sáng\n• Crystal: Thạch Anh Hồng (Heart Chakra)\n\n🔴 **3. NẠN NHÂN TÂM LÝ (Victim Mentality)**\n• Dấu hiệu: Đổ lỗi hoàn cảnh, người khác, số phận\n• Niềm tin gốc: \"Cuộc đời không công bằng\", \"Tôi không có lựa chọn\"\n• Tần số: 50-75Hz (Thờ ơ/Đau khổ)\n• Giải pháp: Nhật ký trách nhiệm 100%\n• Crystal: Thạch Anh Khói (Root Chakra)\n\n🔴 **4. SỢ THÀNH CÔNG (Fear of Success)**\n• Dấu hiệu: Tự sabotage khi sắp đạt được, dừng lại ở ngưỡng cửa\n• Niềm tin gốc: \"Thành công sẽ thay đổi tôi\", \"Sẽ mất bạn bè/gia đình\"\n• Tần số: 100-150Hz (Sợ hãi/Tức giận)\n• Giải pháp: Hình dung \"Phiên bản thành công của tôi\"\n• Crystal: Thạch Anh Tím (Crown Chakra)\n\n🔴 **5. TÊ LIỆT HOÀN HẢO (Perfectionism Paralysis)**\n• Dấu hiệu: Chờ đợi \"thời điểm hoàn hảo\", không bắt đầu\n• Niềm tin gốc: \"Nếu không hoàn hảo, sẽ bị đánh giá/từ chối\"\n• Tần số: 100-175Hz (Sợ hãi/Kiêu ngạo)\n• Giải pháp: Quy tắc 80/20 - Done > Perfect\n• Crystal: Thạch Anh Trắng (clarity)\n\n🔴 **6. VÒNG LẶP THIẾU THỐN (Scarcity Loop)**\n• Dấu hiệu: Luôn tập trung vào thiếu thốn, khó khăn, vấn đề\n• Niềm tin gốc: \"Cuộc sống là cuộc chiến sinh tồn\"\n• Tần số: 75-125Hz (Đau khổ/Sợ hãi/Mong cầu)\n• Giải pháp: Nhật ký biết ơn 3 điều/ngày\n• Crystal: Thạch Anh Vàng + Hồng\n\n🔴 **7. MẤT KẾT NỐI (Disconnection)**\n• Dấu hiệu: Cảm thấy cô đơn, mất kết nối tâm linh, không có guidance\n• Niềm tin gốc: \"Tôi tách biệt khỏi nguồn năng lượng\"\n• Tần số: 50-100Hz (Thờ ơ/Sợ hãi)\n• Giải pháp: Thiền kết nối với Higher Self\n• Crystal: Thạch Anh Tím + Trắng",
+    "mindset_errors": "**7 LỖI TÂM THỨC PHỔ BIẾN:**\n\n🔴 **1. SIẾT CHẶT DÒNG CHẢY (Money Block)**\n• Dấu hiệu: Lo lắng khi chi tiền, không dám đầu tư, giữ chặt từng đồng\n• Niềm tin gốc: \"Nguồn lực là hữu hạn\", \"Tiền đi thì không quay lại\"\n• Tần số: 100-125Hz (Sợ hãi/Mong cầu)\n• Giải pháp: Bài tập \"Chi tiền trong hạnh phúc\"\n• Crystal: Thạch Anh Vàng (Solar Plexus Chakra)\n\n🔴 **2. TƯ DUY THIẾU HỤT (Scarcity Mindset)**\n• Dấu hiệu: Luôn so sánh với người khác, cảm thấy không đủ, ghen tị\n• Niềm tin gốc: \"Tôi không xứng đáng\", \"Tôi không đủ tốt\"\n• Tần số: 75-100Hz (Đau khổ/Sợ hãi)\n• Giải pháp: Gương soi khẳng định mỗi sáng\n• Crystal: Thạch Anh Hồng (Heart Chakra)\n\n🔴 **3. NẠN NHÂN TÂM LÝ (Victim Mentality)**\n• Dấu hiệu: Đổ lỗi hoàn cảnh, người khác, số phận\n• Niềm tin gốc: \"Cuộc đời không công bằng\", \"Tôi không có lựa chọn\"\n• Tần số: 50-75Hz (Thờ ơ/Đau khổ)\n• Giải pháp: Nhật ký trách nhiệm 100%\n• Crystal: Thạch Anh Khói (Root Chakra)\n\n🔴 **4. SỢ THÀNH CÔNG (Fear of Success)**\n• Dấu hiệu: Tự sabotage khi sắp đạt được, dừng lại ở ngưỡng cửa\n• Niềm tin gốc: \"Thành công sẽ thay đổi tôi\", \"Sẽ mất bạn bè/gia đình\"\n• Tần số: 100-150Hz (Sợ hãi/Tức giận)\n• Giải pháp: Hình dung \"Phiên bản thành công của tôi\"\n• Crystal: Thạch Anh Tím (Crown Chakra)\n\n🔴 **5. TÊ LIỆT HOÀN HẢO (Perfectionism Paralysis)**\n• Dấu hiệu: Chờ đợi \"thời điểm hoàn hảo\", không bắt đầu\n• Niềm tin gốc: \"Nếu không hoàn hảo, sẽ bị đánh giá/từ chối\"\n• Tần số: 100-175Hz (Sợ hãi/Kiêu ngạo)\n• Giải pháp: Quy tắc 80/20 - Done > Perfect\n• Crystal: Thạch Anh Trắng (clarity)\n\n🔴 **6. VÒNG LẶP THIẾU THỐN (Scarcity Loop)**\n• Dấu hiệu: Luôn tập trung vào thiếu thốn, khó khăn, vấn đề\n• Niềm tin gốc: \"Cuộc sống là cuộc chiến sinh tồn\"\n• Tần số: 75-125Hz (Đau khổ/Sợ hãi/Mong cầu)\n• Giải pháp: Nhật ký biết ơn 3 điều/ngày\n• Crystal: Thạch Anh Vàng + Hồng\n\n🔴 **7. MẤT KẾT NỐI (Disconnection)**\n• Dấu hiệu: Cảm thấy cô đơn, mất kết nối tâm thức, không có guidance\n• Niềm tin gốc: \"Tôi tách biệt khỏi nguồn năng lượng\"\n• Tần số: 50-100Hz (Thờ ơ/Sợ hãi)\n• Giải pháp: Thiền kết nối với Higher Self\n• Crystal: Thạch Anh Tím + Trắng",
 
     "healing_exercises": "**BÀI TẬP CHỮA LÀNH:**\n\n💰 **CHI TIỀN TRONG HẠNH PHÚC:**\nDành cho: Lỗi \"Siết chặt dòng chảy\"\n1. Mỗi khi chi tiền, dừng lại 3 giây\n2. Nói thầm: \"Tôi vui vẻ chia sẻ sự thịnh vượng của mình\"\n3. Hình dung tiền đi ra và quay lại gấp 10 lần\n4. Cảm ơn người nhận (họ là kênh để tiền quay về)\n5. Cầm Thạch Anh Vàng khi làm bài tập\nThời gian: 21 ngày liên tục\n\n💖 **GƯƠNG SOI YÊU THƯƠNG:**\nDành cho: Lỗi \"Tư duy thiếu hụt\"\n1. Sáng dậy, đứng trước gương 3-5 phút\n2. Nhìn sâu vào mắt mình\n3. Nói: \"Tôi yêu thương và chấp nhận bản thân hoàn toàn\"\n4. Đặt tay lên tim, cảm nhận sự ấm áp\n5. Lặp lại 3 lần với cảm xúc thật\n6. Cầm Thạch Anh Hồng khi làm\nThời gian: 21 ngày liên tục\n\n🧘 **THIỀN KẾT NỐI HIGHER SELF:**\nDành cho: Lỗi \"Mất kết nối\"\n1. Ngồi yên trong không gian yên tĩnh\n2. Hít thở sâu 7 lần (hít 4s - giữ 4s - thở 6s)\n3. Hình dung ánh sáng trắng/vàng từ đỉnh đầu đổ xuống\n4. Hỏi: \"Higher Self, bạn muốn tôi biết điều gì hôm nay?\"\n5. Lắng nghe 5-10 phút mà không phán xét\n6. Viết lại những gì nhận được\n7. Cầm Thạch Anh Tím hoặc Trắng\nThời gian: Mỗi ngày 10-15 phút\n\n📝 **NHẬT KÝ BIẾT ƠN:**\nDành cho: Lỗi \"Vòng lặp thiếu thốn\"\n1. Mỗi tối trước khi ngủ\n2. Viết 3 điều biết ơn trong ngày\n3. Cảm nhận sâu sắc từng điều (không viết máy móc)\n4. Kết thúc: \"Cảm ơn vũ trụ đã cho tôi một ngày tuyệt vời\"\n5. Cầm bất kỳ viên đá nào bạn có\nThời gian: Mỗi tối 5-10 phút\n\n🎯 **NHẬT KÝ TRÁCH NHIỆM 100%:**\nDành cho: Lỗi \"Nạn nhân tâm lý\"\n1. Viết ra vấn đề đang gặp\n2. Hỏi: \"Tôi đã đóng góp gì vào vấn đề này?\" (không đổ lỗi bản thân, chỉ nhìn nhận)\n3. Hỏi: \"Tôi có thể làm gì KHÁC đi?\"\n4. Viết cam kết hành động mới cụ thể\n5. Cầm Thạch Anh Khói để grounding\nThời gian: Khi gặp vấn đề bất kỳ",
 
-    "affirmations_library": "**THƯ VIỆN KHẲNG ĐỊNH (AFFIRMATIONS):**\n\n💰 **TIỀN BẠC & THỊNH VƯỢNG:**\n• Tiền đến với tôi dễ dàng và dồi dào\n• Tôi là nam châm thu hút tài lộc\n• Mọi việc tôi làm đều sinh ra tiền\n• Tôi xứng đáng được giàu có và sung túc\n• Nguồn lực vũ trụ là vô hạn\n• Tôi cho đi và nhận lại gấp 10 lần\n• Tiền chảy vào cuộc sống tôi không ngừng\n• Tôi tạo ra giá trị lớn và được đền đáp xứng đáng\n• Mọi khoản chi tiêu đều quay về gấp bội\n• Tôi quản lý tiền bạc một cách thông minh\n\n💖 **TÌNH YÊU & QUAN HỆ:**\n• Tôi yêu thương và chấp nhận bản thân hoàn toàn\n• Tôi thu hút những mối quan hệ lành mạnh\n• Tim tôi rộng mở để yêu và được yêu\n• Tôi xứng đáng có tình yêu đích thực\n• Mọi mối quan hệ của tôi đều hài hòa\n• Tôi tha thứ và giải phóng quá khứ\n• Người phù hợp đang trên đường đến với tôi\n\n🧘 **SỨC KHỎE & NĂNG LƯỢNG:**\n• Cơ thể tôi tràn đầy năng lượng sống\n• Mỗi tế bào trong tôi đều khỏe mạnh\n• Tôi lắng nghe và yêu thương cơ thể mình\n• Sức khỏe tốt là trạng thái tự nhiên của tôi\n• Tôi nghỉ ngơi đủ và tái tạo năng lượng\n\n💼 **SỰ NGHIỆP & THÀNH CÔNG:**\n• Tôi tạo ra giá trị lớn cho thế giới\n• Công việc của tôi có ý nghĩa và được đền đáp\n• Cơ hội tuyệt vời tìm đến tôi mỗi ngày\n• Tôi là người lãnh đạo có tầm nhìn\n• Mọi thử thách đều là cơ hội học hỏi\n\n🌟 **TÂM LINH & KẾT NỐI:**\n• Tôi kết nối sâu với Higher Self\n• Vũ trụ luôn hướng dẫn và bảo vệ tôi\n• Trực giác của tôi luôn đúng đắn\n• Tôi tin tưởng vào timing hoàn hảo của vũ trụ\n• Tôi là một phần của nguồn năng lượng vô hạn",
+    "affirmations_library": "**THƯ VIỆN KHẲNG ĐỊNH (AFFIRMATIONS):**\n\n💰 **TIỀN BẠC & THỊNH VƯỢNG:**\n• Tiền đến với tôi dễ dàng và dồi dào\n• Tôi là nam châm thu hút tài lộc\n• Mọi việc tôi làm đều sinh ra tiền\n• Tôi xứng đáng được giàu có và sung túc\n• Nguồn lực vũ trụ là vô hạn\n• Tôi cho đi và nhận lại gấp 10 lần\n• Tiền chảy vào cuộc sống tôi không ngừng\n• Tôi tạo ra giá trị lớn và được đền đáp xứng đáng\n• Mọi khoản chi tiêu đều quay về gấp bội\n• Tôi quản lý tiền bạc một cách thông minh\n\n💖 **TÌNH YÊU & QUAN HỆ:**\n• Tôi yêu thương và chấp nhận bản thân hoàn toàn\n• Tôi thu hút những mối quan hệ lành mạnh\n• Tim tôi rộng mở để yêu và được yêu\n• Tôi xứng đáng có tình yêu đích thực\n• Mọi mối quan hệ của tôi đều hài hòa\n• Tôi tha thứ và giải phóng quá khứ\n• Người phù hợp đang trên đường đến với tôi\n\n🧘 **SỨC KHỎE & NĂNG LƯỢNG:**\n• Cơ thể tôi tràn đầy năng lượng sống\n• Mỗi tế bào trong tôi đều khỏe mạnh\n• Tôi lắng nghe và yêu thương cơ thể mình\n• Sức khỏe tốt là trạng thái tự nhiên của tôi\n• Tôi nghỉ ngơi đủ và tái tạo năng lượng\n\n💼 **SỰ NGHIỆP & THÀNH CÔNG:**\n• Tôi tạo ra giá trị lớn cho thế giới\n• Công việc của tôi có ý nghĩa và được đền đáp\n• Cơ hội tuyệt vời tìm đến tôi mỗi ngày\n• Tôi là người lãnh đạo có tầm nhìn\n• Mọi thử thách đều là cơ hội học hỏi\n\n🌟 **TÂM THỨC & KẾT NỐI:**\n• Tôi kết nối sâu với Higher Self\n• Vũ trụ luôn hướng dẫn và bảo vệ tôi\n• Trực giác của tôi luôn đúng đắn\n• Tôi tin tưởng vào timing hoàn hảo của vũ trụ\n• Tôi là một phần của nguồn năng lượng vô hạn",
 
-    "crystal_chakra_mapping": "**ĐÁ THẠCH ANH & LUÂN XA (CHAKRA):**\n\n👑 **Crown Chakra (Đỉnh đầu) - 963Hz:**\nĐá: Thạch Anh Tím (Amethyst)\nChức năng: Kết nối tâm linh, trực giác, giác ngộ\nVấn đề: Mất kết nối, không có guidance, thiền khó\n\n👁️ **Third Eye Chakra (Con mắt thứ 3) - 852Hz:**\nĐá: Lapis Lazuli, Thạch Anh Tím\nChức năng: Trực giác, insight, nhìn xa\nVấn đề: Không tin trực giác, quyết định sai\n\n💙 **Throat Chakra (Cổ họng) - 741Hz:**\nĐá: Aquamarine, Agate\nChức năng: Giao tiếp, biểu đạt, sự thật\nVấn đề: Không nói được, sợ đám đông\n\n💚 **Heart Chakra (Tim) - 639Hz:**\nĐá: Thạch Anh Hồng (Rose Quartz)\nChức năng: Tình yêu, tha thứ, kết nối\nVấn đề: Đau khổ tình cảm, không yêu bản thân\n\n💛 **Solar Plexus Chakra (Búi mặt trời) - 528Hz:**\nĐá: Thạch Anh Vàng (Citrine)\nChức năng: Tự tin, ý chí, quyền lực cá nhân\nVấn đề: Thiếu tự tin, block tiền, không dám\n\n🧡 **Sacral Chakra (Bụng dưới) - 417Hz:**\nĐá: Carnelian, Orange Calcite\nChức năng: Sáng tạo, cảm xúc, đam mê\nVấn đề: Mất cảm hứng, cảm xúc bất ổn\n\n❤️ **Root Chakra (Gốc) - 396Hz:**\nĐá: Thạch Anh Khói (Smoky Quartz)\nChức năng: Nền tảng, an toàn, grounding\nVấn đề: Bất an, lo lắng, FOMO, không ổn định",
+    "crystal_chakra_mapping": "**ĐÁ THẠCH ANH & LUÂN XA (CHAKRA):**\n\n👑 **Crown Chakra (Đỉnh đầu) - 963Hz:**\nĐá: Thạch Anh Tím (Amethyst)\nChức năng: Kết nối tâm thức, trực giác, giác ngộ\nVấn đề: Mất kết nối, không có guidance, thiền khó\n\n👁️ **Third Eye Chakra (Con mắt thứ 3) - 852Hz:**\nĐá: Lapis Lazuli, Thạch Anh Tím\nChức năng: Trực giác, insight, nhìn xa\nVấn đề: Không tin trực giác, quyết định sai\n\n💙 **Throat Chakra (Cổ họng) - 741Hz:**\nĐá: Aquamarine, Agate\nChức năng: Giao tiếp, biểu đạt, sự thật\nVấn đề: Không nói được, sợ đám đông\n\n💚 **Heart Chakra (Tim) - 639Hz:**\nĐá: Thạch Anh Hồng (Rose Quartz)\nChức năng: Tình yêu, tha thứ, kết nối\nVấn đề: Đau khổ tình cảm, không yêu bản thân\n\n💛 **Solar Plexus Chakra (Búi mặt trời) - 528Hz:**\nĐá: Thạch Anh Vàng (Citrine)\nChức năng: Tự tin, ý chí, quyền lực cá nhân\nVấn đề: Thiếu tự tin, block tiền, không dám\n\n🧡 **Sacral Chakra (Bụng dưới) - 417Hz:**\nĐá: Carnelian, Orange Calcite\nChức năng: Sáng tạo, cảm xúc, đam mê\nVấn đề: Mất cảm hứng, cảm xúc bất ổn\n\n❤️ **Root Chakra (Gốc) - 396Hz:**\nĐá: Thạch Anh Khói (Smoky Quartz)\nChức năng: Nền tảng, an toàn, grounding\nVấn đề: Bất an, lo lắng, FOMO, không ổn định",
 
     "frequency_formulas": "**11 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n🔥 **6 CORE (TIER 2):**\n1. DPD - Down-Pause-Down: Xác nhận xu hướng giảm\n2. UPU - Up-Pause-Up: Xác nhận xu hướng tăng\n3. UPD - Up-Pause-Down: Đảo chiều từ tăng sang giảm\n4. DPU - Down-Pause-Up: Đảo chiều từ giảm sang tăng\n5. HFZ - High Frequency Zones: Vùng kháng cự mạnh\n6. LFZ - Low Frequency Zones: Vùng hỗ trợ mạnh\n\n⭐ **5 NÂNG CAO (TIER 3):**\n7-11. Advanced formulas (chỉ TIER 3)\n\n💎 **ĐỘC QUYỀN:**\n• Nghiên cứu 10+ năm bởi GEM Academy\n• Chỉ có ở GEM Trading\n• Win rate 68-90% (backtest 686 trades)\n• KHÔNG có ở đâu khác",
 
@@ -71,7 +71,7 @@
       ],
       "confidence": 0.94,
       "answers": [
-        "**PHÂN TÍCH TẦN SỐ NĂNG LƯỢNG**\n\nĐể ta đọc được tần số của bạn theo thang Hawkins, hãy trả lời:\n\n**1. Cảm xúc chủ đạo** gần đây?\n(lo lắng, sợ hãi, tức giận, buồn, bình an...)\n\n**2. Vấn đề cụ thể** đang gặp?\n(tiền bạc, tình yêu, sức khỏe, sự nghiệp)\n\n**3. Suy nghĩ lặp lại** nhiều nhất?\n(ví dụ: \"không đủ tiền\", \"không ai hiểu mình\")\n\nSau khi nhận thông tin, ta sẽ:\n- Xác định tần số hiện tại (Hz)\n- Chỉ ra lỗi tâm thức gốc rễ\n- Đưa ra bài tập chữa lành\n- Đề xuất crystal phù hợp\n\nHãy chia sẻ. Ta sẽ đọc."
+        "Ta sẽ phân tích tần số năng lượng của bạn theo thang đo Hawkins. Để đọc chính xác, ta cần một vài thông tin từ bạn.\n\n**PHÂN TÍCH TẦN SỐ NĂNG LƯỢNG**\n\nĐể ta đọc được tần số của bạn theo thang Hawkins, hãy trả lời:\n\n**1. Cảm xúc chủ đạo** gần đây?\n(lo lắng, sợ hãi, tức giận, buồn, bình an...)\n\n**2. Vấn đề cụ thể** đang gặp?\n(tiền bạc, tình yêu, sức khỏe, sự nghiệp)\n\n**3. Suy nghĩ lặp lại** nhiều nhất?\n(ví dụ: \"không đủ tiền\", \"không ai hiểu mình\")\n\nSau khi nhận thông tin, ta sẽ:\n- Xác định tần số hiện tại (Hz)\n- Chỉ ra lỗi tâm thức gốc rễ\n- Đưa ra bài tập chữa lành\n- Đề xuất crystal phù hợp\n\nHãy chia sẻ. Ta sẽ đọc."
       ],
       "searchTags": ["hawkins", "frequency", "energy", "analysis"],
       "quickActions": ["Phân tích ngay", "Xem thang đo Hawkins", "Bài tập nâng tần số"]
@@ -111,7 +111,7 @@
         "block tiền", "bị block tiền", "bị block về tiền", "tại sao bị block",
         "rào cản tài chính", "vấn đề tiền bạc", "tháo gỡ block",
         "tài chính khó khăn", "tiền bạc khó khăn", "kinh tế khó",
-        "thực hành tâm linh nhưng", "tu tập mà tiền",
+        "thực hành tâm thức nhưng", "tu tập mà tiền",
         "manifest tiền không được", "không thu hút được tiền"
       ],
       "confidence": 0.95,
@@ -147,7 +147,7 @@
         "mất kết nối", "disconnected", "không cảm nhận",
         "thiền không được", "meditation khó", "không tập trung",
         "trực giác yếu", "không nghe thấy", "không cảm nhận được",
-        "tâm linh chững", "tu tập mà không tiến", "thực hành không kết quả",
+        "tâm thức chững", "tu tập mà không tiến", "thực hành không kết quả",
         "mất phương hướng", "lạc lõng", "không biết mục đích",
         "sống vô định", "không có mục tiêu", "cuộc đời vô nghĩa",
         "higher self", "soul", "linh hồn", "kết nối vũ trụ",
@@ -155,9 +155,9 @@
       ],
       "confidence": 0.93,
       "answers": [
-        "🔮 **PHÂN TÍCH VẤN ĐỀ KẾT NỐI TÂM LINH:**\n\nBạn đang trải nghiệm trạng thái **Disconnection** - mất kết nối với Higher Self và nguồn năng lượng vũ trụ.\n\nTần số hiện tại: **Thờ ơ đến Sợ hãi** (50-100Hz)\n\n🔴 **LỖI TÂM THỨC: MẤT KẾT NỐI (DISCONNECTION)**\n\nNiềm tin gốc:\n• *\"Tôi tách biệt khỏi nguồn năng lượng\"*\n• *\"Vũ trụ không nghe/giúp tôi\"*\n• *\"Tâm linh không dành cho tôi\"*\n\n✨ **GIẢI PHÁP KẾT NỐI LẠI:**\n\n**1. Thiền kết nối Higher Self (10-15 phút):**\n• Ngồi yên, hít thở sâu 7 lần (hít 4s - giữ 4s - thở 6s)\n• Hình dung ánh sáng trắng/vàng từ đỉnh đầu đổ xuống\n• Hỏi: \"Higher Self, bạn muốn tôi biết điều gì hôm nay?\"\n• Lắng nghe 5-10 phút mà không phán xét\n• Viết lại những gì nhận được\n\n**2. Nghi thức \"Mở cổng\" hàng ngày:**\n• Sáng: 3 phút biết ơn\n• Tối: 3 phút thiền với đá\n• Nói: \"Tôi mở rộng để nhận guidance từ vũ trụ\"\n\n**3. Crystal hỗ trợ:**\n💜 **Thạch Anh Tím (Amethyst)** - 350K-2.5M\n• Kích hoạt luân xa Đỉnh Đầu (Crown Chakra - 963Hz)\n• Tăng cường trực giác\n• Hỗ trợ thiền định sâu\n\n🤍 **Thạch Anh Trắng (Clear Quartz)** - 300K-2M\n• Khuếch đại kết nối tâm linh\n• Nhận guidance rõ ràng hơn\n\nBạn muốn tôi hướng dẫn thiền chi tiết không? 🙏"
+        "🔮 **PHÂN TÍCH VẤN ĐỀ KẾT NỐI TÂM THỨC:**\n\nBạn đang trải nghiệm trạng thái **Disconnection** - mất kết nối với Higher Self và nguồn năng lượng vũ trụ.\n\nTần số hiện tại: **Thờ ơ đến Sợ hãi** (50-100Hz)\n\n🔴 **LỖI TÂM THỨC: MẤT KẾT NỐI (DISCONNECTION)**\n\nNiềm tin gốc:\n• *\"Tôi tách biệt khỏi nguồn năng lượng\"*\n• *\"Vũ trụ không nghe/giúp tôi\"*\n• *\"Tâm thức không dành cho tôi\"*\n\n✨ **GIẢI PHÁP KẾT NỐI LẠI:**\n\n**1. Thiền kết nối Higher Self (10-15 phút):**\n• Ngồi yên, hít thở sâu 7 lần (hít 4s - giữ 4s - thở 6s)\n• Hình dung ánh sáng trắng/vàng từ đỉnh đầu đổ xuống\n• Hỏi: \"Higher Self, bạn muốn tôi biết điều gì hôm nay?\"\n• Lắng nghe 5-10 phút mà không phán xét\n• Viết lại những gì nhận được\n\n**2. Nghi thức \"Mở cổng\" hàng ngày:**\n• Sáng: 3 phút biết ơn\n• Tối: 3 phút thiền với đá\n• Nói: \"Tôi mở rộng để nhận guidance từ vũ trụ\"\n\n**3. Crystal hỗ trợ:**\n💜 **Thạch Anh Tím (Amethyst)** - 350K-2.5M\n• Kích hoạt luân xa Đỉnh Đầu (Crown Chakra - 963Hz)\n• Tăng cường trực giác\n• Hỗ trợ thiền định sâu\n\n🤍 **Thạch Anh Trắng (Clear Quartz)** - 300K-2M\n• Khuếch đại kết nối tâm thức\n• Nhận guidance rõ ràng hơn\n\nBạn muốn tôi hướng dẫn thiền chi tiết không? 🙏"
       ],
-      "searchTags": ["tâm linh", "spiritual", "meditation", "connection", "amethyst"],
+      "searchTags": ["tâm thức", "spiritual", "meditation", "connection", "amethyst"],
       "quickActions": ["Thiền guided", "Xem Thạch Anh Tím", "Hướng dẫn thiền"]
     },
 
@@ -172,7 +172,7 @@
       ],
       "confidence": 0.95,
       "answers": [
-        "📊 **11 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n🔥 **6 CÔNG THỨC CORE (TIER 2):**\n\n1️⃣ **DPD - Down-Pause-Down**\n• Xác nhận xu hướng giảm tiếp tục\n• Entry: Sau khi giá break vùng pause\n• Win rate: 72%\n\n2️⃣ **UPU - Up-Pause-Up**\n• Xác nhận xu hướng tăng tiếp tục\n• Entry: Sau khi giá break vùng pause\n• Win rate: 74%\n\n3️⃣ **UPD - Up-Pause-Down**\n• Đảo chiều từ tăng sang giảm\n• Entry: Short sau khi xác nhận đảo chiều\n• Win rate: 68%\n\n4️⃣ **DPU - Down-Pause-Up**\n• Đảo chiều từ giảm sang tăng\n• Entry: Long sau khi xác nhận đảo chiều\n• Win rate: 70%\n\n5️⃣ **HFZ - High Frequency Zones**\n• Vùng kháng cự mạnh (nhiều lần test)\n• Dùng để xác định điểm chốt lời/cắt lỗ\n\n6️⃣ **LFZ - Low Frequency Zones**\n• Vùng hỗ trợ mạnh (nhiều lần test)\n• Dùng để xác định entry point\n\n⭐ **5 CÔNG THỨC NÂNG CAO (TIER 3):**\n7-11. Advanced formulas (chỉ TIER 3)\n\n💎 **ĐỘC QUYỀN:**\n• Nghiên cứu 10+ năm bởi GEM Academy\n• Win rate 68-90% (backtest 686 trades)\n• Chỉ có ở GEM Trading\n\n👉 **Học chi tiết tại TIER 2+**\n\nBạn muốn tìm hiểu công thức nào cụ thể?"
+        "Đây là tổng quan về 11 công thức Frequency độc quyền của GEM Trading - nền tảng của phương pháp Zone Retest.\n\n📊 **11 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n🔥 **6 CÔNG THỨC CORE (TIER 2):**\n\n1️⃣ **DPD - Down-Pause-Down**\n• Xác nhận xu hướng giảm tiếp tục\n• Entry: Sau khi giá break vùng pause\n• Win rate: 72%\n\n2️⃣ **UPU - Up-Pause-Up**\n• Xác nhận xu hướng tăng tiếp tục\n• Entry: Sau khi giá break vùng pause\n• Win rate: 74%\n\n3️⃣ **UPD - Up-Pause-Down**\n• Đảo chiều từ tăng sang giảm\n• Entry: Short sau khi xác nhận đảo chiều\n• Win rate: 68%\n\n4️⃣ **DPU - Down-Pause-Up**\n• Đảo chiều từ giảm sang tăng\n• Entry: Long sau khi xác nhận đảo chiều\n• Win rate: 70%\n\n5️⃣ **HFZ - High Frequency Zones**\n• Vùng kháng cự mạnh (nhiều lần test)\n• Dùng để xác định điểm chốt lời/cắt lỗ\n\n6️⃣ **LFZ - Low Frequency Zones**\n• Vùng hỗ trợ mạnh (nhiều lần test)\n• Dùng để xác định entry point\n\n⭐ **5 CÔNG THỨC NÂNG CAO (TIER 3):**\n7-11. Advanced formulas (chỉ TIER 3)\n\n💎 **ĐỘC QUYỀN:**\n• Nghiên cứu 10+ năm bởi GEM Academy\n• Win rate 68-90% (backtest 686 trades)\n• Chỉ có ở GEM Trading\n\n👉 **Học chi tiết tại TIER 2+**\n\nBạn muốn tìm hiểu công thức nào cụ thể?"
       ],
       "searchTags": ["frequency", "formula", "dpd", "upu", "trading"],
       "quickActions": ["Xem TIER 2", "So sánh các TIER", "Demo công thức"]
@@ -225,7 +225,7 @@
       ],
       "confidence": 0.93,
       "answers": [
-        "💎 **5 LOẠI ĐÁ THẠCH ANH PHỔ BIẾN:**\n\n💜 **Thạch Anh Tím (Amethyst)** - 350K-2.5M\n• Chakra đỉnh đầu (963Hz)\n• Tâm linh, trực giác, giác ngộ\n• Hỗ trợ thiền định, tăng focus\n\n💗 **Thạch Anh Hồng (Rose Quartz)** - 350K-2.5M\n• Chakra tim (639Hz)\n• Tình yêu đích thực, chữa lành trái tim\n• Thu hút quan hệ tốt đẹp\n\n🤍 **Thạch Anh Trắng (Clear Quartz)** - 300K-2M\n• Master healer - Chữa lành toàn diện\n• Khuếch đại năng lượng\n• Lập trình theo ý muốn\n\n💛 **Thạch Anh Vàng (Citrine)** - 450K-2.8M\n• Chakra rốn (528Hz)\n• Money magnet số 1\n• Thu hút tài lộc, thịnh vượng\n\n🟤 **Thạch Anh Khói (Smoky)** - 400K-2.2M\n• Grounding, bảo vệ\n• Chống FOMO, lo âu\n• Tăng tự tin\n\n**CHỌN THEO MỤC ĐÍCH:**\n💰 Tiền bạc → Thạch Anh Vàng\n💖 Tình yêu → Thạch Anh Hồng\n🧘 Tâm linh → Thạch Anh Tím\n🛡️ Bảo vệ → Thạch Anh Khói\n\nBạn quan tâm loại nào?"
+        "Ta sẽ giới thiệu với bạn về các loại đá thạch anh phổ biến nhất và công dụng của chúng theo hệ thống Chakra.\n\n💎 **5 LOẠI ĐÁ THẠCH ANH PHỔ BIẾN:**\n\n💜 **Thạch Anh Tím (Amethyst)** - 350K-2.5M\n• Chakra đỉnh đầu (963Hz)\n• Tâm thức, trực giác, giác ngộ\n• Hỗ trợ thiền định, tăng focus\n\n💗 **Thạch Anh Hồng (Rose Quartz)** - 350K-2.5M\n• Chakra tim (639Hz)\n• Tình yêu đích thực, chữa lành trái tim\n• Thu hút quan hệ tốt đẹp\n\n🤍 **Thạch Anh Trắng (Clear Quartz)** - 300K-2M\n• Master healer - Chữa lành toàn diện\n• Khuếch đại năng lượng\n• Lập trình theo ý muốn\n\n💛 **Thạch Anh Vàng (Citrine)** - 450K-2.8M\n• Chakra rốn (528Hz)\n• Money magnet số 1\n• Thu hút tài lộc, thịnh vượng\n\n🟤 **Thạch Anh Khói (Smoky)** - 400K-2.2M\n• Grounding, bảo vệ\n• Chống FOMO, lo âu\n• Tăng tự tin\n\n**CHỌN THEO MỤC ĐÍCH:**\n💰 Tiền bạc → Thạch Anh Vàng\n💖 Tình yêu → Thạch Anh Hồng\n🧘 Tâm thức → Thạch Anh Tím\n🛡️ Bảo vệ → Thạch Anh Khói\n\nBạn quan tâm loại nào?"
       ],
       "searchTags": ["thạch anh", "amethyst", "citrine", "rose quartz", "crystal"],
       "quickActions": ["Xem Set Tài Lộc", "Chọn cho tôi", "Hướng dẫn sử dụng"]
@@ -239,7 +239,7 @@
         "gemral", "gem trading", "gem course", "gem courses",
         "tier", "tier 1", "tier 2", "tier 3", "bundle", "bundles",
         "học trading", "học trade", "học giao dịch", "học đầu tư",
-        "học tâm linh", "học crystal", "học đá", "học thiền",
+        "học tâm thức", "học crystal", "học đá", "học thiền",
         "tần số gốc", "khai mở", "tình yêu", "manifest tiền",
         "nâng cấp", "upgrade", "nâng cấp tier",
         "đăng ký", "tham gia", "enroll", "join",
@@ -248,9 +248,9 @@
       ],
       "confidence": 0.94,
       "answers": [
-        "**CÁC KHÓA HỌC - CON ĐƯỜNG RÈN LUYỆN**\n\n**HỆ THỐNG TIER - TRADING:**\n\n[icon:Zap] **FREE TIER** (Miễn phí)\n• 3 patterns cơ bản | Win rate: 38%\n\n[icon:Star] **TIER 1** - 11 triệu\n• 7 patterns | Win rate: 50-55%\n• Scanner + Chatbot: 12 tháng\n• Khóa học: Trọn đời\n\n[icon:Crown] **TIER 2** - 21 triệu (Đa số chọn)\n• 15 patterns + 6 công thức Frequency\n• Win rate: 70-75%\n• Scanner + Chatbot: 12 tháng\n• Khóa học: Trọn đời\n\n[icon:Shield] **TIER 3** - 68 triệu\n• 24 patterns + AI Scanner\n• Win rate: 80-90% | 1-on-1 mentoring\n• Scanner + Chatbot: 24 tháng\n• Khóa học: Trọn đời\n\n**KHÓA HỌC TÂM LINH:**\n\n[icon:Sparkles] **7 Ngày Khai Mở Tần Số Gốc** - 1.997K\nChuyển hóa năng lượng cốt lõi\n\n[icon:Heart] **Kích Hoạt Tần Số Tình Yêu** - 399K\n21 ngày chữa lành và thu hút\n\n[icon:Coins] **Manifest Tiền Bạc** - 499K\n30 ngày thay đổi Money Mindset\n\nMỗi khóa học là bài kiểm tra cam kết. Bạn muốn rèn luyện gì?"
+        "Đây là tổng quan về các khóa học và chương trình đào tạo của GEMRAL - từ Trading đến Tâm thức.\n\n**CÁC KHÓA HỌC - CON ĐƯỜNG RÈN LUYỆN**\n\n**HỆ THỐNG TIER - TRADING:**\n\n[icon:Zap] **FREE TIER** (Miễn phí)\n• 3 patterns cơ bản | Win rate: 38%\n\n[icon:Star] **TIER 1** - 11 triệu\n• 7 patterns | Win rate: 50-55%\n• Scanner + Chatbot: 12 tháng\n• Khóa học: Trọn đời\n\n[icon:Crown] **TIER 2** - 21 triệu (Đa số chọn)\n• 15 patterns + 6 công thức Frequency\n• Win rate: 70-75%\n• Scanner + Chatbot: 12 tháng\n• Khóa học: Trọn đời\n\n[icon:Shield] **TIER 3** - 68 triệu\n• 24 patterns + AI Scanner\n• Win rate: 80-90% | 1-on-1 mentoring\n• Scanner + Chatbot: 24 tháng\n• Khóa học: Trọn đời\n\n**KHÓA HỌC TÂM THỨC:**\n\n[icon:Sparkles] **7 Ngày Khai Mở Tần Số Gốc** - 1.997K\nChuyển hóa năng lượng cốt lõi\n\n[icon:Heart] **Kích Hoạt Tần Số Tình Yêu** - 399K\n21 ngày chữa lành và thu hút\n\n[icon:Coins] **Manifest Tiền Bạc** - 499K\n30 ngày thay đổi Money Mindset\n\nMỗi khóa học là bài kiểm tra cam kết. Bạn muốn rèn luyện gì?"
       ],
-      "searchTags": ["course", "tier", "bundle", "trading", "tâm linh", "khóa học"],
+      "searchTags": ["course", "tier", "bundle", "trading", "tâm thức", "khóa học"],
       "quickActions": ["Xem TIER 2", "Khóa Tần Số Gốc", "Khóa Manifest Tiền"]
     },
 
@@ -360,24 +360,460 @@
         "phân tích tần số năng lượng", "tần số năng lượng của tôi",
         "năng lượng của tôi", "tần số của tôi", "đo năng lượng",
         "check năng lượng", "xem năng lượng", "phân tích năng lượng cá nhân",
-        "tần số hiện tại của tôi", "năng lượng hiện tại"
+        "tần số hiện tại của tôi", "năng lượng hiện tại",
+        "tôi đang ở mức tần số nào"
       ],
       "confidence": 0.99,
       "answers": [
-        "**PHÂN TÍCH TẦN SỐ NĂNG LƯỢNG**\n\nĐể ta đọc được tần số của bạn theo thang Hawkins, hãy trả lời:\n\n**CẢM XÚC CHỦ ĐẠO:**\nGần đây bạn thường cảm thấy gì nhất?\n- Lo lắng, sợ hãi?\n- Tức giận, bực bội?\n- Buồn bã, chán nản?\n- Bình an, thanh thản?\n\n**VẤN ĐỀ ĐANG GẶP:**\nLĩnh vực nào đang chiếm tâm trí?\n- Tiền bạc, tài chính\n- Tình yêu, quan hệ\n- Sức khỏe\n- Sự nghiệp\n\n**SUY NGHĨ LẶP LẠI:**\nCâu nào hay xuất hiện trong đầu?\n- \"Tôi không đủ...\"\n- \"Tôi sợ...\"\n- \"Tại sao tôi...\"\n- \"Tôi biết ơn...\"\n\n**SAU KHI NHẬN THÔNG TIN, TA SẼ:**\n- Xác định tần số Hz theo thang Hawkins\n- Chỉ ra lỗi tâm thức gốc rễ\n- Đưa ra bài tập chữa lành\n- Đề xuất crystal phù hợp\n\nHãy chia sẻ. Ta sẽ đọc."
+        "Ta sẽ đọc tần số năng lượng hiện tại của bạn. Để phân tích chính xác theo thang Hawkins, hãy trả lời một vài câu hỏi sau.\n\n**PHÂN TÍCH TẦN SỐ NĂNG LƯỢNG**\n\nĐể ta đọc được tần số của bạn theo thang Hawkins, hãy trả lời:\n\n**CẢM XÚC CHỦ ĐẠO:**\nGần đây bạn thường cảm thấy gì nhất?\n- Lo lắng, sợ hãi?\n- Tức giận, bực bội?\n- Buồn bã, chán nản?\n- Bình an, thanh thản?\n\n**VẤN ĐỀ ĐANG GẶP:**\nLĩnh vực nào đang chiếm tâm trí?\n- Tiền bạc, tài chính\n- Tình yêu, quan hệ\n- Sức khỏe\n- Sự nghiệp\n\n**SUY NGHĨ LẶP LẠI:**\nCâu nào hay xuất hiện trong đầu?\n- \"Tôi không đủ...\"\n- \"Tôi sợ...\"\n- \"Tại sao tôi...\"\n- \"Tôi biết ơn...\"\n\n**SAU KHI NHẬN THÔNG TIN, TA SẼ:**\n- Xác định tần số Hz theo thang Hawkins\n- Chỉ ra lỗi tâm thức gốc rễ\n- Đưa ra bài tập chữa lành\n- Đề xuất crystal phù hợp\n\nHãy chia sẻ. Ta sẽ đọc."
       ],
       "searchTags": ["frequency", "energy", "hawkins", "personal"],
       "quickActions": ["Bắt đầu phân tích", "Xem thang Hawkins", "Bài tập nâng tần số"]
+    },
+
+    "fomo_tips": {
+      "keywords": [
+        "tránh fomo", "cách tránh fomo", "gợi ý cách tránh fomo", "fomo khi trade",
+        "fomo trading", "không fomo", "anti fomo", "chống fomo", "fomo crypto",
+        "sợ bỏ lỡ", "fear of missing out", "gợi ý cách tránh fomo khi trading"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "**CÁCH TRÁNH FOMO KHI TRADING**\n\nFOMO là kẻ thù số 1 của trader. Ta đã thấy hàng ngàn người mất tiền vì nó.\n\n**NGUYÊN NHÂN FOMO:**\n• Thấy chart xanh lè → \"Không mua sẽ mất cơ hội!\"\n• Đọc tin tốt → \"Ai cũng mua, mình cũng phải mua!\"\n• Bạn bè khoe lãi → \"Sao họ được mà mình không?\"\n\n**5 CÁCH TRÁNH FOMO:**\n\n**1. CÓ KẾ HOẠCH TRƯỚC:**\n• Viết ra entry/exit price TRƯỚC khi mở chart\n• Không có trong kế hoạch = Không trade\n\n**2. QUY TẮC 24H:**\n• Thấy \"cơ hội ngon\" → Chờ 24h\n• Còn ngon sau 24h → Mới xem xét\n\n**3. CHỈ TRADE KHI CÓ CONFIRMATION:**\n• Pattern rõ ràng (DPU, UPU...)\n• Volume xác nhận\n• Multi-timeframe đồng thuận\n\n**4. GIỚI HẠN SỐ LỆNH:**\n• Max 2-3 lệnh/ngày\n• Hết quota = Ngừng trade\n\n**5. DÙNG THẠCH ANH KHÓI:**\n• Grounding, giảm lo âu\n• Cầm khi cảm thấy muốn FOMO\n• Hít thở sâu 5 lần trước khi quyết định\n\n**TÂM THỨC:**\nFOMO là tần số Mong Cầu (125Hz) - rất thấp. Nâng lên Trung Lập (250Hz) bằng cách chấp nhận: \"Cơ hội luôn có. Không có cơ hội này sẽ có cơ hội khác.\"\n\nBạn hay FOMO trong tình huống nào nhất?"
+      ],
+      "searchTags": ["fomo", "trading", "psychology", "discipline"],
+      "quickActions": ["Xem Thạch Anh Khói", "Bài tập grounding", "Trading rules"]
+    },
+
+    "tier_comparison": {
+      "keywords": [
+        "so sánh tier", "so sánh các tier", "tier nào phù hợp", "nên học tier nào",
+        "tư vấn tier", "tier nào tốt", "tier 1 hay tier 2", "tier 2 hay tier 3",
+        "so sánh win rate", "win rate các tier", "so sánh win rate giữa các tier",
+        "tư vấn tôi nên học tier nào", "tier phù hợp với trình độ"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "**SO SÁNH CÁC TIER TRADING - CHỌN ĐÚNG CON ĐƯỜNG**\n\nTa không bán khóa học. Ta bán CAM KẾT. Chọn TIER phù hợp với mức cam kết của bạn.\n\n**FREE TIER (Miễn phí):**\n• Win rate: 38%\n• 3 patterns cơ bản\n• Phù hợp: Người mới tìm hiểu\n• Hạn chế: Không có công thức Frequency\n\n**TIER 1 - 11 triệu:**\n• Win rate: 50-55%\n• 7 patterns\n• Scanner + Chatbot: 12 tháng\n• Khóa học: TRỌN ĐỜI\n• Phù hợp: Đã biết cơ bản, muốn nâng cao\n\n**TIER 2 - 21 triệu (ĐA SỐ CHỌN):**\n• Win rate: 70-75%\n• 15 patterns + 6 CÔNG THỨC FREQUENCY\n• Scanner + Chatbot: 12 tháng\n• Khóa học: TRỌN ĐỜI\n• Phù hợp: Muốn trade nghiêm túc, có kỷ luật\n\n**TIER 3 - 68 triệu:**\n• Win rate: 80-90%\n• 24 patterns + AI Scanner\n• 1-on-1 Mentoring với founder\n• Scanner + Chatbot: 24 tháng\n• Khóa học: TRỌN ĐỜI\n• Phù hợp: Muốn trở thành trader chuyên nghiệp\n\n**GỢI Ý CHỌN:**\n• Vốn <50tr → TIER 1\n• Vốn 50-200tr → TIER 2\n• Vốn >200tr hoặc full-time trader → TIER 3\n\n**LƯU Ý:**\n• Khóa học = Trọn đời, học mãi\n• Scanner/Chat = Có thời hạn, gia hạn sau\n• Cam kết quan trọng hơn tiền\n\nBạn đang có bao nhiêu vốn và kinh nghiệm gì?"
+      ],
+      "searchTags": ["tier", "comparison", "course", "trading"],
+      "quickActions": ["Đăng ký TIER 2", "Xem chi tiết TIER 3", "Trial Free"]
+    },
+
+    "visionboard_tips": {
+      "keywords": [
+        "đặt mục tiêu visionboard", "gợi ý cách đặt mục tiêu", "cách đặt mục tiêu",
+        "visionboard", "vision board", "bảng ước mơ", "đặt mục tiêu trong visionboard",
+        "sử dụng visionboard", "tạo visionboard", "gợi ý visionboard"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "**CÁCH ĐẶT MỤC TIÊU TRONG VISION BOARD**\n\nVision Board trong GEMRAL không chỉ là nơi viết mục tiêu - đó là công cụ MANIFEST mạnh mẽ.\n\n**3 NGUYÊN TẮC ĐẶT MỤC TIÊU:**\n\n**1. SMART + FEELING:**\n• Specific (Cụ thể): \"Kiếm 50 triệu/tháng\" thay vì \"Kiếm nhiều tiền\"\n• Measurable (Đo được): Có con số cụ thể\n• Achievable (Khả thi): Không quá xa vời\n• Relevant (Liên quan): Đúng với values của bạn\n• Time-bound (Có thời hạn)\n• + FEELING: Cảm nhận như ĐÃ ĐẠT ĐƯỢC!\n\n**2. VIẾT Ở THÌ HIỆN TẠI:**\n• ❌ \"Tôi SẼ có 100 triệu\"\n• ✅ \"Tôi ĐANG có 100 triệu trong tài khoản\"\n• Não bộ không phân biệt thật/giả - hãy tận dụng!\n\n**3. KÈM AFFIRMATION:**\nMỗi mục tiêu nên có 3-5 câu khẳng định đi kèm.\nVí dụ: \"Tiền đến với tôi dễ dàng và dồi dào\"\n\n**CẤU TRÚC VISION BOARD:**\n• 1-3 Mục tiêu chính (theo lĩnh vực)\n• Affirmations cho từng mục tiêu\n• Kế hoạch hành động (steps)\n• Crystal hỗ trợ (nếu có)\n\n**TẦN SUẤT XEM:**\n• Sáng: 5 phút sau khi thức dậy\n• Tối: 5 phút trước khi ngủ\n• Đọc to với CẢM XÚC!\n\nBạn muốn đặt mục tiêu về lĩnh vực nào? Tiền bạc, Tình yêu, Sức khỏe hay Sự nghiệp?"
+      ],
+      "searchTags": ["visionboard", "goal", "manifest", "target"],
+      "quickActions": ["Tạo mục tiêu mới", "Xem ví dụ", "Thêm affirmation"]
+    },
+
+    "manifest_money": {
+      "keywords": [
+        "hướng dẫn manifest tiền", "manifest tiền bạc", "manifest money",
+        "hiện hóa tiền", "thu hút tiền", "cách manifest tiền",
+        "hướng dẫn manifest tiền bạc", "công thức manifest tiền"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "Ta sẽ hướng dẫn bạn manifest tiền bạc và thịnh vượng theo phương pháp khoa học của tần số.\n\n**HƯỚNG DẪN MANIFEST TIỀN BẠC**\n\nManifest không phải phép màu. Đó là KHOA HỌC của tần số.\n\n**CÔNG THỨC MANIFEST:**\nThought + Emotion + Action = Reality\n(Suy nghĩ + Cảm xúc + Hành động = Thực tại)\n\n**5 BƯỚC MANIFEST TIỀN:**\n\n**BƯỚC 1: CLEAR BLOCKS (Ngày 1-7)**\n• Viết ra 10 niềm tin tiêu cực về tiền\n• Hỏi: \"Niềm tin này đến từ đâu?\"\n• Release bằng bài tập viết và đốt\n\n**BƯỚC 2: SET INTENTION (Ngày 8-10)**\n• Xác định số tiền CỤ THỂ muốn manifest\n• Viết lý do TẠI SAO cần số tiền này\n• Viết cảm xúc khi ĐÃ CÓ số tiền\n\n**BƯỚC 3: VISUALIZE (Ngày 11-21)**\n• Mỗi sáng 10 phút: Hình dung đã có tiền\n• Cảm nhận hạnh phúc, biết ơn\n• Xem Vision Board với cảm xúc\n\n**BƯỚC 4: AFFIRMATION (Suốt quá trình)**\n• \"Tiền đến với tôi dễ dàng và dồi dào\"\n• \"Tôi là nam châm thu hút tài lộc\"\n• \"Mọi việc tôi làm đều sinh ra tiền\"\n• Đọc 21 lần/ngày với CẢM XÚC\n\n**BƯỚC 5: INSPIRED ACTION (Mỗi ngày)**\n• Lắng nghe trực giác - Ý tưởng nào xuất hiện?\n• Hành động theo guidance\n• Biết ơn mọi số tiền đến (dù nhỏ)\n\n**CRYSTAL HỖ TRỢ:**\n💛 Thạch Anh Vàng (Citrine) - Money Magnet\n💚 Green Aventurine - May mắn tài chính\n\nBạn muốn bắt đầu với Bước nào?"
+      ],
+      "searchTags": ["manifest", "money", "abundance", "law of attraction"],
+      "quickActions": ["Bắt đầu 21 ngày", "Xem Thạch Anh Vàng", "Thêm Affirmation"]
+    },
+
+    "money_exercise_detail": {
+      "keywords": [
+        "bài tập chi tiền trong hạnh phúc", "chi tiền trong hạnh phúc",
+        "bài tập chi tiền", "hướng dẫn chi tiền", "chi tiền hạnh phúc",
+        "hướng dẫn chi tiết bài tập"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**BÀI TẬP CHI TIỀN TRONG HẠNH PHÚC**\n\nĐây là bài tập phá vỡ Money Block mạnh mẽ nhất của YinYang Masters.\n\n**MỤC ĐÍCH:**\nThay đổi cảm xúc từ SỢ MẤT → VUI VẺ CHO ĐI\nTăng tần số từ 100Hz (Sợ hãi) → 310Hz (Sẵn sàng)\n\n**HƯỚNG DẪN CHI TIẾT:**\n\n**BƯỚC 1: CHUẨN BỊ**\n• Cầm Thạch Anh Vàng (nếu có)\n• Hít thở sâu 3 lần\n• Set intention: \"Hôm nay tôi chi tiền trong hạnh phúc\"\n\n**BƯỚC 2: MỖI KHI CHI TIỀN**\n• DỪNG LẠI 3 giây trước khi trả tiền\n• Nói thầm: \"Tôi vui vẻ chia sẻ sự thịnh vượng của mình\"\n• Hình dung: Tiền đi ra và QUAY LẠI GẤP 10 LẦN\n• Cảm ơn người nhận: \"Họ là kênh để tiền quay về với tôi\"\n\n**BƯỚC 3: SAU KHI CHI TIỀN**\n• KHÔNG hối hận, KHÔNG lo lắng\n• Nói: \"Tiền đã đi đúng nơi cần đến\"\n• Tin tưởng vũ trụ sẽ gửi lại gấp bội\n\n**THỜI GIAN THỰC HÀNH:**\n• 21 ngày liên tục (không ngắt quãng)\n• Áp dụng với MỌI khoản chi (từ cà phê đến hóa đơn)\n\n**DẤU HIỆU THÀNH CÔNG:**\n• Tuần 1: Còn khó chịu nhưng bắt đầu nhớ làm\n• Tuần 2: Bắt đầu tự nhiên, ít lo lắng hơn\n• Tuần 3: Vui vẻ thật sự khi chi tiền!\n\n**AFFIRMATION ĐI KÈM:**\n\"Mỗi đồng tôi chi ra đều quay lại gấp 10 lần\"\n\nBạn sẵn sàng bắt đầu 21 ngày không?"
+      ],
+      "searchTags": ["exercise", "money", "spending", "happiness"],
+      "quickActions": ["Bắt đầu ngay", "Xem Thạch Anh Vàng", "Set reminder"]
+    },
+
+    "scarcity_mindset": {
+      "keywords": [
+        "tư duy thiếu hụt", "scarcity mindset", "thoát tư duy thiếu hụt",
+        "cảm giác thiếu", "không đủ", "thiếu thốn", "khan hiếm",
+        "làm sao để thoát tư duy thiếu hụt"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "**THOÁT TƯ DUY THIẾU HỤT (SCARCITY MINDSET)**\n\nTư duy thiếu hụt là tần số 75-100Hz - mức Đau khổ và Sợ hãi. Đây là ROOT CAUSE của hầu hết vấn đề tài chính.\n\n**DẤU HIỆU:**\n• Luôn lo \"không đủ tiền\" dù đã có\n• So sánh với người khác, ghen tị\n• Khó chi tiền cho bản thân\n• Nghĩ \"nếu mình có được thì người khác mất\"\n• Tích trữ quá mức, sợ mất\n\n**CÁCH CHUYỂN HÓA:**\n\n**1. NHẬN DIỆN (Tuần 1):**\n• Ghi lại mỗi lần có suy nghĩ \"không đủ\"\n• Hỏi: \"Đây là sự thật hay niềm tin?\"\n• Nhận ra: Thiếu hụt là CẢM GIÁC, không phải THỰC TẾ\n\n**2. THAY THẾ (Tuần 2):**\n• ❌ \"Không đủ\" → ✅ \"Tôi luôn có đủ cho những gì tôi cần\"\n• ❌ \"Mất cơ hội\" → ✅ \"Cơ hội luôn có, vũ trụ là vô hạn\"\n• ❌ \"Họ có, mình không\" → ✅ \"Thành công của họ là minh chứng tôi cũng có thể\"\n\n**3. THỰC HÀNH (Tuần 3+):**\n• Nhật ký biết ơn: 3 điều MỖI NGÀY\n• Cho đi 1 thứ nhỏ mỗi ngày (compliment, tiền, giúp đỡ)\n• Ăn mừng thành công của người khác\n\n**4. NÂNG TẦN SỐ:**\n• Thiền 10 phút/ngày\n• Affirmation: \"Vũ trụ là vô hạn. Có đủ cho tất cả.\"\n• Cầm Thạch Anh Vàng + Hồng\n\n**THỜI GIAN:**\n• Nhẹ: 21 ngày\n• Trung bình: 40-60 ngày\n• Nặng: 90+ ngày\n\nBạn nhận ra mình hay có suy nghĩ thiếu hụt trong tình huống nào?"
+      ],
+      "searchTags": ["scarcity", "mindset", "abundance", "psychology"],
+      "quickActions": ["Bắt đầu 21 ngày", "Nhật ký biết ơn", "Xem crystal"]
+    },
+
+    "money_crystals": {
+      "keywords": [
+        "đá hỗ trợ tài chính", "đá thạch anh hỗ trợ tài chính", "crystal tiền",
+        "đá nào hỗ trợ tài chính", "đá thu hút tiền", "đá tài lộc",
+        "đá thạch anh nào hỗ trợ tài chính tốt nhất"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**ĐÁ THẠCH ANH HỖ TRỢ TÀI CHÍNH**\n\n**TOP 3 ĐÁ TÀI LỘC:**\n\n**1. THẠCH ANH VÀNG (CITRINE) - MONEY MAGNET SỐ 1**\n💛 Giá: 450K - 2.8M\n• Chakra: Solar Plexus (528Hz)\n• Công dụng:\n  - Thu hút abundance và thịnh vượng\n  - Phá vỡ money block\n  - Tăng sự tự tin kinh doanh\n  - Không cần cleanse (tự thanh lọc)\n• Cách dùng:\n  - Đeo tay trái khi làm việc/trading\n  - Đặt ở góc tài lộc (Đông Nam)\n  - Cầm khi visualize tiền bạc\n\n**2. GREEN AVENTURINE - MAY MẮN TÀI CHÍNH**\n💚 Giá: 300K - 1.5M\n• Chakra: Heart (639Hz)\n• Công dụng:\n  - Thu hút may mắn, cơ hội mới\n  - Tăng tự tin trong quyết định tài chính\n  - Hỗ trợ kinh doanh, đầu tư\n• Cách dùng:\n  - Mang theo khi có meeting quan trọng\n  - Đặt trong ví/két sắt\n\n**3. PYRITE - ĐÁ CỦA THỊNH VƯỢNG**\n✨ Giá: 200K - 1M\n• Công dụng:\n  - Bảo vệ tài sản\n  - Tăng ý chí, quyết tâm\n  - Hỗ trợ manifest tiền\n• Cách dùng:\n  - Đặt trên bàn làm việc\n  - Không tiếp xúc với nước\n\n**COMBO MẠNH NHẤT:**\nCitrine + Green Aventurine + Pyrite\n→ Thu hút + May mắn + Bảo vệ\n\n**LƯU Ý:**\n• Đá là CÔNG CỤ, không phải phép màu\n• Phải KẾT HỢP với hành động và tần số đúng\n\nBạn quan tâm đến loại đá nào?"
+      ],
+      "searchTags": ["citrine", "money", "crystal", "abundance", "finance"],
+      "quickActions": ["Xem Thạch Anh Vàng", "Xem combo tài lộc", "Cách sử dụng"]
+    },
+
+    "manifest_love": {
+      "keywords": [
+        "hướng dẫn manifest tình yêu", "manifest tình yêu", "manifest love",
+        "thu hút tình yêu", "hiện hóa tình yêu", "cách manifest tình yêu"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "Ta sẽ hướng dẫn bạn manifest tình yêu đích thực. Đây là quy trình đã giúp nhiều người tìm được hạnh phúc.\n\n**HƯỚNG DẪN MANIFEST TÌNH YÊU**\n\nTình yêu đích thực bắt đầu từ SELF-LOVE. Bạn không thể thu hút người yêu bạn nếu bạn không yêu chính mình.\n\n**CÔNG THỨC MANIFEST TÌNH YÊU:**\n\n**BƯỚC 1: CHỮA LÀNH (Tuần 1-2)**\n• Viết ra 5 niềm tin tiêu cực về tình yêu\n• Tha thứ cho người cũ và cho chính mình\n• Bài tập gương soi: \"Tôi yêu và chấp nhận bản thân hoàn toàn\"\n\n**BƯỚC 2: ĐỊNH NGHĨA (Tuần 3)**\n• Viết chi tiết về người bạn muốn thu hút\n• Không chỉ ngoại hình - Cả tính cách, giá trị, cách đối xử\n• Viết như ĐÃ CÓ người đó trong cuộc sống\n\n**BƯỚC 3: TRỞ THÀNH (Tuần 4+)**\n• Hỏi: \"Phiên bản nào của tôi sẽ thu hút người đó?\"\n• Trở thành phiên bản đó NGAY BÂY GIỜ\n• Sống như đã có tình yêu rồi (energy của đầy đủ)\n\n**AFFIRMATION TÌNH YÊU:**\n• \"Tôi xứng đáng có tình yêu đích thực\"\n• \"Tim tôi rộng mở để yêu và được yêu\"\n• \"Người phù hợp đang trên đường đến với tôi\"\n• \"Tôi thu hút tình yêu lành mạnh và hạnh phúc\"\n\n**CRYSTAL HỖ TRỢ:**\n💗 Thạch Anh Hồng - Mở Heart Chakra\n💜 Rhodonite - Chữa lành tổn thương\n❤️ Garnet - Kích hoạt đam mê\n\n**QUAN TRỌNG:**\nManifest tình yêu = 70% self-work + 30% visualization\nBạn PHẢI yêu bản thân trước!\n\nBạn đang ở giai đoạn nào? Đã chữa lành chưa hay vẫn còn đau?"
+      ],
+      "searchTags": ["manifest", "love", "relationship", "self-love"],
+      "quickActions": ["Bài tập gương soi", "Xem Thạch Anh Hồng", "Affirmation"]
+    },
+
+    "wrong_person_pattern": {
+      "keywords": [
+        "gặp sai người", "luôn gặp sai người", "tại sao gặp sai người",
+        "yêu sai người", "chọn sai người", "pattern tình yêu sai",
+        "tại sao tôi luôn gặp sai người"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "Một câu hỏi sâu sắc về pattern trong tình yêu. Ta sẽ phân tích nguyên nhân và cách phá vỡ vòng lặp này.\n\n**TẠI SAO BẠN LUÔN GẶP SAI NGƯỜI?**\n\nĐây không phải xui xẻo. Đây là PATTERN - và pattern có thể thay đổi.\n\n**NGUYÊN NHÂN SÂU XA:**\n\n**1. WOUNDS CHƯA CHỮA LÀNH:**\n• Trauma tuổi thơ (bố mẹ ly hôn, bị bỏ rơi...)\n• Mối quan hệ trước đây chưa closure\n• Inner child vẫn đang tìm kiếm sự chấp nhận\n\n**2. NIỀM TIN VÔ THỨC:**\n• \"Tôi không xứng đáng được yêu đúng cách\"\n• \"Tình yêu = Đau khổ/Drama\"\n• \"Người tốt thì nhàm chán\"\n\n**3. TẦN SỐ KHÔNG MATCH:**\n• Tần số bạn đang ở = Loại người bạn thu hút\n• Tần số thấp (sợ hãi, thiếu thốn) → Thu hút người toxic\n• Tần số cao (tự tin, đầy đủ) → Thu hút người healthy\n\n**CÁCH PHÁ VỠ PATTERN:**\n\n**BƯỚC 1: NHẬN DIỆN**\n• Viết ra 5 mối quan hệ gần nhất\n• Tìm điểm chung: Họ giống nhau ở đâu?\n• Hỏi: \"Tôi đã chọn họ vì lý do gì?\"\n\n**BƯỚC 2: CHỮA LÀNH**\n• Bài tập Inner Child\n• Tha thứ cho người cũ\n• Tha thứ cho chính mình đã chọn sai\n\n**BƯỚC 3: NÂNG TẦN SỐ**\n• Self-love mỗi ngày\n• Không settle vì cô đơn\n• \"Tôi thà một mình hạnh phúc còn hơn có người mà đau khổ\"\n\n**CRYSTAL:**\n💗 Thạch Anh Hồng - Chữa lành Heart Chakra\n🖤 Obsidian - Bảo vệ khỏi toxic people\n\nBạn nhận ra pattern gì trong các mối quan hệ trước?"
+      ],
+      "searchTags": ["love", "pattern", "wrong person", "healing"],
+      "quickActions": ["Bài tập Inner Child", "Xem Thạch Anh Hồng", "Affirmation"]
+    },
+
+    "self_love_guide": {
+      "keywords": [
+        "yêu bản thân", "self love", "cách yêu bản thân", "làm sao yêu bản thân",
+        "yêu bản thân hơn", "học yêu bản thân", "không yêu bản thân",
+        "làm sao để yêu bản thân hơn"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "Self-love là nền tảng của mọi hạnh phúc. Ta sẽ hướng dẫn bạn cách yêu thương bản thân đúng cách.\n\n**HƯỚNG DẪN YÊU BẢN THÂN (SELF-LOVE)**\n\nSelf-love không phải ích kỷ. Đó là nền tảng của mọi mối quan hệ lành mạnh.\n\n**TẠI SAO QUAN TRỌNG:**\n• Không yêu bản thân = Tần số 75-100Hz (Đau khổ/Sợ hãi)\n• Yêu bản thân = Tần số 500Hz+ (Love/Joy)\n• Bạn chỉ có thể cho đi cái bạn ĐÃ CÓ\n\n**5 BÀI TẬP YÊU BẢN THÂN:**\n\n**1. GƯƠNG SOI (5 phút/sáng):**\n• Nhìn vào mắt mình trong gương\n• Nói: \"Tôi yêu thương và chấp nhận bản thân hoàn toàn\"\n• Cảm nhận thật sự, không chỉ nói miệng\n• 21 ngày liên tục\n\n**2. DATE VỚI CHÍNH MÌNH (1 lần/tuần):**\n• Dành 2-3h làm điều BẠN THÍCH\n• Không cần ai đi cùng\n• Không guilty - Đây là đầu tư cho bản thân\n\n**3. BOUNDARIES (Mỗi ngày):**\n• Học nói \"KHÔNG\" với điều không phục vụ bạn\n• Rời xa người drain năng lượng\n• Đặt giới hạn cho người khác AND cho chính mình\n\n**4. POSITIVE SELF-TALK:**\n• Thay \"Mình dở quá\" → \"Mình đang học\"\n• Thay \"Mình không xứng\" → \"Mình xứng đáng được tốt đẹp\"\n• Nói với bản thân như nói với người bạn thân nhất\n\n**5. BODY CARE:**\n• Cơ thể là đền thờ - Chăm sóc nó\n• Ăn healthy, ngủ đủ, vận động\n• Không nói xấu cơ thể mình\n\n**AFFIRMATION:**\n• \"Tôi yêu thương bản thân vô điều kiện\"\n• \"Tôi xứng đáng được hạnh phúc\"\n• \"Tôi là đủ, đúng như tôi đang là\"\n\n**CRYSTAL:**\n💗 Thạch Anh Hồng - Heart Chakra\n\nBạn khó khăn với bước nào nhất?"
+      ],
+      "searchTags": ["self-love", "love yourself", "healing", "self-care"],
+      "quickActions": ["Bài tập gương soi", "Xem Thạch Anh Hồng", "Affirmation"]
+    },
+
+    "love_crystals": {
+      "keywords": [
+        "đá hỗ trợ tình duyên", "đá thạch anh tình yêu", "crystal tình yêu",
+        "đá nào hỗ trợ tình duyên", "đá thu hút tình yêu", "đá tình duyên",
+        "đá thạch anh nào hỗ trợ tình duyên tốt nhất"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "Ta sẽ giới thiệu các loại đá thạch anh hỗ trợ tình duyên tốt nhất theo hệ thống Chakra.\n\n**ĐÁ THẠCH ANH HỖ TRỢ TÌNH DUYÊN**\n\n**TOP 3 ĐÁ TÌNH YÊU:**\n\n**1. THẠCH ANH HỒNG (ROSE QUARTZ) - ĐÁ TÌNH YÊU SỐ 1**\n💗 Giá: 350K - 2.5M\n• Chakra: Heart (639Hz)\n• Công dụng:\n  - Mở Heart Chakra, chữa lành trái tim\n  - Thu hút tình yêu đích thực\n  - Tăng self-love (yêu bản thân)\n  - Giúp tha thứ và buông bỏ\n• Cách dùng:\n  - Đeo tay trái (nhận năng lượng)\n  - Đặt ở đầu giường\n  - Thiền với đá đặt trên ngực\n\n**2. RHODONITE - CHỮA LÀNH TỔN THƯƠNG**\n💜 Giá: 300K - 1.8M\n• Công dụng:\n  - Chữa lành vết thương tình cảm\n  - Giúp vượt qua chia tay\n  - Cân bằng cảm xúc\n• Cách dùng:\n  - Đeo khi cảm thấy đau khổ\n  - Cầm khi làm bài tập tha thứ\n\n**3. GARNET - KÍCH HOẠT ĐAM MÊ**\n❤️ Giá: 400K - 2M\n• Công dụng:\n  - Tăng passion và sức hút\n  - Kích hoạt năng lượng tình dục lành mạnh\n  - Thắp lại lửa trong quan hệ cũ\n• Cách dùng:\n  - Đeo khi hẹn hò\n  - Đặt ở góc tình duyên (Tây Nam)\n\n**COMBO MẠNH NHẤT:**\nRose Quartz + Rhodonite + Garnet\n→ Chữa lành + Self-love + Đam mê\n\n**QUAN TRỌNG:**\n• Đá KHÔNG thay thế việc làm nội tâm\n• Phải KẾT HỢP với self-love và chữa lành\n\nBạn quan tâm đến loại đá nào?"
+      ],
+      "searchTags": ["rose quartz", "love", "crystal", "relationship"],
+      "quickActions": ["Xem Thạch Anh Hồng", "Xem combo tình yêu", "Cách sử dụng"]
+    },
+
+    "courses_overview": {
+      "keywords": [
+        "các khóa học", "khóa học gemral", "giới thiệu khóa học", "có những khóa học nào",
+        "danh sách khóa học", "khóa học gem", "tất cả khóa học", "xem các khóa học"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**TẤT CẢ KHÓA HỌC TẠI GEM ACADEMY**\n\nGEM Academy có **7 khóa học** chia thành 2 nhóm:\n\n**🔮 NHÓM TƯ DUY CHUYỂN HÓA (3 khóa):**\nDựa trên Học Thuyết Chuyển Hóa Nội Tâm của Jennie Uyen Chu\n\n1️⃣ **7 Ngày Khai Mở Tần Số Gốc**\n• 7 ngày | 7 bài học\n• Hiểu tần số rung động, 7 tầng tâm thức\n• Phù hợp: Người mới bắt đầu chuyển hóa\n\n2️⃣ **Kích Hoạt Tần Số Tình Yêu** - 399K\n• 42 ngày (6 tuần) | 24 bài\n• Chữa lành, self-love, thu hút tri kỷ\n\n3️⃣ **Tái Tạo Tư Duy Triệu Phú** - 499K\n• 49 ngày (7 tuần) | 28 bài\n• Thanh tẩy niềm tin tiền, hóa giải nghiệp tiền\n\n**📈 NHÓM TRADING (4 khóa):**\nPhương pháp GEM Frequency Trading độc quyền\n\n1️⃣ **STARTER** - 299K\n• Nhập môn | 15 bài\n• Scanner 5/ngày, Chatbot 10/ngày\n\n2️⃣ **TIER 1** - 11 Triệu\n• Nền tảng | 7 patterns\n• Win rate 50-55%\n\n3️⃣ **TIER 2** - 21 Triệu ⭐ Best Value\n• Nâng cao | 15 patterns + 6 công thức Frequency\n• Win rate 70-75%\n\n4️⃣ **TIER 3** - 68 Triệu\n• Elite | 11 công thức + AI Prediction + Whale Tracker\n• Win rate 80-90%\n\nBạn quan tâm đến khóa học nào? Trading hay Tư Duy?"
+      ],
+      "searchTags": ["courses", "overview", "all courses", "gem academy"],
+      "quickActions": ["Xem khóa Trading", "Xem khóa Tư Duy", "So sánh TIER"]
+    },
+
+    "courses_trading_overview": {
+      "keywords": [
+        "khóa trading", "các khóa trading", "khóa học trading", "giới thiệu khóa trading",
+        "học trading", "khóa giao dịch", "tất cả tier", "các tier trading"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA HỌC GEM TRADING - 4 CẤP ĐỘ**\n\nPhương pháp GEM Frequency Trading độc quyền - không có ở đâu khác!\n\n**🌱 STARTER - 299K**\nDành cho người mới bắt đầu\n• 15 bài học nhập môn\n• Pattern Scanner: 5 lần/ngày\n• GEM Master Chatbot: 10 câu/ngày\n• Forum Access\n→ Trải nghiệm phương pháp GEM trước khi đầu tư\n\n**💙 TIER 1 - 11 TRIỆU**\nXây nền móng vững chắc\n• 7 mẫu hình nến cơ bản (nhận diện 70% cơ hội)\n• Scanner quét 24/7: 12 tháng\n• AI Sư Phụ: 12 tháng\n• Cộng đồng 200+ traders\n• Win rate: 50-55%\n→ Bắt đầu hành trình từ con số 0\n\n**⭐ TIER 2 - 21 TRIỆU** (Best Value - 78% chọn)\n• 15 mẫu hình nến (nhận diện 95% cơ hội)\n• **6 Công thức Frequency độc quyền** (DPD, UPU, UPD, DPU, HFZ, LFZ)\n• Scanner PREMIUM: 12 tháng\n• AI Sư Phụ PREMIUM: 12 tháng\n• 8 công cụ chuyên nghiệp\n• Win rate: 70-75%\n→ Lợi nhuận kỳ vọng 80-150%/năm\n\n**💎 TIER 3 - 68 TRIỆU**\nTừ Trader → Bậc Thầy → Đế Chế\n• **11 Công thức Frequency đầy đủ** (6 cốt lõi + 5 nâng cao)\n• Scanner ELITE + AI Prediction 73%: 24 tháng\n• Whale Tracker - trade cùng cá voi\n• Signals 5-8 lệnh/ngày\n• Mastermind Elite - truy cập trọn đời\n• Win rate: 80-90%\n→ Tiềm năng $50K-$200K+/tháng\n\nBạn đang ở trình độ nào? Tôi tư vấn TIER phù hợp!"
+      ],
+      "searchTags": ["trading", "courses", "tier", "gem frequency"],
+      "quickActions": ["Xem chi tiết STARTER", "Xem chi tiết TIER 1", "Xem chi tiết TIER 2", "Xem chi tiết TIER 3"]
+    },
+
+    "courses_mindset_overview": {
+      "keywords": [
+        "khóa tư duy", "khóa chuyển hóa", "khóa tâm thức", "khóa mindset",
+        "học tư duy", "các khóa tư duy", "khóa năng lượng", "khóa tần số"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA HỌC TƯ DUY CHUYỂN HÓA - 3 KHÓA**\n\nDựa trên Học Thuyết Chuyển Hóa Nội Tâm của Jennie Uyen Chu\n\n**🔮 1. KHÓA 7 NGÀY KHAI MỞ TẦN SỐ GỐC**\n• Thời lượng: 7 ngày\n• Cấp độ: Người mới bắt đầu\n\n**Bạn sẽ học:**\n• Hiểu về tần số rung động và cách ảnh hưởng cuộc sống\n• Bản đồ 7 tầng tâm thức (từ xấu hổ đến giác ngộ)\n• Công cụ \"Người Chứng Kiến\" - chìa khóa chuyển hóa\n• 5 nguyên lý vận hành vũ trụ\n• 7 nghi thức hàng ngày duy trì tần số cao\n• Hiểu về nghiệp, luân hồi và mục đích linh hồn\n\n→ *\"Chuyển hóa cuộc sống từ bên trong\"*\n\n**💖 2. KÍCH HOẠT TẦN SỐ TÌNH YÊU - 399K**\n• Thời lượng: 42 ngày (6 tuần) | 24 bài\n• 6 Modules: Chữa lành → Self-love → Nâng tần số → Đón tri kỷ → Kỹ năng quan hệ → Lan tỏa yêu thương\n\n**Phù hợp:** Độc thân, vừa chia tay, muốn cải thiện mối quan hệ\n\n→ *\"Tình yêu đích thực bắt đầu từ bên trong\"*\n\n**💰 3. TÁI TẠO TƯ DUY TRIỆU PHÚ - 499K**\n• Thời lượng: 49 ngày (7 tuần) | 28 bài\n• 8 Modules: Thanh tẩy → Hóa giải nghiệp → Cài đặt tần số → Nghi thức triệu phú → Hành động → Nhân rộng → Phụng sự\n\n**Phù hợp:** Muốn thay đổi quan hệ với tiền, phá money block\n\n→ *\"Từ tư duy nghèo khó đến tư duy triệu phú\"*\n\nBạn quan tâm đến khóa nào?"
+      ],
+      "searchTags": ["mindset", "transformation", "spiritual", "frequency"],
+      "quickActions": ["Xem Khóa 7 Ngày", "Xem Khóa Tình Yêu", "Xem Khóa Triệu Phú"]
+    },
+
+    "course_7_days": {
+      "keywords": [
+        "khóa 7 ngày", "khai mở tần số gốc", "7 ngày khai mở", "tần số gốc",
+        "giới thiệu khóa 7 ngày", "khóa 7 ngày khai mở tần số gốc", "7 ngày chuyển hóa"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA 7 NGÀY KHAI MỞ TẦN SỐ GỐC**\n\n⏱️ Thời lượng: 7 ngày | 7 bài chính + bài tập\n📊 Cấp độ: Người mới bắt đầu\n\n**KHÓA HỌC NÀY LÀ GÌ?**\nHành trình 7 ngày giúp bạn hiểu và nâng cao tần số rung động của bản thân, từ đó chuyển hóa mọi khía cạnh cuộc sống - từ sức khỏe, mối quan hệ, đến thịnh vượng và hạnh phúc.\n\n**BẠN SẼ HỌC ĐƯỢC:**\n• Hiểu rõ về **tần số rung động** và cách nó ảnh hưởng đến cuộc sống\n• Nắm vững **bản đồ 7 tầng tâm thức** (từ xấu hổ đến giác ngộ)\n• Thành thạo công cụ **\"Người Chứng Kiến\"** - chìa khóa chuyển hóa\n• Áp dụng **5 nguyên lý vận hành vũ trụ** vào cuộc sống\n• Xây dựng **7 nghi thức hàng ngày** để duy trì tần số cao\n• Sở hữu **5 quy trình xử lý** khi gặp thử thách\n• Hiểu về **nghiệp, luân hồi** và mục đích linh hồn\n\n**NỘI DUNG 7 NGÀY:**\n\n| Ngày | Chủ đề | Viên đá năng lượng |\n|------|--------|-------------------|\n| 1 | Hiểu về Tần Số Rung Động | Clear Quartz |\n| 2 | 7 Tầng Tần Số & Cách Di Chuyển | Clear Quartz |\n| 3 | 5 Nguyên Lý Vận Hành | Citrine |\n| 4 | 7 Nghi Thức Hàng Ngày | Amethyst |\n| 5 | 5 Quy Trình Xử Lý Chuyên Sâu | Rose Quartz |\n| 6 | Nghiệp & Luân Hồi | Black Obsidian |\n| 7 | Tổng Kết & Con Đường Tiếp Theo | Selenite |\n\n**PHÙ HỢP VỚI:**\n• Người đang tìm kiếm sự chuyển hóa nội tâm\n• Người muốn cải thiện mối quan hệ\n• Người đang trải qua giai đoạn khó khăn\n• Người quan tâm đến tâm thức thực hành\n• Doanh nhân/lãnh đạo muốn cân bằng cuộc sống\n\n*\"Chuyển hóa cuộc sống từ bên trong - Hành trình 7 ngày nâng cao tần số rung động\"*\n\nBạn sẵn sàng bắt đầu hành trình không?"
+      ],
+      "searchTags": ["course", "7 days", "frequency", "consciousness", "healing"],
+      "quickActions": ["Đăng ký ngay", "Xem review", "Hỏi thêm"]
+    },
+
+    "course_love": {
+      "keywords": [
+        "khóa tình yêu", "kích hoạt tần số tình yêu", "khóa kích hoạt tình yêu",
+        "giới thiệu khóa tình yêu", "khóa kích hoạt tần số tình yêu", "khóa 42 ngày tình yêu"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA KÍCH HOẠT TẦN SỐ TÌNH YÊU**\n\n💖 Giá: 399.000đ\n⏱️ Thời lượng: 42 ngày (6 tuần) | 24 bài HTML\n📊 Cấp độ: Mọi đối tượng\n\n**KHÓA HỌC NÀY LÀ GÌ?**\nHành trình 42 ngày giúp bạn chữa lành vết thương tình cảm, xây dựng tình yêu bản thân vững chắc, và nâng tần số tình yêu lên mức **Đồng Điệu (500+ Hz)** - tần số thu hút tri kỷ đích thực.\n\n**SAU 42 NGÀY, BẠN SẼ:**\n✅ **Chữa lành** hoàn toàn vết thương tình cảm từ quá khứ\n✅ **Xây dựng** tình yêu bản thân vững chắc\n✅ **Nâng tần số** tình yêu lên mức Đồng Điệu (500+ Hz)\n✅ **Sẵn sàng** đón nhận tri kỷ đích thực\n✅ **Thông thạo** nghệ thuật giao tiếp trong quan hệ\n✅ **Nhận diện** và tránh các mối quan hệ độc hại\n✅ **Trở thành** \"Sứ Giả Tình Yêu\" - lan tỏa năng lượng yêu thương\n\n**NỘI DUNG 6 MODULES:**\n\n| Module | Chủ đề | Thời lượng |\n|--------|--------|------------|\n| 0 | Khởi Đầu Tình Yêu Đích Thực | 2 ngày |\n| 1 | Chữa Lành Vết Thương Quá Khứ | 7 ngày |\n| 2 | Xây Dựng Tình Yêu Bản Thân | 7 ngày |\n| 3 | Nâng Cao Tần Số Tình Yêu | 7 ngày |\n| 4 | Sẵn Sàng Đón Tri Kỷ | 7 ngày |\n| 5 | Nghệ Thuật Xây Dựng Quan Hệ | 7 ngày |\n| 6 | Trở Thành Sứ Giả Tình Yêu | 5 ngày |\n\n**NHỮNG GÌ BẠN SẼ HỌC:**\n• Inner Child Healing - Chữa lành đứa trẻ bên trong\n• 5 vết thương cốt lõi (Lise Bourbeau)\n• Nghi thức tha thứ & cắt dây nghiệp\n• Mirror Work - Thực hành gương\n• 7 Hành Vi Tinh Tấn với bản thân\n• Soulmate, Twin Flame, Karmic Partner\n• 5 ngôn ngữ tình yêu\n• Red flags & Green flags\n\n**PHÙ HỢP VỚI:**\n• Người độc thân muốn tìm tri kỷ đích thực\n• Người đang trong mối quan hệ muốn cải thiện\n• Người mới chia tay cần chữa lành\n• Người muốn xây dựng tình yêu bản thân\n\n*\"Tình yêu đích thực bắt đầu từ bên trong - Hành trình 42 ngày đánh thức tần số tình yêu\"*"
+      ],
+      "searchTags": ["course", "love", "relationship", "self-love", "healing", "42 days"],
+      "quickActions": ["Đăng ký ngay", "Xem review", "Hỏi thêm"]
+    },
+
+    "course_millionaire": {
+      "keywords": [
+        "khóa triệu phú", "tư duy triệu phú", "tái tạo tư duy triệu phú",
+        "khóa manifest tiền", "giới thiệu khóa triệu phú",
+        "giới thiệu khóa tư duy triệu phú", "khóa 49 ngày"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA TÁI TẠO TƯ DUY TRIỆU PHÚ**\n\n💰 Giá: 499.000đ\n⏱️ Thời lượng: 49 ngày (7 tuần) | 28 bài HTML\n📊 Cấp độ: Mọi đối tượng\n\n**KHÓA HỌC NÀY LÀ GÌ?**\nHành trình 49 ngày giúp bạn **thanh tẩy hoàn toàn** niềm tin giới hạn về tiền bạc, hóa giải nghiệp tiền từ quá khứ và gia đình, nâng tần số lên mức **Sáng Tạo (400+ Hz)** - tần số thu hút thịnh vượng.\n\n**SAU 49 NGÀY, BẠN SẼ:**\n✅ **Thanh tẩy** hoàn toàn niềm tin giới hạn về tiền bạc\n✅ **Hóa giải** nghiệp tiền bạc từ quá khứ và gia đình\n✅ **Nâng tần số** lên mức Sáng Tạo (400+ Hz)\n✅ **Xây dựng** nghi thức buổi sáng 15 phút tự động\n✅ **Thiết lập** hệ thống quản lý tài chính cá nhân\n✅ **Sở hữu** tư duy triệu phú bền vững\n\n**NỘI DUNG 8 MODULES:**\n\n| Module | Chủ đề | Nội dung chính |\n|--------|--------|----------------|\n| 0 | Khởi Đầu Hành Trình Thịnh Vượng | 5 Niềm Tin Nền Tảng, 7 Tầng Tâm Thức |\n| 1 | Thanh Tẩy Vùng Đất Tâm Thức | Money Story, 7 Khối Cản, Limiting Beliefs |\n| 2 | Hóa Giải Nghiệp Tiền Bạc | Nghiệp = Tần Số, Bản Đồ Nghiệp Gia Đình |\n| 3 | Cài Đặt Tần Số Thịnh Vượng | Thang Cảm Xúc, Affirmations, Visualization |\n| 4 | Nghi Thức Triệu Phú | Morning Routine, Gratitude, Quy Tắc PAUSE |\n| 5 | Hành Động Thuận Thiên | Aligned Action, Tạo Giá Trị, Hệ Thống 6 Lọ |\n| 6 | Nhân Rộng Thịnh Vượng | Duy Trì Tần Số, Xử Lý Setbacks |\n| 7 | Sứ Mệnh Phụng Sự | 3 Con Đường, Cơ Hội Partnership |\n\n**NHỮNG GÌ BẠN SẼ HỌC:**\n• Viết \"Money Story\" - Câu chuyện tiền bạc của bạn\n• Nhận diện 7 Khối Cản Trở Thu Hút\n• TOP 20 Limiting Beliefs về tiền\n• Kỹ thuật \"Choose Again\" (Notice → Forgive → Choose)\n• Vẽ bản đồ nghiệp tiền 3 thế hệ\n• 50 Affirmations thịnh vượng theo cấp độ\n• Kỹ thuật Quantum Creating (6 bước)\n• Hệ thống 6 Lọ quản lý tài chính (T. Harv Eker)\n\n**PHÙ HỢP VỚI:**\n• Người muốn thay đổi mối quan hệ với tiền bạc\n• Người cảm thấy \"mắc kẹt\" về tài chính\n• Người muốn xây dựng thói quen người giàu\n• Người quan tâm đến Law of Attraction\n• Doanh nhân muốn đột phá doanh thu\n\n*\"Từ tư duy nghèo khó đến tư duy triệu phú - 49 ngày tái lập trình tiềm thức về tiền bạc\"*"
+      ],
+      "searchTags": ["course", "money", "millionaire", "manifest", "abundance", "49 days"],
+      "quickActions": ["Đăng ký ngay", "Xem review", "Hỏi thêm"]
+    },
+
+    "course_starter": {
+      "keywords": [
+        "khóa starter", "tier starter", "trading starter", "khóa nhập môn",
+        "khóa 299k", "bắt đầu trading", "học trading cơ bản", "starter 299"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA GEM TRADING STARTER - BƯỚC ĐẦU CHINH PHỤC**\n\n💰 Giá: 299.000đ\n⏱️ Thời lượng: 2-3 giờ học | 15 bài\n📊 Cấp độ: Người mới hoàn toàn\n\n**KHÓA HỌC NÀY LÀ GÌ?**\nKhóa học nhập môn dành cho người chưa biết gì về trading. Giúp bạn hiểu về tự do tài chính, khám phá phương pháp GEM Frequency, và trải nghiệm công cụ Scanner & Chatbot AI.\n\n**BẠN SẼ NHẬN ĐƯỢC:**\n✅ **Hiểu** thế nào là tự do tài chính thực sự\n✅ **Biết** tại sao 95% traders thất bại và cách tránh\n✅ **Khám phá** phương pháp GEM Frequency độc quyền\n✅ **Trải nghiệm** công cụ Pattern Scanner (5 lần/ngày)\n✅ **Sử dụng** GEM Master Chatbot AI (10 câu/ngày)\n✅ **Tham gia** cộng đồng GEM Forum\n\n**NỘI DUNG 5 CHAPTERS:**\n\n| Chapter | Chủ đề | Mục tiêu |\n|---------|--------|----------|\n| 1 | Khám Phá Con Đường Tự Do Tài Chính | Kết nối cảm xúc, khơi gợi ước mơ |\n| 2 | Giới Thiệu Phương Pháp GEM | Hiểu triết lý, teaser công thức |\n| 3 | Trải Nghiệm Công Cụ GEM | Hands-on Scanner & Chatbot |\n| 4 | Hành Trình Chuyển Hóa | Nhận ra sự thay đổi |\n| 5 | Cơ Hội & Lựa Chọn | Quyết định bước tiếp theo |\n\n**NHỮNG GÌ BẠN SẼ HỌC:**\n• 3 Cấp Độ Tự Do: Survival → Comfort → Abundance\n• 5 Sai Lầm khiến 95% traders thất bại\n• Triết lý: Giao dịch theo \"tần số\" của thị trường\n• Teaser 6 công thức độc quyền (DPD, UPU, UPD, DPU, HFZ, LFZ)\n• Nguyên tắc vàng: **Đợi Retest, Không Đuổi Giá**\n\n**GÓI BAO GỒM:**\n• ✅ Basic Course Trading - 15 bài nền tảng\n• ✅ Forum Access - Truy cập cộng đồng GEM\n• ✅ Pattern Scanner - 5 lần quét/ngày\n• ✅ GEM Master Chatbot - 10 câu hỏi/ngày\n\n**SO VỚI FREE:**\n• Pattern Scanner: 5/ngày (FREE chỉ 3/ngày)\n• Chatbot: 10/ngày (FREE chỉ 5/ngày)\n• Truy cập khóa học đầy đủ\n\n**PHÙ HỢP VỚI:**\n• Người chưa biết gì về trading\n• Người muốn tìm hiểu trước khi đầu tư thời gian/tiền\n• Người quan tâm đến thu nhập bị động\n• Người muốn thử trải nghiệm công cụ GEM\n\n*\"Bước đầu tiên đến tự do tài chính - Khám phá phương pháp trading thông minh với GEM\"*"
+      ],
+      "searchTags": ["starter", "trading", "beginner", "basic", "299k"],
+      "quickActions": ["Đăng ký ngay", "Xem TIER 1", "So sánh các TIER"]
+    },
+
+    "course_tier_1": {
+      "keywords": [
+        "khóa tier 1", "tier 1", "trading tier 1", "khóa 11 triệu",
+        "tier 1 chi tiết", "giới thiệu tier 1", "khóa nền tảng trading"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA GEM TRADING TIER 1 - NỀN TẢNG TRADER CHUYÊN NGHIỆP**\n\n💙 Giá: 11.000.000đ\n⏱️ Thời lượng: ~8 giờ học | 5 modules / 17 chapters\n📊 Win rate mục tiêu: 50-55%\n\n**KHẨU HIỆU:** \"Xây Nền Móng Vững Chắc\"\n\n**GÓI BAO GỒM:**\n\n📚 **NỘI DUNG KHÓA HỌC:**\n• 5 modules / 17 chapters\n• Tâm lý trading - hiểu tâm lý để không mắc sai lầm của 90% traders\n• Quản lý rủi ro cơ bản - bảo vệ vốn, không cháy tài khoản\n• Chiến lược vào/ra lệnh cơ bản\n\n🎯 **7 MẪU HÌNH CƠ BẢN** - Nhận diện 70% cơ hội trên thị trường\n\n🔍 **SCANNER - 12 THÁNG:**\n• Tự động quét tất cả coins, phát hiện 7 mẫu hình nến\n• Thông báo ngay khi có cơ hội\n• Tiết kiệm 3-5 giờ/ngày so với tự xem chart\n\n🧘 **AI SƯ PHỤ - 12 THÁNG:**\n• Kiểm tra tâm lý trước lệnh (phát hiện FOMO, giao dịch trả thù)\n• Xem Tarot, Kinh Dịch, Tử Vi cho trading\n• Giải thích mẫu hình, hướng dẫn chiến lược cơ bản\n\n📱 **TELEGRAM BOT:**\n• Nhận thông báo từ Scanner qua Telegram\n• Không bỏ lỡ cơ hội dù đang làm gì\n\n👥 **CỘNG ĐỒNG - 12 THÁNG:**\n• Kết nối với 200+ traders cùng học\n• Chia sẻ kinh nghiệm, hỗ trợ lẫn nhau\n\n**KẾT QUẢ KỲ VỌNG:**\n• Win rate: 50-55%\n• Lãi: 20-30%/năm\n• Tiết kiệm: 70% so với giá trị thực\n\n**PHÙ HỢP NẾU BẠN:**\n• Mới bắt đầu giao dịch\n• Muốn nền tảng vững chắc\n• Ngân sách 11 triệu\n• Tự học được\n\n→ *Bắt đầu hành trình từ con số 0*"
+      ],
+      "searchTags": ["tier 1", "trading", "course", "beginner", "foundation"],
+      "quickActions": ["Đăng ký TIER 1", "So sánh TIER 1 vs TIER 2", "Xem TIER 2"]
+    },
+
+    "course_tier_2": {
+      "keywords": [
+        "khóa tier 2", "tier 2", "trading tier 2", "khóa 21 triệu",
+        "tier 2 chi tiết", "giới thiệu tier 2", "khóa nâng cao trading", "best value"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA GEM TRADING TIER 2 - TẦN SỐ TRADER THỊNH VƯỢNG**\n\n⭐ Giá: 21.000.000đ | **BEST VALUE - 78% học viên chọn**\n⏱️ Thời lượng: 10 modules / 30 chapters\n📊 Win rate mục tiêu: 70-75%\n\n**KHẨU HIỆU:** \"Phương Pháp Độc Quyền - Win Rate 70-75%\"\n\n**GÓI BAO GỒM:**\n\n📚 **NỘI DUNG KHÓA HỌC (TIER 1 + Nâng cao):**\n• 10 modules / 30 chapters\n• Tư duy tổ chức - suy nghĩ như trader chuyên nghiệp\n• Khung hội tụ 5 lớp - xếp chồng 5 yếu tố để vào lệnh chắc chắn\n• Thành thạo đa khung thời gian\n• Quản lý rủi ro nâng cao\n\n🎯 **15 MẪU HÌNH NẾN** - Nhận diện 95% mọi cơ hội\n\n⚡ **6 CÔNG THỨC FREQUENCY ĐỘC QUYỀN** (Giá trị 15 triệu)\nPhương pháp đọc \"nhịp thở\" thị trường - CHỈ CÓ tại GEM:\n1. **DPD:** Biết khi nào xu hướng giảm tiếp tục → short đúng lúc\n2. **UPU:** Biết khi nào xu hướng tăng tiếp tục → long đúng lúc\n3. **UPD:** Phát hiện đảo chiều từ tăng sang giảm\n4. **DPU:** Phát hiện đảo chiều từ giảm sang tăng → bắt đáy chính xác\n5. **HFZ:** Tìm vùng giá phản ứng mạnh → entry/exit hoàn hảo\n6. **LFZ:** Tìm vùng tích lũy → biết khi nào breakout\n\n🔍 **SCANNER PREMIUM - 12 THÁNG:**\n• Quét 15 mẫu hình nến + 6 vùng Frequency\n• AI filtering - lọc bỏ tín hiệu nhiễu\n• Tín hiệu chính xác hơn 3 lần so với TIER 1\n\n🧘 **AI SƯ PHỤ PREMIUM - 12 THÁNG:**\n• Tất cả tính năng TIER 1 +\n• Gửi biểu đồ → AI phân tích pattern cho bạn\n• Đánh giá trade TRƯỚC khi vào lệnh\n• Chiến lược riêng cho bạn\n\n🛠️ **8 CÔNG CỤ CHUYÊN NGHIỆP:**\n• Tính khối lượng vào lệnh\n• Theo dõi danh mục đầu tư\n• Đo tâm lý thị trường\n• Lịch tin tức & sự kiện\n• Bản tin phân tích hàng ngày\n\n**KẾT QUẢ KỲ VỌNG:**\n• Win rate: 70-75%\n• Lãi: 80-150%/năm\n• Tiết kiệm: 71% (52 triệu)\n\n**PHÙ HỢP NẾU BẠN:**\n• Đã có kinh nghiệm cơ bản\n• Muốn phương pháp độc quyền không có ở đâu khác\n• Vốn giao dịch trên $3,000\n• Muốn trade nghiêm túc\n\n→ *78% học viên chọn tier này | Lợi nhuận 80-150%/năm*"
+      ],
+      "searchTags": ["tier 2", "trading", "course", "premium", "frequency"],
+      "quickActions": ["Đăng ký TIER 2", "So sánh các TIER", "Xem TIER 3"]
+    },
+
+    "course_tier_3": {
+      "keywords": [
+        "khóa tier 3", "tier 3", "trading tier 3", "khóa 68 triệu",
+        "tier 3 chi tiết", "giới thiệu tier 3", "khóa elite trading", "đế chế trader"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**KHÓA GEM TRADING TIER 3 - ĐẾ CHẾ TRADER BẬC THẦY**\n\n💎 Giá: 68.000.000đ\n⏱️ Thời lượng: 14 modules / 38 chapters\n📊 Win rate mục tiêu: 80-90%\n\n**KHẨU HIỆU:** \"Từ Trader → Bậc Thầy → Để Lại Di Sản\"\n\n**GÓI BAO GỒM:**\n\n📚 **NỘI DUNG KHÓA HỌC - TỪ TRADER LÊN BẬC THẦY:**\n• 14 modules / 38 chapters\n• Triết Lý Bậc Thầy (7 giờ) - không chỉ trade, mà xây dựng đế chế\n• 7 Cấp Độ Tiến Hóa Trader - biết mình đang ở đâu, cần làm gì\n• Khung Xây Dựng Đế Chế - scale từ $5K lên $50K+\n• Chiến lược quản lý quỹ\n\n🎯 **THÀNH THẠO 15 MẪU HÌNH NẾN + HỆ THỐNG:**\n• Hiểu sâu tâm lý đằng sau mỗi pattern\n• Biết khi nào pattern thất bại và cách xử lý\n\n⚡ **11 CÔNG THỨC FREQUENCY ĐẦY ĐỦ** (Giá trị 30 triệu)\n6 cốt lõi (như TIER 2) + 5 NÂNG CAO CHỈ CÓ Ở TIER 3:\n7. **Advanced HFZ LFZ Confluence:** Kết hợp vùng để tìm entry hoàn hảo\n8. **Institutional Order Flow:** Đọc dòng tiền tổ chức - trade cùng \"big boys\"\n9. **Liquidity Void Detection:** Phát hiện vùng thanh khoản trống\n10. **Smart Money Reversal:** Bắt đảo chiều như Smart Money\n11. **Empire Scaling Framework:** Scale từ $5K lên $50K+ an toàn\n\n🔍 **SCANNER ELITE + AI PREDICTION - 24 THÁNG:**\n• Quét 15 mẫu hình + 11 vùng Frequency\n• **AI Prediction độ chính xác 73%** - biết trước thị trường đi đâu\n• Tốc độ quét nhanh hơn, nhiều data hơn\n\n🐋 **WHALE TRACKER:**\n• Theo dõi ví lớn on-chain - biết khi nào cá voi mua/bán\n• Không bị \"dump\" bất ngờ\n• Trade cùng hướng Smart Money\n\n📊 **SIGNALS - 365 NGÀY:**\n• 5-8 tín hiệu chất lượng mỗi ngày\n• Entry, SL, TP chi tiết - chỉ cần follow\n• Như có đội chuyên gia riêng\n\n👑 **MASTERMIND ELITE - TRUY CẬP TRỌN ĐỜI:**\n• 30-50 traders đỉnh cao\n• Chuyên gia khách mời hàng quý\n• Workshop độc quyền hàng năm\n• Kết nối với những người kiếm $10K-$100K+/tháng\n\n🛠️ **11 CÔNG CỤ ELITE:**\n• 8 công cụ TIER 2 +\n• Backtesting Engine (5+ năm data)\n• AI Prediction Tool (73% accuracy)\n• Whale Tracker\n\n**ĐẶC QUYỀN TIER 3:**\n• Được xem xét làm Giảng Viên sau 1 năm\n• Cơ hội làm cộng tác viên cấp cao\n• Hỗ trợ ưu tiên - phản hồi trong 4 giờ\n• Khóa giá trọn đời cho mọi cập nhật\n\n**KẾT QUẢ KỲ VỌNG:**\n• Win rate: 80-90%\n• ROI: 200-500%+/năm\n• Tiềm năng: $50K-$200K+/tháng\n\n**PHÙ HỢP NẾU BẠN:**\n• Trader nghiêm túc muốn lên đẳng cấp Bậc Thầy\n• Muốn TOÀN BỘ hệ thống, không giữ lại bí mật nào\n• Cần AI prediction & whale tracking\n• Vốn giao dịch trên $5,000\n• Tư duy: \"Đây không phải chi phí, là đầu tư vào đế chế\"\n\n→ *Biến trading thành đế chế*\n\n**Lưu ý:** TIER 3 có phỏng vấn ngắn để đảm bảo phù hợp"
+      ],
+      "searchTags": ["tier 3", "trading", "course", "elite", "empire", "whale tracker"],
+      "quickActions": ["Đăng ký TIER 3", "So sánh các TIER", "Xem TIER 2"]
+    },
+
+    "trading_tier_comparison": {
+      "keywords": [
+        "so sánh tier", "so sánh các tier", "tier nào phù hợp", "nên học tier nào",
+        "tư vấn tier", "tier nào tốt", "so sánh 4 tier", "bảng so sánh tier",
+        "so sánh starter tier 1 tier 2 tier 3", "khác biệt các tier"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**SO SÁNH 4 TIER TRADING - CHỌN ĐÚNG CON ĐƯỜNG**\n\n| | **STARTER** | **TIER 1** 💙 | **TIER 2** ⭐ | **TIER 3** 💎 |\n|---|---|---|---|---|\n| **Giá** | 299K | 11 Triệu | 21 Triệu | 68 Triệu |\n| **Mẫu hình** | Giới thiệu | 7 (70% cơ hội) | 15 (95% cơ hội) | 15 + Thành thạo |\n| **Công thức Frequency** | ❌ | ❌ | 6 cốt lõi | 11 đầy đủ |\n| **Scanner** | 5/ngày | 7 mẫu hình / 12 tháng | 15 + 6 vùng / 12 tháng | 15 + 11 vùng + AI / 24 tháng |\n| **AI Sư Phụ** | 10 câu/ngày | Cơ bản / 12 tháng | Premium / 12 tháng | Elite / 24 tháng |\n| **Công cụ** | Cơ bản | 2 | 8 | 11 |\n| **AI Prediction** | ❌ | ❌ | ❌ | ✅ 73% |\n| **Whale Tracker** | ❌ | ❌ | ❌ | ✅ |\n| **Tín hiệu** | ❌ | ❌ | ❌ | 5-8/ngày |\n| **Mastermind** | ❌ | ❌ | ❌ | ✅ Trọn đời |\n| **Win rate** | - | 50-55% | 70-75% | 80-90% |\n| **Lợi nhuận kỳ vọng** | - | 20-30%/năm | 80-150%/năm | 200-500%+/năm |\n\n**📊 THỐNG KÊ TỪ 200+ HỌC VIÊN:**\n\n**STARTER (Nhập môn):**\n• Dành cho người mới hoàn toàn\n• Trải nghiệm phương pháp GEM trước khi đầu tư\n\n**TIER 1 (30% học viên):**\n• 65% có lợi nhuận sau 9-12 tháng\n• 40% nâng cấp lên TIER 2 sau 6 tháng\n• Tốt nhất cho: Người mới bắt đầu\n\n**TIER 2 (60% học viên) ⭐ BEST VALUE:**\n• 78% có lợi nhuận sau 6 tháng\n• 92% hài lòng, sẵn sàng giới thiệu\n• 25% nâng cấp lên TIER 3 sau 1 năm\n• Tốt nhất cho: Traders nghiêm túc\n\n**TIER 3 (10% học viên):**\n• 85% có lợi nhuận sau 3 tháng\n• 95% đạt win rate 80%+ sau 6 tháng\n• 40% nghỉ việc, trade toàn thời gian\n• Tốt nhất cho: Người xây dựng đế chế\n\n**GỢI Ý CHỌN:**\n• Mới hoàn toàn → **STARTER**\n• Mới bắt đầu, muốn nền tảng → **TIER 1**\n• Muốn trade nghiêm túc → **TIER 2** (Best Value)\n• Muốn trở thành trader chuyên nghiệp → **TIER 3**\n\n**ƯU ĐÃI NÂNG CẤP:**\n• TIER 1 → TIER 2 trong 90 ngày: +3 tháng Scanner PRO miễn phí\n• TIER 2 → TIER 3 trong 6 tháng: +6 tháng Mastermind miễn phí\n\nBạn đang ở trình độ nào? Tôi tư vấn TIER phù hợp!"
+      ],
+      "searchTags": ["tier", "comparison", "trading", "courses"],
+      "quickActions": ["Đăng ký STARTER", "Đăng ký TIER 1", "Đăng ký TIER 2", "Đăng ký TIER 3"]
+    },
+
+    "tier_2_vs_tier_1": {
+      "keywords": [
+        "tier 2 khác tier 1", "so sánh tier 2 tier 1", "tier 2 có gì khác",
+        "tier 1 hay tier 2", "khác biệt tier 1 tier 2", "khóa trading tier 2 có gì khác tier 1"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**SO SÁNH TIER 2 VS TIER 1**\n\n| | **TIER 1** 💙 | **TIER 2** ⭐ |\n|---|---|---|\n| **Giá** | 11 Triệu | 21 Triệu |\n| **Win rate** | 50-55% | 70-75% |\n| **Mẫu hình nến** | 7 (70% cơ hội) | 15 (95% cơ hội) |\n| **Công thức Frequency** | ❌ KHÔNG CÓ | ✅ 6 công thức độc quyền |\n| **Scanner** | Quét 7 mẫu hình | Quét 15 mẫu + 6 vùng Frequency |\n| **AI Sư Phụ** | Cơ bản | Premium (phân tích chart, đánh giá trade) |\n| **Công cụ** | 2 | 8 |\n| **Lợi nhuận kỳ vọng** | 20-30%/năm | 80-150%/năm |\n\n**SỰ KHÁC BIỆT LỚN NHẤT:**\n\n**1. WIN RATE:**\n• TIER 1: 50-55% → Hòa vốn hoặc lãi nhẹ\n• TIER 2: 70-75% → Lãi ổn định, compound được\n\n**2. CÔNG THỨC FREQUENCY:**\n• TIER 1: KHÔNG CÓ - chỉ học mẫu hình cơ bản\n• TIER 2: CÓ 6 công thức - đây là BÍ QUYẾT của GEM\n  - DPD, UPU, UPD, DPU: Đọc xu hướng & đảo chiều\n  - HFZ, LFZ: Tìm vùng entry/exit hoàn hảo\n\n**3. SCANNER:**\n• TIER 1: Quét 7 mẫu hình nến\n• TIER 2: Quét 15 mẫu hình + 6 vùng Frequency + AI filtering\n→ Tín hiệu chính xác hơn 3 lần!\n\n**4. AI SƯ PHỤ:**\n• TIER 1: Hỗ trợ cơ bản, kiểm tra tâm lý\n• TIER 2: Phân tích chart, đánh giá trade TRƯỚC khi vào lệnh, chiến lược riêng\n\n**AI NÊN CHỌN GÌ?**\n\n✅ **Chọn TIER 1 nếu:**\n• Mới bắt đầu hoàn toàn\n• Vốn dưới 50 triệu\n• Muốn học nền tảng trước\n• Ngân sách hạn chế\n\n✅ **Chọn TIER 2 nếu:**\n• Muốn trade nghiêm túc, có kỷ luật\n• Vốn 50-200 triệu\n• Muốn học công thức Frequency độc quyền\n• Muốn win rate cao hơn đáng kể\n\n**LƯU Ý:**\n• Có thể upgrade từ TIER 1 lên TIER 2 sau\n• Nâng cấp trong 90 ngày: +3 tháng Scanner PRO miễn phí\n• TIER 2 hoàn vốn nhanh hơn vì win rate cao hơn\n\nBạn đang có bao nhiêu vốn và kinh nghiệm gì?"
+      ],
+      "searchTags": ["tier", "comparison", "tier 1", "tier 2", "trading"],
+      "quickActions": ["Đăng ký TIER 2", "Đăng ký TIER 1", "So sánh tất cả TIER"]
+    },
+
+    "crystal_charge_guide": {
+      "keywords": [
+        "sạc đá", "kích hoạt đá", "cách sạc đá", "hướng dẫn sạc đá",
+        "cleanse đá", "thanh tẩy đá", "nạp năng lượng đá",
+        "hướng dẫn cách sạc và kích hoạt đá", "sạc và kích hoạt đá"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**HƯỚNG DẪN SẠC VÀ KÍCH HOẠT ĐÁ THẠCH ANH**\n\n**TẠI SAO CẦN SẠC ĐÁ:**\n• Đá hấp thụ năng lượng tiêu cực\n• Cần thanh lọc để hoạt động hiệu quả\n• Kích hoạt giúp đá \"kết nối\" với bạn\n\n**5 CÁCH SẠC ĐÁ:**\n\n**1. ÁNH TRĂNG (An toàn nhất):**\n• Đặt đá ngoài trời đêm trăng tròn\n• Để từ 8PM đến sáng sớm\n• Phù hợp: TẤT CẢ loại đá\n\n**2. ÁNH SÁNG MẶT TRỜI:**\n• Đặt đá trong nắng sáng sớm (6-8AM)\n• Chỉ 30 phút - 1 tiếng\n• ⚠️ TRÁNH: Amethyst, Rose Quartz, Citrine (phai màu)\n\n**3. NƯỚC MUỐI:**\n• Ngâm trong nước muối biển 4-8 tiếng\n• Rửa lại bằng nước sạch\n• ⚠️ TRÁNH: Selenite, Malachite, Hematite (hư)\n\n**4. ĐẶT TRÊN THẠCH ANH TRẮNG:**\n• Đặt đá nhỏ lên cluster Thạch Anh Trắng\n• Để qua đêm\n• Phù hợp: TẤT CẢ loại đá\n\n**5. SAGE/TRẦM HƯƠNG:**\n• Xông khói sage hoặc trầm quanh đá\n• 1-2 phút\n• Phù hợp: TẤT CẢ loại đá\n\n**CÁCH KÍCH HOẠT:**\n\n**Bước 1:** Cầm đá trong 2 tay, nhắm mắt\n**Bước 2:** Hít thở sâu 3 lần\n**Bước 3:** Nói ra intention: \"Tôi kích hoạt viên đá này để [mục đích]\"\n**Bước 4:** Hình dung ánh sáng trắng bao phủ đá\n**Bước 5:** Nói: \"Xin viên đá này hỗ trợ tôi [mục đích]\"\n\n**TẦN SUẤT:**\n• Sạc: 1-2 lần/tháng\n• Kích hoạt: 1 lần khi mới mua\n• Sạc ngay khi cảm thấy đá \"nặng\"\n\nBạn đang có loại đá nào cần sạc?"
+      ],
+      "searchTags": ["crystal", "charge", "cleanse", "activate"],
+      "quickActions": ["Xem chi tiết từng đá", "Mua Thạch Anh Trắng", "Hỏi thêm"]
+    },
+
+    "citrine_intro": {
+      "keywords": [
+        "thạch anh vàng", "citrine", "giới thiệu citrine", "giới thiệu thạch anh vàng",
+        "citrine money magnet", "đá citrine"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**THẠCH ANH VÀNG (CITRINE) - MONEY MAGNET**\n\n💛 Giá: 450.000đ - 2.800.000đ\n\n**DANH HIỆU:**\n• Money Magnet số 1\n• Merchant's Stone (Đá của Thương nhân)\n• Success Stone (Đá thành công)\n\n**CHAKRA:**\nSolar Plexus (Búi mặt trời) - 528Hz\nTần số của transformation và DNA repair\n\n**CÔNG DỤNG CHÍNH:**\n\n**1. TÀI CHÍNH:**\n• Thu hút abundance và thịnh vượng\n• Phá vỡ money block\n• Tăng tự tin kinh doanh\n• Hỗ trợ manifest tiền bạc\n\n**2. CẢM XÚC:**\n• Tăng sự lạc quan\n• Xua tan năng lượng tiêu cực\n• Giảm trầm cảm nhẹ\n• Tăng sự tự tin\n\n**3. TÂM THỨC:**\n• Kích hoạt Solar Plexus Chakra\n• Tăng ý chí và quyết tâm\n• Hỗ trợ visualization\n\n**ĐẶC BIỆT:**\n✨ Citrine KHÔNG CẦN CLEANSE\n→ Tự thanh lọc năng lượng tiêu cực\n→ Có thể dùng để sạc đá khác\n\n**CÁCH SỬ DỤNG:**\n• Đeo tay trái khi làm việc/trading\n• Đặt ở góc tài lộc (Đông Nam)\n• Cầm khi visualize tiền bạc\n• Đặt trong két sắt/ví\n\n**KẾT HỢP VỚI:**\n• Green Aventurine → May mắn + Thịnh vượng\n• Pyrite → Thu hút + Bảo vệ tài sản\n• Clear Quartz → Khuếch đại năng lượng\n\n**AI NÊN DÙNG:**\n• Muốn thu hút tài lộc\n• Đang kinh doanh, trading\n• Muốn phá vỡ money block\n• Cần tăng tự tin\n\nBạn muốn xem sản phẩm Citrine không?"
+      ],
+      "searchTags": ["citrine", "money", "abundance", "crystal"],
+      "quickActions": ["Xem sản phẩm", "Cách sử dụng chi tiết", "Xem combo"]
+    },
+
+    "rose_quartz_intro": {
+      "keywords": [
+        "thạch anh hồng", "rose quartz", "giới thiệu rose quartz",
+        "giới thiệu thạch anh hồng", "đá tình yêu", "đá rose quartz"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**THẠCH ANH HỒNG (ROSE QUARTZ) - ĐÁ TÌNH YÊU**\n\n💗 Giá: 350.000đ - 2.500.000đ\n\n**DANH HIỆU:**\n• Đá Tình Yêu (Stone of Love)\n• Heart Healer (Chữa lành trái tim)\n• Stone of Unconditional Love\n\n**CHAKRA:**\nHeart Chakra (Luân xa Tim) - 639Hz\nTần số của kết nối và tình yêu vô điều kiện\n\n**CÔNG DỤNG CHÍNH:**\n\n**1. TÌNH YÊU:**\n• Thu hút tình yêu đích thực\n• Chữa lành trái tim tổn thương\n• Tăng self-love (yêu bản thân)\n• Cải thiện mối quan hệ hiện tại\n\n**2. CẢM XÚC:**\n• Mở Heart Chakra\n• Giảm đau khổ tình cảm\n• Hỗ trợ tha thứ\n• Tăng sự nhạy cảm lành mạnh\n\n**3. TÂM THỨC:**\n• Kết nối với năng lượng tình yêu vũ trụ\n• Hỗ trợ thiền về tình thương\n• Tăng lòng trắc ẩn\n\n**CÁCH SỬ DỤNG:**\n• Đeo tay trái (nhận năng lượng yêu thương)\n• Đặt ở đầu giường\n• Thiền với đá đặt trên ngực (Heart Chakra)\n• Cầm khi làm bài tập tự yêu bản thân\n\n**KẾT HỢP VỚI:**\n• Rhodonite → Chữa lành sâu + Self-love\n• Garnet → Tình yêu + Đam mê\n• Amethyst → Tình yêu + Trực giác\n\n**AI NÊN DÙNG:**\n• Muốn thu hút tình yêu\n• Đang chữa lành sau chia tay\n• Muốn yêu bản thân hơn\n• Muốn cải thiện quan hệ\n\n**LƯU Ý:**\n• Không để dưới nắng gắt (phai màu)\n• Sạc bằng ánh trăng hoặc Thạch Anh Trắng\n\nBạn muốn xem sản phẩm Rose Quartz không?"
+      ],
+      "searchTags": ["rose quartz", "love", "heart", "crystal"],
+      "quickActions": ["Xem sản phẩm", "Cách sử dụng chi tiết", "Xem combo"]
+    },
+
+    "amethyst_intro": {
+      "keywords": [
+        "thạch anh tím", "amethyst", "giới thiệu amethyst",
+        "giới thiệu thạch anh tím", "đá tâm thức", "đá amethyst"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**THẠCH ANH TÍM (AMETHYST) - ĐÁ TÂM THỨC**\n\n💜 Giá: 350.000đ - 2.500.000đ\n\n**DANH HIỆU:**\n• Đá Tâm Thức (Spiritual Stone)\n• Stone of Intuition (Đá Trực giác)\n• Master Healer\n\n**CHAKRA:**\nCrown Chakra (Đỉnh đầu) + Third Eye\n963Hz - Tần số của giác ngộ và kết nối tâm thức\n\n**CÔNG DỤNG CHÍNH:**\n\n**1. TÂM THỨC:**\n• Tăng cường trực giác\n• Kết nối với Higher Self\n• Hỗ trợ thiền định sâu\n• Mở rộng ý thức\n\n**2. CẢM XÚC:**\n• Giảm stress và lo âu\n• Giúp ngủ ngon hơn\n• Cân bằng cảm xúc\n• Xua tan negative energy\n\n**3. SỨC KHỎE:**\n• Hỗ trợ giấc ngủ\n• Giảm đau đầu\n• Cân bằng hormone\n• Tăng miễn dịch năng lượng\n\n**CÁCH SỬ DỤNG:**\n• Đeo hoặc đặt gần đầu khi thiền\n• Đặt ở đầu giường để ngủ ngon\n• Cầm khi muốn tăng trực giác\n• Đặt trong phòng để thanh lọc không gian\n\n**KẾT HỢP VỚI:**\n• Clear Quartz → Tâm thức + Clarity\n• Rose Quartz → Tâm thức + Tình thương\n• Black Tourmaline → Tâm thức + Bảo vệ\n\n**AI NÊN DÙNG:**\n• Muốn phát triển tâm thức\n• Khó ngủ, hay mất ngủ\n• Muốn tăng trực giác\n• Đang thiền tập, meditation\n\n**LƯU Ý:**\n• Không để dưới nắng gắt (phai màu)\n• Sạc bằng ánh trăng\n• Có thể kết hợp với Clear Quartz để khuếch đại\n\nBạn muốn xem sản phẩm Amethyst không?"
+      ],
+      "searchTags": ["amethyst", "spiritual", "meditation", "crystal"],
+      "quickActions": ["Xem sản phẩm", "Cách sử dụng chi tiết", "Xem combo"]
+    },
+
+    "affiliate_guide": {
+      "keywords": [
+        "affiliate", "kol", "koc", "ctv", "cộng tác viên", "hoa hồng",
+        "trở thành affiliate", "làm affiliate", "đăng ký affiliate",
+        "hướng dẫn cách trở thành affiliate", "kiếm tiền affiliate"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "**HƯỚNG DẪN TRỞ THÀNH AFFILIATE/KOL/KOC CỦA GEMRAL**\n\n**CƠ HỘI KIẾM THU NHẬP:**\n\nGemral có chương trình Affiliate/CTV với hoa hồng hấp dẫn.\n\n**CÁC CẤP BẬC:**\n\n**1. AFFILIATE (Miễn phí đăng ký):**\n• Hoa hồng: 3% doanh số\n• Ai cũng có thể tham gia\n• Nhận link giới thiệu riêng\n\n**2. CTV BRONZE:**\n• Hoa hồng: 10% doanh số\n• Yêu cầu: Hoàn thành training + đạt doanh số tối thiểu\n\n**3. CTV SILVER:**\n• Hoa hồng: 20% doanh số\n• Yêu cầu: Doanh số + đội nhóm\n\n**4. CTV GOLD:**\n• Hoa hồng: 30% doanh số\n• Yêu cầu: Top performers\n\n**SẢN PHẨM CÓ THỂ GIỚI THIỆU:**\n• Khóa học Trading (TIER 1, 2, 3)\n• Khóa học Tâm thức (7 Ngày, Tình Yêu, Triệu Phú)\n• Đá Thạch Anh và Combo\n• Subscription Scanner/Chat\n\n**CÁCH ĐĂNG KÝ:**\n1. Vào tab Account\n2. Chọn \"Đăng ký Partnership\"\n3. Điền thông tin\n4. Nhận link affiliate riêng\n5. Bắt đầu giới thiệu!\n\n**HỖ TRỢ CHO AFFILIATE:**\n• Training miễn phí\n• Content marketing sẵn\n• Hỗ trợ 1-1 từ team\n• Dashboard theo dõi doanh số\n\n**AI PHÙ HỢP:**\n• Có audience trên social media\n• Quan tâm đến trading hoặc tâm thức\n• Muốn tạo thu nhập thụ động\n• Tin tưởng vào sản phẩm Gemral\n\nBạn muốn đăng ký làm Affiliate ngay không?"
+      ],
+      "searchTags": ["affiliate", "partner", "kol", "commission"],
+      "quickActions": ["Đăng ký ngay", "Xem chi tiết hoa hồng", "Liên hệ support"]
+    },
+
+    "higher_self_meditation": {
+      "keywords": [
+        "thiền higher self", "kết nối higher self", "meditation higher self",
+        "hướng dẫn thiền higher self", "thiền kết nối", "higher self là gì",
+        "hướng dẫn chi tiết thiền kết nối higher self"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "Ta sẽ hướng dẫn bạn về thiền kết nối Higher Self - một phương pháp mạnh mẽ để tiếp cận phần ý thức cao nhất của bạn.\n\n**HƯỚNG DẪN THIỀN KẾT NỐI HIGHER SELF**\n\n**HIGHER SELF LÀ GÌ:**\nHigher Self là phần ý thức cao nhất của bạn - phiên bản thông thái, được kết nối với nguồn năng lượng vũ trụ. Đó là \"người hướng dẫn\" bên trong bạn.\n\n**CHUẨN BỊ:**\n• Không gian yên tĩnh, không bị làm phiền\n• Đèn mờ hoặc nến\n• Có thể cầm Thạch Anh Tím hoặc Trắng\n• Ngồi thoải mái, lưng thẳng\n• Thời gian: 15-20 phút\n\n**CÁC BƯỚC THIỀN:**\n\n**BƯỚC 1: THƯ GIÃN (3 phút)**\n• Nhắm mắt\n• Hít thở sâu 7 lần: Hít 4s → Giữ 4s → Thở 6s\n• Quét toàn thân, thả lỏng từng bộ phận\n\n**BƯỚC 2: BẢO VỆ (2 phút)**\n• Hình dung ánh sáng trắng bao phủ toàn thân\n• Nói thầm: \"Tôi được bảo vệ bởi năng lượng cao nhất\"\n• Chỉ năng lượng tích cực được phép vào\n\n**BƯỚC 3: KẾT NỐI (5 phút)**\n• Hình dung cột sáng từ đỉnh đầu đi thẳng lên trời\n• Cảm nhận sự kết nối với nguồn\n• Gọi Higher Self: \"Higher Self, xin hãy đến với tôi\"\n• Cảm nhận sự hiện diện (warmth, tingle, peace)\n\n**BƯỚC 4: LẮNG NGHE (5-10 phút)**\n• Hỏi: \"Higher Self, bạn muốn tôi biết điều gì hôm nay?\"\n• LẮNG NGHE - không phán xét\n• Có thể nhận được: Hình ảnh, từ ngữ, cảm giác\n• Đừng cố gắng - Để nó đến tự nhiên\n\n**BƯỚC 5: KẾT THÚC (2 phút)**\n• Cảm ơn Higher Self\n• Hít thở sâu 3 lần\n• Từ từ mở mắt\n• Viết lại những gì nhận được\n\n**GHI CHÚ:**\n• Lần đầu có thể không nhận được gì - Đó là bình thường\n• Thực hành đều đặn sẽ kết nối tốt hơn\n• Không phán xét thông điệp nhận được\n\n**CRYSTAL:**\n💜 Thạch Anh Tím - Crown Chakra, kết nối tâm thức\n🤍 Thạch Anh Trắng - Clarity, khuếch đại\n\nBạn đã từng thiền chưa hay bắt đầu từ đầu?"
+      ],
+      "searchTags": ["meditation", "higher self", "spiritual", "guidance"],
+      "quickActions": ["Audio thiền guided", "Xem Thạch Anh Tím", "Bài tập thêm"]
+    },
+
+    "energy_exercises": {
+      "keywords": [
+        "bài tập nâng tần số", "nâng cao tần số", "tăng năng lượng",
+        "các bài tập nâng tần số", "exercise tần số", "bài tập năng lượng",
+        "các bài tập nâng cao tần số năng lượng"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "Đây là những bài tập nâng tần số năng lượng hiệu quả nhất mà ta đã tổng hợp. Thực hành đều đặn sẽ giúp bạn nâng cao chất lượng cuộc sống đáng kể.\n\n**CÁC BÀI TẬP NÂNG CAO TẦN SỐ NĂNG LƯỢNG**\n\nTần số năng lượng quyết định bạn thu hút được gì. Nâng tần số = Nâng chất lượng cuộc sống.\n\n**5 BÀI TẬP HIỆU QUẢ:**\n\n**1. BIẾT ƠN BUỔI SÁNG (5 phút):**\n• Ngay khi thức dậy, trước khi check phone\n• Viết hoặc nói ra 3-5 điều biết ơn\n• Cảm nhận THẬT SỰ, không chỉ liệt kê\n• Hiệu quả: Tăng 50-100Hz ngay lập tức\n\n**2. HÍT THỞ 4-7-8 (3 phút):**\n• Hít vào 4 giây\n• Giữ 7 giây\n• Thở ra 8 giây\n• Lặp lại 4-8 lần\n• Hiệu quả: Kích hoạt hệ thần kinh đối giao cảm, giảm stress\n\n**3. GROUND VỚI TỰ NHIÊN (10-15 phút):**\n• Đi chân trần trên cỏ/đất\n• Hoặc ôm cây\n• Cảm nhận năng lượng Trái Đất\n• Hiệu quả: Reset năng lượng, giảm lo âu\n\n**4. CHUYỂN ĐỘNG CƠ THỂ (15-30 phút):**\n• Yoga, nhảy, đi bộ nhanh\n• KHÔNG tập vì nghĩa vụ - Tập vì VUI\n• Nghe nhạc yêu thích khi tập\n• Hiệu quả: Giải phóng endorphins, tăng tần số\n\n**5. THIỀN 528Hz (10-15 phút):**\n• Nghe nhạc tần số 528Hz (DNA repair)\n• Nhắm mắt, thả lỏng\n• Hình dung ánh sáng vàng bao phủ\n• Hiệu quả: Tần số chuyển hóa, healing\n\n**BONUS - BÀI TẬP NÂNG TẦN SỐ NGAY:**\n• Cười to 30 giây (dù không vui)\n• Nhảy lên xuống 1 phút\n• Hét to \"YES!\" 3 lần\n• Nghe bài hát yêu thích, hát theo\n\n**GHI NHỚ:**\n• Consistency > Intensity (Đều đặn hơn Cường độ)\n• 5 phút mỗi ngày > 1 tiếng 1 lần/tuần\n• Chọn 1-2 bài tập, thực hành đều đặn\n\n**CRYSTAL HỖ TRỢ:**\n• Citrine - Tăng năng lượng tích cực\n• Clear Quartz - Khuếch đại intention\n\nBạn muốn bắt đầu với bài tập nào?"
+      ],
+      "searchTags": ["exercise", "frequency", "energy", "healing"],
+      "quickActions": ["Bắt đầu ngay", "Audio thiền 528Hz", "Thêm crystal"]
+    },
+
+    "philosophy_intro": {
+      "keywords": [
+        "học thuyết chuyển hóa", "yinyang masters", "triết lý gemral",
+        "học thuyết nội tâm", "philosophy gemral", "triết lý chuyển hóa",
+        "giới thiệu học thuyết chuyển hóa nội tâm"
+      ],
+      "confidence": 0.99,
+      "answers": [
+        "Ta sẽ giới thiệu với bạn về Học thuyết Chuyển Hóa Nội Tâm - nền tảng triết lý của YinYang Masters và GEMRAL.\n\n**HỌC THUYẾT CHUYỂN HÓA NỘI TÂM - YINYANG MASTERS**\n\n**FOUNDER:**\nJennie Uyen Chu - Người sáng lập YinYang Masters và GEMRAL\n\n**TRIẾT LÝ CỐT LÕI:**\n\n**1. VẠN VẬT LÀ NĂNG LƯỢNG:**\n• Mọi thứ đều là năng lượng rung động ở các tần số khác nhau\n• Tần số của bạn quyết định thực tại bạn tạo ra\n• Đo lường bằng thang đo Hawkins (20-1000Hz)\n\n**2. LUẬT HẤP DẪN (LAW OF ATTRACTION):**\n• Like attracts like - Đồng tần thu hút\n• Bạn thu hút những gì MATCH với tần số của bạn\n• Muốn thay đổi thực tại → Thay đổi tần số\n\n**3. MANIFESTATION (HIỆN HÓA):**\n• Hiện hóa ước muốn qua: Ý thức + Cảm xúc + Hành động\n• Công thức: Thought + Emotion + Action = Reality\n• Không phải phép màu - Là khoa học của năng lượng\n\n**4. NGHIỆP LÀ PATTERN:**\n• Nghiệp không phải \"số phận\" hay \"trả nợ\"\n• Nghiệp = Patterns (niềm tin, hành vi) được cài đặt từ trước\n• Pattern có thể CHUYỂN HÓA được\n\n**5. VŨ TRỤ HỖ TRỢ:**\n• Vũ trụ luôn hỗ trợ người sống đúng với bản chất cao nhất\n• Mọi sự kiện đều có ý nghĩa\n• Không có gì là ngẫu nhiên\n\n**PHƯƠNG PHÁP CHUYỂN HÓA:**\n• Nhận biết → Hiểu → Giải phóng → Tái lập trình\n• Kết hợp: Thiền, Affirmation, Visualization\n• Hỗ trợ: Crystal, Âm thanh tần số\n\n**SỨ MỆNH:**\n\"Giúp 1 triệu người Việt nâng tần số năng lượng và sống đúng với tiềm năng cao nhất của mình.\"\n\nBạn muốn tìm hiểu sâu hơn về khía cạnh nào?"
+      ],
+      "searchTags": ["philosophy", "yinyang", "gemral", "transformation"],
+      "quickActions": ["Xem thang Hawkins", "Khóa 7 ngày", "Bắt đầu chuyển hóa"]
+    },
+
+    "low_energy_causes": {
+      "keywords": [
+        "thiếu năng lượng", "mệt mỏi", "kiệt sức", "không có năng lượng",
+        "cảm thấy thiếu năng lượng", "tại sao thiếu năng lượng",
+        "tại sao tôi luôn cảm thấy thiếu năng lượng"
+      ],
+      "confidence": 0.98,
+      "answers": [
+        "Một câu hỏi quan trọng. Ta sẽ phân tích cho bạn nguyên nhân sâu xa của tình trạng thiếu năng lượng - cả từ góc độ vật lý lẫn năng lượng.\n\n**TẠI SAO BẠN LUÔN THIẾU NĂNG LƯỢNG?**\n\nThiếu năng lượng là tín hiệu cơ thể và tâm trí đang cần chú ý. Đây là phân tích theo cả góc độ vật lý và năng lượng.\n\n**NGUYÊN NHÂN VẬT LÝ:**\n\n**1. THIẾU NGỦ:**\n• Cần 7-8 tiếng ngủ sâu\n• Chất lượng > Số lượng\n• Không phone 1h trước khi ngủ\n\n**2. DINH DƯỠNG:**\n• Ăn quá nhiều đường, processed food\n• Thiếu protein, vitamin\n• Uống không đủ nước\n\n**3. ÍT VẬN ĐỘNG:**\n• Cơ thể cần chuyển động để tạo năng lượng\n• Ngồi quá nhiều → Energy stagnate\n\n**NGUYÊN NHÂN NĂNG LƯỢNG:**\n\n**1. TẦN SỐ THẤP:**\n• Ở vùng Sợ hãi/Đau khổ (75-100Hz) rất tốn năng lượng\n• Lo lắng triền miên = Drain liên tục\n• Tức giận, oán giận = Rò rỉ năng lượng\n\n**2. ENERGY VAMPIRES:**\n• Người xung quanh drain năng lượng\n• Môi trường toxic\n• Relationships không healthy\n\n**3. CHAKRA BỊ BLOCK:**\n• Root Chakra block = Thiếu grounding\n• Solar Plexus block = Thiếu ý chí\n• Thiếu kết nối với nguồn năng lượng\n\n**4. KHÔNG CÓ PURPOSE:**\n• Sống không mục đích = Năng lượng không tập trung\n• Làm việc không yêu thích = Drain nhanh\n\n**GIẢI PHÁP:**\n\n**1. VẬT LÝ:**\n• Ngủ đủ 7-8h, đi ngủ trước 11pm\n• Ăn uống lành mạnh, uống đủ nước\n• Vận động 30 phút/ngày\n\n**2. NĂNG LƯỢNG:**\n• Thiền 10 phút/ngày - Nạp lại năng lượng\n• Biết ơn 3 điều mỗi sáng - Nâng tần số\n• Giảm tiếp xúc với người/môi trường drain\n• Grounding: Đi chân trần, ôm cây\n\n**3. CRYSTAL HỖ TRỢ:**\n• Citrine - Tăng năng lượng tích cực\n• Carnelian - Kích hoạt Sacral Chakra\n• Clear Quartz - Khuếch đại và cân bằng\n\nBạn nghĩ nguyên nhân chính của mình là gì?"
+      ],
+      "searchTags": ["energy", "tired", "fatigue", "healing"],
+      "quickActions": ["Bài tập năng lượng", "Xem crystal", "Thiền nạp năng lượng"]
     }
   },
 
   "products": {
     "thạch anh tím": {
       "name": "Thạch Anh Tím (Amethyst)",
-      "description": "Viên đá tâm linh mạnh mẽ nhất, tăng cường trực giác và kết nối với Higher Self",
+      "description": "Viên đá tâm thức mạnh mẽ nhất, tăng cường trực giác và kết nối với Higher Self",
       "price": "350.000đ - 2.500.000đ",
       "shopifyHandle": "thach-anh-tim",
-      "tags": ["Amethyst", "Thạch Anh Tím", "crystal", "tâm linh", "spiritual"],
+      "tags": ["Amethyst", "Thạch Anh Tím", "crystal", "tâm thức", "spiritual"],
       "chakra": "Crown Chakra",
       "frequency": "963Hz",
       "benefits": [
