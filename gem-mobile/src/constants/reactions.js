@@ -113,15 +113,15 @@ export const REACTION_CONFIG = {
 export const REACTION_ORDER = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
 
 /**
- * Animation timing constants
+ * Animation timing constants - OPTIMIZED for speed
  */
 export const REACTION_ANIMATIONS = {
-  LONG_PRESS_THRESHOLD: 300,    // ms to trigger long press
-  PICKER_APPEAR_DURATION: 200,  // ms for picker fade in
-  STAGGER_DELAY: 50,            // ms delay between each icon animation
-  HOVER_SCALE: 1.4,             // scale factor on hover
-  HOVER_DURATION: 150,          // ms for hover transition
-  SELECTION_DURATION: 200,      // ms for selection animation
+  LONG_PRESS_THRESHOLD: 200,    // ms to trigger long press (reduced from 300)
+  PICKER_APPEAR_DURATION: 120,  // ms for picker fade in (reduced from 200)
+  STAGGER_DELAY: 0,             // ms delay between each icon animation (disabled)
+  HOVER_SCALE: 1.3,             // scale factor on hover (reduced from 1.4)
+  HOVER_DURATION: 80,           // ms for hover transition (reduced from 150)
+  SELECTION_DURATION: 100,      // ms for selection animation (reduced from 200)
   LABEL_TRANSLATE_Y: -24,       // px to move label up
 };
 

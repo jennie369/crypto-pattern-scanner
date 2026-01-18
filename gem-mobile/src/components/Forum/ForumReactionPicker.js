@@ -1,17 +1,16 @@
 /**
- * ForumReactionPicker Component
+ * ForumReactionPicker Component - OPTIMIZED VERSION
  * Long-press reaction picker overlay for forum posts (Facebook-style)
  *
- * Features:
- * - 6 reaction types (like, love, haha, wow, sad, angry)
- * - Staggered entrance animation
- * - Hover detection with scale effect
- * - Label popup on hover
- * - Glass blur background
- * - Position clamping to screen bounds
+ * Performance optimizations:
+ * - No Modal (uses absolute positioning)
+ * - No BlurView on Android (uses solid background)
+ * - Fast withTiming instead of withSpring
+ * - No staggered animations
+ * - Minimal re-renders
  */
 
-import React, { useState, useCallback, useEffect, useRef, memo } from 'react';
+import React, { useCallback, memo } from 'react';
 import {
   StyleSheet,
   View,
@@ -19,46 +18,70 @@ import {
   Pressable,
   Dimensions,
   Platform,
-  Modal,
 } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withTiming,
-  FadeIn,
-  FadeOut,
+  runOnJS,
+  Easing,
 } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
-import ReactionIcon from './ReactionIcon';
-import {
-  REACTION_CONFIG,
-  REACTION_ORDER,
-  REACTION_SIZES,
-  REACTION_ANIMATIONS,
-} from '../../constants/reactions';
+import { REACTION_CONFIG, REACTION_ORDER, REACTION_SIZES } from '../../constants/reactions';
 import { COLORS, SPACING } from '../../utils/tokens';
 
 // Safe haptics import
 let Haptics = null;
 try {
   Haptics = require('expo-haptics');
-} catch (e) {
-  console.log('[ForumReactionPicker] expo-haptics not available');
-}
+} catch (e) {}
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Fast animation config
+const FAST_TIMING = { duration: 120, easing: Easing.out(Easing.ease) };
 
 /**
- * ForumReactionPicker - Long-press reaction picker
- *
- * @param {Object} props
- * @param {boolean} props.visible - Show/hide picker
- * @param {Object} props.position - Position {x, y} to anchor picker
- * @param {string|null} props.currentReaction - User's current reaction type
- * @param {Function} props.onSelect - Callback when reaction selected
- * @param {Function} props.onClose - Callback when picker closes
- * @param {Object|null} props.panPosition - Current pan position for hover detection
+ * Single Reaction Item - Memoized for performance
+ */
+const ReactionItem = memo(({ type, onSelect, isSelected }) => {
+  const config = REACTION_CONFIG[type];
+  const scale = useSharedValue(1);
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withTiming(1.3, { duration: 80 });
+  }, []);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withTiming(1, { duration: 80 });
+  }, []);
+
+  const handlePress = useCallback(() => {
+    if (Haptics) {
+      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (e) {}
+    }
+    onSelect(type);
+  }, [type, onSelect]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={styles.reactionItem}
+    >
+      <Animated.View style={[styles.iconWrapper, isSelected && styles.selectedIcon, animatedStyle]}>
+        <Text style={styles.emoji}>{config.emoji}</Text>
+      </Animated.View>
+    </Pressable>
+  );
+});
+
+/**
+ * ForumReactionPicker - Optimized for performance
  */
 const ForumReactionPicker = ({
   visible,
@@ -66,308 +89,115 @@ const ForumReactionPicker = ({
   currentReaction = null,
   onSelect,
   onClose,
-  panPosition = null,
 }) => {
-  // State
-  const [hoveredReaction, setHoveredReaction] = useState(null);
-  const [showLabels, setShowLabels] = useState(false);
-
-  // Refs for icon positions
-  const iconPositions = useRef({});
-  const pickerRef = useRef(null);
-  const pickerLayout = useRef({ x: 0, y: 0 });
-
-  // Animation values
-  const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
+  const translateY = useSharedValue(10);
 
-  /**
-   * Calculate picker position (avoid screen edges)
-   */
-  const getPickerPosition = useCallback(() => {
-    let x = position.x - REACTION_SIZES.PICKER_WIDTH / 2;
-    let y = position.y - REACTION_SIZES.PICKER_HEIGHT - 20;
-
-    // Clamp to screen bounds with padding
-    const padding = 16;
-    x = Math.max(
-      padding,
-      Math.min(x, SCREEN_WIDTH - REACTION_SIZES.PICKER_WIDTH - padding)
-    );
-    y = Math.max(padding, y);
-
-    // If would go off bottom, position above
-    if (y + REACTION_SIZES.PICKER_HEIGHT > SCREEN_HEIGHT - 100) {
-      y = position.y - REACTION_SIZES.PICKER_HEIGHT - 20;
-    }
-
-    return { x, y };
-  }, [position]);
-
-  /**
-   * Handle visibility changes
-   */
-  useEffect(() => {
+  // Animate when visible changes
+  React.useEffect(() => {
     if (visible) {
-      // Animate in
-      scale.value = withSpring(1, { damping: 15, stiffness: 200 });
-      opacity.value = withTiming(1, {
-        duration: REACTION_ANIMATIONS.PICKER_APPEAR_DURATION,
-      });
-
-      // Delay showing labels
-      setTimeout(() => setShowLabels(true), 200);
+      opacity.value = withTiming(1, FAST_TIMING);
+      translateY.value = withTiming(0, FAST_TIMING);
     } else {
-      // Animate out
-      scale.value = withSpring(0, { damping: 20, stiffness: 200 });
-      opacity.value = withTiming(0, { duration: 150 });
-      setShowLabels(false);
-      setHoveredReaction(null);
+      opacity.value = withTiming(0, { duration: 80 });
+      translateY.value = withTiming(10, { duration: 80 });
     }
-  }, [visible, scale, opacity]);
+  }, [visible]);
 
-  /**
-   * Detect hover based on pan position
-   */
-  useEffect(() => {
-    if (!panPosition || !visible) {
-      setHoveredReaction(null);
-      return;
-    }
+  const handleSelect = useCallback((type) => {
+    onSelect?.(type);
+    onClose?.();
+  }, [onSelect, onClose]);
 
-    const { x, y } = panPosition;
-    let foundReaction = null;
-
-    // Check each icon position
-    for (const [type, pos] of Object.entries(iconPositions.current)) {
-      const iconX = pickerLayout.current.x + pos.x;
-      const iconY = pickerLayout.current.y + pos.y;
-      const hitPadding = 20;
-
-      if (
-        x >= iconX - hitPadding &&
-        x <= iconX + REACTION_SIZES.ICON_SIZE + hitPadding &&
-        y >= iconY - hitPadding &&
-        y <= iconY + REACTION_SIZES.ICON_SIZE + hitPadding
-      ) {
-        foundReaction = type;
-        break;
-      }
-    }
-
-    if (foundReaction !== hoveredReaction) {
-      setHoveredReaction(foundReaction);
-
-      // Haptic feedback on hover change
-      if (foundReaction && Haptics) {
-        try {
-          Haptics.selectionAsync();
-        } catch (e) {
-          // Ignore
-        }
-      }
-    }
-  }, [panPosition, visible, hoveredReaction]);
-
-  /**
-   * Handle icon layout to track positions
-   */
-  const handleIconLayout = useCallback((type, event) => {
-    const { x, y, width, height } = event.nativeEvent.layout;
-    iconPositions.current[type] = { x, y, width, height };
-  }, []);
-
-  /**
-   * Handle picker layout
-   */
-  const handlePickerLayout = useCallback((event) => {
-    const { x, y } = event.nativeEvent.layout;
-    pickerLayout.current = { x, y };
-  }, []);
-
-  /**
-   * Handle reaction selection
-   */
-  const handleSelect = useCallback(
-    (type) => {
-      // Haptic feedback
-      if (Haptics) {
-        try {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        } catch (e) {
-          // Ignore
-        }
-      }
-
-      onSelect?.(type);
-      onClose?.();
-    },
-    [onSelect, onClose]
-  );
-
-  /**
-   * Animated styles
-   */
   const containerStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ scale: scale.value }],
+    transform: [{ translateY: translateY.value }],
   }));
+
+  // Calculate position (centered, clamped to screen)
+  const pickerX = Math.max(16, Math.min(
+    position.x - REACTION_SIZES.PICKER_WIDTH / 2,
+    SCREEN_WIDTH - REACTION_SIZES.PICKER_WIDTH - 16
+  ));
+  const pickerY = Math.max(60, position.y - 60);
 
   if (!visible) return null;
 
-  const pickerPos = getPickerPosition();
-
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
-      statusBarTranslucent
-    >
-      <View style={styles.overlay}>
-        {/* Backdrop - tap to close */}
-        <Pressable style={styles.backdrop} onPress={onClose} />
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+      {/* Backdrop */}
+      <Pressable style={styles.backdrop} onPress={onClose} />
 
-        {/* Picker Container */}
-        <Animated.View
-          ref={pickerRef}
-          style={[
-            styles.pickerContainer,
-            containerStyle,
-            {
-              left: pickerPos.x,
-              top: pickerPos.y,
-            },
-          ]}
-          onLayout={handlePickerLayout}
-        >
-          <BlurView
-            intensity={Platform.OS === 'ios' ? 80 : 100}
-            tint="dark"
-            style={styles.blurView}
-          >
-            <View style={styles.reactionsRow}>
-              {REACTION_ORDER.map((type, index) => {
-                const isHovered = hoveredReaction === type;
-                const isCurrentReaction = currentReaction === type;
-
-                return (
-                  <Pressable
-                    key={type}
-                    onPress={() => handleSelect(type)}
-                    style={styles.reactionItem}
-                  >
-                    {/* Label popup on hover */}
-                    {showLabels && isHovered && (
-                      <Animated.View
-                        entering={FadeIn.duration(100)}
-                        exiting={FadeOut.duration(100)}
-                        style={styles.labelContainer}
-                      >
-                        <Text style={styles.label}>
-                          {REACTION_CONFIG[type]?.label}
-                        </Text>
-                      </Animated.View>
-                    )}
-
-                    {/* Icon wrapper */}
-                    <View
-                      onLayout={(e) => handleIconLayout(type, e)}
-                      style={[
-                        styles.iconWrapper,
-                        isCurrentReaction && styles.currentReaction,
-                      ]}
-                    >
-                      <ReactionIcon
-                        type={type}
-                        size={REACTION_SIZES.PICKER_EMOJI_SIZE}
-                        emojiSize={REACTION_SIZES.PICKER_EMOJI_SIZE}
-                        index={index}
-                        isHovered={isHovered}
-                        showAnimation={visible}
-                      />
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </BlurView>
-        </Animated.View>
-      </View>
-    </Modal>
+      {/* Picker */}
+      <Animated.View
+        style={[
+          styles.picker,
+          containerStyle,
+          { left: pickerX, top: pickerY },
+        ]}
+      >
+        <View style={styles.reactionsRow}>
+          {REACTION_ORDER.map((type) => (
+            <ReactionItem
+              key={type}
+              type={type}
+              onSelect={handleSelect}
+              isSelected={currentReaction === type}
+            />
+          ))}
+        </View>
+      </Animated.View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'transparent',
   },
-  pickerContainer: {
+  picker: {
     position: 'absolute',
     width: REACTION_SIZES.PICKER_WIDTH,
-    height: REACTION_SIZES.PICKER_HEIGHT,
-    borderRadius: REACTION_SIZES.PICKER_BORDER_RADIUS,
-    overflow: 'hidden',
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Platform.OS === 'ios' ? 'rgba(30, 30, 50, 0.95)' : 'rgba(20, 20, 40, 0.98)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     // Shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 15,
-    // Border
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  blurView: {
-    flex: 1,
-    borderRadius: REACTION_SIZES.PICKER_BORDER_RADIUS,
-    overflow: 'hidden',
-    backgroundColor:
-      Platform.OS === 'android' ? 'rgba(15, 16, 48, 0.95)' : 'transparent',
-  },
   reactionsRow: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
-    paddingHorizontal: REACTION_SIZES.PADDING_HORIZONTAL,
+    flex: 1,
+    paddingHorizontal: 8,
   },
   reactionItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 4,
   },
   iconWrapper: {
-    // Picker emoji size (larger than button emoji for easy selection)
-    width: REACTION_SIZES.PICKER_EMOJI_SIZE + 12,
-    height: REACTION_SIZES.PICKER_EMOJI_SIZE + 12,
-    borderRadius: (REACTION_SIZES.PICKER_EMOJI_SIZE + 12) / 2,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'visible',
   },
-  currentReaction: {
+  selectedIcon: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
-  labelContainer: {
-    position: 'absolute',
-    top: -28,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: 10,
-    minWidth: 50,
-    alignItems: 'center',
-  },
-  label: {
-    color: COLORS.textPrimary,
-    fontSize: 11,
-    fontWeight: '600',
+  emoji: {
+    fontSize: 26,
+    textAlign: 'center',
+    includeFontPadding: false,
   },
 });
 

@@ -16,9 +16,8 @@ import { StyleSheet, View, Text, Pressable } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withSequence,
   withTiming,
+  Easing,
 } from 'react-native-reanimated';
 import { ThumbsUp, Heart } from 'lucide-react-native';
 import ForumReactionPicker from './ForumReactionPicker';
@@ -94,16 +93,15 @@ const ForumReactionButton = ({
   }, []);
 
   /**
-   * Handle tap (toggle like)
+   * Handle tap (toggle like) - OPTIMIZED
    */
   const handleTap = useCallback(() => {
     if (disabled) return;
 
-    // Bounce animation
-    scale.value = withSequence(
-      withTiming(0.9, { duration: 100 }),
-      withSpring(1, { damping: 15 })
-    );
+    // Fast bounce animation
+    scale.value = withTiming(0.9, { duration: 50 }, () => {
+      scale.value = withTiming(1, { duration: 80 });
+    });
 
     // Call toggle callback
     onToggle?.(userReaction || 'like');
@@ -118,23 +116,22 @@ const ForumReactionButton = ({
   }, [disabled, openPicker]);
 
   /**
-   * Handle reaction selection from picker
+   * Handle reaction selection from picker - OPTIMIZED
    */
   const handleSelect = useCallback(
     (type) => {
-      // Selection animation
-      scale.value = withSequence(
-        withTiming(0.8, { duration: 100 }),
-        withSpring(1.2, { damping: 10 }),
-        withSpring(1, { damping: 15 })
-      );
+      // Fast selection animation
+      scale.value = withTiming(0.9, { duration: 40 }, () => {
+        scale.value = withTiming(1.05, { duration: 60 }, () => {
+          scale.value = withTiming(1, { duration: 50 });
+        });
+      });
 
-      // Big heart animation for "love" reaction
+      // Quick heart animation for "love" reaction
       if (type === 'love') {
-        heartScale.value = withSequence(
-          withTiming(1.5, { duration: 200 }),
-          withTiming(0, { duration: 400 })
-        );
+        heartScale.value = withTiming(1.2, { duration: 150 }, () => {
+          heartScale.value = withTiming(0, { duration: 200 });
+        });
       }
 
       // Call parent callback
