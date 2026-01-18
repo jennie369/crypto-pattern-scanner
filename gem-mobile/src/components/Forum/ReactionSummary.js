@@ -138,9 +138,9 @@ const ReactionSummary = ({
                 style={[
                   styles.iconWrapper,
                   {
-                    // Small container for stacked reaction icons
-                    width: dimensions.icon + 4,
-                    height: dimensions.icon + 4,
+                    // Larger container for stacked reaction icons to prevent clipping
+                    width: dimensions.icon + 8,
+                    height: dimensions.icon + 8,
                     marginLeft: index === 0 ? 0 : -dimensions.overlap,
                     zIndex: topReactions.length - index,
                     borderColor: COLORS.bgDark,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bgDark,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   countText: {
     color: COLORS.textMuted,

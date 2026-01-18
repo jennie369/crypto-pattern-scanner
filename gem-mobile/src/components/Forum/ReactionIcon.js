@@ -128,8 +128,8 @@ const ReactionIcon = ({
   }, [selected]);
 
   // Calculate container size to prevent emoji clipping
-  // Container needs to be slightly larger than fontSize to prevent clipping on mobile
-  const containerSize = Math.max(size, Math.round(fontSize * 1.15));
+  // Container needs to be larger than fontSize to prevent clipping on mobile (especially Android)
+  const containerSize = Math.max(size + 4, Math.round(fontSize * 1.3));
 
   return (
     <Animated.View
@@ -176,9 +176,12 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'visible',
   },
   emoji: {
     textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   fallbackContainer: {
     flex: 1,

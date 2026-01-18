@@ -267,10 +267,11 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     // Fixed size container for emoji - small like other action buttons
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'visible',
   },
   label: {
     fontWeight: '500',

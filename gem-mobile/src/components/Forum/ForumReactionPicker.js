@@ -344,11 +344,12 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     // Picker emoji size (larger than button emoji for easy selection)
-    width: REACTION_SIZES.PICKER_EMOJI_SIZE + 8,
-    height: REACTION_SIZES.PICKER_EMOJI_SIZE + 8,
-    borderRadius: (REACTION_SIZES.PICKER_EMOJI_SIZE + 8) / 2,
+    width: REACTION_SIZES.PICKER_EMOJI_SIZE + 12,
+    height: REACTION_SIZES.PICKER_EMOJI_SIZE + 12,
+    borderRadius: (REACTION_SIZES.PICKER_EMOJI_SIZE + 12) / 2,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'visible',
   },
   currentReaction: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
