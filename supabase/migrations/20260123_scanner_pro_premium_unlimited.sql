@@ -150,8 +150,8 @@ BEGIN
     v_today := (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')::DATE;
 
     -- Get profile
-    SELECT is_admin, role, scanner_tier INTO v_profile
-    FROM profiles WHERE id = p_user_id;
+    SELECT p.is_admin, p.role, p.scanner_tier AS user_scanner_tier INTO v_profile
+    FROM profiles p WHERE p.id = p_user_id;
 
     -- Check if unlimited (Admin/Manager/VIP/PRO/PREMIUM - all paid tiers now unlimited)
     v_is_unlimited := (
