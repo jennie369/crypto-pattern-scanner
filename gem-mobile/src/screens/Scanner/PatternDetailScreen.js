@@ -73,9 +73,9 @@ const PATTERN_NAMES_VI = {
   'descending_triangle': 'Tam Giác Giảm',
   'symmetrical_triangle': 'Tam Giác Đối Xứng',
   'symmetric_triangle': 'Tam Giác Đối Xứng',
-  'wedge': 'Nêm',
-  'rising_wedge': 'Nêm Tăng',
-  'falling_wedge': 'Nêm Giảm',
+  'wedge': 'Wedge',
+  'rising_wedge': 'Rising Wedge',
+  'falling_wedge': 'Falling Wedge',
   'flag': 'Cờ',
   'bull_flag': 'Cờ Tăng',
   'bear_flag': 'Cờ Giảm',
@@ -101,9 +101,9 @@ const PATTERN_DESCRIPTIONS_VI = {
   'ascending_triangle': 'Đáy nâng dần trong khi đỉnh ngang. Thường breakout lên. Tín hiệu mua khi phá kháng cự.',
   'descending_triangle': 'Đỉnh hạ dần trong khi đáy ngang. Thường breakout xuống. Tín hiệu bán khi phá hỗ trợ.',
   'symmetrical_triangle': 'Giá hội tụ về 1 điểm. Breakout có thể lên hoặc xuống. Chờ xác nhận.',
-  'wedge': 'Giá di chuyển trong kênh dốc đang thu hẹp. Thường đảo chiều khi thoát khỏi nêm.',
-  'rising_wedge': 'Giá tăng nhưng đang yếu dần. Tín hiệu giảm khi phá đáy nêm.',
-  'falling_wedge': 'Giá giảm nhưng đang yếu dần. Tín hiệu tăng khi phá đỉnh nêm.',
+  'wedge': 'Giá di chuyển trong kênh dốc đang thu hẹp. Thường đảo chiều khi thoát khỏi wedge.',
+  'rising_wedge': 'Giá tăng nhưng đang yếu dần. Tín hiệu giảm khi phá đáy wedge.',
+  'falling_wedge': 'Giá giảm nhưng đang yếu dần. Tín hiệu tăng khi phá đỉnh wedge.',
   'flag': 'Nghỉ ngắn sau sóng mạnh. Giá sẽ tiếp tục theo hướng trước đó.',
   'bull_flag': 'Cờ sau sóng tăng. Tín hiệu mua khi phá cạnh trên cờ.',
   'bear_flag': 'Cờ sau sóng giảm. Tín hiệu bán khi phá cạnh dưới cờ.',
@@ -203,9 +203,12 @@ const PatternDetailScreen = ({ navigation, route }) => {
   const slPrice = pattern?.stopLoss || 0;
   const tpPrice = pattern?.takeProfit || pattern?.target || pattern?.targets?.[0] || pattern?.target1 || 0;
 
-  // Subscribe to price updates
+  // Subscribe to price updates (for non-position views)
+  // When fromPosition=true, we use onPriceUpdate from TradingChart for perfect sync
   useEffect(() => {
     if (!pattern?.symbol) return;
+    // Skip if viewing from position - will use onPriceUpdate callback from chart
+    if (fromPosition) return;
 
     const unsubscribe = binanceService.subscribe(pattern.symbol, (data) => {
       setCurrentPrice(data.price);
@@ -215,7 +218,14 @@ const PatternDetailScreen = ({ navigation, route }) => {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [pattern?.symbol]);
+  }, [pattern?.symbol, fromPosition]);
+
+  // Callback for real-time price sync from TradingChart
+  const handleChartPriceUpdate = useCallback((price) => {
+    if (price && !isNaN(price)) {
+      setCurrentPrice(price);
+    }
+  }, []);
 
   // Fetch zone data and MTF alignment for TIER1+
   useEffect(() => {
@@ -224,6 +234,19 @@ const PatternDetailScreen = ({ navigation, route }) => {
 
       setLoadingZone(true);
       try {
+        // ✅ Get formation_time from pattern (when pattern was detected)
+        // This is the CORRECT timestamp for zone positioning
+        const formationTime = pattern.formation_time || pattern.formationTime ||
+                              pattern.start_time || pattern.startTime ||
+                              pattern.openedAt;
+
+        console.log('[PatternDetail] Zone formation time:', {
+          formation_time: pattern.formation_time,
+          start_time: pattern.start_time,
+          openedAt: pattern.openedAt,
+          resolved: formationTime
+        });
+
         // Create zone from pattern if it has zone boundaries
         if (pattern.zoneHigh && pattern.zoneLow) {
           setZoneData({
@@ -233,6 +256,11 @@ const PatternDetailScreen = ({ navigation, route }) => {
             status: pattern.zoneStatus || 'FRESH',
             strength: pattern.strength || 100,
             type: pattern.direction === 'LONG' ? 'LFZ' : 'HFZ',
+            // ✅ Mark as position zone if viewing from open position
+            isPositionZone: fromPosition,
+            // ✅ Use formation_time for correct zone positioning
+            formation_time: formationTime,
+            start_time: formationTime,
           });
         } else if (pattern.entry && pattern.stopLoss) {
           // Fallback: create zone from entry/SL levels
@@ -244,6 +272,11 @@ const PatternDetailScreen = ({ navigation, route }) => {
             status: 'FRESH',
             strength: pattern.confidence || 80,
             type: isLong ? 'LFZ' : 'HFZ',
+            // ✅ Mark as position zone if viewing from open position
+            isPositionZone: fromPosition,
+            // ✅ Use formation_time for correct zone positioning
+            formation_time: formationTime,
+            start_time: formationTime,
           });
         }
 
@@ -571,13 +604,15 @@ const PatternDetailScreen = ({ navigation, route }) => {
             </View>
           )}
 
-          {/* Chart - Using Binance Futures */}
+          {/* Chart - Using Binance Futures with Zone Visualization */}
           <View style={styles.chartSection}>
             <TradingChart
               symbol={pattern?.symbol || 'BTCUSDT'}
               timeframe={pattern?.timeframe || '4h'}
               height={350}
               selectedPattern={chartPattern}
+              zones={zoneData ? [zoneData] : []}
+              onPriceUpdate={fromPosition ? handleChartPriceUpdate : null}
             />
           </View>
 
@@ -685,10 +720,10 @@ const PatternDetailScreen = ({ navigation, route }) => {
               {/* Liquidation Price */}
               <View style={[styles.priceLevelCard, styles.priceLevelCardLiq]}>
                 <View style={styles.priceLevelHeader}>
-                  <AlertTriangle size={14} color={COLORS.warning} />
+                  <AlertTriangle size={14} color={COLORS.error} />
                   <Text style={styles.priceLevelLabel}>Thanh Lý</Text>
                 </View>
-                <Text style={[styles.priceLevelValue, { color: COLORS.warning }]}>
+                <Text style={[styles.priceLevelValue, { color: COLORS.textPrimary }]}>
                   ${formatPrice((() => {
                     // Binance Futures Liquidation Price Calculation
                     // LONG: Liq = Entry × (1 - IMR + MMR) → BELOW entry
@@ -707,7 +742,7 @@ const PatternDetailScreen = ({ navigation, route }) => {
                     }
                   })())}
                 </Text>
-                <Text style={[styles.priceLevelPercent, { color: COLORS.warning }]}>
+                <Text style={[styles.priceLevelPercent, { color: COLORS.textSecondary }]}>
                   {(() => {
                     const lev = pattern?.leverage || 10;
                     const pct = ((1 / lev) * 100 - 0.4).toFixed(1);
@@ -864,15 +899,15 @@ const PatternDetailScreen = ({ navigation, route }) => {
               >
                 <Text style={styles.tradeInfoLabelDotted}>Loại lệnh</Text>
                 <Text style={styles.tradeInfoValue}>
-                  {pattern?.order_type === 'limit' ? 'Limit' :
-                   pattern?.order_type === 'market' ? 'Market' :
+                  {pattern?.order_type === 'limit' || pattern?.order_type === 'LIMIT' ? 'Limit' :
+                   pattern?.order_type === 'market' || pattern?.order_type === 'MARKET' ? 'Market' :
                    pattern?.order_type === 'stop_limit' ? 'Stop Limit' :
                    pattern?.order_type === 'stop_market' ? 'Stop Market' :
-                   pattern?.orderType === 'limit' ? 'Limit' :
-                   pattern?.orderType === 'market' ? 'Market' :
+                   pattern?.orderType === 'limit' || pattern?.orderType === 'LIMIT' ? 'Limit' :
+                   pattern?.orderType === 'market' || pattern?.orderType === 'MARKET' ? 'Market' :
                    pattern?.orderType === 'stop_limit' ? 'Stop Limit' :
                    pattern?.orderType === 'stop_market' ? 'Stop Market' :
-                   'Limit'}
+                   'Market'}
                 </Text>
                 {activeTooltip === 'orderType' && (
                   <View style={styles.tooltipBubbleLeft}>
@@ -902,9 +937,19 @@ const PatternDetailScreen = ({ navigation, route }) => {
               >
                 <Text style={styles.tradeInfoLabelDotted}>Tỷ lệ R:R</Text>
                 <Text style={styles.tradeInfoValue}>
-                  1:{typeof pattern?.riskReward === 'number'
-                    ? pattern.riskReward.toFixed(1).replace('.', ',')
-                    : pattern?.riskReward?.toString().replace('.', ',') || '2,0'}
+                  {(() => {
+                    const rr = pattern?.riskReward || pattern?.risk_reward;
+                    // If already in "1:X" format, return as-is with comma decimal
+                    if (typeof rr === 'string' && rr.includes(':')) {
+                      return rr.replace('.', ',');
+                    }
+                    // If number, format as "1:X"
+                    if (typeof rr === 'number') {
+                      return `1:${rr.toFixed(1).replace('.', ',')}`;
+                    }
+                    // Default
+                    return '1:2,0';
+                  })()}
                 </Text>
                 {activeTooltip === 'riskReward' && (
                   <View style={styles.tooltipBubbleRight}>

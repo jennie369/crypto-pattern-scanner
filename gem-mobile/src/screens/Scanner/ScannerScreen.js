@@ -43,14 +43,14 @@ import CoinSelector from './components/CoinSelector';
 import TradingChart from './components/TradingChart';
 import ScanResultsSection from './components/ScanResultsSection';
 // V2 Paper Trade Modal with enhanced Binance-style UI
-import { PaperTradeModalV2, OpenPositionsSection, MTFAlignmentPanel } from '../../components/Trading';
+import { PaperTradeModalV2, OpenPositionsSection } from '../../components/Trading';
 import { MultiZoneOverlay } from '../../components/Scanner';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
 import SponsorBanner from '../../components/SponsorBanner';
 import { useTooltip } from '../../components/Common/TooltipProvider';
 import { patternDetection } from '../../services/patternDetection';
 import zoneManager from '../../services/zoneManager';
-import { mtfAlignmentService } from '../../services/mtfAlignmentService';
+// MTF Service removed - integrated into main scan
 import {
   checkMultiTFAccess,
   getAvailableTimeframesForTier,
@@ -129,7 +129,7 @@ const ScannerScreen = ({ navigation }) => {
   // Zone Visualization State
   const [zones, setZones] = useState([]);
   const [zonePreferences, setZonePreferences] = useState(null);
-  const [mtfAlignment, setMtfAlignment] = useState(null);
+  // MTF state removed - integrated into main scan
   const [showZones, setShowZones] = useState(true);
 
   // =====================================================
@@ -137,6 +137,12 @@ const ScannerScreen = ({ navigation }) => {
   // =====================================================
   const [selectedZonePatternId, setSelectedZonePatternId] = useState(null); // Currently selected pattern/zone ID
   const [zoneDisplayMode, setZoneDisplayMode] = useState('all'); // 'all' | 'selected' | 'hidden' - Default to 'all'
+
+  // =====================================================
+  // POSITION ZONE STATE - Show zone from open position
+  // =====================================================
+  const [selectedPosition, setSelectedPosition] = useState(null); // Currently selected position
+  const [showPositionZone, setShowPositionZone] = useState(true); // Toggle for position zone visibility
 
   // Section order for drag & drop (scanResults first by default)
   const [sectionOrder, setSectionOrder] = useState(['scanResults', 'openPositions']);
@@ -552,11 +558,13 @@ const ScannerScreen = ({ navigation }) => {
       const generatePatternId = (p) => {
         // Use pattern properties to create a unique ID
         // Format: symbol_type_timeframe_entry_sl (entry & sl make it unique)
+        // ⚠️ FIX: Check patternType first (used by Ascending Triangle, Double Top, etc.)
         const entryVal = parseFloat(p.entry || p.entryPrice || p.price || 0) || 0;
         const slVal = parseFloat(p.stopLoss || p.stop_loss || 0) || 0;
         const entry = entryVal.toFixed(6);
         const sl = slVal.toFixed(6);
-        return `${p.symbol}_${p.name || p.type}_${p.timeframe || selectedTimeframe}_${entry}_${sl}`;
+        const patternName = p.patternType || p.name || p.type || 'unknown';
+        return `${p.symbol}_${patternName}_${p.timeframe || selectedTimeframe}_${entry}_${sl}`;
       };
 
       const enrichedPatterns = allPatterns.map((p) => ({
@@ -610,26 +618,12 @@ const ScannerScreen = ({ navigation }) => {
           setZones(createdZones);
           console.log('[Scanner] Zones created:', createdZones.length);
 
-          // Calculate MTF alignment if enabled
-          if (tierAccessService.canUseMTFAlignment()) {
-            try {
-              const alignment = await mtfAlignmentService.calculateMTFAlignment(
-                displayCoin,
-                user?.id,
-                userTier
-              );
-              setMtfAlignment(alignment);
-              console.log('[Scanner] MTF alignment calculated:', alignment?.recommendation);
-            } catch (mtfError) {
-              console.log('[Scanner] MTF alignment error:', mtfError.message);
-            }
-          }
+          // MTF alignment now integrated into main scan results
         } catch (zoneError) {
           console.log('[Scanner] Zone creation error:', zoneError.message);
         }
       } else {
         setZones([]);
-        setMtfAlignment(null);
       }
 
       // =====================================================
@@ -677,7 +671,79 @@ const ScannerScreen = ({ navigation }) => {
 
   // Paper Trade handlers
   const handlePaperTrade = (pattern) => {
-    setSelectedPattern(pattern);
+    // ═══════════════════════════════════════════════════════════
+    // MERGE ZONE DATA - Find matching zone and add zone boundaries
+    // This is needed so zone can be displayed when viewing position later
+    // ═══════════════════════════════════════════════════════════
+    let enrichedPattern = { ...pattern };
+
+    // Try to find matching zone by pattern_id
+    const patternId = pattern.pattern_id || pattern.id;
+    if (patternId && zones.length > 0) {
+      const matchingZone = zones.find(z =>
+        z.pattern_id === patternId ||
+        z.metadata?.patternData?.pattern_id === patternId
+      );
+
+      if (matchingZone) {
+        console.log('[PaperTrade] Found matching zone:', matchingZone.pattern_id);
+        enrichedPattern = {
+          ...enrichedPattern,
+          // Add zone boundaries
+          zone_high: matchingZone.zone_high,
+          zone_low: matchingZone.zone_low,
+          zoneHigh: matchingZone.zone_high,
+          zoneLow: matchingZone.zone_low,
+          start_time: matchingZone.start_time,
+          end_time: matchingZone.end_time,
+          // Also ensure entry/SL/TP from zone are available
+          entry_price: matchingZone.entry_price || enrichedPattern.entry,
+          stop_loss: matchingZone.stop_loss || enrichedPattern.stopLoss,
+          target_1: matchingZone.target_1 || enrichedPattern.target,
+          take_profit: matchingZone.take_profit || matchingZone.target_1 || enrichedPattern.target,
+        };
+      } else {
+        console.log('[PaperTrade] No matching zone found for pattern:', patternId);
+        // Calculate zone boundaries from entry and stopLoss
+        const entry = pattern.entry || pattern.entry_price || 0;
+        const sl = pattern.stopLoss || pattern.stop_loss || 0;
+        if (entry > 0 && sl > 0) {
+          const isLong = pattern.direction === 'LONG';
+          enrichedPattern = {
+            ...enrichedPattern,
+            zone_high: isLong ? entry : sl,
+            zone_low: isLong ? sl : entry,
+            zoneHigh: isLong ? entry : sl,
+            zoneLow: isLong ? sl : entry,
+          };
+          console.log('[PaperTrade] Calculated zone bounds from Entry/SL');
+        }
+      }
+    } else if (!patternId) {
+      // No pattern_id - calculate zone from entry/SL
+      const entry = pattern.entry || pattern.entry_price || 0;
+      const sl = pattern.stopLoss || pattern.stop_loss || 0;
+      if (entry > 0 && sl > 0) {
+        const isLong = pattern.direction === 'LONG';
+        enrichedPattern = {
+          ...enrichedPattern,
+          zone_high: isLong ? entry : sl,
+          zone_low: isLong ? sl : entry,
+          zoneHigh: isLong ? entry : sl,
+          zoneLow: isLong ? sl : entry,
+        };
+        console.log('[PaperTrade] Calculated zone bounds from Entry/SL (no pattern_id)');
+      }
+    }
+
+    console.log('[PaperTrade] Enriched pattern zone data:', {
+      zone_high: enrichedPattern.zone_high,
+      zone_low: enrichedPattern.zone_low,
+      start_time: enrichedPattern.start_time,
+      end_time: enrichedPattern.end_time,
+    });
+
+    setSelectedPattern(enrichedPattern);
     setPaperTradeModalVisible(true);
   };
 
@@ -913,31 +979,210 @@ const ScannerScreen = ({ navigation }) => {
             zones={(() => {
               // =====================================================
               // ZONE FILTERING based on zoneDisplayMode + current coin
+              // + POSITION ZONE from selected open position
               // =====================================================
-              console.log('[ZONE-DEBUG] showZones:', showZones);
-              console.log('[ZONE-DEBUG] zoneDisplayMode:', zoneDisplayMode);
-              console.log('[ZONE-DEBUG] zones.length:', zones.length);
-              console.log('[ZONE-DEBUG] displayCoin:', displayCoin);
-              console.log('[ZONE-DEBUG] selectedZonePatternId:', selectedZonePatternId);
+              let resultZones = [];
 
-              if (!showZones || zoneDisplayMode === 'hidden') return [];
+              // ═══════════════════════════════════════════════════════════
+              // 1. POSITION ZONE - from selected open position (Pattern Mode)
+              // ═══════════════════════════════════════════════════════════
+              if (showPositionZone && selectedPosition) {
+                const pd = selectedPosition.patternData || {};
 
-              // ⚠️ ALWAYS filter by current displayCoin first (zones belong to specific coins)
-              const coinZones = zones.filter(z => z.symbol === displayCoin);
-              console.log('[ZONE-DEBUG] coinZones for', displayCoin, ':', coinZones.length);
+                console.log('[ZONE] Position zone check:', {
+                  showPositionZone,
+                  positionSymbol: selectedPosition.symbol,
+                  displayCoin,
+                  symbolMatch: selectedPosition.symbol === displayCoin,
+                  entryPrice: selectedPosition.entryPrice,
+                  stopLoss: selectedPosition.stopLoss,
+                  direction: selectedPosition.direction,
+                  hasPatternData: !!pd && Object.keys(pd).length > 0,
+                  patternDataKeys: Object.keys(pd),
+                  pd_zone_high: pd.zone_high,
+                  pd_zone_low: pd.zone_low,
+                  pd_zoneHigh: pd.zoneHigh,
+                  pd_zoneLow: pd.zoneLow,
+                });
 
-              if (zoneDisplayMode === 'all') return coinZones;
+                // Only show if position is for current displayCoin
+                if (selectedPosition.symbol === displayCoin) {
+                  // ═══════════════════════════════════════════════════════════
+                  // PRIORITY: Use position fields directly (always available from Supabase)
+                  // FALLBACK: Use patternData (only available for in-memory positions)
+                  // ═══════════════════════════════════════════════════════════
+                  const entry = parseFloat(selectedPosition.entryPrice || pd.entry || pd.entry_price || 0);
+                  const sl = parseFloat(selectedPosition.stopLoss || pd.stopLoss || pd.stop_loss || 0);
+                  const tp = parseFloat(selectedPosition.takeProfit || pd.take_profit || pd.target || pd.target_1 || 0);
+                  const isLong = selectedPosition.direction === 'LONG';
 
-              // 'selected' mode - show only the selected zone
-              if (selectedZonePatternId) {
-                const filtered = coinZones.filter(z =>
-                  z.pattern_id === selectedZonePatternId ||
-                  z.metadata?.patternData?.pattern_id === selectedZonePatternId
-                );
-                console.log('[ZONE-DEBUG] filtered zones:', filtered.length);
-                return filtered;
+                  console.log('[ZONE] Position values for zone calc:', {
+                    positionEntryPrice: selectedPosition.entryPrice,
+                    positionStopLoss: selectedPosition.stopLoss,
+                    positionDirection: selectedPosition.direction,
+                    pdEntry: pd.entry || pd.entry_price,
+                    pdStopLoss: pd.stopLoss || pd.stop_loss,
+                    parsedEntry: entry,
+                    parsedSL: sl,
+                  });
+
+                  // Calculate zone boundaries from entry/SL
+                  let zoneHigh = 0;
+                  let zoneLow = 0;
+
+                  // First check if patternData has explicit zone bounds
+                  if (pd.zone_high && pd.zone_low) {
+                    zoneHigh = parseFloat(pd.zone_high || pd.zoneHigh);
+                    zoneLow = parseFloat(pd.zone_low || pd.zoneLow);
+                    console.log('[ZONE] Using patternData zone bounds:', { zoneHigh, zoneLow });
+                  }
+
+                  // If no explicit zone, calculate from entry/SL
+                  if ((zoneHigh <= 0 || zoneLow <= 0) && entry > 0 && sl > 0) {
+                    // LONG: zone from SL (bottom) to Entry (top)
+                    // SHORT: zone from Entry (bottom) to SL (top)
+                    zoneHigh = isLong ? entry : sl;
+                    zoneLow = isLong ? sl : entry;
+                    console.log('[ZONE] Calculated zone from entry/SL:', { zoneHigh, zoneLow, isLong });
+                  }
+
+                  // ⚠️ FALLBACK: If still no zone and we have entry, create a 2% zone around entry
+                  if ((zoneHigh <= 0 || zoneLow <= 0) && entry > 0) {
+                    // Create zone: 1% above and 1% below entry (2% total thickness)
+                    zoneHigh = entry * 1.01;
+                    zoneLow = entry * 0.99;
+                    console.log('[ZONE] Fallback zone (2% around entry):', { zoneHigh, zoneLow, entry });
+                  }
+
+                  // Only create zone if we have valid boundaries
+                  if (zoneHigh > 0 && zoneLow > 0) {
+                    // ✅ USE FORMATION_TIME from patternData (when pattern was detected)
+                    // This is the CORRECT position where the pattern candles formed
+                    // Zone must be sticky to these exact candles
+                    const formationTime = pd.formation_time || pd.formationTime || pd.start_time || pd.startTime;
+                    const endFormationTime = pd.end_time || pd.endTime;
+
+                    // Fallback: if no formation_time, use position openedAt
+                    const openedAt = selectedPosition.openedAt || selectedPosition.created_at;
+                    let startTime = formationTime;
+                    let endTime = endFormationTime;
+
+                    // Convert to seconds if in milliseconds
+                    if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+                    if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+                    if (!startTime && openedAt) {
+                      startTime = typeof openedAt === 'string' ? Math.floor(new Date(openedAt).getTime() / 1000) : Math.floor(openedAt / 1000);
+                    }
+
+                    console.log('[ZONE] Formation time from patternData:', {
+                      formationTime,
+                      endFormationTime,
+                      openedAt,
+                      resolvedStartTime: startTime,
+                      resolvedEndTime: endTime,
+                    });
+
+                    const positionZone = {
+                      id: `position-${selectedPosition.id}`,
+                      pattern_id: `position-${selectedPosition.id}`,
+                      symbol: selectedPosition.symbol,
+                      direction: selectedPosition.direction,
+                      pattern_type: pd.pattern_type || pd.patternType || selectedPosition.patternType || 'Position Zone',
+                      zone_high: zoneHigh,
+                      zone_low: zoneLow,
+                      start_time: startTime,
+                      end_time: endTime,
+                      formation_time: startTime, // ✅ Explicit formation_time for chart positioning
+                      entry_price: entry,
+                      stop_loss: sl,
+                      take_profit: tp,
+                      target_1: tp,
+                      isPositionZone: true,
+                      positionId: selectedPosition.id,
+                    };
+                    console.log('[ZONE] ✅ Position zone CREATED:', {
+                      id: positionZone.id,
+                      zone_high: zoneHigh,
+                      zone_low: zoneLow,
+                      entry_price: entry,
+                      stop_loss: sl,
+                      start_time: startTime,
+                      end_time: endTime,
+                    });
+                    resultZones.push(positionZone);
+                  } else {
+                    console.log('[ZONE] ❌ Zone NOT created - invalid bounds:', { zoneHigh, zoneLow, entry, sl });
+                  }
+                }
               }
-              return []; // No selection = no zones
+
+              // ═══════════════════════════════════════════════════════════
+              // 2. SCAN RESULT ZONES - from scan results (if enabled)
+              // ═══════════════════════════════════════════════════════════
+              console.log('[ZONE] DEBUG:', {
+                showZones,
+                zoneDisplayMode,
+                selectedZonePatternId,
+                totalZones: zones.length,
+                displayCoin,
+              });
+              if (showZones && zoneDisplayMode !== 'hidden') {
+                const coinZones = zones.filter(z => z.symbol === displayCoin);
+                console.log('[ZONE] coinZones filtered:', coinZones.length, 'from', zones.length);
+
+                // Debug: Log pattern_ids of all coinZones
+                if (coinZones.length > 0) {
+                  console.log('[ZONE] coinZones pattern_ids:', coinZones.map(z => ({
+                    zone_pattern_id: z.pattern_id,
+                    metadata_pattern_id: z.metadata?.patternData?.pattern_id,
+                  })));
+                }
+
+                if (zoneDisplayMode === 'all') {
+                  resultZones = [...resultZones, ...coinZones];
+                } else if (zoneDisplayMode === 'selected') {
+                  // ⚠️ FIX: When in 'selected' mode, show the selected zone OR all zones if no specific one selected
+                  if (selectedZonePatternId) {
+                    const filtered = coinZones.filter(z =>
+                      z.pattern_id === selectedZonePatternId ||
+                      z.metadata?.patternData?.pattern_id === selectedZonePatternId
+                    );
+                    console.log('[ZONE] Filtered by selectedZonePatternId:', filtered.length, 'matches');
+
+                    // If no exact match found, try partial match (handle floating point precision issues)
+                    if (filtered.length === 0 && selectedZonePatternId) {
+                      // Extract symbol and pattern type from selectedZonePatternId
+                      // Format: BTRUSDT_continuation_4h_0.074403_0.055909
+                      const parts = selectedZonePatternId.split('_');
+                      if (parts.length >= 3) {
+                        const [symbol, patternName, timeframe] = parts;
+                        const partialFiltered = coinZones.filter(z => {
+                          const zParts = (z.pattern_id || '').split('_');
+                          const zMeta = (z.metadata?.patternData?.pattern_id || '').split('_');
+                          return (
+                            (zParts[0] === symbol && zParts[1] === patternName && zParts[2] === timeframe) ||
+                            (zMeta[0] === symbol && zMeta[1] === patternName && zMeta[2] === timeframe)
+                          );
+                        });
+                        if (partialFiltered.length > 0) {
+                          console.log('[ZONE] Partial match found:', partialFiltered.length);
+                          resultZones = [...resultZones, ...partialFiltered];
+                        }
+                      }
+                    } else {
+                      resultZones = [...resultZones, ...filtered];
+                    }
+                  } else {
+                    // No specific pattern selected but in 'selected' mode - show all coinZones
+                    // This happens when user hasn't clicked a pattern yet
+                    console.log('[ZONE] No selectedZonePatternId, showing all coinZones');
+                    resultZones = [...resultZones, ...coinZones];
+                  }
+                }
+              }
+
+              console.log('[ZONE] Final resultZones to TradingChart:', resultZones.length, resultZones.map(z => ({ id: z.id, zone_high: z.zone_high, zone_low: z.zone_low })));
+              return resultZones;
             })()}
             zonePreferences={zonePreferences}
             selectedZonePatternId={selectedZonePatternId}
@@ -949,24 +1194,15 @@ const ScannerScreen = ({ navigation }) => {
                 setSelectedZonePatternId(patternId);
               }
             }}
+            // ═══════════════════════════════════════════════════════════
+            // POSITION ZONE PROPS - Show zone from selected open position
+            // ═══════════════════════════════════════════════════════════
+            showPositionZone={showPositionZone}
+            onTogglePositionZone={() => setShowPositionZone(prev => !prev)}
+            selectedPosition={selectedPosition}
           />
 
-          {/* MTF Alignment Panel (TIER2+) */}
-          {mtfAlignment && tierAccessService.canUseMTFAlignment() && (
-            <View style={styles.mtfPanel}>
-              <MTFAlignmentPanel
-                symbol={displayCoin}
-                alignment={mtfAlignment}
-                compact
-                onExpand={() => {
-                  navigation.navigate('MTFDashboard', {
-                    symbol: displayCoin,
-                    alignment: mtfAlignment,
-                  });
-                }}
-              />
-            </View>
-          )}
+          {/* MTF Panel removed - integrated into scan results */}
 
           {/* First Section (based on order) */}
           <Animated.View style={[styles.sectionWrapper, animatedStyle1]}>
@@ -1003,9 +1239,19 @@ const ScannerScreen = ({ navigation }) => {
                 navigation={navigation}
                 refreshTrigger={positionsRefreshTrigger}
                 onViewAllPress={handleViewOpenPositions}
-                onViewChart={(symbol) => {
+                onViewChart={(symbol, position) => {
+                  console.log('[ZONE] onViewChart called:', {
+                    symbol,
+                    positionId: position?.id,
+                    entryPrice: position?.entryPrice,
+                    stopLoss: position?.stopLoss,
+                    direction: position?.direction,
+                    patternDataKeys: position?.patternData ? Object.keys(position.patternData) : [],
+                  });
+                  // Set all states together - React will batch them
                   setSelectedCoins([symbol]);
-                  // Don't call subscribeToPrice - useEffect handles it
+                  setSelectedPosition(position || null);
+                  setShowPositionZone(true); // Auto-show zone when position selected
                 }}
                 onPositionClose={() => {
                   setPositionsRefreshTrigger(prev => prev + 1);
@@ -1057,9 +1303,19 @@ const ScannerScreen = ({ navigation }) => {
                 navigation={navigation}
                 refreshTrigger={positionsRefreshTrigger}
                 onViewAllPress={handleViewOpenPositions}
-                onViewChart={(symbol) => {
+                onViewChart={(symbol, position) => {
+                  console.log('[ZONE] onViewChart called:', {
+                    symbol,
+                    positionId: position?.id,
+                    entryPrice: position?.entryPrice,
+                    stopLoss: position?.stopLoss,
+                    direction: position?.direction,
+                    patternDataKeys: position?.patternData ? Object.keys(position.patternData) : [],
+                  });
+                  // Set all states together - React will batch them
                   setSelectedCoins([symbol]);
-                  // Don't call subscribeToPrice - useEffect handles it
+                  setSelectedPosition(position || null);
+                  setShowPositionZone(true); // Auto-show zone when position selected
                 }}
                 onPositionClose={() => {
                   setPositionsRefreshTrigger(prev => prev + 1);
@@ -1344,12 +1600,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
 
-  // MTF Alignment Panel
-  mtfPanel: {
-    marginHorizontal: SPACING.md,
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.xs,
-  },
+  // MTF Panel style removed
 
   // Section wrapper with drag handle
   sectionWrapper: {

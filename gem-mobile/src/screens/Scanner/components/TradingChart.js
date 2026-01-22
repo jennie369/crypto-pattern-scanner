@@ -21,6 +21,9 @@ import { WebView } from 'react-native-webview';
 import {
   Minimize2,
   X,
+  Layers,
+  Eye,
+  EyeOff,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../../utils/tokens';
 import ChartToolbar from '../../../components/Trading/ChartToolbar';
@@ -77,6 +80,16 @@ const TradingChart = ({
   onZonePress = null,
   // ⚠️ ZONE-PATTERN SYNC: For highlighting the selected zone
   selectedZonePatternId = null,
+  // ═══════════════════════════════════════════════════════════
+  // POSITION ZONE TOGGLE PROPS (NEW)
+  // ═══════════════════════════════════════════════════════════
+  showPositionZone = true,
+  onTogglePositionZone = null,
+  selectedPosition = null, // The currently selected position (for zone info)
+  // ═══════════════════════════════════════════════════════════
+  // REAL-TIME PRICE CALLBACK (for P&L sync)
+  // ═══════════════════════════════════════════════════════════
+  onPriceUpdate = null, // Callback when price updates: (price) => void
 }) => {
   const [showVolume, setShowVolume] = useState(true);
   const [darkTheme, setDarkTheme] = useState(true);
@@ -125,6 +138,19 @@ const TradingChart = ({
 
   // Store the timeframe used for HTML generation (only changes on explicit reload)
   const htmlTimeframeRef = useRef(timeframe);
+
+  // Store zones in ref for injection when chart becomes ready (fixes timing issue)
+  const zonesRef = useRef(zones);
+  const zonePreferencesRef = useRef(zonePreferences);
+  const symbolRef = useRef(symbol);
+
+  // Keep refs updated
+  useEffect(() => {
+    zonesRef.current = zones;
+    zonePreferencesRef.current = zonePreferences;
+    symbolRef.current = symbol;
+    console.log('[TradingChart] Refs updated:', { zonesCount: zones?.length, symbol });
+  }, [zones, zonePreferences, symbol]);
 
   // Reset chartReady when WebView reloads
   useEffect(() => {
@@ -319,40 +345,56 @@ const TradingChart = ({
     return () => clearTimeout(timer);
   }, [showPriceLines, hasPatternData, patternEntry, patternTP, patternSL, patternDirection, orderLines, showOrderLines, chartReady, zones]);
 
-  // Send zones to WebView when they change and chart is ready
-  useEffect(() => {
-    if (!webViewRef.current || !chartReady) return;
+  // Track if symbol is pending change (to avoid injecting to wrong WebView)
+  const pendingSymbolChangeRef = useRef(false);
 
-    const injectZones = () => {
-      if (zones.length > 0) {
-        // 🔴 DEBUG: Log ALL zone data being injected (including entry/sl/tp)
-        console.log('[TradingChart] 🔴 Injecting zones:', zones.length);
-        zones.forEach((z, i) => {
-          console.log(`[TradingChart] 🔴 ZONE[${i}]:`, {
-            pattern_type: z.pattern_type,
-            direction: z.direction,
-            entry_price: z.entry_price,
-            stop_price: z.stop_price,
-            target_1: z.target_1,
-            zone_high: z.zone_high,
-            zone_low: z.zone_low,
-            start_time: z.start_time,
-            end_time: z.end_time,
-          });
-        });
+  // Detect symbol change EARLY and set pending flag
+  useEffect(() => {
+    // This effect runs when symbol prop changes
+    // Set flag so zone injection is deferred until new chart is ready
+    pendingSymbolChangeRef.current = true;
+    // CRITICAL: Reset chartReady so zones wait for new chart to be initialized
+    setChartReady(false);
+    console.log('[TradingChart] Symbol changed, deferring zone injection, resetting chartReady:', symbol);
+
+    // CRITICAL: Clear old zones in WebView immediately to prevent stale zone rendering
+    if (webViewRef.current) {
+      webViewRef.current.injectJavaScript(`
+        if (window.clearZones) {
+          window.clearZones();
+          console.log('[Chart] Zones cleared on symbol change');
+        }
+        true;
+      `);
+    }
+  }, [symbol]);
+
+  // Send zones to WebView when zones change and chart is already ready
+  useEffect(() => {
+    console.log('[TradingChart] Zone change effect:', {
+      zonesCount: zones?.length || 0,
+      chartReady,
+      hasWebView: !!webViewRef.current,
+      pendingSymbolChange: pendingSymbolChangeRef.current,
+      firstZone: zones?.[0] ? { id: zones[0].id, zone_high: zones[0].zone_high, zone_low: zones[0].zone_low } : null
+    });
+
+    // Skip if chart not ready OR if symbol just changed (WebView will reload)
+    if (!chartReady || !webViewRef.current || pendingSymbolChangeRef.current) {
+      console.log('[TradingChart] Zone injection skipped:', { chartReady, pendingSymbolChange: pendingSymbolChangeRef.current });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (zones && zones.length > 0) {
+        console.log('[TradingChart] Injecting zones from zone change:', zones.length);
         webViewRef.current?.injectJavaScript(`
           if (window.updateZones) {
-            console.log('[Chart] Received zones:', ${JSON.stringify(zones)}.length);
-            console.log('[Chart] First zone keys:', Object.keys(${JSON.stringify(zones)}[0] || {}).join(', '));
             window.updateZones(${JSON.stringify(zones)}, ${JSON.stringify(zonePreferences)});
-            console.log('[Chart] Zones updated:', ${zones.length});
-          } else {
-            console.log('[Chart] ERROR: window.updateZones not defined');
           }
           true;
         `);
       } else {
-        // Clear zones if empty
         webViewRef.current?.injectJavaScript(`
           if (window.clearZones) {
             window.clearZones();
@@ -360,12 +402,54 @@ const TradingChart = ({
           true;
         `);
       }
-    };
-
-    // Delay to ensure chart is fully initialized
-    const timer = setTimeout(injectZones, 250);
+    }, 250);
     return () => clearTimeout(timer);
   }, [zones, zonePreferences, chartReady]);
+
+  // CRITICAL: Inject zones when chartReady changes to true (fixes timing issue)
+  // This ensures zones stored in ref are injected even if they were set before chart was ready
+  useEffect(() => {
+    if (!chartReady || !webViewRef.current) return;
+
+    // Clear the pending symbol change flag - new chart is now ready
+    pendingSymbolChangeRef.current = false;
+
+    const currentZones = zonesRef.current;
+    const currentPrefs = zonePreferencesRef.current;
+    const currentSymbol = symbolRef.current;
+
+    console.log('[TradingChart] Chart became ready - checking stored zones:', {
+      zonesCount: currentZones?.length || 0,
+      symbol: currentSymbol,
+      propSymbol: symbol,
+      pendingSymbolChange: false
+    });
+
+    // Inject zones from ref (zones were stored before chart was ready)
+    if (currentZones && currentZones.length > 0) {
+      // Longer delay to ensure chart is fully initialized
+      const timer = setTimeout(() => {
+        // Double-check refs are still valid and WebView exists
+        const latestZones = zonesRef.current;
+        const latestPrefs = zonePreferencesRef.current;
+
+        if (latestZones && latestZones.length > 0 && webViewRef.current) {
+          console.log('[TradingChart] ✅ Injecting stored zones after chart ready:', latestZones.length);
+          webViewRef.current.injectJavaScript(`
+            if (window.updateZones) {
+              window.updateZones(${JSON.stringify(latestZones)}, ${JSON.stringify(latestPrefs)});
+            }
+            true;
+          `);
+        } else {
+          console.log('[TradingChart] ❌ No zones to inject or WebView gone:', { zonesCount: latestZones?.length, hasWebView: !!webViewRef.current });
+        }
+      }, 400);
+      return () => clearTimeout(timer);
+    } else {
+      console.log('[TradingChart] No stored zones to inject');
+    }
+  }, [chartReady, symbol]);
 
   // Handle drawing tool selection
   const handleSelectDrawingTool = useCallback((toolId) => {
@@ -486,18 +570,6 @@ const TradingChart = ({
         return;
       }
 
-      // 🔴 Zone position debug from WebView
-      if (data.type === 'zone_position_debug') {
-        console.log(`[WebView] 🔴 ZONE[${data.index}] X-POSITION:`, {
-          startTime: data.input_startTime,
-          startTime_date: data.startTime_date,
-          startX_pixels: data.output_startX,
-          startX_is_null: data.startX_is_null,
-          startX_is_NaN: data.startX_is_NaN,
-        });
-        return;
-      }
-
       if (data.type === 'drawing_complete') {
         // Save drawing to database
         const newDrawing = {
@@ -530,7 +602,22 @@ const TradingChart = ({
       } else if (data.type === 'chart_ready') {
         // Chart has loaded data and is ready for order lines
         console.log('[TradingChart] Chart ready signal received:', data.symbol, data.candles);
+        console.log('[TradingChart] Current zonesRef at chart_ready:', zonesRef.current?.length, zonesRef.current?.[0]?.id);
         setChartReady(true);
+      } else if (data.type === 'price_update') {
+        // Real-time price update from WebSocket - emit to parent for P&L sync
+        if (onPriceUpdate && data.price) {
+          onPriceUpdate(data.price);
+        }
+      } else if (data.type === 'zone_update_debug') {
+        // Debug: Zone update received in WebView
+        console.log('[TradingChart] 🔵 WEBVIEW zone_update_debug:', data);
+      } else if (data.type === 'zone_render_debug') {
+        // Debug: Zone render details from WebView
+        console.log('[TradingChart] 🟢 WEBVIEW zone_render_debug:', data);
+      } else if (data.type === 'zone_draw_start') {
+        // Debug: Zone draw started
+        console.log('[TradingChart] 🎨 WEBVIEW zone_draw_start:', data);
       } else if (data.type === 'timeframe_changed') {
         // Timeframe was changed via JavaScript (without WebView reload)
         console.log('[TradingChart] Timeframe changed:', data.interval, 'candles:', data.candles);
@@ -574,6 +661,12 @@ const TradingChart = ({
         // Handle zone press event
         console.log('[TradingChart] Zone pressed:', data.zoneId);
         onZonePress?.(data.zone);
+      } else if (data.type === 'zone_skip') {
+        // Debug: Zone was skipped during rendering
+        console.log('[TradingChart] ⚠️ ZONE SKIPPED:', data.reason, data);
+      } else if (data.type === 'zone_draw_success') {
+        // Debug: Zone drawing succeeded
+        console.log('[TradingChart] ✅ ZONE DRAWN:', data);
       }
     } catch (e) {
       console.log('[TradingChart] Message parse error:', e);
@@ -1048,6 +1141,15 @@ const TradingChart = ({
 
             // Real-time PnL update with live price
             updatePnlOverlays(closePrice);
+
+            // ✅ Emit price to React Native for P&L sync
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'price_update',
+                price: closePrice,
+                symbol: SYMBOL
+              }));
+            }
           }
         } catch (e) {
           console.error('WS parse error:', e);
@@ -1447,6 +1549,15 @@ const TradingChart = ({
 
             // Real-time PnL update
             updatePnlOverlays(closePrice);
+
+            // ✅ Emit price to React Native for P&L sync
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'price_update',
+                price: closePrice,
+                symbol: SYMBOL
+              }));
+            }
           }
         } catch (e) {
           console.error('WS parse error:', e);
@@ -2130,8 +2241,8 @@ const TradingChart = ({
         'Descending Triangle': 'Tam Giác Giảm',
         'Ascending Triangle': 'Tam Giác Tăng',
         'Symmetrical Triangle': 'Tam Giác Cân',
-        'Rising Wedge': 'Nêm Tăng',
-        'Falling Wedge': 'Nêm Giảm',
+        'Rising Wedge': 'Rising Wedge',
+        'Falling Wedge': 'Falling Wedge',
         'Bull Flag': 'Cờ Tăng',
         'Bear Flag': 'Cờ Giảm',
         'Hammer': 'Nến Búa',
@@ -2288,7 +2399,7 @@ const TradingChart = ({
         if (tooltipDebounceTimeout) clearTimeout(tooltipDebounceTimeout);
         tooltipDebounceTimeout = setTimeout(() => {
           tooltipJustShown = false;
-        }, 500); // 500ms debounce window
+        }, 4500); // 4500ms debounce window - prevents tooltip from disappearing too quickly
 
         // ⚠️ AUTO-HIDE after 5 seconds
         if (tooltipAutoHideTimeout) {
@@ -2358,8 +2469,17 @@ const TradingChart = ({
     // Draw all zones on canvas - called every frame
     // ✅ SWIFT ALGO STYLE: Darker colors, labels always visible, cyan entry line
     function drawZonesOnCanvas() {
-      if (!zoneCanvas || !zoneCtx || !chart || !candleSeries) return;
+      if (!zoneCanvas || !zoneCtx || !chart || !candleSeries) {
+        // Only log once to avoid spam
+        if (!window._zoneCanvasDebugLogged) {
+          window._zoneCanvasDebugLogged = true;
+          console.log('[Zone] drawZonesOnCanvas SKIP - missing:', { zoneCanvas: !!zoneCanvas, zoneCtx: !!zoneCtx, chart: !!chart, candleSeries: !!candleSeries });
+        }
+        return;
+      }
       if (activeZones.length === 0) return;
+      // Reset debug flag when we have zones
+      window._zoneCanvasDebugLogged = false;
 
       const chartEl = document.getElementById('chart-container');
       if (!chartEl) return;
@@ -2394,14 +2514,53 @@ const TradingChart = ({
         let startTime = zone.start_time || zone.startTime || zone.formation_time;
         let endTime = zone.end_time || zone.endTime;
 
+        // ✅ DEBUG: Log original timestamps from zone data
+        if (idx === 0) {
+          console.log('[Zone] RAW zone data:', {
+            id: zone.id,
+            isPositionZone: zone.isPositionZone,
+            start_time: zone.start_time,
+            startTime: zone.startTime,
+            formation_time: zone.formation_time,
+            end_time: zone.end_time,
+            resolvedStartTime: startTime,
+            resolvedEndTime: endTime,
+            lastCandleDataLen: lastCandleData?.length || 0
+          });
+        }
+
         // Convert ms to seconds if needed
         if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
         if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
 
-        // ⚠️ VALIDATION: Skip zones with invalid/missing timestamps
+        // ✅ ZONE POSITIONING: Use formation_time (when pattern was detected)
+        // Zone must be sticky to the exact candles where pattern formed
+        // This ensures zone moves correctly with zoom/pan
+        if (idx === 0) {
+          console.log('[Zone] Using formation time for positioning:', {
+            startTime,
+            endTime,
+            isPositionZone: zone.isPositionZone,
+            lastCandleDataLen: lastCandleData?.length || 0
+          });
+        }
+
+        // ✅ FIX: If no startTime, try to get timestamp from candle index
+        if ((!startTime || startTime <= 0) && lastCandleData && lastCandleData.length > 0) {
+          const candleIdx = zone.start_candle_index ?? zone.startCandleIndex;
+          if (candleIdx !== null && candleIdx !== undefined && candleIdx >= 0) {
+            const effectiveIdx = Math.min(candleIdx, lastCandleData.length - 1);
+            const candle = lastCandleData[effectiveIdx];
+            if (candle?.time) {
+              startTime = candle.time;
+            }
+          }
+        }
+
+        // Skip zones with no valid timestamp after all attempts
         if (!startTime || startTime <= 0) {
-          console.warn('[Zone] Skipping zone with invalid startTime:', startTime);
-          return;
+          console.log('[Zone] SKIP - no valid startTime for zone:', zone.id);
+          return; // Zone cannot be positioned - skip silently
         }
 
         // ⚠️ VALIDATION: Check if zone is beyond visible data range
@@ -2421,15 +2580,79 @@ const TradingChart = ({
         }
 
         // Get X coordinates
-        const x1 = timeScale.timeToCoordinate(startTime);
+        let x1 = timeScale.timeToCoordinate(startTime);
         const x2 = endTime ? timeScale.timeToCoordinate(endTime) : null;
 
-        // Skip if start is completely off-screen
-        if (x1 === null) return;
+        // ✅ FIX: If x1 is null, zone's formation_time is outside chart's visible/loaded range
+        // Try to scroll chart to show the zone's position
+        if (x1 === null && startTime && lastCandleData && lastCandleData.length > 0) {
+          const firstDataTime = lastCandleData[0]?.time;
+          const lastDataTime = lastCandleData[lastCandleData.length - 1]?.time;
 
-        // Calculate zone position and width
+          console.log('[Zone] x1 is null, checking if we can scroll to zone:', {
+            startTime,
+            firstDataTime,
+            lastDataTime,
+            isInRange: startTime >= firstDataTime && startTime <= lastDataTime
+          });
+
+          // If startTime is within loaded data range, try scrolling to it
+          if (startTime >= firstDataTime && startTime <= lastDataTime) {
+            // Scroll chart to show the zone
+            try {
+              timeScale.scrollToPosition(-50, false); // Scroll left to show historical data
+              x1 = timeScale.timeToCoordinate(startTime);
+              console.log('[Zone] Scrolled chart, new x1:', x1);
+            } catch (e) {
+              console.warn('[Zone] Failed to scroll chart:', e);
+            }
+          }
+        }
+
+        // If still null after all attempts, skip with debug info
+        if (x1 === null) {
+          console.log('[Zone] SKIP zone - formation_time outside chart data range:', {
+            id: zone.id,
+            startTime,
+            dataRange: lastCandleData?.length > 0 ? {
+              first: lastCandleData[0]?.time,
+              last: lastCandleData[lastCandleData.length - 1]?.time
+            } : 'no data'
+          });
+          window.ReactNativeWebView?.postMessage(JSON.stringify({
+            type: 'zone_skip',
+            reason: 'formation_time_outside_range',
+            zoneId: zone.id,
+            startTime,
+            dataRange: lastCandleData?.length > 0 ? [lastCandleData[0]?.time, lastCandleData[lastCandleData.length - 1]?.time] : null
+          }));
+          return;
+        }
+
+        // ✅ DEBUG: Log zone coordinate calculation for first zone
+        if (idx === 0) {
+          console.log('[Zone] CALC zone #0:', {
+            id: zone.id,
+            startTime,
+            endTime,
+            x1,
+            entry_price: zone.entry_price || zone.entryPrice,
+            stop_loss: zone.stop_loss || zone.stopLoss,
+            zone_high: zone.zone_high,
+            zone_low: zone.zone_low,
+          });
+        }
+
+        // ✅ CRITICAL: Recalculate x2 from endTime (in case it was updated by fallback)
+        // This ensures zone width is TIME-BASED, not pixel-based
+        let x2Final = null;
+        if (endTime) {
+          x2Final = timeScale.timeToCoordinate(endTime);
+        }
+
+        // Calculate zone position and width using TIME-BASED coordinates
         let left = x1;
-        let right = x2 !== null ? x2 : (left + 120); // Default width ~120px if no end_time
+        let right = x2Final !== null ? x2Final : (left + 120); // Default width ~120px if no end_time
         let width = right - left;
 
         // Ensure reasonable width: min 40px, max 180px
@@ -2437,28 +2660,32 @@ const TradingChart = ({
         if (width > 180) width = 180;
 
         // ⚠️ FIX: Get position of last candle to prevent zones in empty space
-        // Find the x-coordinate of the most recent candle
+        // Find the x-coordinate of the most recent candle (use lastCandleData for reliability)
         const lastCandleX = (() => {
           try {
-            const data = candleSeries.data();
-            if (data && data.length > 0) {
-              const lastTime = data[data.length - 1].time;
+            if (lastCandleData && lastCandleData.length > 0) {
+              const lastTime = lastCandleData[lastCandleData.length - 1].time;
               const coord = timeScale.timeToCoordinate(lastTime);
-              // console.log('[Zone] Last candle time:', lastTime, 'x:', coord);
-              return coord;
+              if (coord !== null) return coord;
             }
           } catch (e) {
             console.warn('[Zone] Error getting last candle X:', e);
           }
-          return rect.width - priceScaleWidth - 20; // Fallback
+          return rect.width - priceScaleWidth - 20; // Fallback to near right edge
         })();
 
         // ⚠️ CRITICAL: Don't let zones extend beyond last candle
         // Use tight margin (10px) to prevent floating zones
         const maxRight = lastCandleX !== null ? lastCandleX + 10 : rect.width - priceScaleWidth;
+
+        // ✅ DEBUG: Log position check for first zone
+        if (idx === 0) {
+          console.log('[Zone] POSITION zone #0:', { left, width, lastCandleX, maxRight, willSkip: left > maxRight });
+        }
+
         if (left > maxRight) {
           // Zone starts beyond last candle - skip it entirely
-          console.warn('[Zone] Skipping zone that starts beyond last candle:', zone.pattern_type, 'left:', left, 'maxRight:', maxRight);
+          window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'zone_skip', reason: 'beyond_last_candle', left, maxRight, zoneId: zone.id }));
           return;
         }
         if (left + width > maxRight) {
@@ -2466,7 +2693,7 @@ const TradingChart = ({
           width = maxRight - left;
           // If clipped width is too small, skip the zone instead of forcing minimum
           if (width < 20) {
-            console.warn('[Zone] Skipping zone - clipped width too small:', width);
+            window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'zone_skip', reason: 'width_too_small', width, zoneId: zone.id }));
             return;
           }
         }
@@ -2490,7 +2717,7 @@ const TradingChart = ({
 
         // Skip zones with invalid entry or SL
         if (!entryForDir || entryForDir <= 0 || isNaN(entryForDir)) {
-          console.warn('[Zone] Skipping zone with invalid entry:', entryForDir);
+          window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'zone_skip', reason: 'invalid_entry', entryForDir }));
           return;
         }
 
@@ -2552,7 +2779,16 @@ const TradingChart = ({
         const slY = stopLoss > 0 ? candleSeries.priceToCoordinate(stopLoss) : null;
         const tpY = takeProfit > 0 ? candleSeries.priceToCoordinate(takeProfit) : null;
 
-        if (entryY === null) return;
+        if (entryY === null) {
+          console.log('[Zone] SKIP zone - entryY is null for:', zone.id, 'entryPrice:', entryPrice);
+          window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'zone_skip', reason: 'entryY_null', zoneId: zone.id, entryPrice }));
+          return;
+        }
+
+        // ✅ DEBUG: Log Y coordinates for first zone
+        if (idx === 0) {
+          console.log('[Zone] Y-COORDS zone #0:', { entryY, slY, tpY, entryPrice, stopLoss, takeProfit });
+        }
 
         // Calculate zone bounds for hit detection
         let zoneTop = entryY;
@@ -2574,6 +2810,16 @@ const TradingChart = ({
           top: zoneTop,
           bottom: zoneBottom
         });
+        // Debug: Confirm zone drawing started
+        if (idx === 0 && !window._zoneDrawDebugLogged) {
+          window._zoneDrawDebugLogged = true;
+          console.log('[Zone] ✅ DRAWING zone:', zone.id, 'at x:', left, 'width:', width, 'entryY:', entryY, 'slY:', slY, 'tpY:', tpY, 'isShort:', isShort);
+          window.ReactNativeWebView?.postMessage(JSON.stringify({
+            type: 'zone_draw_success',
+            zoneId: zone.id,
+            left, width, entryY, slY, tpY, isShort
+          }));
+        }
 
         // ✅ Format price for labels - VIETNAMESE: 95.880,50
         function formatPriceVN(price) {
@@ -2738,7 +2984,7 @@ const TradingChart = ({
       });
     }
 
-    // Start zone animation loop
+    // Start zone animation loop - runs every frame for smooth zone movement
     function startZoneAnimation() {
       function animate() {
         drawZonesOnCanvas();
@@ -2760,13 +3006,24 @@ const TradingChart = ({
 
     // ✅ Update zones from React Native - CANVAS-BASED VERSION
     window.updateZones = function(zones, preferences) {
-      console.log('[Chart.updateZones] ✅ Canvas-based rendering with', zones?.length || 0, 'zones');
+      // Send debug info back to React Native
+      window.ReactNativeWebView?.postMessage(JSON.stringify({
+        type: 'zone_update_debug',
+        zonesReceived: zones?.length || 0,
+        firstZone: zones?.[0] ? {
+          id: zones[0].id,
+          zone_high: zones[0].zone_high,
+          zone_low: zones[0].zone_low,
+          symbol: zones[0].symbol
+        } : null,
+        chartExists: !!chart,
+        candleSeriesExists: !!candleSeries
+      }));
 
       // Clear existing zones first
       window.clearZones();
 
       if (!zones || !Array.isArray(zones) || zones.length === 0) {
-        console.log('[Chart.updateZones] No zones to render');
         updateZoneCanvasPointerEvents(); // Ensure pointer events are disabled
         return;
       }
@@ -2795,48 +3052,41 @@ const TradingChart = ({
 
       console.log('[Chart.updateZones] Showing', zonesToRender.length, 'zones closest to price', currentPrice);
 
+      // Debug: Send zone data to RN for verification
+      window.ReactNativeWebView?.postMessage(JSON.stringify({
+        type: 'zone_render_debug',
+        zonesToRender: zonesToRender.length,
+        lastCandleDataLength: lastCandleData?.length || 0,
+        firstZoneDetails: zonesToRender[0] ? {
+          id: zonesToRender[0].id,
+          zone_high: zonesToRender[0].zone_high,
+          zone_low: zonesToRender[0].zone_low,
+          entry_price: zonesToRender[0].entry_price,
+          stop_loss: zonesToRender[0].stop_loss,
+          start_time: zonesToRender[0].start_time,
+          end_time: zonesToRender[0].end_time,
+          isPositionZone: zonesToRender[0].isPositionZone,
+        } : null
+      }));
+
       // Store zones in activeZones array for canvas rendering
       activeZones = zonesToRender.map((zone, idx) => ({
         ...zone,
         index: idx,
       }));
 
-      // Debug: Log zones being rendered - CHECK FOR CLUSTERING
-      console.log('🔴🔴🔴 [DEBUG] Zone time analysis:');
-      const startTimes = [];
-      activeZones.forEach((z, i) => {
-        const st = z.start_time || z.startTime || z.formation_time;
-        const et = z.end_time || z.endTime;
-        startTimes.push(st);
-        console.log('🔴 Zone[' + i + '] ' + (z.pattern_type || z.type) + ':', {
-          start_time: st,
-          end_time: et,
-          start_date: st ? new Date(st * 1000).toLocaleString() : 'N/A',
-          end_date: et ? new Date(et * 1000).toLocaleString() : 'N/A',
-          entry: z.entry_price || z.entryPrice,
-        });
-      });
-
-      // Check for duplicate start_times (clustering issue)
-      const uniqueTimes = [...new Set(startTimes.filter(t => t))];
-      console.log('🔴🔴🔴 Unique start_times:', uniqueTimes.length, '/', startTimes.length);
-      if (uniqueTimes.length < startTimes.length) {
-        console.warn('🔴🔴🔴 WARNING: Multiple zones have SAME start_time - causing clustering!');
-      }
-
       // Start animation loop (zones now move with chart pan/scroll)
       startZoneAnimation();
 
       // Enable pointer events for tap-to-select now that we have zones
       updateZoneCanvasPointerEvents();
-
-      console.log('[Chart.updateZones] ✅ Done! Zones will move with chart (canvas-based).');
     };
 
     // ✅ Clear all zones - CANVAS-BASED VERSION
     window.clearZones = function() {
       // Stop animation loop
       stopZoneAnimation();
+      zoneDrawDebugSent = false; // Reset debug flag
 
       // Clear canvas
       if (zoneCanvas && zoneCtx) {
@@ -3455,6 +3705,31 @@ const TradingChart = ({
             positionCount={positionCount}
             pendingCount={pendingCount}
           />
+
+          {/* Position Zone Toggle - Show zone from selected position */}
+          {selectedPosition && onTogglePositionZone && (
+            <TouchableOpacity
+              style={[
+                styles.positionZoneToggle,
+                showPositionZone && styles.positionZoneToggleActive,
+              ]}
+              onPress={onTogglePositionZone}
+              activeOpacity={0.7}
+            >
+              <Layers size={14} color={showPositionZone ? COLORS.cyan : COLORS.textMuted} />
+              {showPositionZone ? (
+                <Eye size={12} color={COLORS.cyan} />
+              ) : (
+                <EyeOff size={12} color={COLORS.textMuted} />
+              )}
+              <Text style={[
+                styles.positionZoneToggleText,
+                showPositionZone && styles.positionZoneToggleTextActive,
+              ]}>
+                Zone
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Chart WebView */}
@@ -3521,6 +3796,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 16, 48, 0.95)',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+  },
+
+  // Position Zone Toggle Button Styles
+  positionZoneToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginLeft: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  positionZoneToggleActive: {
+    backgroundColor: 'rgba(0, 207, 255, 0.15)',
+    borderColor: 'rgba(0, 207, 255, 0.3)',
+  },
+  positionZoneToggleText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  positionZoneToggleTextActive: {
+    color: COLORS.cyan,
   },
 
   chartWrapper: {

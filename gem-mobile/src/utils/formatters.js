@@ -80,9 +80,10 @@ const addThousandSeparators = (numStr) => {
 /**
  * Format price với dynamic precision based on value
  * Includes thousand separators for large numbers
- * Standardized decimal places:
+ * Standardized decimal places (matching chart labels):
  * - >= 1000: 2 decimals (e.g., 90,363.84)
  * - >= 1: 4 decimals (e.g., 13.5752)
+ * - >= 0.01: 4 decimals (e.g., 0.3195) ← UPDATED to match chart
  * - >= 0.0001: 6 decimals (e.g., 0.001234)
  * - < 0.0001: 8 decimals (e.g., 0.00001234)
  *
@@ -99,6 +100,9 @@ export const formatPrice = (price, withSeparators = true) => {
   if (price >= 1000) {
     formatted = price.toFixed(2);
   } else if (price >= 1) {
+    formatted = price.toFixed(4);
+  } else if (price >= 0.01) {
+    // Match chart label format: 4 decimals for prices like 0.3xxx
     formatted = price.toFixed(4);
   } else if (price >= 0.0001) {
     formatted = price.toFixed(6);
