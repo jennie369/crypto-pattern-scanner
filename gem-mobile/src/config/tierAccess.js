@@ -22,8 +22,8 @@ export const TIER_ACCESS = {
       ],
     },
     patterns: {
-      allowed: ['DPD', 'UPU'],
-      count: 2,
+      allowed: ['DPD', 'UPU', 'DPU'],
+      count: 3,
     },
     features: {
       scan: true,
@@ -34,7 +34,7 @@ export const TIER_ACCESS = {
       whaleTracking: false,
     },
     limits: {
-      scansPerDay: 10,
+      scansPerDay: 5,
       alertsPerCoin: 0,
     },
     // Zone Visualization Configuration - FREE tier per user's table
@@ -72,7 +72,7 @@ export const TIER_ACCESS = {
       whaleTracking: false,
     },
     limits: {
-      scansPerDay: 50,
+      scansPerDay: -1, // Unlimited (updated Jan 2026)
       alertsPerCoin: 3,
     },
     // Zone Visualization Configuration - TIER1 per user's table

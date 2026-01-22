@@ -14,9 +14,9 @@
  * - ADMIN/MANAGER: Unlimited (bypass)
  *
  * Scanner:
- * - FREE: 10 scans/day
- * - PRO/TIER1: 20 scans/day
- * - PREMIUM/TIER2: 50 scans/day
+ * - FREE: 5 scans/day
+ * - PRO/TIER1: Unlimited
+ * - PREMIUM/TIER2: Unlimited
  * - VIP/TIER3: Unlimited
  * - ADMIN/MANAGER: Unlimited (bypass)
  *
@@ -79,9 +79,9 @@ class QuotaService {
         },
         scanner: {
           tier: result.scanner_tier || 'FREE',
-          limit: result.scanner_limit ?? 10,
+          limit: result.scanner_limit ?? 5,
           used: result.scanner_used ?? 0,
-          remaining: result.scanner_remaining ?? 10,
+          remaining: result.scanner_remaining ?? 5,
           unlimited: result.scanner_unlimited || false,
         },
         todayDate: result.today_date,
@@ -467,15 +467,16 @@ class QuotaService {
 
   /**
    * Get scanner limit for tier
+   * PRO/PREMIUM/VIP all have unlimited scans
    */
   static getScannerLimit(tier) {
     const limits = {
       'TIER3': -1, 'VIP': -1,
-      'TIER2': 50, 'PREMIUM': 50,
-      'TIER1': 20, 'PRO': 20,
-      'FREE': 10,
+      'TIER2': -1, 'PREMIUM': -1,
+      'TIER1': -1, 'PRO': -1,
+      'FREE': 5,
     };
-    return limits[tier?.toUpperCase()] ?? 10;
+    return limits[tier?.toUpperCase()] ?? 5;
   }
 
   /**
@@ -493,9 +494,9 @@ class QuotaService {
       },
       scanner: {
         tier: 'FREE',
-        limit: 10,
+        limit: 5,
         used: 0,
-        remaining: 10,
+        remaining: 5,
         unlimited: false,
       },
       todayDate: this.getVietnamDate(),
