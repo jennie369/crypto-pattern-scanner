@@ -44,22 +44,22 @@ BEGIN
     v_today := (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')::DATE;
     v_reset := (v_today + INTERVAL '1 day')::TIMESTAMPTZ;
 
-    -- Get profile
+    -- Get profile (use aliases to avoid ambiguous column reference)
     SELECT
-        chatbot_tier,
-        scanner_tier,
-        is_admin,
-        role
+        p.chatbot_tier AS user_chatbot_tier,
+        p.scanner_tier AS user_scanner_tier,
+        p.is_admin,
+        p.role
     INTO v_profile
-    FROM profiles
-    WHERE id = p_user_id;
+    FROM profiles p
+    WHERE p.id = p_user_id;
 
     -- Check if Admin or Manager (unlimited access)
     v_is_unlimited := (
         v_profile.is_admin = true OR
         v_profile.role IN ('admin', 'ADMIN', 'manager', 'MANAGER') OR
-        v_profile.chatbot_tier IN ('ADMIN', 'MANAGER') OR
-        v_profile.scanner_tier IN ('ADMIN', 'MANAGER')
+        v_profile.user_chatbot_tier IN ('ADMIN', 'MANAGER') OR
+        v_profile.user_scanner_tier IN ('ADMIN', 'MANAGER')
     );
 
     -- Determine effective tier for display
@@ -89,7 +89,7 @@ BEGIN
         v_scanner_limit := -1;
     ELSE
         -- Chatbot limits (unchanged)
-        v_chatbot_limit := CASE UPPER(COALESCE(v_profile.chatbot_tier, 'FREE'))
+        v_chatbot_limit := CASE UPPER(COALESCE(v_profile.user_chatbot_tier, 'FREE'))
             WHEN 'TIER3' THEN -1
             WHEN 'VIP' THEN -1
             WHEN 'TIER2' THEN 50
@@ -100,7 +100,7 @@ BEGIN
         END;
 
         -- Scanner limits - PRO and PREMIUM now UNLIMITED
-        v_scanner_limit := CASE UPPER(COALESCE(v_profile.scanner_tier, 'FREE'))
+        v_scanner_limit := CASE UPPER(COALESCE(v_profile.user_scanner_tier, 'FREE'))
             WHEN 'TIER3' THEN -1
             WHEN 'VIP' THEN -1
             WHEN 'TIER2' THEN -1   -- CHANGED: Was 50, now unlimited
@@ -112,12 +112,12 @@ BEGIN
     END IF;
 
     RETURN QUERY SELECT
-        COALESCE(v_effective_tier, UPPER(COALESCE(v_profile.chatbot_tier, 'FREE'))),
+        COALESCE(v_effective_tier, UPPER(COALESCE(v_profile.user_chatbot_tier, 'FREE'))),
         v_chatbot_limit,
         v_chatbot_used,
         CASE WHEN v_chatbot_limit = -1 THEN -1 ELSE GREATEST(0, v_chatbot_limit - v_chatbot_used) END,
         v_is_unlimited OR v_chatbot_limit = -1,
-        COALESCE(v_effective_tier, UPPER(COALESCE(v_profile.scanner_tier, 'FREE'))),
+        COALESCE(v_effective_tier, UPPER(COALESCE(v_profile.user_scanner_tier, 'FREE'))),
         v_scanner_limit,
         v_scanner_used,
         CASE WHEN v_scanner_limit = -1 THEN -1 ELSE GREATEST(0, v_scanner_limit - v_scanner_used) END,
@@ -157,7 +157,7 @@ BEGIN
     v_is_unlimited := (
         v_profile.is_admin = true OR
         v_profile.role IN ('admin', 'ADMIN', 'manager', 'MANAGER') OR
-        v_profile.scanner_tier IN ('TIER3', 'VIP', 'TIER2', 'PREMIUM', 'TIER1', 'PRO', 'ADMIN', 'MANAGER')
+        v_profile.user_scanner_tier IN ('TIER3', 'VIP', 'TIER2', 'PREMIUM', 'TIER1', 'PRO', 'ADMIN', 'MANAGER')
     );
 
     -- Get or create today's quota record
