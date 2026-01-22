@@ -56,25 +56,25 @@ const TABS = [
     id: 'bundles',
     label: 'Khóa Trading',
     icon: Package,
-    description: 'Bundle khóa học + Scanner + Chatbot',
+    description: 'Gói khóa học kết hợp Quét nến + Master Sư Phụ AI',
   },
   {
     id: 'scanner',
-    label: 'Scanner',
+    label: 'Quét Nến',
     icon: BarChart3,
-    description: 'Subscription quét coin',
+    description: 'Công cụ quét mẫu hình tự động 24/7',
   },
   {
     id: 'chatbot',
-    label: 'Chatbot',
+    label: 'Sư Phụ AI',
     icon: MessageCircle,
-    description: 'AI trợ lý trading',
+    description: 'Master Sư Phụ AI GEM - Cố vấn giao dịch 24/7',
   },
   {
     id: 'mindset',
     label: 'Tư Duy',
     icon: Heart,
-    description: 'Khóa học mindset',
+    description: 'Khóa học chuyển hóa nội tâm - Học thuyết Jennie Uyên Chu',
   },
 ];
 
@@ -187,6 +187,7 @@ const UpgradeScreen = () => {
       setCheckingOut(product.variantId);
 
       // Navigate to Shop CheckoutWebView with cart URL
+      // Pass returnTab to ensure proper navigation back to Assets tab
       navigation.navigate('Shop', {
         screen: 'CheckoutWebView',
         params: {
@@ -194,7 +195,8 @@ const UpgradeScreen = () => {
           title: product.name,
           productName: product.name,
           variantId: product.variantId,
-          returnScreen: 'Upgrade',
+          returnScreen: 'UpgradeScreen',
+          returnTab: 'Account', // Return to Assets tab
         },
       });
     } catch (err) {
@@ -214,7 +216,8 @@ const UpgradeScreen = () => {
         checkoutUrl: landingUrl,
         title: 'Tìm hiểu thêm',
         productName: product.name,
-        returnScreen: 'Upgrade',
+        returnScreen: 'UpgradeScreen',
+        returnTab: 'Account', // Return to Assets tab
       },
     });
   };
@@ -400,7 +403,7 @@ const UpgradeScreen = () => {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Account')}
           >
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
