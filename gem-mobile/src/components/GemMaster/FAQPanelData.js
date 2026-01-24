@@ -115,6 +115,14 @@ export const FAQ_TOPICS = [
 export const FAQ_QUESTIONS = {
   analyze: [
     {
+      id: 'analyze_fomo_btc',
+      text: 'BTC tăng 5% rồi, muốn mua ngay!',
+      action: 'message',
+      prompt: 'Muốn mua BTC ngay, tăng 5% rồi! Không muốn bỏ lỡ cơ hội!',
+      isFOMO: true,
+      tag: 'FOMO TEST',
+    },
+    {
       id: 'analyze_btc',
       text: 'Phân tích giá Bitcoin hiện tại',
       action: 'message',
@@ -154,6 +162,14 @@ export const FAQ_QUESTIONS = {
 
   suggest: [
     {
+      id: 'suggest_career',
+      text: 'Tôi nên đổi việc hay ở lại?',
+      action: 'message',
+      prompt: 'Tôi nên đổi việc hay ở lại công ty hiện tại? Hãy phân tích và đưa ra framework giúp tôi đưa ra quyết định.',
+      isDeep: true,
+      tag: 'CAREER',
+    },
+    {
       id: 'suggest_newbie',
       text: 'Gợi ý chiến lược đầu tư crypto cho người mới',
       action: 'message',
@@ -192,6 +208,14 @@ export const FAQ_QUESTIONS = {
   ],
 
   wealth: [
+    {
+      id: 'wealth_leak',
+      text: 'Tại sao tiền cứ tuột khỏi tay tôi?',
+      action: 'message',
+      prompt: 'Tại sao tiền cứ tuột khỏi tay tôi? Phân tích gốc rễ vấn đề từ góc nhìn năng lượng và tâm lý, đưa ra bài tập chữa lành.',
+      isDeep: true,
+      tag: 'DEEP QUESTION',
+    },
     {
       id: 'wealth_manifest',
       text: 'Hướng dẫn manifest tiền bạc',
@@ -239,6 +263,14 @@ export const FAQ_QUESTIONS = {
   ],
 
   love: [
+    {
+      id: 'love_destiny',
+      text: 'Người ấy có phải định mệnh của tôi không?',
+      action: 'message',
+      prompt: 'Người ấy có phải định mệnh của tôi không? Hãy phân tích từ góc nhìn năng lượng và tâm linh.',
+      isDeep: true,
+      tag: 'DEEP QUESTION',
+    },
     {
       id: 'love_manifest',
       text: 'Hướng dẫn manifest tình yêu',
@@ -379,6 +411,14 @@ export const FAQ_QUESTIONS = {
   ],
 
   spiritual: [
+    {
+      id: 'spiritual_potential',
+      text: 'Điều gì đang ngăn cản tôi sống đúng tiềm năng?',
+      action: 'message',
+      prompt: 'Điều gì đang ngăn cản tôi sống đúng tiềm năng? Hãy đào sâu vào gốc rễ vấn đề và đưa ra insight giúp tôi chuyển hóa.',
+      isDeep: true,
+      tag: 'LIFE-CHANGING',
+    },
     {
       id: 'spiritual_frequency',
       text: 'Tôi đang ở mức tần số nào?',

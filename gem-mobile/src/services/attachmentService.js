@@ -128,12 +128,18 @@ export const uploadFile = async (file, lessonId, onProgress = null) => {
     } catch (readError) {
       console.warn('[attachmentService] Base64 read failed, trying fetch:', readError.message);
 
-      // Fallback to fetch method
-      try {
-        const response = await fetch(file.uri);
-        fileData = await response.blob();
-      } catch (fetchError) {
-        console.error('[attachmentService] Fetch also failed:', fetchError);
+      // Fallback to fetch method - only works on web
+      if (Platform.OS === 'web') {
+        try {
+          const response = await fetch(file.uri);
+          fileData = await response.blob();
+        } catch (fetchError) {
+          console.error('[attachmentService] Fetch also failed:', fetchError);
+          throw new Error('Không thể đọc file. Vui lòng thử lại.');
+        }
+      } else {
+        // On native, if FileSystem failed, there's no fallback
+        console.error('[attachmentService] FileSystem read failed on native:', readError);
         throw new Error('Không thể đọc file. Vui lòng thử lại.');
       }
     }

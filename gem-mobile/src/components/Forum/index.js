@@ -34,3 +34,16 @@ export { default as LoadMoreReplies } from './LoadMoreReplies';
 export { default as ViewCount } from './ViewCount';
 export { default as FeedTabs, FEED_TYPES } from './FeedTabs';
 export { default as TrendingBadge } from './TrendingBadge';
+
+// Product Integration
+export { default as TaggedProductCard, clearProductCache } from './TaggedProductCard';
+
+// Performance & Loading Components (Phase: Optimization Jan 2026)
+export {
+  default as PostSkeleton,
+  PostSkeletonList,
+  CompactSkeleton,
+  SkeletonItem,
+  ShimmerEffect,
+} from './PostSkeleton';
+export { default as ScrollToTopButton } from './ScrollToTopButton';

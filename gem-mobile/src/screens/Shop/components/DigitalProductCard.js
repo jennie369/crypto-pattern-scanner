@@ -11,14 +11,12 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import { ShoppingBag, Crown, Star, Check } from 'lucide-react-native';
+import { ShoppingBag, Star, Check, Lock } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import OptimizedImage from '../../../components/Common/OptimizedImage';
 import { useCart } from '../../../contexts/CartContext';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, GRADIENTS } from '../../../utils/tokens';
 import {
-  TIER_COLORS,
-  TIER_NAMES,
   formatPrice,
   calculateDiscount,
 } from '../../../utils/digitalProductsConfig';
@@ -27,7 +25,6 @@ import {
   preventDoubleTap,
   PLACEHOLDER_IMAGE,
 } from '../../../utils/digitalProductHelpers';
-import TierLockOverlay, { TierLockBadge } from './TierLockOverlay';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.lg * 3) / 2;
@@ -56,20 +53,12 @@ const DigitalProductCard = ({
   const discount = calculateDiscount(price, comparePrice);
   const showDiscount = discount >= 10;
 
-  const tier = product.tier;
-  const tierColor = tier ? (TIER_COLORS[tier] || TIER_COLORS.tier1) : null;
-  const tierName = tier ? (TIER_NAMES[tier] || tier) : null;
-
   const imageUrl = extractImageUrl(product, PLACEHOLDER_IMAGE);
 
   // Handle press with double-tap prevention
   const handlePress = preventDoubleTap(() => {
     if (isLocked) {
-      onUpgradePress?.({
-        requiredTier: tier,
-        currentTier: userTier,
-        product,
-      });
+      onUpgradePress?.({ product, requiredTier: product.tier });
     } else {
       onPress?.(product);
     }
@@ -78,11 +67,7 @@ const DigitalProductCard = ({
   // Handle add to cart
   const handleAddToCart = useCallback(async () => {
     if (isLocked) {
-      onUpgradePress?.({
-        requiredTier: tier,
-        currentTier: userTier,
-        product,
-      });
+      onUpgradePress?.({ product, requiredTier: product.tier });
       return;
     }
 
@@ -91,7 +76,7 @@ const DigitalProductCard = ({
     } else {
       await addItem(product, null, 1);
     }
-  }, [product, isLocked, onAddToCart, onUpgradePress, tier, userTier, addItem]);
+  }, [product, isLocked, onAddToCart, onUpgradePress, addItem]);
 
   return (
     <TouchableOpacity
@@ -116,21 +101,6 @@ const DigitalProductCard = ({
           colors={['transparent', 'rgba(0,0,0,0.6)']}
           style={styles.imageGradient}
         />
-
-        {/* Tier Badge - Top Left */}
-        {tier && (
-          <View
-            style={[
-              styles.tierBadge,
-              { backgroundColor: tierColor.bg, borderColor: tierColor.border },
-            ]}
-          >
-            <Crown size={10} color={tierColor.text} />
-            <Text style={[styles.tierBadgeText, { color: tierColor.text }]}>
-              {tierName}
-            </Text>
-          </View>
-        )}
 
         {/* Sale Badge - Top Right */}
         {showDiscount && !isLocked && (
@@ -162,7 +132,7 @@ const DigitalProductCard = ({
         {/* Lock Overlay for Locked Products */}
         {isLocked && (
           <View style={styles.lockOverlaySmall}>
-            <TierLockBadge tier={tier} />
+            <Lock size={20} color={COLORS.textPrimary} />
           </View>
         )}
       </View>
@@ -245,24 +215,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '40%',
-  },
-
-  // Tier Badge
-  tierBadge: {
-    position: 'absolute',
-    top: SPACING.sm,
-    left: SPACING.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    gap: 4,
-  },
-  tierBadgeText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
 
   // Sale Badge
@@ -375,7 +327,6 @@ export default memo(DigitalProductCard, (prevProps, nextProps) => {
   return (
     prevProps.product?.id === nextProps.product?.id &&
     prevProps.isLocked === nextProps.isLocked &&
-    prevProps.isOwned === nextProps.isOwned &&
-    prevProps.userTier === nextProps.userTier
+    prevProps.isOwned === nextProps.isOwned
   );
 });

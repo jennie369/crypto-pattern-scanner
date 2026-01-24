@@ -294,11 +294,16 @@ const AdminLivestreamScreen = ({ navigation }) => {
   };
 
   const handleCreateSession = () => {
-    navigation.navigate('CreateLivestreamSession');
+    Alert.alert(
+      'Tính năng đang phát triển',
+      'Chức năng tạo phiên livestream mới sẽ sớm ra mắt.',
+      [{ text: 'OK' }]
+    );
   };
 
   const handleSessionPress = (session) => {
-    navigation.navigate('LivestreamDetail', { sessionId: session.id });
+    // Navigate to viewer screen with session details
+    navigation.navigate('LivestreamViewer', { sessionId: session.id });
   };
 
   // ============================================================================

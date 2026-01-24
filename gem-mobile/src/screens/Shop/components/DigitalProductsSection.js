@@ -32,7 +32,7 @@ const CARD_WIDTH = (SCREEN_WIDTH - SPACING.lg * 3) / 2;
 const DigitalProductsSection = ({
   title = 'Sản Phẩm Số',
   subtitle = 'Khóa học & Công cụ Premium',
-  limit = 8,
+  limit = 12,
   showHero = true,
   showCategories = true,
   onViewAll,
@@ -117,11 +117,12 @@ const DigitalProductsSection = ({
   }, [navigation]);
 
   // Render product card
+  // Note: isLocked disabled - all products show cart icon for direct purchase
   const renderProductCard = useCallback(({ item, index }) => (
     <DigitalProductCard
       product={item}
       userTier={userTier}
-      isLocked={item.isLocked}
+      isLocked={false}
       onPress={handleProductPress}
       onUpgradePress={handleUpgradePress}
       style={styles.card}
@@ -218,6 +219,15 @@ const DigitalProductsSection = ({
           contentContainerStyle={styles.listContent}
           scrollEnabled={false}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          initialNumToRender={4}
+          maxToRenderPerBatch={4}
+          windowSize={5}
+          getItemLayout={(data, index) => ({
+            length: 220,
+            offset: 220 * Math.floor(index / 2),
+            index,
+          })}
         />
       )}
 

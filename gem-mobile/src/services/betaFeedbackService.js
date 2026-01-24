@@ -12,6 +12,7 @@
 
 import { supabase } from './supabase';
 import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Device from 'expo-device';
 import * as Application from 'expo-application';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -220,14 +221,28 @@ class BetaFeedbackService {
       // Generate unique filename
       const filename = `feedback/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
 
-      // Read file as blob
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
+      // Read file - platform specific
+      let fileData;
+      if (Platform.OS === 'web') {
+        const response = await fetch(imageUri);
+        fileData = await response.blob();
+      } else {
+        // React Native: use FileSystem
+        const base64 = await FileSystem.readAsStringAsync(imageUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        fileData = bytes.buffer;
+      }
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('feedback-screenshots')
-        .upload(filename, blob, {
+        .upload(filename, fileData, {
           contentType: 'image/jpeg',
         });
 

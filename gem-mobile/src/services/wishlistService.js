@@ -83,15 +83,29 @@ export const addToWishlist = async (productData) => {
       return addToLocalWishlist(productData);
     }
 
+    // Extract product_id from various possible fields
+    const productId =
+      productData.id?.toString() ||
+      productData.product_id?.toString() ||
+      productData.shopify_product_id?.toString() ||
+      productData.variants?.[0]?.product_id?.toString() ||
+      null;
+
+    // Validate product_id is not null
+    if (!productId) {
+      console.error('[wishlistService] Cannot add to wishlist: product_id is null', productData);
+      return { success: false, error: 'Không thể thêm vào yêu thích: thiếu ID sản phẩm' };
+    }
+
     const wishlistItem = {
       user_id: user.id,
-      product_id: productData.id?.toString() || productData.product_id,
-      product_handle: productData.handle || productData.product_handle,
-      product_title: productData.title || productData.product_title,
-      product_image: productData.images?.[0]?.src || productData.image?.src || productData.product_image,
+      product_id: productId,
+      product_handle: productData.handle || productData.product_handle || null,
+      product_title: productData.title || productData.product_title || 'Sản phẩm',
+      product_image: productData.images?.[0]?.src || productData.image?.src || productData.featuredImage?.src || productData.product_image || null,
       product_price: parseFloat(productData.variants?.[0]?.price || productData.price || productData.product_price || 0),
       product_compare_price: parseFloat(productData.variants?.[0]?.compareAtPrice || productData.compareAtPrice || productData.product_compare_price || 0),
-      variant_id: productData.variants?.[0]?.id?.toString() || productData.variant_id,
+      variant_id: productData.variants?.[0]?.id?.toString() || productData.variant_id || null,
     };
 
     const { data, error } = await supabase
@@ -109,7 +123,6 @@ export const addToWishlist = async (productData) => {
     }
 
     // V2: Store price for price drop tracking
-    const productId = productData.id?.toString() || productData.product_id;
     const productPrice = wishlistItem.product_price;
     if (productPrice > 0) {
       await storeWishlistPrice(productId, productPrice);
@@ -221,7 +234,20 @@ const getLocalWishlist = async () => {
 const addToLocalWishlist = async (productData) => {
   try {
     const wishlist = await getLocalWishlist();
-    const productId = productData.id?.toString() || productData.product_id;
+
+    // Extract product_id from various possible fields
+    const productId =
+      productData.id?.toString() ||
+      productData.product_id?.toString() ||
+      productData.shopify_product_id?.toString() ||
+      productData.variants?.[0]?.product_id?.toString() ||
+      null;
+
+    // Validate product_id is not null
+    if (!productId) {
+      console.error('[wishlistService] Cannot add to local wishlist: product_id is null', productData);
+      return { success: false, error: 'Không thể thêm vào yêu thích: thiếu ID sản phẩm' };
+    }
 
     // Check if already exists
     if (wishlist.some(item => item.product_id === productId)) {
@@ -231,9 +257,9 @@ const addToLocalWishlist = async (productData) => {
     const newItem = {
       id: `local_${Date.now()}`,
       product_id: productId,
-      product_handle: productData.handle || productData.product_handle,
-      product_title: productData.title || productData.product_title,
-      product_image: productData.images?.[0]?.src || productData.image?.src || productData.product_image,
+      product_handle: productData.handle || productData.product_handle || null,
+      product_title: productData.title || productData.product_title || 'Sản phẩm',
+      product_image: productData.images?.[0]?.src || productData.image?.src || productData.featuredImage?.src || productData.product_image || null,
       product_price: parseFloat(productData.variants?.[0]?.price || productData.price || productData.product_price || 0),
       product_compare_price: parseFloat(productData.variants?.[0]?.compareAtPrice || productData.compareAtPrice || productData.product_compare_price || 0),
       created_at: new Date().toISOString(),

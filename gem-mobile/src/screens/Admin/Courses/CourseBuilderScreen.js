@@ -21,6 +21,7 @@ import CustomAlert, { useCustomAlert } from '../../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -353,14 +354,23 @@ const CourseBuilderScreen = ({ navigation, route }) => {
       const fileExt = image.uri.split('.').pop() || 'jpg';
       const fileName = `course-thumbnails/${courseId || 'new'}-${Date.now()}.${fileExt}`;
 
-      // Read as blob
-      const response = await fetch(image.uri);
-      const blob = await response.blob();
+      // Read file as base64 (React Native compatible)
+      const base64 = await FileSystem.readAsStringAsync(image.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert base64 to ArrayBuffer
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const arrayBuffer = bytes.buffer;
 
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('course-images')
-        .upload(fileName, blob, {
+        .upload(fileName, arrayBuffer, {
           contentType: `image/${fileExt}`,
           cacheControl: '3600',
           upsert: true,

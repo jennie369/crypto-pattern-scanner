@@ -2,10 +2,10 @@
  * Gemini API Configuration
  *
  * Model: gemini-2.5-flash
- * API Key: Hardcoded (as requested)
+ * API Key: From environment variable
  */
 export const GEMINI_CONFIG = {
-  apiKey: 'AIzaSyCymkgeL0ERDYYePtbV4zuL-BZ2mfMxehc',
+  apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY || '',
   model: 'gemini-2.5-flash',
   endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
 

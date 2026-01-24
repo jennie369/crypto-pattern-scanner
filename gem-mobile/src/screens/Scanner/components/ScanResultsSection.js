@@ -153,143 +153,72 @@ const ScanResultsSection = ({
 
   return (
     <View style={styles.container}>
-      {/* Header with stats - Tappable for collapse/expand */}
-      <TouchableOpacity
-        style={styles.header}
-        onPress={() => setSectionCollapsed(!sectionCollapsed)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.headerLeft}>
-          <BarChart2 size={20} color={COLORS.textPrimary} />
-          <Text style={styles.headerTitle}>Kết Quả Scan</Text>
-          {/* Collapse/Expand indicator */}
+      {/* =====================================================
+          COMPACT HEADER - All controls in ONE row
+          ===================================================== */}
+      <View style={styles.headerCompact}>
+        {/* Left: Title + Collapse toggle */}
+        <TouchableOpacity
+          style={styles.headerTitleSection}
+          onPress={() => setSectionCollapsed(!sectionCollapsed)}
+          activeOpacity={0.7}
+        >
+          <BarChart2 size={16} color={COLORS.textPrimary} />
+          <Text style={styles.headerTitleCompact}>Scan</Text>
           {sectionCollapsed ? (
-            <ChevronDown size={18} color={COLORS.textMuted} />
+            <ChevronDown size={14} color={COLORS.textMuted} />
           ) : (
-            <ChevronUp size={18} color={COLORS.textMuted} />
+            <ChevronUp size={14} color={COLORS.textMuted} />
           )}
-        </View>
-        <View style={styles.statsContainer}>
-          {/* Show scanned coins / total with patterns */}
-          <View style={styles.statBadge}>
-            <CheckCircle size={14} color="#22C55E" />
-            <Text style={styles.statValue}>{stats.withPatterns}</Text>
-            <Text style={styles.statLabel}>coins</Text>
-          </View>
-          {/* Show total scanned if more than with patterns */}
-          {stats.total > stats.withPatterns && (
-            <View style={[styles.statBadge, styles.statBadgeMuted]}>
-              <Text style={styles.statValueMuted}>/{stats.total}</Text>
-              <Text style={styles.statLabelMuted}>đã quét</Text>
-            </View>
-          )}
-          <View style={styles.statBadge}>
-            <TrendingUp size={14} color="#22C55E" />
-            <Text style={[styles.statValue, styles.greenText]}>{stats.longPatterns}</Text>
-          </View>
-          <View style={styles.statBadge}>
-            <TrendingDown size={14} color="#EF4444" />
-            <Text style={[styles.statValue, styles.redText]}>{stats.shortPatterns}</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
 
-      {/* Collapsible Content */}
+        {/* Middle: Filter + Expand controls + Pattern count */}
+        {!sectionCollapsed && (
+          <View style={styles.headerControlsInline}>
+            {/* Filter Toggle */}
+            <TouchableOpacity
+              style={[styles.filterBtnCompact, showOnlyWithPatterns && styles.filterBtnCompactActive]}
+              onPress={() => setShowOnlyWithPatterns(!showOnlyWithPatterns)}
+            >
+              <Filter size={12} color={showOnlyWithPatterns ? COLORS.gold : COLORS.textMuted} />
+              <Text style={[styles.filterTextCompact, showOnlyWithPatterns && styles.filterTextCompactActive]}>
+                {showOnlyWithPatterns ? 'Có' : 'All'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Expand/Collapse */}
+            <TouchableOpacity style={styles.expandBtnCompact} onPress={expandFirst}>
+              <ChevronDown size={12} color={COLORS.textMuted} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.expandBtnCompact} onPress={collapseAll}>
+              <ChevronUp size={12} color={COLORS.textMuted} />
+            </TouchableOpacity>
+
+            {/* Pattern Count */}
+            <Text style={styles.patternCountCompact}>{stats.totalPatterns}p</Text>
+          </View>
+        )}
+
+        {/* Right: Stats badges */}
+        <View style={styles.statsCompact}>
+          <View style={styles.statBadgeCompact}>
+            <CheckCircle size={12} color="#22C55E" />
+            <Text style={styles.statValueCompact}>{stats.withPatterns}</Text>
+          </View>
+          <View style={styles.statBadgeCompact}>
+            <TrendingUp size={12} color="#22C55E" />
+            <Text style={[styles.statValueCompact, styles.greenText]}>{stats.longPatterns}</Text>
+          </View>
+          <View style={styles.statBadgeCompact}>
+            <TrendingDown size={12} color="#EF4444" />
+            <Text style={[styles.statValueCompact, styles.redText]}>{stats.shortPatterns}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Collapsible Content - NO zone toggle here (moved to Toolbox) */}
       {!sectionCollapsed && (
         <>
-      {/* Controls Row */}
-      <View style={styles.controlsRow}>
-        {/* Filter Toggle */}
-        <TouchableOpacity
-          style={[styles.filterButton, showOnlyWithPatterns && styles.filterButtonActive]}
-          onPress={() => setShowOnlyWithPatterns(!showOnlyWithPatterns)}
-        >
-          <Filter size={14} color={showOnlyWithPatterns ? COLORS.gold : COLORS.textMuted} />
-          <Text style={[styles.filterText, showOnlyWithPatterns && styles.filterTextActive]}>
-            {showOnlyWithPatterns ? 'Có patterns' : 'Tất cả'}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Expand First / Collapse All */}
-        <View style={styles.expandControls}>
-          <TouchableOpacity style={styles.expandBtn} onPress={expandFirst}>
-            <ChevronDown size={14} color={COLORS.textMuted} />
-            <Text style={styles.expandText}>Mở Đầu</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.expandBtn} onPress={collapseAll}>
-            <ChevronUp size={14} color={COLORS.textMuted} />
-            <Text style={styles.expandText}>Đóng</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Pattern Count */}
-        <Text style={styles.patternTotal}>
-          {stats.totalPatterns} patterns
-        </Text>
-      </View>
-
-      {/* =====================================================
-          ZONE TOGGLE BUTTONS (2-way sync)
-          ===================================================== */}
-      <View style={styles.zoneToggleRow}>
-        {/* Tất cả zones */}
-        <TouchableOpacity
-          style={[
-            styles.zoneToggleBtn,
-            zoneDisplayMode === 'all' && styles.zoneToggleBtnActive,
-          ]}
-          onPress={() => {
-            onZoneDisplayModeChange?.('all');
-            onClearZoneSelection?.();
-          }}
-        >
-          <Layers size={14} color={zoneDisplayMode === 'all' ? COLORS.gold : COLORS.textMuted} />
-          <Text style={[
-            styles.zoneToggleText,
-            zoneDisplayMode === 'all' && styles.zoneToggleTextActive,
-          ]}>
-            Tất cả zones
-          </Text>
-        </TouchableOpacity>
-
-        {/* Ẩn zones */}
-        <TouchableOpacity
-          style={[
-            styles.zoneToggleBtn,
-            zoneDisplayMode === 'hidden' && styles.zoneToggleBtnActive,
-          ]}
-          onPress={() => {
-            onZoneDisplayModeChange?.('hidden');
-            onClearZoneSelection?.();
-          }}
-        >
-          <EyeOff size={14} color={zoneDisplayMode === 'hidden' ? COLORS.gold : COLORS.textMuted} />
-          <Text style={[
-            styles.zoneToggleText,
-            zoneDisplayMode === 'hidden' && styles.zoneToggleTextActive,
-          ]}>
-            Ẩn zones
-          </Text>
-        </TouchableOpacity>
-
-        {/* Chỉ zone đã chọn */}
-        <TouchableOpacity
-          style={[
-            styles.zoneToggleBtn,
-            zoneDisplayMode === 'selected' && styles.zoneToggleBtnActive,
-          ]}
-          onPress={() => onZoneDisplayModeChange?.('selected')}
-        >
-          <Eye size={14} color={zoneDisplayMode === 'selected' ? COLORS.gold : COLORS.textMuted} />
-          <Text style={[
-            styles.zoneToggleText,
-            zoneDisplayMode === 'selected' && styles.zoneToggleTextActive,
-          ]}>
-            Đã chọn
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Coin Accordions - Inline ScrollView for independent scrolling */}
       <ScrollView
         style={styles.accordionScrollView}
@@ -335,8 +264,8 @@ const ScanResultsSection = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'rgba(15, 16, 48, 0.6)',
-    marginTop: SPACING.md,
-    borderRadius: 16,
+    marginTop: SPACING.sm,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(106, 91, 255, 0.25)',
     overflow: 'hidden',
@@ -361,69 +290,101 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
 
-  header: {
+  // =====================================================
+  // COMPACT HEADER STYLES - All in ONE row
+  // =====================================================
+  headerCompact: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    backgroundColor: 'rgba(106, 91, 255, 0.08)',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(106, 91, 255, 0.15)',
-    backgroundColor: 'rgba(106, 91, 255, 0.08)',
+    minHeight: 36,
   },
 
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  statsContainer: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-  },
-
-  statBadge: {
+  headerTitleSection: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: 6,
   },
 
-  statValue: {
+  headerTitleCompact: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
 
-  statLabel: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
+  headerControlsInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+    marginLeft: SPACING.sm,
+  },
+
+  filterBtnCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+
+  filterBtnCompactActive: {
+    backgroundColor: 'rgba(255, 193, 7, 0.15)',
+    borderColor: 'rgba(255, 193, 7, 0.4)',
+  },
+
+  filterTextCompact: {
+    fontSize: 10,
     color: COLORS.textMuted,
   },
 
-  // Muted badge for total scanned count
-  statBadgeMuted: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 2,
+  filterTextCompactActive: {
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
   },
-  statValueMuted: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textMuted,
+
+  expandBtnCompact: {
+    padding: 4,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderRadius: 4,
   },
-  statLabelMuted: {
-    fontSize: 9,
+
+  patternCountCompact: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textMuted,
-    opacity: 0.7,
+    marginLeft: 2,
+  },
+
+  statsCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+
+  statBadgeCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+
+  statValueCompact: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
   },
 
   greenText: {
@@ -434,113 +395,9 @@ const styles = StyleSheet.create({
     color: COLORS.error,
   },
 
-  controlsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.1)',
-  },
-
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.sm,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-
-  filterButtonActive: {
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    borderColor: 'rgba(106, 91, 255, 0.5)',
-  },
-
-  filterText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-
-  filterTextActive: {
-    color: COLORS.purple,
-  },
-
-  expandControls: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-  },
-
-  expandBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    paddingVertical: 4,
-    paddingHorizontal: SPACING.sm,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderRadius: 4,
-  },
-
-  expandText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-
-  patternTotal: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textMuted,
-  },
-
-  // =====================================================
-  // ZONE TOGGLE STYLES
-  // =====================================================
-  zoneToggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.1)',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  },
-
-  zoneToggleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 5,
-    paddingHorizontal: SPACING.sm,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-
-  zoneToggleBtnActive: {
-    backgroundColor: 'rgba(255, 193, 7, 0.15)',
-    borderColor: 'rgba(255, 193, 7, 0.5)',
-  },
-
-  zoneToggleText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-
-  zoneToggleTextActive: {
-    color: COLORS.gold,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-
   accordionScrollView: {
     minHeight: 200,
-    maxHeight: 450,
+    maxHeight: 500,
   },
 
   accordionContainer: {

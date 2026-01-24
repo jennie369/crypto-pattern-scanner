@@ -8,12 +8,23 @@ export { default as CourseCardVertical } from './CourseCardVertical';
 export { default as CourseSection } from './CourseSection';
 export { default as CategoryChips } from './CategoryChips';
 export { default as CourseCategoryGrid } from './CourseCategoryGrid';
-export { default as CourseFlashSaleSection, resetFlashSaleCache } from './CourseFlashSaleSection';
+export { default as CourseFlashSaleSection } from './CourseFlashSaleSection';
 export { default as CourseFilterSheet } from './CourseFilterSheet';
-export { default as HighlightedCourseSection, resetHighlightedCourseCache } from './HighlightedCourseSection';
+export { default as HighlightedCourseSection } from './HighlightedCourseSection';
+
+// Import cache reset functions separately for safer bundling
+import { resetFlashSaleCache } from './CourseFlashSaleSection';
+import { resetHighlightedCourseCache } from './HighlightedCourseSection';
+
+// Re-export the reset functions
+export { resetFlashSaleCache, resetHighlightedCourseCache };
 
 // Utility function to reset all course section caches (call on pull-to-refresh)
 export const resetAllCourseSectionCaches = () => {
-  resetFlashSaleCache();
-  resetHighlightedCourseCache();
+  if (typeof resetFlashSaleCache === 'function') {
+    resetFlashSaleCache();
+  }
+  if (typeof resetHighlightedCourseCache === 'function') {
+    resetHighlightedCourseCache();
+  }
 };

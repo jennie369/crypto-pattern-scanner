@@ -5,7 +5,7 @@
  */
 
 import { supabase } from './supabase';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 import {
   KOL_CONFIG,

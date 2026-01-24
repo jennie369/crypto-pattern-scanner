@@ -110,6 +110,12 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "assetBundlePatterns": [
+      "**/*",
+      "assets/**/*",
+      "assets/videos/**/*",
+      "assets/lottie/**/*"
+    ],
     "plugins": [
       "expo-secure-store",
       "expo-web-browser",

@@ -44,6 +44,9 @@ import useChatTheme from '../../hooks/useChatTheme';
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
 
+// In-App Notifications
+import { useInAppNotification } from '../../contexts/InAppNotificationContext';
+
 // Components
 import MessageBubble from './components/MessageBubble';
 import ChatInput from './components/ChatInput';
@@ -77,6 +80,13 @@ export default function ChatScreen({ route, navigation }) {
   const { conversationId, conversation: initialConversation } = route.params;
   const insets = useSafeAreaInsets();
   const { user, profile } = useAuth();
+  const { setCurrentConversation } = useInAppNotification();
+
+  // Track current conversation to skip in-app notifications for it
+  useEffect(() => {
+    setCurrentConversation(conversationId);
+    return () => setCurrentConversation(null);
+  }, [conversationId, setCurrentConversation]);
 
   // State
   const [conversation, setConversation] = useState(initialConversation);
@@ -112,7 +122,7 @@ export default function ChatScreen({ route, navigation }) {
   const otherParticipant = useMemo(() => {
     if (conversation?.is_group) return null;
     return conversation?.other_participant ||
-      conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.users;
+      conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.profiles;
   }, [conversation, user?.id]);
 
   const displayName = conversation?.is_group
@@ -125,7 +135,7 @@ export default function ChatScreen({ route, navigation }) {
   const participants = useMemo(() => {
     if (!conversation?.conversation_participants) return [];
     return conversation.conversation_participants
-      .map(p => p.users)
+      .map(p => p.profiles)
       .filter(u => u && u.id);
   }, [conversation?.conversation_participants]);
 

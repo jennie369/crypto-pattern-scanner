@@ -80,9 +80,9 @@ const PATTERN_NAMES_VI = {
   'descending_triangle': 'Tam Giác Giảm',
   'symmetrical_triangle': 'Tam Giác Đối Xứng',
   'symmetric_triangle': 'Tam Giác Đối Xứng',
-  'wedge': 'Nêm',
-  'rising_wedge': 'Nêm Tăng',
-  'falling_wedge': 'Nêm Giảm',
+  'wedge': 'Wedge',
+  'rising_wedge': 'Rising Wedge',
+  'falling_wedge': 'Falling Wedge',
   'flag': 'Cờ',
   'bull_flag': 'Cờ Tăng',
   'bear_flag': 'Cờ Giảm',
@@ -1050,6 +1050,48 @@ export default function PaperTradeHistoryScreen({ navigation }) {
                             <TrendingDown size={20} color={COLORS.error} />
                           )}
                         </View>
+
+                        {/* View Chart Button - Navigate to PatternDetailScreen */}
+                        <TouchableOpacity
+                          style={styles.viewChartButton}
+                          onPress={() => {
+                            // Build pattern data for PatternDetailScreen
+                            const patternData = {
+                              symbol: trade.symbol,
+                              type: trade.pattern_type,
+                              patternType: trade.pattern_type,
+                              timeframe: trade.timeframe,
+                              direction: trade.direction,
+                              entry: trade.entry_price,
+                              entryPrice: trade.entry_price,
+                              stopLoss: trade.stop_loss,
+                              takeProfit: trade.take_profit,
+                              confidence: trade.confidence,
+                              riskReward: trade.risk_reward,
+                              winRate: trade.win_rate,
+                              // Position data for paper trade
+                              positionId: trade.id,
+                              margin: trade.margin,
+                              positionSize: trade.position_size,
+                              positionValue: trade.position_value,
+                              quantity: trade.quantity,
+                              leverage: trade.leverage,
+                              orderType: trade.order_type || 'market',
+                              order_type: trade.order_type || 'market',
+                              unrealizedPnL: isOpen ? trade.pnl : undefined,
+                              unrealizedPnLPercent: isOpen ? trade.pnl_percent : undefined,
+                              realizedPnL: !isOpen ? trade.pnl : undefined,
+                              status: trade.status,
+                              tradeMode: trade.trade_mode,
+                              openedAt: trade.opened_at,
+                            };
+                            navigation.navigate('PatternDetail', { pattern: patternData });
+                          }}
+                          activeOpacity={0.7}
+                        >
+                          <Target size={16} color={COLORS.gold} />
+                          <Text style={styles.viewChartButtonText}>Xem Chi Tiết</Text>
+                        </TouchableOpacity>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -1560,6 +1602,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
     borderRadius: 8,
     padding: SPACING.sm,
+  },
+  viewChartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
+  },
+  viewChartButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.gold,
   },
   tradeDate: {
     fontSize: 11,

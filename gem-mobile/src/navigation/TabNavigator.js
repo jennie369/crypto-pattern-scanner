@@ -7,7 +7,7 @@
  * - FINAL_NAVIGATION_STRUCTURE_6_TABS.md (tab names, icons)
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // Screens
@@ -21,9 +21,18 @@ import AccountStack from './AccountStack';
 // Custom Tab Bar
 import GlassBottomTab from '../components/GlassBottomTab';
 
+// Preload services for instant tab switching
+import { preloadShopData } from '../services/shopifyService';
+
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+  // Preload shop data in background when tabs are mounted
+  // This makes Shop tab instant when user navigates to it
+  useEffect(() => {
+    // Start preload immediately but non-blocking
+    preloadShopData();
+  }, []);
   return (
     <Tab.Navigator
       tabBar={(props) => <GlassBottomTab {...props} />}

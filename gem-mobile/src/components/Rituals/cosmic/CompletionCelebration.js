@@ -1,10 +1,10 @@
 /**
- * CompletionCelebration - ELEGANT REDESIGN
- * Minimalist, premium design with subtle animations
- * Includes reflection input modal
+ * CompletionCelebration - OPTIMIZED VERSION V2
+ * Fixed: opacity issues, animation lag, better UX
+ * Uses native driver animations for smooth performance
  */
 
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,18 +15,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  Animated as RNAnimated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedReaction,
   withTiming,
   withSpring,
-  withDelay,
-  withSequence,
-  runOnJS,
   Easing,
+  interpolate,
+  runOnJS,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Check, Flame, Star, ChevronRight, X, Send, PenLine } from 'lucide-react-native';
@@ -36,7 +35,6 @@ import {
   COSMIC_SPACING,
   COSMIC_RADIUS,
 } from '../../../theme/cosmicTokens';
-import { COSMIC_TIMING } from '../../../utils/cosmicAnimations';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -90,78 +88,36 @@ const RITUAL_THEMES = {
 };
 
 // ============================================
-// FLOATING PARTICLES - Subtle background effect
+// FLOATING PARTICLES - REMOVED FOR PERFORMANCE
+// Using simple static glow instead
 // ============================================
 
-const FloatingParticle = React.memo(({ delay, size, x, color }) => {
-  const translateY = useSharedValue(SCREEN_HEIGHT);
-  const opacity = useSharedValue(0);
+// ============================================
+// ELEGANT CHECKMARK - OPTIMIZED V2
+// Uses native driver for smooth animation
+// ============================================
+
+const ElegantCheckmark = React.memo(({ color, gradient }) => {
+  const scaleAnim = useRef(new RNAnimated.Value(0)).current;
 
   useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(0.6, { duration: 500 }));
-    translateY.value = withDelay(
-      delay,
-      withTiming(-100, { duration: 4000 + Math.random() * 2000, easing: Easing.linear })
-    );
-    opacity.value = withDelay(delay + 3000, withTiming(0, { duration: 1000 }));
+    // Single smooth spring animation with native driver
+    RNAnimated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 50,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
   }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-    opacity: opacity.value,
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        styles.floatingParticle,
-        {
-          left: x,
-          width: size,
-          height: size,
-          backgroundColor: color,
-          borderRadius: size / 2,
-        },
-        animatedStyle,
-      ]}
-    />
-  );
-});
-
-// ============================================
-// ELEGANT CHECKMARK
-// ============================================
-
-const ElegantCheckmark = React.memo(({ color, gradient, delay }) => {
-  const scale = useSharedValue(0);
-  const ringScale = useSharedValue(0.8);
-  const ringOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    scale.value = withDelay(
-      delay,
-      withSpring(1, { damping: 12, stiffness: 100 })
-    );
-    ringScale.value = withDelay(delay + 200, withTiming(1.4, { duration: 600 }));
-    ringOpacity.value = withDelay(delay + 200, withSequence(
-      withTiming(0.5, { duration: 200 }),
-      withTiming(0, { duration: 400 })
-    ));
-  }, [delay]);
-
-  const checkStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const ringStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: ringScale.value }],
-    opacity: ringOpacity.value,
-  }));
 
   return (
     <View style={styles.checkmarkWrapper}>
-      <Animated.View style={[styles.checkmarkRing, { borderColor: color }, ringStyle]} />
-      <Animated.View style={checkStyle}>
+      <RNAnimated.View
+        style={{
+          transform: [{ scale: scaleAnim }],
+          opacity: scaleAnim,
+        }}
+      >
         <LinearGradient
           colors={gradient}
           style={styles.checkmarkCircle}
@@ -170,76 +126,64 @@ const ElegantCheckmark = React.memo(({ color, gradient, delay }) => {
         >
           <Check size={28} color="#FFF" strokeWidth={3} />
         </LinearGradient>
-      </Animated.View>
+      </RNAnimated.View>
     </View>
   );
 });
 
 // ============================================
-// XP DISPLAY - Compact & Elegant
+// XP DISPLAY - OPTIMIZED V2 (Native driver)
 // ============================================
 
-const XPDisplay = React.memo(({ xp, delay, color }) => {
-  const [displayXP, setDisplayXP] = useState(0);
-  const scale = useSharedValue(0);
-  const opacity = useSharedValue(0);
-  const xpProgress = useSharedValue(0);
+const XPDisplay = React.memo(({ xp, color }) => {
+  const scaleAnim = useRef(new RNAnimated.Value(0)).current;
 
   useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
-    scale.value = withDelay(delay, withSpring(1, { damping: 15, stiffness: 150 }));
-    xpProgress.value = withDelay(delay, withTiming(1, {
-      duration: 800,
-      easing: Easing.out(Easing.cubic),
-    }));
-  }, [xp, delay]);
-
-  useAnimatedReaction(
-    () => xpProgress.value,
-    (progress) => {
-      const currentXP = Math.round(xp * progress);
-      runOnJS(setDisplayXP)(currentXP);
-    },
-    [xp]
-  );
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
+    RNAnimated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 60,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   return (
-    <Animated.View style={[styles.xpWrapper, animatedStyle]}>
-      <View style={[styles.xpBadge, { backgroundColor: color + '20' }]}>
+    <RNAnimated.View
+      style={[
+        styles.xpWrapper,
+        {
+          transform: [{ scale: scaleAnim }],
+          opacity: scaleAnim,
+        }
+      ]}
+    >
+      <View style={[styles.xpBadge, { backgroundColor: color + '30' }]}>
         <Star size={14} color={color} fill={color} />
-        <Text style={[styles.xpText, { color }]}>+{displayXP} XP</Text>
+        <Text style={[styles.xpText, { color }]}>+{xp} XP</Text>
       </View>
-    </Animated.View>
+    </RNAnimated.View>
   );
 });
 
 // ============================================
-// STREAK DISPLAY - Inline & Minimal
+// STREAK DISPLAY - OPTIMIZED V2 (Native driver)
 // ============================================
 
-const StreakDisplay = React.memo(({ streak, isNewRecord, delay }) => {
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(10);
+const StreakDisplay = React.memo(({ streak, isNewRecord }) => {
+  const fadeAnim = useRef(new RNAnimated.Value(0)).current;
 
   useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
-    translateY.value = withDelay(delay, withSpring(0, { damping: 15 }));
-  }, [delay]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
-  }));
+    RNAnimated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   if (!streak || streak < 1) return null;
 
   return (
-    <Animated.View style={[styles.streakWrapper, animatedStyle]}>
+    <RNAnimated.View style={[styles.streakWrapper, { opacity: fadeAnim }]}>
       <View style={styles.streakInline}>
         <Flame size={16} color={COSMIC_COLORS.glow.orange} fill={COSMIC_COLORS.glow.orange} />
         <Text style={styles.streakText}>
@@ -251,89 +195,109 @@ const StreakDisplay = React.memo(({ streak, isNewRecord, delay }) => {
           </View>
         )}
       </View>
-    </Animated.View>
+    </RNAnimated.View>
   );
 });
 
 // ============================================
-// ELEGANT BUTTON
+// ELEGANT BUTTON - OPTIMIZED (No animation, just static)
 // ============================================
 
-const ElegantButton = React.memo(({ label, onPress, variant = 'primary', color, delay, icon }) => {
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(20);
-
-  useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
-    translateY.value = withDelay(delay, withSpring(0, { damping: 15 }));
-  }, [delay]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
-  }));
-
+const ElegantButton = React.memo(({ label, onPress, variant = 'primary', color, icon, isLightColor = false }) => {
   const isPrimary = variant === 'primary';
+  // Use dark text for light backgrounds (like star ritual)
+  const textColor = isPrimary && isLightColor ? '#1A1A2E' : (isPrimary ? '#FFF' : COSMIC_COLORS.text.secondary);
+  const iconColor = isLightColor ? '#1A1A2E' : '#FFF';
 
   return (
-    <Animated.View style={animatedStyle}>
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={0.8}
-        style={[
-          styles.elegantButton,
-          isPrimary && { backgroundColor: color },
-          !isPrimary && styles.outlineButton,
-        ]}
-      >
-        {icon && !isPrimary && icon}
-        <Text style={[
-          styles.buttonText,
-          isPrimary && styles.primaryButtonText,
-          !isPrimary && { color: COSMIC_COLORS.text.secondary },
-        ]}>
-          {label}
-        </Text>
-        {isPrimary && <ChevronRight size={18} color="#FFF" />}
-      </TouchableOpacity>
-    </Animated.View>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      style={[
+        styles.elegantButton,
+        isPrimary && { backgroundColor: color },
+        !isPrimary && styles.outlineButton,
+      ]}
+    >
+      {icon && !isPrimary && icon}
+      <Text style={[
+        styles.buttonText,
+        { color: textColor },
+      ]}>
+        {label}
+      </Text>
+      {isPrimary && <ChevronRight size={18} color={iconColor} />}
+    </TouchableOpacity>
   );
 });
 
 // ============================================
-// REFLECTION INPUT VIEW
+// REFLECTION INPUT VIEW - OPTIMIZED V2
+// Fixed opacity, simplified animations using native driver
 // ============================================
 
-const ReflectionInput = React.memo(({ visible, onClose, onSubmit, color, ritualTitle }) => {
+const ReflectionInput = React.memo(({ visible, onClose, onSubmit, color, ritualTitle, onSaving }) => {
   const [text, setText] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef(null);
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(50);
+
+  // Use native RN Animated for smoother performance
+  const fadeAnim = useRef(new RNAnimated.Value(0)).current;
+  const slideAnim = useRef(new RNAnimated.Value(100)).current;
 
   useEffect(() => {
     if (visible) {
-      opacity.value = withTiming(1, { duration: 300 });
-      translateY.value = withSpring(0, { damping: 15 });
-      setTimeout(() => inputRef.current?.focus(), 400);
+      // Parallel animations with native driver
+      RNAnimated.parallel([
+        RNAnimated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        RNAnimated.spring(slideAnim, {
+          toValue: 0,
+          tension: 65,
+          friction: 10,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // Focus input after animation completes
+        inputRef.current?.focus();
+      });
     } else {
-      opacity.value = withTiming(0, { duration: 200 });
-      translateY.value = withTiming(50, { duration: 200 });
+      RNAnimated.parallel([
+        RNAnimated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        RNAnimated.timing(slideAnim, {
+          toValue: 100,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
   }, [visible]);
 
-  const containerStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
+  const handleSubmit = async () => {
+    if (!text.trim()) return;
 
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
+    setIsSaving(true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-  const handleSubmit = () => {
-    if (text.trim()) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      onSubmit?.(text.trim());
+    try {
+      // Call onSubmit and wait for it (for calendar update)
+      await onSubmit?.(text.trim());
+    } finally {
+      setIsSaving(false);
+      setText('');
+      onClose();
     }
+  };
+
+  const handleClose = () => {
+    Keyboard.dismiss();
     setText('');
     onClose();
   };
@@ -341,27 +305,38 @@ const ReflectionInput = React.memo(({ visible, onClose, onSubmit, color, ritualT
   if (!visible) return null;
 
   return (
-    <Animated.View style={[styles.reflectionOverlay, containerStyle]}>
+    <RNAnimated.View
+      style={[
+        styles.reflectionOverlay,
+        { opacity: fadeAnim }
+      ]}
+    >
       <TouchableOpacity
         style={styles.reflectionBackdrop}
         activeOpacity={1}
-        onPress={() => {
-          Keyboard.dismiss();
-          onClose();
-        }}
+        onPress={handleClose}
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.reflectionKeyboard}
       >
-        <Animated.View style={[styles.reflectionCard, cardStyle]}>
+        <RNAnimated.View
+          style={[
+            styles.reflectionCard,
+            { transform: [{ translateY: slideAnim }] }
+          ]}
+        >
           {/* Header */}
           <View style={styles.reflectionHeader}>
             <View style={styles.reflectionTitleRow}>
               <PenLine size={20} color={color} />
               <Text style={styles.reflectionTitle}>Suy ngẫm</Text>
             </View>
-            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity
+              onPress={handleClose}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              disabled={isSaving}
+            >
               <X size={22} color={COSMIC_COLORS.text.muted} />
             </TouchableOpacity>
           </View>
@@ -370,17 +345,18 @@ const ReflectionInput = React.memo(({ visible, onClose, onSubmit, color, ritualT
             Ghi lại cảm xúc sau {ritualTitle}
           </Text>
 
-          {/* Input */}
-          <View style={[styles.reflectionInputContainer, { borderColor: color + '40' }]}>
+          {/* Input - Better contrast */}
+          <View style={[styles.reflectionInputContainer, { borderColor: color }]}>
             <TextInput
               ref={inputRef}
               style={styles.reflectionTextInput}
               placeholder="Tôi cảm thấy..."
-              placeholderTextColor={COSMIC_COLORS.text.hint}
+              placeholderTextColor="rgba(255, 255, 255, 0.4)"
               multiline
               value={text}
               onChangeText={setText}
               maxLength={500}
+              editable={!isSaving}
             />
           </View>
 
@@ -390,27 +366,35 @@ const ReflectionInput = React.memo(({ visible, onClose, onSubmit, color, ritualT
           <View style={styles.reflectionActions}>
             <TouchableOpacity
               style={styles.reflectionCancelBtn}
-              onPress={onClose}
+              onPress={handleClose}
+              disabled={isSaving}
             >
               <Text style={styles.reflectionCancelText}>Bỏ qua</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.reflectionSubmitBtn, { backgroundColor: color }]}
+              style={[
+                styles.reflectionSubmitBtn,
+                { backgroundColor: color },
+                (!text.trim() || isSaving) && styles.reflectionSubmitBtnDisabled,
+              ]}
               onPress={handleSubmit}
-              disabled={!text.trim()}
+              disabled={!text.trim() || isSaving}
             >
               <Send size={16} color="#FFF" />
-              <Text style={styles.reflectionSubmitText}>Lưu</Text>
+              <Text style={styles.reflectionSubmitText}>
+                {isSaving ? 'Đang lưu...' : 'Lưu'}
+              </Text>
             </TouchableOpacity>
           </View>
-        </Animated.View>
+        </RNAnimated.View>
       </KeyboardAvoidingView>
-    </Animated.View>
+    </RNAnimated.View>
   );
 });
 
 // ============================================
-// MAIN COMPONENT
+// MAIN COMPONENT - OPTIMIZED V2
+// Uses native RN Animated for smooth fade-in
 // ============================================
 
 const CompletionCelebration = ({
@@ -429,79 +413,53 @@ const CompletionCelebration = ({
 }) => {
   const theme = RITUAL_THEMES[ritualType] || RITUAL_THEMES.heart;
   const [showReflectionInput, setShowReflectionInput] = useState(false);
+  const hasTriggeredHaptic = useRef(false);
 
-  // Animation values
-  const containerOpacity = useSharedValue(0);
-  const contentOpacity = useSharedValue(0);
+  // Use native RN Animated for smoother performance
+  const fadeAnim = useRef(new RNAnimated.Value(0)).current;
 
-  // Generate floating particles
-  const particles = useMemo(() =>
-    Array.from({ length: 8 }, (_, i) => ({
-      id: i,
-      delay: 500 + i * 300,
-      size: 3 + Math.random() * 4,
-      x: Math.random() * SCREEN_WIDTH,
-      color: i % 2 === 0 ? theme.color : COSMIC_COLORS.glow.gold,
-    })),
-  [theme.color]);
-
-  // Haptic trigger
-  const triggerHaptic = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  };
-
-  // Animation sequence
+  // Animation sequence - simplified with native driver
   useEffect(() => {
-    if (visible) {
-      containerOpacity.value = withTiming(1, { duration: 400 });
-      contentOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
+    if (visible && !hasTriggeredHaptic.current) {
+      // Single fade-in animation
+      RNAnimated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
 
-      // Trigger haptic after checkmark appears
-      setTimeout(triggerHaptic, 500);
+      // Haptic once
+      hasTriggeredHaptic.current = true;
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
   }, [visible]);
 
-  // Animated styles
-  const containerStyle = useAnimatedStyle(() => ({
-    opacity: containerOpacity.value,
-  }));
-
-  const contentStyle = useAnimatedStyle(() => ({
-    opacity: contentOpacity.value,
-  }));
-
   // Handle reflection button press
-  const handleReflectionPress = () => {
+  const handleReflectionPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setShowReflectionInput(true);
-  };
+  }, []);
 
-  // Handle reflection submit
-  const handleReflectionSubmit = (text) => {
-    onWriteReflection?.(text);
-  };
+  // Handle reflection submit - now async to support saving
+  const handleReflectionSubmit = useCallback(async (text) => {
+    // Call onWriteReflection and await if it returns a promise
+    const result = onWriteReflection?.(text);
+    if (result instanceof Promise) {
+      await result;
+    }
+  }, [onWriteReflection]);
 
   if (!visible) return null;
 
   return (
-    <Animated.View style={[styles.container, containerStyle, style]}>
-      {/* Background */}
-      <LinearGradient
-        colors={['rgba(5, 4, 11, 0.97)', 'rgba(13, 13, 43, 0.99)']}
-        style={StyleSheet.absoluteFill}
-      />
-
-      {/* Floating particles */}
-      <View style={styles.particlesContainer} pointerEvents="none">
-        {particles.map((p) => (
-          <FloatingParticle key={p.id} {...p} />
-        ))}
-      </View>
+    <RNAnimated.View style={[styles.container, { opacity: fadeAnim }, style]}>
+      {/* Background - solid, no transparency issues */}
+      <View style={styles.staticBackground} />
 
       {/* Main content */}
-      <Animated.View style={[styles.content, contentStyle]}>
+      <View style={styles.content}>
         {/* Checkmark */}
-        <ElegantCheckmark color={theme.color} gradient={theme.gradient} delay={200} />
+        <ElegantCheckmark color={theme.color} gradient={theme.gradient} />
 
         {/* Title */}
         <Text style={styles.title}>Hoàn thành!</Text>
@@ -509,14 +467,14 @@ const CompletionCelebration = ({
         {/* Ritual name with XP inline */}
         <View style={styles.infoRow}>
           <Text style={styles.ritualName}>{theme.title}</Text>
-          <XPDisplay xp={xpEarned} delay={600} color={theme.color} />
+          <XPDisplay xp={xpEarned} color={theme.color} />
         </View>
 
         {/* Message */}
         <Text style={styles.message}>{message}</Text>
 
         {/* Streak */}
-        <StreakDisplay streak={streakCount} isNewRecord={isNewRecord} delay={800} />
+        <StreakDisplay streak={streakCount} isNewRecord={isNewRecord} />
 
         {/* Divider */}
         <View style={styles.divider} />
@@ -529,7 +487,6 @@ const CompletionCelebration = ({
               variant="outline"
               icon={<PenLine size={16} color={COSMIC_COLORS.text.secondary} style={{ marginRight: 6 }} />}
               onPress={handleReflectionPress}
-              delay={1000}
             />
           )}
 
@@ -538,10 +495,10 @@ const CompletionCelebration = ({
             variant="primary"
             color={theme.color}
             onPress={onContinue}
-            delay={1100}
+            isLightColor={ritualType === 'star'}
           />
         </View>
-      </Animated.View>
+      </View>
 
       {/* Reflection Input Modal */}
       <ReflectionInput
@@ -551,7 +508,7 @@ const CompletionCelebration = ({
         color={theme.color}
         ritualTitle={theme.title}
       />
-    </Animated.View>
+    </RNAnimated.View>
   );
 };
 
@@ -566,12 +523,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  particlesContainer: {
+  staticBackground: {
     ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-  },
-  floatingParticle: {
-    position: 'absolute',
+    backgroundColor: 'rgba(8, 6, 18, 0.98)',
   },
   content: {
     alignItems: 'center',
@@ -585,13 +539,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: COSMIC_SPACING.lg,
-  },
-  checkmarkRing: {
-    position: 'absolute',
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 2,
   },
   checkmarkCircle: {
     width: 56,
@@ -719,14 +666,14 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
 
-  // Reflection Input
+  // Reflection Input - FIXED OPACITY
   reflectionOverlay: {
     ...StyleSheet.absoluteFillObject,
-    zIndex: 110,
+    zIndex: 200, // Higher z-index to be above everything
   },
   reflectionBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(8, 6, 18, 0.95)', // Almost opaque dark background
   },
   reflectionKeyboard: {
     flex: 1,
@@ -737,11 +684,17 @@ const styles = StyleSheet.create({
   reflectionCard: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: COSMIC_COLORS.bgCard,
+    backgroundColor: '#1A1A2E', // Solid dark background, not transparent
     borderRadius: COSMIC_RADIUS.xl,
     padding: COSMIC_SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    // Add shadow for depth
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 20,
   },
   reflectionHeader: {
     flexDirection: 'row',
@@ -756,31 +709,31 @@ const styles = StyleSheet.create({
   },
   reflectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: COSMIC_COLORS.text.primary,
+    fontWeight: '700',
+    color: '#FFFFFF', // Pure white for better contrast
   },
   reflectionSubtitle: {
-    fontSize: 13,
-    color: COSMIC_COLORS.text.muted,
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)', // Brighter for readability
     marginBottom: COSMIC_SPACING.md,
   },
   reflectionInputContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Darker input background
     borderRadius: COSMIC_RADIUS.md,
-    borderWidth: 1,
+    borderWidth: 2,
     padding: COSMIC_SPACING.md,
-    minHeight: 120,
+    minHeight: 130,
   },
   reflectionTextInput: {
-    fontSize: 15,
-    color: COSMIC_COLORS.text.primary,
-    lineHeight: 22,
+    fontSize: 16,
+    color: '#FFFFFF', // Pure white text
+    lineHeight: 24,
     textAlignVertical: 'top',
-    minHeight: 100,
+    minHeight: 110,
   },
   reflectionCharCount: {
-    fontSize: 11,
-    color: COSMIC_COLORS.text.hint,
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.5)',
     textAlign: 'right',
     marginTop: COSMIC_SPACING.xs,
     marginBottom: COSMIC_SPACING.md,
@@ -792,24 +745,28 @@ const styles = StyleSheet.create({
     gap: COSMIC_SPACING.sm,
   },
   reflectionCancelBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
   },
   reflectionCancelText: {
-    fontSize: 14,
-    color: COSMIC_COLORS.text.muted,
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontWeight: '500',
   },
   reflectionSubmitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+  },
+  reflectionSubmitBtnDisabled: {
+    opacity: 0.5,
   },
   reflectionSubmitText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: '#FFF',
   },
 });

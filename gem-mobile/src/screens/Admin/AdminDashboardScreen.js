@@ -3,7 +3,7 @@
  * Main admin control panel with stats and quick actions
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -42,6 +43,8 @@ import {
   History,
   ShoppingBag,
   Star,
+  Handshake,
+  GraduationCap,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
@@ -49,6 +52,9 @@ import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import subscriptionExpirationService from '../../services/subscriptionExpirationService';
+
+// Cache duration in milliseconds (30 seconds)
+const CACHE_DURATION = 30 * 1000;
 
 const AdminDashboardScreen = ({ navigation }) => {
   const { isAdmin, isManager } = useAuth();
@@ -64,8 +70,11 @@ const AdminDashboardScreen = ({ navigation }) => {
     totalUsers: 0,
     totalCommission: 0,
     monthlyRevenue: 0,
-    activeAffiliates: 0,
     activeCTVs: 0,
+    activeKOLs: 0,
+    totalInstructors: 0,
+    pendingInstructors: 0,
+    totalStaff: 0,
     // Subscription expiration stats
     expiringToday: 0,
     expiring3Days: 0,
@@ -73,116 +82,176 @@ const AdminDashboardScreen = ({ navigation }) => {
     totalExpiring: 0,
   });
 
-  useEffect(() => {
-    if (hasAdminAccess) {
-      loadStats();
+  // Cache control
+  const lastFetchTime = useRef(0);
+  const hasLoadedOnce = useRef(false);
+
+  // Load stats on focus (with cache check)
+  useFocusEffect(
+    useCallback(() => {
+      if (hasAdminAccess) {
+        const now = Date.now();
+        const timeSinceLastFetch = now - lastFetchTime.current;
+
+        // Only reload if cache expired or never loaded
+        if (!hasLoadedOnce.current || timeSinceLastFetch > CACHE_DURATION) {
+          loadStats();
+        }
+      }
+    }, [hasAdminAccess])
+  );
+
+  // Safe query wrapper for Supabase
+  const safeQuery = async (queryFn, defaultValue = { count: 0, data: [] }) => {
+    try {
+      const result = await queryFn();
+      return result;
+    } catch (error) {
+      console.warn('[AdminDashboard] Query error:', error.message);
+      return defaultValue;
     }
-  }, [hasAdminAccess]);
+  };
 
   const loadStats = async () => {
     try {
-      setLoading(true);
+      // Only show full loading on first load
+      if (!hasLoadedOnce.current) {
+        setLoading(true);
+      }
 
-      // Pending applications
-      const { count: apps } = await supabase
-        .from('partnership_applications')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-
-      // Pending withdrawals
-      const { count: withdrawals } = await supabase
-        .from('withdrawal_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-
-      // Total partners
-      const { count: partners } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .not('partnership_role', 'is', null);
-
-      // Total users
-      const { count: users } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-
-      // Active affiliates
-      const { count: affiliates } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('partnership_role', 'affiliate');
-
-      // Active CTVs
-      const { count: ctvs } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('partnership_role', 'ctv');
-
-      // Total commission paid
-      const { data: commissions } = await supabase
-        .from('profiles')
-        .select('total_commission')
-        .not('total_commission', 'is', null);
-
-      const totalCommission = commissions?.reduce(
-        (sum, c) => sum + (parseFloat(c.total_commission) || 0),
-        0
-      ) || 0;
-
-      // Monthly revenue (this month)
+      // Monthly revenue date calculation
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      // Try to get monthly orders - table may not exist yet
-      let monthlyRevenue = 0;
-      try {
-        const { data: monthlyOrders, error: ordersError } = await supabase
+      // Run ALL queries in parallel for faster loading
+      const [
+        appsResult,
+        withdrawalsResult,
+        usersResult,
+        ctvsResult,
+        kolsResult,
+        staffResult,
+        commissionsResult,
+        instructorsApprovedResult,
+        instructorsPendingResult,
+        ordersResult,
+        expiringResult,
+      ] = await Promise.all([
+        // Pending applications
+        safeQuery(() => supabase
+          .from('partnership_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+        ),
+
+        // Pending withdrawals
+        safeQuery(() => supabase
+          .from('withdrawal_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+        ),
+
+        // Total users
+        safeQuery(() => supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+        ),
+
+        // Active CTVs
+        safeQuery(() => supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('partnership_role', 'ctv')
+        ),
+
+        // Active KOLs
+        safeQuery(() => supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('partnership_role', 'kol')
+        ),
+
+        // Total Staff
+        safeQuery(() => supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .or('role.eq.manager,role.eq.staff')
+        ),
+
+        // Total commission
+        safeQuery(() => supabase
+          .from('profiles')
+          .select('total_commission')
+          .not('total_commission', 'is', null)
+        ),
+
+        // Approved Instructors
+        safeQuery(() => supabase
+          .from('instructor_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved')
+        ),
+
+        // Pending Instructors
+        safeQuery(() => supabase
+          .from('instructor_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+        ),
+
+        // Monthly orders
+        safeQuery(() => supabase
           .from('shopify_orders')
           .select('total_price')
           .eq('financial_status', 'paid')
-          .gte('paid_at', startOfMonth.toISOString());
+          .gte('paid_at', startOfMonth.toISOString())
+        ),
 
-        if (!ordersError && monthlyOrders) {
-          monthlyRevenue = monthlyOrders.reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
-        }
-      } catch (orderError) {
-        console.warn('[AdminDashboard] shopify_orders table not available:', orderError.message);
-      }
+        // Expiring subscriptions - this one has its own error handling
+        subscriptionExpirationService.getExpiringUsersCount(7)
+          .then(res => res)
+          .catch(() => ({ success: false, data: null })),
+      ]);
 
-      // Get expiring subscriptions count
-      let expiringStats = {
-        expiringToday: 0,
-        expiring3Days: 0,
-        expiring7Days: 0,
-        totalExpiring: 0,
-      };
-      try {
-        const expiringResult = await subscriptionExpirationService.getExpiringUsersCount(7);
-        if (expiringResult.success && expiringResult.data) {
-          expiringStats = {
+      // Process results
+      const totalCommission = commissionsResult.data?.reduce(
+        (sum, c) => sum + (parseFloat(c.total_commission) || 0),
+        0
+      ) || 0;
+
+      const monthlyRevenue = ordersResult.data?.reduce(
+        (sum, o) => sum + (parseFloat(o.total_price) || 0),
+        0
+      ) || 0;
+
+      const expiringStats = expiringResult?.success && expiringResult?.data
+        ? {
             expiringToday: expiringResult.data.expiring_today || 0,
             expiring3Days: expiringResult.data.expiring_3_days || 0,
             expiring7Days: expiringResult.data.expiring_7_days || 0,
             totalExpiring: expiringResult.data.total_expiring || 0,
-          };
-        }
-      } catch (expiringError) {
-        console.warn('[AdminDashboard] Expiring users stats not available:', expiringError.message);
-      }
+          }
+        : { expiringToday: 0, expiring3Days: 0, expiring7Days: 0, totalExpiring: 0 };
 
       setStats({
-        pendingApplications: apps || 0,
-        pendingWithdrawals: withdrawals || 0,
-        totalPartners: partners || 0,
-        totalUsers: users || 0,
+        pendingApplications: appsResult.count || 0,
+        pendingWithdrawals: withdrawalsResult.count || 0,
+        totalPartners: (ctvsResult.count || 0) + (kolsResult.count || 0),
+        totalUsers: usersResult.count || 0,
         totalCommission,
         monthlyRevenue,
-        activeAffiliates: affiliates || 0,
-        activeCTVs: ctvs || 0,
-        // Expiration stats
+        activeCTVs: ctvsResult.count || 0,
+        activeKOLs: kolsResult.count || 0,
+        totalInstructors: instructorsApprovedResult.count || 0,
+        pendingInstructors: instructorsPendingResult.count || 0,
+        totalStaff: staffResult.count || 0,
         ...expiringStats,
       });
+
+      // Update cache control
+      lastFetchTime.current = Date.now();
+      hasLoadedOnce.current = true;
     } catch (error) {
       console.error('[AdminDashboard] Error loading stats:', error);
     } finally {
@@ -303,49 +372,114 @@ const AdminDashboardScreen = ({ navigation }) => {
             <>
               <Text style={styles.sectionTitle}>Tổng Quan</Text>
               <View style={styles.statsGrid}>
-                <View style={styles.statCard}>
+                {/* Tổng Users */}
+                <TouchableOpacity
+                  style={styles.statCard}
+                  onPress={() => navigation.navigate('AdminUsers')}
+                  activeOpacity={0.7}
+                >
                   <Users size={20} color={COLORS.gold} />
                   <Text style={styles.statValue}>{stats.totalUsers}</Text>
                   <Text style={styles.statLabel}>Tổng Users</Text>
-                </View>
+                  <ChevronRight size={14} color={COLORS.textMuted} style={styles.statChevron} />
+                </TouchableOpacity>
 
-                <View style={styles.statCard}>
-                  <Users size={20} color={COLORS.gold} />
-                  <Text style={styles.statValue}>{stats.activeAffiliates}</Text>
-                  <Text style={styles.statLabel}>Affiliates (3%)</Text>
-                </View>
-
-                <View style={styles.statCard}>
+                {/* CTV - Cộng tác viên (10-30% based on tier) */}
+                <TouchableOpacity
+                  style={styles.statCard}
+                  onPress={() => navigation.navigate('AdminPartnershipDashboard', { filter: 'ctv' })}
+                  activeOpacity={0.7}
+                >
                   <Users size={20} color={COLORS.gold} />
                   <Text style={styles.statValue}>{stats.activeCTVs}</Text>
-                  <Text style={styles.statLabel}>CTVs (10-30%)</Text>
-                </View>
+                  <Text style={styles.statLabel}>CTV (10-30%)</Text>
+                  <ChevronRight size={14} color={COLORS.textMuted} style={styles.statChevron} />
+                </TouchableOpacity>
 
-                <View style={styles.statCard}>
+                {/* KOL Affiliate (20% commission) */}
+                <TouchableOpacity
+                  style={styles.statCard}
+                  onPress={() => navigation.navigate('AdminPartnershipDashboard', { filter: 'kol' })}
+                  activeOpacity={0.7}
+                >
+                  <Star size={20} color={COLORS.gold} />
+                  <Text style={styles.statValue}>{stats.activeKOLs}</Text>
+                  <Text style={styles.statLabel}>KOL (20%)</Text>
+                  <ChevronRight size={14} color={COLORS.textMuted} style={styles.statChevron} />
+                </TouchableOpacity>
+
+                {/* Tổng Đối tác */}
+                <TouchableOpacity
+                  style={styles.statCard}
+                  onPress={() => navigation.navigate('AdminPartnershipDashboard')}
+                  activeOpacity={0.7}
+                >
                   <Users size={20} color={COLORS.gold} />
-                  <Text style={styles.statValue}>{stats.activeAffiliates + stats.activeCTVs}</Text>
+                  <Text style={styles.statValue}>{stats.activeCTVs + stats.activeKOLs}</Text>
                   <Text style={styles.statLabel}>Tổng Đối tác</Text>
-                </View>
+                  <ChevronRight size={14} color={COLORS.textMuted} style={styles.statChevron} />
+                </TouchableOpacity>
+
+                {/* Giảng viên (Instructors) */}
+                <TouchableOpacity
+                  style={styles.statCard}
+                  onPress={() => navigation.navigate('AdminInstructors')}
+                  activeOpacity={0.7}
+                >
+                  <GraduationCap size={20} color="#10B981" />
+                  <Text style={styles.statValue}>{stats.totalInstructors}</Text>
+                  <Text style={styles.statLabel}>Giảng viên</Text>
+                  {stats.pendingInstructors > 0 && (
+                    <View style={styles.statBadge}>
+                      <Text style={styles.statBadgeText}>{stats.pendingInstructors} chờ</Text>
+                    </View>
+                  )}
+                  <ChevronRight size={14} color={COLORS.textMuted} style={styles.statChevron} />
+                </TouchableOpacity>
+
+                {/* Staff */}
+                <TouchableOpacity
+                  style={styles.statCard}
+                  onPress={() => navigation.navigate('AdminUsers', { filter: 'staff' })}
+                  activeOpacity={0.7}
+                >
+                  <Users size={20} color="#3B82F6" />
+                  <Text style={styles.statValue}>{stats.totalStaff}</Text>
+                  <Text style={styles.statLabel}>Staff</Text>
+                  <ChevronRight size={14} color={COLORS.textMuted} style={styles.statChevron} />
+                </TouchableOpacity>
               </View>
 
               {/* Financial Stats - Side by side */}
               <Text style={styles.sectionTitle}>Tài Chính</Text>
               <View style={styles.financialRow}>
-                <View style={styles.financialCardCompact}>
+                {/* Monthly Revenue */}
+                <TouchableOpacity
+                  style={styles.financialCardCompact}
+                  onPress={() => navigation.navigate('RevenueDashboard')}
+                  activeOpacity={0.7}
+                >
                   <TrendingUp size={20} color={COLORS.gold} />
                   <Text style={styles.financialValueCompact}>
                     {formatCurrency(stats.monthlyRevenue)}
                   </Text>
                   <Text style={styles.financialLabelCompact}>Doanh thu tháng</Text>
-                </View>
+                  <ChevronRight size={14} color={COLORS.textMuted} style={styles.financialChevron} />
+                </TouchableOpacity>
 
-                <View style={styles.financialCardCompact}>
+                {/* Commission Paid */}
+                <TouchableOpacity
+                  style={styles.financialCardCompact}
+                  onPress={() => navigation.navigate('AdminWithdrawals', { status: 'completed' })}
+                  activeOpacity={0.7}
+                >
                   <DollarSign size={20} color={COLORS.gold} />
                   <Text style={styles.financialValueCompact}>
                     {formatCurrency(stats.totalCommission)}
                   </Text>
                   <Text style={styles.financialLabelCompact}>Hoa hồng đã trả</Text>
-                </View>
+                  <ChevronRight size={14} color={COLORS.textMuted} style={styles.financialChevron} />
+                </TouchableOpacity>
               </View>
             </>
           )}
@@ -417,6 +551,24 @@ const AdminDashboardScreen = ({ navigation }) => {
                   <Text style={styles.gridSubtitle}>Thống kê</Text>
                 </TouchableOpacity>
 
+                {/* Partnership */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminPartnershipDashboard')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <Handshake size={22} color={COLORS.gold} />
+                    {(stats.activeCTVs + stats.activeKOLs) > 0 && (
+                      <View style={[styles.gridBadge, { backgroundColor: '#22c55e' }]}>
+                        <Text style={styles.gridBadgeText}>{stats.activeCTVs + stats.activeKOLs}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.gridTitle}>Đối Tác</Text>
+                  <Text style={styles.gridSubtitle}>CTV & KOL</Text>
+                </TouchableOpacity>
+
                 {/* Thông Báo */}
                 <TouchableOpacity
                   style={styles.gridCard}
@@ -441,6 +593,19 @@ const AdminDashboardScreen = ({ navigation }) => {
                   </View>
                   <Text style={styles.gridTitle}>Upgrade</Text>
                   <Text style={styles.gridSubtitle}>Tiers & Plan</Text>
+                </TouchableOpacity>
+
+                {/* Revenue */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('RevenueDashboard')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <DollarSign size={22} color="#22c55e" />
+                  </View>
+                  <Text style={styles.gridTitle}>Doanh Thu</Text>
+                  <Text style={styles.gridSubtitle}>Revenue</Text>
                 </TouchableOpacity>
 
                 {/* Waitlist Leads */}
@@ -838,6 +1003,25 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginTop: 2,
   },
+  statChevron: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  statBadge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    backgroundColor: COLORS.burgundy,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  statBadgeText: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
 
   // Financial Cards - Compact Row
   financialRow: {
@@ -863,6 +1047,11 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginTop: 4,
     textAlign: 'center',
+  },
+  financialChevron: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
   },
   // Legacy financial styles (kept for compatibility)
   financialCards: {

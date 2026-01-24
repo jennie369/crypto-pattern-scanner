@@ -271,8 +271,8 @@ export const getCompressionTypeName = (type) => {
   const names = {
     descending_triangle: 'Tam Giác Giảm',
     ascending_triangle: 'Tam Giác Tăng',
-    descending_wedge: 'Nêm Giảm',
-    ascending_wedge: 'Nêm Tăng',
+    descending_wedge: 'Falling Wedge',
+    ascending_wedge: 'Rising Wedge',
     symmetrical: 'Tam Giác Đối Xứng',
     undefined_compression: 'Nén Giá',
   };

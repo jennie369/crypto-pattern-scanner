@@ -6,6 +6,8 @@
  */
 
 import { supabase } from './supabase';
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 
 class StickerService {
   constructor() {
@@ -482,14 +484,28 @@ class StickerService {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${packId}/${fileName}`;
 
-      // Fetch file and convert to blob
-      const response = await fetch(file.uri);
-      const blob = await response.blob();
+      // Read file - platform specific
+      let fileData;
+      if (Platform.OS === 'web') {
+        const response = await fetch(file.uri);
+        fileData = await response.blob();
+      } else {
+        // React Native: use FileSystem
+        const base64 = await FileSystem.readAsStringAsync(file.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        fileData = bytes.buffer;
+      }
 
       // Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('stickers')
-        .upload(filePath, blob, {
+        .upload(filePath, fileData, {
           contentType: file.type || 'image/png',
           cacheControl: '31536000', // 1 year cache
         });

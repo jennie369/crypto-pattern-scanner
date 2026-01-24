@@ -50,6 +50,11 @@ export { default as AnalyticsDashboardScreen } from './AnalyticsDashboardScreen'
 // Partnership System v3.0 (Phase 4)
 export { default as AdminPartnershipDashboard } from './AdminPartnershipDashboard';
 export { default as AdminApplicationDetail } from './AdminApplicationDetail';
+export { default as AdminPartnersScreen } from './AdminPartnersScreen';
+export { default as AdminPartnerResourcesScreen } from './AdminPartnerResourcesScreen';
 
 // Waitlist Leads Management
 export { default as WaitlistLeadsScreen } from './WaitlistLeadsScreen';
+
+// Instructor Management
+export { default as AdminInstructorsScreen } from './AdminInstructorsScreen';

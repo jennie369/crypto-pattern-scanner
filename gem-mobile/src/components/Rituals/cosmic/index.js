@@ -5,6 +5,10 @@
 
 // Background
 export { default as CosmicBackground } from './CosmicBackground';
+export { default as VideoBackground, preloadVideo, clearPreloadedVideos } from './VideoBackground';
+
+// Lottie Animations
+export { default as RitualAnimation } from './RitualAnimation';
 
 // Cards
 export { default as GlassCard, GlassInputCard, GlassButtonCard } from './GlassCard';

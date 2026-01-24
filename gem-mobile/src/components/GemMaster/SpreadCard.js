@@ -1,10 +1,10 @@
 /**
  * SpreadCard Component
- * Card preview in spread selection grid
+ * Card preview in spread selection grid with thumbnail images
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   Lock,
@@ -29,6 +29,36 @@ const CATEGORY_ICONS = {
   advanced: Crown,
 };
 
+// Thumbnail image mapping - must use require() for static imports
+const SPREAD_THUMBNAILS = {
+  'spread-single-card': require('../../../assets/images/tarot-spreads/spread-single-card.webp'),
+  'spread-past-present-future': require('../../../assets/images/tarot-spreads/spread-past-present-future.webp'),
+  'spread-mind-body-spirit': require('../../../assets/images/tarot-spreads/spread-mind-body-spirit.webp'),
+  'spread-decision-making': require('../../../assets/images/tarot-spreads/spread-decision-making.webp'),
+  'spread-celtic-cross': require('../../../assets/images/tarot-spreads/spread-celtic-cross.webp'),
+  'spread-love-relationship': require('../../../assets/images/tarot-spreads/spread-love-relationship.webp'),
+  'spread-broken-heart': require('../../../assets/images/tarot-spreads/spread-broken-heart.webp'),
+  'spread-career-path': require('../../../assets/images/tarot-spreads/spread-career-path.webp'),
+  'spread-should-i-buy': require('../../../assets/images/tarot-spreads/spread-should-i-buy.webp'),
+  'spread-market-outlook': require('../../../assets/images/tarot-spreads/spread-market-outlook.webp'),
+  'spread-portfolio-balance': require('../../../assets/images/tarot-spreads/spread-portfolio-balance.webp'),
+  'spread-trading-strategy': require('../../../assets/images/tarot-spreads/spread-trading-strategy.webp'),
+};
+
+// Get thumbnail by key or spread_id
+const getThumbnail = (spread) => {
+  // Try thumbnail_key first
+  if (spread?.thumbnail_key && SPREAD_THUMBNAILS[spread.thumbnail_key]) {
+    return SPREAD_THUMBNAILS[spread.thumbnail_key];
+  }
+  // Fallback: try spread_id with 'spread-' prefix
+  const key = `spread-${spread?.spread_id}`;
+  if (SPREAD_THUMBNAILS[key]) {
+    return SPREAD_THUMBNAILS[key];
+  }
+  return null;
+};
+
 const SpreadCard = ({
   spread,
   isLocked = false,
@@ -39,6 +69,7 @@ const SpreadCard = ({
   const CategoryIcon = CATEGORY_ICONS[spread?.category] || Sparkles;
   const tierColor = getTierColor(spread?.tier_required);
   const tierName = getTierDisplayName(spread?.tier_required);
+  const thumbnail = getThumbnail(spread);
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -62,11 +93,26 @@ const SpreadCard = ({
       activeOpacity={0.8}
     >
       <View style={styles.card}>
-        {/* Background gradient */}
-        <LinearGradient
-          colors={[COLORS.glassBg, COLORS.bgDarkest]}
-          style={styles.background}
-        />
+        {/* Background - Image or Gradient */}
+        {thumbnail ? (
+          <ImageBackground
+            source={thumbnail}
+            style={styles.thumbnailBackground}
+            imageStyle={styles.thumbnailImage}
+            resizeMode="cover"
+          >
+            {/* Dark overlay for text readability */}
+            <LinearGradient
+              colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.7)']}
+              style={styles.thumbnailOverlay}
+            />
+          </ImageBackground>
+        ) : (
+          <LinearGradient
+            colors={[COLORS.glassBg, COLORS.bgDarkest]}
+            style={styles.background}
+          />
+        )}
 
         {/* Border gradient effect */}
         <View style={styles.borderGradient} />
@@ -86,6 +132,15 @@ const SpreadCard = ({
               <CategoryIcon size={14} color={tierColor} />
             </View>
 
+            {/* Tier badge - moved to header right */}
+            {spread?.tier_required && spread.tier_required !== 'FREE' && (
+              <View style={[styles.tierBadge, { backgroundColor: `${tierColor}30`, borderColor: tierColor }]}>
+                <Text style={[styles.tierText, { color: tierColor }]}>
+                  {tierName}
+                </Text>
+              </View>
+            )}
+
             <TouchableOpacity
               style={styles.infoButton}
               onPress={handleInfoPress}
@@ -95,17 +150,13 @@ const SpreadCard = ({
             </TouchableOpacity>
           </View>
 
+          {/* Spacer to push content to bottom */}
+          <View style={styles.spacer} />
+
           {/* Name */}
           <Text style={styles.name} numberOfLines={2}>
             {spread?.name_vi || spread?.name_en || 'Unnamed Spread'}
           </Text>
-
-          {/* Description */}
-          {spread?.description_vi && (
-            <Text style={styles.description} numberOfLines={2}>
-              {spread.description_vi}
-            </Text>
-          )}
 
           {/* Footer */}
           <View style={styles.footer}>
@@ -123,22 +174,6 @@ const SpreadCard = ({
               </View>
             )}
           </View>
-
-          {/* Tier badge */}
-          {spread?.tier_required && spread.tier_required !== 'FREE' && (
-            <View style={[styles.tierBadge, { backgroundColor: `${tierColor}30`, borderColor: tierColor }]}>
-              <Text style={[styles.tierText, { color: tierColor }]}>
-                {tierName}
-              </Text>
-            </View>
-          )}
-
-          {/* Free badge */}
-          {(!spread?.tier_required || spread.tier_required === 'FREE') && (
-            <View style={styles.freeBadge}>
-              <Text style={styles.freeText}>Miễn phí</Text>
-            </View>
-          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -153,10 +188,19 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
     overflow: 'hidden',
-    minHeight: 160,
+    minHeight: 180,
     position: 'relative',
   },
   background: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  thumbnailBackground: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  thumbnailImage: {
+    borderRadius: 16,
+  },
+  thumbnailOverlay: {
     ...StyleSheet.absoluteFillObject,
   },
   borderGradient: {
@@ -180,9 +224,8 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    gap: SPACING.xs,
   },
   categoryBadge: {
     width: 28,
@@ -191,8 +234,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  tierBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  tierText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
   infoButton: {
     padding: 4,
+    marginLeft: 'auto',
+  },
+  spacer: {
+    flex: 1,
   },
   name: {
     fontSize: TYPOGRAPHY.fontSize.base,
@@ -200,6 +257,9 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
     lineHeight: 20,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   description: {
     fontSize: TYPOGRAPHY.fontSize.xs,
@@ -211,7 +271,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-    marginTop: 'auto',
   },
   metaItem: {
     flexDirection: 'row',
@@ -221,19 +280,9 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
-  },
-  tierBadge: {
-    position: 'absolute',
-    top: SPACING.sm,
-    right: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  tierText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   freeBadge: {
     position: 'absolute',

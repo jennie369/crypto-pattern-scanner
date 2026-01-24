@@ -7,3 +7,4 @@
 
 export { default as MonthCalendar, MonthCalendarCompact, CalendarEventItem } from './MonthCalendar';
 export { default as DayDetailModal, AddEventFAB } from './DayDetailModal';
+export { default as AddEventModal } from './AddEventModal';

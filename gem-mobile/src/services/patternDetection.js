@@ -22,6 +22,9 @@
  */
 
 import { binanceService } from './binanceService';
+// V2 Enhancement Integration
+import { applyV2Enhancements } from './scanner/patternEnhancerV2';
+import { hasAccess, getTierKey } from '../constants/scannerAccess';
 
 // Phase 1A: Pattern Config and Zone Calculator
 import {
@@ -302,6 +305,134 @@ class PatternDetectionService {
     this.MIN_CANDLES = 30; // Reduced from 50
     this.ZONE_TOLERANCE = 0.03; // 3% tolerance for zone matching
     this.userTier = 'FREE'; // Default tier, should be set by caller
+
+    // ========================================
+    // TIMEFRAME-BASED TP/SL SCALING
+    // ========================================
+    // Scale factors for different timeframes
+    // Base = 4h timeframe (1.0x)
+    // Smaller TF = smaller TP/SL, Larger TF = larger TP/SL
+    this.TIMEFRAME_SCALE = {
+      '1m': 0.10,   // 10% of base (very small moves)
+      '3m': 0.15,   // 15% of base
+      '5m': 0.20,   // 20% of base
+      '15m': 0.35,  // 35% of base
+      '30m': 0.50,  // 50% of base
+      '1h': 0.65,   // 65% of base
+      '2h': 0.80,   // 80% of base
+      '4h': 1.00,   // Base (100%)
+      '6h': 1.20,   // 120% of base
+      '8h': 1.35,   // 135% of base
+      '12h': 1.50,  // 150% of base
+      '1d': 2.00,   // 200% of base
+      '3d': 3.00,   // 300% of base
+      '1w': 4.00,   // 400% of base
+    };
+
+    // Candles per 7 days for each timeframe
+    this.CANDLES_PER_7_DAYS = {
+      '1m': 10080,  // 7 * 24 * 60
+      '3m': 3360,   // 7 * 24 * 20
+      '5m': 2016,   // 7 * 24 * 12
+      '15m': 672,   // 7 * 24 * 4
+      '30m': 336,   // 7 * 24 * 2
+      '1h': 168,    // 7 * 24
+      '2h': 84,     // 7 * 12
+      '4h': 42,     // 7 * 6
+      '6h': 28,     // 7 * 4
+      '8h': 21,     // 7 * 3
+      '12h': 14,    // 7 * 2
+      '1d': 7,      // 7
+      '3d': 3,      // ~2-3
+      '1w': 1,      // 1
+    };
+  }
+
+  /**
+   * Get TP/SL scale factor for timeframe
+   * @param {string} timeframe - Timeframe string (1m, 5m, 1h, 4h, etc.)
+   * @returns {number} Scale factor
+   */
+  getTimeframeScale(timeframe) {
+    return this.TIMEFRAME_SCALE[timeframe] || 1.0;
+  }
+
+  /**
+   * Get number of candles to scan (7 days worth)
+   * @param {string} timeframe - Timeframe string
+   * @returns {number} Number of candles
+   */
+  getCandlesFor7Days(timeframe) {
+    return this.CANDLES_PER_7_DAYS[timeframe] || 168; // Default to 1h equivalent
+  }
+
+  /**
+   * Scale TP percentage based on timeframe
+   * @param {number} basePercent - Base percentage (e.g., 0.05 for 5%)
+   * @param {string} timeframe - Timeframe string
+   * @returns {number} Scaled percentage
+   */
+  scaleTP(basePercent, timeframe) {
+    const scale = this.getTimeframeScale(timeframe);
+    // Minimum 0.3% TP, maximum based on timeframe
+    return Math.max(0.003, basePercent * scale);
+  }
+
+  /**
+   * Scale SL percentage based on timeframe
+   * @param {number} basePercent - Base percentage (e.g., 0.02 for 2%)
+   * @param {string} timeframe - Timeframe string
+   * @returns {number} Scaled percentage
+   */
+  scaleSL(basePercent, timeframe) {
+    const scale = this.getTimeframeScale(timeframe);
+    // Minimum 0.2% SL, maximum based on timeframe
+    return Math.max(0.002, basePercent * scale);
+  }
+
+  /**
+   * Check if zone is still valid (not broken)
+   * @param {Object} zone - Zone object with zoneHigh, zoneLow
+   * @param {Array} candles - Candles after zone formation
+   * @param {string} direction - LONG or SHORT
+   * @returns {Object} { valid, tested, broken, fresh }
+   */
+  checkZoneValidity(zone, candles, direction) {
+    const { zoneHigh, zoneLow } = zone;
+    let tested = false;
+    let broken = false;
+
+    for (const candle of candles) {
+      // Check if price broke through the zone
+      if (direction === 'LONG') {
+        // For LONG zones (support), broken if price closes below zoneLow
+        if (candle.close < zoneLow) {
+          broken = true;
+          break;
+        }
+        // Tested if price touched zoneLow but didn't close below
+        if (candle.low <= zoneLow * 1.001) {
+          tested = true;
+        }
+      } else {
+        // For SHORT zones (resistance), broken if price closes above zoneHigh
+        if (candle.close > zoneHigh) {
+          broken = true;
+          break;
+        }
+        // Tested if price touched zoneHigh but didn't close above
+        if (candle.high >= zoneHigh * 0.999) {
+          tested = true;
+        }
+      }
+    }
+
+    return {
+      valid: !broken,
+      tested: tested,
+      broken: broken,
+      fresh: !tested && !broken,
+    };
   }
 
   /**
@@ -966,9 +1097,14 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.DPD;
     const entry = lowBetween.price;
-    const stopLoss = high2.price * 1.01;
+
+    // TIMEFRAME-SCALED TP/SL
+    // Base: 1% SL above high2, 2:1 RR for target
+    const slPercent = this.scaleSL(0.01, timeframe); // Scale 1% base SL
+    const stopLoss = high2.price * (1 + slPercent);
     const riskAmount = stopLoss - entry;
-    const target = entry - (riskAmount * 2);
+    const rrMultiplier = 2.0; // Keep 2:1 R:R
+    const target = entry - (riskAmount * rrMultiplier);
 
     return {
       id: `DPD-${symbol}-${timeframe}-${Date.now()}`,
@@ -983,7 +1119,7 @@ class PatternDetectionService {
       entry,
       stopLoss,
       target,
-      riskReward: 2.0,
+      riskReward: rrMultiplier,
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
@@ -1034,9 +1170,14 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPU;
     const entry = highBetween.price;
-    const stopLoss = low2.price * 0.99;
+
+    // TIMEFRAME-SCALED TP/SL
+    // Base: 1% SL below low2, 2:1 RR for target
+    const slPercent = this.scaleSL(0.01, timeframe); // Scale 1% base SL
+    const stopLoss = low2.price * (1 - slPercent);
     const riskAmount = entry - stopLoss;
-    const target = entry + (riskAmount * 2);
+    const rrMultiplier = 2.0; // Keep 2:1 R:R
+    const target = entry + (riskAmount * rrMultiplier);
 
     return {
       id: `UPU-${symbol}-${timeframe}-${Date.now()}`,
@@ -1051,7 +1192,7 @@ class PatternDetectionService {
       entry,
       stopLoss,
       target,
-      riskReward: 2.0,
+      riskReward: rrMultiplier,
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
@@ -1102,9 +1243,19 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.DPU;
     const entry = peak.price;
-    const stopLoss = low2.price * 0.98;
+
+    // TIMEFRAME-SCALED TP/SL
+    // Base: 2% SL below low2, 2:1 RR for target
+    const slPercent = this.scaleSL(0.02, timeframe); // Scale 2% base SL
+    const stopLoss = low2.price * (1 - slPercent);
     const riskAmount = entry - stopLoss;
-    const target = entry + riskAmount;
+    const rrMultiplier = 2.0; // 2:1 R:R
+    const target = entry + (riskAmount * rrMultiplier);
+
+    // ⚠️ FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+    const low1Time = low1.timestamp > 9999999999 ? Math.floor(low1.timestamp / 1000) : low1.timestamp;
+    const low2Time = low2.timestamp > 9999999999 ? Math.floor(low2.timestamp / 1000) : low2.timestamp;
+    const peakTime = peak.timestamp > 9999999999 ? Math.floor(peak.timestamp / 1000) : peak.timestamp;
 
     return {
       id: `DPU-${symbol}-${timeframe}-${Date.now()}`,
@@ -1119,11 +1270,21 @@ class PatternDetectionService {
       entry,
       stopLoss,
       target,
-      riskReward: 1.0,
+      riskReward: rrMultiplier,
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
-      points: { low1, low2, peak }, // Added for zone positioning
+      points: { low1, low2, peak },
+      // ⚠️ FIX: Explicit zone data for zone rendering
+      // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
+      zoneHigh: entry,
+      zoneLow: stopLoss,
+      // ⚠️ FIX: Explicit time data for zone X-axis positioning
+      startTime: low1Time,
+      endTime: peakTime,
+      formationTime: low1Time,
+      startCandleIndex: low1.index,
+      endCandleIndex: peak.index,
     };
   }
 
@@ -1170,9 +1331,19 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPD;
     const entry = trough.price;
-    const stopLoss = high2.price * 1.02;
+
+    // TIMEFRAME-SCALED TP/SL
+    // Base: 2% SL above high2, 2:1 RR for target
+    const slPercent = this.scaleSL(0.02, timeframe); // Scale 2% base SL
+    const stopLoss = high2.price * (1 + slPercent);
     const riskAmount = stopLoss - entry;
-    const target = entry - riskAmount;
+    const rrMultiplier = 2.0; // 2:1 R:R
+    const target = entry - (riskAmount * rrMultiplier);
+
+    // ⚠️ FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+    const high1Time = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
+    const high2Time = high2.timestamp > 9999999999 ? Math.floor(high2.timestamp / 1000) : high2.timestamp;
+    const troughTime = trough.timestamp > 9999999999 ? Math.floor(trough.timestamp / 1000) : trough.timestamp;
 
     return {
       id: `UPD-${symbol}-${timeframe}-${Date.now()}`,
@@ -1187,11 +1358,21 @@ class PatternDetectionService {
       entry,
       stopLoss,
       target,
-      riskReward: 1.0,
+      riskReward: rrMultiplier,
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
-      points: { high1, high2, trough }, // Added for zone positioning
+      points: { high1, high2, trough },
+      // ⚠️ FIX: Explicit zone data for zone rendering
+      // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
+      zoneHigh: stopLoss,
+      zoneLow: entry,
+      // ⚠️ FIX: Explicit time data for zone X-axis positioning
+      startTime: high1Time,
+      endTime: troughTime,
+      formationTime: high1Time,
+      startCandleIndex: high1.index,
+      endCandleIndex: trough.index,
     };
   }
 
@@ -1240,15 +1421,24 @@ class PatternDetectionService {
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS['Head & Shoulders'];
-    const entry = neckline * 0.995;
-    const stopLoss = head.price * 1.01;
+
+    // TIMEFRAME-SCALED TP/SL
+    // Entry slightly below neckline, SL above head
+    const entryBuffer = this.scaleSL(0.005, timeframe); // 0.5% base buffer
+    const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL above head
+    const entry = neckline * (1 - entryBuffer);
+    const stopLoss = head.price * (1 + slPercent);
     const patternHeight = head.price - neckline;
-    const target = neckline - patternHeight;
+    const target = neckline - patternHeight; // Target based on pattern height (naturally scales)
 
     // Get neckline lows with proper index reference
     const necklineLowPoints = swingLows.filter(l =>
       l.index > leftShoulder.index && l.index < rightShoulder.index
     );
+
+    // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+    const leftShoulderTime = leftShoulder.timestamp > 9999999999 ? Math.floor(leftShoulder.timestamp / 1000) : leftShoulder.timestamp;
+    const rightShoulderTime = rightShoulder.timestamp > 9999999999 ? Math.floor(rightShoulder.timestamp / 1000) : rightShoulder.timestamp;
 
     return {
       id: `HS-${symbol}-${timeframe}-${Date.now()}`,
@@ -1268,7 +1458,17 @@ class PatternDetectionService {
       detectedAt: Date.now(),
       currentPrice,
       neckline,
-      points: { leftShoulder, head, rightShoulder, necklineLow: necklineLowPoints[0] }, // Added for zone positioning
+      points: { leftShoulder, head, rightShoulder, necklineLow: necklineLowPoints[0] },
+      // FIX: Explicit zone data for zone rendering
+      // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
+      zoneHigh: stopLoss,
+      zoneLow: entry,
+      // FIX: Explicit time data for zone X-axis positioning
+      startTime: leftShoulderTime,
+      endTime: rightShoulderTime,
+      formationTime: leftShoulderTime,
+      startCandleIndex: leftShoulder.index,
+      endCandleIndex: rightShoulder.index,
     };
   }
 
@@ -1314,9 +1514,18 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS['Double Top'];
     const entry = trough.price;
-    const stopLoss = Math.max(top1.price, top2.price) * 1.01;
+
+    // TIMEFRAME-SCALED TP/SL
+    // SL above highest top with scaled buffer
+    const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL
+    const stopLoss = Math.max(top1.price, top2.price) * (1 + slPercent);
     const patternHeight = top1.price - trough.price;
-    const target = entry - patternHeight;
+    const target = entry - patternHeight; // Target based on pattern height (naturally scales)
+
+    // ⚠️ FIX: Extract timestamps for zone positioning
+    const top1Time = top1.timestamp > 9999999999 ? Math.floor(top1.timestamp / 1000) : top1.timestamp;
+    const top2Time = top2.timestamp > 9999999999 ? Math.floor(top2.timestamp / 1000) : top2.timestamp;
+    const troughTime = trough.timestamp > 9999999999 ? Math.floor(trough.timestamp / 1000) : trough.timestamp;
 
     return {
       id: `DT-${symbol}-${timeframe}-${Date.now()}`,
@@ -1336,6 +1545,16 @@ class PatternDetectionService {
       detectedAt: Date.now(),
       currentPrice,
       points: { top1, top2, trough },
+      // ⚠️ FIX: Explicit zone data for zone rendering
+      // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
+      zoneHigh: stopLoss,
+      zoneLow: entry,
+      // ⚠️ FIX: Explicit time data for zone X-axis positioning
+      startTime: top1Time,
+      endTime: Math.max(top2Time, troughTime),
+      formationTime: top1Time,
+      startCandleIndex: top1.index,
+      endCandleIndex: Math.max(top2.index, trough.index),
     };
   }
 
@@ -1381,9 +1600,18 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS['Double Bottom'];
     const entry = peak.price;
-    const stopLoss = Math.min(bottom1.price, bottom2.price) * 0.99;
+
+    // TIMEFRAME-SCALED TP/SL
+    // SL below lowest bottom with scaled buffer
+    const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL
+    const stopLoss = Math.min(bottom1.price, bottom2.price) * (1 - slPercent);
     const patternHeight = peak.price - bottom1.price;
-    const target = entry + patternHeight;
+    const target = entry + patternHeight; // Target based on pattern height (naturally scales)
+
+    // ⚠️ FIX: Extract timestamps for zone positioning
+    const bottom1Time = bottom1.timestamp > 9999999999 ? Math.floor(bottom1.timestamp / 1000) : bottom1.timestamp;
+    const bottom2Time = bottom2.timestamp > 9999999999 ? Math.floor(bottom2.timestamp / 1000) : bottom2.timestamp;
+    const peakTime = peak.timestamp > 9999999999 ? Math.floor(peak.timestamp / 1000) : peak.timestamp;
 
     return {
       id: `DB-${symbol}-${timeframe}-${Date.now()}`,
@@ -1403,6 +1631,16 @@ class PatternDetectionService {
       detectedAt: Date.now(),
       currentPrice,
       points: { bottom1, bottom2, peak },
+      // ⚠️ FIX: Explicit zone data for zone rendering
+      // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
+      zoneHigh: entry,
+      zoneLow: stopLoss,
+      // ⚠️ FIX: Explicit time data for zone X-axis positioning
+      startTime: bottom1Time,
+      endTime: Math.max(bottom2Time, peakTime),
+      formationTime: bottom1Time,
+      startCandleIndex: bottom1.index,
+      endCandleIndex: Math.max(bottom2.index, peak.index),
     };
   }
 
@@ -1437,6 +1675,17 @@ class PatternDetectionService {
       if (headDepth > 0.03) confidence += 10;
       confidence = Math.min(confidence, 90);
 
+      // TIMEFRAME-SCALED TP/SL
+      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% base entry buffer
+      const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL below head
+      const entry = neckline * (1 + entryBuffer);
+      const stopLoss = head.price * (1 - slPercent);
+
+      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      const leftShoulderTime = leftShoulder.timestamp > 9999999999 ? Math.floor(leftShoulder.timestamp / 1000) : leftShoulder.timestamp;
+      const headTime = head.timestamp > 9999999999 ? Math.floor(head.timestamp / 1000) : head.timestamp;
+      const rightShoulderTime = rightShoulder.timestamp > 9999999999 ? Math.floor(rightShoulder.timestamp / 1000) : rightShoulder.timestamp;
+
       return {
         id: `IHS-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Inverse H&S',
@@ -1447,15 +1696,25 @@ class PatternDetectionService {
         type: signal.type,
         color: signal.color,
         description: signal.description,
-        entry: neckline * 1.01,
-        stopLoss: head.price * 0.99,
+        entry,
+        stopLoss,
         target: neckline + (neckline - head.price),
         riskReward: 2.4,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
         neckline,
-        points: { leftShoulder, head, rightShoulder }, // Added for zone positioning
+        points: { leftShoulder, head, rightShoulder },
+        // FIX: Explicit zone data for zone rendering
+        // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
+        zoneHigh: entry,
+        zoneLow: stopLoss,
+        // FIX: Explicit time data for zone X-axis positioning
+        startTime: leftShoulderTime,
+        endTime: rightShoulderTime,
+        formationTime: leftShoulderTime,
+        startCandleIndex: leftShoulder.index,
+        endCandleIndex: rightShoulder.index,
       };
     }
     return null;
@@ -1488,6 +1747,16 @@ class PatternDetectionService {
       const firstPoint = recentHighs[0];
       const lastPoint = recentLows[recentLows.length - 1];
 
+      // TIMEFRAME-SCALED TP/SL
+      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% base entry buffer above resistance
+      const slPercent = this.scaleSL(0.02, timeframe); // 2% base SL below support
+      const entry = resistance * (1 + entryBuffer);
+      const stopLoss = support * (1 - slPercent);
+
+      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      const firstPointTime = firstPoint.timestamp > 9999999999 ? Math.floor(firstPoint.timestamp / 1000) : firstPoint.timestamp;
+      const lastPointTime = lastPoint.timestamp > 9999999999 ? Math.floor(lastPoint.timestamp / 1000) : lastPoint.timestamp;
+
       return {
         id: `AT-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Ascending Triangle',
@@ -1498,14 +1767,24 @@ class PatternDetectionService {
         type: signal.type,
         color: signal.color,
         description: signal.description,
-        entry: resistance * 1.01,
-        stopLoss: support * 0.98,
+        entry,
+        stopLoss,
         target: resistance + (resistance - support),
         riskReward: 2.2,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
-        points: { firstHigh: firstPoint, lastLow: lastPoint, resistance: recentHighs[recentHighs.length - 1] }, // Added for zone positioning
+        points: { firstHigh: firstPoint, lastLow: lastPoint, resistance: recentHighs[recentHighs.length - 1] },
+        // FIX: Explicit zone data for zone rendering
+        // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
+        zoneHigh: entry,
+        zoneLow: stopLoss,
+        // FIX: Explicit time data for zone X-axis positioning
+        startTime: firstPointTime,
+        endTime: lastPointTime,
+        formationTime: firstPointTime,
+        startCandleIndex: firstPoint.index,
+        endCandleIndex: lastPoint.index,
       };
     }
     return null;
@@ -1538,6 +1817,16 @@ class PatternDetectionService {
       const firstPoint = recentLows[0];
       const lastPoint = recentHighs[recentHighs.length - 1];
 
+      // TIMEFRAME-SCALED TP/SL
+      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% base entry buffer below support
+      const slPercent = this.scaleSL(0.02, timeframe); // 2% base SL above resistance
+      const entry = support * (1 - entryBuffer);
+      const stopLoss = resistance * (1 + slPercent);
+
+      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      const firstPointTime = firstPoint.timestamp > 9999999999 ? Math.floor(firstPoint.timestamp / 1000) : firstPoint.timestamp;
+      const lastPointTime = lastPoint.timestamp > 9999999999 ? Math.floor(lastPoint.timestamp / 1000) : lastPoint.timestamp;
+
       return {
         id: `DT2-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Descending Triangle',
@@ -1548,14 +1837,24 @@ class PatternDetectionService {
         type: signal.type,
         color: signal.color,
         description: signal.description,
-        entry: support * 0.99,
-        stopLoss: resistance * 1.02,
+        entry,
+        stopLoss,
         target: support - (resistance - support),
         riskReward: 2.1,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
-        points: { firstLow: firstPoint, lastHigh: lastPoint, support: recentLows[recentLows.length - 1] }, // Added for zone positioning
+        points: { firstLow: firstPoint, lastHigh: lastPoint, support: recentLows[recentLows.length - 1] },
+        // FIX: Explicit zone data for zone rendering
+        // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
+        zoneHigh: stopLoss,
+        zoneLow: entry,
+        // FIX: Explicit time data for zone X-axis positioning
+        startTime: firstPointTime,
+        endTime: lastPointTime,
+        formationTime: firstPointTime,
+        startCandleIndex: firstPoint.index,
+        endCandleIndex: lastPoint.index,
       };
     }
     return null;
@@ -1580,6 +1879,17 @@ class PatternDetectionService {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['Symmetrical Triangle'];
 
+      // TIMEFRAME-SCALED TP/SL
+      const slPercent = this.scaleSL(0.03, timeframe); // 3% base SL (symmetrical patterns more volatile)
+      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base TP
+      const entry = currentPrice;
+      const stopLoss = currentPrice * (1 - slPercent);
+      const targetPrice = currentPrice * (1 + tpPercent);
+
+      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      const high1Time = recentHighs[0].timestamp > 9999999999 ? Math.floor(recentHighs[0].timestamp / 1000) : recentHighs[0].timestamp;
+      const low2Time = recentLows[1].timestamp > 9999999999 ? Math.floor(recentLows[1].timestamp / 1000) : recentLows[1].timestamp;
+
       return {
         id: `ST-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Symmetrical Triangle',
@@ -1590,14 +1900,24 @@ class PatternDetectionService {
         type: signal.type,
         color: signal.color,
         description: signal.description,
-        entry: currentPrice,
-        stopLoss: currentPrice * 0.97,
-        target: currentPrice * 1.05,
+        entry,
+        stopLoss,
+        target: targetPrice,
         riskReward: 2.0,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
-        points: { high1: recentHighs[0], high2: recentHighs[1], low1: recentLows[0], low2: recentLows[1] }, // Added for zone positioning
+        points: { high1: recentHighs[0], high2: recentHighs[1], low1: recentLows[0], low2: recentLows[1] },
+        // FIX: Explicit zone data for zone rendering
+        // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
+        zoneHigh: entry,
+        zoneLow: stopLoss,
+        // FIX: Explicit time data for zone X-axis positioning
+        startTime: high1Time,
+        endTime: low2Time,
+        formationTime: high1Time,
+        startCandleIndex: recentHighs[0].index,
+        endCandleIndex: recentLows[1].index,
       };
     }
     return null;
@@ -1624,6 +1944,18 @@ class PatternDetectionService {
       const firstHigh = recentHighs[0];
       const lastHigh = recentHighs[recentHighs.length - 1];
 
+      // TIMEFRAME-SCALED TP/SL
+      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% below current
+      const slPercent = this.scaleSL(0.01, timeframe); // 1% above avg high
+      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base target
+      const entry = currentPrice * (1 - entryBuffer);
+      const stopLoss = avgHigh * (1 + slPercent);
+      const targetPrice = currentPrice * (1 - tpPercent);
+
+      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      const firstHighTime = firstHigh.timestamp > 9999999999 ? Math.floor(firstHigh.timestamp / 1000) : firstHigh.timestamp;
+      const lastHighTime = lastHigh.timestamp > 9999999999 ? Math.floor(lastHigh.timestamp / 1000) : lastHigh.timestamp;
+
       return {
         id: `HFZ-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'HFZ',
@@ -1634,15 +1966,25 @@ class PatternDetectionService {
         type: signal.type,
         color: signal.color,
         description: signal.description,
-        entry: currentPrice * 0.99,
-        stopLoss: avgHigh * 1.01,
-        target: currentPrice * 0.95,
+        entry,
+        stopLoss,
+        target: targetPrice,
         riskReward: 2.3,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
         zone: { top: avgHigh * 1.005, bottom: avgHigh * 0.995, mid: avgHigh },
-        points: { firstHigh, lastHigh, cluster: recentHighs }, // Added for zone positioning
+        points: { firstHigh, lastHigh, cluster: recentHighs },
+        // FIX: Explicit zone data for zone rendering
+        // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
+        zoneHigh: stopLoss,
+        zoneLow: entry,
+        // FIX: Explicit time data for zone X-axis positioning
+        startTime: firstHighTime,
+        endTime: lastHighTime,
+        formationTime: firstHighTime,
+        startCandleIndex: firstHigh.index,
+        endCandleIndex: lastHigh.index,
       };
     }
     return null;
@@ -1669,6 +2011,18 @@ class PatternDetectionService {
       const firstLow = recentLows[0];
       const lastLow = recentLows[recentLows.length - 1];
 
+      // TIMEFRAME-SCALED TP/SL
+      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% above current
+      const slPercent = this.scaleSL(0.01, timeframe); // 1% below avg low
+      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base target
+      const entry = currentPrice * (1 + entryBuffer);
+      const stopLoss = avgLow * (1 - slPercent);
+      const targetPrice = currentPrice * (1 + tpPercent);
+
+      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      const firstLowTime = firstLow.timestamp > 9999999999 ? Math.floor(firstLow.timestamp / 1000) : firstLow.timestamp;
+      const lastLowTime = lastLow.timestamp > 9999999999 ? Math.floor(lastLow.timestamp / 1000) : lastLow.timestamp;
+
       return {
         id: `LFZ-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'LFZ',
@@ -1679,15 +2033,25 @@ class PatternDetectionService {
         type: signal.type,
         color: signal.color,
         description: signal.description,
-        entry: currentPrice * 1.01,
-        stopLoss: avgLow * 0.99,
-        target: currentPrice * 1.05,
+        entry,
+        stopLoss,
+        target: targetPrice,
         riskReward: 2.3,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
         zone: { top: avgLow * 1.005, bottom: avgLow * 0.995, mid: avgLow },
-        points: { firstLow, lastLow, cluster: recentLows }, // Added for zone positioning
+        points: { firstLow, lastLow, cluster: recentLows },
+        // FIX: Explicit zone data for zone rendering
+        // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
+        zoneHigh: entry,
+        zoneLow: stopLoss,
+        // FIX: Explicit time data for zone X-axis positioning
+        startTime: firstLowTime,
+        endTime: lastLowTime,
+        formationTime: firstLowTime,
+        startCandleIndex: firstLow.index,
+        endCandleIndex: lastLow.index,
       };
     }
     return null;
@@ -1720,6 +2084,16 @@ class PatternDetectionService {
       const bottomCandle = candles[bottomIndex];
       const endCandle = candles[candles.length - 1];
 
+      // TIMEFRAME-SCALED TP/SL
+      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% above current
+      const slPercent = this.scaleSL(0.02, timeframe); // 2% below bottom
+      const entry = currentPrice * (1 + entryBuffer);
+      const stopLoss = bottomPrice * (1 - slPercent);
+
+      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      const startTime = startCandle.timestamp > 9999999999 ? Math.floor(startCandle.timestamp / 1000) : startCandle.timestamp;
+      const endTime = endCandle.timestamp > 9999999999 ? Math.floor(endCandle.timestamp / 1000) : endCandle.timestamp;
+
       return {
         id: `RB-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Rounding Bottom',
@@ -1730,8 +2104,8 @@ class PatternDetectionService {
         type: signal.type,
         color: signal.color,
         description: signal.description,
-        entry: currentPrice * 1.01,
-        stopLoss: bottomPrice * 0.98,
+        entry,
+        stopLoss,
         target: currentPrice + (currentPrice - bottomPrice),
         riskReward: 2.4,
         winRate: signal.expectedWinRate,
@@ -1741,7 +2115,17 @@ class PatternDetectionService {
           start: { index: windowStartIndex, price: startCandle.low, timestamp: startCandle.timestamp },
           bottom: { index: bottomIndex, price: bottomPrice, timestamp: bottomCandle.timestamp },
           end: { index: candles.length - 1, price: endCandle.close, timestamp: endCandle.timestamp },
-        }, // Added for zone positioning
+        },
+        // FIX: Explicit zone data for zone rendering
+        // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
+        zoneHigh: entry,
+        zoneLow: stopLoss,
+        // FIX: Explicit time data for zone X-axis positioning
+        startTime: startTime,
+        endTime: endTime,
+        formationTime: startTime,
+        startCandleIndex: windowStartIndex,
+        endCandleIndex: candles.length - 1,
       };
     }
     return null;
@@ -1774,6 +2158,16 @@ class PatternDetectionService {
       const topCandle = candles[topIndex];
       const endCandle = candles[candles.length - 1];
 
+      // TIMEFRAME-SCALED TP/SL
+      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% below current
+      const slPercent = this.scaleSL(0.02, timeframe); // 2% above top
+      const entry = currentPrice * (1 - entryBuffer);
+      const stopLoss = topPrice * (1 + slPercent);
+
+      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      const startTime = startCandle.timestamp > 9999999999 ? Math.floor(startCandle.timestamp / 1000) : startCandle.timestamp;
+      const endTime = endCandle.timestamp > 9999999999 ? Math.floor(endCandle.timestamp / 1000) : endCandle.timestamp;
+
       return {
         id: `RT-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Rounding Top',
@@ -1784,8 +2178,8 @@ class PatternDetectionService {
         type: signal.type,
         color: signal.color,
         description: signal.description,
-        entry: currentPrice * 0.99,
-        stopLoss: topPrice * 1.02,
+        entry,
+        stopLoss,
         target: currentPrice - (topPrice - currentPrice),
         riskReward: 2.2,
         winRate: signal.expectedWinRate,
@@ -1795,7 +2189,17 @@ class PatternDetectionService {
           start: { index: windowStartIndex, price: startCandle.high, timestamp: startCandle.timestamp },
           top: { index: topIndex, price: topPrice, timestamp: topCandle.timestamp },
           end: { index: candles.length - 1, price: endCandle.close, timestamp: endCandle.timestamp },
-        }, // Added for zone positioning
+        },
+        // FIX: Explicit zone data for zone rendering
+        // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
+        zoneHigh: stopLoss,
+        zoneLow: entry,
+        // FIX: Explicit time data for zone X-axis positioning
+        startTime: startTime,
+        endTime: endTime,
+        formationTime: startTime,
+        startCandleIndex: windowStartIndex,
+        endCandleIndex: candles.length - 1,
       };
     }
     return null;
@@ -1828,6 +2232,13 @@ class PatternDetectionService {
         const poleStartCandle = candles[poleStart];
         const flagEndCandle = candles[candles.length - 1];
 
+        // TIMEFRAME-SCALED TP/SL
+        const entryBuffer = this.scaleSL(0.01, timeframe);
+        const slPercent = this.scaleSL(0.02, timeframe);
+        const entryPrice = currentPrice * (1 + entryBuffer);
+        const flagLow = Math.min(...flag.map(c => c.low));
+        const stopLossPrice = flagLow * (1 - slPercent);
+
         return {
           id: `BF-${symbol}-${timeframe}-${Date.now()}`,
           patternType: 'Bull Flag',
@@ -1838,8 +2249,8 @@ class PatternDetectionService {
           type: signal.type,
           color: signal.color,
           description: signal.description,
-          entry: currentPrice * 1.01,
-          stopLoss: Math.min(...flag.map(c => c.low)) * 0.98,
+          entry: entryPrice,
+          stopLoss: stopLossPrice,
           target: currentPrice + (pole[pole.length - 1].close - pole[0].close),
           riskReward: 2.5,
           winRate: signal.expectedWinRate,
@@ -1878,6 +2289,13 @@ class PatternDetectionService {
         const poleStartCandle = candles[poleStart];
         const flagEndCandle = candles[candles.length - 1];
 
+        // TIMEFRAME-SCALED TP/SL
+        const entryBuffer = this.scaleSL(0.01, timeframe);
+        const slPercent = this.scaleSL(0.02, timeframe);
+        const entryPrice = currentPrice * (1 - entryBuffer);
+        const flagHigh = Math.max(...flag.map(c => c.high));
+        const stopLossPrice = flagHigh * (1 + slPercent);
+
         return {
           id: `BRF-${symbol}-${timeframe}-${Date.now()}`,
           patternType: 'Bear Flag',
@@ -1888,8 +2306,8 @@ class PatternDetectionService {
           type: signal.type,
           color: signal.color,
           description: signal.description,
-          entry: currentPrice * 0.99,
-          stopLoss: Math.max(...flag.map(c => c.high)) * 1.02,
+          entry: entryPrice,
+          stopLoss: stopLossPrice,
           target: currentPrice - (pole[0].close - pole[pole.length - 1].close),
           riskReward: 2.4,
           winRate: signal.expectedWinRate,
@@ -2347,12 +2765,23 @@ class PatternDetectionService {
         this.setUserTier(userTier);
       }
 
-      const candles = await binanceService.getCandles(symbol, timeframe, 150);
+      const rawCandles = await binanceService.getCandles(symbol, timeframe, 500);
 
-      if (!candles || candles.length < this.MIN_CANDLES) {
-        console.log('[PatternDetection] Not enough candle data:', candles?.length);
+      if (!rawCandles || rawCandles.length < this.MIN_CANDLES) {
+        console.log('[PatternDetection] Not enough candle data:', rawCandles?.length);
         return [];
       }
+
+      // =====================================================
+      // 7-DAY LOOKBACK LIMIT: Only scan recent patterns
+      // Prevents scanning full history, focuses on actionable patterns
+      // =====================================================
+      const candlesFor7Days = this.getCandlesFor7Days(timeframe);
+      const candles = rawCandles.length > candlesFor7Days
+        ? rawCandles.slice(-candlesFor7Days)
+        : rawCandles;
+
+      console.log(`[PatternDetection] 7-day limit applied: ${rawCandles.length} -> ${candles.length} candles (limit: ${candlesFor7Days})`);
 
       // 🔴 DEBUG: Verify candles have timestamp property
       const firstCandle = candles[0];
@@ -2483,9 +2912,98 @@ class PatternDetectionService {
 
       console.log(`[PatternDetection] Enhanced ${enhancedPatterns.filter(p => p.hasEnhancements).length}/${patterns.length} patterns`);
 
+      // =====================================================
+      // V2 ENHANCEMENTS: Apply volume, retest, MTF validations
+      // For TIER1+ users only
+      // =====================================================
+      const tierKey = getTierKey(this.userTier);
+      let v2EnhancedPatterns = enhancedPatterns;
+
+      if (tierKey !== 'FREE') {
+        try {
+          // Get historical candles for volume comparison (last 50 candles before pattern)
+          const historicalCandles = candles.slice(0, Math.max(50, candles.length - 20));
+
+          v2EnhancedPatterns = await Promise.all(
+            enhancedPatterns.map(async (pattern) => {
+              try {
+                // Build zone object from pattern data
+                const zone = pattern.zone || {
+                  high: pattern.zoneHigh || pattern.entry,
+                  low: pattern.zoneLow || pattern.stopLoss,
+                  type: pattern.zoneType || 'RESISTANCE',
+                  direction: pattern.direction,
+                };
+
+                const v2Pattern = await applyV2Enhancements(pattern, candles, zone, {
+                  userTier: this.userTier,
+                  symbol,
+                  timeframe,
+                  historicalCandles,
+                });
+
+                return v2Pattern;
+              } catch (v2Err) {
+                console.log('[PatternDetection] V2 enhancement error for pattern:', v2Err.message);
+                return pattern;
+              }
+            })
+          );
+
+          console.log(`[PatternDetection] V2 Enhanced ${v2EnhancedPatterns.filter(p => p.hasV2Enhancements).length}/${patterns.length} patterns`);
+        } catch (v2Error) {
+          console.error('[PatternDetection] V2 batch enhancement error:', v2Error);
+          v2EnhancedPatterns = enhancedPatterns;
+        }
+      }
+
+      // =====================================================
+      // ZONE VALIDITY FILTER: Remove broken zones
+      // Only keep zones that haven't been broken by price action
+      // =====================================================
+      let validPatterns = v2EnhancedPatterns;
+
+      // Filter out broken zones
+      validPatterns = validPatterns.filter(pattern => {
+        // Skip if pattern doesn't have zone data
+        if (!pattern.zoneHigh || !pattern.zoneLow) return true;
+
+        // Get candles after the pattern formation
+        const patternEndIdx = pattern.endCandleIndex || pattern.startCandleIndex;
+        if (!patternEndIdx && patternEndIdx !== 0) return true;
+
+        const candlesAfterZone = candles.slice(patternEndIdx + 1);
+        if (candlesAfterZone.length === 0) return true; // No candles to check, keep zone
+
+        // Check zone validity
+        const validity = this.checkZoneValidity(
+          { zoneHigh: pattern.zoneHigh, zoneLow: pattern.zoneLow },
+          candlesAfterZone,
+          pattern.direction
+        );
+
+        // Attach validity info to pattern
+        pattern.zoneValidity = validity;
+
+        // Only keep valid zones (not broken)
+        if (!validity.valid) {
+          console.log(`[PatternDetection] 🔴 ZONE BROKEN - Filtering out ${pattern.patternType} for ${symbol}:`, {
+            zoneHigh: pattern.zoneHigh,
+            zoneLow: pattern.zoneLow,
+            tested: validity.tested,
+            broken: validity.broken,
+          });
+          return false;
+        }
+
+        return true;
+      });
+
+      console.log(`[PatternDetection] Zone validity filter: ${v2EnhancedPatterns.length} -> ${validPatterns.length} patterns (removed ${v2EnhancedPatterns.length - validPatterns.length} broken zones)`);
+
       // Phase 1A: Sort by pattern strength first, then confidence
       // Reversal patterns (5 stars) > Continuation patterns (3 stars)
-      return enhancedPatterns.sort((a, b) => {
+      return validPatterns.sort((a, b) => {
         // Primary sort: pattern strength (descending)
         const strengthA = a.patternConfig?.strength || 1;
         const strengthB = b.patternConfig?.strength || 1;
@@ -2602,12 +3120,32 @@ export const patternDetection = new PatternDetectionService();
  * @returns {Promise<Array>} Detected patterns
  */
 export async function detectAllPatterns(candles, options = {}) {
-  const { symbol = 'UNKNOWN', timeframe = '4h', tier = 'FREE', patternTypes = null, includeEnhancements = true } = options;
+  const {
+    symbol = 'UNKNOWN',
+    timeframe = '4h',
+    tier = 'FREE',
+    patternTypes = null,
+    includeEnhancements = true,
+    filterValidZones = false, // NEW: Filter only valid zones (not broken)
+    filterFreshZones = false, // NEW: Filter only fresh zones (not tested)
+  } = options;
 
   if (!candles || candles.length < 30) {
     console.log('[detectAllPatterns] Not enough candles:', candles?.length);
     return [];
   }
+
+  // ========================================
+  // 7-DAY LOOKBACK LIMIT
+  // ========================================
+  // Limit candles to 7 days worth based on timeframe
+  // This prevents scanning full history and focuses on recent patterns
+  const candlesFor7Days = patternDetection.getCandlesFor7Days(timeframe);
+  const limitedCandles = candles.length > candlesFor7Days
+    ? candles.slice(-candlesFor7Days)
+    : candles;
+
+  console.log(`[detectAllPatterns] Using ${limitedCandles.length} candles (7-day limit: ${candlesFor7Days}) for ${timeframe}`);
 
   // Set tier
   patternDetection.setUserTier(tier);
@@ -2619,29 +3157,29 @@ export async function detectAllPatterns(candles, options = {}) {
     // ============================================
     // FREE TIER PATTERNS (3 patterns)
     // ============================================
-    const dpd = patternDetection.detectDPD(candles, symbol, timeframe);
+    const dpd = patternDetection.detectDPD(limitedCandles, symbol, timeframe);
     if (dpd) patterns.push(dpd);
 
-    const upu = patternDetection.detectUPU(candles, symbol, timeframe);
+    const upu = patternDetection.detectUPU(limitedCandles, symbol, timeframe);
     if (upu) patterns.push(upu);
 
-    const hs = patternDetection.detectHeadAndShoulders(candles, symbol, timeframe);
+    const hs = patternDetection.detectHeadAndShoulders(limitedCandles, symbol, timeframe);
     if (hs) patterns.push(hs);
 
     // ============================================
     // TIER 1 PATTERNS (+4 = 7 total)
     // ============================================
     if (['TIER1', 'TIER2', 'TIER3', 'ADMIN'].includes(userTier)) {
-      const dpu = patternDetection.detectDPU(candles, symbol, timeframe);
+      const dpu = patternDetection.detectDPU(limitedCandles, symbol, timeframe);
       if (dpu) patterns.push(dpu);
 
-      const upd = patternDetection.detectUPD(candles, symbol, timeframe);
+      const upd = patternDetection.detectUPD(limitedCandles, symbol, timeframe);
       if (upd) patterns.push(upd);
 
-      const dt = patternDetection.detectDoubleTop(candles, symbol, timeframe);
+      const dt = patternDetection.detectDoubleTop(limitedCandles, symbol, timeframe);
       if (dt) patterns.push(dt);
 
-      const db = patternDetection.detectDoubleBottom(candles, symbol, timeframe);
+      const db = patternDetection.detectDoubleBottom(limitedCandles, symbol, timeframe);
       if (db) patterns.push(db);
     }
 
@@ -2649,28 +3187,28 @@ export async function detectAllPatterns(candles, options = {}) {
     // TIER 2 PATTERNS (+8 = 15 total)
     // ============================================
     if (['TIER2', 'TIER3', 'ADMIN'].includes(userTier)) {
-      const ihs = patternDetection.detectInverseHeadShoulders(candles, symbol, timeframe);
+      const ihs = patternDetection.detectInverseHeadShoulders(limitedCandles, symbol, timeframe);
       if (ihs) patterns.push(ihs);
 
-      const at = patternDetection.detectAscendingTriangle(candles, symbol, timeframe);
+      const at = patternDetection.detectAscendingTriangle(limitedCandles, symbol, timeframe);
       if (at) patterns.push(at);
 
-      const dt2 = patternDetection.detectDescendingTriangle(candles, symbol, timeframe);
+      const dt2 = patternDetection.detectDescendingTriangle(limitedCandles, symbol, timeframe);
       if (dt2) patterns.push(dt2);
 
-      const st = patternDetection.detectSymmetricalTriangle(candles, symbol, timeframe);
+      const st = patternDetection.detectSymmetricalTriangle(limitedCandles, symbol, timeframe);
       if (st) patterns.push(st);
 
-      const hfz = patternDetection.detectHFZ(candles, symbol, timeframe);
+      const hfz = patternDetection.detectHFZ(limitedCandles, symbol, timeframe);
       if (hfz) patterns.push(hfz);
 
-      const lfz = patternDetection.detectLFZ(candles, symbol, timeframe);
+      const lfz = patternDetection.detectLFZ(limitedCandles, symbol, timeframe);
       if (lfz) patterns.push(lfz);
 
-      const rb = patternDetection.detectRoundingBottom(candles, symbol, timeframe);
+      const rb = patternDetection.detectRoundingBottom(limitedCandles, symbol, timeframe);
       if (rb) patterns.push(rb);
 
-      const rt = patternDetection.detectRoundingTop(candles, symbol, timeframe);
+      const rt = patternDetection.detectRoundingTop(limitedCandles, symbol, timeframe);
       if (rt) patterns.push(rt);
     }
 
@@ -2678,32 +3216,73 @@ export async function detectAllPatterns(candles, options = {}) {
     // TIER 3 PATTERNS (+7 = 22 total)
     // ============================================
     if (['TIER3', 'ADMIN'].includes(userTier)) {
-      const bf = patternDetection.detectBullFlag(candles, symbol, timeframe);
+      const bf = patternDetection.detectBullFlag(limitedCandles, symbol, timeframe);
       if (bf) patterns.push(bf);
 
-      const brf = patternDetection.detectBearFlag(candles, symbol, timeframe);
+      const brf = patternDetection.detectBearFlag(limitedCandles, symbol, timeframe);
       if (brf) patterns.push(brf);
 
-      const wdg = patternDetection.detectWedge(candles, symbol, timeframe);
+      const wdg = patternDetection.detectWedge(limitedCandles, symbol, timeframe);
       if (wdg) patterns.push(wdg);
 
-      const eng = patternDetection.detectEngulfing(candles, symbol, timeframe);
+      const eng = patternDetection.detectEngulfing(limitedCandles, symbol, timeframe);
       if (eng) patterns.push(eng);
 
-      const mes = patternDetection.detectMorningEveningStar(candles, symbol, timeframe);
+      const mes = patternDetection.detectMorningEveningStar(limitedCandles, symbol, timeframe);
       if (mes) patterns.push(mes);
 
-      const cup = patternDetection.detectCupHandle(candles, symbol, timeframe);
+      const cup = patternDetection.detectCupHandle(limitedCandles, symbol, timeframe);
       if (cup) patterns.push(cup);
 
-      const hm = patternDetection.detectHammer(candles, symbol, timeframe);
+      const hm = patternDetection.detectHammer(limitedCandles, symbol, timeframe);
       if (hm) patterns.push(hm);
     }
 
-    // Filter by patternTypes if provided
+    // ========================================
+    // ZONE VALIDITY FILTERING
+    // ========================================
     let filteredPatterns = patterns;
+
+    // Filter by patternTypes if provided
     if (patternTypes && patternTypes.length > 0) {
-      filteredPatterns = patterns.filter(p => patternTypes.includes(p.type) || patternTypes.includes(p.name));
+      filteredPatterns = filteredPatterns.filter(p => patternTypes.includes(p.type) || patternTypes.includes(p.name));
+    }
+
+    // Filter valid zones (zones that haven't been broken)
+    if (filterValidZones || filterFreshZones) {
+      filteredPatterns = filteredPatterns.filter(pattern => {
+        // Skip if pattern doesn't have zone data
+        if (!pattern.zoneHigh || !pattern.zoneLow) return true;
+
+        // Get candles after the zone formation
+        const zoneEndIndex = pattern.endCandleIndex || limitedCandles.length - 10;
+        const candlesAfterZone = limitedCandles.slice(zoneEndIndex);
+
+        if (candlesAfterZone.length === 0) return true; // No candles to check, keep zone
+
+        // Check zone validity
+        const validity = patternDetection.checkZoneValidity(
+          { zoneHigh: pattern.zoneHigh, zoneLow: pattern.zoneLow },
+          candlesAfterZone,
+          pattern.direction
+        );
+
+        // Add validity info to pattern
+        pattern.zoneValidity = validity;
+
+        // Filter based on options
+        if (filterFreshZones) {
+          // Only keep fresh zones (not tested, not broken)
+          return validity.fresh;
+        }
+        if (filterValidZones) {
+          // Keep valid zones (not broken, may be tested)
+          return validity.valid;
+        }
+        return true;
+      });
+
+      console.log(`[detectAllPatterns] After zone filter: ${filteredPatterns.length} valid patterns`);
     }
 
     console.log(`[detectAllPatterns] Found ${filteredPatterns.length} patterns for ${symbol} ${timeframe}`);

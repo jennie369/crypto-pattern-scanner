@@ -150,11 +150,12 @@ const DigitalProductsScreen = ({ navigation, route }) => {
   );
 
   // Render product card
+  // Note: isLocked disabled - all products show cart icon for direct purchase
   const renderProductCard = useCallback(({ item }) => (
     <DigitalProductCard
       product={item}
       userTier={userTier}
-      isLocked={item.isLocked}
+      isLocked={false}
       onPress={handleProductPress}
       onUpgradePress={handleUpgradePress}
       style={styles.card}

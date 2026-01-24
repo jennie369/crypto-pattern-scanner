@@ -27,6 +27,7 @@ import {
   AlertCircle,
   DollarSign,
   Zap,
+  Brain,
 } from 'lucide-react-native';
 
 // Components
@@ -41,6 +42,8 @@ import ModeTabSelector from './ModeTabSelector';
 import ModeBanner from './ModeBanner';
 import AIAssessmentSection from './AIAssessmentSection';
 import CustomAlert, { useCustomAlert } from '../CustomAlert';
+import MindsetCheckModal from './MindsetCheckModal';
+import { SCORE_COLORS } from '../../services/mindsetAdvisorService';
 
 // Services & Constants
 import {
@@ -152,6 +155,18 @@ const PaperTradeModalV2 = ({
   // AI Assessment state (for Custom mode)
   const [aiAssessment, setAIAssessment] = useState(null);
 
+  // Mindset Check state
+  const [showMindsetCheck, setShowMindsetCheck] = useState(false);
+  const [mindsetResult, setMindsetResult] = useState(null);
+
+  // Helper to get score color
+  const getScoreColor = (score) => {
+    if (score >= 80) return SCORE_COLORS.ready;
+    if (score >= 60) return SCORE_COLORS.prepare;
+    if (score >= 40) return SCORE_COLORS.caution;
+    return SCORE_COLORS.stop;
+  };
+
   // Animated scroll for smooth header hide/show
   const scrollY = useRef(new Animated.Value(0)).current;
   const lastScrollY = useRef(0);
@@ -261,6 +276,9 @@ const PaperTradeModalV2 = ({
   };
 
   // Initialize fields from pattern (for Pattern mode)
+  // IMPORTANT: Support both camelCase AND snake_case field names
+  // because zoneManager uses snake_case (entry_price, stop_loss, target_1)
+  // while patternDetection uses camelCase (entry, stopLoss, target)
   const initializeFromPattern = () => {
     if (!pattern) return;
 
@@ -269,23 +287,35 @@ const PaperTradeModalV2 = ({
       (pattern.direction === 'bullish' ? 'LONG' : 'SHORT');
     setDirection(patternDir === 'LONG' || patternDir === 'BULLISH' ? 'LONG' : 'SHORT');
 
-    // Set entry price
-    if (pattern.entry) {
-      setPrice(pattern.entry.toString());
+    // Set entry price - support both naming conventions
+    const entryVal = pattern.entry || pattern.entry_price || pattern.entryPrice;
+    if (entryVal) {
+      setPrice(entryVal.toString());
     }
 
-    // Set SL
-    if (pattern.stopLoss) {
+    // Set SL - support both naming conventions
+    const slVal = pattern.stopLoss || pattern.stop_loss || pattern.sl;
+    if (slVal) {
       setSLEnabled(true);
-      setSLPrice(pattern.stopLoss);
+      setSLPrice(parseFloat(slVal));
     }
 
-    // Set TP
-    const tp = pattern.takeProfit1 || pattern.takeProfit || pattern.target || pattern.targets?.[0];
-    if (tp) {
+    // Set TP - support both naming conventions
+    const tpVal = pattern.takeProfit1 || pattern.takeProfit || pattern.target ||
+                  pattern.target_1 || pattern.take_profit || pattern.tp ||
+                  pattern.targets?.[0];
+    if (tpVal) {
       setTPEnabled(true);
-      setTPPrice(tp);
+      setTPPrice(parseFloat(tpVal));
     }
+
+    console.log('[PaperTradeV2] initializeFromPattern:', {
+      entry: entryVal,
+      sl: slVal,
+      tp: tpVal,
+      direction: patternDir,
+      rawPattern: { ...pattern },
+    });
   };
 
   // Handle mode change
@@ -435,40 +465,33 @@ const PaperTradeModalV2 = ({
       const coinQuantity = (marginAmount * leverage) / entryPrice;
 
       // ═══════════════════════════════════════════════════════════
-      // SMART ORDER TYPE for Pattern Mode
-      // Pattern Mode: Use Limit at pattern.entry if price not in zone
+      // ORDER TYPE LOGIC for Pattern Mode vs Custom Mode
+      // Pattern Mode: ALWAYS use LIMIT unless price EQUALS entry
+      // Custom Mode: Can use Market anytime
       // ═══════════════════════════════════════════════════════════
       let actualOrderType = orderType;
       let patternLimitPrice = null;
 
-      if (isPatternMode && pattern?.entry) {
-        const patternEntry = pattern.entry;
-        const tolerance = patternEntry * 0.001; // 0.1% tolerance
+      if (isPatternMode) {
+        // Pattern Mode: STRICT - only Market if price equals entry exactly
+        const patternEntry = parseFloat(pattern?.entry || pattern?.entry_price || entryPrice);
+        const tolerance = patternEntry * 0.0005; // 0.05% tolerance (very strict)
 
-        if (direction === 'LONG') {
-          if (currentPrice <= patternEntry + tolerance) {
-            // Giá đã ở hoặc dưới entry → Market OK
-            actualOrderType = 'market';
-            console.log('[PaperTradeV2] Pattern LONG: Price in zone, using Market');
-          } else {
-            // Giá cao hơn entry → Limit để chờ giá xuống
-            actualOrderType = 'limit';
-            patternLimitPrice = patternEntry;
-            console.log('[PaperTradeV2] Pattern LONG: Price above entry, using Limit at', patternEntry);
-          }
-        } else { // SHORT
-          if (currentPrice >= patternEntry - tolerance) {
-            // Giá đã ở hoặc trên entry → Market OK
-            actualOrderType = 'market';
-            console.log('[PaperTradeV2] Pattern SHORT: Price in zone, using Market');
-          } else {
-            // Giá thấp hơn entry → Limit để chờ giá lên
-            actualOrderType = 'limit';
-            patternLimitPrice = patternEntry;
-            console.log('[PaperTradeV2] Pattern SHORT: Price below entry, using Limit at', patternEntry);
-          }
+        const priceMatchesEntry = Math.abs(currentPrice - patternEntry) <= tolerance;
+
+        if (priceMatchesEntry) {
+          // Price equals entry → Market OK
+          actualOrderType = 'market';
+          console.log('[PaperTradeV2] Pattern Mode: Price matches entry, using Market');
+        } else {
+          // Price != entry → MUST use Limit (pending order)
+          actualOrderType = 'limit';
+          patternLimitPrice = patternEntry;
+          console.log('[PaperTradeV2] Pattern Mode: Price != entry, using LIMIT at', patternEntry);
+          console.log('[PaperTradeV2] Current:', currentPrice, 'Entry:', patternEntry, 'Diff:', Math.abs(currentPrice - patternEntry));
         }
       }
+      // Custom Mode: Use whatever orderType was selected (default: market)
 
       console.log('[PaperTradeV2] Order type:', actualOrderType, 'Pattern mode:', isPatternMode);
 
@@ -608,6 +631,16 @@ const PaperTradeModalV2 = ({
         type: pattern?.patternType || pattern?.type || actualOrderType,
         timeframe: pattern?.timeframe || '4H',
         confidence: pattern?.confidence || 75,
+        // ═══════════════════════════════════════════════════════════
+        // ZONE DATA - For displaying zone rectangle on chart when viewing position
+        // ═══════════════════════════════════════════════════════════
+        zone_high: pattern?.zone_high || pattern?.zoneHigh,
+        zone_low: pattern?.zone_low || pattern?.zoneLow,
+        zoneHigh: pattern?.zoneHigh || pattern?.zone_high,
+        zoneLow: pattern?.zoneLow || pattern?.zone_low,
+        start_time: pattern?.start_time || pattern?.startTime,
+        end_time: pattern?.end_time || pattern?.endTime,
+        pattern_id: pattern?.pattern_id || pattern?.id,
       };
 
       // Parameters for paperTradeService.openPosition
@@ -620,14 +653,17 @@ const PaperTradeModalV2 = ({
         currentMarketPrice: currentPrice,
         tradeMode: tradeMode,
 
-        // Pattern comparison for Custom mode
-        patternEntry: pattern?.entry || executionPrice,
-        patternSL: pattern?.stopLoss || 0,
-        patternTP: pattern?.takeProfit1 || pattern?.takeProfit || pattern?.target || 0,
+        // Pattern comparison for Custom mode - support both naming conventions
+        patternEntry: pattern?.entry || pattern?.entry_price || executionPrice,
+        patternSL: pattern?.stopLoss || pattern?.stop_loss || 0,
+        patternTP: pattern?.takeProfit1 || pattern?.takeProfit || pattern?.target || pattern?.target_1 || 0,
 
         // AI Assessment
         aiScore: aiAssessment?.score || 0,
         aiFeedback: aiAssessment?.warnings?.join(', ') || null,
+
+        // Mindset Check
+        mindsetScore: mindsetResult?.score,
       };
 
       console.log('[PaperTradeV2] Executing Market/Limit order:', serviceParams);
@@ -736,23 +772,20 @@ const PaperTradeModalV2 = ({
                 {/* Mode Banner - shows current mode description */}
                 <ModeBanner mode={tradeMode} />
 
-                {/* Pattern Mode: Show smart order info in header */}
+                {/* Pattern Mode: Show order type info in header */}
                 {isPatternMode && pattern?.entry && (
                   <View style={styles.patternOrderTypeInfo}>
                     <Zap size={14} color={COLORS.cyan} />
                     <Text style={styles.patternOrderTypeText}>
                       {(() => {
-                        const entry = pattern.entry;
-                        const tolerance = entry * 0.001;
-                        const dir = pattern.direction || direction;
-                        if (dir === 'LONG') {
-                          return currentPrice <= entry + tolerance
-                            ? 'Market - Giá đã trong zone'
-                            : `Limit chờ giá ≤ ${formatUSDT(entry).replace('$', '')}`;
+                        const entry = parseFloat(pattern.entry || pattern.entry_price);
+                        const tolerance = entry * 0.0005; // 0.05% strict tolerance
+                        const priceMatchesEntry = Math.abs(currentPrice - entry) <= tolerance;
+
+                        if (priceMatchesEntry) {
+                          return 'Market - Giá khớp Entry';
                         } else {
-                          return currentPrice >= entry - tolerance
-                            ? 'Market - Giá đã trong zone'
-                            : `Limit chờ giá ≥ ${formatUSDT(entry).replace('$', '')}`;
+                          return `Limit - Chờ giá = ${formatUSDT(entry).replace('$', '')}`;
                         }
                       })()}
                     </Text>
@@ -818,7 +851,7 @@ const PaperTradeModalV2 = ({
                 {/* Entry Price Display */}
                 <View style={styles.entryPriceRow}>
                   <View style={styles.entryPriceLeft}>
-                    <DollarSign size={14} color={COLORS.gold} />
+                    <DollarSign size={14} color={COLORS.textSecondary} />
                     <Text style={styles.entryPriceLabel}>Giá vào lệnh:</Text>
                   </View>
                   <View style={styles.entryPriceRight}>
@@ -929,9 +962,9 @@ const PaperTradeModalV2 = ({
                     customEntry={entryPrice}
                     customSL={slEnabled ? slPrice : 0}
                     customTP={tpEnabled ? tpPrice : entryPrice}
-                    patternEntry={pattern?.entry || entryPrice}
-                    patternSL={pattern?.stopLoss || 0}
-                    patternTP={pattern?.takeProfit1 || pattern?.takeProfit || pattern?.target || 0}
+                    patternEntry={pattern?.entry || pattern?.entry_price || entryPrice}
+                    patternSL={pattern?.stopLoss || pattern?.stop_loss || 0}
+                    patternTP={pattern?.takeProfit1 || pattern?.takeProfit || pattern?.target || pattern?.target_1 || 0}
                     direction={direction}
                     leverage={leverage}
                     onAssessmentChange={setAIAssessment}
@@ -956,8 +989,25 @@ const PaperTradeModalV2 = ({
                 <View style={{ height: 250 }} />
               </ScrollView>
 
-              {/* Submit Button */}
+              {/* Footer with Mindset Check + Submit */}
               <View style={styles.footer}>
+                {/* Mindset Check Button */}
+                <TouchableOpacity
+                  style={styles.mindsetCheckButton}
+                  onPress={() => setShowMindsetCheck(true)}
+                  activeOpacity={0.8}
+                  disabled={loading}
+                >
+                  <Brain size={18} color={COLORS.gold} />
+                  <Text style={styles.mindsetCheckText}>Kiểm Tra Tâm Thế</Text>
+                  {mindsetResult && (
+                    <View style={[styles.scoreBadge, { backgroundColor: getScoreColor(mindsetResult.score) }]}>
+                      <Text style={styles.scoreBadgeText}>{mindsetResult.score}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                {/* Submit Button */}
                 <TouchableOpacity
                   style={[
                     styles.submitButton,
@@ -991,6 +1041,18 @@ const PaperTradeModalV2 = ({
           visible={showOnboarding}
           onComplete={handleOnboardingComplete}
           onSkip={handleOnboardingSkip}
+        />
+
+        {/* Mindset Check Modal */}
+        <MindsetCheckModal
+          visible={showMindsetCheck}
+          pattern={pattern}
+          sourceScreen="paper_trade_modal"
+          onClose={() => setShowMindsetCheck(false)}
+          onResult={(result) => {
+            setMindsetResult(result);
+            setShowMindsetCheck(false);
+          }}
         />
 
         {AlertComponent}
@@ -1060,7 +1122,7 @@ const styles = StyleSheet.create({
   balanceText: {
     fontSize: 10,
     fontWeight: '700',
-    color: COLORS.gold,
+    color: COLORS.textPrimary,
   },
   // Content
   content: {
@@ -1150,7 +1212,7 @@ const styles = StyleSheet.create({
   entryPriceValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.gold,
+    color: COLORS.textPrimary,
   },
   marketBadge: {
     backgroundColor: 'rgba(0, 240, 255, 0.15)',
@@ -1172,7 +1234,7 @@ const styles = StyleSheet.create({
   patternBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: COLORS.gold,
+    color: COLORS.textSecondary,
   },
   longText: {
     color: COLORS.success,
@@ -1201,6 +1263,36 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  // Mindset Check Button
+  mindsetCheckButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderRadius: 8,
+    paddingVertical: SPACING.sm,
+    marginBottom: SPACING.sm,
+    gap: 8,
+  },
+  mindsetCheckText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.gold,
+  },
+  scoreBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginLeft: 'auto',
+    marginRight: SPACING.md,
+  },
+  scoreBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   submitButton: {
     flexDirection: 'row',

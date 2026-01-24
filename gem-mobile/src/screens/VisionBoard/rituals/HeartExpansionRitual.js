@@ -32,11 +32,13 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-g
 import { Heart, Sparkles, Send } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
-import { completeRitual } from '../../../services/ritualService';
+import { completeRitual, saveReflection } from '../../../services/ritualService';
+import useVideoPause from '../../../hooks/useVideoPause';
 
 // Cosmic Components
 import {
-  CosmicBackground,
+  VideoBackground,
+  RitualAnimation,
   GlassCard,
   GlassInputCard,
   GlowingOrb,
@@ -150,6 +152,8 @@ const ExpandingRing = ({ index, active, color }) => {
 const HeartExpansionRitual = ({ navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const shouldPauseVideo = useVideoPause();
+  const heartAnimationRef = useRef(null);
 
   // ===== STATE =====
   const [phase, setPhase] = useState('intro'); // intro, breath, expansion, completion
@@ -169,10 +173,16 @@ const HeartExpansionRitual = ({ navigation }) => {
   // ===== REFS =====
   const breathTimerRef = useRef(null);
   const expansionTimerRef = useRef(null);
+  const energyLevelRef = useRef(0); // Track energyLevel for interval
 
   // ===== ANIMATION VALUES =====
   const orbGlowIntensity = useSharedValue(0.6);
   const contentOpacity = useSharedValue(1);
+
+  // ===== SYNC ENERGY LEVEL REF =====
+  useEffect(() => {
+    energyLevelRef.current = energyLevel;
+  }, [energyLevel]);
 
   // ===== CLEANUP =====
   useEffect(() => {
@@ -233,9 +243,13 @@ const HeartExpansionRitual = ({ navigation }) => {
   // ===== EXPANSION TIMER =====
   useEffect(() => {
     if (phase === 'expansion') {
+      // Reset timer when entering expansion phase
+      setTimeRemaining(CONFIG.expansionDuration);
+
       expansionTimerRef.current = setInterval(() => {
         setTimeRemaining(prev => {
-          if (prev <= 1 || energyLevel >= 100) {
+          // Use ref to get latest energyLevel (avoids stale closure)
+          if (prev <= 1 || energyLevelRef.current >= 100) {
             clearInterval(expansionTimerRef.current);
             handleComplete();
             return 0;
@@ -248,7 +262,7 @@ const HeartExpansionRitual = ({ navigation }) => {
     return () => {
       if (expansionTimerRef.current) clearInterval(expansionTimerRef.current);
     };
-  }, [phase, energyLevel]);
+  }, [phase]); // Removed energyLevel - using ref instead
 
   // ===== HEART GESTURES =====
   const handleHeartPress = useCallback(() => {
@@ -513,14 +527,8 @@ const HeartExpansionRitual = ({ navigation }) => {
   // ===== MAIN RENDER =====
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CosmicBackground
-        variant="heart"
-        starDensity="medium"
-        showNebula={true}
-        showSpotlight={true}
-        spotlightIntensity={0.6}
-      >
-        {/* Heart particles */}
+      <VideoBackground ritualId="heart-expansion" paused={shouldPauseVideo}>
+        {/* Heart particles overlay */}
         {phase === 'expansion' && (
           <ParticleField
             variant="hearts"
@@ -564,11 +572,17 @@ const HeartExpansionRitual = ({ navigation }) => {
           message="Trái tim bạn đã được mở rộng. Yêu thương đang lan tỏa."
           visible={showCelebration}
           onContinue={handleContinue}
-          onWriteReflection={() => setShowReflection(true)}
+          onWriteReflection={async (text) => {
+            setReflection(text);
+            // Save reflection to database and calendar
+            if (user?.id) {
+              await saveReflection(user.id, 'heart-expansion', text);
+            }
+          }}
           showVisionBoardButton={true}
           showReflectionButton={true}
         />
-      </CosmicBackground>
+      </VideoBackground>
     </GestureHandlerRootView>
   );
 };

@@ -23,11 +23,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Wind, Leaf, Play, Pause, RotateCcw } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
-import { completeRitual } from '../../../services/ritualService';
+import { completeRitual, saveReflection } from '../../../services/ritualService';
 
 // Cosmic Components
 import {
-  CosmicBackground,
+  VideoBackground,
   GlassCard,
   GlowingOrb,
   GlowButton,
@@ -46,6 +46,7 @@ import {
   HAPTIC_PATTERNS,
   COSMIC_TIMING,
 } from '../../../components/Rituals/cosmic';
+import useVideoPause from '../../../hooks/useVideoPause';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -169,6 +170,7 @@ const BreathingCircle = ({ phase, timer, isActive }) => {
 const CleansingBreathRitual = ({ navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const shouldPauseVideo = useVideoPause();
 
   // State
   const [ritualPhase, setRitualPhase] = useState('intro'); // intro, breathing, completed
@@ -180,6 +182,7 @@ const CleansingBreathRitual = ({ navigation }) => {
   const [xpEarned, setXpEarned] = useState(0);
   const [streak, setStreak] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [reflection, setReflection] = useState('');
 
   // Refs
   const timerRef = useRef(null);
@@ -272,6 +275,7 @@ const CleansingBreathRitual = ({ navigation }) => {
       if (user?.id) {
         const result = await completeRitual(user.id, 'cleansing-breath', {
           completedCycles: CONFIG.cycles,
+          reflection,
         });
         setXpEarned(result?.xpEarned || CONFIG.xpReward);
         setStreak(result?.newStreak || 1);
@@ -413,13 +417,7 @@ const CleansingBreathRitual = ({ navigation }) => {
   // Main render
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CosmicBackground
-        variant="breath"
-        starDensity="low"
-        showNebula={true}
-        showSpotlight={true}
-        spotlightIntensity={0.4}
-      >
+      <VideoBackground ritualId="cleansing-breath" paused={shouldPauseVideo}>
         {/* Air particles */}
         <ParticleField
           variant="energy"
@@ -460,10 +458,16 @@ const CleansingBreathRitual = ({ navigation }) => {
           message="Tâm trí bạn đã được thanh lọc. Hãy cảm nhận sự bình an."
           visible={showCelebration}
           onContinue={handleContinue}
+          onWriteReflection={async (text) => {
+            setReflection(text);
+            if (user?.id) {
+              await saveReflection(user.id, 'cleansing-breath', text);
+            }
+          }}
           showVisionBoardButton={false}
           showReflectionButton={true}
         />
-      </CosmicBackground>
+      </VideoBackground>
     </GestureHandlerRootView>
   );
 };

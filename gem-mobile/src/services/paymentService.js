@@ -4,6 +4,8 @@
 // ============================================================
 
 import { supabase, SUPABASE_URL } from './supabase';
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 
 // ============================================================
 // CONSTANTS
@@ -178,13 +180,27 @@ export const uploadPaymentProof = async (orderNumber, imageFile) => {
       });
 
     if (uploadError) {
-      // Try alternative upload method
-      const response = await fetch(imageFile.uri);
-      const blob = await response.blob();
+      // Try alternative upload method - platform specific
+      let fileData;
+      if (Platform.OS === 'web') {
+        const response = await fetch(imageFile.uri);
+        fileData = await response.blob();
+      } else {
+        // React Native: use FileSystem
+        const base64 = await FileSystem.readAsStringAsync(imageFile.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        fileData = bytes.buffer;
+      }
 
       const { data: altUploadData, error: altUploadError } = await supabase.storage
         .from('payment-proofs')
-        .upload(fileName, blob, {
+        .upload(fileName, fileData, {
           contentType: 'image/jpeg',
           upsert: true,
         });

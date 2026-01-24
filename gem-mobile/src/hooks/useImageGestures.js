@@ -30,10 +30,18 @@ const DOUBLE_TAP_SCALE = 2;
 const DOUBLE_TAP_DELAY = 300;
 const DISMISS_THRESHOLD = 100;
 
+// Optimized spring config for smoother animations
 const SPRING_CONFIG = {
-  damping: 15,
-  stiffness: 150,
-  mass: 1,
+  damping: 20,      // Increased for less bouncy, smoother feel
+  stiffness: 120,   // Decreased for gentler motion
+  mass: 0.8,        // Slightly lighter for faster response
+};
+
+// Faster spring for dismiss gesture snapping back
+const SNAP_BACK_CONFIG = {
+  damping: 25,
+  stiffness: 200,
+  mass: 0.5,
 };
 
 /**
@@ -211,11 +219,11 @@ export const useImageGestures = ({
       if (scale.value <= 1) {
         // Check for dismiss
         if (shouldDismiss(event.velocityY, translateY.value)) {
-          // Dismiss
+          // Dismiss - smooth exit animation
           const direction = translateY.value > 0 ? 1 : -1;
           translateY.value = withTiming(
             direction * SCREEN_HEIGHT,
-            { duration: 200 }
+            { duration: 250 }  // Slightly slower for smoother feel
           );
           backgroundOpacity.value = withTiming(0, { duration: 200 });
 
@@ -223,10 +231,10 @@ export const useImageGestures = ({
             runOnJS(onDismiss)();
           }
         } else {
-          // Spring back
-          translateY.value = withSpring(0, SPRING_CONFIG);
-          backgroundOpacity.value = withSpring(1, SPRING_CONFIG);
-          dismissProgress.value = withSpring(0, SPRING_CONFIG);
+          // Spring back - use faster snap-back config for responsive feel
+          translateY.value = withSpring(0, SNAP_BACK_CONFIG);
+          backgroundOpacity.value = withSpring(1, SNAP_BACK_CONFIG);
+          dismissProgress.value = withSpring(0, SNAP_BACK_CONFIG);
         }
       }
     });

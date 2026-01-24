@@ -12,6 +12,8 @@
  */
 
 import { supabase } from './supabase';
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 
 // Simple UUID generator
 const generateUUID = () => {
@@ -22,11 +24,93 @@ const generateUUID = () => {
   });
 };
 
+// =============================================
+// ADMIN/MANAGER USER IDS CACHE
+// Used for filtering news/notifications/academy feeds
+// =============================================
+let cachedAdminIds = null;
+let adminIdsCacheTimestamp = null;
+const ADMIN_IDS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// =============================================
+// SEED POSTS CACHE - for faster feed loading
+// =============================================
+const seedPostsCache = {
+  data: {},      // Keyed by feedType-page
+  lastFetch: {}, // Timestamp per key
+  CACHE_TTL: 60000, // 60 seconds
+};
+
+/**
+ * Get admin/manager user IDs with caching
+ * @param {boolean} includeInstructor - Include instructor role (for academy tab)
+ * @returns {Promise<string[]>} Array of user IDs
+ */
+async function getAdminManagerIds(includeInstructor = false) {
+  const now = Date.now();
+
+  // Return cached if still valid
+  if (cachedAdminIds && adminIdsCacheTimestamp && (now - adminIdsCacheTimestamp < ADMIN_IDS_CACHE_TTL)) {
+    if (includeInstructor) {
+      // Also fetch instructors if needed (not cached separately for simplicity)
+      const { data: instructors } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'instructor');
+      const instructorIds = instructors?.map(u => u.id) || [];
+      return [...new Set([...cachedAdminIds, ...instructorIds])];
+    }
+    return cachedAdminIds;
+  }
+
+  // Fetch admin/manager IDs
+  const { data: adminUsers, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .in('role', ['admin', 'manager', 'moderator', 'admin_partner']);
+
+  if (error) {
+    console.error('[forumService] Error fetching admin IDs:', error);
+    return [];
+  }
+
+  cachedAdminIds = adminUsers?.map(u => u.id) || [];
+  adminIdsCacheTimestamp = now;
+
+  if (includeInstructor) {
+    const { data: instructors } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'instructor');
+    const instructorIds = instructors?.map(u => u.id) || [];
+    return [...new Set([...cachedAdminIds, ...instructorIds])];
+  }
+
+  return cachedAdminIds;
+}
+
+/**
+ * Clear admin IDs cache (call on pull-to-refresh if needed)
+ */
+function clearAdminIdsCache() {
+  cachedAdminIds = null;
+  adminIdsCacheTimestamp = null;
+}
+
 // Helper: Fetch seed posts and transform to match forum_posts format
 // Now supports feed type filtering for SideMenu categories
 // FIXED: Added pagination support (page parameter)
+// OPTIMIZED: Added caching for faster subsequent loads
 async function fetchSeedPosts(limit = 20, feedType = null, page = 1) {
   try {
+    // Check cache first
+    const cacheKey = `${feedType || 'all'}-${page}-${limit}`;
+    const now = Date.now();
+    if (seedPostsCache.data[cacheKey] && seedPostsCache.lastFetch[cacheKey] &&
+        (now - seedPostsCache.lastFetch[cacheKey] < seedPostsCache.CACHE_TTL)) {
+      return seedPostsCache.data[cacheKey];
+    }
+
     let query = supabase
       .from('seed_posts')
       .select(`
@@ -112,12 +196,15 @@ async function fetchSeedPosts(limit = 20, feedType = null, page = 1) {
       user_saved: false,
     }));
 
-    // Return object with pagination info
-    return {
+    // Cache and return object with pagination info
+    const result = {
       posts: transformedPosts,
       count: totalCount,
       hasMore: hasMoreSeed,
     };
+    seedPostsCache.data[cacheKey] = result;
+    seedPostsCache.lastFetch[cacheKey] = Date.now();
+    return result;
   } catch (error) {
     console.error('[ForumService] fetchSeedPosts error:', error);
     return { posts: [], count: 0, hasMore: false };
@@ -156,35 +243,28 @@ const FEED_KEYWORDS = {
 // ============================================
 
 // Get user's seen post IDs (both feed_impressions and seed_impressions)
+// OPTIMIZED: Run both queries in parallel
 async function getSeenPostIds(userId) {
   try {
-    // Query feed_impressions for real posts
-    const { data: feedImpressions, error: feedError } = await supabase
-      .from('feed_impressions')
-      .select('post_id')
-      .eq('user_id', userId);
+    // Run both queries in parallel
+    const [feedResult, seedResult] = await Promise.all([
+      supabase.from('feed_impressions').select('post_id').eq('user_id', userId),
+      supabase.from('seed_impressions').select('post_id').eq('user_id', userId),
+    ]);
 
-    if (feedError) {
-      console.log('[ForumService] feed_impressions query error:', feedError.message);
+    if (feedResult.error) {
+      console.log('[ForumService] feed_impressions query error:', feedResult.error.message);
     }
-
-    // Query seed_impressions for seed posts
-    const { data: seedImpressions, error: seedError } = await supabase
-      .from('seed_impressions')
-      .select('post_id')
-      .eq('user_id', userId);
-
-    if (seedError) {
-      console.log('[ForumService] seed_impressions query error:', seedError.message);
+    if (seedResult.error) {
+      console.log('[ForumService] seed_impressions query error:', seedResult.error.message);
     }
 
     // Combine both into a Set
     const seenIds = new Set([
-      ...(feedImpressions?.map(i => i.post_id) || []),
-      ...(seedImpressions?.map(i => i.post_id) || [])
+      ...(feedResult.data?.map(i => i.post_id) || []),
+      ...(seedResult.data?.map(i => i.post_id) || [])
     ]);
 
-    console.log(`[ForumService] User ${userId?.slice(0, 8)}... has seen ${seenIds.size} posts`);
     return seenIds;
   } catch (error) {
     console.error('[ForumService] getSeenPostIds error:', error);
@@ -440,6 +520,8 @@ export const forumService = {
       const { data: { user } } = await supabase.auth.getUser();
       const currentUserId = user?.id;
 
+      // OPTIMIZED: Don't fetch ALL likes/saved/reactions for each post
+      // Instead, we'll batch-query current user's interactions separately
       let query = supabase
         .from('forum_posts')
         .select(`
@@ -447,9 +529,6 @@ export const forumService = {
           reaction_counts,
           author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color),
-          likes:forum_likes(user_id),
-          saved:forum_saved(user_id),
-          reactions:post_reactions(user_id, reaction_type),
           tagged_products:post_products(
             id,
             product_id,
@@ -487,19 +566,38 @@ export const forumService = {
           break;
 
         case 'news':
-          // Admin posts only (tin tuc) - filter by feed_type = 'news' OR is_pinned
-          // FIXED: Use OR to also include pinned posts if no feed_type match
-          query = query
-            .or('feed_type.eq.news,is_pinned.eq.true')
-            .order('created_at', { ascending: false });
+          // ADMIN/MANAGER POSTS ONLY - Tin tức tab
+          // Only show posts from admin/manager users with feed_type = 'news' OR is_pinned
+          {
+            const adminIds = await getAdminManagerIds(false);
+
+            if (adminIds.length > 0) {
+              query = query
+                .in('user_id', adminIds)
+                .or('feed_type.eq.news,is_pinned.eq.true')
+                .order('created_at', { ascending: false });
+            } else {
+              // No admin users found - return empty
+              return { posts: [], sessionId: null, hasMore: false, totalPosts: 0 };
+            }
+          }
           break;
 
         case 'notifications':
-          // Admin/system announcements - filter by feed_type = 'announcement'
-          // FIXED: Also include posts with topic 'announcement' or 'thong-bao'
-          query = query
-            .or('feed_type.eq.announcement,topic.eq.announcement,topic.eq.thong-bao')
-            .order('created_at', { ascending: false });
+          // ADMIN/MANAGER POSTS ONLY - Thông báo tab
+          // Only show announcements from admin/manager users
+          {
+            const adminIds = await getAdminManagerIds(false);
+
+            if (adminIds.length > 0) {
+              query = query
+                .in('user_id', adminIds)
+                .or('feed_type.eq.announcement,topic.eq.announcement,topic.eq.thong-bao')
+                .order('created_at', { ascending: false });
+            } else {
+              return { posts: [], sessionId: null, hasMore: false, totalPosts: 0 };
+            }
+          }
           break;
 
         case 'popular':
@@ -512,11 +610,20 @@ export const forumService = {
           break;
 
         case 'academy':
-          // Admin posts about courses, professional knowledge
-          // FIXED: Use OR to match feed_type OR topic containing learning keywords
-          query = query
-            .or('feed_type.eq.academy,topic.eq.academy,topic.eq.hoc-tap,topic.ilike.%course%,topic.ilike.%khoa-hoc%')
-            .order('created_at', { ascending: false });
+          // ADMIN/MANAGER/INSTRUCTOR POSTS ONLY - Academy tab
+          // Only show educational content from admin/manager/instructor users
+          {
+            const adminIds = await getAdminManagerIds(true); // Include instructors
+
+            if (adminIds.length > 0) {
+              query = query
+                .in('user_id', adminIds)
+                .or('feed_type.eq.academy,topic.eq.academy,topic.eq.hoc-tap,topic.ilike.%course%,topic.ilike.%khoa-hoc%')
+                .order('created_at', { ascending: false });
+            } else {
+              return { posts: [], sessionId: null, hasMore: false, totalPosts: 0 };
+            }
+          }
           break;
 
         // ==== SIDEMENU FEED CATEGORIES (with topic matching OR keyword filtering) ====
@@ -651,33 +758,38 @@ export const forumService = {
         }
       }
 
+      // OPTIMIZED: Batch query current user's interactions instead of fetching ALL for each post
+      let userLikedSet = new Set();
+      let userSavedSet = new Set();
+      let userReactionsMap = new Map();
+
+      if (currentUserId && uniquePosts.length > 0) {
+        const postIds = uniquePosts.map(p => p.id);
+
+        // Run all three queries in parallel for better performance
+        const [likesResult, savedResult, reactionsResult] = await Promise.all([
+          supabase.from('forum_likes').select('post_id').eq('user_id', currentUserId).in('post_id', postIds),
+          supabase.from('forum_saved').select('post_id').eq('user_id', currentUserId).in('post_id', postIds),
+          supabase.from('post_reactions').select('post_id, reaction_type').eq('user_id', currentUserId).in('post_id', postIds),
+        ]);
+
+        // Build lookup sets/maps
+        (likesResult.data || []).forEach(l => userLikedSet.add(l.post_id));
+        (savedResult.data || []).forEach(s => userSavedSet.add(s.post_id));
+        (reactionsResult.data || []).forEach(r => userReactionsMap.set(r.post_id, r.reaction_type));
+      }
+
       // Transform data to include user_liked, user_saved, and user_reaction status
-      const transformedPosts = uniquePosts.map((post) => {
-        // Check if current user liked/saved this post
-        const user_liked = currentUserId
-          ? post.likes?.some(like => like.user_id === currentUserId)
-          : false;
-        const user_saved = currentUserId
-          ? post.saved?.some(save => save.user_id === currentUserId)
-          : false;
-
-        // NEW: Get user's reaction from post_reactions (Phase 1 Reaction System)
-        const userReactionData = currentUserId
-          ? post.reactions?.find(r => r.user_id === currentUserId)
-          : null;
-        const user_reaction = userReactionData?.reaction_type || null;
-
-        return {
-          ...post,
-          user_liked,
-          user_saved,
-          user_reaction,
-          reaction_counts: post.reaction_counts || null,
-          likes_count: post.likes_count || post.likes?.length || 0,
-          // Mark if this is user's own post
-          is_own_post: currentUserId && post.user_id === currentUserId,
-        };
-      });
+      const transformedPosts = uniquePosts.map((post) => ({
+        ...post,
+        user_liked: userLikedSet.has(post.id),
+        user_saved: userSavedSet.has(post.id),
+        user_reaction: userReactionsMap.get(post.id) || null,
+        reaction_counts: post.reaction_counts || null,
+        likes_count: post.likes_count || 0,
+        // Mark if this is user's own post
+        is_own_post: currentUserId && post.user_id === currentUserId,
+      }));
 
       // Add ranking badges for popular feed
       if (feed === 'popular') {
@@ -704,9 +816,7 @@ export const forumService = {
       // Generate session ID for tracking
       const sessionId = generateUUID();
 
-      // Fetch seed posts for feeds that need them
-      // FIXED: Now passing page parameter for proper pagination
-      // FIXED: Added popular, news, academy to fetch seed posts
+      // OPTIMIZED: Run seed posts, seen posts, and profile queries in parallel
       const shouldFetchSeedPosts = [
         'explore', 'trading', 'patterns', 'results',
         'wellness', 'meditation', 'growth',
@@ -714,14 +824,40 @@ export const forumService = {
         'popular', 'news', 'academy', 'notifications'
       ].includes(feed);
 
-      let seedPosts = [];
-      let seedHasMore = false;
-      let totalSeedCount = 0;
+      // Build parallel promises
+      const parallelPromises = [];
+
+      // Promise 0: Seed posts (if needed)
       if (shouldFetchSeedPosts) {
-        const seedResult = await fetchSeedPosts(limit, feed, page);
-        seedPosts = seedResult.posts || [];
-        seedHasMore = seedResult.hasMore || false;
-        totalSeedCount = seedResult.count || 0;
+        parallelPromises.push(fetchSeedPosts(limit, feed, page));
+      } else {
+        parallelPromises.push(Promise.resolve({ posts: [], hasMore: false, count: 0 }));
+      }
+
+      // Promise 1: Seen post IDs (if logged in)
+      if (currentUserId) {
+        parallelPromises.push(getSeenPostIds(currentUserId));
+      } else {
+        parallelPromises.push(Promise.resolve(new Set()));
+      }
+
+      // Promise 2: User profile for ad targeting (if logged in)
+      if (currentUserId) {
+        parallelPromises.push(
+          supabase.from('profiles').select('scanner_tier').eq('id', currentUserId).single()
+        );
+      } else {
+        parallelPromises.push(Promise.resolve({ data: null }));
+      }
+
+      // Run all in parallel
+      const [seedResult, seenPostIds, profileResult] = await Promise.all(parallelPromises);
+
+      // Extract seed posts results
+      const seedPosts = seedResult.posts || [];
+      const seedHasMore = seedResult.hasMore || false;
+      const totalSeedCount = seedResult.count || 0;
+      if (seedPosts.length > 0) {
         console.log(`[ForumService] Fetched ${seedPosts.length}/${totalSeedCount} seed posts (page ${page}) for ${feed} feed`);
       }
 
@@ -739,39 +875,24 @@ export const forumService = {
       }
 
       // ============================================
-      // STEP 1: Get user's seen posts
-      // ============================================
-      let seenPostIds = new Set();
-      if (currentUserId) {
-        seenPostIds = await getSeenPostIds(currentUserId);
-      }
-
-      // ============================================
-      // STEP 2: Score posts (unseen first, then own posts, then seen)
+      // STEP 1: Score posts (unseen first, then own posts, then seen)
       // ============================================
       const scoredPosts = scorePostsForUser(finalPosts, currentUserId, seenPostIds);
 
       // ============================================
-      // STEP 3: Track impressions (async, don't wait)
+      // STEP 2: Track impressions (async, don't wait)
       // ============================================
       if (currentUserId && scoredPosts.length > 0) {
         trackPostImpressions(currentUserId, sessionId, scoredPosts.slice(0, 50));
       }
 
       // ============================================
-      // STEP 4: Insert ads/banners
+      // STEP 3: Insert ads/banners
       // CHANGED: Show ads for ALL tiers including TIER_3
       // ============================================
       let banners = [];
       if (currentUserId) {
-        // Get user tier for ad targeting
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('scanner_tier')
-          .eq('id', currentUserId)
-          .single();
-
-        const userTier = profile?.scanner_tier || 'FREE';
+        const userTier = profileResult?.data?.scanner_tier || 'FREE';
 
         // CHANGED: Fetch sponsor banners for ALL tiers
         banners = await fetchSponsorBannersForFeed(currentUserId, userTier);
@@ -1158,7 +1279,8 @@ export const forumService = {
 
       console.log('[Forum] Uploading multiple images:', imageUris.length);
 
-      const uploadPromises = imageUris.map(async (uri, index) => {
+      // Helper function to upload a single image
+      const uploadSingleImage = async (uri, index) => {
         try {
           // Skip URLs (already uploaded)
           if (uri.startsWith('http')) {
@@ -1168,14 +1290,34 @@ export const forumService = {
           const timestamp = Date.now();
           const filename = `posts/${user.id}/${timestamp}_${index}.jpg`;
 
-          const response = await fetch(uri);
-          if (!response.ok) {
-            throw new Error(`Failed to fetch image ${index}: ${response.status}`);
+          console.log(`[Forum] Reading image ${index}:`, uri.substring(0, 50) + '...');
+
+          // Use FileSystem for better Android compatibility
+          let uint8Array;
+          try {
+            // Read file as base64
+            const base64 = await FileSystem.readAsStringAsync(uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            // Convert base64 to Uint8Array
+            const binaryString = atob(base64);
+            uint8Array = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              uint8Array[i] = binaryString.charCodeAt(i);
+            }
+            console.log(`[Forum] Image ${index} read successfully, size: ${uint8Array.length} bytes`);
+          } catch (fsError) {
+            console.warn(`[Forum] FileSystem read failed for image ${index}, trying fetch:`, fsError.message);
+            // Fallback to fetch for web/iOS
+            const response = await fetch(uri);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch image ${index}: ${response.status}`);
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            uint8Array = new Uint8Array(arrayBuffer);
           }
 
-          const arrayBuffer = await response.arrayBuffer();
-          const uint8Array = new Uint8Array(arrayBuffer);
-
+          console.log(`[Forum] Uploading image ${index} to Supabase...`);
           const { data, error } = await supabase.storage
             .from('forum-images')
             .upload(filename, uint8Array, {
@@ -1184,6 +1326,7 @@ export const forumService = {
             });
 
           if (error) {
+            console.log(`[Forum] Primary bucket failed for image ${index}, trying fallback...`);
             // Try fallback bucket
             const { data: fallbackData, error: fallbackError } = await supabase.storage
               .from('avatars')
@@ -1198,6 +1341,7 @@ export const forumService = {
               .from('avatars')
               .getPublicUrl(`forum/${filename}`);
 
+            console.log(`[Forum] Image ${index} uploaded via fallback bucket`);
             return { success: true, url: fallbackUrl.publicUrl };
           }
 
@@ -1205,18 +1349,38 @@ export const forumService = {
             .from('forum-images')
             .getPublicUrl(filename);
 
+          console.log(`[Forum] Image ${index} uploaded successfully`);
           return { success: true, url: urlData.publicUrl };
         } catch (error) {
           console.error(`[Forum] Upload error for image ${index}:`, error);
           return { success: false, error: error.message };
         }
-      });
+      };
 
-      const results = await Promise.all(uploadPromises);
+      // Upload images sequentially with timeout
+      const results = [];
+      for (let i = 0; i < imageUris.length; i++) {
+        console.log(`[Forum] Processing upload ${i + 1}/${imageUris.length}`);
+        try {
+          // Add timeout of 45 seconds per image (images can be large)
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Upload timeout after 45s')), 45000);
+          });
+          const result = await Promise.race([uploadSingleImage(imageUris[i], i), timeoutPromise]);
+          results.push(result);
+        } catch (error) {
+          console.error(`[Forum] Upload ${i + 1} failed:`, error.message);
+          results.push({ success: false, error: error.message });
+        }
+      }
+
       const urls = results.filter(r => r.success).map(r => r.url);
       const errors = results.filter(r => !r.success).map(r => r.error);
 
       console.log(`[Forum] ✅ Uploaded ${urls.length}/${imageUris.length} images`);
+      if (errors.length > 0) {
+        console.log('[Forum] Upload errors:', errors);
+      }
 
       return {
         success: urls.length > 0,
@@ -1760,12 +1924,21 @@ export const forumService = {
 
       // Create notification for post owner (skip for seed users - they're not real)
       if (post && post.user_id !== user.id && !isSeedPost) {
+        // Get current user's name for notification
+        const { data: currentUserProfile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+        const senderName = currentUserProfile?.full_name || 'Ai đó';
+        const postPreview = post.title?.substring(0, 30) || post.content?.substring(0, 30) || 'bài viết';
+
         await this.createNotification({
           recipientId: post.user_id,
           type: 'like',
-          title: 'Thích bài viết',
-          body: `đã thích bài viết "${post.title?.substring(0, 30)}${post.title?.length > 30 ? '...' : ''}"`,
-          data: { postId },
+          title: '❤️ Thích bài viết',
+          body: `${senderName} đã thích bài viết của bạn: "${postPreview}${postPreview.length >= 30 ? '...' : ''}"`,
+          data: { postId, fromUserId: user.id },
         });
       }
 
@@ -1867,6 +2040,15 @@ export const forumService = {
         .eq('id', postId)
         .single();
 
+      // Get current user's name for notification
+      const { data: currentUserProfile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+      const senderName = currentUserProfile?.full_name || 'Ai đó';
+      const contentPreview = content.substring(0, 50);
+
       // Create notification
       if (parentId) {
         // Reply notification - notify parent comment author
@@ -1880,20 +2062,21 @@ export const forumService = {
           await this.createNotification({
             recipientId: parentComment.user_id,
             type: 'reply',
-            title: 'Trả lời bình luận',
-            body: `đã trả lời bình luận của bạn: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
-            data: { postId, commentId: data.id },
+            title: '↩️ Trả lời bình luận',
+            body: `${senderName} đã trả lời bình luận của bạn: "${contentPreview}${content.length > 50 ? '...' : ''}"`,
+            data: { postId, commentId: data.id, fromUserId: user.id },
           });
         }
       } else {
         // Comment notification - notify post owner
         if (post && post.user_id !== user.id) {
+          const postTitle = post.title?.substring(0, 20) || 'bài viết của bạn';
           await this.createNotification({
             recipientId: post.user_id,
             type: 'comment',
-            title: 'Bình luận mới',
-            body: `đã bình luận: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
-            data: { postId, commentId: data.id },
+            title: '💬 Bình luận mới',
+            body: `${senderName} đã bình luận "${postTitle}": "${contentPreview}${content.length > 50 ? '...' : ''}"`,
+            data: { postId, commentId: data.id, fromUserId: user.id },
           });
         }
       }
@@ -1972,12 +2155,20 @@ export const forumService = {
 
       // Create follow notification
       if (userId !== user.id) {
+        // Get current user's name for notification
+        const { data: currentUserProfile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+        const followerName = currentUserProfile?.full_name || 'Ai đó';
+
         await this.createNotification({
           recipientId: userId,
           type: 'follow',
-          title: 'Người theo dõi mới',
-          body: 'đã bắt đầu theo dõi bạn',
-          data: {},
+          title: '👤 Người theo dõi mới',
+          body: `${followerName} đã bắt đầu theo dõi bạn`,
+          data: { fromUserId: user.id },
         });
       }
 
@@ -2814,14 +3005,28 @@ export const forumService = {
       // Create unique filename
       const filename = `avatars/${user.id}/${Date.now()}.jpg`;
 
-      // Fetch the image as blob
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      // Read file - platform specific
+      let fileData;
+      if (Platform.OS === 'web') {
+        const response = await fetch(uri);
+        fileData = await response.blob();
+      } else {
+        // React Native: use FileSystem
+        const base64 = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        fileData = bytes.buffer;
+      }
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('forum-images')
-        .upload(filename, blob, {
+        .upload(filename, fileData, {
           contentType: 'image/jpeg',
           upsert: true,
         });

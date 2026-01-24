@@ -16,6 +16,8 @@ const TIERS = {
   TIER1: 'TIER1',
   TIER2: 'TIER2',
   TIER3: 'TIER3',
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
 };
 
 // Feature access matrix
@@ -186,12 +188,35 @@ class AccessControlService {
 
   /**
    * Check if user can access a feature
-   * @param {string} userTier - User's tier (FREE, TIER1, TIER2, TIER3)
+   * @param {string} userTier - User's tier (FREE, TIER1, TIER2, TIER3, ADMIN, MANAGER)
    * @param {string} featureKey - Feature key from FEATURE_ACCESS
    * @returns {Object} Access result with enabled status and config
    */
   canAccess(userTier, featureKey) {
     const tier = userTier || TIERS.FREE;
+
+    // ADMIN and MANAGER bypass all restrictions
+    if (tier === TIERS.ADMIN || tier === TIERS.MANAGER) {
+      return {
+        enabled: true,
+        unlimited: true,
+        config: {
+          enabled: true,
+          daily_limit: Infinity,
+          max_rituals: Infinity,
+          max_memories: Infinity,
+          retention_days: Infinity,
+          level: 'full',
+          types: 'all',
+          show_frequency: true,
+          history_days: Infinity,
+          gamification: true,
+          course_access: 'all',
+          formats: ['pdf', 'csv', 'json'],
+        },
+      };
+    }
+
     const featureConfig = FEATURE_ACCESS[featureKey];
 
     if (!featureConfig) {
@@ -491,6 +516,8 @@ class AccessControlService {
       [TIERS.TIER1]: 'Cơ bản',
       [TIERS.TIER2]: 'Nâng cao',
       [TIERS.TIER3]: 'VIP',
+      [TIERS.ADMIN]: 'Admin',
+      [TIERS.MANAGER]: 'Manager',
     };
     return names[tier] || 'Không xác định';
   }

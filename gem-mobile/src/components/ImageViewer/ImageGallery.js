@@ -22,7 +22,7 @@ import Animated, {
   FadeIn,
   FadeOut,
 } from 'react-native-reanimated';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as MediaLibrary from 'expo-media-library';
 import ZoomableImage from './ZoomableImage';
 import ImageViewerControls from './ImageViewerControls';
@@ -95,53 +95,76 @@ const ImageGallery = ({
     }
   }, []);
 
-  // Handle share
+  // Handle share - with better error handling
   const handleShare = useCallback(async () => {
     const currentImage = images[currentIndex];
-    if (!currentImage?.uri) return;
+    if (!currentImage?.uri) {
+      Alert.alert('Lỗi', 'Không tìm thấy ảnh để chia sẻ.');
+      return;
+    }
 
     try {
-      await Share.share({
+      console.log('[ImageGallery] Sharing image:', currentImage.uri);
+      const result = await Share.share({
         url: currentImage.uri,
-        message: 'Chia sẻ từ Gem',
+        message: 'Chia sẻ từ Gemral',
       });
+      console.log('[ImageGallery] Share result:', result);
     } catch (err) {
       console.error('[ImageGallery] Share error:', err);
+      Alert.alert('Lỗi', 'Không thể chia sẻ ảnh. Vui lòng thử lại.');
     }
   }, [currentIndex, images]);
 
-  // Handle download
+  // Handle download - with better feedback and error handling
   const handleDownload = useCallback(async () => {
     const currentImage = images[currentIndex];
-    if (!currentImage?.uri) return;
+    if (!currentImage?.uri) {
+      Alert.alert('Lỗi', 'Không tìm thấy ảnh để tải về.');
+      return;
+    }
 
     try {
+      console.log('[ImageGallery] Downloading image:', currentImage.uri);
+
       // Request permission
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
           'Cần quyền truy cập',
-          'Vui lòng cho phép truy cập thư viện ảnh để tải về.'
+          'Vui lòng vào Cài đặt > Gemral > Ảnh và cho phép truy cập thư viện.'
         );
         return;
       }
 
+      // Show downloading indicator (could add loading state later)
+      console.log('[ImageGallery] Permission granted, starting download...');
+
       // Download file
-      const filename = `gem_image_${Date.now()}.jpg`;
+      const filename = `gemral_image_${Date.now()}.jpg`;
       const fileUri = `${FileSystem.cacheDirectory}${filename}`;
 
-      const { uri } = await FileSystem.downloadAsync(
+      const downloadResult = await FileSystem.downloadAsync(
         currentImage.uri,
         fileUri
       );
 
-      // Save to gallery
-      await MediaLibrary.saveToLibraryAsync(uri);
+      console.log('[ImageGallery] Download result:', downloadResult.status);
 
-      Alert.alert('Thành công', 'Đã lưu ảnh vào thư viện.');
+      if (downloadResult.status !== 200) {
+        throw new Error(`Download failed with status ${downloadResult.status}`);
+      }
+
+      // Save to gallery
+      await MediaLibrary.saveToLibraryAsync(downloadResult.uri);
+
+      Alert.alert('Thành công', 'Đã lưu ảnh vào thư viện!');
     } catch (err) {
       console.error('[ImageGallery] Download error:', err);
-      Alert.alert('Lỗi', 'Không thể tải ảnh. Vui lòng thử lại.');
+      Alert.alert(
+        'Lỗi tải ảnh',
+        'Không thể tải ảnh. Vui lòng kiểm tra kết nối mạng và thử lại.'
+      );
     }
   }, [currentIndex, images]);
 

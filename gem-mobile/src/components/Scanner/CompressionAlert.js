@@ -110,8 +110,8 @@ const CompressionAlert = memo(({
     const names = {
       descending_triangle: 'Tam Giác Giảm',
       ascending_triangle: 'Tam Giác Tăng',
-      descending_wedge: 'Nêm Giảm',
-      ascending_wedge: 'Nêm Tăng',
+      descending_wedge: 'Falling Wedge',
+      ascending_wedge: 'Rising Wedge',
       symmetrical: 'Tam Giác Đối Xứng',
     };
     return names[type] || 'Nén Giá';
@@ -242,8 +242,8 @@ export const CompressionCard = memo(({ compression, onPress }) => {
     const names = {
       descending_triangle: 'Tam Giác Giảm',
       ascending_triangle: 'Tam Giác Tăng',
-      descending_wedge: 'Nêm Giảm',
-      ascending_wedge: 'Nêm Tăng',
+      descending_wedge: 'Falling Wedge',
+      ascending_wedge: 'Rising Wedge',
       symmetrical: 'Đối Xứng',
     };
     return names[type] || 'Nén';

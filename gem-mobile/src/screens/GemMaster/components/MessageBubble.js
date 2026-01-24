@@ -8,7 +8,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Pressable, ToastAndroid, Plat
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import {
-  User, Sparkles, Download, Copy, Check,
+  User, Sparkles, Download, Copy, Check, ThumbsUp, ThumbsDown,
   // Icons for FAQ content
   Zap, Star, Crown, Shield, Heart, Coins, TrendingUp, TrendingDown,
   Target, Award, BookOpen, GraduationCap, Brain, Gem, Diamond,
@@ -21,6 +21,9 @@ import ExportPreview from '../../../components/GemMaster/ExportPreview';
 import exportService from '../../../services/exportService';
 import ProductCard from '../../../components/GemMaster/ProductCard';
 import DivinationResultCard from '../../../components/GemMaster/DivinationResultCard';
+
+// Rich Response Components (Day 25)
+import { RichResponseRenderer, RESPONSE_TYPES } from '../../../components/Chat';
 
 /**
  * Icon mapping for [icon:Name] syntax
@@ -152,7 +155,7 @@ const renderInlineMarkdown = (text, baseStyle) => {
   return parts;
 };
 
-const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, onOptionSelect, onQuickBuy }) => {
+const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, onOptionSelect, onQuickBuy, onFeedback }) => {
   const isUser = message.type === 'user';
   // Skip template selector - go directly to preview with reading_card template
   const [showPreview, setShowPreview] = useState(false);
@@ -160,6 +163,8 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
   const [copied, setCopied] = useState(false);
   // State for selected option (to show visual feedback)
   const [selectedOption, setSelectedOption] = useState(null);
+  // State for feedback (thumbs up/down)
+  const [feedbackGiven, setFeedbackGiven] = useState(null);
 
   // Get products from message only (not from recommendations - those are handled by ProductRecommendations component)
   // Removed crystal fallback to avoid showing unrelated products for course/mindset messages
@@ -167,6 +172,19 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
 
   // Check if this message has interactive options (questionnaire)
   const hasOptions = !isUser && message.options && Array.isArray(message.options) && message.options.length > 0;
+
+  // Check if this message is a rich response type (Day 25)
+  const isRichResponse = !isUser && message.responseType && Object.values(RESPONSE_TYPES).includes(message.responseType);
+
+  // Handle feedback (thumbs up/down)
+  const handleFeedback = useCallback((feedback) => {
+    if (feedbackGiven) return; // Already gave feedback
+    setFeedbackGiven(feedback);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (onFeedback) {
+      onFeedback(message.id, feedback);
+    }
+  }, [feedbackGiven, message.id, onFeedback]);
 
   // Handle option button press
   const handleOptionPress = useCallback((option) => {
@@ -285,15 +303,20 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
             </View>
           )}
 
-          <Text style={[
-            styles.text,
-            isUser ? styles.textUser : styles.textAssistant,
-          ]}>
-            {isUser
-              ? message.text
-              : renderMarkdownText(message.text, [styles.text, styles.textAssistant])
-            }
-          </Text>
+          {/* Rich Response Renderer (Day 25) - for special response types */}
+          {isRichResponse ? (
+            <RichResponseRenderer message={message} />
+          ) : (
+            <Text style={[
+              styles.text,
+              isUser ? styles.textUser : styles.textAssistant,
+            ]}>
+              {isUser
+                ? message.text
+                : renderMarkdownText(message.text, [styles.text, styles.textAssistant])
+              }
+            </Text>
+          )}
 
           {/* Interactive Choice Buttons for Questionnaire */}
           {hasOptions && (
@@ -395,16 +418,57 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
               {formatTime(message.timestamp)}
             </Text>
 
-            {/* Export Button - Only for AI messages */}
-            {!isUser && message.text && message.text.length > 20 && (
-              <TouchableOpacity
-                style={styles.exportButton}
-                onPress={handleExportPress}
-                activeOpacity={0.7}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Download size={14} color={COLORS.gold} />
-              </TouchableOpacity>
+            {/* Actions Row - Feedback + Export */}
+            {!isUser && (
+              <View style={styles.actionsRow}>
+                {/* Feedback Buttons (Day 25) */}
+                {message.text && message.text.length > 20 && (
+                  <View style={styles.feedbackRow}>
+                    <TouchableOpacity
+                      style={[
+                        styles.feedbackButton,
+                        feedbackGiven === 'positive' && styles.feedbackButtonActive,
+                      ]}
+                      onPress={() => handleFeedback('positive')}
+                      disabled={!!feedbackGiven}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <ThumbsUp
+                        size={12}
+                        color={feedbackGiven === 'positive' ? '#10B981' : COLORS.textMuted}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.feedbackButton,
+                        feedbackGiven === 'negative' && styles.feedbackButtonNegative,
+                      ]}
+                      onPress={() => handleFeedback('negative')}
+                      disabled={!!feedbackGiven}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <ThumbsDown
+                        size={12}
+                        color={feedbackGiven === 'negative' ? '#EF4444' : COLORS.textMuted}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Export Button */}
+                {message.text && message.text.length > 20 && (
+                  <TouchableOpacity
+                    style={styles.exportButton}
+                    onPress={handleExportPress}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Download size={14} color={COLORS.gold} />
+                  </TouchableOpacity>
+                )}
+              </View>
             )}
           </View>
         </Pressable>
@@ -503,6 +567,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: SPACING.sm,
+  },
+  // Actions row - feedback + export
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  // Feedback buttons (Day 25)
+  feedbackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  feedbackButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  feedbackButtonActive: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+  },
+  feedbackButtonNegative: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
   },
   productsContainer: {
     marginTop: SPACING.sm,

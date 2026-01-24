@@ -52,11 +52,17 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/token
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
 import waitlistLeadService, {
-  LEAD_STATUS_OPTIONS,
-  LEAD_GRADE_COLORS,
-  INTEREST_LABELS,
-  INTEREST_ICONS,
+  LEAD_STATUS_OPTIONS as IMPORTED_LEAD_STATUS_OPTIONS,
+  LEAD_GRADE_COLORS as IMPORTED_LEAD_GRADE_COLORS,
+  INTEREST_LABELS as IMPORTED_INTEREST_LABELS,
+  INTEREST_ICONS as IMPORTED_INTEREST_ICONS,
 } from '../../services/waitlistLeadService';
+
+// Fallback values in case imports fail
+const LEAD_STATUS_OPTIONS = IMPORTED_LEAD_STATUS_OPTIONS || ['all', 'new', 'engaged', 'qualified', 'hot', 'converted', 'inactive'];
+const LEAD_GRADE_COLORS = IMPORTED_LEAD_GRADE_COLORS || { A: '#22C55E', B: '#3B82F6', C: '#F59E0B', D: '#EF4444' };
+const INTEREST_LABELS = IMPORTED_INTEREST_LABELS || {};
+const INTEREST_ICONS = IMPORTED_INTEREST_ICONS || {};
 
 // Status labels and colors
 const STATUS_CONFIG = {
@@ -284,39 +290,46 @@ const WaitlistLeadsScreen = ({ navigation }) => {
   );
 
   // Render filter tabs
-  const renderFilters = () => (
-    <AdminTooltip
-      tooltipKey="filter_tabs_guide"
-      message="Lọc leads theo trạng thái trong funnel"
-    >
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterScrollView}
-        contentContainerStyle={styles.filterContainer}
+  const renderFilters = () => {
+    // Safety check for LEAD_STATUS_OPTIONS
+    if (!LEAD_STATUS_OPTIONS || !Array.isArray(LEAD_STATUS_OPTIONS)) {
+      return null;
+    }
+
+    return (
+      <AdminTooltip
+        tooltipKey="filter_tabs_guide"
+        message="Lọc leads theo trạng thái trong funnel"
       >
-        {LEAD_STATUS_OPTIONS.map((status) => (
-          <TouchableOpacity
-            key={status}
-            style={[
-              styles.filterTab,
-              statusFilter === status && styles.filterTabActive,
-            ]}
-            onPress={() => setStatusFilter(status)}
-          >
-            <Text
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterScrollView}
+          contentContainerStyle={styles.filterContainer}
+        >
+          {LEAD_STATUS_OPTIONS.map((status) => (
+            <TouchableOpacity
+              key={status}
               style={[
-                styles.filterTabText,
-                statusFilter === status && styles.filterTabTextActive,
+                styles.filterTab,
+                statusFilter === status && styles.filterTabActive,
               ]}
+              onPress={() => setStatusFilter(status)}
             >
-              {status === 'all' ? 'Tất cả' : STATUS_CONFIG[status]?.label || status}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </AdminTooltip>
-  );
+              <Text
+                style={[
+                  styles.filterTabText,
+                  statusFilter === status && styles.filterTabTextActive,
+                ]}
+              >
+                {status === 'all' ? 'Tất cả' : STATUS_CONFIG[status]?.label || status}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </AdminTooltip>
+    );
+  };
 
   // Render lead card
   const renderLeadCard = ({ item }) => {
@@ -369,12 +382,12 @@ const WaitlistLeadsScreen = ({ navigation }) => {
         </View>
 
         {/* Interests */}
-        {item.interested_products && item.interested_products.length > 0 && (
+        {item.interested_products && Array.isArray(item.interested_products) && item.interested_products.length > 0 && (
           <View style={styles.interestsRow}>
             {item.interested_products.map((interest) => (
               <View key={interest} style={styles.interestTag}>
                 <Text style={styles.interestText}>
-                  {INTEREST_ICONS[interest]} {INTEREST_LABELS[interest]?.split(' ')[0]}
+                  {INTEREST_ICONS[interest] || '📦'} {INTEREST_LABELS[interest]?.split(' ')[0] || interest}
                 </Text>
               </View>
             ))}
@@ -537,14 +550,14 @@ const WaitlistLeadsScreen = ({ navigation }) => {
               </View>
 
               {/* Interests */}
-              {lead.interested_products && lead.interested_products.length > 0 && (
+              {lead.interested_products && Array.isArray(lead.interested_products) && lead.interested_products.length > 0 && (
                 <View style={styles.modalSection}>
                   <Text style={styles.sectionTitle}>Quan tâm đến</Text>
                   <View style={styles.interestsList}>
                     {lead.interested_products.map((interest) => (
                       <View key={interest} style={styles.interestItem}>
-                        <Text style={styles.interestEmoji}>{INTEREST_ICONS[interest]}</Text>
-                        <Text style={styles.interestLabel}>{INTEREST_LABELS[interest]}</Text>
+                        <Text style={styles.interestEmoji}>{INTEREST_ICONS[interest] || '📦'}</Text>
+                        <Text style={styles.interestLabel}>{INTEREST_LABELS[interest] || interest}</Text>
                       </View>
                     ))}
                   </View>

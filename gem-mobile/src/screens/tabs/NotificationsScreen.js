@@ -50,6 +50,15 @@ import useScrollToTop from '../../hooks/useScrollToTop';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+// ============================================
+// GLOBAL CACHE - persists across tab switches
+// ============================================
+const notificationsCache = {
+  data: null,
+  lastFetch: 0,
+  CACHE_DURATION: 60000, // 60 seconds
+};
+
 // Notification type configurations
 const NOTIFICATION_CONFIG = {
   // Social
@@ -92,7 +101,7 @@ const NOTIFICATION_CONFIG = {
 const CATEGORY_TABS = [
   { id: 'all', label: 'Tất cả', icon: Bell },
   { id: 'trading', label: 'Giao dịch', icon: ChartLine },
-  { id: 'social', label: 'Xã hội', icon: Heart },
+  { id: 'social', label: 'Cộng đồng', icon: Heart },
   { id: 'system', label: 'Hệ thống', icon: AlertTriangle },
 ];
 
@@ -101,8 +110,9 @@ export default function NotificationsScreen() {
   const { isAuthenticated, user } = useAuth();
   const swipeableRefs = useRef({});
 
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // State - initialize from global cache for instant display
+  const [notifications, setNotifications] = useState(() => notificationsCache.data || []);
+  const [loading, setLoading] = useState(!notificationsCache.data);
   const [refreshing, setRefreshing] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [deletingIds, setDeletingIds] = useState(new Set());
@@ -114,16 +124,39 @@ export default function NotificationsScreen() {
     setRefreshing(false);
   });
 
-  // Load notifications on focus
+  // Load notifications on focus - WITH GLOBAL CACHING
+  // Key principle: NEVER show loading if we have ANY cached data
   useFocusEffect(
     useCallback(() => {
       if (isAuthenticated) {
-        loadNotifications();
+        const now = Date.now();
+        const cacheExpired = now - notificationsCache.lastFetch > notificationsCache.CACHE_DURATION;
+
+        // If we have cached data, set loading false IMMEDIATELY and sync state
+        if (notificationsCache.data) {
+          setLoading(false);
+          // Sync state from cache in case component state is out of sync
+          if (notifications !== notificationsCache.data) {
+            setNotifications(notificationsCache.data);
+          }
+        }
+
+        // Fetch fresh data in background if no cache or cache expired
+        if (!notificationsCache.data || cacheExpired) {
+          loadNotifications();
+        }
       } else {
         setLoading(false);
       }
     }, [isAuthenticated])
   );
+
+  // Helper to set notifications and update cache
+  const updateNotifications = (data) => {
+    setNotifications(data);
+    notificationsCache.data = data;
+    notificationsCache.lastFetch = Date.now();
+  };
 
   const loadNotifications = async () => {
     try {
@@ -137,7 +170,7 @@ export default function NotificationsScreen() {
             ...n,
             read: n.read || n.is_read || false,
           }));
-          setNotifications(normalizedData);
+          updateNotifications(normalizedData);
         } else {
           // Fallback to forumService if database query fails
           const forumData = await forumService.getNotifications();
@@ -146,7 +179,7 @@ export default function NotificationsScreen() {
             category: TYPE_TO_CATEGORY[n.type] || 'system',
             read: n.read || n.is_read || false,
           }));
-          setNotifications(enrichedData);
+          updateNotifications(enrichedData);
         }
       } else {
         // No user, try forumService
@@ -156,7 +189,7 @@ export default function NotificationsScreen() {
           category: TYPE_TO_CATEGORY[n.type] || 'system',
           read: n.read || n.is_read || false,
         }));
-        setNotifications(enrichedData);
+        updateNotifications(enrichedData);
       }
     } catch (error) {
       console.error('[Notifications] Load error:', error);

@@ -13,7 +13,7 @@
  * Updated: December 10, 2025 - Vietnamese + Lucide icons
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,9 @@ import {
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '../../contexts/AuthContext';
+import { getPersonalizedRecommendations, getTimeBasedRecommendations } from '../../services/ritualRecommendationService';
+import { RITUAL_TYPES } from '../../services/ritualService';
 import {
   Moon,
   Sparkles,
@@ -44,6 +47,7 @@ import {
   Leaf,
   Droplets,
   Zap,
+  Gem,
 } from 'lucide-react-native';
 import { COLORS, TYPOGRAPHY, SPACING } from '../../utils/tokens';
 
@@ -70,6 +74,7 @@ const ICONS = {
   Leaf,
   Droplets,
   Zap,
+  Gem,
 };
 
 // Ritual Categories/Tags - Tiếng Việt
@@ -78,7 +83,6 @@ const RITUAL_TAGS = [
   { key: 'healing', label: 'Chữa lành', icon: 'Heart' },
   { key: 'abundance', label: 'Thịnh vượng', icon: 'Coins' },
   { key: 'love', label: 'Tình yêu', icon: 'HeartHandshake' },
-  { key: 'custom', label: 'Tùy chỉnh', icon: 'Plus' },
 ];
 
 // Featured Ritual Data - Tiếng Việt
@@ -155,6 +159,16 @@ const RITUAL_LIBRARY = [
     type: 'intention',
     tags: ['sao băng', 'ước nguyện'],
     gradient: ['#FFFFFF', '#C0C0C0'],
+  },
+  {
+    id: 'crystal-healing',
+    title: 'Chữa Lành Pha Lê',
+    subtitle: 'Kết nối năng lượng chữa lành của đá quý',
+    icon: 'Gem',
+    duration: '5 phút',
+    type: 'healing',
+    tags: ['chữa lành', 'pha lê'],
+    gradient: ['#9D4EDD', '#6A5BFF'],
   },
 ];
 
@@ -481,12 +495,80 @@ const FeaturedRitualSection = ({
   onViewAllRituals,
   style,
 }) => {
+  const { user } = useAuth();
   const [selectedTag, setSelectedTag] = useState('all');
+  const [featuredRitual, setFeaturedRitual] = useState(FEATURED_RITUAL);
+  const [ritualLibrary, setRitualLibrary] = useState(RITUAL_LIBRARY);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+
+  // Load personalized recommendations
+  useEffect(() => {
+    const loadRecommendations = async () => {
+      if (!user?.id) return;
+
+      setIsLoadingRecommendations(true);
+      try {
+        // Get time-based recommendations first (faster, no DB call)
+        const timeRecs = getTimeBasedRecommendations();
+
+        // Get personalized recommendations from service
+        const personalizedRecs = await getPersonalizedRecommendations(user.id, {
+          limit: 8,
+          includeTimeBasedPriority: true,
+        });
+
+        if (personalizedRecs && personalizedRecs.length > 0) {
+          // Map recommendations to ritual library format
+          const mappedRituals = personalizedRecs.map(rec => {
+            // Find matching ritual in static library for full data
+            const staticRitual = RITUAL_LIBRARY.find(r => r.id === rec.ritualId) ||
+              RITUAL_LIBRARY.find(r => r.id === rec.ritualSlug);
+
+            if (staticRitual) {
+              return {
+                ...staticRitual,
+                score: rec.score,
+                reason: rec.reason,
+              };
+            }
+            return null;
+          }).filter(Boolean);
+
+          if (mappedRituals.length > 0) {
+            // Set first recommendation as featured
+            setFeaturedRitual({
+              ...mappedRituals[0],
+              subtitle: mappedRituals[0].reason || mappedRituals[0].subtitle,
+            });
+            // Rest go to library
+            setRitualLibrary(mappedRituals.length > 1 ? mappedRituals.slice(1) : RITUAL_LIBRARY);
+          }
+        } else if (timeRecs && timeRecs.length > 0) {
+          // Fallback to time-based recommendations
+          const topTimeRec = timeRecs[0];
+          const matchingRitual = RITUAL_LIBRARY.find(r => r.id === topTimeRec.ritualId);
+          if (matchingRitual) {
+            setFeaturedRitual({
+              ...matchingRitual,
+              subtitle: topTimeRec.reason || matchingRitual.subtitle,
+            });
+          }
+        }
+      } catch (error) {
+        console.warn('[FeaturedRitualSection] Failed to load recommendations:', error?.message);
+        // Keep static fallback data
+      } finally {
+        setIsLoadingRecommendations(false);
+      }
+    };
+
+    loadRecommendations();
+  }, [user?.id]);
 
   // Filter rituals by tag
   const filteredRituals = selectedTag === 'all'
-    ? RITUAL_LIBRARY
-    : RITUAL_LIBRARY.filter(r => r.type === selectedTag || (r.tags || []).includes(selectedTag));
+    ? ritualLibrary
+    : ritualLibrary.filter(r => r.type === selectedTag || (r.tags || []).includes(selectedTag));
 
   // Split rituals for horizontal and vertical display
   const horizontalRituals = filteredRituals.slice(0, 3);
@@ -510,8 +592,8 @@ const FeaturedRitualSection = ({
 
       {/* Featured Ritual Card */}
       <FeaturedRitualCard
-        ritual={FEATURED_RITUAL}
-        onPress={() => onRitualPress?.(FEATURED_RITUAL)}
+        ritual={featuredRitual}
+        onPress={() => onRitualPress?.(featuredRitual)}
       />
 
       {/* Ritual Library Section */}
@@ -553,12 +635,6 @@ const FeaturedRitualSection = ({
           </View>
         )}
       </View>
-
-      {/* Quick Actions */}
-      <QuickActions
-        onCreateRitual={onCreateRitual}
-        onAmbientMode={onAmbientMode}
-      />
     </View>
   );
 };

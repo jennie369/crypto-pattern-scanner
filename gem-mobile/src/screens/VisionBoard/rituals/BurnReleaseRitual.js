@@ -35,11 +35,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Flame, Wind, Feather, Sparkles } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
-import { completeRitual } from '../../../services/ritualService';
+import { completeRitual, saveReflection } from '../../../services/ritualService';
 
 // Cosmic Components
 import {
-  CosmicBackground,
+  VideoBackground,
+  RitualAnimation,
   GlassCard,
   GlassInputCard,
   GlowButton,
@@ -55,6 +56,7 @@ import {
   HAPTIC_PATTERNS,
   COSMIC_TIMING,
 } from '../../../components/Rituals/cosmic';
+import useVideoPause from '../../../hooks/useVideoPause';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -62,7 +64,7 @@ const THEME = COSMIC_COLORS.ritualThemes.burn;
 
 const CONFIG = {
   xpReward: 35,
-  burnDuration: 8000, // 8 seconds for burn animation
+  burnDuration: 5000, // 5 seconds for burn animation (reduced from 8)
   maxChars: 300,
 };
 
@@ -341,21 +343,21 @@ const BurningPaper = memo(({ text, onBurnComplete }) => {
 
     // Glow intensity during burn
     glowIntensity.value = withSequence(
-      withTiming(1, { duration: 1000 }),
-      withDelay(CONFIG.burnDuration - 3000, withTiming(0, { duration: 2000 }))
+      withTiming(1, { duration: 800 }),
+      withDelay(CONFIG.burnDuration - 2000, withTiming(0, { duration: 1200 }))
     );
 
-    // Char effect
-    charOpacity.value = withDelay(2000,
-      withTiming(0, { duration: 3000 })
+    // Char effect - faster
+    charOpacity.value = withDelay(1000,
+      withTiming(0, { duration: 2500 })
     );
 
-    // Paper shrink and fade
-    paperScale.value = withDelay(4000,
-      withTiming(0.8, { duration: 2000 })
+    // Paper shrink and fade - faster
+    paperScale.value = withDelay(2000,
+      withTiming(0.8, { duration: 1500 })
     );
-    paperOpacity.value = withDelay(5000,
-      withTiming(0, { duration: 3000 }, (finished) => {
+    paperOpacity.value = withDelay(3000,
+      withTiming(0, { duration: 2000 }, (finished) => {
         if (finished && onBurnComplete) {
           runOnJS(onBurnComplete)();
         }
@@ -422,8 +424,7 @@ const BurningPaper = memo(({ text, onBurnComplete }) => {
         </View>
       </Animated.View>
 
-      {/* Flame effect */}
-      <FlameEffect active={true} />
+      {/* Flame effect - replaced by Lottie fire-ball */}
 
       {/* Sparks */}
       {sparks.map((spark) => (
@@ -445,6 +446,7 @@ const BurningPaper = memo(({ text, onBurnComplete }) => {
 const BurnReleaseRitual = ({ navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const shouldPauseVideo = useVideoPause();
 
   // State
   const [phase, setPhase] = useState('write'); // write, burning, completed
@@ -455,10 +457,13 @@ const BurnReleaseRitual = ({ navigation }) => {
   const [streak, setStreak] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showAshMessage, setShowAshMessage] = useState(false);
+  const [reflection, setReflection] = useState('');
 
   // Animation values
   const contentOpacity = useSharedValue(1);
   const messageOpacity = useSharedValue(0);
+  const textOverlayOpacity = useSharedValue(1);
+  const textOverlayScale = useSharedValue(1);
 
   const contentAnimatedStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
@@ -468,17 +473,46 @@ const BurnReleaseRitual = ({ navigation }) => {
     opacity: messageOpacity.value,
   }));
 
+  const textOverlayAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: textOverlayOpacity.value,
+    transform: [
+      { scale: textOverlayScale.value },
+    ],
+  }));
+
   // Handlers
+  // Ref to prevent double-tap
+  const isTransitioning = useRef(false);
+
   const handleStartBurn = useCallback(() => {
     if (!releaseText.trim()) return;
 
-    HAPTIC_PATTERNS.fire.ignite();
-    contentOpacity.value = withTiming(0, { duration: 300 });
+    // Prevent double-tap
+    if (isTransitioning.current) return;
+    isTransitioning.current = true;
 
+    HAPTIC_PATTERNS.fire.ignite();
+
+    // Fade out content first
+    contentOpacity.value = withTiming(0, { duration: 300 }, (finished) => {
+      if (finished) {
+        // Only proceed if animation completed successfully
+        runOnJS(setPhase)('burning');
+      }
+    });
+
+    // Delay the rest of animations
     setTimeout(() => {
-      setPhase('burning');
       contentOpacity.value = withTiming(1, { duration: 400 });
-    }, 300);
+
+      // Animate text overlay - fade out and shrink with paper (faster)
+      textOverlayOpacity.value = withDelay(800,
+        withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.quad) })
+      );
+      textOverlayScale.value = withDelay(500,
+        withTiming(0.7, { duration: 2500, easing: Easing.inOut(Easing.quad) })
+      );
+    }, 350); // Slightly longer to ensure phase change happened
   }, [releaseText]);
 
   const handleBurnComplete = useCallback(async () => {
@@ -486,9 +520,9 @@ const BurnReleaseRitual = ({ navigation }) => {
 
     // Show ash rising message
     setShowAshMessage(true);
-    messageOpacity.value = withTiming(1, { duration: 1500 });
+    messageOpacity.value = withTiming(1, { duration: 800 });
 
-    // Complete after message shows
+    // Complete after short delay (reduced from 3000 to 1500)
     setTimeout(async () => {
       setShowCelebration(true);
 
@@ -496,6 +530,7 @@ const BurnReleaseRitual = ({ navigation }) => {
         if (user?.id) {
           const result = await completeRitual(user.id, 'burn-release', {
             releaseText,
+            reflection,
           });
           setXpEarned(result?.xpEarned || CONFIG.xpReward);
           setStreak(result?.newStreak || 1);
@@ -510,7 +545,7 @@ const BurnReleaseRitual = ({ navigation }) => {
       }
 
       setPhase('completed');
-    }, 3000);
+    }, 1500);
   }, [releaseText, user]);
 
   const handleBack = useCallback(() => {
@@ -584,16 +619,51 @@ const BurnReleaseRitual = ({ navigation }) => {
   // Render Burning Phase
   const renderBurningPhase = () => (
     <View style={styles.burningContainer}>
-      <BurningPaper
-        text={releaseText}
-        onBurnComplete={handleBurnComplete}
-      />
+      {/* Paper with text overlay - centered */}
+      <View style={styles.paperWithTextContainer}>
+        {/* Lottie Animation - Paper Burn */}
+        <View style={styles.paperLottieWrapper}>
+          <RitualAnimation
+            animationId="paper-burn"
+            autoPlay={true}
+            loop={false}
+            speed={0.6}
+          />
+        </View>
 
-      {/* Ash rising message */}
+        {/* User's text overlaid on paper */}
+        <Animated.View style={[styles.paperTextOverlay, textOverlayAnimatedStyle]}>
+          <Text style={styles.overlayText} numberOfLines={6}>
+            {releaseText}
+          </Text>
+        </Animated.View>
+
+        {/* Fire Ball positioned at bottom edge of paper - hide when ash message shows */}
+        {!showAshMessage && (
+          <View style={styles.fireOnPaper}>
+            <RitualAnimation
+              animationId="fire-ball"
+              autoPlay={true}
+              loop={true}
+              speed={1}
+            />
+          </View>
+        )}
+      </View>
+
+      {/* Hidden BurningPaper for timing only */}
+      <View style={styles.hiddenBurnTimer}>
+        <BurningPaper
+          text={releaseText}
+          onBurnComplete={handleBurnComplete}
+        />
+      </View>
+
+      {/* Ash rising message - at bottom of screen */}
       {showAshMessage && (
         <Animated.View style={[styles.ashMessageContainer, messageAnimatedStyle]}>
           <View style={styles.ashIconWrap}>
-            <Wind size={36} color={COSMIC_COLORS.text.secondary} />
+            <Wind size={32} color={COSMIC_COLORS.text.secondary} />
           </View>
           <Text style={styles.ashMessageTitle}>Đã Buông Bỏ</Text>
           <Text style={styles.ashMessageSubtitle}>
@@ -607,13 +677,7 @@ const BurnReleaseRitual = ({ navigation }) => {
   // Main render
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CosmicBackground
-        variant="burn"
-        starDensity="low"
-        showNebula={true}
-        showSpotlight={phase === 'burning'}
-        spotlightIntensity={0.6}
-      >
+      <VideoBackground ritualId="burn-release" paused={shouldPauseVideo}>
         {/* Fire particles - OPTIMIZED: reduced count */}
         <ParticleField
           variant="fire"
@@ -653,10 +717,16 @@ const BurnReleaseRitual = ({ navigation }) => {
           message="Bạn đã buông bỏ những gánh nặng. Hãy tiến về phía trước với tâm hồn nhẹ nhàng hơn."
           visible={showCelebration}
           onContinue={handleContinue}
+          onWriteReflection={async (text) => {
+            setReflection(text);
+            if (user?.id) {
+              await saveReflection(user.id, 'burn-release', text);
+            }
+          }}
           showVisionBoardButton={true}
           showReflectionButton={true}
         />
-      </CosmicBackground>
+      </VideoBackground>
     </GestureHandlerRootView>
   );
 };
@@ -739,6 +809,54 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  paperWithTextContainer: {
+    width: SCREEN_WIDTH * 0.8,
+    height: SCREEN_WIDTH * 1.1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  paperLottieWrapper: {
+    position: 'absolute',
+    width: '100%',
+    height: '85%',
+    top: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  paperTextOverlay: {
+    position: 'absolute',
+    top: '8%',
+    left: '12%',
+    right: '12%',
+    height: '55%',
+    zIndex: 2,
+    paddingHorizontal: 15,
+    paddingVertical: 20,
+    justifyContent: 'center',
+  },
+  overlayText: {
+    fontSize: 15,
+    color: '#2a2a2a',
+    lineHeight: 24,
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  fireOnPaper: {
+    position: 'absolute',
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+    width: 150,
+    height: 150,
+  },
+  hiddenBurnTimer: {
+    position: 'absolute',
+    opacity: 0,
+    pointerEvents: 'none',
   },
   burningPaperContainer: {
     alignItems: 'center',
@@ -840,9 +958,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 100,
+    bottom: 120,
     alignItems: 'center',
     paddingHorizontal: COSMIC_SPACING.lg,
+    zIndex: 1,
   },
   ashIconWrap: {
     marginBottom: COSMIC_SPACING.md,

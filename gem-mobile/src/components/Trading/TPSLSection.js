@@ -273,7 +273,7 @@ const TPSLSection = ({
           <Text style={styles.headerTitle}>TP/SL</Text>
           {locked && (
             <View style={styles.lockedBadge}>
-              <Lock size={10} color={COLORS.gold} />
+              <Lock size={10} color={COLORS.textSecondary} />
               {lockedText && <Text style={styles.lockedText}>{lockedText}</Text>}
             </View>
           )}
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
   lockedText: {
     fontSize: 9,
     fontWeight: '600',
-    color: COLORS.gold,
+    color: COLORS.textSecondary,
   },
   helpButton: {
     padding: 4,
@@ -669,9 +669,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.error,
   },
   inputLocked: {
-    borderColor: 'rgba(255, 215, 0, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     borderStyle: 'dashed',
-    backgroundColor: 'rgba(255, 215, 0, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
   priceInput: {
     flex: 1,
@@ -788,7 +788,7 @@ const styles = StyleSheet.create({
   riskRewardRatio: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.gold,
+    color: COLORS.textPrimary,
   },
   goodRatioBadge: {
     backgroundColor: COLORS.success,

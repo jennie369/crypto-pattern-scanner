@@ -35,6 +35,8 @@ import {
   Briefcase,
   Layers,
   GripVertical,
+  Building2,
+  ArrowRight,
 } from 'lucide-react-native';
 // Note: Using simple state swap for sections instead of DraggableFlatList
 // to avoid scroll conflicts with parent ScrollView
@@ -50,6 +52,10 @@ import SponsorBanner from '../../components/SponsorBanner';
 import { useTooltip } from '../../components/Common/TooltipProvider';
 import { patternDetection } from '../../services/patternDetection';
 import zoneManager from '../../services/zoneManager';
+// Scanner V2 Enhancements
+import { applyV2Enhancements, shouldRejectPattern } from '../../services/scanner/patternEnhancerV2';
+import { getMergedConfig } from '../../services/scanner/scannerConfigService';
+import { hasAccess } from '../../constants/scannerAccess';
 // MTF Service removed - integrated into main scan
 import {
   checkMultiTFAccess,
@@ -59,6 +65,7 @@ import { binanceService } from '../../services/binanceService';
 import { favoritesService } from '../../services/favoritesService';
 import paperTradeService from '../../services/paperTradeService';
 import { tierAccessService } from '../../services/tierAccessService';
+import { exchangeAffiliateService } from '../../services/exchangeAffiliateService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useScanner } from '../../contexts/ScannerContext';
 import { useUpgrade } from '../../hooks/useUpgrade';
@@ -143,6 +150,11 @@ const ScannerScreen = ({ navigation }) => {
   // =====================================================
   const [selectedPosition, setSelectedPosition] = useState(null); // Currently selected position
   const [showPositionZone, setShowPositionZone] = useState(true); // Toggle for position zone visibility
+
+  // =====================================================
+  // EXCHANGE AFFILIATE STATE - Show CTA for users without exchange
+  // =====================================================
+  const [hasExchangeAccount, setHasExchangeAccount] = useState(true); // Default true to hide banner until checked
 
   // Section order for drag & drop (scanResults first by default)
   const [sectionOrder, setSectionOrder] = useState(['scanResults', 'openPositions']);
@@ -551,6 +563,44 @@ const ScannerScreen = ({ navigation }) => {
       allPatterns.sort((a, b) => b.confidence - a.confidence);
 
       // =====================================================
+      // V2 ENHANCEMENTS: Quick confidence recalculation
+      // Full V2 (MTF, Volume API) calculated on pattern detail
+      // =====================================================
+      const getV2QuickSummary = (pattern) => {
+        // Volume grade based on existing volumeRatio
+        const volumeRatio = pattern.volumeRatio || pattern.enhancements?.volume?.ratio || 0;
+        const volumeGrade = volumeRatio >= 2.0 ? 'STRONG' : volumeRatio >= 1.5 ? 'GOOD' : volumeRatio >= 1.2 ? 'ACCEPTABLE' : volumeRatio >= 1.0 ? 'MINIMUM' : 'WEAK';
+
+        // Confidence grade
+        const conf = pattern.confidence || 0;
+        const confGrade = conf >= 85 ? 'A+' : conf >= 75 ? 'A' : conf >= 65 ? 'B+' : conf >= 55 ? 'B' : 'C';
+
+        return {
+          version: 2,
+          userTier,
+          validations: {
+            volume: hasAccess(userTier, 'volumeValidation')
+              ? { valid: volumeRatio >= 1.0, grade: volumeGrade, volumeRatio }
+              : { locked: true, requiredTier: 1 },
+            zoneRetest: hasAccess(userTier, 'zoneRetest')
+              ? { pending: true } // Calculated on detail view
+              : { locked: true, requiredTier: 1 },
+            htfAlignment: hasAccess(userTier, 'mtfAnalysis')
+              ? { pending: true } // Requires API call, done on detail view
+              : { locked: true, requiredTier: 2 },
+            swingQuality: hasAccess(userTier, 'swingQuality')
+              ? { pending: true }
+              : { locked: true, requiredTier: 2 },
+          },
+          confidence: {
+            score: pattern.confidence,
+            grade: confGrade,
+          },
+          warnings: [],
+        };
+      };
+
+      // =====================================================
       // ENRICH PATTERNS WITH UNIQUE IDs (for zone-pattern linking)
       // ⚠️ CRITICAL: Use content-based ID, NOT index-based
       // This ensures zones and UI patterns have matching IDs
@@ -567,10 +617,21 @@ const ScannerScreen = ({ navigation }) => {
         return `${p.symbol}_${patternName}_${p.timeframe || selectedTimeframe}_${entry}_${sl}`;
       };
 
-      const enrichedPatterns = allPatterns.map((p) => ({
-        ...p,
-        pattern_id: generatePatternId(p),
-      }));
+      const enrichedPatterns = allPatterns.map((p) => {
+        const v2Summary = getV2QuickSummary(p);
+        const volRatio = p.enhancements?.volume?.ratio || 0;
+        return {
+          ...p,
+          pattern_id: generatePatternId(p),
+          // V2 enhancements for TIER 1+ users
+          v2: v2Summary,
+          hasV2Enhancements: userTier >= 1,
+          confidenceGrade: v2Summary.confidence.grade,
+          volumeRatio: volRatio, // Hoist to top level for easy access
+          volumeValid: hasAccess(userTier, 'volumeValidation') ? volRatio >= 1.0 : undefined,
+          volumeGrade: hasAccess(userTier, 'volumeValidation') ? v2Summary.validations.volume.grade : undefined,
+        };
+      });
 
       // Sort results - coins with patterns first
       resultsPerCoin.sort((a, b) => {
@@ -579,14 +640,37 @@ const ScannerScreen = ({ navigation }) => {
         return bHas - aHas;
       });
 
-      // Also enrich patterns in resultsPerCoin - SAME ID generation!
+      // Also enrich patterns in resultsPerCoin - SAME ID generation + V2!
       const enrichedResults = resultsPerCoin.map(result => ({
         ...result,
-        patterns: result.patterns.map((p) => ({
-          ...p,
-          pattern_id: generatePatternId(p),
-        })),
+        patterns: result.patterns.map((p) => {
+          const v2Summary = getV2QuickSummary(p);
+          const volRatio = p.enhancements?.volume?.ratio || 0;
+          return {
+            ...p,
+            pattern_id: generatePatternId(p),
+            // V2 enhancements for TIER 1+ users
+            v2: v2Summary,
+            hasV2Enhancements: userTier >= 1,
+            confidenceGrade: v2Summary.confidence.grade,
+            volumeRatio: volRatio, // Hoist to top level for easy access
+            volumeValid: hasAccess(userTier, 'volumeValidation') ? volRatio >= 1.0 : undefined,
+            volumeGrade: hasAccess(userTier, 'volumeValidation') ? v2Summary.validations.volume.grade : undefined,
+          };
+        }),
       }));
+
+      // Debug V2 data
+      if (enrichedPatterns.length > 0) {
+        console.log('[Scanner V2] Sample pattern V2 data:', {
+          userTier,
+          hasV2: enrichedPatterns[0].hasV2Enhancements,
+          confidenceGrade: enrichedPatterns[0].confidenceGrade,
+          volumeRatio: enrichedPatterns[0].volumeRatio,
+          volumeGrade: enrichedPatterns[0].volumeGrade,
+          v2: enrichedPatterns[0].v2,
+        });
+      }
 
       setPatterns(enrichedPatterns);
       setScanResults(enrichedResults);
@@ -805,6 +889,22 @@ const ScannerScreen = ({ navigation }) => {
       return () => clearTimeout(timer);
     }
   }, [tooltipInitialized, user?.id, userTier, showTooltipForScreen]);
+
+  // Check if user has exchange account (for CTA banner)
+  useEffect(() => {
+    const checkExchangeAccount = async () => {
+      if (user?.id) {
+        try {
+          const hasExchange = await exchangeAffiliateService.hasRegisteredExchange();
+          setHasExchangeAccount(hasExchange);
+        } catch (error) {
+          console.warn('[Scanner] Exchange check error:', error);
+          setHasExchangeAccount(true); // Hide banner on error
+        }
+      }
+    };
+    checkExchangeAccount();
+  }, [user?.id]);
 
   // Handle selecting coin from scan results
   // NOTE: Only update state - useEffect will handle subscribeToPrice automatically
@@ -1200,6 +1300,11 @@ const ScannerScreen = ({ navigation }) => {
             showPositionZone={showPositionZone}
             onTogglePositionZone={() => setShowPositionZone(prev => !prev)}
             selectedPosition={selectedPosition}
+            // ═══════════════════════════════════════════════════════════
+            // ZONE DISPLAY MODE (for ChartToolbar toggle)
+            // ═══════════════════════════════════════════════════════════
+            zoneDisplayMode={zoneDisplayMode}
+            onZoneDisplayModeChange={setZoneDisplayMode}
           />
 
           {/* MTF Panel removed - integrated into scan results */}
@@ -1350,6 +1455,29 @@ const ScannerScreen = ({ navigation }) => {
                 <Text style={styles.retryText}>Scan Now</Text>
               </TouchableOpacity>
             </View>
+          )}
+
+          {/* Exchange Affiliate CTA - Show for users without exchange account */}
+          {!hasExchangeAccount && user?.id && (
+            <TouchableOpacity
+              style={styles.exchangeCTABanner}
+              onPress={() => navigation.navigate('Account', {
+                screen: 'ExchangeOnboarding',
+                params: { source: 'scanner' }
+              })}
+              activeOpacity={0.8}
+            >
+              <View style={styles.exchangeCTAContent}>
+                <View style={styles.exchangeCTAIconContainer}>
+                  <Building2 size={20} color={COLORS.gold} />
+                </View>
+                <View style={styles.exchangeCTAText}>
+                  <Text style={styles.exchangeCTATitle}>Muốn trade thật?</Text>
+                  <Text style={styles.exchangeCTASubtitle}>Đăng ký sàn qua GEM để nhận ưu đãi</Text>
+                </View>
+              </View>
+              <ArrowRight size={18} color={COLORS.gold} />
+            </TouchableOpacity>
           )}
 
           {/* Sponsor Banners - distributed */}
@@ -1665,6 +1793,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.purple,
+  },
+
+  // Exchange CTA Banner
+  exchangeCTABanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: SPACING.md,
+    marginVertical: SPACING.sm,
+    padding: SPACING.md,
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+  },
+  exchangeCTAContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  exchangeCTAIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  exchangeCTAText: {
+    flex: 1,
+  },
+  exchangeCTATitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.gold,
+    marginBottom: 2,
+  },
+  exchangeCTASubtitle: {
+    fontSize: 12,
+    color: COLORS.textMuted,
   },
 });
 

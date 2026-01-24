@@ -1,12 +1,11 @@
-﻿node_modules/
+node_modules/
 .expo/
 .git/
 *.log
-*.mp4
-*.mov
-*.zip
-*.tar.gz
-backups/
 dist/
 android/
 ios/
+chrome-extension/
+backups/
+*.zip
+*.tar.gz

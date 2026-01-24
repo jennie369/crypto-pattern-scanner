@@ -7,6 +7,24 @@
 
 import { supabase } from './supabase';
 
+// Direct color values to avoid import issues
+const REVENUE_COLORS = {
+  gold: '#FFBD59',
+  cyan: '#00D9FF',
+  purple: '#8B5CF6',
+};
+
+// Safe query helper - wraps supabase queries with error handling
+const safeQuery = async (queryFn) => {
+  try {
+    const result = await queryFn();
+    return result.data || [];
+  } catch (error) {
+    console.warn('[RevenueService] Query error:', error.message);
+    return [];
+  }
+};
+
 // Date range helpers
 const getDateRange = (range) => {
   const now = new Date();
@@ -49,46 +67,48 @@ const revenueService = {
     try {
       const { start, end } = getDateRange(range);
 
-      // Shop revenue from shopify_orders
-      const { data: shopOrders } = await supabase
-        .from('shopify_orders')
-        .select('total_price, created_at')
-        .eq('financial_status', 'paid')
-        .gte('created_at', start)
-        .lte('created_at', end);
+      // Run all queries in parallel for faster loading
+      const [shopResult, tierResult, courseResult, commissionResult] = await Promise.all([
+        // Shop revenue from shopify_orders
+        safeQuery(() => supabase
+          .from('shopify_orders')
+          .select('total_price, created_at')
+          .eq('financial_status', 'paid')
+          .gte('created_at', start)
+          .lte('created_at', end)
+        ),
 
-      const shopRevenue = (shopOrders || []).reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
+        // Tier upgrade revenue from gems_transactions
+        safeQuery(() => supabase
+          .from('gems_transactions')
+          .select('amount, created_at')
+          .eq('type', 'tier_upgrade')
+          .gte('created_at', start)
+          .lte('created_at', end)
+        ),
 
-      // Tier upgrade revenue from gems_transactions
-      const { data: tierTransactions } = await supabase
-        .from('gems_transactions')
-        .select('amount, created_at')
-        .eq('type', 'tier_upgrade')
-        .gte('created_at', start)
-        .lte('created_at', end);
+        // Course revenue from course_enrollments
+        safeQuery(() => supabase
+          .from('course_enrollments')
+          .select('price_paid, created_at')
+          .eq('payment_status', 'paid')
+          .gte('created_at', start)
+          .lte('created_at', end)
+        ),
 
-      // Estimate tier revenue (gems purchased for tier upgrades)
-      const tierRevenue = (tierTransactions || []).reduce((sum, t) => sum + Math.abs(t.amount || 0), 0) * 0.01; // Convert gems to currency
+        // Total commission paid out from profiles
+        safeQuery(() => supabase
+          .from('profiles')
+          .select('total_commission')
+          .not('total_commission', 'is', null)
+        ),
+      ]);
 
-      // Course revenue from course_enrollments
-      const { data: courseEnrollments } = await supabase
-        .from('course_enrollments')
-        .select('price_paid, created_at')
-        .eq('payment_status', 'paid')
-        .gte('created_at', start)
-        .lte('created_at', end);
-
-      const courseRevenue = (courseEnrollments || []).reduce((sum, e) => sum + (parseFloat(e.price_paid) || 0), 0);
-
-      // Total commission paid out from profiles
-      const { data: commissionData } = await supabase
-        .from('profiles')
-        .select('total_commission')
-        .not('total_commission', 'is', null);
-
-      const totalCommission = (commissionData || []).reduce((sum, p) => sum + (parseFloat(p.total_commission) || 0), 0);
-
-      // Calculate totals
+      // Calculate revenues
+      const shopRevenue = shopResult.reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
+      const tierRevenue = tierResult.reduce((sum, t) => sum + Math.abs(t.amount || 0), 0) * 0.01;
+      const courseRevenue = courseResult.reduce((sum, e) => sum + (parseFloat(e.price_paid) || 0), 0);
+      const totalCommission = commissionResult.reduce((sum, p) => sum + (parseFloat(p.total_commission) || 0), 0);
       const totalRevenue = shopRevenue + tierRevenue + courseRevenue;
 
       return {
@@ -97,8 +117,8 @@ const revenueService = {
         tierRevenue,
         courseRevenue,
         totalCommission,
-        orderCount: shopOrders?.length || 0,
-        enrollmentCount: courseEnrollments?.length || 0,
+        orderCount: shopResult.length,
+        enrollmentCount: courseResult.length,
         range,
       };
     } catch (error) {
@@ -127,18 +147,29 @@ const revenueService = {
       const { start, end } = getDateRange(range);
 
       // Get shop orders grouped by date
-      const { data: shopOrders } = await supabase
+      const shopOrders = await safeQuery(() => supabase
         .from('shopify_orders')
         .select('total_price, created_at')
         .eq('financial_status', 'paid')
         .gte('created_at', start)
         .lte('created_at', end)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+      );
+
+      // Also get course enrollments for trend
+      const courseEnrollments = await safeQuery(() => supabase
+        .from('course_enrollments')
+        .select('price_paid, created_at')
+        .eq('payment_status', 'paid')
+        .gte('created_at', start)
+        .lte('created_at', end)
+      );
 
       // Group by date
       const groupedData = {};
 
-      (shopOrders || []).forEach((order) => {
+      // Process shop orders
+      shopOrders.forEach((order) => {
         let dateKey;
         const date = new Date(order.created_at);
 
@@ -166,7 +197,20 @@ const revenueService = {
         groupedData[dateKey].orders += 1;
       });
 
-      // Convert to array and fill missing dates
+      // Process course enrollments
+      courseEnrollments.forEach((enrollment) => {
+        const date = new Date(enrollment.created_at);
+        const dateKey = date.toISOString().split('T')[0];
+
+        if (!groupedData[dateKey]) {
+          groupedData[dateKey] = { date: dateKey, revenue: 0, orders: 0 };
+        }
+
+        groupedData[dateKey].revenue += parseFloat(enrollment.price_paid) || 0;
+        groupedData[dateKey].orders += 1;
+      });
+
+      // Convert to array and sort
       const result = Object.values(groupedData).sort((a, b) =>
         a.date.localeCompare(b.date)
       );
@@ -185,52 +229,41 @@ const revenueService = {
    */
   async getRecentTransactions(limit = 20) {
     try {
-      // Get recent shop orders
-      const { data: shopOrders } = await supabase
+      // Get recent shop orders (simple query without foreign key)
+      const shopOrders = await safeQuery(() => supabase
         .from('shopify_orders')
-        .select(`
-          id,
-          order_number,
-          total_price,
-          financial_status,
-          created_at,
-          customer:profiles!shopify_orders_customer_id_fkey(id, email, full_name, avatar_url)
-        `)
+        .select('id, order_number, total_price, financial_status, created_at, customer_id, customer_email')
         .eq('financial_status', 'paid')
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .limit(limit)
+      );
 
-      // Get recent tier upgrades
-      const { data: tierTransactions } = await supabase
-        .from('gems_transactions')
-        .select(`
-          id,
-          amount,
-          description,
-          created_at,
-          user:profiles!gems_transactions_user_id_fkey(id, email, full_name, avatar_url)
-        `)
-        .eq('type', 'tier_upgrade')
+      // Get recent course enrollments
+      const courseEnrollments = await safeQuery(() => supabase
+        .from('course_enrollments')
+        .select('id, user_id, course_id, price_paid, created_at')
+        .eq('payment_status', 'paid')
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .limit(limit)
+      );
 
       // Combine and format
       const transactions = [
-        ...(shopOrders || []).map((o) => ({
+        ...shopOrders.map((o) => ({
           id: o.id,
           type: 'shop',
-          description: `Đơn hàng #${o.order_number}`,
+          description: `Đơn hàng #${o.order_number || o.id?.slice(0, 8)}`,
           amount: parseFloat(o.total_price) || 0,
-          user: o.customer,
+          user: { email: o.customer_email || 'Khách hàng', full_name: 'Khách hàng' },
           created_at: o.created_at,
         })),
-        ...(tierTransactions || []).map((t) => ({
-          id: t.id,
-          type: 'tier',
-          description: t.description || 'Nâng cấp tier',
-          amount: Math.abs(t.amount || 0) * 0.01, // Convert gems to currency
-          user: t.user,
-          created_at: t.created_at,
+        ...courseEnrollments.map((e) => ({
+          id: e.id,
+          type: 'course',
+          description: 'Đăng ký khóa học',
+          amount: parseFloat(e.price_paid) || 0,
+          user: { email: 'Học viên', full_name: 'Học viên' },
+          created_at: e.created_at,
         })),
       ];
 
@@ -254,33 +287,37 @@ const revenueService = {
     try {
       const { start, end } = getDateRange(range);
 
-      const { data: orders } = await supabase
+      // Simple query without foreign key
+      const orders = await safeQuery(() => supabase
         .from('shopify_orders')
-        .select(`
-          total_price,
-          customer_id,
-          customer:profiles!shopify_orders_customer_id_fkey(id, email, full_name, avatar_url)
-        `)
+        .select('total_price, customer_id, customer_email')
         .eq('financial_status', 'paid')
         .gte('created_at', start)
-        .lte('created_at', end);
+        .lte('created_at', end)
+      );
 
       // Group by customer
       const customerSpending = {};
 
-      (orders || []).forEach((order) => {
-        if (!order.customer_id || !order.customer) return;
+      orders.forEach((order) => {
+        const customerId = order.customer_id || order.customer_email || 'unknown';
+        if (customerId === 'unknown') return;
 
-        if (!customerSpending[order.customer_id]) {
-          customerSpending[order.customer_id] = {
-            user: order.customer,
+        if (!customerSpending[customerId]) {
+          customerSpending[customerId] = {
+            user: {
+              id: customerId,
+              email: order.customer_email || '',
+              full_name: order.customer_email?.split('@')[0] || 'Khách hàng',
+              avatar_url: null,
+            },
             totalSpent: 0,
             orderCount: 0,
           };
         }
 
-        customerSpending[order.customer_id].totalSpent += parseFloat(order.total_price) || 0;
-        customerSpending[order.customer_id].orderCount += 1;
+        customerSpending[customerId].totalSpent += parseFloat(order.total_price) || 0;
+        customerSpending[customerId].orderCount += 1;
       });
 
       // Sort by spending and take top
@@ -309,7 +346,7 @@ const revenueService = {
           percentage: overview.totalRevenue > 0
             ? (overview.shopRevenue / overview.totalRevenue * 100).toFixed(1)
             : 0,
-          color: COLORS?.gold || '#FFBD59',
+          color: REVENUE_COLORS.gold,
         },
         {
           source: 'Khóa học',
@@ -317,7 +354,7 @@ const revenueService = {
           percentage: overview.totalRevenue > 0
             ? (overview.courseRevenue / overview.totalRevenue * 100).toFixed(1)
             : 0,
-          color: '#00D9FF',
+          color: REVENUE_COLORS.cyan,
         },
         {
           source: 'Tier',
@@ -325,7 +362,7 @@ const revenueService = {
           percentage: overview.totalRevenue > 0
             ? (overview.tierRevenue / overview.totalRevenue * 100).toFixed(1)
             : 0,
-          color: '#8B5CF6',
+          color: REVENUE_COLORS.purple,
         },
       ];
     } catch (error) {
@@ -343,26 +380,20 @@ const revenueService = {
     try {
       const { start, end } = getDateRange(range);
 
-      // Get all orders in range
-      const { data: orders } = await supabase
+      // Get all orders in range (simple query)
+      const orders = await safeQuery(() => supabase
         .from('shopify_orders')
-        .select(`
-          order_number,
-          total_price,
-          financial_status,
-          created_at,
-          customer:profiles!shopify_orders_customer_id_fkey(email, full_name)
-        `)
+        .select('order_number, total_price, financial_status, created_at, customer_email')
         .gte('created_at', start)
         .lte('created_at', end)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+      );
 
       // Format as CSV
-      const headers = ['Order Number', 'Customer', 'Email', 'Amount', 'Status', 'Date'];
-      const rows = (orders || []).map((o) => [
+      const headers = ['Order Number', 'Email', 'Amount', 'Status', 'Date'];
+      const rows = orders.map((o) => [
         o.order_number || '',
-        o.customer?.full_name || '',
-        o.customer?.email || '',
+        o.customer_email || '',
         o.total_price || 0,
         o.financial_status || '',
         new Date(o.created_at).toLocaleDateString('vi-VN'),

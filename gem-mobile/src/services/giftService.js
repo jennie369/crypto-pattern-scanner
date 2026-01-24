@@ -600,24 +600,29 @@ export const giftService = {
     try {
       const { giftName, giftImage, gemAmount, senderName, senderAvatar, message, postId, sentGiftId } = giftData;
 
-      // Insert notification record in database
+      const notifTitle = `🎁 Bạn nhận được quà!`;
+      const notifBody = `${senderName} đã tặng bạn ${giftName} (${gemAmount} gems)${message ? `: "${message}"` : ''}`;
+      const notifData = {
+        type: 'gift_received',
+        gift_name: giftName,
+        gift_image: giftImage,
+        gem_amount: gemAmount,
+        sender_name: senderName,
+        sender_avatar: senderAvatar,
+        message,
+        post_id: postId,
+        sent_gift_id: sentGiftId,
+      };
+
+      // 1. Insert notification record in database (for in-app notification display)
       const { error: notifError } = await supabase
         .from('notifications')
         .insert({
           user_id: recipientId,
           type: 'gift_received',
-          title: `🎁 Bạn nhận được quà!`,
-          body: `${senderName} đã tặng bạn ${giftName} (${gemAmount} gems)${message ? `: "${message}"` : ''}`,
-          data: {
-            gift_name: giftName,
-            gift_image: giftImage,
-            gem_amount: gemAmount,
-            sender_name: senderName,
-            sender_avatar: senderAvatar,
-            message,
-            post_id: postId,
-            sent_gift_id: sentGiftId,
-          },
+          title: notifTitle,
+          body: notifBody,
+          data: notifData,
           read: false,
         });
 
@@ -625,9 +630,11 @@ export const giftService = {
         console.warn('[Gift] Failed to insert notification:', notifError);
       }
 
-      // Also try to send push notification
+      // 2. Send PUSH notification to recipient's device(s)
+      // This uses Expo Push API to send to recipient's registered devices
       try {
-        await notificationService.sendLocalNotification(
+        const pushResult = await notificationService.sendPushToUser(
+          recipientId,
           `🎁 ${senderName} tặng bạn ${giftName}!`,
           `Bạn nhận được ${gemAmount} gems${message ? `: "${message}"` : ''}`,
           {
@@ -636,6 +643,12 @@ export const giftService = {
             sentGiftId,
           }
         );
+
+        if (pushResult.success) {
+          console.log('[Gift] Push notification sent to recipient');
+        } else {
+          console.log('[Gift] Push notification not sent:', pushResult.error);
+        }
       } catch (pushError) {
         console.warn('[Gift] Push notification error:', pushError);
       }

@@ -15,10 +15,12 @@ import LIGHT_THEME, {
 // Import base tokens
 import {
   COLORS as DARK_COLORS,
+  COLORS,
   SPACING,
   GLASS as DARK_GLASS,
   TYPOGRAPHY,
   GRADIENTS as DARK_GRADIENTS,
+  BORDER_RADIUS,
 } from '../utils/tokens';
 
 // Theme type constants
@@ -103,9 +105,11 @@ export {
   LIGHT_GRADIENTS,
   SHOP_LIGHT_COLORS,
 
-  // Shared tokens
+  // Shared tokens (COLORS is default dark theme)
+  COLORS,
   SPACING,
   TYPOGRAPHY,
+  BORDER_RADIUS,
 };
 
 // Default exports

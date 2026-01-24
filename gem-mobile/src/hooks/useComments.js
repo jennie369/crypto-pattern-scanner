@@ -133,7 +133,19 @@ export const useComments = (postId) => {
    * @returns {Object} Created comment
    */
   const createComment = useCallback(async (content) => {
-    if (!postId || !user?.id || !content.trim()) return;
+    // Validate inputs
+    if (!postId) {
+      console.error('[useComments] Missing postId');
+      throw new Error('Post ID is required');
+    }
+    if (!user?.id) {
+      console.error('[useComments] User not authenticated');
+      throw new Error('Bạn cần đăng nhập để bình luận');
+    }
+    if (!content?.trim()) {
+      console.error('[useComments] Empty content');
+      throw new Error('Nội dung không được để trống');
+    }
 
     try {
       const commentData = {
@@ -148,7 +160,9 @@ export const useComments = (postId) => {
         commentData.reply_to_user_id = replyTo.userId;
       }
 
+      console.log('[useComments] Creating comment:', commentData);
       const newComment = await commentService.createComment(commentData);
+      console.log('[useComments] Comment created:', newComment?.id);
 
       // Update state
       if (replyTo) {

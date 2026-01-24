@@ -175,137 +175,52 @@ export default function AdminNotificationsScreen({ navigation }) {
 
   const sendNotification = async () => {
     setSending(true);
-    let debugInfo = [];
 
     try {
-      debugInfo.push('Starting broadcast...');
+      console.log('[AdminNotifications] Starting broadcast...');
 
-      // Try the new admin_send_broadcast RPC first (from 20251130_fix_notifications_system.sql)
-      console.log('[AdminNotifications] Calling admin_send_broadcast RPC...');
-      const { data: rpcResult, error: rpcError } = await supabase.rpc(
-        'admin_send_broadcast',
-        {
-          p_title: title.trim(),
-          p_body: body.trim(),
-          p_admin_id: user.id,
-        }
-      );
+      // Use notificationService.sendBroadcastNotification which now uses direct insert
+      const result = await notificationService.sendBroadcastNotification({
+        title: title.trim(),
+        message: body.trim(),
+        type: 'system',
+        data: { type: 'system_broadcast', target_audience: targetAudience },
+      });
 
-      console.log('[AdminNotifications] RPC Result:', rpcResult, 'Error:', rpcError);
-
-      if (!rpcError && rpcResult?.success) {
-        debugInfo.push(`RPC success: ${rpcResult.sent_count} users`);
-
-        // Also try Edge Function for push notifications
-        await sendPushViaEdgeFunction(null, title.trim(), body.trim(), debugInfo);
-
-        // RPC worked - show success
-        showAlert(
-          'Thành công',
-          `${rpcResult.message || `Đã gửi thông báo đến ${rpcResult.sent_count} người dùng`}\n\n[Debug: ${debugInfo.join(' → ')}]`,
-          [{ text: 'OK' }],
-          'success'
-        );
-
-        // Clear form
-        setTitle('');
-        setBody('');
-
-        // Refresh history
-        loadHistory();
-        loadStats();
-        setSending(false);
-        return;
+      if (!result.success) {
+        throw new Error(result.error || 'Không thể gửi thông báo');
       }
 
-      // If RPC failed, fall back to old method
-      const rpcErrorMsg = rpcError?.message || rpcResult?.error || 'Unknown error';
-      debugInfo.push(`RPC failed: ${rpcErrorMsg}`);
-      console.warn('[AdminNotifications] New RPC failed, using fallback:', rpcError);
+      const sentCount = result.data?.sent_count || 0;
+      console.log('[AdminNotifications] Broadcast result:', result);
 
-      // 1. Save to system_notifications
-      console.log('[AdminNotifications] Fallback: inserting to system_notifications...');
-      const { data: notif, error: saveError } = await supabase
-        .from('system_notifications')
-        .insert({
+      // Also save to system_notifications for history
+      try {
+        await supabase.from('system_notifications').insert({
           title: title.trim(),
           body: body.trim(),
           target_audience: targetAudience,
           sent_by: user.id,
-          status: 'sending',
-        })
-        .select()
-        .single();
-
-      if (saveError) {
-        debugInfo.push(`system_notifications error: ${saveError.code}`);
-        console.error('[AdminNotifications] Save error:', saveError);
-
-        // If table doesn't exist or RLS blocks, try direct forum_notifications insert
-        if (saveError.code === 'PGRST205' || saveError.code === '42P01' || saveError.code === '42501') {
-          console.warn('[AdminNotifications] system_notifications not found or blocked, using forum_notifications');
-          debugInfo.push('Using forum_notifications fallback');
-
-          const broadcastCount = await manualBroadcast(null);
-          await sendPushViaEdgeFunction(null, title.trim(), body.trim(), debugInfo);
-
-          showAlert(
-            'Thành công',
-            `Đã gửi thông báo đến ${broadcastCount || 'tất cả'} người dùng\n\n[Debug: ${debugInfo.join(' → ')}]`,
-            [{ text: 'OK' }],
-            'success'
-          );
-          setTitle('');
-          setBody('');
-          loadHistory();
-          loadStats();
-          setSending(false);
-          return;
-        }
-        throw saveError;
-      }
-
-      debugInfo.push(`Saved to system_notifications: ${notif.id}`);
-
-      // 2. Insert notification to all target users (old RPC)
-      console.log('[AdminNotifications] Calling broadcast_notification_to_users...');
-      const { data: insertCount, error: broadcastError } = await supabase.rpc(
-        'broadcast_notification_to_users',
-        {
-          p_title: title.trim(),
-          p_body: body.trim(),
-          p_data: { notification_id: notif.id, type: 'system_broadcast' },
-          p_target_audience: targetAudience,
-        }
-      );
-
-      if (broadcastError) {
-        debugInfo.push(`broadcast_notification_to_users failed: ${broadcastError.message}`);
-        console.error('[AdminNotifications] Broadcast RPC error:', broadcastError);
-        // Fallback: manual insert
-        await manualBroadcast(notif.id);
-        debugInfo.push('Manual insert done');
-      } else {
-        debugInfo.push(`Broadcast RPC: ${insertCount} users`);
-      }
-
-      // 3. Call Edge Function to send push notifications
-      await sendPushViaEdgeFunction(notif.id, title.trim(), body.trim(), debugInfo);
-
-      // 4. Update status to sent
-      await supabase
-        .from('system_notifications')
-        .update({
           status: 'sent',
           sent_at: new Date().toISOString(),
-          sent_count: insertCount || 0,
-        })
-        .eq('id', notif.id);
+          sent_count: sentCount,
+        });
+      } catch (historyError) {
+        // History save is optional, don't fail the whole operation
+        console.warn('[AdminNotifications] History save error:', historyError.message);
+      }
+
+      // Try to send push notifications (optional, don't fail if Edge Function unavailable)
+      try {
+        await sendPushViaEdgeFunction(null, title.trim(), body.trim(), []);
+      } catch (pushError) {
+        console.warn('[AdminNotifications] Push notification skipped:', pushError.message);
+      }
 
       // Success
       showAlert(
         'Thành công',
-        `Đã gửi thông báo đến ${insertCount || 'tất cả'} người dùng\n\n[Debug: ${debugInfo.join(' → ')}]`,
+        result.data?.message || `Đã gửi thông báo đến ${sentCount} người dùng`,
         [{ text: 'OK' }],
         'success'
       );
@@ -319,11 +234,10 @@ export default function AdminNotificationsScreen({ navigation }) {
       loadStats();
 
     } catch (error) {
-      debugInfo.push(`Error: ${error.message}`);
       console.error('[AdminNotifications] Send error:', error);
       showAlert(
         'Lỗi',
-        `Không thể gửi thông báo: ${error.message}\n\n[Debug: ${debugInfo.join(' → ')}]`,
+        `Không thể gửi thông báo: ${error.message}`,
         [{ text: 'OK' }],
         'error'
       );

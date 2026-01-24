@@ -983,6 +983,317 @@ const ADMIN_PARTNERSHIP_SERVICE = {
       supabase.removeChannel(subscription);
     }
   },
+
+  // ============================================================
+  // INSTRUCTOR MANAGEMENT
+  // ============================================================
+
+  /**
+   * Get instructor dashboard stats
+   * @returns {Promise<Object|null>} Instructor stats
+   */
+  async getInstructorStats() {
+    try {
+      // Try RPC first
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_admin_instructor_stats');
+
+      if (!rpcError && rpcData) {
+        return rpcData;
+      }
+
+      // Fallback to direct queries
+      console.log('[AdminPartnershipService] Using fallback for instructor stats');
+
+      const [
+        totalInstructorsResult,
+        pendingApplicationsResult,
+        earningsResult,
+        thisMonthResult,
+      ] = await Promise.all([
+        // Total approved instructors
+        supabase
+          .from('instructor_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved'),
+
+        // Pending instructor applications
+        supabase
+          .from('instructor_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending'),
+
+        // Total earnings (try, may not exist)
+        supabase
+          .from('instructor_earnings')
+          .select('instructor_earning, platform_earning')
+          .neq('status', 'cancelled'),
+
+        // This month earnings
+        supabase
+          .from('instructor_earnings')
+          .select('instructor_earning')
+          .neq('status', 'cancelled')
+          .gte('created_at', new Date(new Date().setDate(1)).toISOString()),
+      ]);
+
+      const totalInstructorEarnings = (earningsResult.data || []).reduce(
+        (sum, e) => sum + (e.instructor_earning || 0), 0
+      );
+      const totalPlatformEarnings = (earningsResult.data || []).reduce(
+        (sum, e) => sum + (e.platform_earning || 0), 0
+      );
+      const thisMonthEarnings = (thisMonthResult.data || []).reduce(
+        (sum, e) => sum + (e.instructor_earning || 0), 0
+      );
+
+      return {
+        total_instructors: totalInstructorsResult.count || 0,
+        pending_applications: pendingApplicationsResult.count || 0,
+        total_instructor_earnings: totalInstructorEarnings,
+        total_platform_earnings: totalPlatformEarnings,
+        this_month_instructor_earnings: thisMonthEarnings,
+        pending_payouts: 0, // Would need additional query
+      };
+    } catch (err) {
+      console.error('[AdminPartnershipService] getInstructorStats error:', err);
+      return null;
+    }
+  },
+
+  /**
+   * Get instructor applications with filtering
+   * @param {Object} options - Query options
+   * @returns {Promise<Object>} { data: [], count: number }
+   */
+  async getInstructorApplications({
+    status = 'all',
+    page = 0,
+    limit = 20,
+    search = '',
+  } = {}) {
+    try {
+      let query = supabase
+        .from('instructor_applications')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false });
+
+      if (status !== 'all') {
+        query = query.eq('status', status);
+      }
+
+      if (search) {
+        query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+      }
+
+      const offset = page * limit;
+      query = query.range(offset, offset + limit - 1);
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      return { data: data || [], count: count || 0 };
+    } catch (err) {
+      console.error('[AdminPartnershipService] getInstructorApplications error:', err);
+      return { data: [], count: 0 };
+    }
+  },
+
+  /**
+   * Approve instructor application
+   * @param {string} applicationId - Application ID
+   * @param {string} revenueShare - Revenue share type: '40-60', '50-50', '60-40', '70-30'
+   * @param {string} notes - Admin notes
+   * @returns {Promise<Object>} { success: boolean, error?: string }
+   */
+  async approveInstructorApplication(applicationId, revenueShare = '50-50', notes = '') {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const adminId = user?.id;
+
+      if (!adminId) {
+        return { success: false, error: 'Không tìm thấy admin' };
+      }
+
+      // Validate revenue share
+      const validShares = ['30-70', '40-60', '50-50', '60-40', '70-30'];
+      if (!validShares.includes(revenueShare)) {
+        return { success: false, error: 'Revenue share không hợp lệ' };
+      }
+
+      // Get application
+      const { data: app, error: appError } = await supabase
+        .from('instructor_applications')
+        .select('*')
+        .eq('id', applicationId)
+        .single();
+
+      if (appError || !app) {
+        return { success: false, error: 'Không tìm thấy đơn đăng ký' };
+      }
+
+      // Update application
+      const { error: updateError } = await supabase
+        .from('instructor_applications')
+        .update({
+          status: 'approved',
+          reviewed_by: adminId,
+          reviewed_at: new Date().toISOString(),
+          approved_at: new Date().toISOString(),
+          preferred_revenue_share: revenueShare,
+          admin_notes: notes,
+        })
+        .eq('id', applicationId);
+
+      if (updateError) throw updateError;
+
+      // Log action
+      await this.logAdminAction('approve_instructor', {
+        application_id: applicationId,
+        instructor_name: app.full_name,
+        revenue_share: revenueShare,
+        notes,
+      });
+
+      return { success: true };
+    } catch (err) {
+      console.error('[AdminPartnershipService] approveInstructorApplication error:', err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
+   * Reject instructor application
+   * @param {string} applicationId - Application ID
+   * @param {string} reason - Rejection reason
+   * @returns {Promise<Object>} { success: boolean, error?: string }
+   */
+  async rejectInstructorApplication(applicationId, reason) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const adminId = user?.id;
+
+      if (!adminId) {
+        return { success: false, error: 'Không tìm thấy admin' };
+      }
+
+      if (!reason?.trim()) {
+        return { success: false, error: 'Vui lòng nhập lý do từ chối' };
+      }
+
+      const { error: updateError } = await supabase
+        .from('instructor_applications')
+        .update({
+          status: 'rejected',
+          reviewed_by: adminId,
+          reviewed_at: new Date().toISOString(),
+          rejection_reason: reason,
+        })
+        .eq('id', applicationId);
+
+      if (updateError) throw updateError;
+
+      // Log action
+      await this.logAdminAction('reject_instructor', {
+        application_id: applicationId,
+        reason,
+      });
+
+      return { success: true };
+    } catch (err) {
+      console.error('[AdminPartnershipService] rejectInstructorApplication error:', err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
+   * Get instructor earnings with filtering
+   * @param {Object} options - Query options
+   * @returns {Promise<Object>} { data: [], count: number }
+   */
+  async getInstructorEarnings({
+    instructorId = null,
+    status = 'all',
+    page = 0,
+    limit = 50,
+  } = {}) {
+    try {
+      let query = supabase
+        .from('instructor_earnings')
+        .select(`
+          *,
+          course:courses!instructor_earnings_course_id_fkey (
+            title,
+            thumbnail_url
+          )
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false });
+
+      if (instructorId) {
+        query = query.eq('instructor_id', instructorId);
+      }
+
+      if (status !== 'all') {
+        query = query.eq('status', status);
+      }
+
+      const offset = page * limit;
+      query = query.range(offset, offset + limit - 1);
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      return { data: data || [], count: count || 0 };
+    } catch (err) {
+      console.error('[AdminPartnershipService] getInstructorEarnings error:', err);
+      return { data: [], count: 0 };
+    }
+  },
+
+  /**
+   * Process instructor payout
+   * @param {string[]} earningIds - Array of earning IDs to process
+   * @param {string} paymentMethod - Payment method used
+   * @param {string} paymentReference - Payment reference/transaction ID
+   * @returns {Promise<Object>} { success: boolean, error?: string, processed: number }
+   */
+  async processInstructorPayout(earningIds, paymentMethod, paymentReference) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const adminId = user?.id;
+
+      if (!adminId) {
+        return { success: false, error: 'Không tìm thấy admin' };
+      }
+
+      const { error: updateError } = await supabase
+        .from('instructor_earnings')
+        .update({
+          status: 'paid',
+          paid_at: new Date().toISOString(),
+          payment_method: paymentMethod,
+          payment_reference: paymentReference,
+        })
+        .in('id', earningIds)
+        .eq('status', 'pending');
+
+      if (updateError) throw updateError;
+
+      // Log action
+      await this.logAdminAction('process_instructor_payout', {
+        earning_ids: earningIds,
+        payment_method: paymentMethod,
+        payment_reference: paymentReference,
+        count: earningIds.length,
+      });
+
+      return { success: true, processed: earningIds.length };
+    } catch (err) {
+      console.error('[AdminPartnershipService] processInstructorPayout error:', err);
+      return { success: false, error: err.message };
+    }
+  },
 };
 
 export default ADMIN_PARTNERSHIP_SERVICE;

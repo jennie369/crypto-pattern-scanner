@@ -6,18 +6,21 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   ActivityIndicator,
   Platform,
   BackHandler,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { useRoute, useNavigation, CommonActions } from '@react-navigation/native';
+import { ArrowLeft, X } from 'lucide-react-native';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { COLORS } from '../../utils/tokens';
+import { COLORS, SPACING } from '../../utils/tokens';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import deepLinkHandler from '../../services/deepLinkHandler';
 
@@ -59,10 +62,41 @@ const CheckoutWebView = () => {
     if (cancelConfirmed) return; // Prevent multiple calls
     setCancelConfirmed(true);
 
-    console.log('[CheckoutWebView] Cancel checkout, going back to previous screen');
+    const { returnScreen, returnTab } = route.params || {};
+    console.log('[CheckoutWebView] Cancel checkout, returnScreen:', returnScreen, 'returnTab:', returnTab);
 
-    // Simply go back to the previous screen
-    navigation.goBack();
+    // If we have a specific return screen, navigate there
+    if (returnScreen) {
+      // Reset Shop stack to ShopMain to clear WebView from history
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'Shop',
+              state: {
+                routes: [{ name: 'ShopMain' }],
+              },
+            },
+          ],
+        })
+      );
+
+      // Then navigate to the return screen
+      setTimeout(() => {
+        if (returnTab) {
+          // Navigate to specific tab first, then screen
+          navigation.navigate(returnTab, {
+            screen: returnScreen,
+          });
+        } else {
+          navigation.navigate(returnScreen);
+        }
+      }, 100);
+    } else {
+      // No return screen specified, just go back
+      navigation.goBack();
+    }
   };
 
   // Prevent back button during checkout
@@ -690,9 +724,56 @@ const CheckoutWebView = () => {
     });
   };
 
+  // Handle back button press with confirmation
+  const handleBackPress = () => {
+    if (checkoutCompleted || cancelConfirmed) {
+      handleCancelCheckout();
+      return;
+    }
+
+    alert({
+      type: 'warning',
+      title: 'Hủy thanh toán?',
+      message: 'Bạn có chắc muốn hủy thanh toán?',
+      buttons: [
+        { text: 'Tiếp tục thanh toán', style: 'cancel' },
+        {
+          text: 'Hủy',
+          style: 'destructive',
+          onPress: handleCancelCheckout,
+        },
+      ],
+    });
+  };
+
+  // Get title from route params
+  const headerTitle = route.params?.title || 'Thanh toán';
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={handleBackPress}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <ArrowLeft size={24} color={COLORS.text} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          {headerTitle}
+        </Text>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={handleBackPress}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <X size={24} color={COLORS.text} />
+        </TouchableOpacity>
+      </View>
+
       {loading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.gold} />
@@ -747,9 +828,37 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF', // White background for Shopify checkout
   },
 
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+
+  backButton: {
+    padding: SPACING.xs,
+  },
+
+  closeButton: {
+    padding: SPACING.xs,
+  },
+
+  headerTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+    textAlign: 'center',
+    marginHorizontal: SPACING.sm,
+  },
+
   loadingContainer: {
     position: 'absolute',
-    top: 0,
+    top: 60, // Account for header height
     left: 0,
     right: 0,
     bottom: 0,

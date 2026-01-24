@@ -21,17 +21,162 @@ import binanceService from './binanceService';
 import { vietnameseNLP } from './nlp';
 import { detectIntentEnhanced } from './intentDetector';
 
+// NEW: Import enhanced services for chatbot upgrade
+import userContextService from './userContextService';
+import smartTriggerService from './smartTriggerService';
+import chatbotAnalyticsService from './chatbotAnalyticsService';
+
 // ========== API CONFIG ==========
-const API_KEY = 'AIzaSyCymkgeL0ERDYYePtbV4zuL-BZ2mfMxehc';
+// API key from environment variable (set in .env file)
+const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+
+if (!API_KEY) {
+  console.warn('[GEM] WARNING: EXPO_PUBLIC_GEMINI_API_KEY is not set in .env file!');
+}
+
+// API Request timeout (ms)
+const API_TIMEOUT = 60000; // 60 seconds
 
 // RAG Configuration
 const USE_RAG = true; // Enable RAG by default
 const RAG_FALLBACK_TO_API = true; // Fallback to direct API if RAG fails
 
 console.log('[GEM] API Key exists:', !!API_KEY);
+console.log('[GEM] API URL:', API_URL);
 console.log('[GEM] Local Knowledge loaded:', !!gemKnowledge?.faq);
 console.log('[GEM] RAG enabled:', USE_RAG);
+
+/**
+ * Fetch with timeout wrapper
+ */
+const fetchWithTimeout = async (url, options, timeout = API_TIMEOUT) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - vui lòng thử lại');
+    }
+    throw error;
+  }
+};
+
+/**
+ * Call Gemini API with retry logic
+ */
+const callGeminiAPI = async (prompt, config = {}) => {
+  const { temperature = 0.7, maxOutputTokens = 8192, retries = 2 } = config;
+
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      console.log(`[GEM] API call attempt ${attempt + 1}/${retries + 1}`);
+
+      const res = await fetchWithTimeout(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature, maxOutputTokens },
+        }),
+      });
+
+      console.log('[GEM] API Status:', res.status);
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('[GEM] API Error:', errText);
+
+        // Parse error message
+        let errorMsg = `API ${res.status}`;
+        try {
+          const errJson = JSON.parse(errText);
+          errorMsg = errJson.error?.message || errorMsg;
+        } catch (e) {}
+
+        // Don't retry on 4xx errors (except 429 rate limit)
+        if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+          throw new Error(errorMsg);
+        }
+
+        lastError = new Error(errorMsg);
+        // Wait before retry (exponential backoff)
+        if (attempt < retries) {
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(`[GEM] Retrying in ${delay}ms...`);
+          await new Promise(r => setTimeout(r, delay));
+        }
+        continue;
+      }
+
+      const data = await res.json();
+      console.log('[GEM] API Response received');
+
+      // Extract text from response
+      let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!text && data.candidates?.[0]?.output) {
+        text = data.candidates[0].output;
+      }
+
+      if (!text) {
+        const finishReason = data.candidates?.[0]?.finishReason;
+        if (finishReason === 'SAFETY') {
+          return { text: 'Xin lỗi, tôi không thể trả lời câu hỏi này. Hãy thử hỏi cách khác nhé!', blocked: true };
+        }
+        throw new Error('Không nhận được phản hồi từ AI');
+      }
+
+      return { text, usage: data.usageMetadata };
+
+    } catch (error) {
+      console.error(`[GEM] Attempt ${attempt + 1} failed:`, error.message);
+      lastError = error;
+
+      if (attempt < retries) {
+        const delay = Math.pow(2, attempt) * 1000;
+        console.log(`[GEM] Retrying in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+
+  throw lastError || new Error('API call failed after retries');
+};
+
+/**
+ * Test API connection - call this to debug
+ */
+export const testAPIConnection = async () => {
+  console.log('[GEM] Testing API connection...');
+  console.log('[GEM] URL:', API_URL);
+
+  try {
+    const result = await callGeminiAPI('Hello, respond with just "OK"', {
+      temperature: 0.1,
+      maxOutputTokens: 100,
+      retries: 0, // No retry for test
+    });
+
+    return {
+      success: true,
+      response: result.text,
+    };
+  } catch (error) {
+    console.error('[GEM] Test Error:', error);
+    return { success: false, error: error.message };
+  }
+};
 
 // ========== REAL-TIME TRADING ANALYSIS ==========
 
@@ -283,27 +428,8 @@ ${userMessage}
 
     console.log('[GEM] Calling AI for real-time analysis...');
 
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error('[GEM] AI API Error:', err);
-      throw new Error(`API ${res.status}`);
-    }
-
-    const data = await res.json();
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!text) {
-      throw new Error('Không nhận được phản hồi từ AI');
-    }
+    const result = await callGeminiAPI(prompt, { temperature: 0.7 });
+    const text = result.text;
 
     console.log('[GEM] Real-time analysis generated successfully');
 
@@ -1329,7 +1455,8 @@ const getCourseRecommendation = (scenario) => {
 };
 
 // ========== MAIN PROCESS FUNCTION ==========
-export const processMessage = async (userMessage, history = []) => {
+export const processMessage = async (userMessage, history = [], options = {}) => {
+  // options can include: intentInstruction, userContext, userTier, etc.
   console.log('[GEM] === START ===');
   console.log('[GEM] Message:', userMessage);
   console.log('[GEM] State:', conversationState);
@@ -1803,6 +1930,7 @@ export const processMessage = async (userMessage, history = []) => {
     }
 
     // ========== STEP 3: TRY RAG-ENHANCED CHAT (EDGE FUNCTION) ==========
+    // RAG now supports intentInstruction and userContext
     console.log('[GEM] No local match, trying RAG...');
 
     if (USE_RAG) {
@@ -1836,7 +1964,7 @@ export const processMessage = async (userMessage, history = []) => {
           message: userMessage,
           conversationHistory,
           userId,
-          userTier: 'FREE', // TODO: Get actual tier from profile
+          userTier: options.userTier || 'FREE',
           useRAG: true,
         });
 
@@ -1894,12 +2022,13 @@ export const processMessage = async (userMessage, history = []) => {
 
 **QUY TẮC BẮT BUỘC (VI PHẠM = THẤT BẠI):**
 1. TUYỆT ĐỐI KHÔNG giới thiệu bản thân (KHÔNG "Ta là GEM Master", KHÔNG "Người Bảo Hộ...")
-2. TUYỆT ĐỐI KHÔNG hỏi "Bạn muốn khám phá điều gì hôm nay" hoặc câu hỏi mở chung chung
-3. LUÔN BẮT ĐẦU bằng 1 CÂU DẪN TỰ NHIÊN (ví dụ: "Đây là những gì bạn cần biết về...", "Ta sẽ hướng dẫn bạn...", "Một câu hỏi hay. Về vấn đề này...")
-4. SAU CÂU DẪN mới đi vào nội dung chi tiết
-5. KHÔNG emoji
-6. Tối đa 250 từ
-7. Câu hỏi cuối phải LIÊN QUAN TRỰC TIẾP đến câu hỏi user đã hỏi
+2. TUYỆT ĐỐI KHÔNG chào hỏi (KHÔNG "Chào bạn", KHÔNG "Xin chào") - Đã trong cuộc hội thoại!
+3. ⚠️ TUYỆT ĐỐI CẤM gọi user là "Gemral", "GEMral", "Gem" hoặc BẤT KỲ tên app nào - CHỈ gọi "bạn"
+4. LUÔN BẮT ĐẦU bằng 1 CÂU DẪN TỰ NHIÊN LIÊN QUAN ĐẾN CÂU HỎI (VD: "Về câu hỏi này...", "Ta sẽ giúp bạn hiểu...")
+5. SAU CÂU DẪN mới đi vào nội dung chi tiết
+6. KHÔNG emoji
+7. Tối đa 250 từ
+8. NẾU có bài tập: CHỈ đưa 1 bài tập cụ thể nhất, cuối response hỏi "Bạn muốn thêm bài tập khác không?"
 
 **VÍ DỤ CÂU DẪN TỰ NHIÊN:**
 - "Ta sẽ hướng dẫn bạn về thiền kết nối Higher Self."
@@ -1921,7 +2050,7 @@ Nếu user hỏi CHI TIẾT về:
 **KIẾN THỨC (chỉ overview, KHÔNG chi tiết setup):**
 - GEM Frequency Method: Zone Retest > Breakout (68% win rate)
 - Patterns: DPD, UPU, UPD, DPU, HFZ, LFZ (tên, KHÔNG cách dùng cụ thể)
-- TIER: FREE (38%), TIER 1 11tr (50-55%), TIER 2 21tr (70-75%), TIER 3 68tr (80-90%)
+- TIER: STARTER 299k (cơ bản), TIER 1 11tr (50-55%), TIER 2 21tr (70-75%), TIER 3 68tr (80-90%)
 - Stop Loss: 2-3% max, Position size: 1-2% account
 
 **LỊCH SỬ HỘI THOẠI:**
@@ -1945,7 +2074,7 @@ Nếu user hỏi CHI TIẾT về:
       prompt += `---
 
 **CÂU HỎI MỚI TỪ USER:** ${userMessage}
-
+${options.userContext ? `\n**THÔNG TIN USER:**\n${options.userContext}\n` : ''}${options.intentInstruction ? `\n**HƯỚNG DẪN PHẢN HỒI THEO INTENT:**\n${options.intentInstruction}\n` : ''}
 **TRẢ LỜI (bắt đầu bằng 1 câu dẫn tự nhiên, sau đó vào nội dung):**`;
 
     } else {
@@ -1959,6 +2088,7 @@ Nếu user hỏi CHI TIẾT về:
 - Emoji (😂, 🚀, 🤑, 👋, 💰, ✨)
 - Ngôn ngữ lùa gà: "Kèo ngon", "Múc mạnh", "To the moon"
 - Sự phục tùng: "Dạ thưa", "Em xin phép"
+- ⚠️ CẤM gọi user là "Gemral", "GEMral", "Gem" hoặc BẤT KỲ tên app nào - CHỈ gọi "bạn"
 
 **BẢO VỆ NỘI DUNG PREMIUM:**
 Nếu user hỏi CHI TIẾT về công thức Frequency, khóa học TIER 1/2/3, AI Prediction, Whale Tracker:
@@ -1973,62 +2103,18 @@ Nếu user hỏi CHI TIẾT về công thức Frequency, khóa học TIER 1/2/3,
 
 **KIẾN THỨC (overview only):**
 - GEM Frequency: DPD, UPU, UPD, DPU, HFZ, LFZ (68% win rate)
-- TIER: FREE (38%), TIER 1 11tr (50-55%), TIER 2 21tr (70-75%), TIER 3 68tr (80-90%)
+- TIER: STARTER 299k (cơ bản), TIER 1 11tr (50-55%), TIER 2 21tr (70-75%), TIER 3 68tr (80-90%)
 - Hawkins: 20-100Hz (thấp), 200Hz+ (can đảm), 500Hz+ (tình yêu)
 
 **TIN NHẮN TỪ USER:** ${userMessage}
-
+${options.userContext ? `\n**THÔNG TIN USER:**\n${options.userContext}\n` : ''}${options.intentInstruction ? `\n**HƯỚNG DẪN PHẢN HỒI THEO INTENT:**\n${options.intentInstruction}\n` : ''}
 **TRẢ LỜI:**`;
     }
 
     console.log('[GEM] Calling direct API...');
 
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
-      }),
-    });
-
-    console.log('[GEM] Status:', res.status);
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error('[GEM] API Error:', err);
-      throw new Error(`API ${res.status}`);
-    }
-
-    const data = await res.json();
-    console.log('[GEM] API Response structure:', JSON.stringify(data).substring(0, 500));
-
-    // Try multiple paths to extract text from Gemini response
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    // Fallback: check if response has different structure
-    if (!text && data.candidates?.[0]?.output) {
-      text = data.candidates[0].output;
-    }
-    if (!text && data.text) {
-      text = data.text;
-    }
-    if (!text && data.response) {
-      text = data.response;
-    }
-
-    // Check for blocked content or safety issues
-    if (!text && data.candidates?.[0]?.finishReason) {
-      console.warn('[GEM] Finish reason:', data.candidates[0].finishReason);
-      if (data.candidates[0].finishReason === 'SAFETY') {
-        text = 'Xin lỗi, tôi không thể trả lời câu hỏi này. Hãy thử hỏi cách khác nhé!';
-      }
-    }
-
-    if (!text) {
-      console.error('[GEM] Cannot extract text from response:', JSON.stringify(data));
-      throw new Error('No response text');
-    }
+    const result = await callGeminiAPI(prompt, { temperature: 0.7 });
+    const text = result.text;
 
     console.log('[GEM] SUCCESS! Length:', text.length);
 
@@ -2242,12 +2328,172 @@ export const resetConversation = () => {
 // ========== EXPORTS ==========
 export const clearHistory = resetConversation;
 
+// ============================================================
+// ENHANCED CHATBOT FUNCTIONS (NEW)
+// Integration with User Context, Intent Detection, Smart Triggers
+// ============================================================
+
+/**
+ * Enhanced message processing with user context and intent detection
+ * @param {string} userId - User ID
+ * @param {string} message - User message
+ * @param {object} options - Options (userTier, sessionId, history)
+ * @returns {Promise<object>} - Response with analytics ID
+ */
+export const sendMessageEnhanced = async (userId, message, options = {}) => {
+  console.log('[GemMasterService] sendMessageEnhanced started:', {
+    userId,
+    messageLength: message?.length,
+  });
+
+  const startTime = Date.now();
+
+  try {
+    // 1. Validate inputs
+    if (!message || typeof message !== 'string') {
+      throw new Error('Message is required');
+    }
+
+    // 2. Process with existing processMessage (which uses RAG with all knowledge)
+    // RAG edge function handles: intent detection, user context, response formatting
+    const response = await processMessage(message, options.history || [], {
+      userTier: options.userTier || 'FREE',
+    });
+
+    // 3. Track analytics (use detectIntentEnhanced result from processMessage or simple detection)
+    const responseTimeMs = Date.now() - startTime;
+    let analyticsId = null;
+    try {
+      // Simple intent detection for analytics only
+      const simpleIntent = detectSimpleIntent(message);
+      analyticsId = await chatbotAnalyticsService.trackQuery({
+        userId,
+        query: message,
+        intent: simpleIntent,
+        responseType: response.type || 'text',
+        confidence: 0.7,
+        responseTimeMs,
+        userTier: options.userTier,
+        sessionId: options.sessionId,
+      });
+    } catch (analyticsErr) {
+      console.warn('[GemMasterService] Analytics error:', analyticsErr.message);
+    }
+
+    console.log('[GemMasterService] sendMessageEnhanced success:', {
+      responseTimeMs,
+      analyticsId,
+    });
+
+    return {
+      ...response,
+      analyticsId,
+    };
+  } catch (err) {
+    console.error('[GemMasterService] sendMessageEnhanced error:', err.message);
+    throw err;
+  }
+};
+
+/**
+ * Simple intent detection for analytics (not for response formatting)
+ */
+const detectSimpleIntent = (message) => {
+  const lowerMsg = message.toLowerCase();
+  if (lowerMsg.includes('mua ngay') || lowerMsg.includes('fomo') || lowerMsg.includes('tăng rồi')) return 'FOMO';
+  if (lowerMsg.includes('tiền') || lowerMsg.includes('tài chính') || lowerMsg.includes('giàu')) return 'WEALTH';
+  if (lowerMsg.includes('tình') || lowerMsg.includes('yêu') || lowerMsg.includes('crush')) return 'RELATIONSHIP';
+  if (lowerMsg.includes('việc') || lowerMsg.includes('nghiệp') || lowerMsg.includes('công ty')) return 'CAREER';
+  if (lowerMsg.includes('btc') || lowerMsg.includes('eth') || lowerMsg.includes('coin')) return 'TRADING';
+  if (lowerMsg.includes('thiền') || lowerMsg.includes('tần số') || lowerMsg.includes('chakra')) return 'SPIRITUAL';
+  return 'GENERAL';
+};
+
+/**
+ * Get smart triggers for user based on behavior
+ * @param {string} userId - User ID
+ * @returns {Promise<array>} - Array of active triggers
+ */
+export const getSmartTriggersForUser = async (userId) => {
+  console.log('[GemMasterService] getSmartTriggersForUser:', userId);
+
+  try {
+    const triggers = await smartTriggerService.evaluateTriggers(userId);
+    return triggers;
+  } catch (err) {
+    console.error('[GemMasterService] getSmartTriggersForUser error:', err.message);
+    return [];
+  }
+};
+
+/**
+ * Log smart trigger shown to user
+ * @param {string} userId - User ID
+ * @param {object} trigger - Trigger object
+ * @returns {Promise<boolean>}
+ */
+export const logTriggerShown = async (userId, trigger) => {
+  return await smartTriggerService.logTriggerShown(userId, trigger);
+};
+
+/**
+ * Submit feedback for a chatbot response
+ * @param {string} analyticsId - Analytics record ID
+ * @param {string} feedback - 'thumbs_up' | 'thumbs_down'
+ * @param {string} comment - Optional feedback comment
+ * @returns {Promise<boolean>}
+ */
+export const submitFeedback = async (analyticsId, feedback, comment = null) => {
+  return await chatbotAnalyticsService.updateFeedback(analyticsId, feedback, comment);
+};
+
+/**
+ * Get user's chatbot usage stats
+ * @param {string} userId - User ID
+ * @returns {Promise<object>}
+ */
+export const getUserChatStats = async (userId) => {
+  console.log('[GemMasterService] getUserChatStats:', userId);
+
+  try {
+    const [queryHistory, feedbackStats] = await Promise.all([
+      chatbotAnalyticsService.getUserQueryHistory(userId, 10),
+      chatbotAnalyticsService.getFeedbackStats(30),
+    ]);
+
+    return {
+      recentQueries: queryHistory,
+      feedbackStats,
+    };
+  } catch (err) {
+    console.error('[GemMasterService] getUserChatStats error:', err.message);
+    return { recentQueries: [], feedbackStats: {} };
+  }
+};
+
+/**
+ * Refresh user context (invalidate cache)
+ * @param {string} userId - User ID
+ */
+export const refreshUserContext = async (userId) => {
+  console.log('[GemMasterService] refreshUserContext:', userId);
+  await userContextService.invalidateUserContextCache(userId);
+};
+
 export default {
   processMessage,
   saveWidgetToVisionBoard,
   resetConversation,
   clearHistory,
+  testAPIConnection,
   WIDGET_SUGGESTIONS,
   COURSE_RECOMMENDATIONS,
   AFFILIATE_PROMO,
+  // NEW: Enhanced functions
+  sendMessageEnhanced,
+  getSmartTriggersForUser,
+  logTriggerShown,
+  submitFeedback,
+  getUserChatStats,
+  refreshUserContext,
 };

@@ -15,6 +15,7 @@ export { default as LetterToUniverseRitual } from './LetterToUniverseRitual';
 // New Rituals
 export { default as BurnReleaseRitual } from './BurnReleaseRitual';
 export { default as StarWishRitual } from './StarWishRitual';
+export { default as CrystalHealingRitual } from './CrystalHealingRitual';
 
 // Ritual mapping for navigation
 export const RITUAL_SCREENS = {
@@ -27,6 +28,7 @@ export const RITUAL_SCREENS = {
   'letter-to-universe': 'LetterToUniverseRitual',
   'burn-release': 'BurnReleaseRitual',
   'star-wish': 'StarWishRitual',
+  'crystal-healing': 'CrystalHealingRitual',
 };
 
 // Ritual metadata for displaying in lists
@@ -93,6 +95,16 @@ export const RITUAL_METADATA = {
     duration: '3-5 phút',
     xpReward: 25,
     theme: 'star',
+  },
+  'crystal-healing': {
+    id: 'crystal-healing',
+    name: 'Chữa Lành Pha Lê',
+    description: 'Kết nối năng lượng chữa lành của đá quý',
+    icon: 'Gem',
+    duration: '5 phút',
+    xpReward: 30,
+    theme: 'crystal',
+    tags: ['healing'],
   },
 };
 

@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   gridContent: {
     padding: SPACING.md,
-    paddingBottom: SPACING.huge,
+    paddingBottom: 120, // Extra padding for bottom tab bar
   },
   gridRow: {
     justifyContent: 'space-between',

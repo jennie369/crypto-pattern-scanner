@@ -95,6 +95,9 @@ import { EmotionIndicator, EmotionBadge } from '../../components/GemMaster/Emoti
 import { StreakDisplay, MiniStreak } from '../../components/GemMaster/StreakDisplay';
 import { ProactiveMessageCard, ProactiveMessageList } from '../../components/GemMaster/ProactiveMessageCard';
 
+// NEW: Smart Triggers & Rich Responses (Day 25)
+import { SmartSuggestionBanner } from '../../components/Chat';
+
 // NEW: Upgrade Banner for quota exhausted
 import { UpgradeBanner } from '../../components/upgrade';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
@@ -126,6 +129,18 @@ import shopifyService from '../../services/shopifyService';
 // NEW: WebSocket/Hybrid Chat Services (PHASE 1C)
 import { useWebSocketChat } from '../../hooks/useWebSocketChat';
 import ConnectionStatus from './components/ConnectionStatus';
+
+// NEW: Smart Triggers Hook (Day 25)
+import { useSmartTriggers } from '../../hooks/useSmartTriggers';
+
+// Simple UUID generator for session tracking
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 // Karma type icons mapping (lucide-react-native icon names)
 const KARMA_ICONS = {
@@ -165,6 +180,20 @@ const GemMasterScreen = ({ navigation, route }) => {
     getConnectionStatusColor,
   } = useWebSocketChat({ autoConnect: true });
 
+  // User state (moved up for hook dependencies)
+  const [user, setUser] = useState(null);
+
+  // Smart Triggers Hook (Day 25) - proactive AI engagement
+  const {
+    activeTrigger: smartTrigger,
+    dismissTrigger: dismissSmartTrigger,
+    handleTriggerAction: handleSmartTriggerAction,
+    hasTriggers: hasSmartTriggers,
+  } = useSmartTriggers(user?.id, {
+    enabled: true,
+    checkInterval: 120000, // Check every 2 minutes
+  });
+
   // Chat state
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [isTyping, setIsTyping] = useState(false);
@@ -184,8 +213,7 @@ const GemMasterScreen = ({ navigation, route }) => {
     disableAutoHide,
   } = useTabBar();
 
-  // User & Tier state
-  const [user, setUser] = useState(null);
+  // User & Tier state (user is declared above for hook dependencies)
   const [userTier, setUserTier] = useState('FREE');
   const [quota, setQuota] = useState(null);
   const [isLoadingTier, setIsLoadingTier] = useState(true);
@@ -364,54 +392,84 @@ const GemMasterScreen = ({ navigation, route }) => {
   // ===== CHATBOT UPGRADE: Load Personalized Data =====
   useEffect(() => {
     const loadPersonalizedData = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('[GemMaster] No user ID, skipping personalized data load');
+        return;
+      }
 
-      try {
-        // Load user profile for personalization
-        if (isFeatureEnabled(FEATURES.MEMORY)) {
+      console.log('[GemMaster] ========== LOADING PERSONALIZED DATA ==========');
+      console.log('[GemMaster] User ID:', user.id);
+      console.log('[GemMaster] Feature Flags:', {
+        MEMORY: isFeatureEnabled(FEATURES.MEMORY),
+        PROACTIVE: isFeatureEnabled(FEATURES.PROACTIVE),
+        GAMIFICATION: isFeatureEnabled(FEATURES.GAMIFICATION),
+        RITUALS: isFeatureEnabled(FEATURES.RITUALS),
+      });
+
+      // Load user profile for personalization
+      if (isFeatureEnabled(FEATURES.MEMORY)) {
+        try {
+          console.log('[GemMaster] Loading user profile...');
           const profile = await userMemoryService.getUserProfile(user.id);
           setUserProfile(profile);
-          console.log('[GemMaster] Loaded user profile:', profile?.preferred_name || 'new user');
+          console.log('[GemMaster] ✓ User profile loaded:', profile?.preferred_name || 'new user');
+        } catch (err) {
+          console.error('[GemMaster] ✗ Failed to load user profile:', err.message);
         }
+      }
 
-        // Load pending proactive messages
-        if (isFeatureEnabled(FEATURES.PROACTIVE)) {
+      // Load pending proactive messages
+      if (isFeatureEnabled(FEATURES.PROACTIVE)) {
+        try {
+          console.log('[GemMaster] Loading proactive messages...');
           const pending = await proactiveAIService.getPendingMessages(user.id);
-          setPendingProactiveMessages(pending);
-          console.log('[GemMaster] Pending proactive messages:', pending?.length || 0);
+          setPendingProactiveMessages(pending || []);
+          console.log('[GemMaster] ✓ Proactive messages:', pending?.length || 0);
 
           // Generate daily insight if needed (once per day)
           proactiveAIService.generateDailyInsight(user.id).catch(err => {
-            console.warn('[GemMaster] Daily insight error:', err);
+            console.warn('[GemMaster] Daily insight error:', err.message);
           });
+        } catch (err) {
+          console.error('[GemMaster] ✗ Failed to load proactive messages:', err.message);
         }
+      }
 
-        // Load gamification summary
-        if (isFeatureEnabled(FEATURES.GAMIFICATION)) {
+      // Load gamification summary
+      if (isFeatureEnabled(FEATURES.GAMIFICATION)) {
+        try {
+          console.log('[GemMaster] Loading gamification summary...');
           const summary = await streakService.getGamificationSummary(user.id);
           setGamificationSummary(summary);
-          console.log('[GemMaster] Gamification:', summary?.level?.name, 'Level', summary?.level?.level);
+          console.log('[GemMaster] ✓ Gamification:', summary?.level?.name, 'Level', summary?.level?.level, 'Streak:', summary?.currentStreak);
 
           // Check streak risk and generate alerts
           proactiveAIService.checkStreaksAndAlert(user.id).catch(err => {
-            console.warn('[GemMaster] Streak alert error:', err);
+            console.warn('[GemMaster] Streak alert error:', err.message);
           });
+        } catch (err) {
+          console.error('[GemMaster] ✗ Failed to load gamification:', err.message);
         }
+      }
 
-        // Load today's ritual status
-        if (isFeatureEnabled(FEATURES.RITUALS)) {
+      // Load today's ritual status
+      if (isFeatureEnabled(FEATURES.RITUALS)) {
+        try {
+          console.log('[GemMaster] Loading ritual status...');
           const rituals = await ritualTrackingService.getTodayStatus(user.id);
           setTodayRituals(rituals);
-          console.log('[GemMaster] Today rituals:', rituals?.completedCount, '/', rituals?.totalCount);
+          console.log('[GemMaster] ✓ Today rituals:', rituals?.completedCount, '/', rituals?.totalCount);
 
           // Generate ritual reminders
           proactiveAIService.generateRitualReminders(user.id).catch(err => {
-            console.warn('[GemMaster] Ritual reminder error:', err);
+            console.warn('[GemMaster] Ritual reminder error:', err.message);
           });
+        } catch (err) {
+          console.error('[GemMaster] ✗ Failed to load rituals:', err.message);
         }
-      } catch (error) {
-        console.error('[GemMaster] Error loading personalized data:', error);
       }
+
+      console.log('[GemMaster] ========== PERSONALIZED DATA LOADED ==========');
     };
 
     loadPersonalizedData();
@@ -625,11 +683,16 @@ const GemMasterScreen = ({ navigation, route }) => {
     // No scroll needed - inverted FlatList auto-shows new content at bottom
 
     try {
-      // ⚠️ CRITICAL: Pass messages history for context (last 10 messages)
-      // gemMasterService will sync this to responseDetector
-      const response = await gemMasterService.processMessage(
+      // ⚠️ CRITICAL: Use sendMessageEnhanced for intent detection & personalization
+      // Falls back to processMessage internally but adds intent instructions
+      const response = await gemMasterService.sendMessageEnhanced(
+        user?.id,
         userMessage,
-        currentMessages // Pass current conversation for context
+        {
+          history: currentMessages,
+          userTier: userTier,
+          sessionId: generateUUID(),
+        }
       );
 
       console.log('[GemMaster] Response:', {
@@ -1736,14 +1799,27 @@ const GemMasterScreen = ({ navigation, route }) => {
     handleSend(option.label);
   }, [handleSend]);
 
+  // Handle feedback (thumbs up/down) for AI responses (Day 25)
+  const handleMessageFeedback = useCallback((messageId, feedback) => {
+    console.log('[GemMaster] Feedback received:', messageId, feedback);
+    // Import and call the analytics service to track feedback
+    // This is fire-and-forget - don't block the UI
+    import('../../services/chatbotAnalyticsService').then(({ updateFeedback }) => {
+      updateFeedback(messageId, feedback).catch(err => {
+        console.warn('[GemMaster] Failed to save feedback:', err);
+      });
+    });
+  }, []);
+
   // Render message item with option selection handler and quick buy
   const renderMessage = useCallback(({ item }) => (
     <MessageBubble
       message={item}
       onOptionSelect={(option) => handleOptionSelect(option, item.id)}
       onQuickBuy={handleQuickBuy}
+      onFeedback={handleMessageFeedback}
     />
-  ), [handleOptionSelect, handleQuickBuy]);
+  ), [handleOptionSelect, handleQuickBuy, handleMessageFeedback]);
 
   // Key extractor
   const keyExtractor = useCallback((item) => item.id, []);
@@ -1764,11 +1840,12 @@ const GemMasterScreen = ({ navigation, route }) => {
           <QuotaIndicator quota={quota} size="sm" showResetTime />
 
           {/* Mini Streak Display - Tap to open Gamification */}
-          {isFeatureEnabled(FEATURES.GAMIFICATION) && gamificationSummary?.currentStreak > 0 && (
+          {/* Show streak even when 0 to encourage users */}
+          {isFeatureEnabled(FEATURES.GAMIFICATION) && gamificationSummary && (
             <TouchableOpacity onPress={handleNavigateToGamification}>
               <MiniStreak
-                streak={gamificationSummary.currentStreak}
-                level={gamificationSummary.level?.level}
+                streak={gamificationSummary.currentStreak || 0}
+                level={gamificationSummary.level || 1}
               />
             </TouchableOpacity>
           )}
@@ -2131,6 +2208,22 @@ const GemMasterScreen = ({ navigation, route }) => {
             <Plus size={18} color={messages.length > 1 ? COLORS.gold : COLORS.textMuted} />
           </TouchableOpacity>
         </View>
+
+        {/* Smart Triggers Banner (Day 25) - proactive AI engagement */}
+        {smartTrigger && (
+          <SmartSuggestionBanner
+            trigger={smartTrigger}
+            onDismiss={dismissSmartTrigger}
+            onAction={(action, trigger) => {
+              // Handle the action (e.g., navigate to a feature, send a message)
+              handleSmartTriggerAction(action, trigger);
+              // If action is a message prompt, send it to chat
+              if (action?.type === 'send_message' && action?.message) {
+                handleSend(action.message);
+              }
+            }}
+          />
+        )}
 
         {/* Chat Messages Container */}
         <View style={styles.chatContainer}>

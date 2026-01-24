@@ -35,6 +35,7 @@ class MessagingService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Step 1: Fetch conversations with participants
       const { data, error } = await supabase
         .from('conversations')
         .select(`
@@ -42,13 +43,7 @@ class MessagingService {
           conversation_participants!inner(
             unread_count,
             last_read_at,
-            user_id,
-            users:user_id(
-              id,
-              display_name,
-              avatar_url,
-              online_status
-            )
+            user_id
           ),
           messages(
             id,
@@ -63,15 +58,45 @@ class MessagingService {
 
       if (error) throw error;
 
-      // Get latest non-deleted message for each conversation
+      // Step 2: Collect all unique participant user_ids (excluding current user)
+      const otherUserIds = new Set();
+      data.forEach(conv => {
+        conv.conversation_participants.forEach(p => {
+          if (p.user_id !== user.id) {
+            otherUserIds.add(p.user_id);
+          }
+        });
+      });
+
+      // Step 3: Fetch profiles for all other participants
+      let profilesMap = {};
+      if (otherUserIds.size > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url, online_status')
+          .in('id', Array.from(otherUserIds));
+
+        if (!profilesError && profiles) {
+          profiles.forEach(profile => {
+            // Create normalized display_name with fallback: full_name > username > display_name
+            profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+            profilesMap[profile.id] = profile;
+          });
+        }
+      }
+
+      // Step 4: Map conversations with profile data
       const conversationsWithLatest = data.map(conv => {
         const sortedMessages = conv.messages
           .filter(m => !m.is_deleted)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         // Get the other participant for 1-1 conversations
-        const otherParticipant = conv.conversation_participants
-          .find(p => p.user_id !== user.id)?.users;
+        const otherParticipantRecord = conv.conversation_participants
+          .find(p => p.user_id !== user.id);
+        const otherParticipant = otherParticipantRecord
+          ? profilesMap[otherParticipantRecord.user_id]
+          : null;
 
         return {
           ...conv,
@@ -99,15 +124,11 @@ class MessagingService {
    */
   async getMessages(conversationId, cursor = null, limit = 50) {
     try {
+      // Step 1: Fetch messages with reactions
       let query = supabase
         .from('messages')
         .select(`
           *,
-          users:sender_id(
-            id,
-            display_name,
-            avatar_url
-          ),
           message_reactions(
             id,
             emoji,
@@ -140,8 +161,33 @@ class MessagingService {
       const messages = hasMore ? data.slice(0, limit) : data;
       const nextCursor = hasMore ? messages[messages.length - 1]?.id : null;
 
+      // Step 2: Collect unique sender_ids and fetch profiles
+      const senderIds = [...new Set(messages.map(m => m.sender_id).filter(Boolean))];
+      let profilesMap = {};
+
+      if (senderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url')
+          .in('id', senderIds);
+
+        if (profiles) {
+          profiles.forEach(profile => {
+            profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+            profilesMap[profile.id] = profile;
+          });
+        }
+      }
+
+      // Step 3: Attach profiles to messages
+      const messagesWithProfiles = messages.map(msg => ({
+        ...msg,
+        sender: profilesMap[msg.sender_id] || null,
+        users: profilesMap[msg.sender_id] || null // Keep for backward compatibility
+      }));
+
       return {
-        messages: messages.reverse(), // Reverse to show oldest first
+        messages: messagesWithProfiles.reverse(), // Reverse to show oldest first
         hasMore,
         nextCursor
       };
@@ -223,17 +269,21 @@ class MessagingService {
       const { data, error } = await supabase
         .from('messages')
         .insert(messageData)
-        .select(`
-          *,
-          users:sender_id(
-            id,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
+
+      // Fetch sender profile separately
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, username, avatar_url')
+        .eq('id', data.sender_id)
+        .single();
+
+      if (profile) {
+        profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+      }
 
       // Update conversation's updated_at
       await supabase
@@ -241,7 +291,7 @@ class MessagingService {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
-      return { ...data, tempId };
+      return { ...data, sender: profile, users: profile, tempId };
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
@@ -274,13 +324,7 @@ class MessagingService {
             conversation_participants(
               unread_count,
               last_read_at,
-              user_id,
-              users:user_id(
-                id,
-                display_name,
-                avatar_url,
-                online_status
-              )
+              user_id
             )
           `)
           .contains('participant_ids', participantIds)
@@ -288,6 +332,19 @@ class MessagingService {
           .maybeSingle();
 
         if (existing) {
+          // Fetch profiles for participants
+          const otherUserId = participantIds.find(id => id !== user.id);
+          if (otherUserId) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, display_name, full_name, username, avatar_url, online_status')
+              .eq('id', otherUserId)
+              .single();
+            if (profile) {
+              profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+            }
+            existing.other_participant = profile;
+          }
           console.log('✅ Found existing conversation:', existing.id);
           return existing;
         }
@@ -329,19 +386,27 @@ class MessagingService {
             id,
             unread_count,
             last_read_at,
-            user_id,
-            users:user_id(
-              id,
-              display_name,
-              avatar_url,
-              online_status
-            )
+            user_id
           )
         `)
         .eq('id', data.id)
         .single();
 
       if (fetchError) throw fetchError;
+
+      // Fetch profile for other participant
+      const otherUserId = participantIds.find(id => id !== user.id);
+      if (otherUserId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url, online_status')
+          .eq('id', otherUserId)
+          .single();
+        if (profile) {
+          profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+        }
+        fullConversation.other_participant = profile;
+      }
 
       console.log('✅ Created new conversation:', fullConversation.id);
       return fullConversation;
@@ -437,18 +502,13 @@ class MessagingService {
           filter: `conversation_id=eq.${conversationId}`
         },
         async (payload) => {
-          // CRITICAL FIX: payload.new only contains raw message data
-          // We need to fetch full message with user data for proper display
+          // Fetch full message with user data for proper display
           try {
-            const { data: fullMessage, error } = await supabase
+            // Step 1: Fetch message with reactions
+            const { data: message, error } = await supabase
               .from('messages')
               .select(`
                 *,
-                users:sender_id(
-                  id,
-                  display_name,
-                  avatar_url
-                ),
                 message_reactions(
                   id,
                   emoji,
@@ -459,13 +519,28 @@ class MessagingService {
               .single();
 
             if (error) {
-              console.error('[messagingService] Error fetching full message:', error);
-              // Fallback to raw payload if fetch fails
+              console.error('[messagingService] Error fetching message:', error);
               callback(payload.new);
               return;
             }
 
-            callback(fullMessage);
+            // Step 2: Fetch sender profile separately
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, display_name, full_name, username, avatar_url')
+              .eq('id', message.sender_id)
+              .single();
+
+            // Normalize display_name
+            if (profile) {
+              profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+            }
+
+            // Attach profile as 'sender' for compatibility
+            message.sender = profile;
+            message.users = profile; // Keep for backward compatibility
+
+            callback(message);
           } catch (err) {
             console.error('[messagingService] subscribeToMessages error:', err);
             callback(payload.new);
@@ -483,15 +558,11 @@ class MessagingService {
         async (payload) => {
           // Handle message updates (reactions, soft deletes, recalls)
           try {
-            const { data: fullMessage, error } = await supabase
+            // Step 1: Fetch message with reactions
+            const { data: message, error } = await supabase
               .from('messages')
               .select(`
                 *,
-                users:sender_id(
-                  id,
-                  display_name,
-                  avatar_url
-                ),
                 message_reactions(
                   id,
                   emoji,
@@ -507,7 +578,23 @@ class MessagingService {
               return;
             }
 
-            callback(fullMessage, 'update');
+            // Step 2: Fetch sender profile separately
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, display_name, full_name, username, avatar_url')
+              .eq('id', message.sender_id)
+              .single();
+
+            // Normalize display_name
+            if (profile) {
+              profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+            }
+
+            // Attach profile as 'sender' for compatibility
+            message.sender = profile;
+            message.users = profile; // Keep for backward compatibility
+
+            callback(message, 'update');
           } catch (err) {
             console.error('[messagingService] subscribeToMessages update error:', err);
             callback(payload.new, 'update');
@@ -830,22 +917,35 @@ class MessagingService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Step 1: Get blocked user IDs
       const { data, error } = await supabase
         .from('blocked_users')
-        .select(`
-          *,
-          blocked_user:users!blocked_users_blocked_id_fkey(
-            id,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('blocker_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      if (!data || data.length === 0) return [];
 
-      return data;
+      // Step 2: Fetch profiles for blocked users
+      const blockedIds = data.map(b => b.blocked_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, username, avatar_url')
+        .in('id', blockedIds);
+
+      const profilesMap = {};
+      profiles?.forEach(p => {
+        p.display_name = p.full_name || p.display_name || p.username || 'User';
+        profilesMap[p.id] = p;
+      });
+
+      // Step 3: Attach profiles to blocked users
+      return data.map(item => ({
+        ...item,
+        blocked_user: profilesMap[item.blocked_id] || null,
+        profiles: profilesMap[item.blocked_id] || null,
+      }));
     } catch (error) {
       console.error('Error fetching blocked users:', error);
       throw error;
@@ -961,13 +1061,19 @@ class MessagingService {
       } catch (readError) {
         console.warn('[messagingService] Base64 read failed, trying fetch:', readError.message);
 
-        // Fallback to fetch method (works on some devices)
-        try {
-          const response = await fetch(file.uri);
-          fileData = await response.blob();
-          fileSize = fileData.size;
-        } catch (fetchError) {
-          console.error('[messagingService] Fetch also failed:', fetchError);
+        // Fallback to fetch method - only works on web
+        if (Platform.OS === 'web') {
+          try {
+            const response = await fetch(file.uri);
+            fileData = await response.blob();
+            fileSize = fileData.size;
+          } catch (fetchError) {
+            console.error('[messagingService] Fetch also failed:', fetchError);
+            throw new Error('Không thể đọc file. Vui lòng thử lại.');
+          }
+        } else {
+          // On native, if FileSystem failed, there's no fallback
+          console.error('[messagingService] FileSystem read failed on native:', readError);
           throw new Error('Không thể đọc file. Vui lòng thử lại.');
         }
       }
@@ -1044,11 +1150,6 @@ class MessagingService {
         .from('messages')
         .select(`
           *,
-          users:sender_id(
-            id,
-            display_name,
-            avatar_url
-          ),
           conversations(
             id,
             name,
@@ -1068,7 +1169,32 @@ class MessagingService {
 
       if (error) throw error;
 
-      return data;
+      if (!data || data.length === 0) return [];
+
+      // Fetch sender profiles
+      const senderIds = [...new Set(data.map(m => m.sender_id).filter(Boolean))];
+      let profilesMap = {};
+
+      if (senderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url')
+          .in('id', senderIds);
+
+        if (profiles) {
+          profiles.forEach(profile => {
+            profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+            profilesMap[profile.id] = profile;
+          });
+        }
+      }
+
+      // Attach profiles to messages
+      return data.map(msg => ({
+        ...msg,
+        sender: profilesMap[msg.sender_id] || null,
+        users: profilesMap[msg.sender_id] || null
+      }));
     } catch (error) {
       console.error('Error searching messages:', error);
       throw error;
@@ -1086,16 +1212,10 @@ class MessagingService {
    */
   async getPinnedMessages(conversationId) {
     try {
+      // Step 1: Get pinned messages
       const { data, error } = await supabase
         .from('messages')
-        .select(`
-          *,
-          sender:sender_id(
-            id,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('conversation_id', conversationId)
         .eq('is_pinned', true)
         .eq('is_deleted', false)
@@ -1110,7 +1230,30 @@ class MessagingService {
         throw error;
       }
 
-      return data || [];
+      if (!data || data.length === 0) return [];
+
+      // Step 2: Fetch sender profiles
+      const senderIds = [...new Set(data.map(m => m.sender_id).filter(Boolean))];
+      let profilesMap = {};
+
+      if (senderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url')
+          .in('id', senderIds);
+
+        profiles?.forEach(p => {
+          p.display_name = p.full_name || p.display_name || p.username || 'User';
+          profilesMap[p.id] = p;
+        });
+      }
+
+      // Step 3: Attach sender profiles to messages
+      return data.map(msg => ({
+        ...msg,
+        sender: profilesMap[msg.sender_id] || null,
+        users: profilesMap[msg.sender_id] || null,
+      }));
     } catch (error) {
       console.warn('[messagingService] getPinnedMessages:', error?.message);
       return [];
@@ -1332,16 +1475,11 @@ class MessagingService {
 
       const messageIds = starredData.map(s => s.message_id);
 
-      // Fetch full message details
+      // Step 1: Fetch messages with conversations
       let query = supabase
         .from('messages')
         .select(`
           *,
-          sender:sender_id(
-            id,
-            display_name,
-            avatar_url
-          ),
           conversations(
             id,
             name,
@@ -1358,10 +1496,29 @@ class MessagingService {
       const { data: messages, error: messagesError } = await query;
 
       if (messagesError) throw messagesError;
+      if (!messages || messages.length === 0) return [];
 
-      // Add starred_at to each message
+      // Step 2: Fetch sender profiles
+      const senderIds = [...new Set(messages.map(m => m.sender_id).filter(Boolean))];
+      let profilesMap = {};
+
+      if (senderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url')
+          .in('id', senderIds);
+
+        profiles?.forEach(p => {
+          p.display_name = p.full_name || p.display_name || p.username || 'User';
+          profilesMap[p.id] = p;
+        });
+      }
+
+      // Step 3: Attach sender profiles and starred_at to messages
       const messagesWithStarred = messages.map(msg => ({
         ...msg,
+        sender: profilesMap[msg.sender_id] || null,
+        users: profilesMap[msg.sender_id] || null,
         starred_at: starredData.find(s => s.message_id === msg.id)?.starred_at,
       }));
 
@@ -1916,13 +2073,7 @@ class MessagingService {
           conversation_participants!inner(
             unread_count,
             last_read_at,
-            user_id,
-            users:user_id(
-              id,
-              display_name,
-              avatar_url,
-              online_status
-            )
+            user_id
           ),
           messages(
             id,
@@ -1937,14 +2088,44 @@ class MessagingService {
 
       if (error) throw error;
 
+      // Collect all unique participant user_ids (excluding current user)
+      const otherUserIds = new Set();
+      data.forEach(conv => {
+        conv.conversation_participants.forEach(p => {
+          if (p.user_id !== user.id) {
+            otherUserIds.add(p.user_id);
+          }
+        });
+      });
+
+      // Fetch profiles for all other participants
+      let profilesMap = {};
+      if (otherUserIds.size > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url, online_status')
+          .in('id', Array.from(otherUserIds));
+
+        if (!profilesError && profiles) {
+          profiles.forEach(profile => {
+            // Create normalized display_name with fallback: full_name > username > display_name
+            profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+            profilesMap[profile.id] = profile;
+          });
+        }
+      }
+
       // Process conversations similar to getConversations
       const conversationsWithLatest = data.map(conv => {
         const sortedMessages = conv.messages
           .filter(m => !m.is_deleted)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        const otherParticipant = conv.conversation_participants
-          .find(p => p.user_id !== user.id)?.users;
+        const otherParticipantRecord = conv.conversation_participants
+          .find(p => p.user_id !== user.id);
+        const otherParticipant = otherParticipantRecord
+          ? profilesMap[otherParticipantRecord.user_id]
+          : null;
 
         const archivedInfo = archivedSettings.find(s => s.conversation_id === conv.id);
 

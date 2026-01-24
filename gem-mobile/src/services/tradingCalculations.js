@@ -355,9 +355,9 @@ export const calculateRiskReward = (entryPrice, tpPrice, slPrice, direction) => 
   }
 
   const ratio = reward / risk;
-  // Use Vietnamese decimal format (comma)
-  const ratioFormatted = ratio.toFixed(1).replace('.', ',');
-  const ratioString = `1:${ratioFormatted}`;
+  // Format as whole number (1:2, not 1:2,0) - no decimal
+  const ratioRounded = Math.round(ratio);
+  const ratioString = `1:${ratioRounded}`;
 
   return { risk, reward, ratio, ratioString };
 };

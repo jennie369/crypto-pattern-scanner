@@ -255,9 +255,10 @@ const SmallCourseCard = ({ product, onPress, index }) => {
             style={styles.smallImage}
             resizeMode="cover"
           />
-          {/* Gradient */}
+          {/* Gradient - lighter opacity for better visibility */}
           <LinearGradient
-            colors={['transparent', 'rgba(17, 34, 80, 0.9)']}
+            colors={['transparent', 'rgba(17, 34, 80, 0.4)']}
+            locations={[0.6, 1]}
             style={styles.smallGradient}
           />
           {/* Price Badge */}
@@ -579,7 +580,7 @@ const styles = StyleSheet.create({
   },
   smallImageContainer: {
     width: '100%',
-    height: 100,
+    aspectRatio: 1, // 1:1 square ratio
     position: 'relative',
   },
   smallImage: {

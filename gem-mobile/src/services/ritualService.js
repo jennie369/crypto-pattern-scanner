@@ -6,6 +6,8 @@
 
 import { supabase } from './supabase';
 import { addXPToUser, updateDailySummary, XP_REWARDS } from './goalService';
+import calendarService, { EVENT_SOURCE_TYPES } from './calendarService';
+import { logActivity, ACTIVITY_TYPES } from './activityService';
 
 // ============ RITUAL TYPES ============
 export const RITUAL_TYPES = {
@@ -130,6 +132,77 @@ export const RITUAL_TYPES = {
   },
 };
 
+// ============ ENSURE RITUAL EXISTS IN DATABASE ============
+/**
+ * Creates a ritual in the database if it doesn't exist
+ * Uses the local RITUAL_TYPES config as the source of truth
+ * @param {string} ritualSlug - Ritual slug/id
+ * @returns {Promise<Object|null>} The ritual record or null on failure
+ */
+const ensureRitualExists = async (ritualSlug) => {
+  const ritualConfig = RITUAL_TYPES[ritualSlug];
+  if (!ritualConfig) {
+    console.warn('[ritualService] Unknown ritual type:', ritualSlug);
+    return null;
+  }
+
+  try {
+    // Check if ritual exists
+    const { data: existing } = await supabase
+      .from('vision_rituals')
+      .select('id, name')
+      .eq('id', ritualSlug)
+      .single();
+
+    if (existing) {
+      return existing;
+    }
+
+    // Create ritual in database
+    console.log('[ritualService] Creating ritual in database:', ritualSlug);
+
+    // Map category from RITUAL_TYPES to database format
+    const categoryMap = {
+      'love': 'healing',
+      'abundance': 'prosperity',
+      'cleansing': 'spiritual',
+      'manifestation': 'manifest',
+      'release': 'release',
+      'healing': 'healing',
+    };
+
+    const { data: created, error } = await supabase
+      .from('vision_rituals')
+      .insert({
+        id: ritualSlug,
+        name: ritualConfig.title,
+        name_vi: ritualConfig.title,
+        description: ritualConfig.description,
+        category: categoryMap[ritualConfig.category] || 'spiritual',
+        duration_minutes: ritualConfig.duration || 5,
+        icon: ritualConfig.icon?.toLowerCase() || 'sparkles',
+        color: ritualConfig.color || '#9C0612',
+        xp_per_completion: 25,
+        sort_order: Object.keys(RITUAL_TYPES).indexOf(ritualSlug) + 1,
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      // If insert fails (e.g., RLS policy), log but don't throw
+      console.warn('[ritualService] Failed to create ritual in DB:', error.message);
+      return null;
+    }
+
+    console.log('[ritualService] Ritual created successfully:', ritualSlug);
+    return created;
+  } catch (err) {
+    console.error('[ritualService] ensureRitualExists error:', err);
+    return null;
+  }
+};
+
 // ============ GET ALL RITUALS ============
 export const getAllRituals = async () => {
   try {
@@ -141,10 +214,10 @@ export const getAllRituals = async () => {
 
     if (error) throw error;
 
-    // Merge with local configs
+    // Merge with local configs (id is the slug in vision_rituals)
     return (data || []).map(ritual => ({
       ...ritual,
-      ...RITUAL_TYPES[ritual.slug],
+      ...RITUAL_TYPES[ritual.id],
     }));
   } catch (err) {
     console.error('[ritualService] getAllRituals error:', err);
@@ -164,9 +237,10 @@ export const getRitualById = async (ritualId) => {
 
     if (error) throw error;
 
+    // In vision_rituals table, id IS the slug (VARCHAR)
     return {
       ...data,
-      ...RITUAL_TYPES[data.slug],
+      ...RITUAL_TYPES[data.id],
     };
   } catch (err) {
     console.error('[ritualService] getRitualById error:', err);
@@ -185,9 +259,10 @@ export const getUserRitualProgress = async (userId) => {
 
     if (error) throw error;
 
+    // In vision_rituals table, id IS the slug (VARCHAR)
     return (streaks || []).map(streak => ({
       ritualId: streak.ritual_id,
-      ritualSlug: streak.ritual?.slug,
+      ritualSlug: streak.ritual?.id, // id is the slug in this table
       currentStreak: streak.current_streak,
       bestStreak: streak.best_streak,
       totalCompletions: streak.total_completions,
@@ -202,24 +277,21 @@ export const getUserRitualProgress = async (userId) => {
 // ============ COMPLETE RITUAL ============
 export const completeRitual = async (userId, ritualSlug, content = null) => {
   try {
-    // Get ritual info
-    let { data: ritual } = await supabase
-      .from('vision_rituals')
-      .select('id, slug, name')
-      .eq('slug', ritualSlug)
-      .single();
+    const today = new Date().toISOString().split('T')[0];
+    const ritualConfig = RITUAL_TYPES[ritualSlug] || {};
+
+    // Ensure ritual exists in database, create if not
+    let ritual = await ensureRitualExists(ritualSlug);
 
     if (!ritual) {
-      // Ritual not in database - use local config instead
-      const ritualType = RITUAL_TYPES[ritualSlug];
-      if (!ritualType) {
+      // Fallback: ritual couldn't be found or created in DB
+      // Still allow completion with local config
+      console.log('[ritualService] Using local-only mode for ritual:', ritualSlug);
+
+      if (!ritualConfig.title) {
         console.warn('[ritualService] Unknown ritual type:', ritualSlug);
         return { success: true, xpEarned: 25, newStreak: 1, isNewBest: false };
       }
-
-      // Use local config - don't try to auto-create in database
-      // This avoids RLS/permission errors while still completing the ritual
-      console.log('[ritualService] Using local ritual config for:', ritualSlug);
 
       // Award XP directly without database tracking
       try {
@@ -227,6 +299,32 @@ export const completeRitual = async (userId, ritualSlug, content = null) => {
         await updateDailySummary(userId, { rituals_completed: 1 });
       } catch (xpErr) {
         console.warn('[ritualService] XP update failed:', xpErr.message);
+      }
+
+      // Create calendar event for local-only ritual (no sourceId - uses null)
+      try {
+        const reflection = content?.reflection || content?.notes || null;
+        await calendarService.createEvent(userId, {
+          title: `✨ ${ritualConfig.title}`,
+          description: reflection ? `Suy ngẫm: ${reflection}` : ritualConfig.description || null,
+          date: today,
+          sourceType: EVENT_SOURCE_TYPES.DIVINATION,
+          // sourceId omitted - will be null (local-only ritual)
+          color: ritualConfig.color || '#9C0612',
+          icon: 'sparkles',
+          lifeArea: 'spiritual',
+          isAllDay: true,
+          metadata: {
+            ritual_slug: ritualSlug,
+            ritual_name: ritualConfig.title,
+            reflection: reflection,
+            xp_earned: XP_REWARDS.ritual_complete,
+            streak: 1,
+          },
+        });
+        console.log('[ritualService] Calendar event created for local ritual:', ritualSlug);
+      } catch (calendarErr) {
+        console.warn('[ritualService] Calendar event creation failed:', calendarErr.message);
       }
 
       return {
@@ -237,8 +335,7 @@ export const completeRitual = async (userId, ritualSlug, content = null) => {
       };
     }
 
-    const today = new Date().toISOString().split('T')[0];
-
+    // Ritual exists in database - proceed with full tracking
     // Check if already completed today
     const { data: existing } = await supabase
       .from('vision_ritual_completions')
@@ -249,18 +346,60 @@ export const completeRitual = async (userId, ritualSlug, content = null) => {
       .single();
 
     if (existing) {
-      return { alreadyCompleted: true, xpEarned: 0 };
+      return { alreadyCompleted: true, xpEarned: 0, completionId: existing.id };
     }
 
-    // Log completion
-    await supabase
-      .from('vision_ritual_completions')
-      .insert({
-        user_id: userId,
-        ritual_id: ritual.id,
-        content: content,
-        completed_at: new Date().toISOString(),
-      });
+    // Log completion and get the completion record (with UUID id)
+    // Build insert data - only include content if provided (column may not exist in older schemas)
+    const insertData = {
+      user_id: userId,
+      ritual_id: ritual.id,
+      completed_at: new Date().toISOString(),
+    };
+
+    // Try insert with content first, fallback without content if column doesn't exist
+    let completionRecord = null;
+    let insertError = null;
+
+    if (content !== null && content !== undefined) {
+      // Try with content
+      const result = await supabase
+        .from('vision_ritual_completions')
+        .insert({ ...insertData, content: content })
+        .select('id')
+        .single();
+
+      if (result.error?.code === 'PGRST204' && result.error?.message?.includes('content')) {
+        // content column doesn't exist, retry without it
+        console.warn('[ritualService] content column not found, inserting without it');
+        const retryResult = await supabase
+          .from('vision_ritual_completions')
+          .insert(insertData)
+          .select('id')
+          .single();
+        completionRecord = retryResult.data;
+        insertError = retryResult.error;
+      } else {
+        completionRecord = result.data;
+        insertError = result.error;
+      }
+    } else {
+      // No content provided, insert without it
+      const result = await supabase
+        .from('vision_ritual_completions')
+        .insert(insertData)
+        .select('id')
+        .single();
+      completionRecord = result.data;
+      insertError = result.error;
+    }
+
+    if (insertError) {
+      console.error('[ritualService] Failed to insert completion:', insertError);
+      throw insertError;
+    }
+
+    const completionId = completionRecord?.id; // This is UUID
 
     // Update streak
     const streakResult = await updateRitualStreak(userId, ritual.id);
@@ -282,11 +421,63 @@ export const completeRitual = async (userId, ritualSlug, content = null) => {
       rituals_completed: 1,
     });
 
+    // Create calendar event using completion UUID as sourceId
+    try {
+      const eventTitle = ritualConfig.title || ritual.name || 'Nghi thức hoàn thành';
+      const reflection = content?.reflection || content?.notes || null;
+
+      await calendarService.createEvent(userId, {
+        title: `✨ ${eventTitle}`,
+        description: reflection ? `Suy ngẫm: ${reflection}` : ritualConfig.description || null,
+        date: today,
+        sourceType: EVENT_SOURCE_TYPES.DIVINATION,
+        sourceId: completionId, // Use completion UUID, not ritual.id (VARCHAR)
+        color: ritualConfig.color || '#9C0612',
+        icon: 'sparkles',
+        lifeArea: 'spiritual',
+        isAllDay: true,
+        metadata: {
+          ritual_slug: ritualSlug,
+          ritual_name: ritual.name,
+          reflection: reflection,
+          xp_earned: xpEarned,
+          streak: streakResult.newStreak,
+          completion_id: completionId,
+        },
+      });
+      console.log('[ritualService] Calendar event created for ritual:', ritualSlug);
+    } catch (calendarErr) {
+      // Don't fail the ritual completion if calendar event fails
+      console.warn('[ritualService] Calendar event creation failed:', calendarErr.message);
+    }
+
+    // Log activity for activity feed
+    try {
+      await logActivity(userId, ACTIVITY_TYPES.RITUAL_COMPLETE, {
+        title: `Hoàn thành ${ritualConfig.title || ritual.name}`,
+        description: content?.reflection || null,
+        referenceId: completionId,
+        referenceType: 'ritual_completion',
+        xpEarned,
+        metadata: {
+          ritual_slug: ritualSlug,
+          ritual_name: ritualConfig.title || ritual.name,
+          streak: streakResult.newStreak,
+          is_new_best: streakResult.isNewBest,
+        },
+      });
+      console.log('[ritualService] Activity logged for ritual:', ritualSlug);
+    } catch (activityErr) {
+      // Don't fail if activity logging fails
+      console.warn('[ritualService] Activity logging failed:', activityErr?.message);
+    }
+
     return {
       success: true,
       xpEarned,
       newStreak: streakResult.newStreak,
       isNewBest: streakResult.isNewBest,
+      completionId,
     };
   } catch (err) {
     console.error('[ritualService] completeRitual error:', err);
@@ -373,13 +564,14 @@ export const getTodayCompletions = async (userId) => {
 
     const { data, error } = await supabase
       .from('vision_ritual_completions')
-      .select('*, ritual:vision_rituals(slug, name)')
+      .select('*, ritual:vision_rituals(id, name)')
       .eq('user_id', userId)
       .gte('completed_at', today);
 
     if (error) throw error;
 
-    return (data || []).map(c => c.ritual?.slug).filter(Boolean);
+    // In vision_rituals table, id IS the slug (VARCHAR)
+    return (data || []).map(c => c.ritual?.id).filter(Boolean);
   } catch (err) {
     console.error('[ritualService] getTodayCompletions error:', err);
     return [];
@@ -495,6 +687,119 @@ export const getRecommendedRituals = async (userId) => {
   }
 };
 
+// ============ SAVE REFLECTION (After completion) ============
+/**
+ * Save reflection for today's ritual completion and create calendar event
+ * @param {string} userId - User ID
+ * @param {string} ritualSlug - Ritual slug
+ * @param {string} reflection - Reflection text
+ * @returns {Promise<Object>}
+ */
+export const saveReflection = async (userId, ritualSlug, reflection) => {
+  if (!userId || !ritualSlug || !reflection?.trim()) {
+    console.warn('[ritualService] saveReflection: Missing required params');
+    return { success: false, error: 'Missing required parameters' };
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const ritualConfig = RITUAL_TYPES[ritualSlug] || {};
+
+  try {
+    // Ensure ritual exists in database, create if not
+    const ritual = await ensureRitualExists(ritualSlug);
+
+    // Get today's completion for this ritual
+    let completion = null;
+    if (ritual) {
+      // Try to get completion with content column first
+      let result = await supabase
+        .from('vision_ritual_completions')
+        .select('id, content')
+        .eq('user_id', userId)
+        .eq('ritual_id', ritual.id)
+        .gte('completed_at', today)
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      // If content column doesn't exist, query without it
+      if (result.error?.code === 'PGRST204' && result.error?.message?.includes('content')) {
+        console.warn('[ritualService] content column not found, querying without it');
+        result = await supabase
+          .from('vision_ritual_completions')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('ritual_id', ritual.id)
+          .gte('completed_at', today)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .single();
+      }
+
+      completion = result.data;
+    }
+
+    // Update completion with reflection (if content column exists)
+    if (completion) {
+      const existingContent = completion.content || {};
+      const updatedContent = {
+        ...existingContent,
+        reflection: reflection.trim(),
+      };
+
+      // Try to update with content
+      const updateResult = await supabase
+        .from('vision_ritual_completions')
+        .update({ content: updatedContent })
+        .eq('id', completion.id);
+
+      if (updateResult.error?.code === 'PGRST204' && updateResult.error?.message?.includes('content')) {
+        // content column doesn't exist, skip update
+        console.warn('[ritualService] content column not found, skipping reflection update');
+      } else if (updateResult.error) {
+        console.error('[ritualService] Failed to update completion with reflection:', updateResult.error);
+      } else {
+        console.log('[ritualService] Updated completion with reflection:', completion.id);
+      }
+    }
+
+    // Create calendar event with reflection
+    // Use completion.id (UUID) as sourceId, NOT ritual.id (VARCHAR)
+    const eventTitle = ritualConfig.title || (ritual?.name) || 'Nghi thức hoàn thành';
+    const sourceId = completion?.id || null; // UUID from vision_ritual_completions
+
+    const calendarResult = await calendarService.createEvent(userId, {
+      title: `✨ ${eventTitle}`,
+      description: `Suy ngẫm: ${reflection.trim()}`,
+      date: today,
+      sourceType: EVENT_SOURCE_TYPES.DIVINATION,
+      sourceId: sourceId, // Use completion UUID, not ritual.id (VARCHAR)
+      color: ritualConfig.color || '#9C0612',
+      icon: 'sparkles',
+      lifeArea: 'spiritual',
+      isAllDay: true,
+      metadata: {
+        ritual_slug: ritualSlug,
+        ritual_name: eventTitle,
+        reflection: reflection.trim(),
+        saved_after_completion: true,
+        completion_id: completion?.id || null,
+      },
+    });
+
+    console.log('[ritualService] Calendar event created for reflection:', calendarResult.success);
+
+    return {
+      success: true,
+      calendarEventCreated: calendarResult.success,
+      completionId: completion?.id,
+    };
+  } catch (err) {
+    console.error('[ritualService] saveReflection error:', err);
+    return { success: false, error: err.message };
+  }
+};
+
 export default {
   RITUAL_TYPES,
   getAllRituals,
@@ -505,4 +810,5 @@ export default {
   getRitualHistory,
   getRitualStats,
   getRecommendedRituals,
+  saveReflection,
 };

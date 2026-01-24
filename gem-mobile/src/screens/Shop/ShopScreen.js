@@ -18,7 +18,7 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Search, ShoppingCart, ShoppingBag, Heart } from 'lucide-react-native';
 import { ProductCard, CategoryFilter, DigitalProductsSection } from './components';
@@ -28,7 +28,7 @@ import CourseSection from './components/CourseSection';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
 import SponsorBanner from '../../components/SponsorBanner';
 import { distributeBannersAmongSections } from '../../utils/bannerDistribution';
-import { shopifyService } from '../../services/shopifyService';
+import { shopifyService, preloadShopData } from '../../services/shopifyService';
 import { useShopSections, useFilteredProducts } from '../../hooks/useShopProducts';
 import { prefetchImages } from '../../components/Common/OptimizedImage';
 import { useCart } from '../../contexts/CartContext';
@@ -57,9 +57,19 @@ const HEADER_HEIGHT = 60;
 const TABS_HEIGHT = 60; // 12 (paddingTop) + 36 (tab height) + 12 (paddingBottom)
 const TOTAL_HEADER_HEIGHT = HEADER_HEIGHT + TABS_HEIGHT;
 
+// =========== GLOBAL SHOP CACHE - for instant display ===========
+const shopCache = {
+  allProducts: null,
+  sectionsData: null,
+  exploreProducts: null,
+  lastFetch: 0,
+  CACHE_DURATION: 60000, // 60 seconds cache for shop data
+};
+
 const ShopScreen = ({ navigation }) => {
   const { itemCount } = useCart();
   const { handleScroll: handleTabBarScroll } = useTabBar();
+  const insets = useSafeAreaInsets();
 
   // Auto-hide header animation
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -70,10 +80,11 @@ const ShopScreen = ({ navigation }) => {
   // Sponsor banners - use hook to fetch ALL banners for distribution
   const { banners: sponsorBanners, dismissBanner, userId } = useSponsorBanners('shop', null);
 
-  // Data states
-  const [allProducts, setAllProducts] = useState([]);
+  // Data states - Initialize from cache for instant display
+  const [allProducts, setAllProducts] = useState(() => shopCache.allProducts || []);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [loading, setLoading] = useState(true);
+  // Only show loading if no cached data
+  const [loading, setLoading] = useState(!shopCache.allProducts || shopCache.allProducts.length === 0);
   const [refreshing, setRefreshing] = useState(false);
 
   // Shop Enhancement states
@@ -81,12 +92,12 @@ const ShopScreen = ({ navigation }) => {
   const [showPromoBar, setShowPromoBar] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Sections data từ Shopify tags
-  const [sectionsData, setSectionsData] = useState({});
+  // Sections data từ Shopify tags - Initialize from cache
+  const [sectionsData, setSectionsData] = useState(() => shopCache.sectionsData || {});
   const [sectionsLoading, setSectionsLoading] = useState({});
 
-  // Infinity scroll state cho section "explore"
-  const [exploreProducts, setExploreProducts] = useState([]);
+  // Infinity scroll state cho section "explore" - Initialize from cache
+  const [exploreProducts, setExploreProducts] = useState(() => shopCache.exploreProducts || []);
   const [exploreLoading, setExploreLoading] = useState(false);
   const [exploreLoadingMore, setExploreLoadingMore] = useState(false);
   const [exploreHasMore, setExploreHasMore] = useState(true);
@@ -161,7 +172,32 @@ const ShopScreen = ({ navigation }) => {
   }, [handleTabBarScroll, headerTranslateY, exploreHasMore, exploreLoadingMore]);
 
   useEffect(() => {
-    loadInitialData();
+    const now = Date.now();
+    const cacheExpired = now - shopCache.lastFetch > shopCache.CACHE_DURATION;
+
+    // Check if service-level cache has data (from preload)
+    const serviceHasCache = shopifyService._productsCache && shopifyService._productsCache.length > 0;
+
+    // If service has cache but screen doesn't, populate screen cache from service cache
+    if (serviceHasCache && (!shopCache.allProducts || shopCache.allProducts.length === 0)) {
+      console.log('[ShopScreen] Using preloaded data from service cache');
+      const preloadedProducts = shopifyService._productsCache;
+      setAllProducts(preloadedProducts);
+      shopCache.allProducts = preloadedProducts;
+      shopCache.lastFetch = Date.now();
+
+      // Still need to load sections and explore
+      loadSectionsAndExplore(preloadedProducts);
+      return;
+    }
+
+    // Only load if cache expired or no cached data
+    if (cacheExpired || !shopCache.allProducts || shopCache.allProducts.length === 0) {
+      loadInitialData();
+    } else {
+      // Use cached data - instant display
+      setLoading(false);
+    }
   }, []);
 
   // Fetch wishlist count and refresh on focus
@@ -188,12 +224,42 @@ const ShopScreen = ({ navigation }) => {
     checkOnboarding();
   }, []);
 
+  // Helper to load sections and explore when we have preloaded products
+  const loadSectionsAndExplore = async (productsData) => {
+    setLoading(true);
+    try {
+      // Prefetch images
+      const imageUrls = productsData
+        .slice(0, 30)
+        .map(p => p.images?.[0]?.src || p.image)
+        .filter(Boolean);
+      prefetchImages(imageUrls);
+
+      // Load sections and explore in parallel
+      const [newSectionsData] = await Promise.all([
+        loadSections(productsData),
+        loadExploreProducts(productsData, true),
+      ]);
+
+      // Update cache
+      shopCache.sectionsData = newSectionsData;
+      shopCache.lastFetch = Date.now();
+    } catch (error) {
+      console.error('Error loading sections:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
       // Load tất cả sản phẩm
       const productsData = await shopifyService.getProducts({ limit: 100 });
       setAllProducts(productsData);
+
+      // Update cache immediately for products
+      shopCache.allProducts = productsData;
 
       // Prefetch images for faster loading - get first image of each product
       const imageUrls = productsData
@@ -203,10 +269,14 @@ const ShopScreen = ({ navigation }) => {
       prefetchImages(imageUrls);
 
       // Load các sections theo tags
-      await loadSections(productsData);
+      const newSectionsData = await loadSections(productsData);
 
       // Load initial explore products
       await loadExploreProducts(productsData, true);
+
+      // Update cache with all data
+      shopCache.sectionsData = newSectionsData;
+      shopCache.lastFetch = Date.now();
     } catch (error) {
       console.error('Error loading shop data:', error);
     } finally {
@@ -233,6 +303,8 @@ const ShopScreen = ({ navigation }) => {
 
       if (reset) {
         setExploreProducts(newProducts);
+        // Update cache for explore products
+        shopCache.exploreProducts = newProducts;
       } else {
         setExploreProducts(prev => [...prev, ...newProducts]);
       }
@@ -318,6 +390,7 @@ const ShopScreen = ({ navigation }) => {
     );
 
     setSectionsData(newSectionsData);
+    return newSectionsData; // Return for caching
   };
 
   const onRefresh = useCallback(async () => {
@@ -423,6 +496,12 @@ const ShopScreen = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
       onScroll={handleScroll}
       scrollEventThrottle={16}
+      removeClippedSubviews={true}
+      maxToRenderPerBatch={8}
+      windowSize={7}
+      initialNumToRender={6}
+      decelerationRate="fast"
+      overScrollMode="never"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -474,6 +553,10 @@ const ShopScreen = ({ navigation }) => {
               showsVerticalScrollIndicator={false}
               onScroll={handleScroll}
               scrollEventThrottle={16}
+              removeClippedSubviews={true}
+              decelerationRate="fast"
+              overScrollMode="never"
+              nestedScrollEnabled={false}
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
@@ -484,8 +567,8 @@ const ShopScreen = ({ navigation }) => {
               }
               contentContainerStyle={styles.scrollContent}
             >
-              {/* Spacer for header */}
-              <View style={{ height: TOTAL_HEADER_HEIGHT }} />
+              {/* Spacer for header + safe area inset */}
+              <View style={{ height: TOTAL_HEADER_HEIGHT + insets.top }} />
 
               {/* Promo Bar */}
               {showPromoBar && (
@@ -499,7 +582,7 @@ const ShopScreen = ({ navigation }) => {
               <DigitalProductsSection
                 title="Sản Phẩm Số"
                 subtitle="Khóa học & Công cụ Premium"
-                limit={4}
+                limit={12}
                 showHero={true}
                 showCategories={true}
               />
@@ -554,6 +637,7 @@ const ShopScreen = ({ navigation }) => {
           style={[
             styles.animatedHeaderContainer,
             {
+              paddingTop: insets.top,
               transform: [{ translateY: headerTranslateY }],
             },
           ]}

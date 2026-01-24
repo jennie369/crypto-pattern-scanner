@@ -41,7 +41,7 @@ import {
 const ConversationItem = memo(({ conversation, currentUserId, onPress, index, isPinned }) => {
   // Get other participant info
   const otherParticipant = conversation.other_participant ||
-    conversation.conversation_participants?.find(p => p.user_id !== currentUserId)?.users;
+    conversation.conversation_participants?.find(p => p.user_id !== currentUserId)?.profiles;
 
   const isGroup = conversation.is_group;
   const displayName = isGroup

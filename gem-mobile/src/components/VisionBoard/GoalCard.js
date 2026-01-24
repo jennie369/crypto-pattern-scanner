@@ -12,14 +12,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Icons from 'lucide-react-native';
 import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
 
-// Life area configuration
+// Life area configuration - 6 lĩnh vực cuộc sống theo kịch bản demo
 const LIFE_AREA_CONFIG = {
   finance: { label: 'Tài chính', icon: 'Wallet', color: COLORS.gold },
   career: { label: 'Sự nghiệp', icon: 'Briefcase', color: COLORS.purple },
   health: { label: 'Sức khỏe', icon: 'Heart', color: COLORS.success },
-  relationships: { label: 'Quan hệ', icon: 'Users', color: '#FF6B9D' },
+  relationships: { label: 'Tình yêu', icon: 'Heart', color: '#FF6B9D' },
   personal: { label: 'Cá nhân', icon: 'User', color: COLORS.cyan },
-  spiritual: { label: 'Tâm linh', icon: 'Sparkles', color: COLORS.burgundy },
+  spiritual: { label: 'Tâm thức', icon: 'Sparkles', color: COLORS.burgundy },
 };
 
 const GoalCard = ({

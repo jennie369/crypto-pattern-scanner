@@ -81,6 +81,12 @@ const ProductSection = ({
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.horizontalList}
       ItemSeparatorComponent={() => <View style={{ width: SPACING.md }} />}
+      removeClippedSubviews={true}
+      maxToRenderPerBatch={5}
+      windowSize={5}
+      initialNumToRender={4}
+      decelerationRate="fast"
+      scrollEventThrottle={16}
     />
   );
 

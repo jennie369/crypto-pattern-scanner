@@ -137,6 +137,7 @@ import {
   LetterToUniverseRitual,
   BurnReleaseRitual,
   StarWishRitual,
+  CrystalHealingRitual,
 } from '../screens/VisionBoard';
 
 // Gem Economy Screens
@@ -186,10 +187,23 @@ import { LivestreamViewerScreen, LivestreamListScreen } from '../screens/Livestr
 import { AdminLivestreamScreen, AnalyticsDashboardScreen } from '../screens/Admin';
 
 // Partnership Admin Screens (Phase 4-5)
-import { AdminPartnershipDashboard, AdminApplicationDetail } from '../screens/Admin';
+import { AdminPartnershipDashboard, AdminApplicationDetail, AdminPartnersScreen, AdminPartnerResourcesScreen } from '../screens/Admin';
 
 // Waitlist Leads Admin Screen
 import { WaitlistLeadsScreen } from '../screens/Admin';
+
+// Instructor Management Admin Screen
+import { AdminInstructorsScreen } from '../screens/Admin';
+
+// Exchange Affiliate Screens
+import {
+  ExchangeOnboardingScreen,
+  ExchangeAccountsScreen,
+  APIConnectionScreen,
+} from '../screens/Exchange';
+
+// Exchange Affiliate Admin Screen
+import AffiliateExchangeAdminScreen from '../screens/Admin/AffiliateExchangeAdminScreen';
 
 // Settings Screens (Language, Currency, Theme)
 import {
@@ -346,6 +360,14 @@ export default function AccountStack() {
       <Stack.Screen
         name="StarWishRitual"
         component={StarWishRitual}
+        options={{
+          animation: 'slide_from_bottom',
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
+        name="CrystalHealingRitual"
+        component={CrystalHealingRitual}
         options={{
           animation: 'slide_from_bottom',
           presentation: 'modal',
@@ -740,6 +762,16 @@ export default function AccountStack() {
         component={AdminApplicationDetail}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="AdminPartners"
+        component={AdminPartnersScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AdminPartnerResources"
+        component={AdminPartnerResourcesScreen}
+        options={{ headerShown: false }}
+      />
 
       {/* ═══════════════════════════════════════════ */}
       {/* ADMIN WAITLIST LEADS MANAGEMENT */}
@@ -747,6 +779,39 @@ export default function AccountStack() {
       <Stack.Screen
         name="WaitlistLeads"
         component={WaitlistLeadsScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ADMIN INSTRUCTOR MANAGEMENT */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen
+        name="AdminInstructors"
+        component={AdminInstructorsScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* EXCHANGE AFFILIATE SCREENS */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen
+        name="ExchangeOnboarding"
+        component={ExchangeOnboardingScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ExchangeAccounts"
+        component={ExchangeAccountsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="APIConnection"
+        component={APIConnectionScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AffiliateExchangeAdmin"
+        component={AffiliateExchangeAdminScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

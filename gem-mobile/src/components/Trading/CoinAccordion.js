@@ -4,7 +4,7 @@
  * Groups patterns by coin with expandable accordion
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, createContext, useContext } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,9 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Dimensions,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {
   ChevronDown,
@@ -30,11 +33,245 @@ import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { formatPrice, formatConfidence, calculateRR } from '../../utils/formatters';
 import { PATTERN_STATES } from '../../constants/patternSignals';
 import { isPremiumTier } from '../../constants/tierFeatures';
+// V2 Badge Components
+import { VolumeBadge, LockedBadge } from '../Scanner';
+import { getTierKey } from '../../constants/scannerAccess';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+/**
+ * Tooltip definitions - comprehensive for all elements
+ */
+const TOOLTIPS = {
+  // Stats tooltips
+  entry: 'Giá khuyến nghị để mở vị thế. Đợi giá chạm mức này trước khi vào lệnh.',
+  takeProfit: 'Mức giá mục tiêu để chốt lời. Khi giá đạt mức này, nên đóng vị thế để bảo toàn lợi nhuận.',
+  stopLoss: 'Mức giá cắt lỗ bảo vệ. Nếu giá chạm mức này, đóng vị thế để hạn chế thua lỗ.',
+  rr: 'Tỷ lệ lợi nhuận/rủi ro. R:R 1:2 = tiềm năng lời gấp 2 lần mức lỗ.',
+
+  // Pattern types
+  UPD: 'Unmitigated Proximal Demand - Vùng cầu chưa được test lại. Giá có thể quay về vùng này.',
+  UPS: 'Unmitigated Proximal Supply - Vùng cung chưa được test lại. Giá có thể quay về vùng này.',
+  QM: 'Quasimodo - Pattern đảo chiều mạnh với shoulder-head-shoulder không cân đối.',
+  FTR: 'Fail To Return - Giá không thể quay lại vùng trước đó, xác nhận xu hướng mới.',
+  DP: 'Decision Point - Điểm quyết định nơi giá chọn hướng đi tiếp theo.',
+  FL: 'Flag Limit - Giới hạn của pattern cờ, thường báo hiệu tiếp diễn xu hướng.',
+  'Double Bottom': 'Hai đáy bằng nhau - Pattern đảo chiều tăng sau downtrend.',
+  'Double Top': 'Hai đỉnh bằng nhau - Pattern đảo chiều giảm sau uptrend.',
+  Engulfing: 'Nến nuốt - Nến hiện tại bao trùm hoàn toàn nến trước, báo hiệu đảo chiều.',
+  'Pin Bar': 'Nến búa/sao băng - Bấc dài, thân nhỏ. Báo hiệu từ chối giá.',
+
+  // Timeframe tooltips
+  '1m': 'Khung 1 phút - Scalping, biến động cao, nhiều nhiễu.',
+  '5m': 'Khung 5 phút - Scalping/Day trading ngắn hạn.',
+  '15m': 'Khung 15 phút - Day trading phổ biến.',
+  '30m': 'Khung 30 phút - Day trading, ít nhiễu hơn 15m.',
+  '1h': 'Khung 1 giờ - Day/Swing trading. Cân bằng độ tin cậy và tần suất.',
+  '4h': 'Khung 4 giờ - Swing trading. Tín hiệu mạnh, ít nhiễu.',
+  '1d': 'Khung ngày - Position trading. Tín hiệu rất mạnh.',
+  '1w': 'Khung tuần - Position/Investment. Xu hướng dài hạn.',
+
+  // State badges
+  FRESH: 'Tín hiệu mới - Chưa được test, còn nguyên sức mạnh.',
+  ACTIVE: 'Đang hoạt động - Giá đang trong vùng pattern.',
+  TESTED: 'Đã test - Vùng đã được retest ít nhất 1 lần.',
+  INVALIDATED: 'Đã vô hiệu - Pattern bị phá vỡ, không còn hiệu lực.',
+
+  // Grade tooltips
+  'A+': 'Chất lượng xuất sắc - Tất cả yếu tố xác nhận. Win rate cao nhất.',
+  'A': 'Chất lượng rất tốt - Đa số yếu tố xác nhận.',
+  'B+': 'Chất lượng tốt - Nhiều yếu tố tích cực.',
+  'B': 'Chất lượng khá - Đủ điều kiện giao dịch.',
+  'C': 'Chất lượng trung bình - Cần cẩn trọng, có thể bỏ qua.',
+  'D': 'Chất lượng yếu - Không khuyến nghị giao dịch.',
+
+  // Direction tooltips
+  LONG: 'Mua/Long - Kỳ vọng giá tăng. Mở vị thế mua.',
+  SHORT: 'Bán/Short - Kỳ vọng giá giảm. Mở vị thế bán.',
+  MIXED: 'Hỗn hợp - Có cả tín hiệu Long và Short. Chờ xác nhận rõ hơn.',
+
+  // Volume tooltips
+  volume: 'Khối lượng xác nhận mức độ quan tâm của thị trường với vùng giá này.',
+  volumeStrong: 'Khối lượng mạnh (>2x) - Xác nhận cao, vùng rất quan trọng.',
+  volumeGood: 'Khối lượng tốt (1.5-2x) - Xác nhận đủ tin cậy.',
+  volumeAcceptable: 'Khối lượng chấp nhận được (1-1.5x) - Có thể trade với size nhỏ.',
+  volumeWeak: 'Khối lượng yếu (<1x) - Thiếu xác nhận, cần cẩn trọng.',
+};
+
+/**
+ * Helper to map volume grade to tooltip key
+ */
+const getVolumeTooltipKey = (grade) => {
+  const gradeMap = {
+    'STRONG': 'volumeStrong',
+    'GOOD': 'volumeGood',
+    'ACCEPTABLE': 'volumeAcceptable',
+    'WEAK': 'volumeWeak',
+    'INSUFFICIENT': 'volumeWeak',
+  };
+  return gradeMap[grade] || 'volume';
+};
+
+/**
+ * Tooltip Context - Only one tooltip open at a time
+ */
+const TooltipContext = createContext({
+  activeTooltip: null,
+  showTooltip: () => {},
+  hideTooltip: () => {},
+});
+
+const TooltipProvider = ({ children }) => {
+  const [activeTooltip, setActiveTooltip] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  const showTooltip = useCallback((key, position) => {
+    setActiveTooltip(key);
+    if (position) {
+      setTooltipPosition(position);
+    }
+  }, []);
+
+  const hideTooltip = useCallback(() => {
+    setActiveTooltip(null);
+  }, []);
+
+  const tooltipText = activeTooltip ? TOOLTIPS[activeTooltip] : null;
+
+  // Calculate tooltip position - compact, positioned near tap location
+  const getTooltipStyle = () => {
+    // Position tooltip below tap point, centered horizontally with smart edge detection
+    const tooltipMaxWidth = 280;
+    let left = tooltipPosition.x - tooltipMaxWidth / 2;
+
+    // Prevent going off left edge
+    if (left < 16) left = 16;
+    // Prevent going off right edge
+    if (left + tooltipMaxWidth > SCREEN_WIDTH - 16) {
+      left = SCREEN_WIDTH - tooltipMaxWidth - 16;
+    }
+
+    return {
+      position: 'absolute',
+      top: tooltipPosition.y + 8,
+      left: left,
+      maxWidth: tooltipMaxWidth,
+    };
+  };
+
+  return (
+    <TooltipContext.Provider value={{ activeTooltip, showTooltip, hideTooltip }}>
+      {children}
+      {/* Global tooltip - compact popup */}
+      <Modal
+        visible={!!activeTooltip && !!tooltipText}
+        transparent
+        animationType="fade"
+        onRequestClose={hideTooltip}
+      >
+        <TouchableWithoutFeedback onPress={hideTooltip}>
+          <View style={tooltipStyles.modalOverlay}>
+            <View style={[tooltipStyles.popup, getTooltipStyle()]}>
+              <Text style={tooltipStyles.popupText}>{tooltipText}</Text>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </TooltipContext.Provider>
+  );
+};
+
+/**
+ * Tooltip Label Component - Underlined label that shows tooltip on tap
+ */
+const TooltipLabel = ({ label, tooltipKey, style }) => {
+  const { activeTooltip, showTooltip, hideTooltip } = useContext(TooltipContext);
+  const tooltip = TOOLTIPS[tooltipKey];
+
+  if (!tooltip) {
+    return <Text style={[tooltipStyles.label, style]}>{label}</Text>;
+  }
+
+  const handlePress = (event) => {
+    if (activeTooltip === tooltipKey) {
+      hideTooltip();
+    } else {
+      const { pageX, pageY } = event.nativeEvent;
+      showTooltip(tooltipKey, { x: pageX, y: pageY });
+    }
+  };
+
+  return (
+    <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
+      <Text style={[tooltipStyles.label, tooltipStyles.underline, style]}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
+
+/**
+ * Tooltip Badge Component - For badges that need tooltips
+ */
+const TooltipBadge = ({ children, tooltipKey, style }) => {
+  const { activeTooltip, showTooltip, hideTooltip } = useContext(TooltipContext);
+  const tooltip = TOOLTIPS[tooltipKey];
+
+  if (!tooltip) {
+    return <View style={style}>{children}</View>;
+  }
+
+  const handlePress = (event) => {
+    if (activeTooltip === tooltipKey) {
+      hideTooltip();
+    } else {
+      const { pageX, pageY } = event.nativeEvent;
+      showTooltip(tooltipKey, { x: pageX, y: pageY });
+    }
+  };
+
+  return (
+    <TouchableOpacity onPress={handlePress} activeOpacity={0.7} style={style}>
+      {children}
+    </TouchableOpacity>
+  );
+};
+
+const tooltipStyles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  label: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+  underline: {
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
+  },
+  popup: {
+    backgroundColor: '#1E2140', // Navy blue matching app theme
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.4)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+  },
+  popupText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    lineHeight: 18,
+  },
+});
 
 /**
  * Get main direction from patterns - show MIXED if both LONG and SHORT exist
@@ -69,13 +306,18 @@ const PatternStateBadge = ({ state }) => {
     emoji: '🆕'
   };
 
+  // Get tooltip key (e.g., FRESH, ACTIVE, etc.)
+  const tooltipKey = state || 'FRESH';
+
   return (
-    <View style={[styles.stateBadge, { backgroundColor: stateInfo.bgColor }]}>
-      <Text style={styles.stateEmoji}>{stateInfo.emoji}</Text>
-      <Text style={[styles.stateLabel, { color: stateInfo.color }]}>
-        {stateInfo.label}
-      </Text>
-    </View>
+    <TooltipBadge tooltipKey={tooltipKey}>
+      <View style={[styles.stateBadge, { backgroundColor: stateInfo.bgColor }]}>
+        <Text style={styles.stateEmoji}>{stateInfo.emoji}</Text>
+        <Text style={[styles.stateLabel, { color: stateInfo.color }]}>
+          {stateInfo.label}
+        </Text>
+      </View>
+    </TooltipBadge>
   );
 };
 
@@ -97,9 +339,11 @@ const QualityGradeBadge = ({ grade, hasPremium }) => {
   const config = gradeConfig[grade] || gradeConfig['C'];
 
   return (
-    <View style={[styles.gradeBadge, { backgroundColor: config.bg }]}>
-      <Text style={[styles.gradeText, { color: config.color }]}>{grade}</Text>
-    </View>
+    <TooltipBadge tooltipKey={grade}>
+      <View style={[styles.gradeBadge, { backgroundColor: config.bg }]}>
+        <Text style={[styles.gradeText, { color: config.color }]}>{grade}</Text>
+      </View>
+    </TooltipBadge>
   );
 };
 
@@ -116,7 +360,11 @@ const PatternItem = ({
   const rr = calculateRR(pattern);
   const hasPremium = isPremiumTier(userTier);
   const patternState = pattern.state || 'FRESH';
-  const qualityGrade = pattern.qualityGrade || null;
+  // V2 Enhancement: Use V2 confidence grade if available
+  const qualityGrade = pattern.confidenceGrade || pattern.qualityGrade || null;
+  // V2 shows for TIER1+ (not just TIER2+ premium)
+  const tierKey = getTierKey(userTier);
+  const hasV2 = pattern.hasV2Enhancements || tierKey !== 'FREE';
 
   return (
     <TouchableOpacity
@@ -127,81 +375,101 @@ const PatternItem = ({
       {/* Pattern Header with State & Quality Badges */}
       <View style={styles.patternHeader}>
         <View style={styles.patternNameRow}>
-          <Text style={styles.patternName}>
-            {pattern.patternType || pattern.name || 'Pattern'}
-          </Text>
-          {/* Timeframe Badge */}
+          {/* Pattern Name with tooltip */}
+          <TooltipBadge tooltipKey={pattern.patternType || pattern.name}>
+            <Text style={styles.patternName}>
+              {pattern.patternType || pattern.name || 'Pattern'}
+            </Text>
+          </TooltipBadge>
+          {/* Timeframe Badge with tooltip */}
           {pattern.timeframe && (
-            <View style={styles.timeframeBadge}>
-              <Clock size={10} color={COLORS.cyan} />
-              <Text style={styles.timeframeText}>{pattern.timeframe}</Text>
-            </View>
+            <TooltipBadge tooltipKey={pattern.timeframe}>
+              <View style={styles.timeframeBadge}>
+                <Clock size={10} color={COLORS.cyan} />
+                <Text style={styles.timeframeText}>{pattern.timeframe}</Text>
+              </View>
+            </TooltipBadge>
           )}
         </View>
         <View style={styles.badgesRow}>
-          {/* Pattern State Badge */}
+          {/* Pattern State Badge - already has tooltip */}
           <PatternStateBadge state={patternState} />
 
-          {/* Quality Grade Badge (Premium only) */}
+          {/* Quality Grade Badge (Premium only) - already has tooltip */}
           <QualityGradeBadge grade={qualityGrade} hasPremium={hasPremium} />
 
-          {/* Direction Badge */}
-          <View style={[
-            styles.miniDirectionBadge,
-            pattern.direction === 'LONG' ? styles.longBadge : styles.shortBadge,
-          ]}>
-            {pattern.direction === 'LONG' ? (
-              <TrendingUp size={12} color="#22C55E" />
-            ) : (
-              <TrendingDown size={12} color="#EF4444" />
-            )}
-            <Text style={[
-              styles.miniDirectionText,
-              pattern.direction === 'LONG' ? styles.longText : styles.shortText,
+          {/* Direction Badge with tooltip */}
+          <TooltipBadge tooltipKey={pattern.direction}>
+            <View style={[
+              styles.miniDirectionBadge,
+              pattern.direction === 'LONG' ? styles.longBadge : styles.shortBadge,
             ]}>
-              {pattern.direction}
-            </Text>
-          </View>
+              {pattern.direction === 'LONG' ? (
+                <TrendingUp size={12} color="#22C55E" />
+              ) : (
+                <TrendingDown size={12} color="#EF4444" />
+              )}
+              <Text style={[
+                styles.miniDirectionText,
+                pattern.direction === 'LONG' ? styles.longText : styles.shortText,
+              ]}>
+                {pattern.direction}
+              </Text>
+            </View>
+          </TooltipBadge>
         </View>
       </View>
 
-      {/* Pattern Stats */}
-      <View style={styles.patternStats}>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Độ Tin Cậy</Text>
-          <Text style={styles.statValue}>
-            {formatConfidence(pattern.confidence, 1)}
-          </Text>
+      {/* V2 Validation Badges Row - TIER 1+ (Volume only, grade shown above) */}
+      {hasV2 && (pattern.volumeGrade || pattern.v2?.validations?.volume?.grade) && (
+        <View style={styles.v2BadgesRow}>
+          {/* Volume Badge with tooltip - Show volume confirmation status */}
+          <TooltipBadge tooltipKey={getVolumeTooltipKey(pattern.volumeGrade || pattern.v2?.validations?.volume?.grade)}>
+            <VolumeBadge
+              grade={pattern.volumeGrade || pattern.v2?.validations?.volume?.grade}
+              ratio={pattern.volumeRatio || pattern.v2?.validations?.volume?.volumeRatio}
+              size="sm"
+            />
+          </TooltipBadge>
         </View>
+      )}
+
+      {/* Pattern Stats - Entry, TP, SL only (Confidence shown as badge above) */}
+      <View style={styles.patternStats}>
+        {/* Entry - White/neutral color */}
         <View style={styles.statItem}>
-          <Target size={12} color="#3B82F6" />
-          <Text style={styles.statLabel}>Điểm Vào</Text>
-          <Text style={[styles.statValue, styles.blueText]}>
+          <Target size={12} color={COLORS.textMuted} />
+          <TooltipLabel label="Điểm Vào" tooltipKey="entry" />
+          <Text style={styles.statValue}>
             ${formatPrice(pattern.entry)}
           </Text>
         </View>
+
+        {/* Take Profit - Green */}
         <View style={styles.statItem}>
           <TrendingUp size={12} color="#22C55E" />
-          <Text style={styles.statLabel}>Chốt Lời</Text>
+          <TooltipLabel label="Chốt Lời" tooltipKey="takeProfit" />
           <Text style={[styles.statValue, styles.greenText]}>
             ${formatPrice(pattern.target || pattern.takeProfit1 || pattern.takeProfit || pattern.targets?.[0])}
           </Text>
         </View>
+
+        {/* Stop Loss - Red */}
         <View style={styles.statItem}>
           <Shield size={12} color="#EF4444" />
-          <Text style={styles.statLabel}>Cắt Lỗ</Text>
+          <TooltipLabel label="Cắt Lỗ" tooltipKey="stopLoss" />
           <Text style={[styles.statValue, styles.redText]}>
             ${formatPrice(pattern.stopLoss)}
           </Text>
         </View>
       </View>
 
-      {/* R:R Row */}
+      {/* R:R Row - with tooltip, inline label and value */}
       <View style={styles.rrRow}>
-        <Text style={styles.rrLabel}>Tỷ Lệ R:R</Text>
-        <Text style={[styles.rrValue, rr >= 2 ? styles.greenText : styles.yellowText]}>
-          1:{rr.toFixed(1).replace('.', ',')}
-        </Text>
+        <View style={styles.rrInline}>
+          <TooltipLabel label="Tỷ Lệ R:R" tooltipKey="rr" style={styles.rrLabel} />
+          <Text style={styles.rrValue}>1:{rr.toFixed(1)}</Text>
+        </View>
       </View>
 
       {/* Paper Trade Button */}
@@ -509,10 +777,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
 
-  blueText: {
-    color: '#3B82F6',
-  },
-
   greenText: {
     color: '#22C55E',
   },
@@ -521,17 +785,20 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
 
-  yellowText: {
-    color: '#FFD700',
+  mutedText: {
+    color: COLORS.textMuted || '#888888',
   },
 
   rrRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+
+  rrInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 
   rrLabel: {
@@ -542,6 +809,7 @@ const styles = StyleSheet.create({
   rrValue: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary, // White color
   },
 
   paperTradeBtn: {
@@ -597,6 +865,27 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
   },
+
+  // V2 Validation Badges Row
+  v2BadgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: SPACING.xs,
+    paddingTop: SPACING.xs,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+  },
 });
 
-export default CoinAccordion;
+/**
+ * CoinAccordion wrapped with TooltipProvider for global tooltip management
+ */
+const CoinAccordionWithTooltips = (props) => (
+  <TooltipProvider>
+    <CoinAccordion {...props} />
+  </TooltipProvider>
+);
+
+export default CoinAccordionWithTooltips;
+export { TooltipProvider, TooltipBadge, TooltipLabel };

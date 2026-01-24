@@ -598,8 +598,8 @@ class ShopifyService {
 
   /**
    * Get "Dành cho bạn" products
-   * Returns random products different from current product
-   * @param {Object} currentProduct - Current product to exclude
+   * Smart recommendations based on complementary products and user behavior
+   * @param {Object} currentProduct - Current product being viewed
    * @param {number} limit - Max products to return
    * @param {Array} productsOverride - Optional: use these products instead of fetching
    */
@@ -612,17 +612,70 @@ class ShopifyService {
       }
 
       const currentId = this.fromGlobalId(currentProduct?.id) || currentProduct?.id;
+      const currentHandle = currentProduct?.handle;
 
-      // Filter out current product and shuffle
-      const otherProducts = allProducts
-        .filter(p => {
-          if (!currentId) return true;
-          const pId = this.fromGlobalId(p.id) || p.id;
-          return pId !== currentId;
-        })
-        .sort(() => Math.random() - 0.5);
+      // Get current product attributes
+      const currentPrice = parseFloat(currentProduct?.variants?.[0]?.price || currentProduct?.price || 0);
+      const currentType = currentProduct?.product_type?.toLowerCase() || '';
 
-      return otherProducts.slice(0, limit);
+      let currentTags = currentProduct?.tags || [];
+      if (typeof currentTags === 'string') {
+        currentTags = currentTags.split(',').map(t => t.trim().toLowerCase());
+      } else {
+        currentTags = currentTags.map(t => t.toLowerCase());
+      }
+
+      // Filter out current product
+      const otherProducts = allProducts.filter(p => {
+        const pId = this.fromGlobalId(p.id) || p.id;
+        return pId !== currentId && p.handle !== currentHandle;
+      });
+
+      // Score each product for "Dành cho bạn" - focus on complementary products
+      const scored = otherProducts.map(product => {
+        let score = 0;
+
+        const pType = product.product_type?.toLowerCase() || '';
+        const pPrice = parseFloat(product.variants?.[0]?.price || product.price || 0);
+
+        let pTags = product.tags || [];
+        if (typeof pTags === 'string') {
+          pTags = pTags.split(',').map(t => t.trim().toLowerCase());
+        } else {
+          pTags = pTags.map(t => t.toLowerCase());
+        }
+
+        // Boost products that complement current product (different type but related)
+        if (pType && currentType && pType !== currentType) {
+          // Cross-sell bonus: different product types get boosted
+          score += 3;
+        }
+
+        // Boost bestsellers and hot products
+        if (pTags.includes('bestseller') || pTags.includes('best seller')) score += 5;
+        if (pTags.includes('hot product') || pTags.includes('hot')) score += 4;
+        if (pTags.includes('new arrival') || pTags.includes('new')) score += 2;
+
+        // Similar price range bonus (within 30% of current price)
+        if (currentPrice > 0 && pPrice > 0) {
+          const priceDiff = Math.abs(pPrice - currentPrice) / currentPrice;
+          if (priceDiff <= 0.3) score += 2;
+        }
+
+        // Some shared tags but not too similar (1-2 shared tags is ideal for complementary)
+        const sharedTags = pTags.filter(t => currentTags.includes(t)).length;
+        if (sharedTags >= 1 && sharedTags <= 2) score += 3;
+
+        // Add randomness to prevent stale recommendations
+        score += Math.random() * 2;
+
+        return { product, score };
+      });
+
+      // Sort by score descending
+      scored.sort((a, b) => b.score - a.score);
+
+      return scored.slice(0, limit).map(item => item.product);
 
     } catch (error) {
       console.error('[Shopify] ❌ getForYouProducts error:', error);
@@ -632,8 +685,8 @@ class ShopifyService {
 
   /**
    * Get similar products
-   * Returns random products different from current product
-   * @param {Object} currentProduct - Current product to exclude
+   * Smart similarity based on product_type, tags, vendor, and price range
+   * @param {Object} currentProduct - Current product to find similar items for
    * @param {number} limit - Max products to return
    * @param {Array} productsOverride - Optional: use these products instead of fetching
    */
@@ -646,17 +699,77 @@ class ShopifyService {
       }
 
       const currentId = this.fromGlobalId(currentProduct?.id) || currentProduct?.id;
+      const currentHandle = currentProduct?.handle;
 
-      // Filter out current product and shuffle
-      const otherProducts = allProducts
-        .filter(p => {
-          if (!currentId) return true;
-          const pId = this.fromGlobalId(p.id) || p.id;
-          return pId !== currentId;
-        })
-        .sort(() => Math.random() - 0.5);
+      // Get current product attributes for similarity matching
+      const currentType = currentProduct?.product_type?.toLowerCase() || '';
+      const currentVendor = currentProduct?.vendor?.toLowerCase() || '';
+      const currentPrice = parseFloat(currentProduct?.variants?.[0]?.price || currentProduct?.price || 0);
 
-      return otherProducts.slice(0, limit);
+      let currentTags = currentProduct?.tags || [];
+      if (typeof currentTags === 'string') {
+        currentTags = currentTags.split(',').map(t => t.trim().toLowerCase());
+      } else {
+        currentTags = currentTags.map(t => t.toLowerCase());
+      }
+
+      // Filter out current product
+      const otherProducts = allProducts.filter(p => {
+        const pId = this.fromGlobalId(p.id) || p.id;
+        return pId !== currentId && p.handle !== currentHandle;
+      });
+
+      // Score each product based on similarity
+      const scored = otherProducts.map(product => {
+        let score = 0;
+
+        const pType = product.product_type?.toLowerCase() || '';
+        const pVendor = product.vendor?.toLowerCase() || '';
+        const pPrice = parseFloat(product.variants?.[0]?.price || product.price || 0);
+
+        let pTags = product.tags || [];
+        if (typeof pTags === 'string') {
+          pTags = pTags.split(',').map(t => t.trim().toLowerCase());
+        } else {
+          pTags = pTags.map(t => t.toLowerCase());
+        }
+
+        // Same product type is highest priority for similarity
+        if (pType && currentType && pType === currentType) {
+          score += 10;
+        }
+
+        // Same vendor bonus
+        if (pVendor && currentVendor && pVendor === currentVendor) {
+          score += 3;
+        }
+
+        // Shared tags - more shared tags = more similar
+        const sharedTags = pTags.filter(t => currentTags.includes(t)).length;
+        score += sharedTags * 2;
+
+        // Similar price range (within 50% of current price)
+        if (currentPrice > 0 && pPrice > 0) {
+          const priceDiff = Math.abs(pPrice - currentPrice) / currentPrice;
+          if (priceDiff <= 0.2) score += 4;      // Very similar price
+          else if (priceDiff <= 0.5) score += 2; // Somewhat similar
+        }
+
+        // Boost in-stock products
+        const firstVariant = product.variants?.[0];
+        const availableForSale = product.availableForSale ?? firstVariant?.availableForSale ?? true;
+        if (availableForSale) score += 1;
+
+        // Small randomness to vary results
+        score += Math.random();
+
+        return { product, score };
+      });
+
+      // Sort by score descending
+      scored.sort((a, b) => b.score - a.score);
+
+      return scored.slice(0, limit).map(item => item.product);
 
     } catch (error) {
       console.error('[Shopify] ❌ getSimilarProducts error:', error);
@@ -674,4 +787,38 @@ class ShopifyService {
 }
 
 export const shopifyService = new ShopifyService();
+
+// =========== PRELOAD FUNCTION ===========
+// Call this early in app lifecycle to warm up the cache
+// This makes Shop tab instant when user navigates to it
+let preloadPromise = null;
+
+export const preloadShopData = async () => {
+  // Avoid duplicate preloads
+  if (preloadPromise) {
+    return preloadPromise;
+  }
+
+  // Check if already cached
+  if (shopifyService._productsCache && shopifyService._productsCache.length > 0) {
+    console.log('[Shopify] Products already cached, skipping preload');
+    return shopifyService._productsCache;
+  }
+
+  console.log('[Shopify] Preloading shop data...');
+  preloadPromise = shopifyService.getProducts({ limit: 100 })
+    .then(products => {
+      console.log(`[Shopify] Preloaded ${products.length} products`);
+      preloadPromise = null;
+      return products;
+    })
+    .catch(err => {
+      console.warn('[Shopify] Preload error:', err);
+      preloadPromise = null;
+      return [];
+    });
+
+  return preloadPromise;
+};
+
 export default shopifyService;

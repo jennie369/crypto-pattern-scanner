@@ -46,12 +46,12 @@ const ReactionSummary = ({
   // Animation values
   const scale = useSharedValue(1);
 
-  // Size-based dimensions
+  // Size-based dimensions - compact for cleaner UI
   const dimensions = {
-    small: { icon: 16, font: 11, overlap: 6, padding: 4 },
-    medium: { icon: 20, font: 13, overlap: 8, padding: 6 },
-    large: { icon: 24, font: 15, overlap: 10, padding: 8 },
-  }[size] || { icon: 20, font: 13, overlap: 8, padding: 6 };
+    small: { icon: 12, font: 10, overlap: 5, padding: 2 },
+    medium: { icon: 14, font: 11, overlap: 6, padding: 3 },
+    large: { icon: 18, font: 13, overlap: 7, padding: 4 },
+  }[size] || { icon: 14, font: 11, overlap: 6, padding: 3 };
 
   /**
    * Calculate top reactions from counts if not provided
@@ -138,13 +138,13 @@ const ReactionSummary = ({
                 style={[
                   styles.iconWrapper,
                   {
-                    // Larger container for stacked reaction icons to prevent clipping
-                    width: dimensions.icon + 8,
-                    height: dimensions.icon + 8,
+                    // Container with 1.4x ratio to prevent clipping
+                    width: Math.round(dimensions.icon * 1.4),
+                    height: Math.round(dimensions.icon * 1.4),
                     marginLeft: index === 0 ? 0 : -dimensions.overlap,
                     zIndex: topReactions.length - index,
                     borderColor: COLORS.bgDark,
-                    borderWidth: 1.5,
+                    borderWidth: 1,
                   },
                 ]}
               >

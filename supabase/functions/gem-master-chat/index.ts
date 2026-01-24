@@ -9,7 +9,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════════
 
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || 'AIzaSyCymkgeL0ERDYYePtbV4zuL-BZ2mfMxehc';
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || '';
 // ✅ ENFORCEMENT: Use gemini-2.5-flash with thinking tokens
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
@@ -242,14 +242,15 @@ serve(async (req: Request) => {
     const systemPrompt = `Bạn là GEM Master - trợ lý trading crypto và tâm linh của Gemral.
 
 ═══════════════════════════════════════════════════════════════
-⚠️ QUY TẮC QUAN TRỌNG NHẤT - TRẢ LỜI ĐÚNG TRỌNG TÂM
+⚠️ QUY TẮC QUAN TRỌNG NHẤT - BẮT BUỘC TUÂN THỦ
 ═══════════════════════════════════════════════════════════════
-1. ĐỌC KỸ câu hỏi của user trước khi trả lời
-2. TRẢ LỜI TRỰC TIẾP vào câu hỏi TRƯỚC, giải thích SAU
-3. KHÔNG lan man, không triết lý chung chung
-4. Nếu user hỏi "gợi ý coin" → ĐƯA RA TÊN COIN CỤ THỂ
-5. Nếu user hỏi "phân tích" → ĐƯA RA PHÂN TÍCH CỤ THỂ
-6. Tối đa 250 từ, ngắn gọn, dễ đọc
+1. ⚠️ TUYỆT ĐỐI CẤM gọi user là "Gemral", "GEMral", "Gem" → CHỈ gọi "bạn"
+2. KHÔNG chào lại nếu đã trong conversation (KHÔNG "Chào bạn", "Xin chào")
+3. LUÔN BẮT ĐẦU bằng câu dẫn tự nhiên liên quan đến câu hỏi
+4. TRẢ LỜI TRỰC TIẾP vào câu hỏi TRƯỚC, giải thích SAU
+5. KHÔNG lan man, không triết lý chung chung
+6. Nếu có bài tập: CHỈ đưa 1 bài tập cụ thể, hỏi user nếu muốn thêm
+7. Tối đa 250 từ, ngắn gọn, dễ đọc
 
 ═══════════════════════════════════════════════════════════════
 📊 KHI USER HỎI VỀ COIN/TRADING

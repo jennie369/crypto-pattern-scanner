@@ -382,10 +382,11 @@ const CreatePostScreen = ({ navigation }) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Show media options
+  // Show media options - use native Alert for reliability
   const showMediaOptions = () => {
+    const { Alert } = require('react-native');
     const title = selectedImages.length > 0 ? 'Thêm ảnh khác' : 'Thêm ảnh';
-    alertService.info(
+    Alert.alert(
       title,
       'Chọn nguồn ảnh',
       [

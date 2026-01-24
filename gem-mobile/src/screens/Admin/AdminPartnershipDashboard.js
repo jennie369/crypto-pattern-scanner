@@ -148,7 +148,7 @@ const AdminPartnershipDashboard = () => {
   const formatTimeRemaining = (autoApproveAt) => {
     if (!autoApproveAt) return 'N/A';
     const remaining = new Date(autoApproveAt) - new Date();
-    if (remaining <= 0) return 'Sap tu dong duyet';
+    if (remaining <= 0) return 'Sắp tự động duyệt';
     const hours = Math.floor(remaining / (1000 * 60 * 60));
     if (hours < 24) return `${hours}h`;
     return `${Math.floor(hours / 24)}d ${hours % 24}h`;
@@ -161,7 +161,7 @@ const AdminPartnershipDashboard = () => {
         <SafeAreaView style={styles.container} edges={['top']}>
           <View style={styles.loadingContainer}>
             <AlertTriangle size={48} color={COLORS.error} />
-            <Text style={styles.errorText}>Khong co quyen truy cap</Text>
+            <Text style={styles.errorText}>Không có quyền truy cập</Text>
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -177,7 +177,7 @@ const AdminPartnershipDashboard = () => {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <ArrowLeft size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Quan Ly Partnership</Text>
+            <Text style={styles.headerTitle}>Quản Lý Partnership</Text>
             <View style={{ width: 24 }} />
           </View>
           <View style={styles.loadingContainer}>
@@ -197,7 +197,7 @@ const AdminPartnershipDashboard = () => {
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Quan Ly Partnership</Text>
+            <Text style={styles.headerTitle}>Quản Lý Partnership</Text>
             {realtimeConnected && (
               <View style={styles.liveBadge}>
                 <Wifi size={10} color={COLORS.success} />
@@ -225,7 +225,7 @@ const AdminPartnershipDashboard = () => {
             >
               <Users size={24} color={COLORS.info} />
               <Text style={styles.statValue}>{stats?.totalPartners || 0}</Text>
-              <Text style={styles.statLabel}>Tong doi tac</Text>
+              <Text style={styles.statLabel}>Tổng đối tác</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -234,7 +234,7 @@ const AdminPartnershipDashboard = () => {
             >
               <Clock size={24} color={COLORS.warning} />
               <Text style={styles.statValue}>{stats?.pendingApplications || 0}</Text>
-              <Text style={styles.statLabel}>Cho duyet</Text>
+              <Text style={styles.statLabel}>Chờ duyệt</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.statCard}>
@@ -248,7 +248,7 @@ const AdminPartnershipDashboard = () => {
               <Text style={styles.statValueSmall}>
                 {formatCurrency(stats?.monthlyCommissions || 0)}
               </Text>
-              <Text style={styles.statLabel}>Hoa hong thang</Text>
+              <Text style={styles.statLabel}>Hoa hồng tháng</Text>
             </TouchableOpacity>
           </View>
 
@@ -263,7 +263,7 @@ const AdminPartnershipDashboard = () => {
               </View>
               <View style={styles.pendingTypeInfo}>
                 <Text style={styles.pendingTypeCount}>{stats?.pendingCTV || 0}</Text>
-                <Text style={styles.pendingTypeLabel}>Don CTV cho duyet</Text>
+                <Text style={styles.pendingTypeLabel}>Đơn CTV chờ duyệt</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -277,7 +277,7 @@ const AdminPartnershipDashboard = () => {
               </View>
               <View style={styles.pendingTypeInfo}>
                 <Text style={styles.pendingTypeCount}>{stats?.pendingKOL || 0}</Text>
-                <Text style={styles.pendingTypeLabel}>Don KOL cho duyet</Text>
+                <Text style={styles.pendingTypeLabel}>Đơn KOL chờ duyệt</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -285,7 +285,7 @@ const AdminPartnershipDashboard = () => {
 
           {/* Tier Distribution */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Phan bo Tier CTV</Text>
+            <Text style={styles.sectionTitle}>Phân bổ Tier CTV</Text>
             <View style={styles.tierDistribution}>
               {Object.entries(stats?.tierDistribution || {}).map(([tier, count]) => {
                 const config = CTV_TIER_CONFIG[tier];
@@ -354,14 +354,14 @@ const AdminPartnershipDashboard = () => {
 
           {/* Quick Actions */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Thao tac nhanh</Text>
+            <Text style={styles.sectionTitle}>Thao tác nhanh</Text>
             <View style={styles.quickActions}>
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={() => navigation.navigate('AdminApplications', { filter: 'ctv' })}
               >
                 <Users size={20} color={COLORS.gold} />
-                <Text style={styles.actionText}>Don CTV</Text>
+                <Text style={styles.actionText}>Đơn CTV</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -369,7 +369,7 @@ const AdminPartnershipDashboard = () => {
                 onPress={() => navigation.navigate('AdminApplications', { filter: 'kol' })}
               >
                 <Star size={20} color="#9C27B0" />
-                <Text style={styles.actionText}>Don KOL</Text>
+                <Text style={styles.actionText}>Đơn KOL</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -394,7 +394,7 @@ const AdminPartnershipDashboard = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Scheduled Jobs</Text>
             <Text style={styles.sectionSubtitle}>
-              Cac job nay tu dong chay theo lich. Chi nhan nut khi can chay thu cong.
+              Các job này tự động chạy theo lịch. Chỉ nhấn nút khi cần chạy thủ công.
             </Text>
 
             <TouchableOpacity
@@ -405,12 +405,12 @@ const AdminPartnershipDashboard = () => {
               <TrendingUp size={18} color={COLORS.success} />
               <View style={styles.jobInfo}>
                 <Text style={styles.jobName}>Weekly Tier Upgrade</Text>
-                <Text style={styles.jobSchedule}>Moi thu 2, 00:00</Text>
+                <Text style={styles.jobSchedule}>Mỗi thứ 2, 00:00</Text>
               </View>
               {triggeringJob === 'weekly_upgrade' ? (
                 <ActivityIndicator size="small" color={COLORS.gold} />
               ) : (
-                <Text style={styles.jobAction}>Chay</Text>
+                <Text style={styles.jobAction}>Chạy</Text>
               )}
             </TouchableOpacity>
 
@@ -422,12 +422,12 @@ const AdminPartnershipDashboard = () => {
               <AlertTriangle size={18} color={COLORS.warning} />
               <View style={styles.jobInfo}>
                 <Text style={styles.jobName}>Monthly Tier Downgrade</Text>
-                <Text style={styles.jobSchedule}>Cuoi thang, 23:59</Text>
+                <Text style={styles.jobSchedule}>Cuối tháng, 23:59</Text>
               </View>
               {triggeringJob === 'monthly_downgrade' ? (
                 <ActivityIndicator size="small" color={COLORS.gold} />
               ) : (
-                <Text style={styles.jobAction}>Chay</Text>
+                <Text style={styles.jobAction}>Chạy</Text>
               )}
             </TouchableOpacity>
 
@@ -439,12 +439,12 @@ const AdminPartnershipDashboard = () => {
               <CheckCircle size={18} color={COLORS.info} />
               <View style={styles.jobInfo}>
                 <Text style={styles.jobName}>CTV Auto-Approve</Text>
-                <Text style={styles.jobSchedule}>Moi gio</Text>
+                <Text style={styles.jobSchedule}>Mỗi giờ</Text>
               </View>
               {triggeringJob === 'ctv_auto_approve' ? (
                 <ActivityIndicator size="small" color={COLORS.gold} />
               ) : (
-                <Text style={styles.jobAction}>Chay</Text>
+                <Text style={styles.jobAction}>Chạy</Text>
               )}
             </TouchableOpacity>
 
@@ -456,12 +456,12 @@ const AdminPartnershipDashboard = () => {
               <Calendar size={18} color={COLORS.textMuted} />
               <View style={styles.jobInfo}>
                 <Text style={styles.jobName}>Reset Monthly Sales</Text>
-                <Text style={styles.jobSchedule}>Ngay 1 moi thang</Text>
+                <Text style={styles.jobSchedule}>Ngày 1 mỗi tháng</Text>
               </View>
               {triggeringJob === 'reset_monthly_sales' ? (
                 <ActivityIndicator size="small" color={COLORS.gold} />
               ) : (
-                <Text style={styles.jobAction}>Chay</Text>
+                <Text style={styles.jobAction}>Chạy</Text>
               )}
             </TouchableOpacity>
           </View>

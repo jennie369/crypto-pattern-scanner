@@ -11,7 +11,7 @@ import { useAuth } from './AuthContext';
 import { callService } from '../services/callService';
 import { CALL_STATUS, VIBRATION_PATTERNS } from '../constants/callConstants';
 import { IncomingCallOverlay } from '../components/Call';
-import { navigationRef } from '../navigation/AppNavigator';
+import { navigationRef } from '../navigation/navigationRef';
 
 const CallContext = createContext({});
 
@@ -122,10 +122,15 @@ export function CallProvider({ children }) {
       // Get caller info
       const caller = incomingCall.caller || incomingCall.call_participants?.find(
         p => p.user_id !== user?.id
-      )?.users;
+      )?.profiles;
 
       // Navigate to IncomingCall screen to handle connection
-      if (navigationRef.current?.isReady()) {
+      const navReady = navigationRef.current &&
+        (typeof navigationRef.current.isReady === 'function'
+          ? navigationRef.current.isReady()
+          : true);
+
+      if (navReady) {
         navigationRef.current.navigate('Call', {
           screen: 'IncomingCall',
           params: {
@@ -172,27 +177,29 @@ export function CallProvider({ children }) {
 
     console.log('[CallProvider] Subscribing to incoming calls for user:', user.id);
 
-    // Subscribe to incoming calls
-    subscriptionRef.current = callService.subscribeToIncomingCalls(
+    // Subscribe to incoming calls - callService returns unsubscribe function directly
+    const unsubscribe = callService.subscribeToIncomingCalls(
       user.id,
-      (call, eventType) => {
-        if (eventType === 'incoming') {
-          handleIncomingCall(call);
-        } else if (eventType === 'ended' || eventType === 'cancelled') {
-          handleCallEnded(call);
-        }
+      (call) => {
+        // This callback is called when an incoming call is detected
+        handleIncomingCall(call);
       }
     );
+
+    subscriptionRef.current = unsubscribe;
 
     return () => {
       console.log('[CallProvider] Cleaning up call subscription');
       if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe?.();
+        // subscriptionRef.current is the unsubscribe function
+        if (typeof subscriptionRef.current === 'function') {
+          subscriptionRef.current();
+        }
         subscriptionRef.current = null;
       }
       stopRingtone();
     };
-  }, [isAuthenticated, user?.id, handleIncomingCall, handleCallEnded, stopRingtone]);
+  }, [isAuthenticated, user?.id, handleIncomingCall, stopRingtone]);
 
   // ========== APP STATE HANDLING ==========
 

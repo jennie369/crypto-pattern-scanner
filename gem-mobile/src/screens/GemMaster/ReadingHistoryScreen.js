@@ -76,28 +76,31 @@ const ReadingHistoryScreen = () => {
         setLoadingMore(true);
       }
 
+      // Map filter options to service parameters
       const options = {
-        page: pageNum,
+        page: pageNum - 1, // Service uses 0-based page index
         limit: PAGE_SIZE,
-        type: activeFilter === 'all' ? null : (activeFilter === 'starred' ? null : activeFilter),
-        starred: activeFilter === 'starred' ? true : null,
-        search: searchQuery || null,
+        type: activeFilter === 'starred' ? 'all' : activeFilter, // 'all', 'tarot', 'iching'
+        starredOnly: activeFilter === 'starred', // Boolean for starred filter
+        lifeArea: null, // Can be extended later
       };
 
-      const { data, error } = await readingHistoryService.getReadings(user.id, options);
+      const { data, hasMore: moreData, error } = await readingHistoryService.getReadings(user.id, options);
 
       if (error) {
         console.error('[ReadingHistoryScreen] Error:', error);
         if (pageNum === 1) {
           setReadings([]);
         }
+        setHasMore(false);
       } else {
         if (pageNum === 1) {
           setReadings(data || []);
         } else {
           setReadings((prev) => [...prev, ...(data || [])]);
         }
-        setHasMore((data?.length || 0) >= PAGE_SIZE);
+        // Use hasMore from service response
+        setHasMore(moreData);
       }
 
       setPage(pageNum);

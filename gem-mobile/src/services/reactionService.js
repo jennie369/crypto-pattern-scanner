@@ -222,6 +222,7 @@ class ReactionService {
 
   /**
    * Get all reactions for a post with user info
+   * Fetches from both profiles and seed_users tables
    * @param {string} postId - Post ID
    * @param {string|null} filterType - Optional reaction type filter
    * @param {number} limit - Maximum results (default 50)
@@ -238,25 +239,91 @@ class ReactionService {
     }
 
     try {
-      let query = supabase
-        .from('post_reactions_with_users')
-        .select('*')
-        .eq('post_id', postId)
+      // Step 1: Get reactions from post_reactions table (try both post_id and seed_post_id)
+      let { data: reactionsData, error: reactionsError } = await supabase
+        .from('post_reactions')
+        .select('id, user_id, reaction_type, created_at')
+        .or(`post_id.eq.${postId},seed_post_id.eq.${postId}`)
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
-      if (filterType) {
-        query = query.eq('reaction_type', filterType.toLowerCase());
+      if (reactionsError) {
+        console.error('[ReactionService] getPostReactions query error:', reactionsError);
+        // Fallback to post_reactions_with_users view
+        let query = supabase
+          .from('post_reactions_with_users')
+          .select('*')
+          .eq('post_id', postId)
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1);
+
+        if (filterType) {
+          query = query.eq('reaction_type', filterType.toLowerCase());
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
       }
 
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('[ReactionService] getPostReactions error:', error);
-        throw error;
+      // Apply filter if needed
+      if (filterType && reactionsData) {
+        reactionsData = reactionsData.filter(
+          r => r.reaction_type?.toLowerCase() === filterType.toLowerCase()
+        );
       }
 
-      return data || [];
+      if (!reactionsData || reactionsData.length === 0) {
+        return [];
+      }
+
+      // Step 2: Collect user IDs
+      const userIds = [...new Set(reactionsData.map(r => r.user_id).filter(Boolean))];
+
+      // Step 3: Batch fetch from profiles table
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url, username')
+        .in('id', userIds);
+
+      const profilesMap = new Map();
+      (profilesData || []).forEach(user => {
+        profilesMap.set(user.id, {
+          display_name: user.full_name,
+          avatar_url: user.avatar_url,
+          username: user.username,
+        });
+      });
+
+      // Step 4: Find missing users and fetch from seed_users table
+      const missingIds = userIds.filter(id => !profilesMap.has(id));
+      if (missingIds.length > 0) {
+        const { data: seedUsersData } = await supabase
+          .from('seed_users')
+          .select('id, full_name, avatar_url')
+          .in('id', missingIds);
+
+        (seedUsersData || []).forEach(user => {
+          profilesMap.set(user.id, {
+            display_name: user.full_name,
+            avatar_url: user.avatar_url,
+            username: null, // Seed users don't have usernames
+          });
+        });
+      }
+
+      // Step 5: Merge reactions with user data
+      const reactionsWithUsers = reactionsData.map(reaction => ({
+        ...reaction,
+        profile: profilesMap.get(reaction.user_id) || {
+          display_name: 'Người dùng',
+          avatar_url: null,
+          username: null,
+        },
+      }));
+
+      console.log(`[ReactionService] Loaded ${reactionsWithUsers.length} reactions with ${profilesMap.size} users`);
+      return reactionsWithUsers;
     } catch (err) {
       console.error('[ReactionService] getPostReactions failed:', err);
       throw err;

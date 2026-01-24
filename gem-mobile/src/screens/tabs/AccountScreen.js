@@ -78,6 +78,7 @@ import {
   X,
   Globe,
   Radio,
+  Building2,
 } from 'lucide-react-native';
 import { Switch } from 'react-native';
 
@@ -101,6 +102,17 @@ import { getSession } from '../../services/supabase';
 import { UserBadges } from '../../components/UserBadge';
 import { UpgradeBanner } from '../../components/upgrade';
 
+// ============================================
+// GLOBAL CACHE - persists across tab switches
+// ============================================
+const accountCache = {
+  profile: null,
+  stats: null,
+  assetStats: null,
+  adminStats: null,
+  lastFetch: 0,
+  CACHE_DURATION: 60000, // 60 seconds
+};
 
 export default function AccountScreen() {
   const navigation = useNavigation();
@@ -108,10 +120,10 @@ export default function AccountScreen() {
   const { user, profile: authProfile, isAdmin } = useAuth();
   const { alert, AlertComponent } = useCustomAlert();
 
-  // State
-  const [profile, setProfile] = useState(null);
-  const [stats, setStats] = useState({ postsCount: 0, followersCount: 0, followingCount: 0 });
-  const [loading, setLoading] = useState(true);
+  // State - initialize from cache for instant display
+  const [profile, setProfile] = useState(() => accountCache.profile);
+  const [stats, setStats] = useState(() => accountCache.stats || { postsCount: 0, followersCount: 0, followingCount: 0 });
+  const [loading, setLoading] = useState(!accountCache.profile); // false if cache exists
   const [refreshing, setRefreshing] = useState(false);
 
   // Double-tap to scroll to top and refresh
@@ -136,16 +148,16 @@ export default function AccountScreen() {
   const [currentRefreshToken, setCurrentRefreshToken] = useState(null);
 
 
-  // Admin Stats State
-  const [adminStats, setAdminStats] = useState({
+  // Admin Stats State - initialize from cache
+  const [adminStats, setAdminStats] = useState(() => accountCache.adminStats || {
     pendingApplications: 0,
     pendingWithdrawals: 0,
     totalPartners: 0,
     totalUsers: 0,
   });
 
-  // Assets Stats State (from AssetsHomeScreen)
-  const [assetStats, setAssetStats] = useState({
+  // Assets Stats State - initialize from cache
+  const [assetStats, setAssetStats] = useState(() => accountCache.assetStats || {
     gems: 0,
     earnings: 0,
     affiliate: 0,
@@ -156,14 +168,38 @@ export default function AccountScreen() {
   const [showConfetti, setShowConfetti] = useState(false);
   const confettiRef = useRef(null);
 
-  // Load data on focus
+  // Load data on focus - with global caching
+  // Key principle: NEVER show loading if we have ANY cached data
   useFocusEffect(
     useCallback(() => {
       if (user?.id) {
-        loadData();
-        // Load admin stats if user is admin
-        if (isAdmin) {
-          loadAdminStats();
+        const now = Date.now();
+        const cacheExpired = now - accountCache.lastFetch > accountCache.CACHE_DURATION;
+
+        // If we have cached data, set loading false IMMEDIATELY (even if stale)
+        if (accountCache.profile) {
+          setLoading(false);
+          // Also sync state from cache in case component remounted
+          if (profile !== accountCache.profile) {
+            setProfile(accountCache.profile);
+          }
+          if (accountCache.stats && stats !== accountCache.stats) {
+            setStats(accountCache.stats);
+          }
+          if (accountCache.assetStats && assetStats !== accountCache.assetStats) {
+            setAssetStats(accountCache.assetStats);
+          }
+          if (isAdmin && accountCache.adminStats && adminStats !== accountCache.adminStats) {
+            setAdminStats(accountCache.adminStats);
+          }
+        }
+
+        // Fetch fresh data in background if cache expired
+        if (!accountCache.profile || cacheExpired) {
+          loadData();
+          if (isAdmin) {
+            loadAdminStats();
+          }
         }
       } else {
         setLoading(false);
@@ -232,16 +268,27 @@ export default function AccountScreen() {
 
   const loadData = async () => {
     try {
-      // Load profile info
-      const profileData = await forumService.getUserProfile(user.id);
-      setProfile(profileData || authProfile);
+      // Run all API calls in PARALLEL for faster loading
+      const [profileData, userStats, assetData] = await Promise.all([
+        forumService.getUserProfile(user.id).catch(e => {
+          console.warn('[Account] Profile load error:', e);
+          return null;
+        }),
+        forumService.getUserStats(user.id).catch(e => {
+          console.warn('[Account] Stats load error:', e);
+          return { postsCount: 0, followersCount: 0, followingCount: 0 };
+        }),
+        loadAssetStatsParallel(), // New parallel version
+      ]);
 
-      // Load stats
-      const userStats = await forumService.getUserStats(user.id);
+      const finalProfile = profileData || authProfile;
+      setProfile(finalProfile);
       setStats(userStats);
 
-      // Load asset stats (from AssetsHomeScreen)
-      await loadAssetStats();
+      // Update global cache for instant display on next tab switch
+      accountCache.profile = finalProfile;
+      accountCache.stats = userStats;
+      accountCache.lastFetch = Date.now();
     } catch (error) {
       console.error('[Account] Load data error:', error);
     } finally {
@@ -249,122 +296,118 @@ export default function AccountScreen() {
     }
   };
 
-  // Load asset statistics (merged from AssetsHomeScreen)
-  const loadAssetStats = async () => {
+  // Load asset statistics - PARALLEL version for faster loading
+  const loadAssetStatsParallel = async () => {
     try {
-      // Load user gems from profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('gems')
-        .eq('id', user.id)
-        .single();
-
-      // Load earnings this month
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      const { data: earnings } = await supabase
-        .from('gems_transactions')
-        .select('amount')
-        .eq('user_id', user.id)
-        .eq('type', 'earning')
-        .gte('created_at', startOfMonth.toISOString());
+      // Run ALL 4 queries in PARALLEL
+      const [profileResult, earningsResult, affiliateResult, activityResult] = await Promise.all([
+        // 1. User gems from profile
+        supabase
+          .from('profiles')
+          .select('gems')
+          .eq('id', user.id)
+          .single(),
+        // 2. Earnings this month
+        supabase
+          .from('gems_transactions')
+          .select('amount')
+          .eq('user_id', user.id)
+          .eq('type', 'earning')
+          .gte('created_at', startOfMonth.toISOString()),
+        // 3. Affiliate commission
+        supabase
+          .from('affiliate_sales')
+          .select('commission')
+          .eq('partner_id', user.id)
+          .eq('status', 'confirmed'),
+        // 4. Recent activity
+        supabase
+          .from('gems_transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5),
+      ]);
 
-      const totalEarnings = earnings?.reduce((sum, t) => sum + t.amount, 0) || 0;
+      const totalEarnings = earningsResult.data?.reduce((sum, t) => sum + t.amount, 0) || 0;
+      const totalAffiliate = affiliateResult.data?.reduce((sum, s) => sum + s.commission, 0) || 0;
 
-      // Load affiliate commission
-      const { data: affiliate } = await supabase
-        .from('affiliate_sales')
-        .select('commission')
-        .eq('partner_id', user.id)
-        .eq('status', 'confirmed');
-
-      const totalAffiliate = affiliate?.reduce((sum, s) => sum + s.commission, 0) || 0;
-
-      // Load recent activity
-      const { data: activity } = await supabase
-        .from('gems_transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      setAssetStats({
-        gems: profileData?.gems || 0,
+      const newAssetStats = {
+        gems: profileResult.data?.gems || 0,
         earnings: totalEarnings * 200, // Convert Gems to VND
         affiliate: totalAffiliate,
-      });
+      };
+      setAssetStats(newAssetStats);
+      accountCache.assetStats = newAssetStats; // Update cache
 
-      setRecentActivity(activity || []);
+      setRecentActivity(activityResult.data || []);
     } catch (error) {
       console.error('[Account] Load asset stats error:', error);
     }
   };
 
-  // ⚡ Load Admin Stats
+  // Legacy load asset statistics (kept for reference)
+  const loadAssetStats = async () => {
+    await loadAssetStatsParallel();
+  };
+
+  // ⚡ Load Admin Stats - PARALLEL version for faster loading
   const loadAdminStats = async () => {
-    let pendingApps = 0;
-    let pendingWithdrawals = 0;
-    let totalPartners = 0;
-    let totalUsers = 0;
+    // Helper to safely run a query
+    const safeQuery = async (queryFn) => {
+      try {
+        return await queryFn();
+      } catch (e) {
+        return { count: 0, error: e };
+      }
+    };
 
     try {
-      // Pending partnership applications
-      const { count } = await supabase
-        .from('partnership_applications')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-      pendingApps = count || 0;
-    } catch (e) {
-      console.log('[Account] partnership_applications not available');
+      // Run ALL 4 queries in PARALLEL
+      const [pendingAppsResult, pendingWithdrawalsResult, partnersResult, usersResult] = await Promise.all([
+        // 1. Pending partnership applications
+        safeQuery(() => supabase
+          .from('partnership_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')),
+        // 2. Pending withdrawal requests
+        safeQuery(() => supabase
+          .from('withdrawal_requests')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'pending')),
+        // 3. Total partners
+        safeQuery(() => supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .not('partnership_role', 'is', null)),
+        // 4. Total users
+        safeQuery(() => supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })),
+      ]);
+
+      const pendingApps = pendingAppsResult?.count || 0;
+      const pendingWithdrawals = pendingWithdrawalsResult?.error ? 0 : (pendingWithdrawalsResult?.count || 0);
+      const totalPartners = partnersResult?.count || 0;
+      const totalUsers = usersResult?.count || 0;
+
+      const newAdminStats = {
+        pendingApplications: pendingApps,
+        pendingWithdrawals: pendingWithdrawals,
+        totalPartners: totalPartners,
+        totalUsers: totalUsers,
+      };
+      setAdminStats(newAdminStats);
+      accountCache.adminStats = newAdminStats; // Update cache
+
+      console.log('[Account] Admin stats loaded:', { pendingApps, pendingWithdrawals, totalPartners, totalUsers });
+    } catch (error) {
+      console.error('[Account] Admin stats load error:', error);
     }
-
-    try {
-      // Pending withdrawal requests - table may not exist
-      const { count, error } = await supabase
-        .from('withdrawal_requests')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'pending');
-      if (!error) pendingWithdrawals = count || 0;
-    } catch (e) {
-      console.log('[Account] withdrawal_requests not available');
-    }
-
-    try {
-      // Total partners
-      const { count } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .not('partnership_role', 'is', null);
-      totalPartners = count || 0;
-    } catch (e) {
-      console.log('[Account] profiles query error');
-    }
-
-    try {
-      // Total users
-      const { count } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      totalUsers = count || 0;
-    } catch (e) {
-      console.log('[Account] profiles count error');
-    }
-
-    setAdminStats({
-      pendingApplications: pendingApps,
-      pendingWithdrawals: pendingWithdrawals,
-      totalPartners: totalPartners,
-      totalUsers: totalUsers,
-    });
-
-    console.log('[Account] Admin stats loaded:', {
-      pendingApps,
-      pendingWithdrawals,
-      totalPartners,
-      totalUsers
-    });
   };
 
   // ========== BIOMETRIC HANDLERS ==========
@@ -515,6 +558,17 @@ export default function AccountScreen() {
           >
             <UserCheck size={18} color={COLORS.gold} />
             <Text style={styles.adminQuickText}>Cấp quyền truy cập</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Quick Actions Row 3 - Exchange Affiliate */}
+        <View style={[styles.adminQuickActions, { marginTop: SPACING.sm }]}>
+          <TouchableOpacity
+            style={[styles.adminQuickBtn, styles.adminQuickBtnWide]}
+            onPress={() => navigation.navigate('AffiliateExchangeAdmin')}
+          >
+            <Building2 size={18} color={COLORS.gold} />
+            <Text style={styles.adminQuickText}>Exchange Affiliate</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -695,7 +749,12 @@ export default function AccountScreen() {
           </TouchableOpacity>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* VISION BOARD - Goals & Affirmations (MOVED UP) */}
+          {/* 📚 MY COURSES SECTION - Moved up before Vision Board */}
+          {/* ═══════════════════════════════════════════ */}
+          <MyCoursesSection navigation={navigation} />
+
+          {/* ═══════════════════════════════════════════ */}
+          {/* VISION BOARD - Goals & Affirmations */}
           {/* ═══════════════════════════════════════════ */}
           <Pressable
             style={({ pressed }) => [
@@ -777,11 +836,6 @@ export default function AccountScreen() {
             variant="prominent"
             style={{ marginHorizontal: SPACING.md, marginBottom: SPACING.md }}
           />
-
-          {/* ═══════════════════════════════════════════ */}
-          {/* 📚 MY COURSES SECTION - Admin Panel Style */}
-          {/* ═══════════════════════════════════════════ */}
-          <MyCoursesSection navigation={navigation} />
 
           {/* ═══════════════════════════════════════════ */}
           {/* ⚡ ADMIN DASHBOARD SECTION - MAGENTA THEME */}
@@ -1022,6 +1076,20 @@ export default function AccountScreen() {
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Portfolio</Text>
                 <Text style={styles.menuSubtext}>Quản lý tài sản crypto</Text>
+              </View>
+              <ChevronRight size={20} color={COLORS.textMuted} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('ExchangeAccounts')}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Building2 size={20} color={COLORS.gold} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Tài khoản sàn</Text>
+                <Text style={styles.menuSubtext}>Đăng ký & quản lý sàn giao dịch</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>

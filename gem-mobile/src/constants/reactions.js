@@ -77,7 +77,7 @@ export const REACTION_CONFIG = {
   },
   love: {
     type: 'love',
-    label: 'Yêu thích',
+    label: 'Yêu',
     emoji: '❤️',
     color: '#E91E63',
   },
@@ -101,7 +101,7 @@ export const REACTION_CONFIG = {
   },
   angry: {
     type: 'angry',
-    label: 'Phẫn nộ',
+    label: 'Giận',
     emoji: '😡',
     color: '#FF9800',
   },
@@ -127,20 +127,20 @@ export const REACTION_ANIMATIONS = {
 
 /**
  * Dimension constants for reaction picker (Facebook-style)
- * Optimized for 6 reactions with proper spacing
+ * Optimized for 6 reactions with compact spacing
  */
 export const REACTION_SIZES = {
   // Picker dimensions
-  PICKER_WIDTH: 280,           // Width to fit 6 icons with proper spacing
-  PICKER_HEIGHT: 48,           // Height for picker bar
-  PICKER_BORDER_RADIUS: 24,    // Half of height for pill shape
-  PICKER_EMOJI_SIZE: 24,       // Emoji size in picker (larger for selection)
-  // Button dimensions (Facebook-like small size)
-  ICON_SIZE: 20,               // Base icon size for buttons
-  ICON_SPACING: 6,             // Spacing between icons
-  PADDING_HORIZONTAL: 12,      // Horizontal padding
-  EMOJI_FONT_SIZE: 18,         // Small emoji for button display (matches other icons)
-  // Note: Container needs ~fontSize * 1.2 to prevent clipping on mobile
+  PICKER_WIDTH: 260,           // Width to fit 6 icons with proper spacing
+  PICKER_HEIGHT: 44,           // Height for picker bar
+  PICKER_BORDER_RADIUS: 22,    // Half of height for pill shape
+  PICKER_EMOJI_SIZE: 22,       // Emoji size in picker (larger for selection)
+  // Button dimensions (Facebook-like compact size)
+  ICON_SIZE: 16,               // Base icon size for buttons
+  ICON_SPACING: 4,             // Spacing between icons
+  PADDING_HORIZONTAL: 8,       // Horizontal padding
+  EMOJI_FONT_SIZE: 14,         // Small emoji for button display (matches other icons)
+  // Note: Container needs ~fontSize * 1.3 to prevent clipping on mobile
 };
 
 /**

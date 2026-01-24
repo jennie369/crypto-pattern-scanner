@@ -149,6 +149,27 @@ export const COSMIC_COLORS = {
       gold: '#FFD700',
       silver: '#C0C0C0',
     },
+    crystal: {
+      primary: '#9B59B6',       // Amethyst purple
+      secondary: '#8E44AD',
+      deep: '#6C3483',
+      light: '#D2B4DE',
+      soft: '#E8DAEF',
+      glow: 'rgba(155, 89, 182, 0.5)',
+      glowIntense: 'rgba(155, 89, 182, 0.8)',
+      gradient: ['#9B59B6', '#8E44AD', '#6C3483'],
+      bgGradient: ['#0D0D2B', '#1A0D2B', '#2D1B4E'],
+      // Crystal-specific colors
+      crystals: {
+        amethyst: '#9B59B6',
+        roseQuartz: '#FFB6C1',
+        clearQuartz: '#E8E8E8',
+        citrine: '#F4D03F',
+        obsidian: '#1C1C1C',
+        turquoise: '#48C9B0',
+        lapisLazuli: '#2E4053',
+      },
+    },
   },
 
   // ========== TEXT ==========

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, StyleSheet, AppState } from 'react-native';
 import * as Linking from 'expo-linking';
@@ -34,13 +34,17 @@ import CallStack from './CallStack';
 // Auth context
 import { useAuth } from '../contexts/AuthContext';
 
+// In-App Notification Provider
+import { InAppNotificationProvider } from '../contexts/InAppNotificationContext';
+
 // Tokens
 import { COLORS } from '../utils/tokens';
 
-const Stack = createNativeStackNavigator();
+// Navigation ref (imported from separate file to avoid circular deps)
+import { navigationRef } from './navigationRef';
+export { navigationRef };
 
-// Navigation ref for deep linking
-export const navigationRef = createNavigationContainerRef();
+const Stack = createNativeStackNavigator();
 
 // Loading screen
 function LoadingScreen() {
@@ -238,11 +242,13 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer ref={navigationRef} onReady={onNavigationReady}>
-      {isAuthenticated ? (
-        <MainStack />
-      ) : (
-        <AuthStack hasCompletedWelcome={hasCompletedWelcome} />
-      )}
+      <InAppNotificationProvider>
+        {isAuthenticated ? (
+          <MainStack />
+        ) : (
+          <AuthStack hasCompletedWelcome={hasCompletedWelcome} />
+        )}
+      </InAppNotificationProvider>
     </NavigationContainer>
   );
 }

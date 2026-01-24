@@ -22,6 +22,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   ArrowLeft,
@@ -345,13 +346,27 @@ export default function AdminShopBannersScreen({ navigation }) {
     }
   };
 
+  // Helper function to convert base64 to ArrayBuffer (React Native compatible)
+  const base64ToArrayBuffer = (base64) => {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  };
+
   // Upload image to Supabase storage
   const uploadImage = async (uri) => {
     setUploading(true);
     try {
-      // Convert URI to blob
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      // Read file as base64 (React Native compatible method)
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert to ArrayBuffer
+      const arrayBuffer = base64ToArrayBuffer(base64);
 
       // Generate unique filename
       const filename = `shop-banner-${Date.now()}.jpg`;
@@ -359,8 +374,8 @@ export default function AdminShopBannersScreen({ navigation }) {
 
       // Upload to Supabase storage
       const { data, error } = await supabase.storage
-        .from('public-assets')
-        .upload(filePath, blob, {
+        .from('forum-images')
+        .upload(filePath, arrayBuffer, {
           contentType: 'image/jpeg',
           upsert: true,
         });
@@ -369,7 +384,7 @@ export default function AdminShopBannersScreen({ navigation }) {
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('public-assets')
+        .from('forum-images')
         .getPublicUrl(filePath);
 
       setForm((prev) => ({ ...prev, image_url: urlData.publicUrl }));
@@ -749,15 +764,20 @@ export default function AdminShopBannersScreen({ navigation }) {
   const uploadFeaturedImage = async (uri) => {
     setFeaturedUploading(true);
     try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      // Read file as base64 (React Native compatible method)
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert to ArrayBuffer
+      const arrayBuffer = base64ToArrayBuffer(base64);
 
       const filename = `featured-product-${Date.now()}.jpg`;
       const filePath = `shop-banners/${filename}`;
 
       const { data, error } = await supabase.storage
-        .from('public-assets')
-        .upload(filePath, blob, {
+        .from('forum-images')
+        .upload(filePath, arrayBuffer, {
           contentType: 'image/jpeg',
           upsert: true,
         });
@@ -765,7 +785,7 @@ export default function AdminShopBannersScreen({ navigation }) {
       if (error) throw error;
 
       const { data: urlData } = supabase.storage
-        .from('public-assets')
+        .from('forum-images')
         .getPublicUrl(filePath);
 
       setFeaturedForm((prev) => ({ ...prev, image_url: urlData.publicUrl }));

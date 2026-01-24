@@ -47,6 +47,14 @@ export const usePostReactions = (
   const previousCountsRef = useRef(null);
   const subscriptionRef = useRef(null);
 
+  // Ref for immediate blocking of multiple rapid clicks
+  // (React state updates are async, so loading state alone can't prevent race conditions)
+  const isProcessingRef = useRef(false);
+
+  // Ref to track current reaction synchronously (state updates are async)
+  // This ensures we always know the ACTUAL current reaction when calculating optimistic updates
+  const currentReactionRef = useRef(initialUserReaction);
+
   /**
    * Calculate total count
    */
@@ -80,6 +88,7 @@ export const usePostReactions = (
 
     // If initial reaction was provided, use it
     if (initialUserReaction !== null) {
+      currentReactionRef.current = initialUserReaction; // Sync ref
       setUserReaction(initialUserReaction);
       return;
     }
@@ -88,7 +97,9 @@ export const usePostReactions = (
     const fetchUserReaction = async () => {
       try {
         const reaction = await reactionService.getUserReaction(postId, userId);
-        setUserReaction(reaction?.reaction_type || null);
+        const reactionType = reaction?.reaction_type || null;
+        currentReactionRef.current = reactionType; // Sync ref
+        setUserReaction(reactionType);
       } catch (err) {
         console.error('[usePostReactions] Fetch error:', err);
       }
@@ -147,59 +158,87 @@ export const usePostReactions = (
 
   /**
    * Add or update a reaction
+   * Enforces one reaction per user per post with immediate blocking
    * @param {string} reactionType - Reaction type to add
    */
   const addReaction = useCallback(
     async (reactionType) => {
-      if (!postId || !userId || loading) return;
+      // Use ref for immediate blocking (state updates are async)
+      if (!postId || !userId || isProcessingRef.current) {
+        console.log('[usePostReactions] Blocked: already processing or missing params');
+        return;
+      }
+
+      // Immediately block further calls
+      isProcessingRef.current = true;
+
+      // Get the ACTUAL current reaction from ref (not state, which might be stale)
+      const oldReaction = currentReactionRef.current;
 
       // Save current state for rollback
-      previousReactionRef.current = userReaction;
+      previousReactionRef.current = oldReaction;
       previousCountsRef.current = { ...reactionCounts };
+
+      // Update ref immediately (synchronous) before state (async)
+      currentReactionRef.current = reactionType;
 
       // Optimistic update
       setLoading(true);
       setError(null);
       setUserReaction(reactionType);
-      updateCountsOptimistically(reactionType, userReaction);
+      updateCountsOptimistically(reactionType, oldReaction);
 
       try {
         await reactionService.addReaction(postId, userId, reactionType);
-        console.log('[usePostReactions] Reaction added:', reactionType);
+        console.log('[usePostReactions] Reaction added:', reactionType, 'oldReaction:', oldReaction);
       } catch (err) {
         // Rollback on error
         console.error('[usePostReactions] Add error:', err);
+        currentReactionRef.current = previousReactionRef.current; // Rollback ref
         setUserReaction(previousReactionRef.current);
         setReactionCounts(previousCountsRef.current);
         setError(err?.message || 'Có lỗi xảy ra');
       } finally {
         setLoading(false);
+        isProcessingRef.current = false; // Release lock
       }
     },
-    [postId, userId, userReaction, reactionCounts, loading, updateCountsOptimistically]
+    [postId, userId, reactionCounts, updateCountsOptimistically]
   );
 
   /**
    * Remove the current reaction
+   * Uses immediate blocking to prevent multiple rapid calls
    */
   const removeReaction = useCallback(async () => {
-    if (!postId || !userId || !userReaction || loading) return;
+    // Get current reaction from ref (more reliable than state)
+    const currentReaction = currentReactionRef.current;
+
+    // Use ref for immediate blocking (state updates are async)
+    if (!postId || !userId || !currentReaction || isProcessingRef.current) {
+      console.log('[usePostReactions] Remove blocked: already processing or no reaction');
+      return;
+    }
+
+    // Immediately block further calls
+    isProcessingRef.current = true;
 
     // Save current state for rollback
-    previousReactionRef.current = userReaction;
+    previousReactionRef.current = currentReaction;
     previousCountsRef.current = { ...reactionCounts };
+
+    // Update ref immediately (synchronous)
+    currentReactionRef.current = null;
 
     // Optimistic update
     setLoading(true);
     setError(null);
-
-    const oldType = userReaction;
     setUserReaction(null);
 
     setReactionCounts((prev) => {
       const newCounts = { ...prev };
-      if (oldType && newCounts[oldType] > 0) {
-        newCounts[oldType] = newCounts[oldType] - 1;
+      if (currentReaction && newCounts[currentReaction] > 0) {
+        newCounts[currentReaction] = newCounts[currentReaction] - 1;
         newCounts.total = Math.max(0, (newCounts.total || 0) - 1);
       }
       return newCounts;
@@ -211,25 +250,37 @@ export const usePostReactions = (
     } catch (err) {
       // Rollback on error
       console.error('[usePostReactions] Remove error:', err);
+      currentReactionRef.current = previousReactionRef.current; // Rollback ref
       setUserReaction(previousReactionRef.current);
       setReactionCounts(previousCountsRef.current);
       setError(err?.message || 'Có lỗi xảy ra');
     } finally {
       setLoading(false);
+      isProcessingRef.current = false; // Release lock
     }
-  }, [postId, userId, userReaction, reactionCounts, loading]);
+  }, [postId, userId, reactionCounts]);
 
   /**
    * Toggle reaction (tap behavior)
    * - If no reaction: add 'like'
    * - If same reaction: remove it
    * - If different reaction: change to new one
+   * Uses immediate blocking to prevent rapid taps
    *
    * @param {string} reactionType - Reaction type to toggle (default: 'like')
    */
   const toggleReaction = useCallback(
     async (reactionType = 'like') => {
-      if (userReaction === reactionType) {
+      // Block if already processing
+      if (isProcessingRef.current) {
+        console.log('[usePostReactions] Toggle blocked: already processing');
+        return;
+      }
+
+      // Use ref for accurate current reaction (state might be stale)
+      const currentReaction = currentReactionRef.current;
+
+      if (currentReaction === reactionType) {
         // Same reaction - remove it
         await removeReaction();
       } else {
@@ -237,7 +288,7 @@ export const usePostReactions = (
         await addReaction(reactionType);
       }
     },
-    [userReaction, addReaction, removeReaction]
+    [addReaction, removeReaction]
   );
 
   /**

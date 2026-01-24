@@ -184,7 +184,11 @@ const checkShouldReset = (action, today) => {
     case 'monthly':
       return daysSinceReset >= 30;
     case 'custom':
-      return daysSinceReset >= (action.recurrence_days || 1);
+      // recurrence_days is stored as INTEGER[] array in database
+      const days = Array.isArray(action.recurrence_days)
+        ? action.recurrence_days[0]
+        : action.recurrence_days;
+      return daysSinceReset >= (days || 1);
     default:
       return false;
   }
@@ -440,6 +444,14 @@ export const createAction = async (userId, actionData, options = {}) => {
       }
     }
 
+    // Prepare recurrence_days as array (PostgreSQL INTEGER[] type)
+    let recurrenceDays = null;
+    if (actionData.recurrenceDays) {
+      recurrenceDays = Array.isArray(actionData.recurrenceDays)
+        ? actionData.recurrenceDays
+        : [actionData.recurrenceDays];
+    }
+
     const { data, error } = await supabase
       .from('vision_actions')
       .insert({
@@ -449,7 +461,7 @@ export const createAction = async (userId, actionData, options = {}) => {
         description: actionData.description || '',
         due_date: actionData.dueDate || new Date().toISOString().split('T')[0],
         recurrence: actionData.recurrence || 'once',
-        recurrence_days: actionData.recurrenceDays || null,
+        recurrence_days: recurrenceDays,
         weight: actionData.weight || 1,
         xp_reward: actionData.xpReward || XP_REWARDS.action_complete,
       })
@@ -673,6 +685,14 @@ export const createActionWithType = async (userId, goalId, actionData, options =
       }
     }
 
+    // Prepare recurrence_days as array (PostgreSQL INTEGER[] type)
+    let recurrenceDays = null;
+    if (actionData.recurrence_days) {
+      recurrenceDays = Array.isArray(actionData.recurrence_days)
+        ? actionData.recurrence_days
+        : [actionData.recurrence_days];
+    }
+
     const { data, error } = await supabase
       .from('vision_actions')
       .insert({
@@ -681,7 +701,7 @@ export const createActionWithType = async (userId, goalId, actionData, options =
         title: actionData.title.trim(),
         description: actionData.description || '',
         action_type: actionData.action_type || 'daily',
-        recurrence_days: actionData.recurrence_days || 1,
+        recurrence_days: recurrenceDays,
         is_completed: false,
         last_reset_date: today,
         due_date: actionData.due_date || today,

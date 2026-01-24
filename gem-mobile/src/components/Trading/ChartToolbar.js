@@ -20,6 +20,9 @@ import {
   Target,
   ChevronDown,
   X,
+  Layers,
+  EyeOff,
+  Eye,
 } from 'lucide-react-native';
 
 // All available timeframes (organized like Binance)
@@ -56,6 +59,13 @@ const getTimeframeLabel = (value) => {
   return tf ? tf.label : value;
 };
 
+// Zone tooltip configs
+const ZONE_TOOLTIPS = {
+  all: 'Hiện tất cả zones',
+  selected: 'Chỉ zone đã chọn',
+  hidden: 'Ẩn tất cả zones',
+};
+
 const ChartToolbar = ({
   // Timeframe props
   activeTimeframe = '4h',
@@ -66,6 +76,9 @@ const ChartToolbar = ({
   // Volume
   showVolume = false,
   onToggleVolume,
+  // Zone display props
+  zoneDisplayMode = 'all', // 'all' | 'selected' | 'hidden'
+  onZoneDisplayModeChange,
   // Other tools
   onToggleDrawing,
   onZoomIn,
@@ -75,6 +88,13 @@ const ChartToolbar = ({
   activeIndicators = [],
 }) => {
   const [showTimeframeModal, setShowTimeframeModal] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState(null); // 'all' | 'selected' | 'hidden' | null
+
+  // Auto-hide tooltip after 1.5s
+  const showTooltip = (mode) => {
+    setActiveTooltip(mode);
+    setTimeout(() => setActiveTooltip(null), 1500);
+  };
 
   // Check if active timeframe is in quick list
   const isInQuickList = QUICK_TIMEFRAMES.includes(activeTimeframe);
@@ -155,6 +175,66 @@ const ChartToolbar = ({
         >
           <Target size={14} color={showPriceLines ? '#FFBD59' : '#A0AEC0'} />
         </TouchableOpacity>
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Zone Toggle Buttons with Tooltips */}
+        <View style={styles.zoneButtonsContainer}>
+          {/* All Zones */}
+          <View>
+            <TouchableOpacity
+              style={[styles.zoneButton, zoneDisplayMode === 'all' && styles.zoneButtonActive]}
+              onPress={() => onZoneDisplayModeChange?.('all')}
+              onLongPress={() => showTooltip('all')}
+              delayLongPress={300}
+            >
+              <Layers size={14} color={zoneDisplayMode === 'all' ? '#FFBD59' : '#A0AEC0'} />
+            </TouchableOpacity>
+            {activeTooltip === 'all' && (
+              <View style={styles.tooltipBubble}>
+                <Text style={styles.tooltipText}>{ZONE_TOOLTIPS.all}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Selected Zone Only */}
+          <View>
+            <TouchableOpacity
+              style={[styles.zoneButton, zoneDisplayMode === 'selected' && styles.zoneButtonActive]}
+              onPress={() => onZoneDisplayModeChange?.('selected')}
+              onLongPress={() => showTooltip('selected')}
+              delayLongPress={300}
+            >
+              <Eye size={14} color={zoneDisplayMode === 'selected' ? '#FFBD59' : '#A0AEC0'} />
+            </TouchableOpacity>
+            {activeTooltip === 'selected' && (
+              <View style={styles.tooltipBubble}>
+                <Text style={styles.tooltipText}>{ZONE_TOOLTIPS.selected}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Hide All Zones */}
+          <View>
+            <TouchableOpacity
+              style={[styles.zoneButton, zoneDisplayMode === 'hidden' && styles.zoneButtonActive]}
+              onPress={() => onZoneDisplayModeChange?.('hidden')}
+              onLongPress={() => showTooltip('hidden')}
+              delayLongPress={300}
+            >
+              <EyeOff size={14} color={zoneDisplayMode === 'hidden' ? '#FFBD59' : '#A0AEC0'} />
+            </TouchableOpacity>
+            {activeTooltip === 'hidden' && (
+              <View style={styles.tooltipBubble}>
+                <Text style={styles.tooltipText}>{ZONE_TOOLTIPS.hidden}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Divider */}
+        <View style={styles.divider} />
 
         {/* Action Buttons */}
         <TouchableOpacity style={styles.actionButton} onPress={onToggleTheme}>
@@ -321,6 +401,48 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 2,
+  },
+  // Zone toggle buttons
+  zoneButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  zoneButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  zoneButtonActive: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+  },
+  // Tooltip bubble
+  tooltipBubble: {
+    position: 'absolute',
+    top: 30,
+    left: -36, // Center under 28px button: -(minWidth/2 - buttonWidth/2) = -(100/2 - 28/2) = -36
+    backgroundColor: 'rgba(15, 16, 48, 0.95)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    zIndex: 1000,
+    minWidth: 100,
+    alignItems: 'center',
+    elevation: 10, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  tooltipText: {
+    fontSize: 11,
+    color: '#FFBD59',
+    fontWeight: '500',
+    textAlign: 'center',
   },
   // Divider
   divider: {

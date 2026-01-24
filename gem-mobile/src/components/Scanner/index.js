@@ -1,76 +1,80 @@
 /**
- * GEM Mobile - Scanner Components
- * Zone-related components for pattern visualization
- *
- * Phase 1A: Zone Object + Pattern Strength
- * Phase 1B: Quasimodo + FTR Detection
- * Phase 1C: Odds Enhancers + Freshness Tracking
- * Phase 2A: Flag Limit + Decision Point + Zone Hierarchy
- * Phase 2B: Stacked Zones + Hidden FTR + FTB Tracking
- * Phase 2C: Compression + Inducement + Look Right
- * Phase 3A: Confirmation Patterns (Engulfing, Pin Bar, etc.)
- * Phase 3B: Extended Zones + MPL + Pin Engulf Combo
- * Phase 3C: Smart Alerts + UI Polish + Final Integration
+ * =====================================================
+ * File: src/components/Scanner/index.js
+ * Description: Scanner components exports
+ * =====================================================
  */
 
-// Phase 1A Components
-export { default as ZoneBoundaryDisplay } from './ZoneBoundaryDisplay';
-export { default as PatternStrengthBadge, StrengthStars, ContextBadge, WinRateBadge } from './PatternStrengthBadge';
-export { default as ZoneConceptOnboarding, checkShouldShowZoneOnboarding, resetZoneOnboarding } from './ZoneConceptOnboarding';
+// =====================================================
+// EXISTING SCANNER COMPONENTS
+// =====================================================
 
-// Phase 1B Components - Quasimodo + FTR
-export { default as QMPatternCard } from './QMPatternCard';
-export { default as FTRZoneCard } from './FTRZoneCard';
-export { default as AdvancedPatternsOnboarding, shouldShowAdvancedPatternsOnboarding, resetAdvancedPatternsOnboarding } from './AdvancedPatternsOnboarding';
-
-// Phase 1C Components - Odds Enhancers + Freshness Tracking
-export { default as OddsEnhancerScorecard, OddsEnhancerCompact, OddsGradeBadge } from './OddsEnhancerScorecard';
-export { default as FreshnessIndicator, FTBBadge, TestCountBadge, OrderAbsorptionBar, FreshnessCard } from './FreshnessIndicator';
-export { default as GradeDisplay, GradeBadge, GradeProgressRing, PositionSizeIndicator, GradeLegend, TradeDecisionCard } from './GradeDisplay';
-export { default as OddsEnhancersOnboarding, shouldShowOddsEnhancersOnboarding, resetOddsEnhancersOnboarding } from './OddsEnhancersOnboarding';
-
-// Phase 2A Components - Flag Limit + Decision Point + Zone Hierarchy
-export { default as ZoneHierarchyBadge, HierarchyInline, HierarchyLegend, HierarchyBar, HierarchyStatsCard } from './ZoneHierarchyBadge';
-export { default as FlagLimitCard } from './FlagLimitCard';
-export { default as DecisionPointCard } from './DecisionPointCard';
-export { default as ZoneHierarchyOnboarding, shouldShowZoneHierarchyOnboarding, resetZoneHierarchyOnboarding } from './ZoneHierarchyOnboarding';
-
-// Phase 2B Components - Stacked Zones + Hidden FTR + FTB Tracking
-export { default as StackedZonesIndicator, StackedZonesList, StackedZonesSummary } from './StackedZonesIndicator';
-export { default as HiddenFTRPanel, HiddenFTRBadge, NestedZonesList } from './HiddenFTRPanel';
-export { default as FTBHighlight, FTBBadge as FTBStatusBadge, FreshnessTierDisplay, FTBOpportunityCard, FTBSummaryCard } from './FTBHighlight';
-export { default as StackedZonesOnboarding, shouldShowStackedZonesOnboarding, resetStackedZonesOnboarding } from './StackedZonesOnboarding';
-
-// Phase 2C Components - Compression + Inducement + Look Right
-export { default as CompressionAlert, CompressionBadge, CompressionCard } from './CompressionAlert';
-export { default as InducementWarning, InducementBadge, InducementCard, LiquidityPoolsDisplay } from './InducementWarning';
-export { default as ZoneValidityBadge, ValidityBadge, ValidityCard, RealTimeValidityIndicator } from './ZoneValidityBadge';
-export { default as CompressionOnboarding, shouldShowCompressionOnboarding, resetCompressionOnboarding } from './CompressionOnboarding';
-
-// Phase 3A Components - Confirmation Patterns
-export { default as ConfirmationBadge, ConfirmationIndicator, ConfirmationScoreBadge, PatternTypeLabel, ConfirmationStrengthBar } from './ConfirmationBadge';
-export { default as CandlePatternCard, CandlePatternListItem, PatternSummary } from './CandlePatternCard';
-export { default as ConfirmationOnboarding, shouldShowConfirmationOnboarding, resetConfirmationOnboarding } from './ConfirmationOnboarding';
-
-// Phase 3B Components - Extended Zones + MPL + Pin Engulf Combo
-export { default as ExtendedZoneVisual, ExtendedZoneBadge, ExtensionIndicator, ExtendedZoneCompare } from './ExtendedZoneVisual';
-export { default as MPLIndicator, MPLBadge, MPLImprovementCard, MPLLevelsChart } from './MPLIndicator';
-export { default as ExtendedZoneOnboarding, shouldShowExtendedZoneOnboarding, resetExtendedZoneOnboarding } from './ExtendedZoneOnboarding';
-
-// Phase 3A Components - Entry Method Selection
-export { default as EntryMethodSelector, EntryMethodBadge, EntryMethodInline } from './EntryMethodSelector';
-
-// Phase 3C Components - Smart Alerts + UI Polish + Final Integration
-export { default as AlertCard, AlertListItem, AlertTypeBadge, AlertPriorityIndicator } from './AlertCard';
-export { default as AlertPanel, AlertBadge, AlertSummary } from './AlertPanel';
-export { default as AlertOnboarding, shouldShowAlertOnboarding, resetAlertOnboarding } from './AlertOnboarding';
-export { default as PriceAlertModal, QuickAlertButton, AlertCreatedToast } from './PriceAlertModal';
-
-// Zone Visualization Components (NEW)
+// Zone visualization
 export { default as ZoneRectangle } from './ZoneRectangle';
 export { default as MultiZoneOverlay } from './MultiZoneOverlay';
-export { default as ZoneFeatureGuard, useZoneFeatureAccess, getRequiredTierForFeature } from './ZoneFeatureGuard';
+export { default as ZoneBoundaryDisplay } from './ZoneBoundaryDisplay';
+export { default as ExtendedZoneVisual } from './ExtendedZoneVisual';
+export { default as StackedZonesIndicator } from './StackedZonesIndicator';
+export { default as ZoneHierarchyBadge } from './ZoneHierarchyBadge';
+export { default as ZoneValidityBadge } from './ZoneValidityBadge';
+export { default as ZoneFeatureGuard } from './ZoneFeatureGuard';
 export { default as ZonePreferencesModal } from './ZonePreferencesModal';
 
-// Trading Leads Benefit Components
+// Pattern cards
+export { default as FTRZoneCard } from './FTRZoneCard';
+export { default as QMPatternCard } from './QMPatternCard';
+export { default as CandlePatternCard } from './CandlePatternCard';
+export { default as DecisionPointCard } from './DecisionPointCard';
+export { default as FlagLimitCard } from './FlagLimitCard';
+
+// Pattern indicators
+export { default as PatternStrengthBadge } from './PatternStrengthBadge';
+export { default as GradeDisplay } from './GradeDisplay';
+export { default as FreshnessIndicator } from './FreshnessIndicator';
+export { default as ConfirmationBadge } from './ConfirmationBadge';
+export { default as MPLIndicator } from './MPLIndicator';
+export { default as FTBHighlight } from './FTBHighlight';
+export { default as InducementWarning } from './InducementWarning';
+export { default as HiddenFTRPanel } from './HiddenFTRPanel';
+
+// Alerts
+export { default as AlertCard } from './AlertCard';
+export { default as AlertPanel } from './AlertPanel';
+export { default as PriceAlertModal } from './PriceAlertModal';
+export { default as CompressionAlert } from './CompressionAlert';
+
+// Odds enhancers
+export { default as OddsEnhancerScorecard } from './OddsEnhancerScorecard';
+export { default as EntryMethodSelector } from './EntryMethodSelector';
+
+// Onboarding modals
+export { default as ZoneConceptOnboarding } from './ZoneConceptOnboarding';
+export { default as ZoneHierarchyOnboarding } from './ZoneHierarchyOnboarding';
+export { default as ExtendedZoneOnboarding } from './ExtendedZoneOnboarding';
+export { default as StackedZonesOnboarding } from './StackedZonesOnboarding';
+export { default as ConfirmationOnboarding } from './ConfirmationOnboarding';
+export { default as OddsEnhancersOnboarding } from './OddsEnhancersOnboarding';
+export { default as AlertOnboarding } from './AlertOnboarding';
+export { default as CompressionOnboarding } from './CompressionOnboarding';
+export { default as AdvancedPatternsOnboarding } from './AdvancedPatternsOnboarding';
+
+// Modals
 export { default as ProScannerBenefitModal } from './ProScannerBenefitModal';
+
+// =====================================================
+// V2 SCANNER COMPONENTS (NEW)
+// =====================================================
+
+// Confidence display
+export { default as ConfidenceBreakdown, ConfidenceCompact, ConfidenceBadge } from './ConfidenceBreakdown';
+
+// Validation badges
+export {
+  default as ValidationBadges,
+  ValidationBadgesCompact,
+  VolumeBadge,
+  HTFBadge,
+  RetestBadge,
+  PendingBadge,
+  LockedBadge,
+} from './ValidationBadges';

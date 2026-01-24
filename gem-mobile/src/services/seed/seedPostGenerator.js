@@ -1668,7 +1668,7 @@ const SAMPLE_POSTS = {
       hashtags: ['#FreshZone', '#tradingtips', '#FrequencyMethod', '#GemTrading'],
     },
     {
-      content: 'Wedge (Cái Nêm) - Mẫu hình số 20 (Tier 3).\n\nNêm Tăng (Rising Wedge) thường báo hiệu đảo chiều GIẢM.\nNêm Giảm (Falling Wedge) thường báo hiệu đảo chiều TĂNG.\n\nHãy tưởng tượng cái nêm giống như một cái lò xo bị ép chặt lại ở cuối con đường. Khi giá phá vỡ nêm, nó thường chạy rất mạnh.\n\nTuy nhiên, đừng trade Nêm một cách mù quáng. Hãy nhìn xem cái Nêm đó đang hướng về đâu? Nếu Nêm Tăng mà mũi nhọn chọc thẳng vào HFZ khung Tuần -> Chuẩn bị Short full giáp (nhưng nhớ quản lý vốn nhé).',
+      content: 'Wedge - Mẫu hình số 20 (Tier 3).\n\nRising Wedge thường báo hiệu đảo chiều GIẢM.\nFalling Wedge thường báo hiệu đảo chiều TĂNG.\n\nHãy tưởng tượng wedge giống như một cái lò xo bị ép chặt lại ở cuối con đường. Khi giá phá vỡ wedge, nó thường chạy rất mạnh.\n\nTuy nhiên, đừng trade Wedge một cách mù quáng. Hãy nhìn xem Wedge đó đang hướng về đâu? Nếu Rising Wedge mà mũi nhọn chọc thẳng vào HFZ khung Tuần -> Chuẩn bị Short full giáp (nhưng nhớ quản lý vốn nhé).',
       hashtags: ['#WedgePattern', '#Tier3', '#technicalanalysis', '#crypto'],
     },
     {
@@ -1836,7 +1836,7 @@ const SAMPLE_POSTS = {
       hashtags: ['#tradersetup', '#lifestyle', '#phongthuy', '#Gemral'],
     },
     {
-      content: 'Falling Wedge (Nêm Giảm) - Mẫu hình số 20 (Tier 3) - Bản nâng cấp.\n\nNêm giảm thường là tín hiệu đảo chiều tăng (Bullish). Nhưng trong Frequency Method, chúng ta soi kỹ hơn:\nCái Nêm đó đang \'chọc\' vào đâu?\n\nNếu mũi nhọn của Nêm Giảm kết thúc ngay tại vùng LFZ khung Ngày -> Tỷ lệ thắng lên tới 80-90%.\nNếu Nêm Giảm lơ lửng giữa trời -> Cẩn thận Bull Trap.\n\nLuôn luôn là: Context (Bối cảnh) > Pattern (Mẫu hình).',
+      content: 'Falling Wedge - Mẫu hình số 20 (Tier 3) - Bản nâng cấp.\n\nFalling Wedge thường là tín hiệu đảo chiều tăng (Bullish). Nhưng trong Frequency Method, chúng ta soi kỹ hơn:\nWedge đó đang \'chọc\' vào đâu?\n\nNếu mũi nhọn của Falling Wedge kết thúc ngay tại vùng LFZ khung Ngày -> Tỷ lệ thắng lên tới 80-90%.\nNếu Falling Wedge lơ lửng giữa trời -> Cẩn thận Bull Trap.\n\nLuôn luôn là: Context (Bối cảnh) > Pattern (Mẫu hình).',
       hashtags: ['#FallingWedge', '#Tier3', '#LFZ', '#technicalanalysis'],
     },
     {
@@ -5186,6 +5186,7 @@ const generatePostData = ({
   topic,
   createdAt,
   avatarUrl,
+  postIndex = 0, // Used to ensure uniqueness
 }) => {
   // Detect gender from avatar URL for gender-specific images
   const gender = detectGenderFromAvatar(avatarUrl);
@@ -5198,7 +5199,11 @@ const generatePostData = ({
 
   // Append hashtags to content (add newlines before hashtags)
   const hashtagString = hashtags.length > 0 ? '\n\n' + hashtags.join(' ') : '';
-  const fullContent = rawContent + hashtagString;
+
+  // Add unique invisible marker to prevent duplicate trigger
+  // Uses zero-width characters that won't affect display
+  const uniqueMarker = `\u200B${Date.now()}-${postIndex}-${Math.random().toString(36).substring(2, 8)}\u200B`;
+  const fullContent = rawContent + hashtagString + uniqueMarker;
 
   // Sanitize content to remove invalid unicode surrogates
   const content = sanitizeText(fullContent);
@@ -5210,11 +5215,15 @@ const generatePostData = ({
   // Matching actual forum_posts table structure
   const imageUrl = images[0] || null;
 
+  // Generate unique title with timestamp to avoid duplicate trigger
+  const baseTitle = sanitizeText(rawContent.substring(0, 90));
+  const uniqueTitle = `${baseTitle} #${postIndex + 1}`;
+
   // Insert into seed_posts table (separate from forum_posts to avoid FK constraint)
   return {
     user_id: authorId,
     content,
-    title: sanitizeText(content.substring(0, 100)), // Required field
+    title: uniqueTitle,
     image_url: imageUrl,
     media_urls: images.length > 0 ? images : [],
     seed_topic: topic,
@@ -5318,6 +5327,7 @@ export const generate = async ({
         topic,
         createdAt,
         avatarUrl: user.avatar_url, // For gender-specific image selection
+        postIndex: i, // Used to ensure uniqueness in title/content
       }));
 
       // Move to next user (cycle through all users)

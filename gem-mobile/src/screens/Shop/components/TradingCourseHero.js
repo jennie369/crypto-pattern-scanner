@@ -27,7 +27,8 @@ import { extractImageUrl, PLACEHOLDER_IMAGE } from '../../../utils/digitalProduc
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BANNER_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
-const BANNER_HEIGHT = HERO_CONFIG.bannerHeight;
+// Use aspectRatio (3:4 portrait) to calculate height
+const BANNER_HEIGHT = BANNER_WIDTH / HERO_CONFIG.aspectRatio;
 
 const TradingCourseHero = ({
   products = [],
@@ -138,6 +139,10 @@ const TradingCourseHero = ({
           offset: (BANNER_WIDTH + SPACING.md) * index,
           index,
         })}
+        removeClippedSubviews={true}
+        initialNumToRender={2}
+        maxToRenderPerBatch={2}
+        windowSize={3}
       />
 
       {/* Pagination Dots */}
@@ -179,9 +184,10 @@ const HeroSlide = memo(({ product, onPress, isActive }) => {
         resizeMode="cover"
       />
 
-      {/* Gradient Overlay */}
+      {/* Gradient Overlay - lighter for better image visibility */}
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.8)']}
+        colors={['transparent', 'rgba(0,0,0,0.4)']}
+        locations={[0.5, 1]}
         style={styles.slideGradient}
       />
 

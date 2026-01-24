@@ -19,17 +19,36 @@ import { useAuth } from '../contexts/AuthContext';
 import { sponsorBannerService } from '../services/sponsorBannerService';
 import SponsorBanner from './SponsorBanner';
 
+// Global banner cache - shared across all screens to avoid redundant API calls
+const bannerCache = {
+  data: {},
+  lastFetch: {},
+  CACHE_DURATION: 60000, // 60 seconds cache for banners
+};
+
 /**
  * Custom hook to fetch banners for a screen
  * Use this hook when you need to manually control banner distribution
+ * Now with CACHING to avoid redundant API calls
  */
 export function useSponsorBanners(screenName, refreshTrigger) {
   const { user, profile } = useAuth();
-  const [banners, setBanners] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [banners, setBanners] = useState(() => bannerCache.data[screenName] || []);
+  const [loading, setLoading] = useState(!bannerCache.data[screenName]);
   const [dismissedIds, setDismissedIds] = useState(new Set());
 
-  const loadBanners = useCallback(async () => {
+  const loadBanners = useCallback(async (forceRefresh = false) => {
+    const now = Date.now();
+    const cacheKey = `${screenName}_${user?.id || 'guest'}`;
+    const cacheExpired = now - (bannerCache.lastFetch[cacheKey] || 0) > bannerCache.CACHE_DURATION;
+
+    // Use cache if available and not expired (unless force refresh)
+    if (!forceRefresh && bannerCache.data[cacheKey] && !cacheExpired) {
+      setBanners(bannerCache.data[cacheKey]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const userTier = profile?.scanner_tier || profile?.tier || 'FREE';
@@ -41,6 +60,11 @@ export function useSponsorBanners(screenName, refreshTrigger) {
         { limit: null }  // No limit - get all banners for this screen
       );
       console.log(`[useSponsorBanners:${screenName}] Loaded ${data.length} banners, userTier: ${userTier}`);
+
+      // Update cache
+      bannerCache.data[cacheKey] = data;
+      bannerCache.lastFetch[cacheKey] = now;
+
       setBanners(data);
     } catch (error) {
       console.error(`[useSponsorBanners:${screenName}] Load error:`, error);
@@ -54,12 +78,12 @@ export function useSponsorBanners(screenName, refreshTrigger) {
     loadBanners();
   }, [loadBanners]);
 
-  // Refresh when refreshTrigger changes
+  // Refresh when refreshTrigger changes (force refresh)
   useEffect(() => {
-    if (refreshTrigger !== undefined) {
-      loadBanners();
+    if (refreshTrigger !== undefined && refreshTrigger !== null) {
+      loadBanners(true); // Force refresh
     }
-  }, [refreshTrigger, loadBanners]);
+  }, [refreshTrigger]);
 
   // Filter out dismissed banners
   const activeBanners = banners.filter(b => !dismissedIds.has(b.id));

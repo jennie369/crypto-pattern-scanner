@@ -147,7 +147,8 @@ export const ALLOWED_ORIGINS: string[] = [
 
 export const GEMINI_MODEL = 'gemini-2.5-flash';
 export const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-export const GEMINI_API_KEY = 'AIzaSyCymkgeL0ERDYYePtbV4zuL-BZ2mfMxehc';
+// API key from environment variable (set in Supabase Dashboard > Edge Functions > Secrets)
+export const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || '';
 
 // Default generation config (gemini-2.5-flash uses thinking tokens, needs higher maxOutputTokens)
 export const DEFAULT_GENERATION_CONFIG = {

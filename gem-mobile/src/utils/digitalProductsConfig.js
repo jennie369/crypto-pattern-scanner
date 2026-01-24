@@ -54,33 +54,34 @@ export const DIGITAL_CATEGORIES = [
     id: 'trading',
     label: 'Trading',
     icon: TrendingUp,
-    // Match: "Khóa học Trading" tag from products
-    tags: ['Khóa học Trading', 'Khoa hoc Trading', 'trading-course', 'Tier 1', 'Tier 2', 'Tier 3'],
+    // ONLY match trading-specific tags - NOT generic tier tags
+    // Generic 'Tier 1', 'Tier 2', 'Tier 3' removed to avoid mixing with mindset courses
+    tags: ['Khóa học Trading', 'Khoa hoc Trading', 'trading-course', 'gem-trading', 'Trading'],
   },
   {
     id: 'mindset',
     label: 'Tư duy',
     icon: Sparkles,
-    // Match: "Khóa học" tag (without "Trading") - for mindset/spiritual courses
-    tags: ['Khóa học', 'Khóa học Tâm Thức', 'tan-so-goc', 'khai-mo'],
+    // Mindset/spiritual courses - "Tái Tạo Tư Duy", "7 Ngày Khai Mở", "Kích Hoạt Tình Yêu"
+    tags: ['Khóa học Tư duy', 'Khóa học Tâm Thức', 'tan-so-goc', 'khai-mo', 'Tái Tạo Tư Duy', 'Tần Số Gốc', 'Tình Yêu', 'Mindset'],
   },
   {
     id: 'chatbot',
     label: 'Chatbot',
     icon: Bot,
-    tags: ['GEM Chatbot'],
+    tags: ['GEM Chatbot', 'Chatbot', 'AI'],
   },
   {
     id: 'scanner',
     label: 'Scanner',
     icon: BarChart3,
-    tags: ['Scanner'],
+    tags: ['Scanner', 'Quét Nến'],
   },
   {
     id: 'gems',
     label: 'Gem Packs',
     icon: Gem,
-    tags: ['Gem Pack'],
+    tags: ['Gem Pack', 'Gems'],
   },
 ];
 
@@ -174,8 +175,8 @@ export const TIER_UPGRADE_PATH = {
 
 export const HERO_CONFIG = {
   autoScrollInterval: 5000, // 5 seconds
-  bannerHeight: 200,
-  aspectRatio: 16 / 9,
+  bannerHeight: null, // Use aspectRatio instead
+  aspectRatio: 4 / 5, // 4:5 ratio - more square for 1:1 images, less cropping
   pauseOnInteraction: 3000, // Resume after 3 seconds
 };
 

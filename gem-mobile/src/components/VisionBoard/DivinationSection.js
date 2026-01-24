@@ -551,14 +551,6 @@ const DivinationDetailModal = memo(({
 
             {/* Action Buttons */}
             <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={styles.actionBtn}
-                onPress={() => onCreateRitual?.(reading)}
-              >
-                <Flame size={18} color="#FF6B6B" />
-                <Text style={styles.actionBtnText}>Tạo nghi thức</Text>
-              </TouchableOpacity>
-
               <TouchableOpacity style={styles.actionBtn}>
                 <Share2 size={18} color="#4ECDC4" />
                 <Text style={styles.actionBtnText}>Chia sẻ</Text>

@@ -1,6 +1,6 @@
 /**
  * Gemral - Product Card Component
- * Enhanced with wishlist, rating, and sold count
+ * Enhanced with wishlist, rating, sold count, and out-of-stock badge
  * Dark theme support
  */
 
@@ -12,10 +12,11 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { ShoppingBag, Star } from 'lucide-react-native';
+import { ShoppingBag, Star, XCircle } from 'lucide-react-native';
 import OptimizedImage from '../../../components/Common/OptimizedImage';
 import WishlistButton from '../../../components/shop/WishlistButton';
 import { useCart } from '../../../contexts/CartContext';
+import alertService from '../../../services/alertService';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS } from '../../../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -75,9 +76,71 @@ const ProductCard = ({
   const rating = product.rating || product.metafields?.rating || null;
   const soldCount = product.soldCount || product.metafields?.sold_count || null;
 
+  // Check if product is out of stock
+  // IMPORTANT: Digital products should never show "out of stock" based on inventory
+  // Digital products include: courses, ebooks, chatbot subscriptions, gem packs, scanner subscriptions
+  const productType = product.product_type?.toLowerCase() || '';
+  const handle = product.handle?.toLowerCase() || '';
+  const title = product.title?.toLowerCase() || '';
+
+  const isDigitalProduct =
+    // Product type checks
+    productType.includes('digital') ||
+    productType.includes('course') ||
+    productType.includes('khoa') ||
+    productType.includes('subscription') ||
+    productType.includes('chatbot') ||
+    productType.includes('gem') ||
+    // Tag checks
+    product.tags?.some(tag =>
+      typeof tag === 'string' && (
+        tag.toLowerCase().includes('digital') ||
+        tag.toLowerCase().includes('course') ||
+        tag.toLowerCase().includes('khoa-hoc') ||
+        tag.toLowerCase().includes('ebook') ||
+        tag.toLowerCase().includes('chatbot') ||
+        tag.toLowerCase().includes('gem-pack') ||
+        tag.toLowerCase().includes('subscription') ||
+        tag.toLowerCase().includes('scanner')
+      )
+    ) ||
+    // Handle checks
+    handle.includes('khoa-hoc') ||
+    handle.includes('course') ||
+    handle.includes('gem-master') ||
+    handle.includes('gem-pack') ||
+    handle.includes('chatbot') ||
+    handle.includes('scanner') ||
+    // Title checks (fallback)
+    title.includes('gem master') ||
+    title.includes('gem pack') ||
+    title.includes('chatbot') ||
+    title.includes('scanner');
+
+  // Use Shopify's availableForSale as the primary indicator
+  // Fallback to inventory check only for physical products
+  const firstVariant = product.variants?.[0];
+  const availableForSale = product.availableForSale ?? firstVariant?.availableForSale ?? true;
+
+  // For physical products, check inventory
+  const inventoryQuantity = firstVariant?.inventory_quantity ?? product.inventory_quantity ?? null;
+  const inventoryPolicy = firstVariant?.inventory_policy || product.inventory_policy || 'deny';
+  const inventoryOutOfStock = inventoryQuantity !== null && inventoryQuantity <= 0 && inventoryPolicy === 'deny';
+
+  // Final out of stock check:
+  // - Digital products: only if explicitly marked unavailable (availableForSale = false)
+  // - Physical products: check both availableForSale and inventory
+  const isOutOfStock = isDigitalProduct
+    ? (availableForSale === false)
+    : (!availableForSale || inventoryOutOfStock);
+
   const imageUrl = getProductImageUrl(product);
 
   const handleQuickAdd = async () => {
+    if (isOutOfStock) {
+      alertService.showWarning('Hết hàng', 'Sản phẩm này hiện đã hết hàng.');
+      return;
+    }
     await addItem(product, null, 1);
   };
 
@@ -112,9 +175,17 @@ const ProductCard = ({
         />
 
         {/* Sale Badge */}
-        {isOnSale && (
+        {isOnSale && !isOutOfStock && (
           <View style={styles.saleBadge}>
             <Text style={styles.saleBadgeText}>-{discount}%</Text>
+          </View>
+        )}
+
+        {/* Out of Stock Badge */}
+        {isOutOfStock && (
+          <View style={styles.outOfStockBadge}>
+            <XCircle size={12} color="#FFFFFF" />
+            <Text style={styles.outOfStockText}>Hết hàng</Text>
           </View>
         )}
 
@@ -129,14 +200,21 @@ const ProductCard = ({
           </View>
         )}
 
-        {/* Quick Add Button */}
-        <TouchableOpacity
-          style={[styles.quickAddBtn, dynamicStyles.quickAddBtn]}
-          onPress={handleQuickAdd}
-          disabled={loading}
-        >
-          <ShoppingBag size={16} color="#FFFFFF" />
-        </TouchableOpacity>
+        {/* Quick Add Button - Hide if out of stock */}
+        {!isOutOfStock && (
+          <TouchableOpacity
+            style={[styles.quickAddBtn, dynamicStyles.quickAddBtn]}
+            onPress={handleQuickAdd}
+            disabled={loading}
+          >
+            <ShoppingBag size={16} color="#FFFFFF" />
+          </TouchableOpacity>
+        )}
+
+        {/* Out of Stock Overlay */}
+        {isOutOfStock && (
+          <View style={styles.outOfStockOverlay} />
+        )}
       </View>
 
       {/* Info */}
@@ -217,6 +295,35 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.xs,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
+  },
+
+  // Out of Stock Badge
+  outOfStockBadge: {
+    position: 'absolute',
+    top: SPACING.sm,
+    left: SPACING.sm,
+    backgroundColor: '#666666',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    zIndex: 2,
+  },
+  outOfStockText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#FFFFFF',
+  },
+  outOfStockOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    zIndex: 1,
   },
 
   // Quick Add Button

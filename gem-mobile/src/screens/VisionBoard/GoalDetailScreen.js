@@ -23,7 +23,10 @@ import {
   RefreshControl,
   TextInput,
   Vibration,
+  Image,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -44,14 +47,20 @@ import {
   getGoalActionsGrouped,
 } from '../../services/actionService';
 
-// Life area configuration
+// Import goal service for cover image
+import {
+  uploadGoalCoverImage,
+  removeGoalCoverImage,
+} from '../../services/goalService';
+
+// Life area configuration - 6 lĩnh vực cuộc sống theo kịch bản demo
 const LIFE_AREA_CONFIG = {
   finance: { label: 'Tài chính', icon: 'Wallet', color: COLORS.gold },
   career: { label: 'Sự nghiệp', icon: 'Briefcase', color: COLORS.purple },
   health: { label: 'Sức khỏe', icon: 'Heart', color: COLORS.success },
-  relationships: { label: 'Quan hệ', icon: 'Users', color: '#FF6B9D' },
+  relationships: { label: 'Tình yêu', icon: 'Heart', color: '#FF6B9D' },
   personal: { label: 'Cá nhân', icon: 'User', color: COLORS.cyan },
-  spiritual: { label: 'Tâm linh', icon: 'Sparkles', color: COLORS.burgundy },
+  spiritual: { label: 'Tâm thức', icon: 'Sparkles', color: COLORS.burgundy },
 };
 
 // Action type configuration
@@ -120,6 +129,9 @@ const GoalDetailScreen = () => {
   const [xpEarned, setXpEarned] = useState(0);
   const [showXpFeedback, setShowXpFeedback] = useState(false);
 
+  // Cover image state
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   // Load goal and actions
   const loadGoalData = useCallback(async () => {
     if (!user?.id || !goalId) return;
@@ -154,6 +166,7 @@ const GoalDetailScreen = () => {
             title: widgetData.title || content?.title || content?.goals?.[0]?.title,
             life_area: content?.lifeArea || 'personal',
             progress_percent: content?.progress || 0,
+            cover_image: content?.cover_image || null, // Extract cover_image from content
             created_at: widgetData.created_at,
             _isLegacy: true,
             _content: content,
@@ -346,6 +359,177 @@ const GoalDetailScreen = () => {
     });
   };
 
+  // Pick and upload cover image
+  const handlePickCoverImage = async () => {
+    try {
+      // Request permission
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        setAlertConfig({
+          visible: true,
+          type: 'warning',
+          title: 'Cần quyền truy cập',
+          message: 'Vui lòng cho phép ứng dụng truy cập thư viện ảnh để chọn hình.',
+          buttons: [{ text: 'OK', style: 'primary' }],
+        });
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setUploadingImage(true);
+        const imageUri = result.assets[0].uri;
+
+        // Upload to Supabase Storage
+        const fileExt = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
+        const fileName = `${goalId}-${Date.now()}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        // Read file as base64 (React Native compatible)
+        const base64 = await FileSystem.readAsStringAsync(imageUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        // Convert base64 to ArrayBuffer
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const arrayBuffer = bytes.buffer;
+
+        const { error: uploadError } = await supabase.storage
+          .from('vision-board')
+          .upload(filePath, arrayBuffer, {
+            contentType: `image/${fileExt}`,
+            cacheControl: '3600',
+            upsert: true,
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('vision-board')
+          .getPublicUrl(filePath);
+
+        // Update the correct table based on goal type
+        if (goal?._isLegacy) {
+          // Update vision_board_widgets for legacy goals
+          const currentContent = goal._content || {};
+          const { error: updateError } = await supabase
+            .from('vision_board_widgets')
+            .update({
+              content: { ...currentContent, cover_image: publicUrl },
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', goalId);
+
+          if (updateError) throw updateError;
+        } else {
+          // Update vision_goals for new goals
+          const { error: updateError } = await supabase
+            .from('vision_goals')
+            .update({
+              cover_image: publicUrl,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', goalId);
+
+          if (updateError) throw updateError;
+        }
+
+        // Update local state
+        setGoal(prev => ({ ...prev, cover_image: publicUrl }));
+        setAlertConfig({
+          visible: true,
+          type: 'success',
+          title: 'Đã thêm hình!',
+          message: 'Hình ảnh minh họa đã được thêm vào mục tiêu.',
+          buttons: [{ text: 'OK', style: 'primary' }],
+        });
+      }
+    } catch (error) {
+      console.error('[GoalDetail] Pick cover image error:', error);
+      setAlertConfig({
+        visible: true,
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể tải hình lên. Vui lòng thử lại.',
+        buttons: [{ text: 'OK', style: 'primary' }],
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Remove cover image
+  const handleRemoveCoverImage = () => {
+    setAlertConfig({
+      visible: true,
+      type: 'warning',
+      title: 'Xóa hình ảnh',
+      message: 'Bạn có chắc muốn xóa hình ảnh minh họa này?',
+      buttons: [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setUploadingImage(true);
+
+              // Delete from storage if URL exists
+              if (goal?.cover_image) {
+                const urlParts = goal.cover_image.split('/vision-board/');
+                if (urlParts.length > 1) {
+                  const filePath = urlParts[1];
+                  await supabase.storage
+                    .from('vision-board')
+                    .remove([filePath]);
+                }
+              }
+
+              // Update the correct table based on goal type
+              if (goal?._isLegacy) {
+                const currentContent = goal._content || {};
+                delete currentContent.cover_image;
+                await supabase
+                  .from('vision_board_widgets')
+                  .update({
+                    content: currentContent,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('id', goalId);
+              } else {
+                await supabase
+                  .from('vision_goals')
+                  .update({
+                    cover_image: null,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('id', goalId);
+              }
+
+              setGoal(prev => ({ ...prev, cover_image: null }));
+            } catch (error) {
+              console.error('[GoalDetail] Remove cover image error:', error);
+            } finally {
+              setUploadingImage(false);
+            }
+          },
+        },
+      ],
+    });
+  };
+
   // Calculate progress
   const calculateProgress = () => {
     const allActions = [
@@ -490,6 +674,53 @@ const GoalDetailScreen = () => {
       >
         {/* Goal Card */}
         <View style={[styles.goalCard, { borderColor: `${config.color}50` }]}>
+          {/* Cover Image Section */}
+          {goal?.cover_image ? (
+            <View style={styles.coverImageContainer}>
+              <Image
+                source={{ uri: goal.cover_image }}
+                style={styles.coverImage}
+                resizeMode="cover"
+              />
+              <View style={styles.coverImageOverlay}>
+                <TouchableOpacity
+                  style={styles.coverImageButton}
+                  onPress={handlePickCoverImage}
+                  disabled={uploadingImage}
+                >
+                  <Icons.Camera size={16} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.coverImageButton, styles.coverImageButtonDanger]}
+                  onPress={handleRemoveCoverImage}
+                  disabled={uploadingImage}
+                >
+                  <Icons.Trash2 size={16} color={COLORS.error} />
+                </TouchableOpacity>
+              </View>
+              {uploadingImage && (
+                <View style={styles.coverImageLoading}>
+                  <ActivityIndicator size="small" color={COLORS.gold} />
+                </View>
+              )}
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.addCoverImageButton}
+              onPress={handlePickCoverImage}
+              disabled={uploadingImage}
+            >
+              {uploadingImage ? (
+                <ActivityIndicator size="small" color={COLORS.gold} />
+              ) : (
+                <>
+                  <Icons.ImagePlus size={24} color={COLORS.gold} />
+                  <Text style={styles.addCoverImageText}>Thêm hình ảnh minh họa</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
+
           {/* Icon and Title */}
           <View style={styles.goalHeader}>
             <View style={[styles.iconContainer, { backgroundColor: `${config.color}20` }]}>
@@ -677,6 +908,66 @@ const styles = StyleSheet.create({
     borderWidth: GLASS.borderWidth,
     marginBottom: SPACING.lg,
   },
+
+  // Cover Image Styles
+  coverImageContainer: {
+    position: 'relative',
+    marginBottom: SPACING.lg,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  coverImage: {
+    width: '100%',
+    height: 160,
+    borderRadius: 12,
+  },
+  coverImageOverlay: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+    flexDirection: 'row',
+    gap: SPACING.xs,
+  },
+  coverImageButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coverImageButtonDanger: {
+    backgroundColor: 'rgba(255, 0, 0, 0.4)',
+  },
+  coverImageLoading: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addCoverImageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 189, 89, 0.08)',
+  },
+  addCoverImageText: {
+    color: COLORS.gold,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+
   goalHeader: {
     flexDirection: 'row',
     alignItems: 'center',

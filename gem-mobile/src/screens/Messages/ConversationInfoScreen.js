@@ -74,7 +74,7 @@ export default function ConversationInfoScreen({ route, navigation }) {
 
   // Get other participant info
   const otherParticipant = conversation?.other_participant ||
-    conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.users;
+    conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.profiles;
 
   const isGroup = conversation?.is_group;
   const displayName = isGroup

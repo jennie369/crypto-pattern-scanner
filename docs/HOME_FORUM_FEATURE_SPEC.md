@@ -1,7 +1,7 @@
 # GEM MOBILE - HOME/FORUM COMPLETE FEATURE SPECIFICATION
 
-## Document Version: 1.0
-## Last Updated: December 2024
+## Document Version: 2.0
+## Last Updated: January 2026
 
 ---
 
@@ -10,12 +10,19 @@
 1. [Executive Summary](#1-executive-summary)
 2. [Architecture Overview](#2-architecture-overview)
 3. [Core Screens](#3-core-screens)
+   - 3.2.6 Reaction System
+   - 3.2.7 Threaded Comments
 4. [Components Library](#4-components-library)
+   - 4.2 Reaction Components
+   - 4.3 Comment Threading Components
+   - 4.4 Link Preview Components
 5. [Services Layer](#5-services-layer)
+   - 5.5 Hooks Layer (usePostReactions, useComments)
 6. [Cross-Feature Integrations](#6-cross-feature-integrations)
 7. [Design System](#7-design-system)
 8. [User Flows](#8-user-flows)
 9. [Data Models](#9-data-models)
+   - 9.2.1 Post Reaction Schema
 10. [Real-time Features](#10-real-time-features)
 11. [Feed Algorithm](#11-feed-algorithm)
 12. [Monetization System](#12-monetization-system)
@@ -29,16 +36,21 @@
 Tab Home/Forum là trung tâm xã hội của GEM Mobile, cung cấp trải nghiệm mạng xã hội đầy đủ tích hợp với các tính năng độc đáo: GEM currency, product tagging, sound effects, boost posts, và notifications system.
 
 ### 1.2 Core Features
-- **Unified Feed System** - Hybrid algorithm (60% following + 40% discovery)
-- **Post Creation/Editing** - Multi-image, products, sound, audience control
-- **Interactions** - Like animation, comments, share, repost, gift
+- **Unified Feed System** - Hybrid algorithm with scoring (unseen priority + engagement)
+- **Facebook-style Reactions** - 6 reaction types (Like, Heart, Haha, Wow, Angry, Sad)
+- **Threaded Comments** - Nested replies with expand/collapse threads
+- **Post Creation/Editing** - Multi-image (max 10), products (max 5), sound, audience control
+- **Link Preview** - Auto-detect and display URL metadata
+- **Collapsible Header** - Hide on scroll down, show on scroll up (velocity detection)
+- **Multiple Feed Types** - Explore, Following, News, Academy, Popular + SideMenu categories
 - **Monetization** - Boost posts using GEM currency
 - **Product Tagging** - Tag up to 5 Shopify products per post
 - **Sound Effects** - Attach background music to posts
-- **Real-time Updates** - Live post/comment/like updates
-- **User Profiles** - Follow system, posts/photos tabs
+- **Real-time Updates** - Live post/comment/reaction updates via Supabase Realtime
+- **User Profiles** - Follow system, posts/photos tabs, badges
 - **Sponsor Banners** - Native ads distributed in feed
-- **Seed Posts** - Pre-populated content for cold start
+- **Seed Posts** - Pre-populated content blended with real posts
+- **Impressions Tracking** - Track seen posts for feed optimization
 
 ### 1.3 Key Integrations
 | Integration | Description |
@@ -58,13 +70,18 @@ Tab Home/Forum là trung tâm xã hội của GEM Mobile, cung cấp trải nghi
 ```
 gem-mobile/src/
 ├── screens/Forum/
-│   ├── ForumScreen.js              # Main feed screen
-│   ├── PostDetailScreen.js         # Post with comments
-│   ├── CreatePostScreen.js         # New post modal
+│   ├── ForumScreen.js              # Main feed screen with collapsible header
+│   ├── PostDetailScreen.js         # Post with threaded comments
+│   ├── CreatePostScreen.js         # New post modal (max 10 images)
 │   ├── EditPostScreen.js           # Edit post modal
 │   ├── UserProfileScreen.js        # User profile view
+│   ├── HashtagFeedScreen.js        # Hashtag filtered posts
+│   ├── PostAnalyticsScreen.js      # Post engagement insights
+│   ├── PostGiftsScreen.js          # Gifts received display
+│   ├── EditHistoryScreen.js        # Post edit history
+│   ├── ScheduledPostsScreen.js     # Scheduled posts management
 │   └── components/
-│       ├── PostCard.js             # Post preview component
+│       ├── PostCard.js             # Post preview with reactions
 │       ├── FABButton.js            # Floating action button
 │       └── CategoryTabs.js         # Feed type tabs
 ├── screens/tabs/
@@ -74,8 +91,25 @@ gem-mobile/src/
 │   └── SelectPostForBoostScreen.js # Post selection for boost
 ├── components/
 │   ├── Forum/
-│   │   └── AdCard.js               # Feed advertisements
-│   ├── MentionInput.js             # @mention support
+│   │   ├── AdCard.js               # Feed advertisements
+│   │   ├── ForumReactionButton.js  # Facebook-style reaction picker
+│   │   ├── ForumReactionPicker.js  # Reaction selection UI
+│   │   ├── ReactionSummary.js      # Top 3 reactions display
+│   │   ├── ReactionIcon.js         # Individual reaction emoji
+│   │   ├── ForumReactionTooltip.js # Who reacted modal
+│   │   ├── ReactionOnboarding.js   # First-time guidance
+│   │   ├── CommentThread.js        # Threaded comment container
+│   │   ├── CommentItem.js          # Individual comment display
+│   │   ├── ThreadLine.js           # Visual thread connector
+│   │   ├── MentionText.js          # @mention text formatting
+│   │   ├── ReplyButton.js          # Reply action button
+│   │   ├── LoadMoreReplies.js      # Pagination for replies
+│   │   ├── TaggedProductCard.js    # Product card in posts
+│   │   ├── LinkPreviewCard.js      # URL preview display
+│   │   ├── CreatePostLinkPreview.js # Link preview in create
+│   │   ├── LinkPreviewSkeleton.js  # Loading skeleton
+│   │   └── MultiLinkPreviewSection.js # Multi-URL support
+│   ├── MentionInput.js             # @mention + #hashtag support
 │   ├── ProductPicker.js            # Product selection modal
 │   ├── RichTextEditor.js           # Text formatting
 │   ├── ShareSheet.js               # Share options
@@ -84,9 +118,15 @@ gem-mobile/src/
 │   ├── ReceivedGiftsBar.js         # Gift display
 │   ├── SoundCard.js                # Audio display
 │   └── SoundPicker.js              # Audio selection
+├── hooks/
+│   ├── usePostReactions.js         # Post reaction state management
+│   ├── useComments.js              # Threaded comments hook
+│   └── useReactions.js             # Generic reactions hook
+├── constants/
+│   └── reactions.js                # Reaction types config
 └── services/
-    ├── forumService.js             # Post CRUD operations
-    ├── feedService.js              # Hybrid feed algorithm
+    ├── forumService.js             # Post CRUD + feed operations
+    ├── reactionService.js          # Reaction CRUD operations
     ├── repostService.js            # Repost functionality
     ├── shareService.js             # Sharing integrations
     ├── soundService.js             # Sound effects management
@@ -240,23 +280,39 @@ const trackVisibleImpressions = useCallback(async () => {
 | 🎵 | Âm Thanh | Navigate to Sound Library |
 | 🚀 | Quảng Bá | Navigate to Boost Post selection |
 
-**Category Tabs**
+**Category Tabs (Main)**
 | Tab ID | Label | Feed Type |
 |--------|-------|-----------|
-| explore | Dành cho bạn | Hybrid algorithm feed |
+| explore | Dành cho bạn | Hybrid algorithm feed (unseen priority) |
 | following | Đang theo dõi | Posts from followed users |
 | news | Tin tức | News category posts |
-| academy | Academy | Educational posts |
+| notifications | Thông báo | Official announcements |
 | popular | Phổ biến | Popular by engagement |
+| academy | Academy | Educational posts from instructors |
+
+**SideMenu Categories**
+| Category ID | Label | Description |
+|-------------|-------|-------------|
+| trading | Giao Dịch | Trading posts |
+| patterns | Mẫu Hình | Technical analysis patterns |
+| results | Kết Quả | Trading results sharing |
+| wellness | Tinh Thần | Wellness/crystal content |
+| meditation | Thiền | Meditation content |
+| growth | Phát Triển | Personal growth |
+| mindful-trading | Chánh Niệm | Trading psychology |
+| sieu-giau | Thịnh Vượng | Success stories |
+| earn | Kiếm Tiền | Affiliate/income content |
 
 #### 3.1.5 Features
-- **Animated Header** - Hides on scroll down, shows on scroll up
+- **Collapsible Header** - Hides on scroll down (velocity detection), shows on scroll up
 - **Pull-to-Refresh** - Refresh feed with gesture
-- **Infinite Scroll** - Load more at 30% from bottom
-- **Session Tracking** - Track user session for analytics
-- **Sponsor Banners** - Injected between posts
-- **Real-time Updates** - Subscribe to new posts
+- **Infinite Scroll** - FlatList optimized (10 initial, 20 batch) with pagination
+- **Impressions Tracking** - Track seen posts to prioritize unseen content
+- **Seed Posts Blending** - Mix real posts with seed content for abundance
+- **Sponsor Banners** - Injected between posts at intervals
+- **Real-time Updates** - Supabase postgres_changes subscriptions
 - **FAB Button** - Floating button for post creation
+- **Custom Feeds** - User-created custom feed lists
 
 #### 3.1.6 Real-time Subscriptions
 ```javascript
@@ -429,15 +485,56 @@ const renderFormattedText = (text, baseStyle) => {
 └─────────────────────────────────────────────────────────────┘
 ```
 
-#### 3.2.5 Action Bar
+#### 3.2.5 Action Bar (Facebook-style)
 | Button | Icon | Action |
 |--------|------|--------|
-| Thích | ❤️ | Toggle like with animation |
+| React | 👍❤️😂😮😠😢 | Long-press for reaction picker, tap for default like |
 | Bình luận | 💬 | Focus comment input |
 | Gửi | 📤 | Open ShareSheet |
 | Repost | 🔄 | Open RepostSheet |
 | Gift | 🎁 | Open GiftCatalogSheet |
 | Save | 📑 | Toggle save/bookmark |
+
+#### 3.2.6 Reaction System
+**Available Reactions**
+| Reaction | Emoji | Color | Description |
+|----------|-------|-------|-------------|
+| Like | 👍 | Blue (#3B82F6) | Default reaction |
+| Heart | ❤️ | Red (#EF4444) | Love |
+| Haha | 😂 | Yellow (#EAB308) | Funny |
+| Wow | 😮 | Purple (#8B5CF6) | Surprised |
+| Angry | 😠 | Orange (#F97316) | Angry |
+| Sad | 😢 | Cyan (#06B6D4) | Sad |
+
+**Reaction Interaction**
+- **Tap**: Toggle default Like reaction
+- **Long-press + Drag**: Open reaction picker, drag to select
+- **Animated hover**: 1.3x scale on selection
+- **Haptic feedback**: On selection
+
+#### 3.2.7 Threaded Comments
+**Comment Data Model**
+```javascript
+{
+  id: string,           // UUID
+  post_id: string,      // Post reference
+  user_id: string,      // Author
+  parent_id: string,    // Parent comment for replies (null for root)
+  reply_to_user_id: string, // Parent author for @mention
+  content: string,      // Comment text with @mentions
+  created_at: string,
+  updated_at: string,
+  replies_count: number // Denormalized count
+}
+```
+
+**Threading Features**
+- Root comments with expandable replies
+- Multi-level nesting supported
+- "Load More Replies" pagination (5 initial)
+- Thread line visualization
+- Reply indicator showing parent author
+- Real-time updates on new comments
 
 ---
 
@@ -903,7 +1000,127 @@ const renderInlineComments = () => (
 
 ---
 
-### 4.2 FABButton
+### 4.2 Reaction Components
+
+#### 4.2.1 ForumReactionButton
+**File**: `gem-mobile/src/components/Forum/ForumReactionButton.js`
+
+**Purpose**: Facebook-style reaction picker with drag-to-select functionality.
+
+**Props**
+```typescript
+interface ForumReactionButtonProps {
+  postId: string;
+  size?: 'small' | 'medium' | 'large';
+  onReactionChange?: (reaction: ReactionType | null) => void;
+  disabled?: boolean;
+}
+```
+
+**Features**
+- Tap to toggle Like (default reaction)
+- Long-press to open reaction picker
+- Drag to select alternative reactions
+- Animated hover effects (1.3x scale)
+- Haptic feedback on selection
+- PanResponder to prevent double-clicking
+
+#### 4.2.2 ReactionSummary
+**File**: `gem-mobile/src/components/Forum/ReactionSummary.js`
+
+**Purpose**: Display top 3 reactions as stacked overlapping icons with total count.
+
+**Props**
+```typescript
+interface ReactionSummaryProps {
+  reactionCounts: Record<ReactionType, number>;
+  totalCount: number;
+  size?: 'small' | 'medium' | 'large';
+  onPress?: () => void; // Open reactions list modal
+}
+```
+
+**Features**
+- Shows top 3 most used reactions
+- Stacked overlapping icons
+- Animated entrance effect
+- Tap to open ForumReactionTooltip modal
+
+#### 4.2.3 ForumReactionTooltip
+**File**: `gem-mobile/src/components/Forum/ForumReactionTooltip.js`
+
+**Purpose**: Modal showing who reacted and their avatars.
+
+**Features**
+- Tab for each reaction type
+- Lists users with avatars
+- Tap user to view profile
+
+---
+
+### 4.3 Comment Threading Components
+
+#### 4.3.1 CommentThread
+**File**: `gem-mobile/src/components/Forum/CommentThread.js`
+
+**Purpose**: Container for root comment with expandable replies.
+
+**Props**
+```typescript
+interface CommentThreadProps {
+  comment: Comment;
+  postId: string;
+  onReply: (comment: Comment) => void;
+  onDelete: (commentId: string) => void;
+}
+```
+
+**Features**
+- Shows first N replies inline
+- "Load More Replies" button for pagination
+- Thread line visualization
+- Expand/collapse functionality
+
+#### 4.3.2 CommentItem
+**File**: `gem-mobile/src/components/Forum/CommentItem.js`
+
+**Purpose**: Individual comment display with actions.
+
+**Features**
+- Author avatar, name, timestamp
+- Comment text with @mention highlighting
+- Reply/Delete buttons
+- Like count display
+- Nested indentation
+
+#### 4.3.3 ThreadLine
+**File**: `gem-mobile/src/components/Forum/ThreadLine.js`
+
+**Purpose**: Visual connector line for threaded replies.
+
+---
+
+### 4.4 Link Preview Components
+
+#### 4.4.1 LinkPreviewCard
+**File**: `gem-mobile/src/components/Forum/LinkPreviewCard.js`
+
+**Purpose**: Display URL metadata preview in posts.
+
+**Features**
+- Title, description, image
+- Favicon display
+- Tap to open URL
+- Skeleton loading state
+
+#### 4.4.2 MultiLinkPreviewSection
+**File**: `gem-mobile/src/components/Forum/MultiLinkPreviewSection.js`
+
+**Purpose**: Handle posts with multiple URLs.
+
+---
+
+### 4.5 FABButton
 **File**: `gem-mobile/src/screens/Forum/components/FABButton.js`
 
 #### 4.2.1 Styling
@@ -1778,6 +1995,85 @@ async markAllAsRead() {
 
 ---
 
+## 5.5 Hooks Layer
+
+### 5.5.1 usePostReactions Hook
+**File**: `gem-mobile/src/hooks/usePostReactions.js`
+
+**Purpose**: Manage reaction state for a post with optimistic updates.
+
+**Properties**
+```typescript
+interface UsePostReactionsReturn {
+  userReaction: ReactionType | null;     // Current user's reaction
+  reactionCounts: Record<ReactionType, number>;  // Counts per reaction
+  totalCount: number;                     // Total reactions
+  topReactions: ReactionType[];          // Top 3 reactions array
+  hasReacted: boolean;
+  loading: boolean;
+  error: string | null;
+}
+```
+
+**Methods**
+```typescript
+{
+  addReaction: (reactionType: ReactionType) => Promise<void>;
+  removeReaction: () => Promise<void>;
+  toggleReaction: (type: ReactionType) => Promise<void>;
+  refreshCounts: () => Promise<void>;
+}
+```
+
+**Features**
+- Optimistic UI updates with rollback on error
+- Realtime subscription to count updates
+- Ref-based locking to prevent rapid duplicate clicks
+- Synchronous state tracking via refs
+
+### 5.5.2 useComments Hook
+**File**: `gem-mobile/src/hooks/useComments.js`
+
+**Purpose**: Manage threaded comments with lazy loading.
+
+**Properties**
+```typescript
+interface UseCommentsReturn {
+  comments: Comment[];           // Root comments array
+  loading: boolean;
+  replyTo: Comment | null;       // Current reply context
+  expandedThreads: Set<string>;  // Expanded thread IDs
+}
+```
+
+**Methods**
+```typescript
+{
+  fetchComments: () => Promise<void>;
+  loadReplies: (commentId: string, offset: number) => Promise<void>;
+  getReplies: (commentId: string) => Comment[];
+  toggleThread: (commentId: string) => void;
+  createComment: (content: string) => Promise<void>;
+  deleteComment: (commentId: string, parentId?: string) => Promise<void>;
+  startReply: (comment: Comment) => void;
+  cancelReply: () => void;
+  refresh: () => Promise<void>;
+}
+```
+
+**Features**
+- Realtime subscription for new comments
+- Lazy-load replies on demand
+- Reply caching in ref Map
+- Thread expand/collapse state
+
+### 5.5.3 useReactions Hook
+**File**: `gem-mobile/src/hooks/useReactions.js`
+
+**Purpose**: Generic reactions management (for comments, etc.).
+
+---
+
 ## 6. CROSS-FEATURE INTEGRATIONS
 
 ### 6.1 GEM Currency Integration
@@ -2618,42 +2914,69 @@ interface Post {
   content: string;               // Post text content
   title: string;                 // First line of content
   image_url: string | null;      // Cover image URL
-  media_urls: string[];          // All media URLs
+  media_urls: string[];          // All media URLs (max 10)
   topic: string | null;          // Topic category
   feed_type: string;             // Feed category
   visibility: 'public' | 'followers' | 'private';
   category_id: string | null;    // Category UUID
-  hashtags: string[];            // Extracted hashtags
+  hashtags: string[];            // Extracted hashtags (JSONB)
   sound_id: string | null;       // Attached sound UUID
   is_seed_post: boolean;         // Is seed content
 
+  // Link Preview
+  link_preview: {                // JSONB with URL metadata
+    url: string;
+    title: string;
+    description: string;
+    image: string;
+    favicon: string;
+  } | null;
+  extracted_urls: string[];      // URLs found in content
+
   // Counts (denormalized for performance)
-  likes_count: number;
+  likes_count: number;           // Legacy - use reaction_counts
   comments_count: number;
-  shares_count: number;
+  share_count: number;
   reposts_count: number;
   views_count: number;
 
-  // Engagement
+  // Reaction System (JSONB with per-reaction counts)
+  reaction_counts: {
+    like: number;
+    heart: number;
+    haha: number;
+    wow: number;
+    angry: number;
+    sad: number;
+  };
+
+  // Engagement & Ranking
   engagement_score: number;
+  hot_score: number;             // Engagement * time decay
+  trending_score: number;        // Velocity of engagement
 
   // Boost
   is_boosted: boolean;
   boost_expires_at: string | null;
+  is_pinned: boolean;            // Admin pinned post
+
+  // Gifts
+  received_gifts: Gift[];        // JSONB array of gifts
 
   // Timestamps
   created_at: string;
   updated_at: string;
+  status: 'published' | 'draft' | 'scheduled' | 'archived';
 
   // Relations (populated via join)
   profiles?: Profile;
   categories?: Category;
   tagged_products?: PostProduct[];
-  likes?: Like[];
+  post_reactions?: PostReaction[];
   saved?: Save[];
 
   // Computed (client-side)
-  user_liked?: boolean;
+  user_reaction?: ReactionType | null;  // Current user's reaction
   user_saved?: boolean;
   _score?: number;
   _isAd?: boolean;
@@ -2667,16 +2990,40 @@ interface Comment {
   id: string;                    // UUID
   post_id: string;               // Post UUID
   user_id: string;               // Author UUID
-  content: string;               // Comment text
-  parent_id: string | null;      // Parent comment (for replies)
+  content: string;               // Comment text with @mentions
+  parent_id: string | null;      // Parent comment (null for root)
+  reply_to_user_id: string | null; // Parent author for @mention display
   likes_count: number;
+  replies_count: number;         // Denormalized for threading
+  reactions_count: number;       // If comment reactions supported
   created_at: string;
-  updated_at: string;
+  updated_at: string;            // If edited
+
+  // Relations (populated via join)
+  profiles?: Profile;
+  reply_to_user?: Profile;       // Parent comment author
+  replies?: Comment[];           // Nested replies (lazy loaded)
+
+  // Computed (client-side)
+  _pending?: boolean;            // Optimistic insert pending
+}
+```
+
+### 9.2.1 Post Reaction Schema
+
+```typescript
+interface PostReaction {
+  id: string;                    // UUID
+  post_id: string;               // Post UUID
+  user_id: string;               // User who reacted
+  reaction_type: ReactionType;   // 'like' | 'heart' | 'haha' | 'wow' | 'angry' | 'sad'
+  created_at: string;
 
   // Relations
   profiles?: Profile;
-  replies?: Comment[];           // Nested replies
 }
+
+type ReactionType = 'like' | 'heart' | 'haha' | 'wow' | 'angry' | 'sad';
 ```
 
 ### 9.3 PostProduct Schema
@@ -2967,25 +3314,32 @@ const generateHybridFeed = async (userId) => {
 
 ```javascript
 const scorePost = (post, userId, seenPostIds) => {
-  let score = 0;
+  let score = post.engagement_score || 0;
 
-  // 1. Unseen bonus (highest priority)
-  if (!seenPostIds.includes(post.id)) {
+  // 1. Unseen bonus (HIGHEST priority)
+  if (!seenPostIds.includes(post.id) && post.user_id !== userId) {
     score += 10000;
+
+    // Additional recency bonus for unseen
+    const hoursAgo = getHoursAgo(post.created_at);
+    if (hoursAgo < 6) score += 5000;
+    else if (hoursAgo < 24) score += 3000;
+    else if (hoursAgo < 72) score += 1000;
   }
 
-  // 2. Recency bonus
-  const hoursAgo = getHoursAgo(post.created_at);
-  if (hoursAgo < 1) score += 8000;
-  else if (hoursAgo < 6) score += 5000;
-  else if (hoursAgo < 24) score += 3000;
-  else if (hoursAgo < 72) score += 1000;
+  // 2. User's own posts (show prominently)
+  if (post.user_id === userId) {
+    score += 5000;
+    const hoursAgo = getHoursAgo(post.created_at);
+    if (hoursAgo < 24) score += 3000;
+  }
 
-  // 3. Engagement score
-  score += post.likes_count * 1;
-  score += post.comments_count * 3;
-  score += post.shares_count * 5;
-  score += post.reposts_count * 4;
+  // 3. Engagement score (weighted)
+  const totalReactions = Object.values(post.reaction_counts || {})
+    .reduce((sum, count) => sum + count, 0);
+  score += totalReactions * 1;
+  score += (post.comments_count || 0) * 3;
+  score += (post.share_count || 0) * 5;
 
   // 4. Author relationship bonus
   if (isFollowing(userId, post.user_id)) {
@@ -2999,12 +3353,35 @@ const scorePost = (post, userId, seenPostIds) => {
 
   // 6. Time decay for seen posts
   if (seenPostIds.includes(post.id)) {
-    const daysSinceSeen = hoursAgo / 24;
-    score *= Math.exp(-daysSinceSeen * 0.5);
+    const hoursAgo = getHoursAgo(post.created_at);
+    score *= Math.exp(-0.08 * hoursAgo);  // Decay factor
   }
 
   return score;
 };
+```
+
+**Scoring Formula Summary**
+```
+Base Score = engagement_score
+
+If unseen && not own post:
+  + 10,000 (unseen bonus)
+  + 5,000 if < 6 hours old
+  + 3,000 if < 24 hours old
+  + 1,000 if < 72 hours old
+
+If own post:
+  + 5,000
+  + 3,000 if < 24 hours old
+
+Engagement:
+  + reactions × 1
+  + comments × 3
+  + shares × 5
+
+If seen:
+  × exp(-0.08 × hours_old)  // Time decay
 ```
 
 ### 11.3 Diversity Rules
@@ -3199,21 +3576,38 @@ const AD_CONFIG = {
 ### 13.1 Screen Files
 | File | Path | Description |
 |------|------|-------------|
-| ForumScreen.js | `screens/Forum/ForumScreen.js` | Main feed screen |
-| PostDetailScreen.js | `screens/Forum/PostDetailScreen.js` | Post detail with comments |
-| CreatePostScreen.js | `screens/Forum/CreatePostScreen.js` | Create new post modal |
+| ForumScreen.js | `screens/Forum/ForumScreen.js` | Main feed with collapsible header |
+| PostDetailScreen.js | `screens/Forum/PostDetailScreen.js` | Post with threaded comments |
+| CreatePostScreen.js | `screens/Forum/CreatePostScreen.js` | Create post (max 10 images) |
 | EditPostScreen.js | `screens/Forum/EditPostScreen.js` | Edit existing post |
 | UserProfileScreen.js | `screens/Forum/UserProfileScreen.js` | User profile view |
+| HashtagFeedScreen.js | `screens/Forum/HashtagFeedScreen.js` | Hashtag filtered posts |
+| PostAnalyticsScreen.js | `screens/Forum/PostAnalyticsScreen.js` | Post engagement insights |
+| PostGiftsScreen.js | `screens/Forum/PostGiftsScreen.js` | Gifts received display |
+| EditHistoryScreen.js | `screens/Forum/EditHistoryScreen.js` | Post edit history |
+| ScheduledPostsScreen.js | `screens/Forum/ScheduledPostsScreen.js` | Scheduled posts management |
+| SearchScreen.js | `screens/Forum/SearchScreen.js` | Post search |
 | BoostPostScreen.js | `screens/Monetization/BoostPostScreen.js` | Boost campaign |
 | SelectPostForBoostScreen.js | `screens/Monetization/SelectPostForBoostScreen.js` | Post selection |
 
 ### 13.2 Component Files
 | File | Path | Description |
 |------|------|-------------|
-| PostCard.js | `screens/Forum/components/PostCard.js` | Post preview component |
+| PostCard.js | `screens/Forum/components/PostCard.js` | Post preview with reactions |
 | FABButton.js | `screens/Forum/components/FABButton.js` | Floating action button |
 | AdCard.js | `components/Forum/AdCard.js` | Native ad component |
-| MentionInput.js | `components/MentionInput.js` | @mention input |
+| ForumReactionButton.js | `components/Forum/ForumReactionButton.js` | Facebook-style reaction picker |
+| ForumReactionPicker.js | `components/Forum/ForumReactionPicker.js` | Reaction selection UI |
+| ReactionSummary.js | `components/Forum/ReactionSummary.js` | Top 3 reactions display |
+| ReactionIcon.js | `components/Forum/ReactionIcon.js` | Individual reaction emoji |
+| ForumReactionTooltip.js | `components/Forum/ForumReactionTooltip.js` | Who reacted modal |
+| CommentThread.js | `components/Forum/CommentThread.js` | Threaded comment container |
+| CommentItem.js | `components/Forum/CommentItem.js` | Individual comment display |
+| ThreadLine.js | `components/Forum/ThreadLine.js` | Visual thread connector |
+| MentionText.js | `components/Forum/MentionText.js` | @mention text formatting |
+| TaggedProductCard.js | `components/Forum/TaggedProductCard.js` | Product card in posts |
+| LinkPreviewCard.js | `components/Forum/LinkPreviewCard.js` | URL preview display |
+| MentionInput.js | `components/MentionInput.js` | @mention + #hashtag input |
 | ProductPicker.js | `components/ProductPicker.js` | Product selector |
 | SoundPicker.js | `components/SoundPicker.js` | Sound selector |
 | SoundCard.js | `components/SoundCard.js` | Sound display |
@@ -3225,21 +3619,33 @@ const AD_CONFIG = {
 ### 13.3 Service Files
 | File | Path | Description |
 |------|------|-------------|
-| forumService.js | `services/forumService.js` | Post CRUD operations |
-| feedService.js | `services/feedService.js` | Feed algorithm |
+| forumService.js | `services/forumService.js` | Post CRUD + feed operations |
+| reactionService.js | `services/reactionService.js` | Reaction CRUD operations |
 | repostService.js | `services/repostService.js` | Repost functionality |
 | shareService.js | `services/shareService.js` | Share integrations |
 | soundService.js | `services/soundService.js` | Sound management |
 | notificationService.js | `services/notificationService.js` | Notifications |
 | gamificationService.js | `services/gamificationService.js` | GEM rewards |
 
-### 13.4 Context Files
+### 13.4 Hook Files
+| File | Path | Description |
+|------|------|-------------|
+| usePostReactions.js | `hooks/usePostReactions.js` | Post reaction state management |
+| useComments.js | `hooks/useComments.js` | Threaded comments with lazy loading |
+| useReactions.js | `hooks/useReactions.js` | Generic reactions hook |
+
+### 13.5 Constant Files
+| File | Path | Description |
+|------|------|-------------|
+| reactions.js | `constants/reactions.js` | Reaction types, colors, order |
+
+### 13.6 Context Files
 | File | Path | Description |
 |------|------|-------------|
 | AuthContext.js | `contexts/AuthContext.js` | User authentication |
 | TabBarContext.js | `contexts/TabBarContext.js` | Tab bar visibility |
 
-### 13.5 Utility Files
+### 13.7 Utility Files
 | File | Path | Description |
 |------|------|-------------|
 | bannerDistribution.js | `utils/bannerDistribution.js` | Ad injection |
@@ -3252,9 +3658,10 @@ const AD_CONFIG = {
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.0 | Jan 2026 | Major update: Added Facebook-style reactions (6 types), threaded comments, link preview, collapsible header, additional feed types (SideMenu categories), hooks layer (usePostReactions, useComments), updated scoring algorithm, new components for reactions and threading |
 | 1.0 | Dec 2024 | Initial complete specification |
 
 ---
 
 *Document maintained by GEM Development Team*
-*Last generated: December 2024*
+*Last generated: January 2026*

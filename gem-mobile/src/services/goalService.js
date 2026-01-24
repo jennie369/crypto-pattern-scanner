@@ -9,13 +9,14 @@ import { supabase } from './supabase';
 import TierService from './tierService';
 
 // ============ LIFE AREAS ============
+// 6 lĩnh vực cuộc sống theo kịch bản demo Vision Board
 export const LIFE_AREAS = [
   { id: 'finance', label: 'Tài chính', icon: 'dollar-sign', color: '#FFD700' },
   { id: 'career', label: 'Sự nghiệp', icon: 'briefcase', color: '#4169E1' },
   { id: 'health', label: 'Sức khỏe', icon: 'heart', color: '#FF6B6B' },
-  { id: 'relationships', label: 'Quan hệ', icon: 'users', color: '#FF69B4' },
-  { id: 'personal', label: 'Bản thân', icon: 'user', color: '#9B59B6' },
-  { id: 'spiritual', label: 'Tâm thức', icon: 'moon', color: '#00CED1' },
+  { id: 'relationships', label: 'Tình yêu', icon: 'heart', color: '#FF69B4' },
+  { id: 'personal', label: 'Cá nhân', icon: 'user', color: '#9B59B6' },
+  { id: 'spiritual', label: 'Tâm thức', icon: 'sparkles', color: '#00CED1' },
 ];
 
 // ============ XP REWARDS ============
@@ -215,6 +216,7 @@ export const createGoal = async (userId, goalData, options = {}) => {
       life_area: goalData.lifeArea,
       icon: goalData.icon || 'target',
       color: goalData.color || lifeAreaData?.color || '#FFBD59',
+      cover_image: goalData.coverImage || null, // Hình ảnh minh họa
 
       target_type: goalData.targetType || 'completion',
       target_value: goalData.targetValue || 100,
@@ -273,6 +275,82 @@ export const updateGoal = async (goalId, updates) => {
   } catch (err) {
     console.error('[goalService] updateGoal error:', err);
     throw err;
+  }
+};
+
+// ============ COVER IMAGE ============
+/**
+ * Upload cover image for a goal
+ * @param {string} userId - User ID
+ * @param {string} goalId - Goal ID
+ * @param {string} imageUri - Local URI of the image
+ * @returns {Promise<string|null>} - Public URL of uploaded image
+ */
+export const uploadGoalCoverImage = async (userId, goalId, imageUri) => {
+  try {
+    const fileExt = imageUri.split('.').pop() || 'jpg';
+    const fileName = `${goalId}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`;
+
+    // Read the file as base64
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('vision-board')
+      .upload(filePath, blob, {
+        contentType: `image/${fileExt}`,
+        upsert: true, // Replace if exists
+      });
+
+    if (error) throw error;
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('vision-board')
+      .getPublicUrl(filePath);
+
+    // Update goal with cover_image URL
+    await updateGoal(goalId, { cover_image: publicUrl });
+
+    return publicUrl;
+  } catch (err) {
+    console.error('[goalService] uploadGoalCoverImage error:', err);
+    return null;
+  }
+};
+
+/**
+ * Remove cover image from a goal
+ * @param {string} userId - User ID
+ * @param {string} goalId - Goal ID
+ * @returns {Promise<boolean>}
+ */
+export const removeGoalCoverImage = async (userId, goalId) => {
+  try {
+    // Get current goal to find the image path
+    const goal = await getGoalById(goalId);
+    if (!goal?.cover_image) return true;
+
+    // Extract file path from URL
+    const urlParts = goal.cover_image.split('/vision-board/');
+    if (urlParts.length > 1) {
+      const filePath = urlParts[1];
+
+      // Delete from storage
+      await supabase.storage
+        .from('vision-board')
+        .remove([filePath]);
+    }
+
+    // Update goal to remove cover_image
+    await updateGoal(goalId, { cover_image: null });
+
+    return true;
+  } catch (err) {
+    console.error('[goalService] removeGoalCoverImage error:', err);
+    return false;
   }
 };
 

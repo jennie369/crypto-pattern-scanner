@@ -41,6 +41,7 @@ import {
 } from 'lucide-react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import paperTradeService from '../../services/paperTradeService';
+import { supabase } from '../../services/supabase';
 import { getPendingOrders as fetchPendingOrders, cancelPendingOrder } from '../../services/pendingOrderService';
 import { binanceService } from '../../services/binanceService';
 import notificationService from '../../services/notificationService';
@@ -191,41 +192,68 @@ export default function OpenPositionsScreen() {
     }
   }, [user?.id]);
 
-  // Load positions on focus - ALWAYS force refresh to get latest stats
+  // Load positions when userId becomes available (handles initial auth delay)
+  useEffect(() => {
+    if (user?.id) {
+      console.log('[OpenPositions] User authenticated, loading data:', user.id);
+      loadData(false); // Don't force refresh - use init() normally
+    }
+  }, [user?.id]);
+
+  // Reload positions on screen focus
   useFocusEffect(
     useCallback(() => {
-      loadData(true); // Force refresh from cloud
-      // Cleanup subscriptions when screen loses focus
+      if (!user?.id) {
+        console.log('[OpenPositions] Waiting for user auth...');
+        return;
+      }
+      console.log('[OpenPositions] Screen focused with user:', user?.id);
+      loadData(false); // Don't force refresh - use init() normally (will load if needed)
       return () => cleanupSubscriptions();
-    }, [cleanupSubscriptions])
+    }, [cleanupSubscriptions, user?.id])
   );
 
   const loadData = async (forceRefresh = false) => {
     try {
-      // IMPORTANT: Sync currentUserId to ensure stats filter correctly
-      // This fixes the issue where stats show 0 after closing positions
-      if (user?.id) {
-        paperTradeService.currentUserId = user?.id;
+      // CRITICAL: Guard against undefined user - must have valid userId to load
+      if (!user?.id) {
+        console.log('[OpenPositions] loadData called but user?.id is undefined - skipping');
+        setLoading(false);
+        return;
       }
 
-      // Force fresh load from cloud when screen is focused
-      // This ensures we get the latest data including recently closed trades
-      if (forceRefresh && user?.id) {
-        console.log('[OpenPositions] Force refreshing from cloud...');
-        paperTradeService.initialized = false; // Reset to force full reload
+      console.log('[OpenPositions] loadData starting with userId:', user.id, 'forceRefresh:', forceRefresh);
+
+      // IMPORTANT: Set currentUserId BEFORE init to ensure correct userId filtering
+      // This prevents init from clearing data when same user calls it
+      if (paperTradeService.currentUserId !== user.id) {
+        console.log('[OpenPositions] Switching user context from', paperTradeService.currentUserId, 'to', user.id);
       }
 
-      // Initialize with CLOUD SYNC using user ID
-      await paperTradeService.init(user?.id);
+      // Use forceRefreshFromCloud only for manual refresh (pull-to-refresh)
+      // For normal screen loads, use init() which has built-in data protection
+      if (forceRefresh && !paperTradeService.initialized) {
+        // First time load - always init
+        await paperTradeService.init(user.id);
+      } else if (forceRefresh) {
+        // Manual refresh requested - force cloud refresh
+        await paperTradeService.forceRefreshFromCloud(user.id);
+      } else {
+        // Normal load - just init (will skip if already initialized for same user)
+        await paperTradeService.init(user.id);
+      }
 
-      // Debug: Log what we loaded
-      console.log('[OpenPositions] After init:', {
+      // Debug: Log what service has after init
+      console.log('[OpenPositions] After init - service state:', {
         historyCount: paperTradeService.tradeHistory?.length || 0,
         openCount: paperTradeService.openPositions?.length || 0,
+        pendingCount: paperTradeService.pendingOrders?.length || 0,
         currentUserId: paperTradeService.currentUserId,
+        initialized: paperTradeService.initialized,
       });
 
-      const openPositions = paperTradeService.getOpenPositions(user?.id);
+      const openPositions = paperTradeService.getOpenPositions(user.id);
+      console.log('[OpenPositions] getOpenPositions returned:', openPositions.length, 'positions');
 
       // Load pending orders from pendingOrderService (Supabase)
       let pending = [];
@@ -367,7 +395,7 @@ export default function OpenPositionsScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadData();
+    await loadData(true); // Force refresh from cloud on pull-to-refresh
     setRefreshing(false);
   };
 
@@ -535,9 +563,9 @@ export default function OpenPositionsScreen() {
     'ascending_triangle': 'Tam Giác Tăng',
     'descending_triangle': 'Tam Giác Giảm',
     'symmetric_triangle': 'Tam Giác Đối Xứng',
-    'wedge': 'Nêm',
-    'falling_wedge': 'Nêm Giảm',
-    'rising_wedge': 'Nêm Tăng',
+    'wedge': 'Wedge',
+    'falling_wedge': 'Falling Wedge',
+    'rising_wedge': 'Rising Wedge',
     'channel': 'Kênh Giá',
     'flag': 'Cờ',
     'pennant': 'Cờ Đuôi Nheo',
@@ -642,12 +670,17 @@ export default function OpenPositionsScreen() {
       // Trade mode MUST come from position, not patternData
       tradeMode: position.tradeMode || position.trade_mode || 'pattern',
       trade_mode: position.tradeMode || position.trade_mode || 'pattern',
+      // Order type
+      orderType: position.orderType || position.order_type || 'market',
+      order_type: position.orderType || position.order_type || 'market',
       // Position sizing info
       margin: position.margin || position.positionSize,
       positionSize: position.positionSize,
       positionValue: position.positionValue,
       leverage: position.leverage || 10,
       quantity: position.quantity,
+      // Risk/Reward ratio
+      riskReward: position.riskReward || position.risk_reward,
       // AI assessment for Custom Mode
       aiScore: position.aiScore || position.ai_score,
       aiFeedback: position.aiFeedback || position.ai_feedback,
@@ -1065,6 +1098,107 @@ export default function OpenPositionsScreen() {
     </View>
   );
 
+  // State for recovery
+  const [recovering, setRecovering] = useState(false);
+
+  // Handle data recovery - DIRECT SUPABASE QUERY
+  const handleRecoverData = async () => {
+    if (!user?.id) {
+      showAlert('Lỗi', 'Bạn cần đăng nhập để khôi phục dữ liệu', [{ text: 'OK' }], 'error');
+      return;
+    }
+
+    try {
+      setRecovering(true);
+      console.log('[OpenPositions] Starting recovery for userId:', user.id);
+
+      // DIRECT SUPABASE QUERY - bypass paperTradeService
+      const { data: supabasePositions, error: supaError } = await supabase
+        .from('paper_trades')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'OPEN');
+
+      console.log('[OpenPositions] Direct Supabase query result:', {
+        error: supaError,
+        count: supabasePositions?.length || 0,
+        positions: supabasePositions,
+      });
+
+      // Run diagnosis
+      const diagnosis = await paperTradeService.diagnoseDataStorage(user.id);
+      console.log('[OpenPositions] Diagnosis result:', diagnosis);
+
+      // Build detailed message
+      let diagMsg = `User ID: ${user.id.substring(0, 8)}...\n\n`;
+      diagMsg += `📱 Bộ nhớ: ${diagnosis.inMemory.openPositions} lệnh mở\n`;
+      diagMsg += `💾 Local Storage: ${diagnosis.userSpecificStorage?.positions || 0} lệnh\n`;
+      diagMsg += `📁 Legacy Storage: ${diagnosis.legacyStorage?.positions || 0} lệnh\n`;
+      diagMsg += `☁️ Supabase (trực tiếp): ${supabasePositions?.length || 0} lệnh mở\n`;
+
+      if (supaError) {
+        diagMsg += `\n⚠️ Lỗi Supabase: ${supaError.message}`;
+      }
+
+      if (supabasePositions && supabasePositions.length > 0) {
+        diagMsg += `\n\n📋 Các lệnh tìm thấy:\n`;
+        supabasePositions.forEach((p, i) => {
+          diagMsg += `${i + 1}. ${p.symbol} ${p.direction}\n`;
+        });
+      }
+
+      // If Supabase has data, force reload
+      if (supabasePositions && supabasePositions.length > 0) {
+        // Reset and reload
+        paperTradeService.initialized = false;
+        paperTradeService.currentUserId = null;
+        paperTradeService.openPositions = [];
+
+        await paperTradeService.init(user.id);
+
+        const reloadedPositions = paperTradeService.getOpenPositions(user.id);
+        console.log('[OpenPositions] After reload:', reloadedPositions.length);
+
+        setPositions(reloadedPositions);
+        setStats(paperTradeService.getStats(user.id));
+
+        showAlert(
+          'Đã tải lại dữ liệu',
+          `Tìm thấy ${supabasePositions.length} lệnh trong Supabase.\n\nĐã hiển thị: ${reloadedPositions.length} lệnh.\n\n${reloadedPositions.length === 0 ? 'Lỗi: Dữ liệu không được parse đúng!' : ''}`,
+          [{ text: 'OK' }],
+          reloadedPositions.length > 0 ? 'success' : 'warning'
+        );
+      } else {
+        // Try recovery from local storage
+        const result = await paperTradeService.attemptDataRecovery(user.id);
+
+        if (result.success) {
+          await loadData(false);
+          showAlert(
+            'Khôi phục thành công!',
+            `Đã khôi phục từ ${result.source}:\n` +
+            `- ${result.data.positions} lệnh mở\n` +
+            `- ${result.data.history} lịch sử`,
+            [{ text: 'OK' }],
+            'success'
+          );
+        } else {
+          showAlert(
+            'Kết quả kiểm tra',
+            diagMsg,
+            [{ text: 'OK' }],
+            'info'
+          );
+        }
+      }
+    } catch (error) {
+      console.error('[OpenPositions] Recovery error:', error);
+      showAlert('Lỗi', 'Không thể khôi phục: ' + error.message, [{ text: 'OK' }], 'error');
+    } finally {
+      setRecovering(false);
+    }
+  };
+
   // Render empty state
   const renderEmpty = () => (
     <View style={styles.emptyState}>
@@ -1073,12 +1207,25 @@ export default function OpenPositionsScreen() {
       <Text style={styles.emptySubtitle}>
         Mở paper trade từ Pattern Scanner để bắt đầu
       </Text>
-      <TouchableOpacity
-        style={styles.scanButton}
-        onPress={() => navigation.navigate('ScannerMain')}
-      >
-        <Text style={styles.scanButtonText}>Quét mẫu</Text>
-      </TouchableOpacity>
+      <View style={styles.emptyButtonsRow}>
+        <TouchableOpacity
+          style={styles.scanButton}
+          onPress={() => navigation.navigate('ScannerMain')}
+        >
+          <Text style={styles.scanButtonText}>Quét mẫu</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.scanButton, styles.recoverButton]}
+          onPress={handleRecoverData}
+          disabled={recovering}
+        >
+          {recovering ? (
+            <ActivityIndicator size="small" color={COLORS.warning} />
+          ) : (
+            <Text style={[styles.scanButtonText, { color: COLORS.warning }]}>Khôi phục dữ liệu</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -1624,6 +1771,15 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
+  },
+  emptyButtonsRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  recoverButton: {
+    borderColor: COLORS.warning,
+    backgroundColor: 'rgba(255, 193, 7, 0.1)',
   },
 
   // Footer Container

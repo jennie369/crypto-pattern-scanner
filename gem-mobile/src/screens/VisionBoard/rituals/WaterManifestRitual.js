@@ -32,11 +32,11 @@ import Svg, { Path, Ellipse, Defs, LinearGradient as SvgGradient, Stop, Circle }
 import { Droplet, Sparkles, ChevronRight, Zap, Heart } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
-import { completeRitual } from '../../../services/ritualService';
+import { completeRitual, saveReflection } from '../../../services/ritualService';
 
 // Cosmic Components
 import {
-  CosmicBackground,
+  VideoBackground,
   GlassCard,
   GlassInputCard,
   GlowButton,
@@ -53,6 +53,7 @@ import {
   HAPTIC_PATTERNS,
   COSMIC_TIMING,
 } from '../../../components/Rituals/cosmic';
+import useVideoPause from '../../../hooks/useVideoPause';
 
 const THEME = COSMIC_COLORS.ritualThemes.water;
 
@@ -434,6 +435,7 @@ const RITUAL_STEPS = [
 const WaterManifestRitual = ({ navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const shouldPauseVideo = useVideoPause();
 
   // State
   const [phase, setPhase] = useState('start'); // start, ritual, completed
@@ -446,6 +448,7 @@ const WaterManifestRitual = ({ navigation }) => {
   const [xpEarned, setXpEarned] = useState(0);
   const [streak, setStreak] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [reflection, setReflection] = useState('');
 
   // Refs
   const chargeInterval = useRef(null);
@@ -467,17 +470,14 @@ const WaterManifestRitual = ({ navigation }) => {
     };
   }, []);
 
-  // Handlers
+  // Handlers - OPTIMIZED: Instant phase transitions
   const handleStart = useCallback(() => {
     HAPTIC_PATTERNS.tap();
-    contentOpacity.value = withTiming(0, { duration: 300 });
-    setTimeout(() => {
-      setPhase('ritual');
-      setCurrentStep(0);
-      contentOpacity.value = withTiming(1, { duration: 400 });
-    }, 300);
+    setPhase('ritual');
+    setCurrentStep(0);
   }, []);
 
+  // OPTIMIZED: Instant step transitions
   const handleNextStep = useCallback(() => {
     const step = RITUAL_STEPS[currentStep] || RITUAL_STEPS[0];
 
@@ -495,20 +495,17 @@ const WaterManifestRitual = ({ navigation }) => {
 
     HAPTIC_PATTERNS.tap();
 
-    // Move to next step or complete
+    // Move to next step or complete - instant transition
     if (currentStep < RITUAL_STEPS.length - 1) {
-      contentOpacity.value = withTiming(0, { duration: 200 });
-      setTimeout(() => {
-        setCurrentStep(prev => prev + 1);
-        setIsCharging(false);
-        setChargeProgress(0);
-        contentOpacity.value = withTiming(1, { duration: 300 });
-      }, 200);
+      setCurrentStep(prev => prev + 1);
+      setIsCharging(false);
+      setChargeProgress(0);
     } else {
       handleComplete();
     }
   }, [currentStep, intention, isCharging]);
 
+  // OPTIMIZED: Instant transitions after charging
   const startCharging = useCallback(() => {
     setIsCharging(true);
     setChargeProgress(0);
@@ -534,14 +531,10 @@ const WaterManifestRitual = ({ navigation }) => {
         setIsCharging(false);
         HAPTIC_PATTERNS.success();
 
-        // Move to next step
+        // Move to next step - instant transition
         if (currentStep < RITUAL_STEPS.length - 1) {
-          contentOpacity.value = withTiming(0, { duration: 200 });
-          setTimeout(() => {
-            setCurrentStep(prev => prev + 1);
-            setChargeProgress(0);
-            contentOpacity.value = withTiming(1, { duration: 300 });
-          }, 200);
+          setCurrentStep(prev => prev + 1);
+          setChargeProgress(0);
         }
       }
     }, interval);
@@ -555,6 +548,7 @@ const WaterManifestRitual = ({ navigation }) => {
       if (user?.id) {
         const result = await completeRitual(user.id, 'water-manifest', {
           intention,
+          reflection,
         });
         setXpEarned(result?.xpEarned || CONFIG.xpReward);
         setStreak(result?.newStreak || 1);
@@ -712,13 +706,7 @@ const WaterManifestRitual = ({ navigation }) => {
   // Main render
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CosmicBackground
-        variant="water"
-        starDensity="medium"
-        showNebula={true}
-        showSpotlight={true}
-        spotlightIntensity={0.4}
-      >
+      <VideoBackground ritualId="water-manifest" paused={shouldPauseVideo}>
         {/* Water particles - OPTIMIZED: reduced counts */}
         <ParticleField
           variant="water"
@@ -758,10 +746,16 @@ const WaterManifestRitual = ({ navigation }) => {
           message={`Ý định của bạn đã được nạp vào cơ thể.\nHãy tin tưởng và để vũ trụ hiện thực hóa.`}
           visible={showCelebration}
           onContinue={handleContinue}
+          onWriteReflection={async (text) => {
+            setReflection(text);
+            if (user?.id) {
+              await saveReflection(user.id, 'water-manifest', text);
+            }
+          }}
           showVisionBoardButton={true}
-          showReflectionButton={false}
+          showReflectionButton={true}
         />
-      </CosmicBackground>
+      </VideoBackground>
     </GestureHandlerRootView>
   );
 };

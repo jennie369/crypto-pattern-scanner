@@ -12,6 +12,7 @@ import { supabase } from './supabase';
 
 const NOTIFICATION_SETTINGS_KEY = '@gem_notification_settings';
 const PUSH_TOKEN_KEY = '@gem_push_token';
+const VISION_BOARD_REMINDER_KEY = '@gem_vision_board_reminder';
 
 // Configure notification handling
 Notifications.setNotificationHandler({
@@ -34,7 +35,7 @@ export const NOTIFICATION_CATEGORIES = {
 export const CATEGORY_LABELS = {
   all: 'Tất cả',
   trading: 'Giao dịch',
-  social: 'Xã hội',
+  social: 'Cộng đồng',
   system: 'Hệ thống',
 };
 
@@ -92,7 +93,9 @@ class NotificationService {
       forumFollows: true,
       systemAlerts: true,
       partnershipAlerts: true, // Partnership notifications
+      visionBoardReminder: true, // Vision Board daily reminder
     };
+    this._visionBoardReminderNotificationId = null;
   }
 
   /**
@@ -137,10 +140,57 @@ class NotificationService {
           vibrationPattern: [0, 500, 250, 500],
           lightColor: '#FF6B6B',
         });
+
+        // Message notification channel
+        await Notifications.setNotificationChannelAsync('messages', {
+          name: 'Tin nhắn',
+          description: 'Thông báo tin nhắn mới',
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 250, 100, 250],
+          lightColor: '#6A5BFF',
+          sound: 'default',
+          enableVibrate: true,
+          showBadge: true,
+        });
+
+        // Incoming call channel (high priority for heads-up display)
+        await Notifications.setNotificationChannelAsync('incoming_calls', {
+          name: 'Cuộc gọi đến',
+          description: 'Thông báo cuộc gọi đến',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 500, 200, 500, 200, 500],
+          lightColor: '#00F0FF',
+          sound: 'default',
+          enableVibrate: true,
+          lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+        });
+
+        // Missed call channel
+        await Notifications.setNotificationChannelAsync('missed_calls', {
+          name: 'Cuộc gọi nhỡ',
+          description: 'Thông báo cuộc gọi nhỡ',
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF6B6B',
+          showBadge: true,
+        });
+
+        // Vision Board daily reminder channel
+        await Notifications.setNotificationChannelAsync('vision_board', {
+          name: 'Vision Board',
+          description: 'Nhắc nhở xem Vision Board hàng ngày',
+          importance: Notifications.AndroidImportance.DEFAULT,
+          vibrationPattern: [0, 200, 100, 200],
+          lightColor: '#6A5BFF',
+          sound: 'default',
+        });
       }
 
       // Get and save push token
       await this.registerPushToken();
+
+      // Load and apply Vision Board reminder settings
+      await this.loadVisionBoardReminderSettings();
 
       console.log('[Notifications] Initialized successfully');
       return true;
@@ -478,6 +528,191 @@ class NotificationService {
    */
   async clearBadge() {
     await this.setBadgeCount(0);
+  }
+
+  // ==========================================
+  // VISION BOARD DAILY REMINDER
+  // ==========================================
+
+  /**
+   * Load Vision Board reminder settings from AsyncStorage
+   */
+  async loadVisionBoardReminderSettings() {
+    try {
+      const stored = await AsyncStorage.getItem(VISION_BOARD_REMINDER_KEY);
+      if (stored) {
+        const settings = JSON.parse(stored);
+        // If enabled, reschedule the reminder
+        if (settings.enabled) {
+          await this.scheduleVisionBoardDailyReminder(settings.hour, settings.minute, false);
+        }
+        return settings;
+      }
+      return null;
+    } catch (error) {
+      console.error('[Notifications] loadVisionBoardReminderSettings error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get Vision Board reminder settings
+   * @returns {Promise<{enabled: boolean, hour: number, minute: number} | null>}
+   */
+  async getVisionBoardReminderSettings() {
+    try {
+      const stored = await AsyncStorage.getItem(VISION_BOARD_REMINDER_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      // Default: enabled at 8:00 AM
+      return { enabled: false, hour: 8, minute: 0 };
+    } catch (error) {
+      console.error('[Notifications] getVisionBoardReminderSettings error:', error);
+      return { enabled: false, hour: 8, minute: 0 };
+    }
+  }
+
+  /**
+   * Schedule Vision Board daily reminder
+   * @param {number} hour - Hour of day (0-23)
+   * @param {number} minute - Minute (0-59)
+   * @param {boolean} saveSettings - Whether to save settings to AsyncStorage
+   * @returns {Promise<boolean>}
+   */
+  async scheduleVisionBoardDailyReminder(hour = 8, minute = 0, saveSettings = true) {
+    if (!this._settings.visionBoardReminder) {
+      console.log('[Notifications] Vision Board reminder disabled in settings');
+      return false;
+    }
+
+    try {
+      // Cancel existing reminder first
+      await this.cancelVisionBoardDailyReminder(false);
+
+      // Schedule new daily reminder
+      const notificationId = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '✨ Nhìn vào Vision Board của bạn',
+          body: 'Dành vài phút để hình dung mục tiêu và tiếp thêm năng lượng cho ngày mới!',
+          data: {
+            type: 'vision_board_reminder',
+            screen: 'VisionBoard',
+          },
+          sound: 'default',
+          ...(Platform.OS === 'android' && { channelId: 'vision_board' }),
+        },
+        trigger: {
+          hour,
+          minute,
+          repeats: true,
+        },
+      });
+
+      this._visionBoardReminderNotificationId = notificationId;
+
+      // Save settings to AsyncStorage
+      if (saveSettings) {
+        await AsyncStorage.setItem(VISION_BOARD_REMINDER_KEY, JSON.stringify({
+          enabled: true,
+          hour,
+          minute,
+          notificationId,
+        }));
+      }
+
+      console.log(`[Notifications] Vision Board daily reminder scheduled at ${hour}:${minute.toString().padStart(2, '0')}`);
+      return true;
+    } catch (error) {
+      console.error('[Notifications] scheduleVisionBoardDailyReminder error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Cancel Vision Board daily reminder
+   * @param {boolean} saveSettings - Whether to update settings in AsyncStorage
+   * @returns {Promise<boolean>}
+   */
+  async cancelVisionBoardDailyReminder(saveSettings = true) {
+    try {
+      // Try to get stored notification ID
+      const stored = await AsyncStorage.getItem(VISION_BOARD_REMINDER_KEY);
+      let notificationId = this._visionBoardReminderNotificationId;
+
+      if (stored) {
+        const settings = JSON.parse(stored);
+        notificationId = notificationId || settings.notificationId;
+      }
+
+      // Cancel the scheduled notification
+      if (notificationId) {
+        await Notifications.cancelScheduledNotificationAsync(notificationId);
+        this._visionBoardReminderNotificationId = null;
+      }
+
+      // Update settings
+      if (saveSettings) {
+        const currentSettings = stored ? JSON.parse(stored) : { hour: 8, minute: 0 };
+        await AsyncStorage.setItem(VISION_BOARD_REMINDER_KEY, JSON.stringify({
+          ...currentSettings,
+          enabled: false,
+          notificationId: null,
+        }));
+      }
+
+      console.log('[Notifications] Vision Board daily reminder cancelled');
+      return true;
+    } catch (error) {
+      console.error('[Notifications] cancelVisionBoardDailyReminder error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Update Vision Board reminder settings
+   * @param {boolean} enabled - Whether reminder is enabled
+   * @param {number} hour - Hour of day (0-23)
+   * @param {number} minute - Minute (0-59)
+   * @returns {Promise<boolean>}
+   */
+  async setVisionBoardReminderSettings(enabled, hour = 8, minute = 0) {
+    try {
+      if (enabled) {
+        return await this.scheduleVisionBoardDailyReminder(hour, minute);
+      } else {
+        return await this.cancelVisionBoardDailyReminder();
+      }
+    } catch (error) {
+      console.error('[Notifications] setVisionBoardReminderSettings error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Send immediate Vision Board reminder (for testing or manual trigger)
+   */
+  async sendVisionBoardReminderNow() {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '✨ Nhìn vào Vision Board của bạn',
+          body: 'Dành vài phút để hình dung mục tiêu và tiếp thêm năng lượng cho ngày mới!',
+          data: {
+            type: 'vision_board_reminder',
+            screen: 'VisionBoard',
+          },
+          sound: 'default',
+          ...(Platform.OS === 'android' && { channelId: 'vision_board' }),
+        },
+        trigger: null, // Immediate
+      });
+      console.log('[Notifications] Vision Board reminder sent immediately');
+      return true;
+    } catch (error) {
+      console.error('[Notifications] sendVisionBoardReminderNow error:', error);
+      return false;
+    }
   }
 
   // ==========================================
@@ -991,6 +1226,236 @@ class NotificationService {
   }
 
   // ==========================================
+  // MESSAGE NOTIFICATIONS
+  // ==========================================
+
+  /**
+   * Send new message notification
+   * @param {Object} sender - Sender info { id, display_name, avatar_url }
+   * @param {Object} message - Message object { id, content, message_type }
+   * @param {Object} conversation - Conversation object { id, name, is_group }
+   */
+  async sendMessageNotification(sender, message, conversation) {
+    try {
+      const senderName = sender?.display_name || sender?.full_name || 'Ai đó';
+
+      // Build notification title
+      let title;
+      if (conversation?.is_group) {
+        title = `${conversation.name || 'Nhóm chat'}`;
+      } else {
+        title = senderName;
+      }
+
+      // Build notification body based on message type
+      let body;
+      const messageTypeLabels = {
+        text: message.content?.substring(0, 100) || 'Tin nhắn mới',
+        image: '📷 Đã gửi một hình ảnh',
+        video: '🎥 Đã gửi một video',
+        audio: '🎵 Đã gửi tin nhắn thoại',
+        file: `📎 Đã gửi tệp: ${message.attachment_name || 'Tệp tin'}`,
+        sticker: '🎨 Đã gửi một sticker',
+        gif: '🎬 Đã gửi một GIF',
+        location: '📍 Đã chia sẻ vị trí',
+      };
+
+      if (conversation?.is_group) {
+        body = `${senderName}: ${messageTypeLabels[message.message_type] || message.content || 'Tin nhắn mới'}`;
+      } else {
+        body = messageTypeLabels[message.message_type] || message.content || 'Tin nhắn mới';
+      }
+
+      // Truncate body if too long
+      if (body.length > 150) {
+        body = body.substring(0, 147) + '...';
+      }
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: {
+            type: 'new_message',
+            conversationId: conversation?.id,
+            messageId: message?.id,
+            senderId: sender?.id,
+            isGroup: conversation?.is_group,
+          },
+          sound: 'default',
+          badge: 1,
+          ...(Platform.OS === 'android' && { channelId: 'messages' }),
+        },
+        trigger: null,
+      });
+
+      console.log('[Notifications] Message notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendMessageNotification error:', error);
+    }
+  }
+
+  /**
+   * Send typing indicator notification (for persistent typing)
+   * Usually not needed, but can be used for long-form typing
+   */
+  async sendTypingNotification(senderName, conversationName) {
+    // Typically not sent as a push notification
+    // This is just a placeholder for in-app display
+    console.log(`[Notifications] ${senderName} is typing in ${conversationName}`);
+  }
+
+  // ==========================================
+  // CALL NOTIFICATIONS
+  // ==========================================
+
+  /**
+   * Send incoming call notification
+   * @param {Object} caller - Caller info { id, display_name, avatar_url }
+   * @param {Object} call - Call object { id, call_type }
+   */
+  async sendIncomingCallNotification(caller, call) {
+    try {
+      const callerName = caller?.display_name || caller?.full_name || 'Ai đó';
+      const callType = call?.call_type === 'video' ? 'video' : 'thoại';
+      const icon = call?.call_type === 'video' ? '📹' : '📞';
+
+      const title = `${icon} Cuộc gọi ${callType} đến`;
+      const body = `${callerName} đang gọi cho bạn`;
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: {
+            type: 'incoming_call',
+            callId: call?.id,
+            callerId: caller?.id,
+            callerName,
+            callerAvatar: caller?.avatar_url,
+            callType: call?.call_type,
+          },
+          sound: 'default',
+          priority: 'max',
+          sticky: true, // Keep notification until answered/declined
+          ...(Platform.OS === 'android' && {
+            channelId: 'incoming_calls',
+            categoryIdentifier: 'incoming_call',
+          }),
+        },
+        trigger: null,
+      });
+
+      console.log('[Notifications] Incoming call notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendIncomingCallNotification error:', error);
+    }
+  }
+
+  /**
+   * Send missed call notification
+   * @param {Object} caller - Caller info { id, display_name, avatar_url }
+   * @param {Object} call - Call object { id, call_type, created_at }
+   */
+  async sendMissedCallNotification(caller, call) {
+    try {
+      const callerName = caller?.display_name || caller?.full_name || 'Ai đó';
+      const callType = call?.call_type === 'video' ? 'video' : 'thoại';
+      const icon = call?.call_type === 'video' ? '📹' : '📞';
+
+      const title = `${icon} Cuộc gọi nhỡ`;
+      const body = `${callerName} đã gọi ${callType} cho bạn`;
+
+      // Save to database for notification tab
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('notifications').insert({
+          user_id: user.id,
+          title,
+          message: body,
+          type: 'missed_call',
+          data: {
+            callId: call?.id,
+            callerId: caller?.id,
+            callerName,
+            callerAvatar: caller?.avatar_url,
+            callType: call?.call_type,
+          },
+          read: false,
+        });
+      }
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: {
+            type: 'missed_call',
+            callId: call?.id,
+            callerId: caller?.id,
+            callerName,
+            callType: call?.call_type,
+          },
+          sound: 'default',
+          ...(Platform.OS === 'android' && { channelId: 'missed_calls' }),
+        },
+        trigger: null,
+      });
+
+      console.log('[Notifications] Missed call notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendMissedCallNotification error:', error);
+    }
+  }
+
+  /**
+   * Send call ended notification (for declined/cancelled calls)
+   * @param {Object} caller - Caller info
+   * @param {string} reason - End reason (declined, cancelled, no_answer, busy)
+   */
+  async sendCallEndedNotification(caller, reason) {
+    try {
+      const callerName = caller?.display_name || caller?.full_name || 'Ai đó';
+
+      const reasonMessages = {
+        declined: `${callerName} đã từ chối cuộc gọi`,
+        cancelled: `${callerName} đã hủy cuộc gọi`,
+        no_answer: `Không có ai trả lời cuộc gọi`,
+        busy: `${callerName} đang bận`,
+        failed: `Cuộc gọi không thể kết nối`,
+      };
+
+      const body = reasonMessages[reason] || 'Cuộc gọi đã kết thúc';
+
+      // Don't send push for user-initiated actions, just log
+      console.log('[Notifications] Call ended:', body);
+    } catch (error) {
+      console.error('[Notifications] sendCallEndedNotification error:', error);
+    }
+  }
+
+  /**
+   * Cancel incoming call notification (when call is answered/declined)
+   * @param {string} callId - Call ID to cancel notification for
+   */
+  async cancelIncomingCallNotification(callId) {
+    try {
+      // Get all delivered notifications and find the one for this call
+      const deliveredNotifications = await Notifications.getPresentedNotificationsAsync();
+
+      for (const notification of deliveredNotifications) {
+        if (notification.request.content.data?.callId === callId) {
+          await Notifications.dismissNotificationAsync(notification.request.identifier);
+          console.log('[Notifications] Cancelled incoming call notification');
+          break;
+        }
+      }
+    } catch (error) {
+      console.error('[Notifications] cancelIncomingCallNotification error:', error);
+    }
+  }
+
+  // ==========================================
   // GIFT NOTIFICATIONS
   // ==========================================
 
@@ -1038,6 +1503,106 @@ class NotificationService {
       console.log('[Notifications] Local notification sent:', title);
     } catch (error) {
       console.error('[Notifications] sendLocalNotification error:', error);
+    }
+  }
+
+  /**
+   * Send push notification to a specific user via Expo Push API
+   * This sends the notification to the user's device(s), not the current device
+   * @param {string} userId - Target user ID
+   * @param {string} title - Notification title
+   * @param {string} body - Notification body
+   * @param {object} data - Additional data
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async sendPushToUser(userId, title, body, data = {}) {
+    try {
+      if (!userId) {
+        console.warn('[Notifications] sendPushToUser: No userId provided');
+        return { success: false, error: 'No userId provided' };
+      }
+
+      // Get user's active push tokens
+      const { data: tokens, error: tokenError } = await supabase
+        .from('user_push_tokens')
+        .select('push_token')
+        .eq('user_id', userId)
+        .eq('is_active', true);
+
+      // Also check profiles table for expo_push_token (legacy)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('expo_push_token')
+        .eq('id', userId)
+        .single();
+
+      // Collect all unique tokens
+      const allTokens = new Set();
+      if (tokens?.length > 0) {
+        tokens.forEach(t => {
+          if (t.push_token) allTokens.add(t.push_token);
+        });
+      }
+      if (profile?.expo_push_token) {
+        allTokens.add(profile.expo_push_token);
+      }
+
+      const pushTokens = Array.from(allTokens);
+
+      if (pushTokens.length === 0) {
+        console.log('[Notifications] sendPushToUser: No push tokens for user', userId);
+        return { success: false, error: 'No push tokens registered' };
+      }
+
+      console.log('[Notifications] Sending push to user', userId, 'with', pushTokens.length, 'token(s)');
+
+      // Send via Expo Push API
+      const messages = pushTokens.map(token => ({
+        to: token,
+        title,
+        body,
+        data,
+        sound: 'default',
+        badge: 1,
+        priority: 'high',
+      }));
+
+      const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messages),
+      });
+
+      const result = await response.json();
+
+      // Check for errors
+      const errors = result.data?.filter(r => r.status === 'error') || [];
+      if (errors.length > 0) {
+        console.warn('[Notifications] Some push notifications failed:', errors);
+        // Mark failed tokens as inactive
+        for (const error of errors) {
+          if (error.details?.error === 'DeviceNotRegistered') {
+            const failedToken = messages[result.data.indexOf(error)]?.to;
+            if (failedToken) {
+              await supabase
+                .from('user_push_tokens')
+                .update({ is_active: false })
+                .eq('push_token', failedToken);
+            }
+          }
+        }
+      }
+
+      const successCount = (result.data?.filter(r => r.status === 'ok') || []).length;
+      console.log('[Notifications] Push sent to user:', userId, 'Success:', successCount, '/', pushTokens.length);
+
+      return { success: successCount > 0 };
+    } catch (error) {
+      console.error('[Notifications] sendPushToUser error:', error);
+      return { success: false, error: error.message };
     }
   }
 
@@ -1337,20 +1902,61 @@ class NotificationService {
 
   /**
    * [ADMIN] Send broadcast notification to all users
+   * Uses direct insert into forum_notifications (more reliable than RPC)
    */
   async sendBroadcastNotification({ title, message, type = 'system', data = {}, imageUrl = null }) {
     try {
-      const { data: result, error } = await supabase.rpc('send_broadcast_notification', {
-        p_title: title,
-        p_message: message,
-        p_type: type,
-        p_data: data,
-        p_image_url: imageUrl,
-      });
+      // Get all user IDs
+      const { data: users, error: usersError } = await supabase
+        .from('profiles')
+        .select('id');
 
-      if (error) throw error;
+      if (usersError) {
+        console.error('[Notifications] Failed to get users:', usersError);
+        throw usersError;
+      }
 
-      return { success: result?.success || false, data: result };
+      if (!users || users.length === 0) {
+        console.warn('[Notifications] No users found for broadcast');
+        return { success: false, error: 'No users found' };
+      }
+
+      // Create notification records for each user
+      const notifications = users.map(u => ({
+        user_id: u.id,
+        type: type,
+        title: title,
+        message: message,
+        data: data,
+        is_broadcast: true,
+        read: false,
+      }));
+
+      // Insert in chunks of 100 for better performance
+      const chunkSize = 100;
+      let insertedCount = 0;
+
+      for (let i = 0; i < notifications.length; i += chunkSize) {
+        const chunk = notifications.slice(i, i + chunkSize);
+        const { error: insertError } = await supabase.from('forum_notifications').insert(chunk);
+
+        if (!insertError) {
+          insertedCount += chunk.length;
+        } else {
+          console.warn('[Notifications] Chunk insert error:', insertError.message);
+        }
+      }
+
+      console.log('[Notifications] Broadcast sent to', insertedCount, 'of', users.length, 'users');
+
+      return {
+        success: insertedCount > 0,
+        data: {
+          sent_count: insertedCount,
+          total_users: users.length,
+          message: `Đã gửi thông báo đến ${insertedCount} người dùng`
+        }
+      };
     } catch (error) {
       console.error('[Notifications] sendBroadcastNotification error:', error);
       return { success: false, error: error.message };
@@ -1359,20 +1965,45 @@ class NotificationService {
 
   /**
    * [ADMIN] Send notification to specific users
+   * Uses direct insert (more reliable than RPC)
    */
   async sendNotificationToUsers(userIds, title, message, type = 'system', data = {}) {
     try {
-      const { data: result, error } = await supabase.rpc('send_notification_to_users', {
-        p_user_ids: userIds,
-        p_title: title,
-        p_message: message,
-        p_type: type,
-        p_data: data,
-      });
+      if (!userIds || userIds.length === 0) {
+        return { success: false, error: 'No user IDs provided' };
+      }
 
-      if (error) throw error;
+      // Create notification records
+      const notifications = userIds.map(userId => ({
+        user_id: userId,
+        type: type,
+        title: title,
+        message: message,
+        data: data,
+        read: false,
+      }));
 
-      return { success: result?.success || false, data: result };
+      // Insert in chunks
+      const chunkSize = 100;
+      let insertedCount = 0;
+
+      for (let i = 0; i < notifications.length; i += chunkSize) {
+        const chunk = notifications.slice(i, i + chunkSize);
+        const { error: insertError } = await supabase.from('forum_notifications').insert(chunk);
+
+        if (!insertError) {
+          insertedCount += chunk.length;
+        } else {
+          console.warn('[Notifications] Chunk insert error:', insertError.message);
+        }
+      }
+
+      console.log('[Notifications] Sent to', insertedCount, 'of', userIds.length, 'users');
+
+      return {
+        success: insertedCount > 0,
+        data: { sent_count: insertedCount }
+      };
     } catch (error) {
       console.error('[Notifications] sendNotificationToUsers error:', error);
       return { success: false, error: error.message };

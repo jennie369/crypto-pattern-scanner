@@ -108,7 +108,20 @@
       "Bash(ping:*)",
       "Bash(cd:*)",
       "Bash(git reset:*)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(git push:*)",
+      "Bash(du:*)",
+      "Bash(git rm:*)",
+      "Bash(gh secret set:*)",
+      "Bash(supabase functions deploy:*)",
+      "Bash(del \"D:\\\\Claude Projects\\\\ẢNH LANDING PAGE GEMRAL\\\\Gemini_Generated_Image_w4gfecw4gfecw4gf.webp\")",
+      "Bash(eas submission:list:*)",
+      "Bash(npx tsc --noEmit --skipLibCheck)",
+      "Bash(npm run lint)",
+      "Bash(npx expo doctor)",
+      "Bash(npx expo install:*)",
+      "Bash(move:*)",
+      "Bash(ren:*)"
     ],
     "deny": [],
     "ask": []

@@ -34,11 +34,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Send, Sparkles, Star, Mail } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
-import { completeRitual } from '../../../services/ritualService';
+import { completeRitual, saveReflection } from '../../../services/ritualService';
 
 // Cosmic Components
 import {
-  CosmicBackground,
+  VideoBackground,
+  RitualAnimation,
   GlassCard,
   GlassInputCard,
   GlowButton,
@@ -54,6 +55,7 @@ import {
   HAPTIC_PATTERNS,
   COSMIC_TIMING,
 } from '../../../components/Rituals/cosmic';
+import useVideoPause from '../../../hooks/useVideoPause';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -486,6 +488,7 @@ const TwinklingStar = memo(({ x, y, size, delay }) => {
 const LetterToUniverseRitual = ({ navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const shouldPauseVideo = useVideoPause();
 
   // State
   const [phase, setPhase] = useState('write'); // write, sending, received
@@ -495,6 +498,7 @@ const LetterToUniverseRitual = ({ navigation }) => {
   const [xpEarned, setXpEarned] = useState(0);
   const [streak, setStreak] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [reflection, setReflection] = useState('');
 
   // Animation states
   const [showLetter, setShowLetter] = useState(false);
@@ -545,29 +549,29 @@ const LetterToUniverseRitual = ({ navigation }) => {
     // Start animation timeline
     setShowLetter(true);
 
-    // 5s: God rays appear (after letter starts fading)
+    // 2.5s: God rays appear (after letter starts flying)
     setTimeout(() => {
       setShowGodRays(true);
       HAPTIC_PATTERNS.tap();
-    }, 5000);
+    }, 2500);
 
-    // 6s: Shooting stars begin
-    setTimeout(() => setShowShootingStars(true), 6000);
+    // 3s: Shooting stars begin
+    setTimeout(() => setShowShootingStars(true), 3000);
 
-    // 8s: Nebula clouds appear
-    setTimeout(() => setShowNebula(true), 8000);
+    // 3.5s: Nebula clouds appear
+    setTimeout(() => setShowNebula(true), 3500);
 
-    // 12s: Twinkling stars appear
-    setTimeout(() => setShowTwinklingStars(true), 12000);
+    // 4s: Twinkling stars appear
+    setTimeout(() => setShowTwinklingStars(true), 4000);
 
-    // 15s: Success message
+    // 5s: Success message (after Lottie finishes ~4s)
     setTimeout(() => {
       setShowMessage(true);
-      messageOpacity.value = withTiming(1, { duration: 2000 });
+      messageOpacity.value = withTiming(1, { duration: 1500 });
       HAPTIC_PATTERNS.cosmic.wishGranted();
-    }, 15000);
+    }, 5000);
 
-    // 18s: Complete
+    // 7s: Complete
     setTimeout(async () => {
       setPhase('received');
       setShowCelebration(true);
@@ -576,6 +580,7 @@ const LetterToUniverseRitual = ({ navigation }) => {
         if (user?.id) {
           const result = await completeRitual(user.id, 'letter-to-universe', {
             wish,
+            reflection,
           });
           setXpEarned(result?.xpEarned || CONFIG.xpReward);
           setStreak(result?.newStreak || 1);
@@ -588,7 +593,7 @@ const LetterToUniverseRitual = ({ navigation }) => {
         setXpEarned(CONFIG.xpReward);
         setStreak(1);
       }
-    }, 18000);
+    }, 7000);
   }, [wish, user]);
 
   const handleLetterComplete = useCallback(() => {
@@ -664,8 +669,17 @@ const LetterToUniverseRitual = ({ navigation }) => {
         <NebulaCloud key={`nebula-${i}`} {...cloud} />
       ))}
 
-      {/* God rays */}
-      <GodRays visible={showGodRays} />
+      {/* Reward light effect - replaces GodRays */}
+      {showGodRays && (
+        <View style={styles.rewardLightContainer}>
+          <RitualAnimation
+            animationId="reward-light"
+            autoPlay={true}
+            loop={true}
+            speed={0.8}
+          />
+        </View>
+      )}
 
       {/* Shooting stars */}
       {showShootingStars && shootingStars.map((star, i) => (
@@ -675,11 +689,18 @@ const LetterToUniverseRitual = ({ navigation }) => {
       {/* Twinkling stars - OPTIMIZED: reduced from 60 to 20 */}
       <TwinklingStarsField visible={showTwinklingStars} count={20} />
 
-      {/* Cosmic letter animation */}
-      <CosmicLetter
-        visible={showLetter}
-        onComplete={handleLetterComplete}
-      />
+      {/* Lottie Animation - Letter Fly */}
+      {showLetter && (
+        <View style={styles.lottieContainer}>
+          <RitualAnimation
+            animationId="letter-fly"
+            autoPlay={true}
+            loop={false}
+            size={SCREEN_WIDTH * 0.7}
+            onAnimationFinish={handleLetterComplete}
+          />
+        </View>
+      )}
 
       {/* Success message */}
       {showMessage && (
@@ -700,13 +721,7 @@ const LetterToUniverseRitual = ({ navigation }) => {
   // Main render
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CosmicBackground
-        variant="letter"
-        starDensity="high"
-        showNebula={phase === 'sending'}
-        showSpotlight={phase === 'sending'}
-        spotlightIntensity={0.5}
-      >
+      <VideoBackground ritualId="letter-to-universe" paused={shouldPauseVideo}>
         {/* Sparkle particles - OPTIMIZED: reduced count */}
         <ParticleField
           variant={phase === 'sending' ? 'sparkles' : 'stars'}
@@ -746,10 +761,16 @@ const LetterToUniverseRitual = ({ navigation }) => {
           message="Điều ước của bạn đã bay đến những vì sao. Hãy tin tưởng và để vũ trụ làm việc."
           visible={showCelebration}
           onContinue={handleContinue}
+          onWriteReflection={async (text) => {
+            setReflection(text);
+            if (user?.id) {
+              await saveReflection(user.id, 'letter-to-universe', text);
+            }
+          }}
           showVisionBoardButton={true}
           showReflectionButton={true}
         />
-      </CosmicBackground>
+      </VideoBackground>
     </GestureHandlerRootView>
   );
 };
@@ -827,6 +848,14 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
+  lottieContainer: {
+    position: 'absolute',
+    left: SCREEN_WIDTH / 2 - SCREEN_WIDTH * 0.35,
+    top: SCREEN_HEIGHT / 2 - SCREEN_WIDTH * 0.35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
 
   // Shooting star
   shootingStar: {
@@ -848,7 +877,18 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
 
-  // God rays wrapper
+  // Reward light container (replaces God rays)
+  rewardLightContainer: {
+    position: 'absolute',
+    width: 400,
+    height: 400,
+    left: SCREEN_WIDTH / 2 - 200,
+    top: SCREEN_HEIGHT / 2 - 280,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 5,
+  },
+  // God rays wrapper (legacy - can be removed)
   godRaysWrapper: {
     position: 'absolute',
     width: 450,

@@ -337,7 +337,7 @@ export const PATTERN_SIGNALS = {
     icon: '⚡',
     label: 'REVERSAL',
     fullLabel: 'REVERSAL PATTERN',
-    description: 'Nêm tăng/giảm đảo chiều',
+    description: 'Wedge tăng/giảm đảo chiều',
     expectedWinRate: 64,
     avgRR: 2.1,
     bestTimeframes: ['4H', '1D'],

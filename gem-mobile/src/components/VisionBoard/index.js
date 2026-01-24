@@ -25,3 +25,6 @@ export { default as DivinationSection } from './DivinationSection';
 // NEW: Quota UI Components (Tier-based limits)
 export { default as QuotaBar, QuotaBarCompact, QuotaSummaryCard } from './QuotaBar';
 export { default as QuotaLimitModal, QuotaWarningBanner } from './QuotaLimitModal';
+
+// NEW: Activity Feed (Phase 2 Upgrade)
+export { default as ActivityFeed } from './ActivityFeed';

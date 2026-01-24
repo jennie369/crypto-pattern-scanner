@@ -50,6 +50,36 @@ const POST_SELECT_QUERY = `
   saved:forum_saved(user_id)
 `;
 
+// FAST query - minimal joins for speed (no likes/saved joins)
+const POST_SELECT_FAST = `
+  id,
+  user_id,
+  content,
+  image_url,
+  media_urls,
+  image_width,
+  image_height,
+  image_ratio,
+  created_at,
+  updated_at,
+  likes_count,
+  comments_count,
+  shares_count,
+  views_count,
+  category_id,
+  hashtags,
+  is_pinned,
+  profiles:user_id (
+    id,
+    username,
+    full_name,
+    avatar_url,
+    role,
+    verified_seller,
+    verified_trader
+  )
+`;
+
 // Select query for seed posts (joined with seed_users instead of profiles)
 // UPDATED: Added seed_post_products for product tagging
 const SEED_POST_SELECT_QUERY = `
@@ -78,28 +108,263 @@ const SEED_POST_SELECT_QUERY = `
 // ============================================
 
 const FEED_CONFIG = {
-  DEFAULT_LIMIT: 100, // INCREASED from 30 to show more posts
+  DEFAULT_LIMIT: 20, // REDUCED for faster initial load (was 30)
   FOLLOWING_WEIGHT: 0.6,
   DISCOVERY_WEIGHT: 0.3,
   SERENDIPITY_WEIGHT: 0.1,
   AD_FIRST_POSITION: 5,   // First inline ad after 5 posts
   AD_INTERVAL: 10,        // INCREASED from 8 to 10 for better spacing
   MAX_ADS_PER_SESSION: 2, // Max 2 inline ads (header shows 1 separately)
-  CACHE_TTL: 300, // 5 minutes
+  CACHE_TTL: 60000, // 60 seconds cache (in ms)
+  MAX_SEED_POSTS: 20, // REDUCED for faster load (was 50)
+  MAX_FALLBACK_POSTS: 20, // REDUCED for faster load (was 50)
+  IMPRESSION_BATCH_SIZE: 50, // Max impressions to check
 };
+
+// ============================================
+// MEMORY CACHE FOR FEED - Prevents refetching on tab switch
+// ============================================
+
+const feedCache = new Map();
+
+/**
+ * Get cached feed if still valid
+ * @param {string} userId - User ID
+ * @returns {object|null} Cached feed or null
+ */
+function getCachedFeed(userId) {
+  const cached = feedCache.get(userId);
+  if (!cached) return null;
+
+  const now = Date.now();
+  if (now - cached.timestamp > FEED_CONFIG.CACHE_TTL) {
+    feedCache.delete(userId);
+    return null;
+  }
+
+  console.log(`[FeedService] ⚡ Cache HIT for user ${userId}`);
+  return cached.data;
+}
+
+/**
+ * Store feed in cache
+ * @param {string} userId - User ID
+ * @param {object} feedData - Feed data to cache
+ */
+function setCachedFeed(userId, feedData) {
+  // Limit cache size to prevent memory issues
+  if (feedCache.size > 100) {
+    const firstKey = feedCache.keys().next().value;
+    feedCache.delete(firstKey);
+  }
+
+  feedCache.set(userId, {
+    data: feedData,
+    timestamp: Date.now(),
+  });
+  console.log(`[FeedService] 💾 Cached feed for user ${userId}`);
+}
+
+/**
+ * Invalidate cache for user (call on refresh)
+ * @param {string} userId - User ID
+ */
+export function invalidateFeedCache(userId) {
+  feedCache.delete(userId);
+  console.log(`[FeedService] 🗑️ Cache invalidated for user ${userId}`);
+}
+
+// ============================================
+// LIGHTWEIGHT ADS INSERTION (for Fast Mode)
+// Single query to fetch banners, no profile check needed
+// ============================================
+
+async function insertAdsLight(userId, sessionId, feedItems) {
+  try {
+    // Fetch sponsor banners - single lightweight query
+    const { data: sponsorBanners, error } = await supabase
+      .from('sponsor_banners')
+      .select('id, title, subtitle, action_label, action_value, action_type, image_url, background_color, text_color, accent_color, is_dismissible')
+      .eq('is_active', true)
+      .eq('placement', 'feed_inline')
+      .order('priority', { ascending: false })
+      .limit(FEED_CONFIG.MAX_ADS_PER_SESSION);
+
+    if (error || !sponsorBanners?.length) {
+      console.log(`[FeedService] ⚡ No inline ads available`);
+      return feedItems;
+    }
+
+    // Build feed with ads
+    const feed = [];
+    let adPosition = FEED_CONFIG.AD_FIRST_POSITION;
+    let adsInserted = 0;
+
+    feedItems.forEach((item, index) => {
+      feed.push(item);
+
+      // Insert ad at configured positions
+      if (index + 1 === adPosition && adsInserted < sponsorBanners.length) {
+        const banner = sponsorBanners[adsInserted];
+        feed.push({
+          type: 'ad',
+          data: {
+            id: banner.id,
+            type: 'sponsor_banner',
+            title: banner.title,
+            description: banner.subtitle,
+            cta: banner.action_label,
+            link: banner.action_value,
+            action_type: banner.action_type,
+            image: banner.image_url,
+            background_color: banner.background_color,
+            text_color: banner.text_color,
+            accent_color: banner.accent_color,
+            is_dismissible: banner.is_dismissible,
+          },
+        });
+        adsInserted++;
+        adPosition += FEED_CONFIG.AD_INTERVAL;
+      }
+    });
+
+    console.log(`[FeedService] ⚡ Inserted ${adsInserted} inline ads`);
+    return feed;
+
+  } catch (error) {
+    console.error('[FeedService] insertAdsLight error:', error);
+    return feedItems;
+  }
+}
 
 // ============================================
 // MAIN FEED GENERATION FUNCTION
 // ============================================
 
-export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG.DEFAULT_LIMIT) {
+export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG.DEFAULT_LIMIT, forceRefresh = false) {
   try {
+    // Check cache first (unless force refresh)
+    if (!forceRefresh) {
+      const cachedFeed = getCachedFeed(userId);
+      if (cachedFeed) {
+        return cachedFeed;
+      }
+    }
+
     // Generate session ID if not provided
     if (!sessionId) {
       sessionId = generateUUID();
     }
 
-    console.log(`[FeedService] Generating feed for user ${userId}, session ${sessionId}`);
+    console.log(`[FeedService] ⚡ FAST MODE + ADS + PERSONALIZATION for user ${userId}`);
+
+    // ============================================
+    // FAST MODE v2: Parallel queries for speed + features
+    // 1. Get recent posts (minimal joins)
+    // 2. Get user's following list (for personalization)
+    // 3. Get user's likes/saves for these posts
+    // ============================================
+
+    // Run queries in parallel for speed
+    const [postsResult, followingResult, userPrefsResult] = await Promise.all([
+      // Query 1: Recent posts with minimal joins
+      supabase
+        .from('forum_posts')
+        .select(POST_SELECT_FAST)
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(limit + 10), // Get extra for personalization sorting
+      // Query 2: User's following list
+      supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', userId),
+      // Query 3: User preferences (for tier check - ads)
+      supabase
+        .from('profiles')
+        .select('scanner_tier, chatbot_tier')
+        .eq('id', userId)
+        .single(),
+    ]);
+
+    if (postsResult.error) {
+      console.error('[FeedService] Fast posts query error:', postsResult.error);
+      throw postsResult.error;
+    }
+
+    const recentPosts = postsResult.data || [];
+    const followingIds = new Set((followingResult.data || []).map(f => f.following_id));
+    const userTier = userPrefsResult.data?.scanner_tier || userPrefsResult.data?.chatbot_tier || 'FREE';
+
+    console.log(`[FeedService] ⚡ Loaded ${recentPosts.length} posts, following ${followingIds.size} users, tier: ${userTier}`);
+
+    // ============================================
+    // PERSONALIZATION: Sort posts - following users first
+    // ============================================
+    const sortedPosts = [...recentPosts].sort((a, b) => {
+      const aIsFollowing = followingIds.has(a.user_id) ? 1 : 0;
+      const bIsFollowing = followingIds.has(b.user_id) ? 1 : 0;
+
+      // Following posts first, then by date
+      if (aIsFollowing !== bIsFollowing) {
+        return bIsFollowing - aIsFollowing;
+      }
+      return new Date(b.created_at) - new Date(a.created_at);
+    }).slice(0, limit); // Take only what we need
+
+    // Transform posts to feed format
+    // Map 'profiles' to 'author' for PostCard compatibility
+    const feedItems = sortedPosts.map(post => ({
+      type: 'post',
+      data: {
+        ...post,
+        author: post.profiles, // PostCard expects 'author' not 'profiles'
+        user_liked: false, // Will be loaded on demand when user interacts
+        user_saved: false, // Will be loaded on demand when user interacts
+        is_following: followingIds.has(post.user_id),
+      },
+      score: followingIds.has(post.user_id) ? 100 : 0,
+    }));
+
+    // ============================================
+    // INLINE ADS: Insert ads for non-premium users
+    // ============================================
+    let feedWithAds = feedItems;
+    const isPremium = userTier === 'TIER3' || userTier === 'PREMIUM' || userTier === 'PRO';
+
+    if (!isPremium && feedItems.length >= FEED_CONFIG.AD_FIRST_POSITION) {
+      feedWithAds = await insertAdsLight(userId, sessionId, feedItems);
+      console.log(`[FeedService] ⚡ Added inline ads for ${userTier} user`);
+    }
+
+    console.log(`[FeedService] ⚡ Fast mode complete: ${feedWithAds.length} items (${feedItems.length} posts + ${feedWithAds.length - feedItems.length} ads)`);
+
+    const result = {
+      feed: feedWithAds,
+      sessionId,
+      hasMore: recentPosts.length >= limit,
+    };
+
+    // Cache the result
+    setCachedFeed(userId, result);
+
+    return result;
+
+  } catch (error) {
+    console.error('[FeedService] Error in fast mode, falling back to legacy:', error);
+    // Fall back to legacy feed generation
+    return generateFeedLegacy(userId, sessionId, limit);
+  }
+}
+
+// Legacy feed generation (full algorithm) - used as fallback
+async function generateFeedLegacy(userId, sessionId = null, limit = FEED_CONFIG.DEFAULT_LIMIT) {
+  try {
+    if (!sessionId) {
+      sessionId = generateUUID();
+    }
+
+    console.log(`[FeedService] Legacy feed for user ${userId}, session ${sessionId}`);
 
     // Step 1: Get user preferences
     const userPrefs = await getUserPreferences(userId);
@@ -112,26 +377,29 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
 
     console.log(`[FeedService] Fetching: ${followingLimit} following, ${discoveryLimit} discovery, ${serendipityLimit} serendipity`);
 
-    // Step 3: Fetch posts from different sources (including user's own posts and seed posts)
-    const [userOwnPosts, followingPosts, discoveryPosts, serendipityPosts, seedPosts] = await Promise.all([
-      getUserOwnPosts(userId, 20), // Always fetch user's recent posts (Facebook-style) - increased to 20
-      getFollowingPosts(userId, followingLimit, sessionId),
-      getDiscoveryPosts(userId, discoveryLimit, sessionId),
-      getSerendipityPosts(userId, serendipityLimit, sessionId),
-      getSeedPosts(limit) // Fetch seed posts to fill the feed
+    // Step 3: Fetch posts from different sources (OPTIMIZED - reduced limits)
+    // Run in parallel but with smaller limits for faster response
+    const [userOwnPosts, followingPosts, discoveryPosts, seedPosts] = await Promise.all([
+      getUserOwnPosts(userId, 5), // Only 5 recent own posts for initial load
+      getFollowingPosts(userId, Math.min(followingLimit, 15), sessionId),
+      getDiscoveryPosts(userId, Math.min(discoveryLimit, 15), sessionId),
+      getSeedPosts(FEED_CONFIG.MAX_SEED_POSTS) // Limited seed posts
     ]);
 
-    console.log(`[FeedService] Fetched: ${userOwnPosts.length} own, ${followingPosts.length} following, ${discoveryPosts.length} discovery, ${serendipityPosts.length} serendipity, ${seedPosts.length} seed`);
+    console.log(`[FeedService] Fetched: ${userOwnPosts.length} own, ${followingPosts.length} following, ${discoveryPosts.length} discovery, ${seedPosts.length} seed`);
 
-    // Step 3.5: FALLBACK - ALWAYS get all recent posts to fill the feed
-    // This ensures all posts show up in the feed (including user's 400+ posts)
-    const fallbackPosts = await getAllRecentPosts(userId, 500);
-    console.log(`[FeedService] Fallback: fetched ${fallbackPosts.length} additional posts`);
+    // Step 3.5: FALLBACK - Only fetch if we don't have enough posts
+    const totalFetched = userOwnPosts.length + followingPosts.length + discoveryPosts.length + seedPosts.length;
+    let fallbackPosts = [];
+    if (totalFetched < limit) {
+      fallbackPosts = await getAllRecentPosts(userId, FEED_CONFIG.MAX_FALLBACK_POSTS);
+      console.log(`[FeedService] Fallback: fetched ${fallbackPosts.length} additional posts`);
+    }
 
     // Step 4: Combine all posts with deduplication
     // User's own posts are added first to ensure they're included
     // Seed posts and fallback posts are added at the end to fill gaps
-    const allPostsRaw = [...userOwnPosts, ...followingPosts, ...discoveryPosts, ...serendipityPosts, ...fallbackPosts, ...seedPosts];
+    const allPostsRaw = [...userOwnPosts, ...followingPosts, ...discoveryPosts, ...fallbackPosts, ...seedPosts];
 
     // Deduplicate by post ID
     const seenPostIds = new Set();
@@ -145,8 +413,8 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
 
     console.log(`[FeedService] Fetched ${allPostsRaw.length} posts, ${allPosts.length} after deduplication`);
 
-    // Step 5: Score posts for this user
-    const scoredPosts = await scorePostsForUser(userId, allPosts);
+    // Step 5: Score posts for this user (pass userPrefs to avoid duplicate query)
+    const scoredPosts = await scorePostsForUser(userId, allPosts, userPrefs);
 
     // Step 6: Apply diversity rules
     const diversifiedPosts = applyDiversityRules(scoredPosts);
@@ -165,11 +433,16 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
 
     // FIXED: Don't slice - return ALL posts to show user's 400+ posts
     // Pagination handles the rest on subsequent loads
-    return {
+    const result = {
       feed: feedWithAds,
       sessionId,
       hasMore: allPosts.length >= limit
     };
+
+    // Cache the result for faster subsequent loads
+    setCachedFeed(userId, result);
+
+    return result;
 
   } catch (error) {
     console.error('[FeedService] Error generating feed:', error);
@@ -411,14 +684,18 @@ async function getDiscoveryPosts(userId, limit, sessionId) {
 // This is the main fallback when other queries return empty
 // ============================================
 
-async function getAllRecentPosts(userId, limit = 200) {
+async function getAllRecentPosts(userId, limit = 50) {
   try {
-    console.log(`[FeedService] FALLBACK: Fetching all recent posts (no filters)`);
+    console.log(`[FeedService] FALLBACK: Fetching recent posts (limit: ${limit})`);
+
+    // Only get posts from last 7 days for faster query
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const { data: posts, error } = await supabase
       .from('forum_posts')
       .select(POST_SELECT_QUERY)
       .eq('status', 'published')
+      .gte('created_at', sevenDaysAgo)
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -481,27 +758,25 @@ async function getSerendipityPosts(userId, limit, sessionId) {
 // Fetch ALL seed posts (no limit) to ensure unseen posts can be found
 // ============================================
 
-async function getSeedPosts(limit = 500) {
+async function getSeedPosts(limit = 50) {
   try {
-    // IMPORTANT: Fetch ALL seed posts to find unseen ones
-    // User may have 400+ posts but only seen 100
-    // We need to fetch all to find the 300+ unseen posts
-    const fetchLimit = Math.max(limit, 500); // Minimum 500 to get all posts
-    console.log(`[FeedService] Fetching seed posts (limit: ${fetchLimit})`);
+    // OPTIMIZED: Only fetch what we need for initial load
+    // Pagination will handle the rest
+    console.log(`[FeedService] Fetching seed posts (limit: ${limit})`);
 
-    const { data: posts, error, count } = await supabase
+    const { data: posts, error } = await supabase
       .from('seed_posts')
-      .select(SEED_POST_SELECT_QUERY, { count: 'exact' })
+      .select(SEED_POST_SELECT_QUERY)
       .eq('status', 'published')
       .order('created_at', { ascending: false })
-      .limit(fetchLimit);
+      .limit(limit);
 
     if (error) {
       console.error('[FeedService] Error getting seed posts:', error);
       return [];
     }
 
-    console.log(`[FeedService] Found ${posts?.length || 0} seed posts (total in DB: ${count || 'unknown'})`);
+    console.log(`[FeedService] Found ${posts?.length || 0} seed posts`);
 
     // Transform seed posts to match PostCard format
     return (posts || []).map(post => ({
@@ -544,34 +819,69 @@ async function getSeedPosts(limit = 500) {
 // SCORE POSTS FOR USER
 // ============================================
 
-async function scorePostsForUser(userId, posts) {
+async function scorePostsForUser(userId, posts, userPrefs = null) {
   try {
-    // Get user's interaction history for scoring
-    const { data: userHistory } = await supabase
+    // OPTIMIZED: Run interaction history query in parallel with impressions
+    // userPrefs is passed from generateFeed to avoid duplicate query
+    const followingUsers = userPrefs?.following_users || [];
+    const preferredCategories = userPrefs?.preferred_categories || [];
+
+    // Get user's interaction history for scoring (run async, process later)
+    const historyPromise = supabase
       .from('post_interactions')
       .select('post_id, interaction_type, forum_posts(category_id, hashtags, user_id)')
       .eq('user_id', userId)
-      .limit(500);
+      .limit(200); // REDUCED from 500 for faster query
 
-    // Extract patterns
+    // Extract patterns will be done after promise resolves
     const engagedCategories = {};
     const engagedHashtags = {};
     const engagedAuthors = {};
 
-    userHistory?.forEach(interaction => {
+    // ============================================
+    // OPTIMIZED: Run ALL queries in parallel with Promise.all
+    // This reduces total time from sequential to parallel execution
+    // ============================================
+    console.log(`[FeedService] 🔍 Querying impressions in parallel for user: ${userId}`);
+
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const postIdsToCheck = posts.map(p => p.id);
+    const seedPostIds = posts.filter(p => p.is_seed_post).map(p => p.id);
+
+    // Run all queries in parallel
+    const [historyResult, feedImpResult, seedImpResult] = await Promise.all([
+      // Query 1: User interaction history (already started above)
+      historyPromise,
+      // Query 2: Feed impressions
+      supabase
+        .from('feed_impressions')
+        .select('post_id')
+        .eq('user_id', userId)
+        .in('post_id', postIdsToCheck)
+        .gte('shown_at', sevenDaysAgo)
+        .limit(200),
+      // Query 3: Seed impressions (only if we have seed posts)
+      seedPostIds.length > 0
+        ? supabase
+            .from('seed_impressions')
+            .select('post_id')
+            .eq('user_id', userId)
+            .in('post_id', seedPostIds)
+            .limit(200)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    // Process interaction history
+    const userHistory = historyResult.data || [];
+    userHistory.forEach(interaction => {
       if (interaction.forum_posts) {
-        // Count category engagement
         const categoryId = interaction.forum_posts.category_id;
         if (categoryId) {
           engagedCategories[categoryId] = (engagedCategories[categoryId] || 0) + 1;
         }
-
-        // Count hashtag engagement
         interaction.forum_posts.hashtags?.forEach(tag => {
           engagedHashtags[tag] = (engagedHashtags[tag] || 0) + 1;
         });
-
-        // Count author engagement
         const authorId = interaction.forum_posts.user_id;
         if (authorId) {
           engagedAuthors[authorId] = (engagedAuthors[authorId] || 0) + 1;
@@ -579,62 +889,16 @@ async function scorePostsForUser(userId, posts) {
       }
     });
 
-    // Get user preferences
-    const { data: prefs } = await supabase
-      .from('user_feed_preferences')
-      .select('following_users, preferred_categories')
-      .eq('user_id', userId)
-      .single();
+    // Process impressions
+    const feedImpressions = feedImpResult.data || [];
+    const seedImpressions = seedImpResult.data || [];
 
-    const followingUsers = prefs?.following_users || [];
-    const preferredCategories = prefs?.preferred_categories || [];
-
-    // ============================================
-    // NEW: Get ALL posts user has seen (impressions)
-    // Query BOTH feed_impressions (real posts) AND seed_impressions (seed posts)
-    // ============================================
-
-    // ============================================
-    // CRITICAL: Query ALL impressions to find seen posts
-    // Also check post_interactions for any user engagement
-    // ============================================
-    console.log(`[FeedService] 🔍 Querying impressions for user: ${userId}`);
-
-    // Query feed_impressions for real posts (may have duplicates, that's OK for Set)
-    const { data: feedImpressions, error: feedImpError } = await supabase
-      .from('feed_impressions')
-      .select('post_id')
-      .eq('user_id', userId);
-
-    if (feedImpError) {
-      console.error(`[FeedService] ❌ ERROR fetching feed_impressions:`, feedImpError);
-    } else {
-      console.log(`[FeedService] ✅ feed_impressions query success: ${feedImpressions?.length || 0} records`);
+    if (feedImpResult.error) {
+      console.error(`[FeedService] ❌ ERROR fetching feed_impressions:`, feedImpResult.error);
     }
 
-    // Query seed_impressions for seed posts
-    const { data: seedImpressions, error: seedImpError } = await supabase
-      .from('seed_impressions')
-      .select('post_id')
-      .eq('user_id', userId);
-
-    if (seedImpError) {
-      console.log(`[FeedService] ⚠️ seed_impressions error:`, seedImpError.message);
-    } else {
-      console.log(`[FeedService] ✅ seed_impressions query success: ${seedImpressions?.length || 0} records`);
-    }
-
-    // ALSO query post_interactions - any interaction means user SAW the post
-    const { data: interactions, error: interactionError } = await supabase
-      .from('post_interactions')
-      .select('post_id')
-      .eq('user_id', userId);
-
-    if (interactionError) {
-      console.log(`[FeedService] ⚠️ post_interactions error:`, interactionError.message);
-    } else {
-      console.log(`[FeedService] ✅ post_interactions query success: ${interactions?.length || 0} records`);
-    }
+    // Skip post_interactions query - impressions are sufficient
+    const interactions = [];
 
     // Combine ALL sources into a single Set for O(1) lookup
     // Set automatically handles duplicates
@@ -1009,10 +1273,9 @@ async function fetchSponsorBannersForFeed(userId, userTier) {
 
 async function trackImpressions(userId, sessionId, feed) {
   try {
-    console.log(`[FeedService] 📝 trackImpressions called with ${feed.length} items for user ${userId}`);
-
-    const feedImpressions = [];     // For real posts -> feed_impressions table
-    const seedImpressions = [];     // For seed posts -> seed_impressions table
+    // OPTIMIZED: Use batch upsert instead of individual inserts
+    const feedImpressions = [];
+    const seedImpressions = [];
 
     feed.forEach((item, index) => {
       if (item.type === 'post' && item.data?.id) {
@@ -1024,7 +1287,6 @@ async function trackImpressions(userId, sessionId, feed) {
           shown_at: new Date().toISOString()
         };
 
-        // Route to correct table based on post type
         if (item.data.is_seed_post) {
           seedImpressions.push(impression);
         } else {
@@ -1033,56 +1295,23 @@ async function trackImpressions(userId, sessionId, feed) {
       }
     });
 
-    console.log(`[FeedService] Prepared: ${feedImpressions.length} feed + ${seedImpressions.length} seed impressions`);
-
-    // Insert feed_impressions one by one to ensure they get saved
-    // Using individual inserts to catch duplicates properly
-    let feedSuccessCount = 0;
-    let feedDuplicateCount = 0;
-    for (const imp of feedImpressions) {
-      const { error } = await supabase
+    // Batch upsert - ignore duplicates with onConflict
+    if (feedImpressions.length > 0) {
+      await supabase
         .from('feed_impressions')
-        .insert(imp);
-
-      if (error) {
-        if (error.code === '23505') {
-          // Duplicate - this is OK, means we already tracked this post
-          feedDuplicateCount++;
-        } else {
-          console.error(`[FeedService] ❌ feed_impression insert error:`, error.message, error.code);
-        }
-      } else {
-        feedSuccessCount++;
-      }
+        .upsert(feedImpressions, { onConflict: 'user_id,post_id', ignoreDuplicates: true });
     }
-    console.log(`[FeedService] feed_impressions: ${feedSuccessCount} new, ${feedDuplicateCount} duplicates`);
 
-    // Insert seed_impressions one by one
-    let seedSuccessCount = 0;
-    let seedDuplicateCount = 0;
-    for (const imp of seedImpressions) {
-      const { error } = await supabase
+    if (seedImpressions.length > 0) {
+      await supabase
         .from('seed_impressions')
-        .insert(imp);
-
-      if (error) {
-        if (error.code === '23505') {
-          // Duplicate - this is OK
-          seedDuplicateCount++;
-        } else {
-          console.error(`[FeedService] ❌ seed_impression insert error:`, error.message, error.code);
-        }
-      } else {
-        seedSuccessCount++;
-      }
+        .upsert(seedImpressions, { onConflict: 'user_id,post_id', ignoreDuplicates: true });
     }
-    console.log(`[FeedService] seed_impressions: ${seedSuccessCount} new, ${seedDuplicateCount} duplicates`);
 
-    console.log(`[FeedService] ✅ Tracked impressions complete: ${feedSuccessCount + seedSuccessCount} new, ${feedDuplicateCount + seedDuplicateCount} already seen`);
+    console.log(`[FeedService] ✅ Batch tracked: ${feedImpressions.length} feed + ${seedImpressions.length} seed`);
 
   } catch (error) {
     console.error('[FeedService] Error tracking impressions:', error);
-    // Don't throw - this is non-critical
   }
 }
 
@@ -1428,11 +1657,8 @@ export async function getImpressionStats(userId) {
 
 export async function trackVisibleImpressions(userId, sessionId, visiblePosts) {
   if (!userId || !visiblePosts || visiblePosts.length === 0) {
-    console.log('[FeedService] ⚠️ trackVisibleImpressions skipped: no userId or posts');
     return;
   }
-
-  console.log(`[FeedService] 📍 trackVisibleImpressions: ${visiblePosts.length} posts for user ${userId}`);
 
   try {
     const feedImpressions = [];
@@ -1449,7 +1675,6 @@ export async function trackVisibleImpressions(userId, sessionId, visiblePosts) {
         shown_at: new Date().toISOString()
       };
 
-      // Route to correct table based on post type
       if (item.data.is_seed_post) {
         seedImpressions.push(impression);
       } else {
@@ -1457,49 +1682,31 @@ export async function trackVisibleImpressions(userId, sessionId, visiblePosts) {
       }
     });
 
-    // Insert feed_impressions one by one
-    let feedSuccessCount = 0;
-    let feedDuplicateCount = 0;
-    for (const imp of feedImpressions) {
-      const { error } = await supabase
-        .from('feed_impressions')
-        .insert(imp);
+    // OPTIMIZED: Batch upsert instead of one-by-one
+    const promises = [];
 
-      if (error) {
-        // 23505 = duplicate, 23503 = foreign key (user doesn't exist)
-        if (error.code === '23505' || error.code === '23503') {
-          feedDuplicateCount++;
-        } else {
-          console.warn(`[FeedService] feed_impression warning:`, error.message);
-        }
-      } else {
-        feedSuccessCount++;
-      }
+    if (feedImpressions.length > 0) {
+      promises.push(
+        supabase
+          .from('feed_impressions')
+          .upsert(feedImpressions, { onConflict: 'user_id,post_id', ignoreDuplicates: true })
+      );
     }
 
-    // Insert seed_impressions one by one
-    let seedSuccessCount = 0;
-    let seedDuplicateCount = 0;
-    for (const imp of seedImpressions) {
-      const { error } = await supabase
-        .from('seed_impressions')
-        .insert(imp);
-
-      if (error) {
-        // 23505 = duplicate, 23503 = foreign key (user doesn't exist)
-        if (error.code === '23505' || error.code === '23503') {
-          seedDuplicateCount++;
-        } else {
-          console.warn(`[FeedService] seed_impression warning:`, error.message);
-        }
-      } else {
-        seedSuccessCount++;
-      }
+    if (seedImpressions.length > 0) {
+      promises.push(
+        supabase
+          .from('seed_impressions')
+          .upsert(seedImpressions, { onConflict: 'user_id,post_id', ignoreDuplicates: true })
+      );
     }
 
-    console.log(`[FeedService] ✅ Visible impressions: feed=${feedSuccessCount} new/${feedDuplicateCount} dup, seed=${seedSuccessCount} new/${seedDuplicateCount} dup`);
+    // Run in parallel, don't wait
+    Promise.all(promises).catch(err => {
+      console.warn('[FeedService] Visible impressions batch error:', err?.message);
+    });
+
   } catch (error) {
-    console.error('[FeedService] Error tracking visible impressions:', error);
     // Non-critical - don't throw
   }
 }

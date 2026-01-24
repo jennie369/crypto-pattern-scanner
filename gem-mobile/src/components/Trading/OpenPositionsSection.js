@@ -68,20 +68,18 @@ const PositionCard = ({
   const isEditingThis = editing === position.id;
 
   return (
-    <View
+    <TouchableOpacity
       style={[
         styles.positionCard,
         isLong ? styles.positionCardLong : styles.positionCardShort,
       ]}
+      onPress={() => onViewChart?.(position.symbol, position)}
+      activeOpacity={0.85}
     >
       {/* Header Row */}
       <View style={styles.positionHeader}>
-        {/* Main Content - Tap to show on chart */}
-        <TouchableOpacity
-          style={styles.leftColumn}
-          onPress={() => onViewChart?.(position.symbol)}
-          activeOpacity={0.8}
-        >
+        {/* Main Content - Symbol, Direction, PnL */}
+        <View style={styles.leftColumn}>
           <View style={styles.symbolRow}>
             <Text style={styles.positionSymbol}>{position.symbol?.replace('USDT', '')}</Text>
             <View style={[styles.directionBadge, { backgroundColor: isLong ? COLORS.success : COLORS.error }]}>
@@ -105,7 +103,7 @@ const PositionCard = ({
               ({isProfitable ? '+' : ''}{pnlPercent.toFixed(2).replace('.', ',')}% ROI)
             </Text>
           </View>
-        </TouchableOpacity>
+        </View>
 
         {/* Right side - Edit + Close buttons */}
         <View style={styles.rightActions}>
@@ -224,7 +222,7 @@ const PositionCard = ({
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -251,21 +249,41 @@ const OpenPositionsSection = ({
   const wsUnsubscribesRef = useRef([]);
 
   // Load positions with CLOUD SYNC
-  const loadPositions = useCallback(async () => {
+  const loadPositions = useCallback(async (forceRefresh = false) => {
     try {
-      console.log('[OpenPositionsSection] Loading positions for userId:', userId);
-
-      // Always ensure currentUserId is synced with component's userId
-      // This fixes stats not updating after close when init returns early
-      if (userId && paperTradeService.currentUserId !== userId) {
-        paperTradeService.currentUserId = userId;
+      // CRITICAL: Guard against undefined userId - don't load without valid user
+      if (!userId) {
+        console.log('[OpenPositionsSection] Waiting for userId - skipping load');
+        setLoading(false);
+        return;
       }
 
-      await paperTradeService.init(userId);
+      console.log('[OpenPositionsSection] Loading positions for userId:', userId, 'forceRefresh:', forceRefresh);
 
-      // Get open positions - use getOpenPositions for proper filtering
+      // Use forceRefreshFromCloud only for manual refresh
+      // For normal loads, use init() which has built-in data protection
+      if (forceRefresh && !paperTradeService.initialized) {
+        // First time load - always init
+        await paperTradeService.init(userId);
+      } else if (forceRefresh) {
+        // Manual refresh requested - force cloud refresh
+        await paperTradeService.forceRefreshFromCloud(userId);
+      } else {
+        // Normal load - just init (will skip if already initialized for same user)
+        await paperTradeService.init(userId);
+      }
+
+      // Debug: Log service state after init
+      console.log('[OpenPositionsSection] After init - service state:', {
+        openCount: paperTradeService.openPositions?.length || 0,
+        pendingCount: paperTradeService.pendingOrders?.length || 0,
+        currentUserId: paperTradeService.currentUserId,
+      });
+
+      // Get open positions - DON'T filter by userId since we already set currentUserId
+      // This ensures we get ALL positions that belong to current user
       const allPositions = paperTradeService.getOpenPositions(userId);
-      console.log('[OpenPositionsSection] Positions loaded:', allPositions.length);
+      console.log('[OpenPositionsSection] getOpenPositions returned:', allPositions.length, 'positions');
 
       // Get stats - this now filters by the correct userId
       const tradeStats = paperTradeService.getStats(userId);
@@ -323,26 +341,35 @@ const OpenPositionsSection = ({
   }, []);
 
   // Load on mount and when refresh trigger changes
+  // CRITICAL: Include userId in dependencies to reload when user auth completes
   useEffect(() => {
-    loadPositions();
+    if (userId) {
+      // Normal load - use init() which will load if not initialized
+      loadPositions(false);
+    }
     return () => {
       wsUnsubscribesRef.current.forEach(unsub => {
         if (typeof unsub === 'function') unsub();
       });
     };
-  }, [loadPositions, refreshTrigger]);
+  }, [loadPositions, refreshTrigger, userId]);
 
   // CRITICAL: Reload positions when screen comes back into focus
   // This ensures positions update after closing from PatternDetailScreen
   useFocusEffect(
     useCallback(() => {
-      console.log('[OpenPositionsSection] Screen focused - reloading positions');
-      loadPositions();
+      if (!userId) {
+        console.log('[OpenPositionsSection] Screen focused but no userId - waiting');
+        return;
+      }
+      console.log('[OpenPositionsSection] Screen focused - loading positions for:', userId);
+      // Normal load - use init() which handles data properly
+      loadPositions(false);
       // Cleanup on blur (optional)
       return () => {
         // Could cleanup subscriptions here if needed
       };
-    }, [loadPositions])
+    }, [loadPositions, userId])
   );
 
   // Handle close position

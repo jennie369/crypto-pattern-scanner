@@ -434,6 +434,122 @@ class CalendarService {
 
     return instances;
   }
+
+  /**
+   * Get daily journal data - rituals and divination readings for a specific date
+   * @param {string} userId - User ID
+   * @param {string} date - Date (YYYY-MM-DD)
+   * @returns {Promise<Object>}
+   */
+  async getDailyJournal(userId, date) {
+    try {
+      // Fetch ritual completions for the date with ritual details
+      const { data: rituals, error: ritualsError } = await supabase
+        .from('vision_ritual_completions')
+        .select('*, ritual:vision_rituals(id, slug, name)')
+        .eq('user_id', userId)
+        .gte('completed_at', `${date}T00:00:00`)
+        .lt('completed_at', `${date}T23:59:59`)
+        .order('completed_at', { ascending: true });
+
+      if (ritualsError && ritualsError.code !== '42P01') {
+        console.warn('[Calendar] Rituals fetch error:', ritualsError);
+      }
+
+      // Map ritual_slug from joined ritual data
+      const mappedRituals = (rituals || []).map(r => ({
+        ...r,
+        ritual_slug: r.ritual?.slug || r.ritual_slug,
+        ritual_name: r.ritual?.name,
+      }));
+
+      // Fetch divination readings for the date
+      const { data: readings, error: readingsError } = await supabase
+        .from('reading_history')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('created_at', `${date}T00:00:00`)
+        .lt('created_at', `${date}T23:59:59`)
+        .order('created_at', { ascending: true });
+
+      if (readingsError && readingsError.code !== '42P01') {
+        console.warn('[Calendar] Readings fetch error:', readingsError);
+      }
+
+      return {
+        success: true,
+        rituals: mappedRituals || [],
+        readings: readings || [],
+        totalActivities: (mappedRituals?.length || 0) + (readings?.length || 0),
+      };
+    } catch (error) {
+      console.error('[Calendar] Get daily journal error:', error);
+      return { success: false, rituals: [], readings: [], error: error.message };
+    }
+  }
+
+  /**
+   * Get journal summary for a month (for calendar dots/indicators)
+   * @param {string} userId - User ID
+   * @param {number} year - Year
+   * @param {number} month - Month (1-12)
+   * @returns {Promise<Object>}
+   */
+  async getMonthJournalSummary(userId, year, month) {
+    try {
+      const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+      const lastDay = new Date(year, month, 0).getDate();
+      const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
+      // Fetch ritual completions for the month
+      const { data: rituals, error: ritualsError } = await supabase
+        .from('vision_ritual_completions')
+        .select('completed_at, ritual_slug')
+        .eq('user_id', userId)
+        .gte('completed_at', `${startDate}T00:00:00`)
+        .lte('completed_at', `${endDate}T23:59:59`);
+
+      if (ritualsError && ritualsError.code !== '42P01') {
+        console.warn('[Calendar] Month rituals fetch error:', ritualsError);
+      }
+
+      // Fetch readings for the month
+      const { data: readings, error: readingsError } = await supabase
+        .from('reading_history')
+        .select('created_at, reading_type')
+        .eq('user_id', userId)
+        .gte('created_at', `${startDate}T00:00:00`)
+        .lte('created_at', `${endDate}T23:59:59`);
+
+      if (readingsError && readingsError.code !== '42P01') {
+        console.warn('[Calendar] Month readings fetch error:', readingsError);
+      }
+
+      // Group by date
+      const journalByDate = {};
+
+      (rituals || []).forEach(r => {
+        const date = r.completed_at.split('T')[0];
+        if (!journalByDate[date]) {
+          journalByDate[date] = { rituals: 0, readings: 0 };
+        }
+        journalByDate[date].rituals++;
+      });
+
+      (readings || []).forEach(r => {
+        const date = r.created_at.split('T')[0];
+        if (!journalByDate[date]) {
+          journalByDate[date] = { rituals: 0, readings: 0 };
+        }
+        journalByDate[date].readings++;
+      });
+
+      return { success: true, journalByDate };
+    } catch (error) {
+      console.error('[Calendar] Get month journal summary error:', error);
+      return { success: false, journalByDate: {}, error: error.message };
+    }
+  }
 }
 
 export default new CalendarService();

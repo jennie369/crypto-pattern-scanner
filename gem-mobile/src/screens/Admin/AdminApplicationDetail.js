@@ -106,12 +106,12 @@ const AdminApplicationDetail = () => {
     const typeName = application.application_type === 'kol' ? 'KOL' : 'CTV';
 
     Alert.alert(
-      'Xac nhan duyet',
-      `Ban co chac muon duyet don dang ky ${typeName} cua ${application.full_name}?`,
+      'Xác nhận duyệt',
+      `Bạn có chắc muốn duyệt đơn đăng ký ${typeName} của ${application.full_name}?`,
       [
-        { text: 'Huy', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Duyet',
+          text: 'Duyệt',
           onPress: async () => {
             setProcessing(true);
             const result = await ADMIN_PARTNERSHIP_SERVICE.approveApplication(
@@ -122,12 +122,12 @@ const AdminApplicationDetail = () => {
 
             if (result.success) {
               Alert.alert(
-                'Thanh cong',
-                `Da duyet don dang ky ${typeName}. Ma gioi thieu: ${result.referralCode}`,
+                'Thành công',
+                `Đã duyệt đơn đăng ký ${typeName}. Mã giới thiệu: ${result.referralCode}`,
                 [{ text: 'OK', onPress: () => navigation.goBack() }]
               );
             } else {
-              Alert.alert('Loi', result.error || 'Khong the duyet don dang ky');
+              Alert.alert('Lỗi', result.error || 'Không thể duyệt đơn đăng ký');
             }
           },
         },
@@ -137,7 +137,7 @@ const AdminApplicationDetail = () => {
 
   const handleReject = async () => {
     if (!rejectReason.trim()) {
-      Alert.alert('Loi', 'Vui long nhap ly do tu choi');
+      Alert.alert('Lỗi', 'Vui lòng nhập lý do từ chối');
       return;
     }
 
@@ -149,23 +149,23 @@ const AdminApplicationDetail = () => {
     setProcessing(false);
 
     if (result.success) {
-      Alert.alert('Da tu choi', 'Don dang ky da bi tu choi', [
+      Alert.alert('Đã từ chối', 'Đơn đăng ký đã bị từ chối', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } else {
-      Alert.alert('Loi', result.error || 'Khong the tu choi don dang ky');
+      Alert.alert('Lỗi', result.error || 'Không thể từ chối đơn đăng ký');
     }
   };
 
   const formatTimeRemaining = (autoApproveAt) => {
     if (!autoApproveAt) return 'N/A';
     const remaining = new Date(autoApproveAt) - new Date();
-    if (remaining <= 0) return 'Sap tu dong duyet';
+    if (remaining <= 0) return 'Sắp tự động duyệt';
     const hours = Math.floor(remaining / (1000 * 60 * 60));
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     if (hours < 24) return `${hours}h ${minutes}m`;
     const days = Math.floor(hours / 24);
-    return `${days} ngay ${hours % 24}h`;
+    return `${days} ngày ${hours % 24}h`;
   };
 
   const formatDate = (dateString) => {
@@ -188,7 +188,7 @@ const AdminApplicationDetail = () => {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <ArrowLeft size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Chi tiet don dang ky</Text>
+            <Text style={styles.headerTitle}>Chi tiết đơn đăng ký</Text>
             <View style={{ width: 24 }} />
           </View>
           <View style={styles.loadingContainer}>
@@ -208,12 +208,12 @@ const AdminApplicationDetail = () => {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <ArrowLeft size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Chi tiet don dang ky</Text>
+            <Text style={styles.headerTitle}>Chi tiết đơn đăng ký</Text>
             <View style={{ width: 24 }} />
           </View>
           <View style={styles.loadingContainer}>
             <AlertCircle size={48} color={COLORS.error} />
-            <Text style={styles.errorText}>Khong tim thay don dang ky</Text>
+            <Text style={styles.errorText}>Không tìm thấy đơn đăng ký</Text>
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -231,7 +231,7 @@ const AdminApplicationDetail = () => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chi tiet don dang ky</Text>
+          <Text style={styles.headerTitle}>Chi tiết đơn đăng ký</Text>
           <View style={{ width: 24 }} />
         </View>
 
@@ -256,8 +256,8 @@ const AdminApplicationDetail = () => {
                 application.status === 'approved' && styles.statusTextApproved,
                 application.status === 'rejected' && styles.statusTextRejected,
               ]}>
-                {application.status === 'pending' ? 'Cho duyet' :
-                 application.status === 'approved' ? 'Da duyet' : 'Tu choi'}
+                {application.status === 'pending' ? 'Chờ duyệt' :
+                 application.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
               </Text>
             </View>
           </View>
@@ -267,7 +267,7 @@ const AdminApplicationDetail = () => {
             <View style={styles.autoApproveCard}>
               <AlertCircle size={20} color={COLORS.warning} />
               <View style={styles.autoApproveInfo}>
-                <Text style={styles.autoApproveLabel}>Tu dong duyet sau:</Text>
+                <Text style={styles.autoApproveLabel}>Tự động duyệt sau:</Text>
                 <Text style={styles.autoApproveTime}>
                   {formatTimeRemaining(application.auto_approve_at)}
                 </Text>
@@ -289,18 +289,18 @@ const AdminApplicationDetail = () => {
                 <AlertCircle size={20} color={COLORS.error} />
               )}
               <Text style={styles.followersCheckText}>
-                Tong followers: {(application.total_followers || 0).toLocaleString()} / {KOL_CONFIG.requirements.minFollowers.toLocaleString()} yeu cau
+                Tổng followers: {(application.total_followers || 0).toLocaleString()} / {KOL_CONFIG.requirements.minFollowers.toLocaleString()} yêu cầu
               </Text>
             </View>
           )}
 
           {/* Personal Info Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Thong tin ca nhan</Text>
+            <Text style={styles.sectionTitle}>Thông tin cá nhân</Text>
 
             <View style={styles.infoRow}>
               <User size={18} color={COLORS.textMuted} />
-              <Text style={styles.infoLabel}>Ho ten:</Text>
+              <Text style={styles.infoLabel}>Họ tên:</Text>
               <Text style={styles.infoValue}>{application.full_name}</Text>
             </View>
 
@@ -312,20 +312,20 @@ const AdminApplicationDetail = () => {
 
             <View style={styles.infoRow}>
               <Phone size={18} color={COLORS.textMuted} />
-              <Text style={styles.infoLabel}>Dien thoai:</Text>
+              <Text style={styles.infoLabel}>Điện thoại:</Text>
               <Text style={styles.infoValue}>{application.phone || 'N/A'}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Calendar size={18} color={COLORS.textMuted} />
-              <Text style={styles.infoLabel}>Ngay dang ky:</Text>
+              <Text style={styles.infoLabel}>Ngày đăng ký:</Text>
               <Text style={styles.infoValue}>{formatDate(application.created_at)}</Text>
             </View>
 
             {application.referred_by_code && (
               <View style={styles.infoRow}>
                 <LinkIcon size={18} color={COLORS.textMuted} />
-                <Text style={styles.infoLabel}>Ma gioi thieu:</Text>
+                <Text style={styles.infoLabel}>Mã giới thiệu:</Text>
                 <Text style={styles.infoValue}>{application.referred_by_code}</Text>
               </View>
             )}
@@ -334,7 +334,7 @@ const AdminApplicationDetail = () => {
           {/* Marketing Channels */}
           {application.marketing_channels && application.marketing_channels.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Kenh marketing</Text>
+              <Text style={styles.sectionTitle}>Kênh marketing</Text>
               <View style={styles.channelTags}>
                 {application.marketing_channels.map((channel, index) => (
                   <View key={index} style={styles.channelTag}>
@@ -348,7 +348,7 @@ const AdminApplicationDetail = () => {
           {/* Reason for joining */}
           {application.reason_for_joining && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Ly do tham gia</Text>
+              <Text style={styles.sectionTitle}>Lý do tham gia</Text>
               <Text style={styles.reasonText}>{application.reason_for_joining}</Text>
             </View>
           )}
@@ -358,47 +358,47 @@ const AdminApplicationDetail = () => {
             <>
               {/* ID Verification */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Xac minh danh tinh</Text>
+                <Text style={styles.sectionTitle}>Xác minh danh tính</Text>
 
                 <View style={styles.infoRow}>
                   <CreditCard size={18} color={COLORS.textMuted} />
-                  <Text style={styles.infoLabel}>So CCCD:</Text>
+                  <Text style={styles.infoLabel}>Số CCCD:</Text>
                   <Text style={styles.infoValue}>{verification.id_number}</Text>
                 </View>
 
-                <Text style={styles.imageLabel}>Anh CCCD mat truoc:</Text>
+                <Text style={styles.imageLabel}>Ảnh CCCD mặt trước:</Text>
                 {verification.id_front_image_url ? (
                   <TouchableOpacity onPress={() => Linking.openURL(verification.id_front_image_url)}>
                     <Image source={{ uri: verification.id_front_image_url }} style={styles.verificationImage} />
-                    <Text style={styles.tapToViewText}>Nhan de xem anh goc</Text>
+                    <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.noImagePlaceholder}>
-                    <Text style={styles.noImageText}>Chua co anh</Text>
+                    <Text style={styles.noImageText}>Chưa có ảnh</Text>
                   </View>
                 )}
 
-                <Text style={styles.imageLabel}>Anh CCCD mat sau:</Text>
+                <Text style={styles.imageLabel}>Ảnh CCCD mặt sau:</Text>
                 {verification.id_back_image_url ? (
                   <TouchableOpacity onPress={() => Linking.openURL(verification.id_back_image_url)}>
                     <Image source={{ uri: verification.id_back_image_url }} style={styles.verificationImage} />
-                    <Text style={styles.tapToViewText}>Nhan de xem anh goc</Text>
+                    <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.noImagePlaceholder}>
-                    <Text style={styles.noImageText}>Chua co anh</Text>
+                    <Text style={styles.noImageText}>Chưa có ảnh</Text>
                   </View>
                 )}
 
-                <Text style={styles.imageLabel}>Anh chan dung:</Text>
+                <Text style={styles.imageLabel}>Ảnh chân dung:</Text>
                 {verification.portrait_image_url ? (
                   <TouchableOpacity onPress={() => Linking.openURL(verification.portrait_image_url)}>
                     <Image source={{ uri: verification.portrait_image_url }} style={styles.portraitImage} />
-                    <Text style={styles.tapToViewText}>Nhan de xem anh goc</Text>
+                    <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.noImagePlaceholder}>
-                    <Text style={styles.noImageText}>Chua co anh</Text>
+                    <Text style={styles.noImageText}>Chưa có ảnh</Text>
                   </View>
                 )}
               </View>
@@ -406,7 +406,7 @@ const AdminApplicationDetail = () => {
               {/* Social Media */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>
-                  Mang xa hoi ({(application.total_followers || 0).toLocaleString()} followers)
+                  Mạng xã hội ({(application.total_followers || 0).toLocaleString()} followers)
                 </Text>
 
                 {Object.entries(application.social_platforms || {}).map(([platform, count]) => {
@@ -440,7 +440,7 @@ const AdminApplicationDetail = () => {
           {/* Rejection reason (if rejected) */}
           {application.status === 'rejected' && application.rejection_reason && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Ly do tu choi</Text>
+              <Text style={styles.sectionTitle}>Lý do từ chối</Text>
               <View style={styles.rejectionCard}>
                 <XCircle size={20} color={COLORS.error} />
                 <Text style={styles.rejectionText}>{application.rejection_reason}</Text>
@@ -451,12 +451,12 @@ const AdminApplicationDetail = () => {
           {/* Reject Reason Input */}
           {isPending && showRejectInput && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Ly do tu choi</Text>
+              <Text style={styles.sectionTitle}>Lý do từ chối</Text>
               <TextInput
                 style={styles.rejectInput}
                 value={rejectReason}
                 onChangeText={setRejectReason}
-                placeholder="Nhap ly do tu choi..."
+                placeholder="Nhập lý do từ chối..."
                 placeholderTextColor={COLORS.textMuted}
                 multiline
                 numberOfLines={3}
@@ -476,7 +476,7 @@ const AdminApplicationDetail = () => {
                     disabled={processing}
                   >
                     <XCircle size={20} color={COLORS.error} />
-                    <Text style={styles.rejectButtonText}>Tu choi</Text>
+                    <Text style={styles.rejectButtonText}>Từ chối</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -489,7 +489,7 @@ const AdminApplicationDetail = () => {
                     ) : (
                       <>
                         <CheckCircle size={20} color={COLORS.bgDark} />
-                        <Text style={styles.approveButtonText}>Duyet</Text>
+                        <Text style={styles.approveButtonText}>Duyệt</Text>
                       </>
                     )}
                   </TouchableOpacity>
@@ -504,7 +504,7 @@ const AdminApplicationDetail = () => {
                     }}
                     disabled={processing}
                   >
-                    <Text style={styles.cancelButtonText}>Huy</Text>
+                    <Text style={styles.cancelButtonText}>Hủy</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -515,7 +515,7 @@ const AdminApplicationDetail = () => {
                     {processing ? (
                       <ActivityIndicator color={COLORS.textPrimary} />
                     ) : (
-                      <Text style={styles.confirmRejectButtonText}>Xac nhan tu choi</Text>
+                      <Text style={styles.confirmRejectButtonText}>Xác nhận từ chối</Text>
                     )}
                   </TouchableOpacity>
                 </>

@@ -31,11 +31,13 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Gift, Sparkles, Plus, X, Send, Check, Star } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
-import { completeRitual } from '../../../services/ritualService';
+import { completeRitual, saveReflection } from '../../../services/ritualService';
+import useVideoPause from '../../../hooks/useVideoPause';
 
 // Cosmic Components
 import {
-  CosmicBackground,
+  VideoBackground,
+  RitualAnimation,
   GlassCard,
   GlassInputCard,
   GlowingOrb,
@@ -126,25 +128,13 @@ const FlyingGratitudeItem = ({ text, index, totalItems }) => {
 };
 
 // ============================================
-// GRATITUDE ITEM COMPONENT (for input list)
+// GRATITUDE ITEM COMPONENT (for input list) - OPTIMIZED: No animation delays
 // ============================================
 
-const GratitudeItem = ({ text, index, onRemove }) => {
-  const opacity = useSharedValue(0);
-  const translateX = useSharedValue(-30);
-
-  useEffect(() => {
-    opacity.value = withDelay(index * 100, withTiming(1, { duration: 300 }));
-    translateX.value = withDelay(index * 100, withSpring(0, COSMIC_TIMING.spring.gentle));
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateX: translateX.value }],
-  }));
-
+const GratitudeItem = React.memo(({ text, onRemove }) => {
+  // No animation - render instantly for better UX
   return (
-    <Animated.View style={[styles.gratitudeItemWrapper, animatedStyle]}>
+    <View style={styles.gratitudeItemWrapper}>
       <GlassCard variant="glow" glowColor={THEME.glow} padding={COSMIC_SPACING.md}>
         <View style={styles.gratitudeItemContent}>
           <Sparkles size={18} color={THEME.primary} strokeWidth={2} />
@@ -159,9 +149,9 @@ const GratitudeItem = ({ text, index, onRemove }) => {
           )}
         </View>
       </GlassCard>
-    </Animated.View>
+    </View>
   );
-};
+});
 
 // ============================================
 // GOLDEN JAR COMPONENT
@@ -205,6 +195,7 @@ const GoldenJar = ({ fillLevel, shimmer }) => {
 const GratitudeFlowRitual = ({ navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const shouldPauseVideo = useVideoPause();
   const scrollViewRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -218,6 +209,7 @@ const GratitudeFlowRitual = ({ navigation }) => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [reflection, setReflection] = useState('');
 
   // Animation values
   const contentOpacity = useSharedValue(1);
@@ -247,14 +239,10 @@ const GratitudeFlowRitual = ({ navigation }) => {
     opacity: contentOpacity.value,
   }));
 
-  // Handlers
+  // Handlers - OPTIMIZED: Instant phase transitions
   const handleStart = useCallback(() => {
     HAPTIC_PATTERNS.tap();
-    contentOpacity.value = withTiming(0, { duration: 300 });
-    setTimeout(() => {
-      setPhase('input');
-      contentOpacity.value = withTiming(1, { duration: 400 });
-    }, 300);
+    setPhase('input'); // Instant transition
   }, []);
 
   const handleAddGratitude = useCallback(() => {
@@ -276,17 +264,12 @@ const GratitudeFlowRitual = ({ navigation }) => {
 
     HAPTIC_PATTERNS.gratitude.send();
     Keyboard.dismiss();
-
-    contentOpacity.value = withTiming(0, { duration: 300 });
-    setTimeout(() => {
-      setPhase('sending');
-      contentOpacity.value = withTiming(1, { duration: 400 });
-    }, 300);
+    setPhase('sending'); // Instant transition
 
     // Complete after animation
     setTimeout(() => {
       handleComplete();
-    }, CONFIG.sendAnimationDuration + 500);
+    }, CONFIG.sendAnimationDuration);
   }, [gratitudes]);
 
   const handleComplete = async () => {
@@ -298,6 +281,7 @@ const GratitudeFlowRitual = ({ navigation }) => {
         const result = await completeRitual(user.id, 'gratitude-flow', {
           gratitudeCount: gratitudes.length,
           gratitudes,
+          reflection,
         });
         setXpEarned(result?.xpEarned || CONFIG.xpReward);
         setStreak(result?.newStreak || 1);
@@ -384,14 +368,13 @@ const GratitudeFlowRitual = ({ navigation }) => {
           />
         </View>
 
-        {/* Gratitude list */}
+        {/* Gratitude list - renders instantly */}
         {gratitudes.length > 0 && (
           <View style={styles.gratitudeListWrapper}>
             {gratitudes.map((text, index) => (
               <GratitudeItem
                 key={`gratitude-${index}`}
                 text={text}
-                index={index}
                 onRemove={() => handleRemoveGratitude(index)}
               />
             ))}
@@ -457,6 +440,16 @@ const GratitudeFlowRitual = ({ navigation }) => {
   // Render Sending Phase
   const renderSending = () => (
     <Animated.View style={[styles.sendingPhaseContainer, contentAnimatedStyle]}>
+      {/* Lottie Animation - Golden Orbs */}
+      <View style={styles.lottieContainer}>
+        <RitualAnimation
+          animationId="golden-orbs"
+          autoPlay={true}
+          loop={true}
+          size={SCREEN_WIDTH * 0.9}
+        />
+      </View>
+
       {/* Flying gratitudes container - positioned at bottom, flying up */}
       <View style={styles.flyingContainer}>
         {gratitudes.map((text, index) => (
@@ -484,13 +477,7 @@ const GratitudeFlowRitual = ({ navigation }) => {
   // Main render
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CosmicBackground
-        variant="gratitude"
-        starDensity="medium"
-        showNebula={true}
-        showSpotlight={true}
-        spotlightIntensity={0.5}
-      >
+      <VideoBackground ritualId="gratitude-flow" paused={shouldPauseVideo}>
         {/* Golden particles */}
         <ParticleField
           variant="golden"
@@ -531,10 +518,16 @@ const GratitudeFlowRitual = ({ navigation }) => {
           message={`Bạn đã gửi ${gratitudes.length} lời biết ơn đến vũ trụ.`}
           visible={showCelebration}
           onContinue={handleContinue}
+          onWriteReflection={async (text) => {
+            setReflection(text);
+            if (user?.id) {
+              await saveReflection(user.id, 'gratitude-flow', text);
+            }
+          }}
           showVisionBoardButton={true}
-          showReflectionButton={false}
+          showReflectionButton={true}
         />
-      </CosmicBackground>
+      </VideoBackground>
     </GestureHandlerRootView>
   );
 };
@@ -645,6 +638,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  lottieContainer: {
+    position: 'absolute',
+    top: '15%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
   },
   flyingContainer: {
     position: 'absolute',

@@ -1,28 +1,30 @@
 /**
  * OptimizedImage Component
- * High-performance image loading using React Native Image with prefetching
+ * High-performance image loading with aggressive caching
  *
  * Features:
- * - React Native Image.prefetch for caching
- * - Shimmer placeholder effect while loading
- * - Fade-in animation when loaded
- * - Automatic retry on failure (up to 3 times)
- * - Memory-efficient prefetching queue
- * - Fallback to placeholder on error
+ * - Aggressive prefetching with parallel loading
+ * - Loading spinner placeholder
+ * - Fast fade-in animation
+ * - Quick retry on failure
+ * - Memory-efficient caching
  *
  * Created: December 14, 2025
- * Updated: January 11, 2026 - Added retry logic and better fallback handling
+ * Updated: January 23, 2026 - Performance optimization
  */
 
-import React, { useState, useEffect, useRef, memo } from 'react';
-import { View, Image, StyleSheet, Animated } from 'react-native';
+import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
+import { View, Image, StyleSheet, Animated, ActivityIndicator, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ImageOff } from 'lucide-react-native';
 import { COLORS } from '../../utils/tokens';
 
-// Default fallback image
-const DEFAULT_PLACEHOLDER = 'https://via.placeholder.com/400x400/1a0b2e/FFBD59?text=GEM';
+// No network fallback - use local placeholder UI instead
+const USE_LOCAL_FALLBACK = true;
 
 // In-memory cache to track which images have been prefetched
 const prefetchedUrls = new Set();
+const failedUrls = new Set(); // Track failed URLs to avoid retrying
 const prefetchQueue = [];
 let isPrefetching = false;
 
@@ -33,18 +35,23 @@ let isPrefetching = false;
 export const prefetchImages = async (urls) => {
   if (!urls || urls.length === 0) return;
 
-  // Filter valid URLs that haven't been prefetched yet
+  // Filter valid URLs that haven't been prefetched or failed
   const validUrls = urls.filter(url =>
     url &&
     typeof url === 'string' &&
     url.startsWith('http') &&
-    !prefetchedUrls.has(url)
+    !prefetchedUrls.has(url) &&
+    !failedUrls.has(url)
   );
 
   if (validUrls.length === 0) return;
 
-  // Add to queue
-  prefetchQueue.push(...validUrls);
+  // Add to queue (avoid duplicates)
+  validUrls.forEach(url => {
+    if (!prefetchQueue.includes(url)) {
+      prefetchQueue.push(url);
+    }
+  });
 
   // Start prefetching if not already running
   if (!isPrefetching) {
@@ -60,26 +67,29 @@ const processPrefetchQueue = async () => {
 
   isPrefetching = true;
 
-  // Process in batches of 5 for better performance
-  const batch = prefetchQueue.splice(0, 5);
+  // Process in batches of 8 for faster loading
+  const batch = prefetchQueue.splice(0, 8);
 
-  try {
-    await Promise.all(
-      batch.map(async (url) => {
-        try {
-          await Image.prefetch(url);
-          prefetchedUrls.add(url);
-        } catch {
-          // Silently fail for individual images
-        }
-      })
-    );
-  } catch (error) {
-    // Silently fail - prefetching is optional optimization
+  await Promise.allSettled(
+    batch.map(async (url) => {
+      try {
+        const result = await Promise.race([
+          Image.prefetch(url),
+          new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000))
+        ]);
+        if (result) prefetchedUrls.add(url);
+      } catch {
+        failedUrls.add(url);
+      }
+    })
+  );
+
+  // Minimal delay between batches - keep loading fast
+  if (prefetchQueue.length > 0) {
+    setImmediate(processPrefetchQueue);
+  } else {
+    isPrefetching = false;
   }
-
-  // Small delay between batches to not block main thread
-  setTimeout(processPrefetchQueue, 50);
 };
 
 /**
@@ -95,8 +105,7 @@ const OptimizedImage = memo(({
   style,
   resizeMode = 'cover',
   showPlaceholder = true,
-  fallbackUri = DEFAULT_PLACEHOLDER,
-  maxRetries = 2,
+  maxRetries = 1,
   onLoad,
   onError,
   ...props
@@ -104,114 +113,126 @@ const OptimizedImage = memo(({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-  const [currentUri, setCurrentUri] = useState(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Resolve image source
   const imageUri = uri || (typeof source === 'object' ? source?.uri : source);
 
-  // Initialize current URI
-  useEffect(() => {
-    if (imageUri && typeof imageUri === 'string' && imageUri.startsWith('http')) {
-      setCurrentUri(imageUri);
-      setHasError(false);
-      setRetryCount(0);
-    } else {
-      // Invalid URI, use fallback
-      setCurrentUri(fallbackUri);
-    }
-  }, [imageUri, fallbackUri]);
+  // Validate URL
+  const isValidUri = imageUri && typeof imageUri === 'string' && imageUri.startsWith('http');
+  const currentUri = isValidUri ? imageUri : null;
 
   // Check if image was already prefetched - skip loading state if so
   const wasPrefetched = currentUri && prefetchedUrls.has(currentUri);
 
   // Initialize fade value to 1 if already prefetched
   useEffect(() => {
+    if (!currentUri) {
+      // Invalid URL - show error state immediately
+      setIsLoading(false);
+      setHasError(true);
+      return;
+    }
+
     if (wasPrefetched) {
       fadeAnim.setValue(1);
       setIsLoading(false);
+      setHasError(false);
+    } else {
+      // Reset for new images
+      setIsLoading(true);
+      setHasError(false);
+      fadeAnim.setValue(0);
     }
-  }, [wasPrefetched, currentUri]);
+  }, [currentUri, wasPrefetched]);
 
-  const handleLoad = (event) => {
+  const handleLoad = useCallback((event) => {
     setIsLoading(false);
     setHasError(false);
 
-    // Only animate fade-in if not already visible
-    if (fadeAnim._value < 1) {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-    }
+    // Fast fade-in animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
 
     // Mark as prefetched for future renders
     if (currentUri) {
       prefetchedUrls.add(currentUri);
     }
-
     onLoad?.(event);
-  };
+  }, [currentUri, onLoad, fadeAnim]);
 
-  const handleError = (event) => {
-    // Try to retry if we haven't exceeded max retries
-    if (retryCount < maxRetries && currentUri !== fallbackUri) {
+  const handleError = useCallback((event) => {
+    // Quick retry once
+    if (retryCount < maxRetries) {
       setRetryCount(prev => prev + 1);
-      // Small delay before retry
-      setTimeout(() => {
-        setIsLoading(true);
-        fadeAnim.setValue(0);
-      }, 500);
+      // Immediate retry
+      setIsLoading(true);
+      fadeAnim.setValue(0);
     } else {
-      // All retries failed, use fallback
+      // Failed - show local fallback UI
       setIsLoading(false);
       setHasError(true);
-      setCurrentUri(fallbackUri);
+      if (currentUri) {
+        failedUrls.add(currentUri);
+      }
       onError?.(event);
     }
-  };
+  }, [retryCount, maxRetries, currentUri, onError, fadeAnim]);
 
-  // If no valid URI, show placeholder
-  if (!currentUri) {
-    return (
-      <View style={[styles.placeholder, style]}>
-        <View style={styles.placeholderIcon} />
-      </View>
-    );
-  }
+  // Render local fallback UI when image fails
+  const renderFallback = () => (
+    <View style={[StyleSheet.absoluteFill, styles.fallbackContainer]}>
+      <LinearGradient
+        colors={['rgba(26, 11, 46, 0.9)', 'rgba(30, 32, 80, 0.95)']}
+        style={StyleSheet.absoluteFill}
+      />
+      <ImageOff size={24} color={COLORS.textMuted || 'rgba(255,255,255,0.4)'} />
+    </View>
+  );
 
   return (
     <View style={[styles.container, style]}>
-      {/* Static placeholder - shows while loading */}
+      {/* Loading spinner - shows while loading */}
       {isLoading && showPlaceholder && (
         <View style={[StyleSheet.absoluteFill, styles.placeholder]}>
-          <View style={styles.loadingDot} />
+          <ActivityIndicator size="small" color={COLORS.gold || '#FFBD59'} />
         </View>
       )}
 
-      {/* Actual image with fade-in */}
-      <Animated.Image
-        key={`${currentUri}-${retryCount}`} // Force re-render on retry
-        source={{ uri: currentUri, cache: 'force-cache' }}
-        style={[
-          StyleSheet.absoluteFill,
-          { opacity: fadeAnim },
-        ]}
-        resizeMode={resizeMode}
-        onLoad={handleLoad}
-        onError={handleError}
-        {...props}
-      />
+      {/* Error fallback - shows when image fails */}
+      {hasError && renderFallback()}
 
-      {/* Error state - show fallback indicator */}
-      {hasError && currentUri === fallbackUri && (
-        <View style={[StyleSheet.absoluteFill, styles.errorOverlay]}>
-          <View style={styles.errorIcon} />
-        </View>
+      {/* Actual image with fade-in - only render if we have valid URL and no error */}
+      {currentUri && !hasError && (
+        <Animated.Image
+          key={`${currentUri}-${retryCount}`}
+          source={{
+            uri: currentUri,
+            cache: 'default',
+            priority: Platform.OS === 'android' ? 'high' : undefined,
+          }}
+          style={[
+            StyleSheet.absoluteFill,
+            { opacity: fadeAnim },
+          ]}
+          resizeMode={resizeMode}
+          onLoad={handleLoad}
+          onError={handleError}
+          progressiveRenderingEnabled={Platform.OS === 'android'}
+          fadeDuration={0}
+          {...props}
+        />
       )}
     </View>
   );
+}, (prevProps, nextProps) => {
+  // Custom comparison for better performance
+  const prevUri = prevProps.uri || prevProps.source?.uri || prevProps.source;
+  const nextUri = nextProps.uri || nextProps.source?.uri || nextProps.source;
+  return prevUri === nextUri;
 });
 
 OptimizedImage.displayName = 'OptimizedImage';
@@ -225,30 +246,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.glassBgHeavy || 'rgba(30, 32, 80, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
   },
-  placeholderIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  loadingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 189, 89, 0.4)',
-  },
-  errorOverlay: {
-    backgroundColor: 'rgba(15, 16, 48, 0.5)',
+  fallbackContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  errorIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(156, 6, 18, 0.3)',
   },
 });
 

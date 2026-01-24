@@ -157,11 +157,12 @@ export const TaskItem = ({
 
 // Helper function
 const getLifeAreaLabel = (area) => {
+  // 6 lĩnh vực cuộc sống theo kịch bản demo
   const labels = {
     finance: 'Tài chính',
     career: 'Sự nghiệp',
     health: 'Sức khỏe',
-    relationships: 'Quan hệ',
+    relationships: 'Tình yêu',
     personal: 'Cá nhân',
     spiritual: 'Tâm thức',
   };

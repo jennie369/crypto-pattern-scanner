@@ -62,7 +62,7 @@ const AdminStickerPacksScreen = ({ navigation }) => {
       setPacks(data || []);
     } catch (error) {
       console.error('[AdminStickerPacks] loadPacks error:', error);
-      alertService.error('Loi', 'Khong the tai danh sach pack');
+      alertService.error('Lỗi', 'Không thể tải danh sách pack');
     } finally {
       setLoading(false);
     }
@@ -88,9 +88,9 @@ const AdminStickerPacksScreen = ({ navigation }) => {
       setPacks(prev => prev.map(p =>
         p.id === pack.id ? { ...p, is_active: !p.is_active } : p
       ));
-      alertService.success('Thanh cong', pack.is_active ? 'Da an pack' : 'Da hien pack');
+      alertService.success('Thành công', pack.is_active ? 'Đã ẩn pack' : 'Đã hiện pack');
     } catch (error) {
-      alertService.error('Loi', 'Khong the cap nhat trang thai');
+      alertService.error('Lỗi', 'Không thể cập nhật trạng thái');
     }
   };
 
@@ -101,21 +101,21 @@ const AdminStickerPacksScreen = ({ navigation }) => {
         p.id === pack.id ? { ...p, is_featured: !p.is_featured } : p
       ));
     } catch (error) {
-      alertService.error('Loi', 'Khong the cap nhat');
+      alertService.error('Lỗi', 'Không thể cập nhật');
     }
   };
 
   const handleDeletePack = (pack) => {
     alertService.confirm(
-      'Xac nhan xoa',
-      `Ban co chac muon xoa pack "${pack.name}"?`,
+      'Xác nhận xóa',
+      `Bạn có chắc muốn xóa pack "${pack.name}"?`,
       async () => {
         try {
           await stickerService.deletePack(pack.id);
           setPacks(prev => prev.filter(p => p.id !== pack.id));
-          alertService.success('Thanh cong', 'Da xoa pack');
+          alertService.success('Thành công', 'Đã xóa pack');
         } catch (error) {
-          alertService.error('Loi', 'Khong the xoa pack');
+          alertService.error('Lỗi', 'Không thể xóa pack');
         }
       }
     );
@@ -302,13 +302,13 @@ const AdminStickerPacksScreen = ({ navigation }) => {
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Package size={48} color={COLORS.textMuted} />
-                <Text style={styles.emptyText}>Chua co sticker pack nao</Text>
+                <Text style={styles.emptyText}>Chưa có sticker pack nào</Text>
                 <TouchableOpacity
                   style={styles.createButton}
                   onPress={handleCreatePack}
                 >
                   <Plus size={18} color={COLORS.textPrimary} />
-                  <Text style={styles.createButtonText}>Tao pack moi</Text>
+                  <Text style={styles.createButtonText}>Tạo pack mới</Text>
                 </TouchableOpacity>
               </View>
             }

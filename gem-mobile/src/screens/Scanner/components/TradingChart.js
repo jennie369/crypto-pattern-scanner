@@ -90,6 +90,11 @@ const TradingChart = ({
   // REAL-TIME PRICE CALLBACK (for P&L sync)
   // ═══════════════════════════════════════════════════════════
   onPriceUpdate = null, // Callback when price updates: (price) => void
+  // ═══════════════════════════════════════════════════════════
+  // ZONE DISPLAY MODE (for ChartToolbar toggle)
+  // ═══════════════════════════════════════════════════════════
+  zoneDisplayMode = 'all', // 'all' | 'selected' | 'hidden'
+  onZoneDisplayModeChange = null,
 }) => {
   const [showVolume, setShowVolume] = useState(true);
   const [darkTheme, setDarkTheme] = useState(true);
@@ -3654,6 +3659,8 @@ const TradingChart = ({
           onTogglePriceLines={togglePriceLines}
           showVolume={showVolume}
           onToggleVolume={toggleVolume}
+          zoneDisplayMode={zoneDisplayMode}
+          onZoneDisplayModeChange={onZoneDisplayModeChange}
           onToggleDrawing={handleToggleDrawing}
           onToggleTheme={toggleTheme}
           onZoomIn={() => {}}

@@ -131,13 +131,25 @@ class CallService {
         .eq('call_id', call.id)
         .eq('user_id', calleeId);
 
-      // 8. Send push notification to callee
-      await this._sendCallNotification(calleeId, call, user);
+      // 8. Fetch caller profile for notification
+      const { data: callerProfile } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, username, avatar_url')
+        .eq('id', user.id)
+        .single();
 
-      // 9. Start ring timeout
+      const caller = callerProfile || { id: user.id };
+      if (callerProfile) {
+        caller.display_name = callerProfile.full_name || callerProfile.display_name || callerProfile.username || 'User';
+      }
+
+      // 9. Send push notification to callee
+      await this._sendCallNotification(calleeId, call, caller);
+
+      // 10. Start ring timeout
       this._startRingTimeout(call.id);
 
-      // 10. Log ringing event
+      // 11. Log ringing event
       await this._logEvent(call.id, CALL_EVENT_TYPE.CALL_RINGING, {});
 
       console.log('[CallService] Call initiated successfully:', call.id);
@@ -568,20 +580,50 @@ class CallService {
    */
   async getCall(callId) {
     try {
+      // Step 1: Fetch call with participants
       const { data: call, error } = await supabase
         .from('calls')
         .select(`
           *,
-          caller:profiles!caller_id(id, display_name, avatar_url),
-          participants:call_participants(
-            *,
-            user:profiles(id, display_name, avatar_url)
-          )
+          participants:call_participants(*)
         `)
         .eq('id', callId)
         .single();
 
       if (error) throw error;
+
+      // Step 2: Collect all user IDs (caller + participants)
+      const userIds = new Set();
+      if (call.caller_id) userIds.add(call.caller_id);
+      call.participants?.forEach(p => {
+        if (p.user_id) userIds.add(p.user_id);
+      });
+
+      // Step 3: Fetch profiles for all users
+      let profilesMap = {};
+      if (userIds.size > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url')
+          .in('id', Array.from(userIds));
+
+        if (profiles) {
+          profiles.forEach(profile => {
+            profile.display_name = profile.full_name || profile.display_name || profile.username || 'User';
+            profilesMap[profile.id] = profile;
+          });
+        }
+      }
+
+      // Step 4: Attach caller profile
+      call.caller = profilesMap[call.caller_id] || null;
+
+      // Step 5: Attach profiles to participants
+      call.participants = call.participants?.map(p => ({
+        ...p,
+        user: profilesMap[p.user_id] || null,
+        profiles: profilesMap[p.user_id] || null,
+      })) || [];
 
       return { success: true, call };
     } catch (error) {
@@ -707,8 +749,21 @@ class CallService {
     this.callTimeoutId = setTimeout(async () => {
       console.log('[CallService] Ring timeout reached for call:', callId);
 
-      // Mark as missed
-      await supabase.rpc('mark_call_missed', { p_call_id: callId });
+      try {
+        // Get call details for notification
+        const { call } = await this.getCall(callId);
+
+        // Mark as missed
+        await supabase.rpc('mark_call_missed', { p_call_id: callId });
+
+        // Send missed call notification to callee
+        if (call?.caller) {
+          const { notificationService } = await import('./notificationService');
+          await notificationService.sendMissedCallNotification(call.caller, call);
+        }
+      } catch (err) {
+        console.error('[CallService] Ring timeout error:', err);
+      }
 
       // Cleanup
       webrtcService.cleanup();

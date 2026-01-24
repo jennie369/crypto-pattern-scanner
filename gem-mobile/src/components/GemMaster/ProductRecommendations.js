@@ -414,7 +414,7 @@ const ProductRecommendations = ({ context, showAll = false }) => {
       title: product.title,
       handle: product.handle,
       description: product.description || '',
-      descriptionHtml: product.descriptionHtml || product.description || '',
+      descriptionHtml: product.description_html || product.descriptionHtml || product.description || '',
       vendor: product.vendor || '',
       productType: product.productType || '',
       tags: product.tags || [],

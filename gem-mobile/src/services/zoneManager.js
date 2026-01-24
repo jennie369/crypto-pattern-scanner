@@ -150,23 +150,37 @@ class ZoneManager {
       try {
         const zone = this._patternToZone(pattern, symbol, timeframe, userId);
 
-        if (zone && this._isValidZone(zone)) {
-          if (canSaveToDb && userId) {
-            // Save to database
-            const savedZone = await this._saveZoneToDb(zone);
-            if (savedZone) {
-              // ⚠️ CRITICAL: Merge pattern_id and metadata back - DB doesn't store these
-              zones.push({
-                ...savedZone,
-                pattern_id: zone.pattern_id,
-                metadata: zone.metadata,
-              });
-            }
-          } else {
-            // Just return in-memory zone
-            zones.push({ ...zone, id: `temp_${Date.now()}_${zones.length}` });
-          }
+        if (!zone) {
+          console.log(`[ZoneManager] ❌ Zone creation failed for ${pattern.patternType || pattern.name}`);
+          continue;
         }
+
+        if (!this._isValidZone(zone)) {
+          console.log(`[ZoneManager] ❌ Zone validation failed for ${pattern.patternType || pattern.name}:`, {
+            zone_high: zone.zone_high,
+            zone_low: zone.zone_low,
+            thickness: ((zone.zone_high - zone.zone_low) / zone.zone_low * 100).toFixed(2) + '%',
+          });
+          continue;
+        }
+
+        // Zone is valid - add it
+        if (canSaveToDb && userId) {
+          // Save to database
+          const savedZone = await this._saveZoneToDb(zone);
+          if (savedZone) {
+            // ⚠️ CRITICAL: Merge pattern_id and metadata back - DB doesn't store these
+            zones.push({
+              ...savedZone,
+              pattern_id: zone.pattern_id,
+              metadata: zone.metadata,
+            });
+          }
+        } else {
+          // Just return in-memory zone
+          zones.push({ ...zone, id: `temp_${Date.now()}_${zones.length}` });
+        }
+        console.log(`[ZoneManager] ✅ Zone created for ${pattern.patternType || pattern.name}`);
       } catch (error) {
         console.error('[ZoneManager] Error creating zone from pattern:', error);
       }
@@ -208,6 +222,16 @@ class ZoneManager {
     // Get entry and stopLoss values
     const entry = parseFloat(pattern.entry || pattern.entryPrice || pattern.price || 0);
     const stopLoss = parseFloat(pattern.stopLoss || pattern.stop_loss || 0);
+
+    // 🔴 DEBUG: Log pattern info for troubleshooting
+    console.log(`[ZoneManager] _patternToZone: ${pattern.patternType || pattern.name}`, {
+      entry,
+      stopLoss,
+      direction,
+      isLong,
+      zoneType,
+      pattern_id: pattern.pattern_id,
+    });
 
     // ⚠️ FIX: Calculate zone boundaries based on DIRECTION
     // LONG: SL below entry → zoneLow = SL, zoneHigh = entry
@@ -312,22 +336,23 @@ class ZoneManager {
    * @private
    */
   _isValidZone(zone) {
-    // Zone too thin (<0.1%)
-    const thickness = (zone.zone_high - zone.zone_low) / zone.zone_low;
-    if (thickness < 0.001) {
-      console.warn('[ZoneManager] Zone too thin:', thickness);
-      return false;
-    }
-
-    // Zone too thick (>10%)
-    if (thickness > 0.10) {
-      console.warn('[ZoneManager] Zone too thick:', thickness);
-      return false;
-    }
-
     // Zone high <= low
     if (zone.zone_high <= zone.zone_low) {
       console.warn('[ZoneManager] Zone high <= low');
+      return false;
+    }
+
+    // Zone too thin (<0.05%) - very lenient
+    const thickness = (zone.zone_high - zone.zone_low) / zone.zone_low;
+    if (thickness < 0.0005) {
+      console.warn('[ZoneManager] Zone too thin:', thickness, zone.pattern_type);
+      return false;
+    }
+
+    // Zone too thick (>25%) - more lenient for patterns with wide stop losses
+    // Some patterns like DPD, UPD, wedges can have wider zones
+    if (thickness > 0.25) {
+      console.warn('[ZoneManager] Zone too thick:', thickness, zone.pattern_type);
       return false;
     }
 

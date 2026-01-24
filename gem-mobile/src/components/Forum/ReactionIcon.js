@@ -21,7 +21,7 @@ import { REACTION_CONFIG } from '../../constants/reactions';
  */
 const ReactionIcon = ({
   type,
-  size = 20,
+  size = 16,
   emojiSize = null,
 }) => {
   const config = REACTION_CONFIG[type];
@@ -30,10 +30,10 @@ const ReactionIcon = ({
     return null;
   }
 
-  // Calculate emoji font size (slightly smaller than container for proper fit)
-  const fontSize = emojiSize || Math.round(size * 0.95);
-  // Container needs extra space to prevent clipping on Android
-  const containerSize = size + 6;
+  // Calculate emoji font size (proportional to size)
+  const fontSize = emojiSize || Math.round(size * 0.9);
+  // Container needs padding ratio to prevent clipping (1.3x for safety)
+  const containerSize = Math.round(size * 1.3);
 
   return (
     <View style={[styles.container, { width: containerSize, height: containerSize }]}>

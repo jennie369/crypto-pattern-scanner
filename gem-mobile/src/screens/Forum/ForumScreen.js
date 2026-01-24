@@ -21,8 +21,12 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient';
 import { CommonActions, useScrollToTop } from '@react-navigation/native';
 import { Menu, Search, Bell, FileText, Gem, DollarSign, Music, Zap, RotateCcw } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import PostCard from './components/PostCard';
 import AdCard from '../../components/Forum/AdCard';
+// Performance & Loading Components
+import { PostSkeletonList, ScrollToTopButton } from '../../components/Forum';
+import performanceService from '../../services/performanceService';
 import HeaderMessagesIcon from '../../components/HeaderMessagesIcon';
 import CategoryTabs from './components/CategoryTabs';
 // FeedTabs removed - using CategoryTabs only
@@ -36,12 +40,48 @@ import SponsorBanner from '../../components/SponsorBanner';
 import { injectBannersIntoFeed } from '../../utils/bannerDistribution';
 import { forumService } from '../../services/forumService';
 import { forumRecommendationService } from '../../services/forumRecommendationService';
-import { generateFeed, getNextFeedPage, resetAllImpressions, getImpressionStats, trackVisibleImpressions } from '../../services/feedService';
+import { generateFeed, getNextFeedPage, resetAllImpressions, getImpressionStats, trackVisibleImpressions, invalidateFeedCache } from '../../services/feedService';
 import { trackView } from '../../services/engagementService';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+
+// Global forum cache - persists data between tab switches
+const forumCache = {
+  posts: null,
+  feedItems: null,
+  sessionId: null,
+  lastFetch: 0,
+  CACHE_DURATION: 30000, // 30 seconds cache
+};
+
+// ============================================================
+// FLATLIST OPTIMIZATION CONSTANTS
+// ============================================================
+
+// Estimated post heights for getItemLayout (improves scroll performance)
+const POST_ITEM_HEIGHTS = {
+  TEXT_ONLY: 200,      // Post chỉ có text
+  WITH_IMAGE: 450,     // Post có 1 ảnh
+  WITH_CAROUSEL: 500,  // Post có nhiều ảnh
+  SPONSOR_BANNER: 120, // Sponsor banner height
+  AD_CARD: 280,        // Ad card height
+  AVERAGE: 400,        // Trung bình cho tất cả types
+};
+
+// FlatList optimization config
+const FLATLIST_CONFIG = {
+  INITIAL_NUM_TO_RENDER: 6,      // Giảm từ 10 để render nhanh hơn
+  MAX_TO_RENDER_PER_BATCH: 8,    // Giảm từ 20 để giảm memory
+  WINDOW_SIZE: 5,                // Giảm từ 10 để render ít items off-screen
+  UPDATE_CELLS_BATCHING_PERIOD: 50, // Batch updates
+  REMOVE_CLIPPED_SUBVIEWS: true, // Memory optimization
+};
+
+// Cache size limits to prevent memory overflow
+const MAX_CACHE_SIZE = 300;
+const MAX_TRACKED_POSTS = 500;
 
 const ForumScreen = ({ navigation }) => {
   const { user } = useAuth();
@@ -51,19 +91,23 @@ const ForumScreen = ({ navigation }) => {
   // Sponsor banners - use hook to fetch ALL banners for distribution
   const { banners: sponsorBanners, dismissBanner, userId: bannerUserId } = useSponsorBanners('forum', null);
 
-  const [posts, setPosts] = useState([]);
-  const [feedItems, setFeedItems] = useState([]); // New: mixed posts + ads
-  const [sessionId, setSessionId] = useState(null); // Feed session ID
+  // Initialize from cache if available for instant display
+  const [posts, setPosts] = useState(() => forumCache.posts || []);
+  const [feedItems, setFeedItems] = useState(() => forumCache.feedItems || []); // New: mixed posts + ads
+  const [sessionId, setSessionId] = useState(() => forumCache.sessionId); // Feed session ID
   const [selectedFeed, setSelectedFeed] = useState('explore'); // Main tab: explore, following, news, notifications, popular, academy
   const [selectedTopic, setSelectedTopic] = useState(null); // Topic filter: giao-dich, tinh-than, can-bang
   // feedType removed - explore always uses 'hot' algorithm
-  const [loading, setLoading] = useState(true);
+  // Only show loading if no cached data
+  const [loading, setLoading] = useState(!forumCache.posts || forumCache.posts.length === 0);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [useHybridFeed, setUseHybridFeed] = useState(true); // Toggle for new feed algorithm
   const [loadingMore, setLoadingMore] = useState(false); // Track infinite scroll loading state
+  const [showScrollToTop, setShowScrollToTop] = useState(false); // Scroll-to-top FAB visibility
+  const SCROLL_TO_TOP_THRESHOLD = 800; // Show button after scrolling this many pixels
   const lastPostIdRef = useRef(null);
   const lastCreatedAtRef = useRef(null); // Track last post created_at for pagination
 
@@ -117,6 +161,85 @@ const ForumScreen = ({ navigation }) => {
   useEffect(() => {
     sessionIdRef.current = sessionId;
   }, [sessionId]);
+
+  // ============================================================
+  // MEMORY LEAK FIX: Cleanup trackedPostIds periodically
+  // ============================================================
+  useEffect(() => {
+    const CLEANUP_INTERVAL = 60000; // 1 phút
+
+    const cleanupInterval = setInterval(() => {
+      if (trackedPostIds.current && trackedPostIds.current.size > MAX_TRACKED_POSTS) {
+        console.log('[ForumScreen] Cleaning up trackedPostIds:', trackedPostIds.current.size, '->', 0);
+        trackedPostIds.current.clear();
+      }
+    }, CLEANUP_INTERVAL);
+
+    return () => {
+      clearInterval(cleanupInterval);
+      // Clear on unmount
+      if (trackedPostIds.current) {
+        trackedPostIds.current.clear();
+      }
+    };
+  }, []);
+
+  // ============================================================
+  // CACHE SIZE LIMIT: Trim cache to prevent memory overflow
+  // ============================================================
+  const trimCache = useCallback(() => {
+    if (forumCache.posts && forumCache.posts.length > MAX_CACHE_SIZE) {
+      console.log('[ForumScreen] Trimming cache from', forumCache.posts.length, 'to', MAX_CACHE_SIZE);
+      forumCache.posts = forumCache.posts.slice(0, MAX_CACHE_SIZE);
+      if (forumCache.feedItems) {
+        forumCache.feedItems = forumCache.feedItems.slice(0, MAX_CACHE_SIZE);
+      }
+    }
+  }, []);
+
+  // ============================================================
+  // GETITEMLAYOUT: Improve FlatList scroll performance
+  // ============================================================
+  const getItemLayout = useCallback((data, index) => {
+    // Safety check
+    if (!data || index < 0) {
+      return {
+        length: POST_ITEM_HEIGHTS.AVERAGE,
+        offset: POST_ITEM_HEIGHTS.AVERAGE * index,
+        index,
+      };
+    }
+
+    const item = data[index];
+    let height = POST_ITEM_HEIGHTS.AVERAGE;
+
+    if (item) {
+      // Determine height based on item type
+      if (item.type === 'sponsor_banner') {
+        height = POST_ITEM_HEIGHTS.SPONSOR_BANNER;
+      } else if (item.type === 'ad') {
+        height = POST_ITEM_HEIGHTS.AD_CARD;
+      } else if (item.type === 'post' && item.data) {
+        // Estimate post height based on content
+        const post = item.data;
+        const images = post?.media_urls || post?.images || [];
+
+        if (images.length > 1) {
+          height = POST_ITEM_HEIGHTS.WITH_CAROUSEL;
+        } else if (images.length === 1 || post?.image_url) {
+          height = POST_ITEM_HEIGHTS.WITH_IMAGE;
+        } else {
+          height = POST_ITEM_HEIGHTS.TEXT_ONLY;
+        }
+      }
+    }
+
+    return {
+      length: height,
+      offset: height * index,
+      index,
+    };
+  }, []);
 
   // Viewability config - item is considered "viewed" when 50% visible for 300ms
   // FIXED: Reduced minimumViewTime from 500ms to 300ms for faster tracking
@@ -298,9 +421,18 @@ const ForumScreen = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-    loadPosts(true);
+    const now = Date.now();
+    const cacheExpired = now - forumCache.lastFetch > forumCache.CACHE_DURATION;
+
+    // Only load if cache expired or feed/topic changed
+    if (cacheExpired || !forumCache.posts || forumCache.posts.length === 0) {
+      setPage(1);
+      setHasMore(true);
+      loadPosts(true);
+    } else {
+      // Use cached data, no need to reload
+      setLoading(false);
+    }
   }, [selectedFeed, selectedTopic]);
 
   // Load posts using hybrid feed algorithm or legacy method
@@ -309,6 +441,9 @@ const ForumScreen = ({ navigation }) => {
     // Prevent double loading
     if (loadingMore && !reset) return;
     if (!reset && !hasMore) return;
+
+    // Track load performance (dev only)
+    performanceService.startMeasure(`loadPosts.${reset ? 'reset' : 'page'}`);
 
     try {
       if (!reset) setLoadingMore(true);
@@ -328,13 +463,12 @@ const ForumScreen = ({ navigation }) => {
       console.log(`[ForumScreen] Loading ${selectedFeed} feed, page ${currentPage}`);
 
       // Get posts from API with feed type and topic filter
-      // NEW: forumService.getPosts now returns { posts, sessionId, hasMore, totalPosts }
-      // Explore uses 'hot' algorithm, other feeds use their own sorting defined in forumService
+      // OPTIMIZED: Reduced limit for faster initial load
       const result = await forumService.getPosts({
         feed: selectedFeed,
         topic: selectedTopic,
         page: currentPage,
-        limit: 50,
+        limit: 20,
         sortBy: selectedFeed === 'explore' ? 'hot' : 'latest',
       });
 
@@ -356,6 +490,13 @@ const ForumScreen = ({ navigation }) => {
         setSessionId(newSessionId);
         lastPostIdRef.current = postsOnly[postsOnly.length - 1]?.id || null;
         lastCreatedAtRef.current = postsOnly[postsOnly.length - 1]?.created_at || null;
+
+        // Update cache for instant display on tab switch
+        forumCache.posts = postsOnly;
+        forumCache.feedItems = feedData;
+        forumCache.sessionId = newSessionId;
+        forumCache.lastFetch = Date.now();
+        trimCache(); // Prevent memory overflow
       } else {
         // Dedupe before appending
         setPosts(prev => {
@@ -383,6 +524,8 @@ const ForumScreen = ({ navigation }) => {
       // On error, still allow retry
       setHasMore(true);
     } finally {
+      // End performance measurement (dev only)
+      performanceService.endMeasure(`loadPosts.${reset ? 'reset' : 'page'}`, 1500);
       setLoading(false);
       setLoadingMore(false);
     }
@@ -391,13 +534,16 @@ const ForumScreen = ({ navigation }) => {
   // New: Load feed using hybrid algorithm with ads
   // INFINITE SCROLL: Always allow more loading
   const loadHybridFeed = async (reset = false) => {
+    // Track hybrid feed load performance (dev only)
+    performanceService.startMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`);
+
     try {
       if (!reset) setLoadingMore(true);
       console.log('[ForumScreen] Loading hybrid feed...', reset ? 'RESET' : `page after ${lastPostIdRef.current}`);
 
       if (reset) {
-        // Generate new feed with new session
-        const result = await generateFeed(user.id, null, 100);
+        // Generate new feed with new session - OPTIMIZED: reduced limit for faster initial load
+        const result = await generateFeed(user.id, null, 30);
 
         setFeedItems(result.feed);
         setSessionId(result.sessionId);
@@ -415,6 +561,13 @@ const ForumScreen = ({ navigation }) => {
 
         // INFINITE SCROLL: Always hasMore if we got any data
         setHasMore(postsOnly.length > 0);
+
+        // Update cache for instant display on tab switch
+        forumCache.posts = postsOnly;
+        forumCache.feedItems = result.feed;
+        forumCache.sessionId = result.sessionId;
+        forumCache.lastFetch = Date.now();
+        trimCache(); // Prevent memory overflow
 
         console.log('[ForumScreen] Hybrid feed loaded:', result.feed.length, 'items');
       } else {
@@ -478,7 +631,7 @@ const ForumScreen = ({ navigation }) => {
         feed: selectedFeed,
         topic: selectedTopic,
         page: currentPage,
-        limit: 50,
+        limit: 20,
       });
       // Handle new return format
       const feedData = result.posts || [];
@@ -490,6 +643,13 @@ const ForumScreen = ({ navigation }) => {
         setPosts(postsOnly);
         setFeedItems(feedData);
         setSessionId(result.sessionId);
+
+        // Update cache for instant display on tab switch
+        forumCache.posts = postsOnly;
+        forumCache.feedItems = feedData;
+        forumCache.sessionId = result.sessionId;
+        forumCache.lastFetch = Date.now();
+        trimCache(); // Prevent memory overflow
       } else {
         // Dedupe before appending
         setPosts(prev => {
@@ -506,12 +666,21 @@ const ForumScreen = ({ navigation }) => {
       // INFINITE SCROLL: Allow more if we got data
       setHasMore(result.hasMore);
     } finally {
+      // End performance measurement (dev only)
+      performanceService.endMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`, 1500);
       setLoading(false);
       setLoadingMore(false);
     }
   };
 
   const onRefresh = useCallback(async () => {
+    // Haptic feedback on refresh
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (err) {
+      // Haptics not available on all devices
+    }
+
     setRefreshing(true);
     // Reset all pagination state for fresh data
     setPage(1);
@@ -520,11 +689,17 @@ const ForumScreen = ({ navigation }) => {
     lastCreatedAtRef.current = null;
     setSessionId(null); // Force new session for hybrid feed
     trackedPostIds.current.clear(); // Clear local impression tracking
+
+    // Invalidate feed cache to force fresh data on refresh
+    if (user?.id) {
+      invalidateFeedCache(user.id);
+    }
+
     // DON'T clear existing data - keep showing old content while loading
     // New data will replace old data when loadPosts completes with reset=true
     await loadPosts(true);
     setRefreshing(false);
-  }, [selectedFeed, selectedTopic]);
+  }, [selectedFeed, selectedTopic, user?.id]);
 
   // DEBUG: Reset impressions and reload feed
   const handleDebugResetImpressions = useCallback(async () => {
@@ -593,6 +768,9 @@ const ForumScreen = ({ navigation }) => {
   // Handle scroll to hide/show header (Instagram/TikTok style)
   // Uses velocity detection for smooth, intentional hide/show
   const handleScroll = useCallback((event) => {
+    // Track scroll performance (dev only)
+    performanceService.trackScroll();
+
     const currentScrollY = event.nativeEvent.contentOffset.y;
     const currentTime = Date.now();
     const timeDelta = currentTime - lastScrollTime.current;
@@ -659,11 +837,27 @@ const ForumScreen = ({ navigation }) => {
 
     lastScrollY.current = currentScrollY;
     lastScrollTime.current = currentTime;
-  }, [headerTranslateY, HEADER_MAX_HEIGHT, SCROLL_THRESHOLD, VELOCITY_THRESHOLD, COOLDOWN_MS]);
+
+    // Show/hide scroll-to-top FAB based on scroll position
+    const shouldShowScrollToTop = currentScrollY > SCROLL_TO_TOP_THRESHOLD;
+    if (shouldShowScrollToTop !== showScrollToTop) {
+      setShowScrollToTop(shouldShowScrollToTop);
+    }
+  }, [headerTranslateY, HEADER_MAX_HEIGHT, SCROLL_THRESHOLD, VELOCITY_THRESHOLD, COOLDOWN_MS, showScrollToTop, SCROLL_TO_TOP_THRESHOLD]);
 
   // Scroll to top function - also shows header and resets animation state
-  const scrollToTop = useCallback(() => {
+  const scrollToTop = useCallback(async () => {
+    // Haptic feedback for scroll-to-top action
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (err) {
+      // Haptics not available on all devices
+    }
+
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+
+    // Hide scroll-to-top button immediately
+    setShowScrollToTop(false);
 
     // Also show header when scrolling to top
     if (!isHeaderVisible.current) {
@@ -678,6 +872,7 @@ const ForumScreen = ({ navigation }) => {
   }, [headerTranslateY]);
 
   // Handle feed change from burger menu - scroll to top and refresh
+  // FIXED: Don't clear data immediately - keep showing old content while loading new
   const handleFeedChange = useCallback((feedType) => {
     // Close menu first
     setMenuOpen(false);
@@ -689,15 +884,15 @@ const ForumScreen = ({ navigation }) => {
       return;
     }
 
-    // Reset all state for new feed
+    // Reset pagination state but DON'T clear posts/feedItems
+    // Old data will be replaced when loadPosts completes with reset=true
     setSelectedFeed(feedType);
-    setPosts([]);
-    setFeedItems([]);
     setPage(1);
     setHasMore(true);
     lastPostIdRef.current = null;
     lastCreatedAtRef.current = null;
     setSessionId(null);
+    setLoading(true); // Show loading indicator but keep old data visible
 
     // Scroll to top immediately (before data loads)
     flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
@@ -714,6 +909,7 @@ const ForumScreen = ({ navigation }) => {
   }, [selectedFeed, headerTranslateY]);
 
   // Handle quick actions (liked, saved) from burger menu
+  // FIXED: Don't clear data immediately - keep showing old content while loading new
   const handleQuickAction = useCallback(async (action) => {
     // Close menu
     setMenuOpen(false);
@@ -729,18 +925,19 @@ const ForumScreen = ({ navigation }) => {
       }).start();
     }
 
+    // Set loading but DON'T clear existing data - keep showing old content
     setLoading(true);
-    setPosts([]);
-    setFeedItems([]);
 
     try {
       if (action === 'liked') {
         const data = await forumService.getLikedPosts();
+        // Replace data only after fetch succeeds
         setPosts(data);
         setFeedItems(data.map(p => ({ type: 'post', data: p })));
         setSelectedFeed('liked');
       } else if (action === 'saved') {
         const data = await forumService.getSavedPosts();
+        // Replace data only after fetch succeeds
         setPosts(data);
         setFeedItems(data.map(p => ({ type: 'post', data: p })));
         setSelectedFeed('saved');
@@ -866,19 +1063,19 @@ const ForumScreen = ({ navigation }) => {
   };
 
   // Memoized feed data with sponsor banners injected
-  // FIXED: Don't inject banners during loading/refreshing states
+  // FIXED: Always show cached data during refresh - don't clear the list
   const feedDataWithBanners = useMemo(() => {
-    // Don't show banners when loading or refreshing (no content to mix with)
-    if (loading || refreshing) {
+    const baseFeed = feedItems.length > 0 ? feedItems : posts.map(p => ({ type: 'post', data: p }));
+    // If no data at all, return empty (will show loading or empty state)
+    if (baseFeed.length === 0) {
       return [];
     }
-    const baseFeed = feedItems.length > 0 ? feedItems : posts.map(p => ({ type: 'post', data: p }));
     // Inject sponsor banners between posts (after 3rd item, then every 8 items)
     return injectBannersIntoFeed(baseFeed, sponsorBanners, {
       firstBannerAfter: 3,
       bannerInterval: 8,
     });
-  }, [feedItems, posts, sponsorBanners, loading, refreshing]);
+  }, [feedItems, posts, sponsorBanners]);
 
   const getFeedTitle = () => {
     const titles = {
@@ -895,6 +1092,7 @@ const ForumScreen = ({ navigation }) => {
   };
 
   // Handle tab change from CategoryTabs - scroll to top and refresh
+  // FIXED: Don't clear data immediately - keep showing old content while loading new
   const handleTabChange = useCallback((tabId) => {
     // Skip if same tab - just scroll to top
     if (tabId === selectedFeed) {
@@ -902,16 +1100,16 @@ const ForumScreen = ({ navigation }) => {
       return;
     }
 
-    // Reset all state for new feed
+    // Reset pagination state but DON'T clear posts/feedItems
+    // Old data will be replaced when loadPosts completes with reset=true
     setSelectedFeed(tabId);
-    setPosts([]);
-    setFeedItems([]);
     setPage(1);
     setHasMore(true);
     lastPostIdRef.current = null;
     lastCreatedAtRef.current = null;
     setSessionId(null);
     trackedPostIds.current.clear(); // Clear local impression tracking
+    setLoading(true); // Show loading indicator but keep old data visible
 
     // Scroll to top immediately (before data loads)
     flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
@@ -928,12 +1126,17 @@ const ForumScreen = ({ navigation }) => {
   }, [selectedFeed, headerTranslateY]);
 
   const renderEmptyState = () => {
-    // FIXED: Don't show loading indicator here - it's already handled by the early return
-    // when loading && posts.length === 0. This prevents duplicate loading indicators.
+    // Show loading state when loading/refreshing with no cached data
     if (loading || refreshing) {
-      return null; // Let the main loading state handle this
+      return (
+        <View style={styles.emptyState}>
+          <ActivityIndicator size="large" color={COLORS.gold} />
+          <Text style={styles.loadingText}>Đang tải bài viết...</Text>
+        </View>
+      );
     }
 
+    // Only show "no posts" when truly empty and not loading
     return (
       <View style={styles.emptyState}>
         <FileText size={64} color={COLORS.textMuted} strokeWidth={1.5} />
@@ -984,10 +1187,15 @@ const ForumScreen = ({ navigation }) => {
         locations={GRADIENTS.backgroundLocations}
         style={styles.gradient}
       >
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.gold} />
-          <Text style={styles.loadingText}>Đang tải...</Text>
-        </View>
+        <SafeAreaView style={styles.container}>
+          {/* Header skeleton placeholder */}
+          <View style={styles.skeletonHeader}>
+            <View style={styles.skeletonLogo} />
+            <View style={styles.skeletonTabs} />
+          </View>
+          {/* Post skeleton list */}
+          <PostSkeletonList count={4} />
+        </SafeAreaView>
       </LinearGradient>
     );
   }
@@ -1180,12 +1388,17 @@ const ForumScreen = ({ navigation }) => {
             scrollEventThrottle={16}
             onEndReached={onEndReached}
             onEndReachedThreshold={0.3}
-            initialNumToRender={10}
-            maxToRenderPerBatch={20}
-            windowSize={10}
-            removeClippedSubviews={true}
+            // ========== PERFORMANCE OPTIMIZATIONS ==========
+            getItemLayout={getItemLayout}
+            initialNumToRender={FLATLIST_CONFIG.INITIAL_NUM_TO_RENDER}
+            maxToRenderPerBatch={FLATLIST_CONFIG.MAX_TO_RENDER_PER_BATCH}
+            windowSize={FLATLIST_CONFIG.WINDOW_SIZE}
+            updateCellsBatchingPeriod={FLATLIST_CONFIG.UPDATE_CELLS_BATCHING_PERIOD}
+            removeClippedSubviews={FLATLIST_CONFIG.REMOVE_CLIPPED_SUBVIEWS}
+            // ========== LIST COMPONENTS ==========
             ListEmptyComponent={renderEmptyState}
             ListFooterComponent={renderFooter}
+            // ========== VIEWABILITY TRACKING ==========
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={viewabilityConfig}
           />
@@ -1195,6 +1408,13 @@ const ForumScreen = ({ navigation }) => {
         <AuthGate action="tạo bài viết mới">
           <FABButton onPress={() => navigation.navigate('CreatePost')} />
         </AuthGate>
+
+        {/* Scroll to Top FAB - Appears when user scrolls down */}
+        <ScrollToTopButton
+          visible={showScrollToTop}
+          onPress={scrollToTop}
+          bottomOffset={160} // Above FABButton
+        />
       </View>
       {AlertComponent}
     </LinearGradient>
@@ -1278,6 +1498,25 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     fontSize: TYPOGRAPHY.fontSize.lg,
     color: COLORS.textSecondary,
+  },
+  // Skeleton loading header styles
+  skeletonHeader: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
+  },
+  skeletonLogo: {
+    width: 100,
+    height: 28,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 8,
+    marginBottom: SPACING.md,
+  },
+  skeletonTabs: {
+    width: '100%',
+    height: 40,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 20,
   },
   emptyState: {
     flex: 1,

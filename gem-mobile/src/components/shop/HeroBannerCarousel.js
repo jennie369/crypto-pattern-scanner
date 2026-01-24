@@ -21,7 +21,7 @@ import OptimizedImage, { prefetchImages } from '../Common/OptimizedImage';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BANNER_WIDTH = SCREEN_WIDTH - (SPACING.lg * 2);
-const BANNER_HEIGHT = 160;
+const BANNER_HEIGHT = 175;
 const AUTO_SCROLL_INTERVAL = 4000; // 4 seconds
 
 const HeroBannerCarousel = ({ style }) => {
@@ -189,9 +189,19 @@ const HeroBannerCarousel = ({ style }) => {
     </View>
   );
 
-  // Don't show loading spinner - section will appear when data is ready
-  // This prevents the perpetual loading spinner when no banners exist
-  if (loading || banners.length === 0) {
+  // Show skeleton placeholder while loading for better UX
+  if (loading) {
+    return (
+      <View style={[styles.container, style]}>
+        <View style={styles.skeletonBanner}>
+          <View style={styles.skeletonShimmer} />
+        </View>
+      </View>
+    );
+  }
+
+  // Hide completely if no banners
+  if (banners.length === 0) {
     return null;
   }
 
@@ -215,6 +225,10 @@ const HeroBannerCarousel = ({ style }) => {
           offset: (BANNER_WIDTH + SPACING.md) * index,
           index,
         })}
+        removeClippedSubviews={true}
+        initialNumToRender={2}
+        maxToRenderPerBatch={2}
+        windowSize={3}
       />
       {banners.length > 1 && renderPagination()}
     </View>
@@ -242,7 +256,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
     justifyContent: 'flex-end',
     padding: SPACING.lg,
   },
@@ -278,6 +292,19 @@ const styles = StyleSheet.create({
   paginationDotActive: {
     width: 20,
     backgroundColor: COLORS.burgundy,
+  },
+  // Skeleton styles
+  skeletonBanner: {
+    marginHorizontal: SPACING.lg,
+    width: BANNER_WIDTH,
+    height: BANNER_HEIGHT,
+    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: COLORS.glassBg,
+    overflow: 'hidden',
+  },
+  skeletonShimmer: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
 });
 

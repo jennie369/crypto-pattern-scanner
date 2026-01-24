@@ -49,15 +49,15 @@ import { TemplateCard } from '../../components/Admin';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
 
 // ========== STAT CARD ==========
-const StatCard = ({ icon: Icon, value, label, color = COLORS.gold, onPress }) => (
+const StatCard = ({ icon: Icon, value, label, onPress }) => (
   <TouchableOpacity
     style={styles.statCard}
     onPress={onPress}
     disabled={!onPress}
     activeOpacity={onPress ? 0.7 : 1}
   >
-    <View style={[styles.statIconContainer, { backgroundColor: `${color}20` }]}>
-      <Icon size={20} color={color} />
+    <View style={styles.statIconContainer}>
+      <Icon size={18} color={COLORS.gold} />
     </View>
     <Text style={styles.statValue}>{value}</Text>
     <Text style={styles.statLabel}>{label}</Text>
@@ -65,10 +65,10 @@ const StatCard = ({ icon: Icon, value, label, color = COLORS.gold, onPress }) =>
 );
 
 // ========== QUICK ACTION BUTTON ==========
-const QuickAction = ({ icon: Icon, label, color, onPress }) => (
+const QuickAction = ({ icon: Icon, label, onPress }) => (
   <TouchableOpacity style={styles.quickAction} onPress={onPress}>
-    <View style={[styles.quickActionIcon, { backgroundColor: color }]}>
-      <Icon size={20} color={COLORS.bgDarkest} />
+    <View style={styles.quickActionIcon}>
+      <Icon size={20} color={COLORS.gold} />
     </View>
     <Text style={styles.quickActionLabel}>{label}</Text>
   </TouchableOpacity>
@@ -87,11 +87,11 @@ const UpcomingItem = ({ item, type, onPress }) => {
 
   return (
     <TouchableOpacity style={styles.upcomingItem} onPress={() => onPress?.(item)} activeOpacity={0.7}>
-      <View style={[styles.upcomingIcon, { backgroundColor: isPush ? 'rgba(255,189,89,0.2)' : 'rgba(0,240,255,0.2)' }]}>
+      <View style={styles.upcomingIcon}>
         {isPush ? (
           <Bell size={18} color={COLORS.gold} />
         ) : (
-          <FileText size={18} color={COLORS.cyan} />
+          <FileText size={18} color={COLORS.gold} />
         )}
       </View>
       <View style={styles.upcomingContent}>
@@ -101,7 +101,7 @@ const UpcomingItem = ({ item, type, onPress }) => {
         <View style={styles.upcomingMeta}>
           <Clock size={12} color={COLORS.textMuted} />
           <Text style={styles.upcomingTime}>{date} {time}</Text>
-          <Text style={[styles.upcomingType, { color: isPush ? COLORS.gold : COLORS.cyan }]}>
+          <Text style={styles.upcomingType}>
             {isPush ? 'Push' : 'Post'}
           </Text>
         </View>
@@ -282,25 +282,21 @@ const ContentDashboardScreen = () => {
               icon={Bell}
               value={todayStats.pushToday}
               label="Push hôm nay"
-              color={COLORS.gold}
             />
             <StatCard
               icon={FileText}
               value={todayStats.postToday}
               label="Post hôm nay"
-              color={COLORS.cyan}
             />
             <StatCard
               icon={Send}
               value={formatNumber(dashboardStats?.total_sent)}
               label="Đã gửi"
-              color={COLORS.success}
             />
             <StatCard
               icon={Eye}
               value={formatRate(dashboardStats?.avg_open_rate)}
               label="Open Rate"
-              color={COLORS.purple}
             />
           </View>
 
@@ -311,25 +307,21 @@ const ContentDashboardScreen = () => {
               <QuickAction
                 icon={Bell}
                 label="+ Push"
-                color={COLORS.gold}
                 onPress={handleCreatePush}
               />
               <QuickAction
                 icon={FileText}
                 label="+ Post"
-                color={COLORS.cyan}
                 onPress={handleCreatePost}
               />
               <QuickAction
                 icon={Calendar}
                 label="Lịch"
-                color={COLORS.purple}
                 onPress={handleViewCalendar}
               />
               <QuickAction
                 icon={BarChart2}
                 label="Analytics"
-                color={COLORS.success}
                 onPress={handleViewAnalytics}
               />
             </View>
@@ -477,11 +469,13 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: SPACING.md,
     padding: SPACING.md,
     marginHorizontal: SPACING.xxs,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   statIconContainer: {
     width: 36,
@@ -490,6 +484,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.xs,
+    backgroundColor: 'rgba(255,189,89,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,189,89,0.2)',
   },
   statValue: {
     fontSize: TYPOGRAPHY.fontSize.display,
@@ -527,9 +524,11 @@ const styles = StyleSheet.create({
   quickActionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: GLASS.borderRadius,
     padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   quickAction: {
     alignItems: 'center',
@@ -537,10 +536,13 @@ const styles = StyleSheet.create({
   quickActionIcon: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.xs,
+    backgroundColor: 'rgba(255,189,89,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,189,89,0.25)',
   },
   quickActionLabel: {
     fontSize: TYPOGRAPHY.fontSize.md,
@@ -552,18 +554,23 @@ const styles = StyleSheet.create({
   upcomingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: SPACING.md,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   upcomingIcon: {
     width: 40,
     height: 40,
-    borderRadius: SPACING.sm,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
+    backgroundColor: 'rgba(255,189,89,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,189,89,0.15)',
   },
   upcomingContent: {
     flex: 1,
@@ -586,14 +593,17 @@ const styles = StyleSheet.create({
   upcomingType: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
   },
 
   // Empty state
   emptyState: {
     alignItems: 'center',
     padding: SPACING.xl,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: GLASS.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   emptyText: {
     fontSize: TYPOGRAPHY.fontSize.lg,
@@ -608,9 +618,11 @@ const styles = StyleSheet.create({
 
   // Menu
   menuContainer: {
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: GLASS.borderRadius,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   menuItem: {
     flexDirection: 'row',
@@ -618,7 +630,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    borderBottomColor: 'rgba(255,255,255,0.04)',
   },
   menuItemLeft: {
     flexDirection: 'row',

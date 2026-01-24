@@ -28,6 +28,14 @@ export { default as statsService } from './statsService';
 export * from './ritualService';
 export { default as ritualService } from './ritualService';
 
+// Activity Feed (Phase 2)
+export * from './activityService';
+export { default as activityService } from './activityService';
+
+// Ritual Recommendations (Phase 2)
+export * from './ritualRecommendationService';
+export { default as ritualRecommendationService } from './ritualRecommendationService';
+
 // Divination (Tarot & I Ching)
 export * from './tarotService';
 export { default as tarotService } from './tarotService';

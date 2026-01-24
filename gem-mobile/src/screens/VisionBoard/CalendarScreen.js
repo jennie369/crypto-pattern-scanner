@@ -41,6 +41,10 @@ const CalendarScreen = () => {
   // Modal
   const [showDayModal, setShowDayModal] = useState(false);
 
+  // Journal data (rituals and readings)
+  const [journalRituals, setJournalRituals] = useState([]);
+  const [journalReadings, setJournalReadings] = useState([]);
+
   // Get user
   useEffect(() => {
     const getUser = async () => {
@@ -109,8 +113,18 @@ const CalendarScreen = () => {
   };
 
   // Handle date selection
-  const handleDateSelect = (date) => {
+  const handleDateSelect = async (date) => {
     setSelectedDate(date);
+    // Fetch journal data for the selected date
+    if (userId) {
+      const dateStr = date.toISOString().split('T')[0];
+      const journalResult = await calendarService.getDailyJournal(userId, dateStr);
+      if (journalResult.success) {
+        setJournalRituals(journalResult.rituals);
+        setJournalReadings(journalResult.readings);
+      }
+    }
+    setShowDayModal(true);
   };
 
   // Handle event press
@@ -277,11 +291,23 @@ const CalendarScreen = () => {
       {/* Day Detail Modal */}
       <DayDetailModal
         visible={showDayModal}
-        onClose={() => setShowDayModal(false)}
-        date={selectedDate}
+        onClose={() => {
+          setShowDayModal(false);
+          setJournalRituals([]);
+          setJournalReadings([]);
+        }}
+        date={selectedDate instanceof Date ? selectedDate.toISOString().split('T')[0] : selectedDate}
         events={selectedDateEvents}
+        rituals={journalRituals}
+        readings={journalReadings}
         onEventPress={handleEventPress}
         onEventComplete={handleEventComplete}
+        onRitualPress={(ritual) => {
+          console.log('[Calendar] Ritual pressed:', ritual.ritual_slug);
+        }}
+        onReadingPress={(reading) => {
+          console.log('[Calendar] Reading pressed:', reading.reading_type);
+        }}
       />
     </SafeAreaView>
   );

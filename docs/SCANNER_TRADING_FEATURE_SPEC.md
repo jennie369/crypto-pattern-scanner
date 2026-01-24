@@ -1,8 +1,8 @@
 # GEM Mobile - Scanner/Trading Tab
 # COMPLETE FEATURE SPECIFICATION
 
-**Version:** 3.0
-**Last Updated:** 2025-12-20
+**Version:** 3.1
+**Last Updated:** 2026-01-24
 **Platform:** React Native (Expo)
 **Author:** GEM Development Team
 
@@ -621,6 +621,8 @@ interface TradingChartProps {
   onTimeframeChange?: (tf: string) => void;
   selectedPattern?: Pattern | null;
   patterns?: Pattern[];
+  zoneData?: ZoneData | null;        // Zone visualization data
+  onPriceUpdate?: (price: number) => void;  // Real-time price callback for P&L sync
 }
 ```
 
@@ -635,6 +637,72 @@ const chartConfig = {
   volumeUpColor: 'rgba(34, 197, 94, 0.5)',
   volumeDownColor: 'rgba(239, 68, 68, 0.5)',
 };
+```
+
+#### Zone Visualization
+The chart can display pattern zones showing the exact candles where the pattern was detected.
+
+**Zone Data Structure:**
+```typescript
+interface ZoneData {
+  entry: number;
+  stopLoss: number;
+  takeProfit: number;
+  direction: 'LONG' | 'SHORT';
+  formation_time: number;      // Unix timestamp when pattern was detected
+  start_time?: number;         // Alias for formation_time
+  end_time?: number;           // Optional zone end time
+  isPositionZone?: boolean;    // Whether this is from an open position
+}
+```
+
+**Zone Positioning (CRITICAL):**
+- Zones MUST be positioned at the exact candles where the pattern was detected
+- Uses `formation_time` from patternData, NOT recent candles
+- Time-based coordinates ensure zones are "sticky" to candles and move with zoom/pan
+- Sources for formation_time (in priority order):
+  1. `pattern.formation_time`
+  2. `pattern.formationTime`
+  3. `pattern.start_time`
+  4. `pattern.startTime`
+  5. `position.openedAt` (fallback for positions)
+
+```javascript
+// Zone creation in ScannerScreen/PatternDetailScreen
+const formationTime = pd.formation_time || pd.formationTime ||
+                      pd.start_time || pd.startTime;
+const positionZone = {
+  entry: pattern.entry,
+  stopLoss: pattern.stopLoss,
+  takeProfit: pattern.takeProfit,
+  direction: pattern.direction,
+  formation_time: formationTime,  // ✅ Correct: at pattern detection candles
+  isPositionZone: true,
+};
+```
+
+#### P&L Real-time Sync
+The chart emits price updates via WebSocket for synchronized P&L display.
+
+```javascript
+// TradingChart sends price updates to React Native
+window.ReactNativeWebView.postMessage(JSON.stringify({
+  type: 'price_update',
+  price: closePrice,
+  symbol: SYMBOL
+}));
+
+// Parent component receives price updates
+const handleChartPriceUpdate = useCallback((price) => {
+  if (price && !isNaN(price)) {
+    setCurrentPrice(price);  // P&L updates immediately
+  }
+}, []);
+
+<TradingChart
+  onPriceUpdate={handleChartPriceUpdate}
+  // ... other props
+/>
 ```
 
 ---
@@ -826,7 +894,92 @@ SHORT: { backgroundColor: COLORS.error, color: '#FFF' }
 
 ---
 
-### 5.3 PaperTradeModal
+### 5.3 MindsetCheckModal & MindsetAdvisor
+**Paths:**
+- `gem-mobile/src/components/Trading/MindsetCheckModal.js`
+- `gem-mobile/src/components/Trading/MindsetAdvisor.js`
+
+#### Purpose
+Prompt traders to assess their mental state before opening a trade. Logs mindset assessments to Supabase for analytics.
+
+#### Layout
+```
+┌─────────────────────────────────────┐
+│ Kiểm Tra Tâm Lý Trading        [X] │
+├─────────────────────────────────────┤
+│ Bạn đang cảm thấy thế nào?          │
+│                                     │
+│ ┌───────────────────────────────┐   │
+│ │ 😊 Tự tin & Bình tĩnh         │   │
+│ └───────────────────────────────┘   │
+│ ┌───────────────────────────────┐   │
+│ │ 😐 Bình thường                │   │
+│ └───────────────────────────────┘   │
+│ ┌───────────────────────────────┐   │
+│ │ 😰 Lo lắng / Căng thẳng       │   │
+│ └───────────────────────────────┘   │
+│ ┌───────────────────────────────┐   │
+│ │ 🤑 FOMO / Nóng vội            │   │
+│ └───────────────────────────────┘   │
+├─────────────────────────────────────┤
+│ [      Tiếp tục giao dịch        ] │
+└─────────────────────────────────────┘
+```
+
+#### Props
+```typescript
+interface MindsetAdvisorProps {
+  visible: boolean;
+  onClose: () => void;
+  onComplete: () => void;
+  tradeInfo: {
+    symbol: string;
+    direction: 'LONG' | 'SHORT';
+    amount: number;
+    riskPercent?: number;
+  };
+  sourceScreen: 'paper_trade_modal' | 'gemmaster' | 'quick_action' | 'scanner';
+}
+```
+
+#### Database Schema
+```sql
+CREATE TABLE trading_mindset_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id),
+  source_screen VARCHAR(30) CHECK (source_screen IN (
+    'paper_trade_modal', 'gemmaster', 'quick_action', 'scanner'
+  )),
+  mindset_state VARCHAR(30),
+  trade_symbol VARCHAR(20),
+  trade_direction VARCHAR(10),
+  trade_amount DECIMAL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### Integration in PaperTradeModalV2
+```javascript
+// PaperTradeModalV2.js
+import { MindsetAdvisor } from '../components/Trading';
+
+// Show mindset check before confirming trade
+<MindsetAdvisor
+  visible={showMindsetCheck}
+  onClose={() => setShowMindsetCheck(false)}
+  onComplete={handleMindsetComplete}
+  tradeInfo={{
+    symbol: pattern.symbol,
+    direction: tradeType,
+    amount: positionSize,
+  }}
+  sourceScreen="paper_trade_modal"  // MUST use allowed value
+/>
+```
+
+---
+
+### 5.4 PaperTradeModal
 **Path:** `gem-mobile/src/screens/Scanner/components/PaperTradeModal.js`
 
 #### Purpose
@@ -1673,6 +1826,65 @@ const ANIMATION = {
 
 ---
 
+### 8.9 Number Formatting (Vietnamese Locale)
+**Path:** `gem-mobile/src/utils/formatters.js`
+
+Vietnamese number format uses:
+- Decimal separator: comma (,) instead of dot (.)
+- Thousands separator: dot (.) instead of comma (,)
+- Example: `$259,174.55` (EN) → `$259.174,55` (VI)
+
+#### Available Functions
+```javascript
+// Price formatting with dynamic precision
+formatPrice(price, withSeparators = true)
+// >= 1000:    2 decimals (e.g., 90.363,84)
+// >= 1:       4 decimals (e.g., 13,5752)
+// >= 0.01:    4 decimals (e.g., 0,3195) ← Matches chart labels
+// >= 0.0001:  6 decimals
+// < 0.0001:   8 decimals
+
+// Percentage formatting
+formatConfidence(value, decimals = 1)  // 85.234 → "85,2%"
+formatPercent(value, decimals = 1)     // 82.872 → "82,9%"
+formatPercentChange(value)             // -2.5 → "-2,50%", +3.2 → "+3,20%"
+
+// Currency formatting
+formatCurrency(amount, decimals = 2)   // 9040 → "9.040,00"
+formatPriceWithCurrency(price)         // 42000 → "$42.000,00"
+
+// Large numbers with suffixes
+formatLargeNumber(num)                 // 1500000 → "1,50M"
+formatVolume(volume)                   // Same as formatLargeNumber
+formatMarketCap(marketCap)             // 1000000000 → "$1,00B"
+
+// Risk:Reward
+formatRiskReward(entry, stopLoss, takeProfit)  // → "1:2,50"
+calculateRR(pattern)                            // Returns numeric R:R ratio
+
+// Time formatting
+formatTimestamp(timestamp)             // → "24/01/2026, 14:30"
+formatRelativeTime(timestamp)          // → "2 giờ trước"
+```
+
+#### Usage Example
+```javascript
+import {
+  formatPrice,
+  formatConfidence,
+  formatCurrency,
+  calculateRR,
+} from '../utils/formatters';
+
+// In component
+<Text>Entry: ${formatPrice(pattern.entry)}</Text>
+<Text>Confidence: {formatConfidence(pattern.confidence)}</Text>
+<Text>Margin: ${formatCurrency(position.margin)}</Text>
+<Text>R:R: 1:{calculateRR(pattern).toFixed(2)}</Text>
+```
+
+---
+
 ## 9. USER FLOWS
 
 ### 9.1 Main Scanning Flow
@@ -2418,9 +2630,13 @@ gem-mobile/src/
 ├── components/
 │   └── Trading/
 │       ├── ChartToolbar.js            # Chart controls
-│       ├── DrawingToolbar.js          # Drawing tools (NEW)
-│       ├── PendingOrdersSection.js    # Pending orders (NEW)
-│       ├── PaperTradeModal.js         # Trade modal
+│       ├── DrawingToolbar.js          # Drawing tools
+│       ├── PendingOrdersSection.js    # Pending orders
+│       ├── PaperTradeModal.js         # Trade modal (deprecated)
+│       ├── PaperTradeModalV2.js       # Trade modal with MindsetAdvisor
+│       ├── MindsetCheckModal.js       # Mindset assessment modal (NEW v3.1)
+│       ├── MindsetAdvisor.js          # Mindset advisor component (NEW v3.1)
+│       ├── QuickMindsetWidget.js      # Quick mindset widget
 │       ├── AITradeGuard.js            # AI assessment
 │       └── index.js
 ├── services/
@@ -2434,7 +2650,8 @@ gem-mobile/src/
 │   ├── ScannerContext.js              # Scanner state
 │   └── AuthContext.js                 # User & tier
 ├── utils/
-│   └── tokens.js                      # Design tokens
+│   ├── tokens.js                      # Design tokens
+│   └── formatters.js                  # Number formatting (Vietnamese locale)
 └── constants/
     └── patternSignals.js              # Pattern definitions
 
@@ -2447,6 +2664,31 @@ supabase/
 ---
 
 ## CHANGELOG
+
+### Version 3.1 (2026-01-24)
+- **Zone Positioning Fix:** Zones now display at correct candle positions
+  - Uses `formation_time` from pattern data
+  - Zones are "sticky" to candles (move with zoom/pan)
+  - Removed incorrect "8 recent candles" fallback logic
+  - Priority: formation_time > formationTime > start_time > startTime > openedAt
+- **P&L Real-time Sync:** Added onPriceUpdate callback to TradingChart
+  - Chart emits price updates via WebSocket
+  - PatternDetailScreen uses callback for synchronized P&L display
+  - Eliminates delay between chart and P&L section
+- **MindsetCheckModal Integration:**
+  - New MindsetAdvisor component for trading psychology
+  - Integrated into PaperTradeModalV2
+  - Logs mindset assessments to Supabase
+  - sourceScreen constraint: 'paper_trade_modal', 'gemmaster', 'quick_action', 'scanner'
+- **Vietnamese Number Formatting (formatters.js):**
+  - Centralized number formatting utility
+  - Vietnamese locale: comma as decimal, dot as thousands
+  - formatPrice: 4 decimals for prices >= 0.01 (matches chart labels)
+  - formatConfidence, formatPercent, formatDecimal, formatCurrency
+  - formatRiskReward, calculateRR, formatTimestamp, formatRelativeTime
+- **Bug Fixes:**
+  - Fixed MindsetAdvisor database constraint error (sourceScreen value)
+  - Fixed decimal formatting mismatch between chart and display
 
 ### Version 3.0 (2025-12-20)
 - **Drawing Tools:** Added 6 chart annotation tools

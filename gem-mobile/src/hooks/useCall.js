@@ -260,6 +260,32 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
   }, [call?.id, handleCallEnded]);
 
   /**
+   * Answer the call (for callee)
+   */
+  const answerCall = useCallback(async () => {
+    if (!call?.id) return;
+
+    try {
+      console.log('[useCall] Answering call:', call.id);
+      const result = await callService.answerCall(call.id);
+
+      if (!result.success) {
+        console.error('[useCall] Answer call failed:', result.error);
+        setError(result.error);
+        return;
+      }
+
+      // Initialize WebRTC if not already done
+      if (!isInitialized.current) {
+        await initializeCall();
+      }
+    } catch (err) {
+      console.error('[useCall] Answer call error:', err);
+      setError(err.message);
+    }
+  }, [call?.id, initializeCall]);
+
+  /**
    * Decline the call (for callee)
    */
   const declineCall = useCallback(async () => {
@@ -323,6 +349,7 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
     toggleVideo,
     switchCamera,
     endCall,
+    answerCall,
     declineCall,
     cancelCall,
     initializeCall,

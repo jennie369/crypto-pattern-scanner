@@ -1,31 +1,57 @@
 # BÁO CÁO TÍNH NĂNG APP GEM MOBILE
 
-**Ngày:** 2025-12-23
+**Ngày:** 2026-01-24
+**Version:** 3.1
 **Platform:** React Native (Expo)
 **Codebase:** gem-mobile/src/
 
 ---
 
+## MỤC LỤC
+
+1. [Tổng Quan](#tổng-quan)
+2. [Scanner & Pattern Detection](#1-scanner--pattern-detection)
+3. [Paper Trade](#2-paper-trade-giao-dịch-mô-phỏng)
+4. [Drawing Tools](#3-drawing-tools-công-cụ-vẽ)
+5. [GEM Master AI](#4-gem-master-ai-chatbot)
+6. [Vision Board](#5-vision-board)
+7. [Trader Ritual](#6-trader-ritual)
+8. [Partnership/Affiliate](#7-partnershipaffiliate)
+9. [Tier System & Access Control](#8-tier-system--access-control)
+10. [Shop (Crystal Shop)](#9-shop-crystal-shop)
+11. [Tarot](#10-tarot)
+12. [I Ching](#11-i-ching)
+13. [Community/Forum](#12-communityforum)
+14. [Courses](#13-courses)
+15. [Alerts/Notifications](#14-alertsnotifications)
+16. [Market Data](#15-market-data)
+17. [Quota System Chi Tiết](#16-quota-system-chi-tiết)
+18. [Database Schema](#17-database-schema)
+
+---
+
 ## TỔNG QUAN
 
-| # | Tính năng | Trạng thái | Files chính |
-|---|-----------|------------|-------------|
-| 1 | Scanner & Pattern Detection | ✅ Hoạt động | patternDetection.js (2,202 lines) |
-| 2 | Paper Trade | ✅ Hoạt động | paperTradeService.js |
-| 3 | GEM Master (AI Chatbot) | ✅ Hoạt động | gemMasterAIService.js |
-| 4 | Vision Board | ✅ Hoạt động | visionBoardService.js |
-| 5 | Trader Ritual | ✅ Hoạt động | RitualPlaygroundScreen.js |
-| 6 | Partnership/Affiliate | ✅ Hoạt động | affiliateService.js |
-| 7 | Tier System | ✅ Hoạt động | tierAccess.js (278 lines) |
-| 8 | Shop (Crystal Shop) | ✅ Hoạt động | shopifyService.js (677 lines) |
-| 9 | Tarot | ✅ Hoạt động | TarotScreen.js |
-| 10 | I Ching | ✅ Hoạt động | IChingScreen.js |
-| 11 | Community/Forum | ✅ Hoạt động | ForumScreen.js |
-| 12 | Courses | ✅ Hoạt động | CoursesScreen.js |
-| 13 | Alerts/Notifications | ✅ Hoạt động | alertManager.js (574 lines) |
-| 14 | Market Data | ✅ Hoạt động | binanceService.js |
+| # | Tính năng | Trạng thái | Files chính | Version |
+|---|-----------|------------|-------------|---------|
+| 1 | Scanner & Pattern Detection | ✅ Hoạt động | patternDetection.js | 3.1 |
+| 2 | Paper Trade | ✅ Hoạt động | paperTradeService.js | 3.1 |
+| 3 | Drawing Tools | ✅ Hoạt động | DrawingToolbar.js | 3.0 |
+| 4 | GEM Master (AI Chatbot) | ✅ Hoạt động | gemMasterAIService.js | 3.0 |
+| 5 | Vision Board | ✅ Hoạt động | visionBoardService.js | 2.0 |
+| 6 | Trader Ritual | ✅ Hoạt động | RitualPlaygroundScreen.js | 2.0 |
+| 7 | Partnership/Affiliate | ✅ Hoạt động | affiliateService.js | 3.0 |
+| 8 | Tier System | ✅ Hoạt động | tierAccess.js | 3.1 |
+| 9 | Shop (Crystal Shop) | ✅ Hoạt động | shopifyService.js | 2.0 |
+| 10 | Tarot | ✅ Hoạt động | TarotScreen.js | 2.0 |
+| 11 | I Ching | ✅ Hoạt động | IChingScreen.js | 2.0 |
+| 12 | Community/Forum | ✅ Hoạt động | ForumScreen.js | 2.0 |
+| 13 | Courses | ✅ Hoạt động | CoursesScreen.js | 3.0 |
+| 14 | Alerts/Notifications | ✅ Hoạt động | alertManager.js | 2.0 |
+| 15 | Market Data | ✅ Hoạt động | binanceService.js | 3.1 |
+| 16 | Mindset Advisor | ✅ MỚI | MindsetAdvisor.js | 3.1 |
 
-**Tổng cộng: 14/14 tính năng đã implement đầy đủ**
+**Tổng cộng: 16/16 tính năng đã implement đầy đủ**
 
 ---
 
@@ -34,59 +60,117 @@
 ### Trạng thái: ✅ Hoạt động (Production Ready)
 
 ### Files liên quan:
-- `gem-mobile/src/services/patternDetection.js` (2,202 lines) - Engine phát hiện pattern
-- `gem-mobile/src/services/multiTimeframeScanner.js` (364 lines) - Multi-TF scanning
-- `gem-mobile/src/services/confirmationPatterns.js` (432 lines) - Zone confirmation
-- `gem-mobile/src/screens/Scanner/ScannerScreen.js` (1,259 lines) - Main UI
-- `gem-mobile/src/screens/Scanner/PatternDetailScreen.js` - Chi tiết pattern
-- `gem-mobile/src/screens/Scanner/components/CoinSelector.js` - Chọn coin
-- `gem-mobile/src/screens/Scanner/components/TradingChart.js` - Chart
-- `gem-mobile/src/screens/Scanner/components/ScanResultsSection.js` - Kết quả scan
-- `gem-mobile/src/screens/Scanner/components/PatternCard.js` - Card pattern
+```
+gem-mobile/src/
+├── services/
+│   ├── patternDetection.js       # Engine phát hiện pattern (2,200+ lines)
+│   ├── multiTimeframeScanner.js  # Multi-TF scanning (364 lines)
+│   ├── confirmationPatterns.js   # Zone confirmation (432 lines)
+│   └── binanceService.js         # Market data
+├── screens/Scanner/
+│   ├── ScannerScreen.js          # Main UI (1,300+ lines)
+│   ├── PatternDetailScreen.js    # Chi tiết pattern
+│   ├── OpenPositionsScreen.js    # Quản lý lệnh
+│   └── components/
+│       ├── CoinSelector.js       # Chọn coin
+│       ├── TradingChart.js       # Chart với zone visualization
+│       ├── ScanResultsSection.js # Kết quả scan
+│       ├── PatternCard.js        # Card pattern
+│       └── PaperTradeModal.js    # Modal đặt lệnh
+└── utils/
+    └── formatters.js             # Vietnamese number formatting
+```
 
 ### 24 Patterns đã implement:
 
-| Tier | Pattern | Win Rate | Mô tả |
-|------|---------|----------|-------|
-| **FREE** | DPD | 65% | Down-Peak-Down - Tiếp diễn giảm |
-| **FREE** | UPU | 68% | Up-Peak-Up - Tiếp diễn tăng |
-| **FREE** | Head & Shoulders | 72% | Đảo chiều giảm |
-| **TIER1** | DPU | 62% | Down-Peak-Up - Đảo chiều tăng |
-| **TIER1** | UPD | 60% | Up-Peak-Down - Đảo chiều giảm |
-| **TIER1** | Double Top | 67% | Hai đỉnh - Đảo chiều giảm |
-| **TIER1** | Double Bottom | 68% | Hai đáy - Đảo chiều tăng |
-| **TIER2** | Inverse H&S | 70% | Vai đầu vai ngược - Đảo chiều tăng |
-| **TIER2** | Ascending Triangle | 70% | Tam giác tăng |
-| **TIER2** | Descending Triangle | 68% | Tam giác giảm |
-| **TIER2** | Symmetrical Triangle | 65% | Tam giác cân |
-| **TIER2** | HFZ | 72% | High Frequency Zone - Vùng kháng cự |
-| **TIER2** | LFZ | 72% | Low Frequency Zone - Vùng hỗ trợ |
-| **TIER2** | Rounding Bottom | 68% | Đáy tròn |
-| **TIER2** | Rounding Top | 66% | Đỉnh tròn |
-| **TIER3** | Bull Flag | 72% | Cờ tăng |
-| **TIER3** | Bear Flag | 71% | Cờ giảm |
-| **TIER3** | Wedge | 68% | Nêm |
-| **TIER3** | Engulfing | 75% | Nhấn chìm |
-| **TIER3** | Morning Star | 73% | Sao mai |
-| **TIER3** | Evening Star | 72% | Sao hôm |
-| **TIER3** | Cup & Handle | 70% | Tách và tay cầm |
-| **TIER3** | Three Methods | 68% | Ba phương pháp |
-| **TIER3** | Hammer | 70% | Búa |
+| Tier | Pattern | Type | Direction | Win Rate | R:R |
+|------|---------|------|-----------|----------|-----|
+| **FREE** | DPD | Continuation | SHORT | 71% | 2.5 |
+| **FREE** | UPU | Continuation | LONG | 68% | 2.8 |
+| **FREE** | Head & Shoulders | Reversal | SHORT | 68% | 2.5 |
+| **TIER1** | DPU | Reversal | LONG | 67% | 2.4 |
+| **TIER1** | UPD | Reversal | SHORT | 65% | 2.2 |
+| **TIER1** | Double Top | Reversal | SHORT | 66% | 2.3 |
+| **TIER1** | Double Bottom | Reversal | LONG | 67% | 2.4 |
+| **TIER2** | Inverse H&S | Reversal | LONG | 69% | 2.6 |
+| **TIER2** | Ascending Triangle | Continuation | LONG | 66% | 2.3 |
+| **TIER2** | Descending Triangle | Continuation | SHORT | 65% | 2.2 |
+| **TIER2** | Symmetrical Triangle | Neutral | BOTH | 63% | 2.0 |
+| **TIER2** | HFZ | Zone | SHORT | 70% | 2.4 |
+| **TIER2** | LFZ | Zone | LONG | 71% | 2.5 |
+| **TIER2** | Rounding Bottom | Reversal | LONG | 68% | 2.3 |
+| **TIER2** | Rounding Top | Reversal | SHORT | 67% | 2.2 |
+| **TIER3** | Bull Flag | Continuation | LONG | 70% | 2.5 |
+| **TIER3** | Bear Flag | Continuation | SHORT | 69% | 2.4 |
+| **TIER3** | Wedge | Reversal | BOTH | 64% | 2.1 |
+| **TIER3** | Engulfing | Candlestick | BOTH | 64% | 2.0 |
+| **TIER3** | Morning Star | Candlestick | LONG | 66% | 2.2 |
+| **TIER3** | Evening Star | Candlestick | SHORT | 66% | 2.2 |
+| **TIER3** | Cup & Handle | Continuation | LONG | 72% | 2.8 |
+| **TIER3** | Three Methods | Continuation | BOTH | 67% | 2.3 |
+| **TIER3** | Hammer | Candlestick | LONG | 62% | 1.8 |
 
 ### Timeframes hỗ trợ:
-`1m` `3m` `5m` `15m` `30m` `1h` `2h` `4h` `8h` `1d` `1w` `1M`
+| Timeframe | Code | Tier Required |
+|-----------|------|---------------|
+| 1 minute | `1m` | ALL |
+| 3 minutes | `3m` | TIER1+ |
+| 5 minutes | `5m` | ALL |
+| 15 minutes | `15m` | ALL |
+| 30 minutes | `30m` | TIER1+ |
+| 1 hour | `1h` | ALL |
+| 2 hours | `2h` | TIER2+ |
+| 4 hours | `4h` | ALL |
+| 8 hours | `8h` | TIER2+ |
+| 1 day | `1d` | ALL |
+| 1 week | `1w` | TIER2+ |
+| 1 month | `1M` | TIER3 |
 
 ### Coins hỗ trợ:
-- **437+ cặp** Binance USDT Perpetual Futures
-- Giới hạn theo tier: FREE=20, TIER1=50, TIER2=200, TIER3=unlimited
+- **500+ cặp** Binance USDT Perpetual Futures
+- Tự động cập nhật từ Binance Exchange Info
+- Giới hạn scan theo tier
 
-### Cách sử dụng:
-1. User mở Scanner tab
-2. Chọn coins từ CoinSelector (có search, favorites)
-3. Chọn timeframe
-4. Bấm "Quét" để scan
-5. Kết quả hiển thị theo coin với pattern cards
-6. Tap pattern để xem chi tiết hoặc Paper Trade
+### Pattern Quality Grades (TIER2+):
+| Grade | Confidence | Color | Mô tả |
+|-------|------------|-------|-------|
+| A+ | ≥85% | Green | Excellent setup |
+| A | ≥75% | Green | Very good |
+| B+ | ≥65% | Gold | Good |
+| B | ≥55% | Gold | Average |
+| C | ≥45% | Orange | Below average |
+| D | <45% | Red | Risky |
+
+### TIER2+ Enhancements:
+| Enhancement | Win Rate Boost | Mô tả |
+|-------------|----------------|-------|
+| Volume Confirmation | +8-10% | Volume spike detection |
+| Trend Analysis | +5-7% | Higher TF trend alignment |
+| Retest Validation | +8-12% | S/R retest validation |
+| Quality Filtering | +5-8% | Grade-based filtering |
+| S/R Confluence | +4-6% | Key level confluence |
+| RSI Divergence | +5-8% | RSI divergence detection |
+| Dynamic R:R | +2-4% | Optimized R:R ratio |
+
+### Zone Visualization:
+```javascript
+// Zone hiển thị đúng vị trí nến pattern được detect
+const zoneData = {
+  entry: pattern.entry,
+  stopLoss: pattern.stopLoss,
+  takeProfit: pattern.takeProfit,
+  direction: pattern.direction,
+  formation_time: pattern.formation_time,  // ✅ Vị trí chính xác
+  isPositionZone: true,
+};
+```
+
+**Zone Positioning Priority:**
+1. `formation_time` - Thời điểm pattern được detect
+2. `formationTime` - Alias
+3. `start_time` - Zone start time
+4. `startTime` - Alias
+5. `openedAt` - Fallback từ position
 
 ---
 
@@ -95,255 +179,614 @@
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/services/paperTradeService.js` - Logic giao dịch
-- `gem-mobile/src/services/pendingOrderService.js` - Lệnh chờ
-- `gem-mobile/src/screens/Scanner/OpenPositionsScreen.js` - Quản lý lệnh
-- `gem-mobile/src/screens/Account/PaperTradeHistoryScreen.js` - Lịch sử
-- `gem-mobile/src/components/Trading/PaperTradeModalV2.js` - Modal đặt lệnh
-- `gem-mobile/src/screens/Scanner/components/PaperTradeModal.js` - Modal từ scanner
+```
+gem-mobile/src/
+├── services/
+│   ├── paperTradeService.js      # Core logic
+│   └── pendingOrderService.js    # Lệnh chờ LIMIT
+├── screens/
+│   ├── Scanner/OpenPositionsScreen.js
+│   └── Account/PaperTradeHistoryScreen.js
+└── components/Trading/
+    ├── PaperTradeModalV2.js      # Modal mới với MindsetAdvisor
+    ├── PaperTradeModal.js        # Modal cũ (deprecated)
+    ├── MindsetCheckModal.js      # Mindset check
+    ├── MindsetAdvisor.js         # Mindset advisor
+    └── PendingOrdersSection.js   # Lệnh chờ
+```
 
 ### Chi tiết tính năng:
 
-| Tính năng | Mô tả |
-|-----------|-------|
-| **Số dư khởi điểm** | $10,000 (có thể tùy chỉnh $100 - $10,000,000) |
-| **Loại lệnh** | MARKET (khớp ngay), LIMIT (lệnh chờ) |
-| **Mode giao dịch** | Pattern Mode (từ scanner), Custom Mode (tự nhập) |
-| **Đòn bẩy** | 1x đến 125x (Binance Futures style) |
-| **Stop Loss** | Có, tự động đóng khi chạm |
-| **Take Profit** | Có, hỗ trợ TP1, TP2 |
-| **P&L realtime** | Tính toán theo giá thực tế từ Binance |
-| **Lịch sử** | Lưu 100 giao dịch gần nhất |
-| **Thống kê** | Win rate, Best/Worst trade, Profit factor, ROE |
+| Tính năng | Mô tả | Tier |
+|-----------|-------|------|
+| **Số dư khởi điểm** | $10,000 (tùy chỉnh $100 - $10,000,000) | ALL |
+| **Loại lệnh** | MARKET (khớp ngay), LIMIT (lệnh chờ) | TIER2+ for LIMIT |
+| **Mode giao dịch** | Pattern Mode, Custom Mode | TIER2+ for Custom |
+| **Đòn bẩy** | 1x - 125x (Binance Futures style) | See leverage limits |
+| **Stop Loss** | Tự động đóng khi chạm | ALL |
+| **Take Profit** | Hỗ trợ TP1, TP2 | ALL |
+| **P&L realtime** | WebSocket sync từ Binance | ALL |
+| **Lịch sử** | 100 giao dịch gần nhất | ALL |
+| **Thống kê** | Win rate, ROE, Profit factor | ALL |
 
-### Dual Mode:
-- **Pattern Mode**: Tự động từ kết quả scan, không chỉnh sửa TP/SL
-- **Custom Mode**: User tự nhập, có thể chỉnh TP/SL sau khi mở lệnh
+### Leverage Limits theo Tier:
+| Tier | Max Leverage |
+|------|--------------|
+| FREE | 10x |
+| TIER1 | 20x |
+| TIER2 | 50x |
+| TIER3 | 125x |
+
+### Trade Modes:
+
+#### Pattern Mode (GEM AI-Generated):
+```javascript
+tradeMode: 'pattern'
+// - Entry: Auto-calculated từ pattern (LOCKED)
+// - Stop Loss: Auto-calculated từ zone boundary (LOCKED)
+// - Take Profit: Auto-calculated với TP1/TP2 (LOCKED)
+// - Order Type: Always MARKET (immediate fill)
+// - Badge: "GEM Pattern Mode" (gold, lock icon)
+```
+
+#### Custom Mode (User-Defined) - TIER2+:
+```javascript
+tradeMode: 'custom'
+// - Entry: User-defined (có thể khác market price)
+// - Stop Loss: User-defined với validation
+// - Take Profit: User-defined với validation
+// - Order Type: MARKET hoặc LIMIT
+// - AI Score: 0-100 (đánh giá trade quality)
+// - Badge: "Custom Mode" (warning color, edit icon)
+```
+
+### Order Types:
+
+#### MARKET Order:
+- Khớp ngay tại giá thị trường
+- Status: OPEN immediately
+- Áp dụng cho: Pattern Mode, Custom Mode (entry = market)
+
+#### LIMIT Order (TIER2+):
+- Chờ giá đến entry price
+- Status: PENDING → OPEN khi filled
+- LONG fills khi: `currentPrice <= entryPrice`
+- SHORT fills khi: `currentPrice >= entryPrice`
+- Có thể cancel bất cứ lúc nào
+
+### P&L Calculation:
+```javascript
+// LONG Position
+unrealizedPnL = (currentPrice - entryPrice) * quantity;
+unrealizedPnLPercent = ((currentPrice - entryPrice) / entryPrice) * 100;
+ROE = unrealizedPnLPercent * leverage;
+
+// SHORT Position
+unrealizedPnL = (entryPrice - currentPrice) * quantity;
+unrealizedPnLPercent = ((entryPrice - currentPrice) / entryPrice) * 100;
+ROE = unrealizedPnLPercent * leverage;
+```
+
+### Liquidation Price:
+```javascript
+// Binance Futures formula
+const mmr = 0.004; // 0.4% maintenance margin rate
+const imr = 1 / leverage;
+
+// LONG: liquidationPrice = entry * (1 - imr + mmr)
+// SHORT: liquidationPrice = entry * (1 + imr - mmr)
+```
+
+### MindsetAdvisor Integration (v3.1):
+```javascript
+// Hiển thị trước khi mở lệnh
+<MindsetAdvisor
+  visible={showMindsetCheck}
+  onComplete={handleMindsetComplete}
+  tradeInfo={{
+    symbol: pattern.symbol,
+    direction: tradeType,
+    amount: positionSize,
+  }}
+  sourceScreen="paper_trade_modal"  // REQUIRED: allowed values only
+/>
+
+// Allowed sourceScreen values:
+// 'paper_trade_modal', 'gemmaster', 'quick_action', 'scanner'
+```
 
 ---
 
-## 3. GEM MASTER (AI CHATBOT)
+## 3. DRAWING TOOLS (CÔNG CỤ VẼ)
+
+### Trạng thái: ✅ Hoạt động (v3.0+)
+
+### Files liên quan:
+```
+gem-mobile/src/
+├── components/Trading/
+│   └── DrawingToolbar.js         # Tool selection UI
+├── services/
+│   └── drawingService.js         # Supabase CRUD
+└── screens/Scanner/components/
+    └── TradingChart.js           # Chart rendering
+```
+
+### 6 Drawing Tools:
+
+| Tool ID | Icon | Label | Clicks | Mô tả |
+|---------|------|-------|--------|-------|
+| `horizontal_line` | Minus | Ngang | 1 | Đường ngang tại giá click |
+| `trend_line` | TrendingUp | Xu hướng | 2 | Đường nét đứt từ điểm 1→2 |
+| `rectangle` | Square | Chữ nhật | 2 | 2 đường ngang (top/bottom) |
+| `fibonacci_retracement` | GitBranch | Fib | 2 | 7 mức Fibonacci |
+| `long_position` | ArrowUpCircle | Long | 1 | Entry + TP (+4%) + SL (-2%) |
+| `short_position` | ArrowDownCircle | Short | 1 | Entry + TP (-4%) + SL (+2%) |
+
+### Fibonacci Levels:
+```javascript
+const FIBONACCI_LEVELS = [
+  { value: 0, label: '0%', color: '#787B86' },
+  { value: 0.236, label: '23.6%', color: '#F7525F' },
+  { value: 0.382, label: '38.2%', color: '#FF9800' },
+  { value: 0.5, label: '50%', color: '#4CAF50' },
+  { value: 0.618, label: '61.8%', color: '#2196F3' },
+  { value: 0.786, label: '78.6%', color: '#9C27B0' },
+  { value: 1, label: '100%', color: '#787B86' },
+];
+```
+
+### Magnet Mode:
+- Default: ON
+- Snap to nearest OHLC value
+- Threshold: 2% of price
+- Improves accuracy of drawing placement
+
+### Storage:
+- Supabase `chart_drawings` table
+- Per-user, per-symbol, per-timeframe
+- Persistent across sessions
+- RLS policies for security
+
+### Database Schema:
+```sql
+CREATE TABLE chart_drawings (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
+  symbol VARCHAR(20) NOT NULL,
+  timeframe VARCHAR(10) NOT NULL,
+  tool_type VARCHAR(30) NOT NULL,
+  drawing_data JSONB NOT NULL,
+  is_visible BOOLEAN DEFAULT TRUE,
+  z_index INTEGER DEFAULT 0,
+  visible_timeframes TEXT[],
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+---
+
+## 4. GEM MASTER (AI CHATBOT)
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/screens/GemMaster/GemMasterScreen.js` - Chat UI
-- `gem-mobile/src/services/gemMasterAIService.js` - AI logic
-- `gem-mobile/src/services/gemMasterService.js` - Response generation
-- `gem-mobile/src/services/geminiService.js` - Gemini API integration
-- `gem-mobile/src/components/GemMaster/QuickActionBar.js` - Quick actions
-- `gem-mobile/src/components/GemMaster/FAQPanel.js` - FAQ panel
+```
+gem-mobile/src/
+├── screens/GemMaster/
+│   └── GemMasterScreen.js        # Chat UI
+├── services/
+│   ├── gemMasterAIService.js     # AI logic
+│   ├── gemMasterService.js       # Response generation
+│   └── geminiService.js          # Gemini API
+└── components/GemMaster/
+    ├── QuickActionBar.js         # Quick actions
+    └── FAQPanel.js               # FAQ panel
+```
 
 ### Chi tiết tính năng:
 
-| Tính năng | Mô tả |
-|-----------|-------|
-| **AI Engine** | Google Gemini API |
-| **Mood System** | Calm, Warning, Angry, Proud, Silent |
-| **Karma System** | Điểm karma, block/unlock trading |
-| **Voice Input** | Nhập giọng nói (quota theo tier) |
-| **Widget Suggestions** | Tạo widget từ AI response |
-| **Product Recommendations** | Gợi ý Crystal/Course |
-| **FAQ Panel** | Binance-style FAQ topics |
+| Tính năng | Mô tả | Tier |
+|-----------|-------|------|
+| **AI Engine** | Google Gemini API | ALL |
+| **Mood System** | Calm, Warning, Angry, Proud, Silent | ALL |
+| **Karma System** | Điểm karma, block/unlock trading | ALL |
+| **Voice Input** | Nhập giọng nói | TIER2+ |
+| **Widget Suggestions** | Tạo widget từ AI response | ALL |
+| **Product Recommendations** | Gợi ý Crystal/Course | ALL |
+| **FAQ Panel** | Binance-style FAQ topics | ALL |
+
+### Karma System:
+| Karma Level | Status | Action |
+|-------------|--------|--------|
+| 100 | Full | Normal trading |
+| 50-99 | Warning | Caution messages |
+| 1-49 | Danger | Trading restricted |
+| 0 | Frozen | Account frozen, need recovery |
 
 ### 14 Trading Scenarios:
-1. FOMO_BUY - RSI overbought hoặc pump lớn
-2. FOMO_RETRY - Retry sau FOMO loss
-3. REVENGE_TRADE - 3+ consecutive losses
-4. NO_STOPLOSS - Không có SL (CRITICAL - luôn block)
-5. SL_MOVED_WIDER - Dời SL xa hơn
-6. BIG_WIN - Win >20% P&L
-7. DISCIPLINE_WIN - Win với SL đúng
-8. DISCIPLINE_LOSS - Loss với SL đúng
-9. ACCOUNT_FROZEN - Karma = 0
-10. OVERTRADE - 10+ trades/ngày
-11. STREAK_BROKEN - Mất win streak
-12. DAILY_LIMIT - Vượt daily limit
-13. BLOCKED - User bị block
-14. ACCOUNT_FROZEN - Cần recovery quest
+| # | Scenario | Trigger | Karma Impact |
+|---|----------|---------|--------------|
+| 1 | FOMO_BUY | RSI overbought hoặc pump lớn | -10 |
+| 2 | FOMO_RETRY | Retry sau FOMO loss | -15 |
+| 3 | REVENGE_TRADE | 3+ consecutive losses | -20 |
+| 4 | NO_STOPLOSS | Không có SL | -50 (CRITICAL) |
+| 5 | SL_MOVED_WIDER | Dời SL xa hơn | -10 |
+| 6 | BIG_WIN | Win >20% P&L | +15 |
+| 7 | DISCIPLINE_WIN | Win với SL đúng | +10 |
+| 8 | DISCIPLINE_LOSS | Loss với SL đúng | +5 |
+| 9 | ACCOUNT_FROZEN | Karma = 0 | N/A |
+| 10 | OVERTRADE | 10+ trades/ngày | -5/trade |
+| 11 | STREAK_BROKEN | Mất win streak | -5 |
+| 12 | DAILY_LIMIT | Vượt daily limit | Block |
+| 13 | BLOCKED | User bị block | Block |
+| 14 | RECOVERY_QUEST | Cần recovery | +20 on complete |
 
 ### Unlock Options:
-- **Meditation** (5 min) - Karma +5
-- **Journal** (10 min) - Karma +10
-- **Rest** (15 min) - Karma +0
-- **Wait** (time-based) - Karma +0
+| Option | Duration | Karma Gain |
+|--------|----------|------------|
+| Meditation | 5 min | +5 |
+| Journal | 10 min | +10 |
+| Rest | 15 min | +0 |
+| Wait | Time-based | +0 |
+
+### Message Quota:
+| Tier | Daily Messages | Voice Messages |
+|------|----------------|----------------|
+| FREE | 10 | 0 |
+| TIER1 | 50 | 5 |
+| TIER2 | 200 | 20 |
+| TIER3 | Unlimited | Unlimited |
 
 ---
 
-## 4. VISION BOARD
+## 5. VISION BOARD
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/services/visionBoardService.js` - Core service
-- `gem-mobile/src/screens/VisionBoard/VisionBoardScreen.js` - Dashboard
-- `gem-mobile/src/screens/VisionBoard/GoalDetailScreen.js` - Chi tiết goal
-- `gem-mobile/src/screens/VisionBoard/DailyRecapScreen.js` - Daily summary
-- `gem-mobile/src/screens/VisionBoard/CalendarScreen.js` - Calendar view
-- `gem-mobile/src/screens/VisionBoard/AchievementsScreen.js` - Achievements
-- `gem-mobile/src/contexts/VisionBoardContext.js` - State management
+```
+gem-mobile/src/
+├── services/
+│   └── visionBoardService.js     # Core service
+├── screens/VisionBoard/
+│   ├── VisionBoardScreen.js      # Dashboard
+│   ├── GoalDetailScreen.js       # Chi tiết goal
+│   ├── DailyRecapScreen.js       # Daily summary
+│   ├── CalendarScreen.js         # Calendar view
+│   └── AchievementsScreen.js     # Achievements
+└── contexts/
+    └── VisionBoardContext.js     # State management
+```
 
 ### Widget Types:
-| Type | Icon | Mô tả |
-|------|------|-------|
-| GOAL | Target | Mục tiêu dài hạn với milestones |
-| ACTION | CheckSquare | Tasks/to-dos với due date |
-| AFFIRMATION | Heart | Affirmations hàng ngày |
-| HABIT | Repeat | Thói quen định kỳ |
+| Type | Icon | Mô tả | Tier |
+|------|------|-------|------|
+| GOAL | Target | Mục tiêu dài hạn với milestones | ALL |
+| ACTION | CheckSquare | Tasks/to-dos với due date | ALL |
+| AFFIRMATION | Heart | Affirmations hàng ngày | ALL |
+| HABIT | Repeat | Thói quen định kỳ | TIER1+ |
 
 ### Life Areas (6):
-| Area | Color | Icon |
-|------|-------|------|
-| Finance | Gold | Wallet |
-| Career | Purple | Briefcase |
-| Health | Green | Heart |
-| Relationships | Pink | Users |
-| Personal | Cyan | User |
-| Spiritual | Red | Sparkles |
+| Area | Color | Icon | Focus |
+|------|-------|------|-------|
+| Finance | Gold | Wallet | Tài chính, trading |
+| Career | Purple | Briefcase | Sự nghiệp |
+| Health | Green | Heart | Sức khỏe |
+| Relationships | Pink | Users | Mối quan hệ |
+| Personal | Cyan | User | Phát triển bản thân |
+| Spiritual | Red | Sparkles | Tâm linh |
 
 ### Gamification:
-- **XP System**: Earn XP khi complete tasks
-- **Level System**: Level up based on XP
-- **Streaks**: Daily completion streaks
-- **Achievements**: Badges unlock
+| Feature | Mô tả |
+|---------|-------|
+| XP System | Earn XP khi complete tasks |
+| Level System | Level up based on XP |
+| Streaks | Daily completion streaks |
+| Achievements | Badges unlock |
+
+### Widget Limits:
+| Tier | Max Widgets | Max Goals | Max Habits |
+|------|-------------|-----------|------------|
+| FREE | 10 | 3 | 2 |
+| TIER1 | 50 | 10 | 10 |
+| TIER2 | 200 | 50 | 50 |
+| TIER3 | Unlimited | Unlimited | Unlimited |
 
 ---
 
-## 5. TRADER RITUAL
+## 6. TRADER RITUAL
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/screens/VisionBoard/RitualPlaygroundScreen.js` - Interactive rituals
-- `gem-mobile/src/screens/VisionBoard/RitualHistoryScreen.js` - Lịch sử ritual
+```
+gem-mobile/src/screens/VisionBoard/
+├── RitualPlaygroundScreen.js     # Interactive rituals
+└── RitualHistoryScreen.js        # Lịch sử ritual
+```
 
-### Chi tiết tính năng:
-| Ritual | Mô tả |
-|--------|-------|
-| Letter to Universe | Viết thư gửi vũ trụ |
-| Meditation | Guided meditation sessions |
-| Gratitude Log | Ghi nhật ký biết ơn |
-| Ritual Calendar | Lịch ritual đã hoàn thành |
+### Ritual Types:
+| Ritual | Duration | Karma Gain | Mô tả |
+|--------|----------|------------|-------|
+| Letter to Universe | 10 min | +10 | Viết thư gửi vũ trụ |
+| Meditation | 5-30 min | +5-15 | Guided meditation |
+| Gratitude Log | 5 min | +5 | Ghi nhật ký biết ơn |
+| Morning Ritual | 15 min | +10 | Morning routine |
+| Evening Review | 10 min | +8 | Daily reflection |
+
+### Ritual Quota:
+| Tier | Daily Rituals | Meditation Minutes |
+|------|---------------|-------------------|
+| FREE | 2 | 15 |
+| TIER1 | 5 | 30 |
+| TIER2 | 10 | 60 |
+| TIER3 | Unlimited | Unlimited |
 
 ---
 
-## 6. PARTNERSHIP/AFFILIATE
+## 7. PARTNERSHIP/AFFILIATE
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/services/affiliateService.js` - Affiliate logic
-- `supabase/migrations/20251214_affiliate_system_complete.sql` - Database schema
+```
+gem-mobile/src/services/
+└── affiliateService.js           # Affiliate logic
+
+supabase/migrations/
+└── 20251214_affiliate_system_complete.sql
+```
 
 ### Chi tiết tính năng:
 | Tính năng | Mô tả |
 |-----------|-------|
 | Referral Links | Tạo link giới thiệu unique |
-| Commission Tracking | Theo dõi hoa hồng |
+| Commission Tracking | Theo dõi hoa hồng real-time |
 | Partner Dashboard | Dashboard cho partner |
 | Withdrawal | Rút tiền hoa hồng |
+| Tier Commissions | Hoa hồng theo tier |
+
+### Commission Rates:
+| Product Tier | Commission Rate |
+|--------------|-----------------|
+| TIER1 (11M) | 20% = 2.2M |
+| TIER2 (21M) | 20% = 4.2M |
+| TIER3 (68M) | 20% = 13.6M |
+| Courses | 15% |
+| Crystal Products | 10% |
+
+### Partner Tiers:
+| Level | Monthly Sales | Bonus |
+|-------|---------------|-------|
+| Bronze | < 50M | 0% |
+| Silver | 50M - 200M | +2% |
+| Gold | 200M - 500M | +5% |
+| Diamond | > 500M | +10% |
 
 ---
 
-## 7. TIER SYSTEM
+## 8. TIER SYSTEM & ACCESS CONTROL
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/config/tierAccess.js` (278 lines) - Tier definitions
-- `gem-mobile/src/constants/tierFeatures.js` (421 lines) - Feature matrix
-- `gem-mobile/src/services/tierService.js` (798 lines) - Tier logic
-- `gem-mobile/src/services/tierAccessService.js` - Access control
-- `gem-mobile/src/services/subscriptionExpirationService.js` - Expiration
+```
+gem-mobile/src/
+├── config/
+│   └── tierAccess.js             # Tier definitions (278 lines)
+├── constants/
+│   └── tierFeatures.js           # Feature matrix (421 lines)
+└── services/
+    ├── tierService.js            # Tier logic (798 lines)
+    ├── tierAccessService.js      # Access control
+    └── subscriptionExpirationService.js  # Expiration
+```
 
-### Bảng so sánh Tier:
+### BẢNG SO SÁNH TIER CHI TIẾT:
 
-| Tính năng | FREE | TIER1 | TIER2 | TIER3 |
-|-----------|------|-------|-------|-------|
-| **Giá** | Miễn phí | 11M VND | 21M VND | 68M VND |
-| **Số coin** | 20 | 50 | 200 | 437+ |
-| **Số pattern** | 3 | 7 | 15 | 24 |
-| **Scans/ngày** | 10 | 50 | Unlimited | Unlimited |
-| **Multi-TF Scan** | ❌ | ❌ | 3 TF | 5 TF |
-| **Alerts** | ❌ | 3/coin | 10/coin | Unlimited |
-| **Paper Trade** | ❌ | ✅ | ✅ | ✅ |
-| **Advanced Stats** | ❌ | ❌ | ✅ | ✅ |
-| **AI Signals** | ❌ | ❌ | ❌ | ✅ |
-| **Whale Tracking** | ❌ | ❌ | ❌ | ✅ |
+#### Giá & Thời hạn:
+| Tier | Giá (VND) | Giá (USD) | Thời hạn |
+|------|-----------|-----------|----------|
+| FREE | Miễn phí | $0 | Vĩnh viễn |
+| TIER1 | 11,000,000 | ~$440 | 1 năm |
+| TIER2 | 21,000,000 | ~$840 | 1 năm |
+| TIER3 | 68,000,000 | ~$2,720 | Lifetime |
 
-### TIER2+ Enhancements:
-- Volume Confirmation (+8-10% win rate)
-- Trend Analysis (+5-7% win rate)
-- Retest Validation (+8-12% win rate)
-- Quality Filtering (+5-8% win rate)
-- Support/Resistance Confluence (+4-6%)
-- RSI Divergence Detection (+5-8%)
-- Dynamic R:R Optimization (+2-4%)
+#### Scanner Features:
+| Feature | FREE | TIER1 | TIER2 | TIER3 |
+|---------|------|-------|-------|-------|
+| Patterns | 3 | 7 | 15 | 24 |
+| Max Coins/Scan | 1 | 5 | 20 | Unlimited |
+| Scans/Day | 5 | 15 | 50 | Unlimited |
+| Timeframes | 4 | 6 | 10 | 12 |
+| Multi-TF Scan | ❌ | ❌ | 3 TF | 5 TF |
+| Quality Grades | ❌ | ❌ | ✅ | ✅ |
+| Confluence Score | ❌ | ❌ | ✅ | ✅ |
+| Zone Visualization | ✅ | ✅ | ✅ | ✅ |
+
+#### Paper Trade Features:
+| Feature | FREE | TIER1 | TIER2 | TIER3 |
+|---------|------|-------|-------|-------|
+| Paper Trading | ❌ | ✅ | ✅ | ✅ |
+| Max Positions | 0 | 5 | 20 | Unlimited |
+| Max Leverage | N/A | 20x | 50x | 125x |
+| Pattern Mode | ❌ | ✅ | ✅ | ✅ |
+| Custom Mode | ❌ | ❌ | ✅ | ✅ |
+| Pending Orders | ❌ | ❌ | ✅ | ✅ |
+| Trade History | ❌ | 50 | 100 | Unlimited |
+| Statistics | ❌ | Basic | Advanced | Full |
+
+#### Drawing Tools:
+| Feature | FREE | TIER1 | TIER2 | TIER3 |
+|---------|------|-------|-------|-------|
+| Drawing Tools | ✅ | ✅ | ✅ | ✅ |
+| Max Drawings/Chart | 5 | 20 | 50 | Unlimited |
+| Fibonacci | ❌ | ✅ | ✅ | ✅ |
+| Save to Cloud | ❌ | ✅ | ✅ | ✅ |
+
+#### Alerts & Notifications:
+| Feature | FREE | TIER1 | TIER2 | TIER3 |
+|---------|------|-------|-------|-------|
+| Price Alerts | ❌ | 3/coin | 10/coin | Unlimited |
+| Pattern Alerts | ❌ | ✅ | ✅ | ✅ |
+| Push Notifications | ❌ | ✅ | ✅ | ✅ |
+| Email Alerts | ❌ | ❌ | ✅ | ✅ |
+| Telegram Alerts | ❌ | ❌ | ❌ | ✅ |
+
+#### GEM Master AI:
+| Feature | FREE | TIER1 | TIER2 | TIER3 |
+|---------|------|-------|-------|-------|
+| Messages/Day | 10 | 50 | 200 | Unlimited |
+| Voice Input | ❌ | 5/day | 20/day | Unlimited |
+| Product Recs | Basic | Standard | Advanced | Premium |
+| Priority Response | ❌ | ❌ | ✅ | ✅ |
+
+#### Vision Board:
+| Feature | FREE | TIER1 | TIER2 | TIER3 |
+|---------|------|-------|-------|-------|
+| Max Widgets | 10 | 50 | 200 | Unlimited |
+| Max Goals | 3 | 10 | 50 | Unlimited |
+| Habits | 2 | 10 | 50 | Unlimited |
+| Calendar | ❌ | ✅ | ✅ | ✅ |
+| Achievements | Basic | Full | Full | Full |
+
+#### Forum & Community:
+| Feature | FREE | TIER1 | TIER2 | TIER3 |
+|---------|------|-------|-------|-------|
+| Read Posts | ✅ | ✅ | ✅ | ✅ |
+| Create Posts | ❌ | ✅ | ✅ | ✅ |
+| Comments | ❌ | ✅ | ✅ | ✅ |
+| Verified Badge | ❌ | ❌ | ✅ | ✅ |
+| Priority Display | ❌ | ❌ | ❌ | ✅ |
+
+#### Additional Features:
+| Feature | FREE | TIER1 | TIER2 | TIER3 |
+|---------|------|-------|-------|-------|
+| Tarot Readings | 1/day | 5/day | 20/day | Unlimited |
+| I Ching | 1/day | 5/day | 20/day | Unlimited |
+| Courses Access | Free only | TIER1 | TIER2 | ALL |
+| Support | Community | Email | Priority | Personal |
+| AI Signals | ❌ | ❌ | ❌ | ✅ |
+| Whale Tracking | ❌ | ❌ | ❌ | ✅ |
+
+### Pattern Access by Tier:
+```javascript
+const TIER_PATTERNS = {
+  FREE: ['DPD', 'UPU', 'HEAD_SHOULDERS'],  // 3
+
+  TIER1: [
+    ...FREE,
+    'UPD', 'DPU', 'DOUBLE_TOP', 'DOUBLE_BOTTOM'  // +4 = 7
+  ],
+
+  TIER2: [
+    ...TIER1,
+    'INVERSE_HEAD_SHOULDERS', 'ASCENDING_TRIANGLE',
+    'DESCENDING_TRIANGLE', 'HFZ', 'LFZ',
+    'SYMMETRICAL_TRIANGLE', 'ROUNDING_BOTTOM', 'ROUNDING_TOP'  // +8 = 15
+  ],
+
+  TIER3: [
+    ...TIER2,
+    'BULL_FLAG', 'BEAR_FLAG', 'WEDGE', 'CUP_HANDLE',
+    'ENGULFING', 'MORNING_EVENING_STAR', 'THREE_METHODS',
+    'HAMMER', 'FLAG'  // +9 = 24
+  ]
+};
+```
 
 ---
 
-## 8. SHOP (CRYSTAL SHOP)
+## 9. SHOP (CRYSTAL SHOP)
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/services/shopifyService.js` (677 lines) - Shopify integration
-- `gem-mobile/src/config/shopConfig.js` (427 lines) - Shop config
-- `gem-mobile/src/screens/Shop/ShopScreen.js` - Main shop
-- `gem-mobile/src/screens/Shop/ProductDetailScreen.js` - Chi tiết sản phẩm
-- `gem-mobile/src/screens/Shop/ProductListScreen.js` - Danh sách
-- `gem-mobile/src/contexts/CartContext.js` - Cart state
+```
+gem-mobile/src/
+├── services/
+│   └── shopifyService.js         # Shopify integration (677 lines)
+├── config/
+│   └── shopConfig.js             # Shop config (427 lines)
+├── screens/Shop/
+│   ├── ShopScreen.js             # Main shop
+│   ├── ProductDetailScreen.js    # Chi tiết sản phẩm
+│   └── ProductListScreen.js      # Danh sách
+└── contexts/
+    └── CartContext.js            # Cart state
+```
 
 ### Categories:
-| Category | Mô tả |
-|----------|-------|
-| Crystals & Spiritual | Thạch anh, đá năng lượng |
-| Khóa học | Trading courses, Ebooks |
-| GemMaster | Chatbot subscriptions |
-| Scanner | Pattern scanner tiers |
-| Gem Pack | Virtual gems |
+| Category | Tag | Mô tả |
+|----------|-----|-------|
+| Crystals & Spiritual | `crystal` | Thạch anh, đá năng lượng |
+| Khóa học | `course` | Trading courses, Ebooks |
+| GemMaster | `gemmaster` | Chatbot subscriptions |
+| Scanner | `scanner` | Pattern scanner tiers |
+| Gem Pack | `gem-pack` | Virtual gems |
 
 ### Shopify Integration:
 - GraphQL API via Supabase Edge Functions
+- Storefront Access Token
 - Cart system (add, update, remove)
-- Checkout URLs
+- Checkout URLs with UTM tracking
 - Product filtering by tags
-- Recommendations
+- Variant selection
 
 ---
 
-## 9. TAROT
+## 10. TAROT
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/screens/GemMaster/TarotScreen.js` - Main screen
-- `gem-mobile/src/services/tarotInterpretationService.js` - AI interpretation
-- `gem-mobile/src/services/readingHistoryService.js` - History
-- `gem-mobile/src/data/tarot/` - Card data
+```
+gem-mobile/src/
+├── screens/GemMaster/
+│   └── TarotScreen.js            # Main screen
+├── services/
+│   ├── tarotInterpretationService.js  # AI interpretation
+│   └── readingHistoryService.js       # History
+└── data/tarot/                   # Card data
+```
 
 ### Chi tiết tính năng:
 | Tính năng | Mô tả |
 |-----------|-------|
-| Deck | 78 cards (Major + Minor Arcana) |
-| Spread | 3-card spread (Past, Present, Future) |
+| Deck | 78 cards (22 Major + 56 Minor Arcana) |
+| Spread | 3-card (Past, Present, Future) |
 | Shuffle | Fisher-Yates algorithm |
-| Interpretation | AI-powered |
+| Interpretation | AI-powered via Gemini |
 | Reversed Cards | Có hỗ trợ |
 | Crystal Link | Gợi ý crystal phù hợp |
 | History | Lưu lại readings |
 
+### Quota:
+| Tier | Readings/Day |
+|------|--------------|
+| FREE | 1 |
+| TIER1 | 5 |
+| TIER2 | 20 |
+| TIER3 | Unlimited |
+
 ---
 
-## 10. I CHING
+## 11. I CHING
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/screens/GemMaster/IChingScreen.js` - Main screen
-- `gem-mobile/src/components/GemMaster/CoinCastAnimation.js` - Coin animation
-- `gem-mobile/src/components/GemMaster/HexagramBuilder.js` - Build hexagram
-- `gem-mobile/src/data/iching/hexagrams.js` - 64 hexagrams data
+```
+gem-mobile/src/
+├── screens/GemMaster/
+│   └── IChingScreen.js           # Main screen
+├── components/GemMaster/
+│   ├── CoinCastAnimation.js      # Coin animation
+│   └── HexagramBuilder.js        # Build hexagram
+└── data/iching/
+    └── hexagrams.js              # 64 hexagrams data
+```
 
 ### Chi tiết tính năng:
 | Tính năng | Mô tả |
@@ -352,43 +795,82 @@
 | Traditional Mode | Tung 6 đồng xu tạo 6 hào |
 | Hexagrams | 64 quẻ Kinh Dịch |
 | Line Interpretation | Giải thích từng hào |
+| Changing Lines | Hào động |
 | Crystal Link | Gợi ý crystal phù hợp |
 
+### Quota:
+| Tier | Readings/Day |
+|------|--------------|
+| FREE | 1 |
+| TIER1 | 5 |
+| TIER2 | 20 |
+| TIER3 | Unlimited |
+
 ---
 
-## 11. COMMUNITY/FORUM
+## 12. COMMUNITY/FORUM
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/screens/Forum/ForumScreen.js` - Main feed
-- `gem-mobile/src/services/forumService.js` - Forum logic
-- `gem-mobile/src/services/repostService.js` - Repost logic
-- `gem-mobile/src/components/RepostSheet.js` - Repost UI
+```
+gem-mobile/src/
+├── screens/Forum/
+│   └── ForumScreen.js            # Main feed
+├── services/
+│   ├── forumService.js           # Forum logic
+│   └── repostService.js          # Repost logic
+└── components/
+    └── RepostSheet.js            # Repost UI
+```
 
 ### Chi tiết tính năng:
-| Tính năng | Mô tả |
-|-----------|-------|
-| Posting | Đăng bài với text, images |
-| Comments | Bình luận, reply |
-| Likes | Like bài viết |
-| Reposts | Share bài người khác |
-| Feeds | Explore, Following, News, Popular |
-| Categories | Trading, Spiritual, Balance, Market, News |
+| Tính năng | Mô tả | Tier |
+|-----------|-------|------|
+| Posting | Đăng bài với text, images | TIER1+ |
+| Comments | Bình luận, reply | TIER1+ |
+| Likes | Like bài viết | ALL |
+| Reposts | Share bài người khác | TIER1+ |
+| Feeds | Explore, Following, News, Popular | ALL |
+| Report | Báo cáo vi phạm | ALL |
+
+### Categories:
+| Category | Icon | Mô tả |
+|----------|------|-------|
+| Trading | TrendingUp | Trading signals, analysis |
+| Spiritual | Sparkles | Spiritual, mindset |
+| Balance | Yin-Yang | Work-life balance |
+| Market | LineChart | Market news |
+| News | Newspaper | General news |
+
+### Posting Limits:
+| Tier | Posts/Day | Comments/Day | Images/Post |
+|------|-----------|--------------|-------------|
+| FREE | 0 | 0 | 0 |
+| TIER1 | 3 | 20 | 4 |
+| TIER2 | 10 | 50 | 10 |
+| TIER3 | Unlimited | Unlimited | 20 |
 
 ---
 
-## 12. COURSES
+## 13. COURSES
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/screens/Courses/CoursesScreen.js` - Course catalog
-- `gem-mobile/src/screens/Courses/CourseDetailScreen.js` - Chi tiết khóa học
-- `gem-mobile/src/screens/Courses/CertificateScreen.js` - Chứng chỉ
-- `gem-mobile/src/services/courseService.js` - Course logic
-- `gem-mobile/src/contexts/CourseContext.js` - State management
-- `gem-mobile/src/screens/Admin/Courses/` - Admin screens
+```
+gem-mobile/src/
+├── screens/Courses/
+│   ├── CoursesScreen.js          # Course catalog
+│   ├── CourseDetailScreen.js     # Chi tiết khóa học
+│   ├── CourseLearning.jsx        # Learning interface
+│   └── CertificateScreen.js      # Chứng chỉ
+├── services/
+│   └── courseService.js          # Course logic
+├── contexts/
+│   └── CourseContext.js          # State management
+└── screens/Admin/Courses/        # Admin screens
+```
 
 ### Chi tiết tính năng:
 | Tính năng | Mô tả |
@@ -400,59 +882,80 @@
 | Certificates | Chứng chỉ hoàn thành |
 | Progress | Theo dõi tiến độ |
 
+### Course Types:
+| Type | Tier Required | Mô tả |
+|------|---------------|-------|
+| Free | ALL | Khóa miễn phí |
+| TIER1 | TIER1+ | Pattern basics |
+| TIER2 | TIER2+ | Advanced analysis |
+| TIER3 | TIER3 | Full curriculum |
+
 ### Filter Tabs:
 - Tất cả (All)
 - Đang học (In Progress)
 - Hoàn thành (Completed)
+- Bookmark (Đã lưu)
 
 ---
 
-## 13. ALERTS/NOTIFICATIONS
+## 14. ALERTS/NOTIFICATIONS
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/services/alertService.js` (86 lines) - Alert provider
-- `gem-mobile/src/services/alertManager.js` (574 lines) - Alert orchestration
-- `gem-mobile/src/services/alertConditions.js` - Trigger logic
-- `gem-mobile/src/services/notificationService.js` - Notifications
-- `gem-mobile/src/constants/alertConfig.js` - Alert types
-- `gem-mobile/src/components/Scanner/AlertCard.js` - Alert UI
-- `gem-mobile/src/components/Scanner/PriceAlertModal.js` - Price alert modal
+```
+gem-mobile/src/
+├── services/
+│   ├── alertService.js           # Alert provider (86 lines)
+│   ├── alertManager.js           # Alert orchestration (574 lines)
+│   ├── alertConditions.js        # Trigger logic
+│   └── notificationService.js    # Notifications
+├── constants/
+│   └── alertConfig.js            # Alert types
+└── components/Scanner/
+    ├── AlertCard.js              # Alert UI
+    └── PriceAlertModal.js        # Price alert modal
+```
 
 ### Alert Types:
-| Type | Mô tả |
-|------|-------|
-| price_alert | Giá chạm mức đặt |
-| pattern_detected | Scan phát hiện pattern |
-| breakout | Phá vỡ hỗ trợ/kháng cự |
-| stop_loss | Chạm stop loss |
-| take_profit | Chạm take profit |
-| limit_order_filled | Lệnh limit khớp |
-| position_opened | Mở lệnh market |
-
-### Tier Limits:
-| Tier | Alerts/Coin |
-|------|-------------|
-| FREE | 0 (disabled) |
-| TIER1 | 3 |
-| TIER2 | 10 |
-| TIER3 | Unlimited |
+| Type | Trigger | Tier |
+|------|---------|------|
+| `price_alert` | Giá chạm mức đặt | TIER1+ |
+| `pattern_detected` | Scan phát hiện pattern | TIER1+ |
+| `breakout` | Phá vỡ hỗ trợ/kháng cự | TIER2+ |
+| `stop_loss` | Chạm stop loss | TIER1+ |
+| `take_profit` | Chạm take profit | TIER1+ |
+| `limit_order_filled` | Lệnh limit khớp | TIER2+ |
+| `position_opened` | Mở lệnh market | TIER1+ |
+| `whale_alert` | Large order detected | TIER3 |
 
 ### Notification Categories:
-- **TRADING**: pattern_detected, price_alert, trade_executed
-- **SOCIAL**: forum_like, comment, follow, mention
-- **SYSTEM**: order, promotion, reminder
+| Category | Types |
+|----------|-------|
+| TRADING | pattern_detected, price_alert, trade_executed |
+| SOCIAL | forum_like, comment, follow, mention |
+| SYSTEM | order, promotion, reminder |
+
+### Tier Limits:
+| Tier | Alerts/Coin | Total Alerts | Push | Email |
+|------|-------------|--------------|------|-------|
+| FREE | 0 | 0 | ❌ | ❌ |
+| TIER1 | 3 | 15 | ✅ | ❌ |
+| TIER2 | 10 | 100 | ✅ | ✅ |
+| TIER3 | Unlimited | Unlimited | ✅ | ✅ |
 
 ---
 
-## 14. MARKET DATA
+## 15. MARKET DATA
 
 ### Trạng thái: ✅ Hoạt động
 
 ### Files liên quan:
-- `gem-mobile/src/services/binanceService.js` - Main service
-- `gem-mobile/src/services/binanceApiService.js` - API wrapper
+```
+gem-mobile/src/services/
+├── binanceService.js             # Main service
+└── binanceApiService.js          # API wrapper
+```
 
 ### Chi tiết tính năng:
 | Tính năng | Mô tả |
@@ -460,142 +963,226 @@
 | REST API | Binance Spot + Futures |
 | WebSocket | Real-time price streaming |
 | Candle Data | OHLCV all timeframes |
-| Coins | 437+ USDT Perpetual pairs |
+| Coins | 500+ USDT Perpetual pairs |
 | Caching | 5-minute cache |
-| Volume | Total + USDT volume |
+| Fallback | Futures → Spot fallback |
 
 ### API Endpoints:
-- `https://api.binance.com/api/v3` - Spot
-- `https://fapi.binance.com/fapi/v1` - Futures
+| Type | Base URL |
+|------|----------|
+| Spot REST | `https://api.binance.com/api/v3` |
+| Futures REST | `https://fapi.binance.com/fapi/v1` |
+| Futures WebSocket | `wss://fstream.binance.com/ws/` |
+| Spot WebSocket | `wss://stream.binance.com:9443/ws/` |
+
+### WebSocket Streams:
+```javascript
+// Price ticker
+`${symbol.toLowerCase()}@ticker`
+
+// Kline/Candlestick
+`${symbol.toLowerCase()}@kline_${interval}`
+```
+
+### Rate Limits:
+| Type | Limit |
+|------|-------|
+| REST requests | 1200/min |
+| WebSocket connections | 5/stream |
+| Order updates | 10/second |
 
 ---
 
-## TỔNG HỢP THEO TIER
+## 16. QUOTA SYSTEM CHI TIẾT
 
-### FREE TIER (Miễn phí)
-| Tính năng | Giới hạn |
-|-----------|----------|
-| Scanner | 10 scans/ngày, 20 coins, 3 patterns |
-| GEM Master | Quota limited |
-| Vision Board | Basic features |
-| Forum | Read only |
-| Tarot/I Ching | Limited readings |
+### Daily Reset:
+- Quotas reset at 00:00 UTC
+- Stored in Supabase `user_quotas` table
+- Cached locally in AsyncStorage
 
-### TIER 1 (11M VND)
-| Tính năng | Giới hạn |
-|-----------|----------|
-| Scanner | 50 scans/ngày, 50 coins, 7 patterns |
-| Paper Trade | Full access |
-| Alerts | 3 alerts/coin |
-| GEM Master | Extended quota |
+### Quota Tracking:
+```sql
+CREATE TABLE user_quotas (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
+  quota_type VARCHAR(50) NOT NULL,
+  used INTEGER DEFAULT 0,
+  max_allowed INTEGER NOT NULL,
+  reset_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
 
-### TIER 2 (21M VND)
-| Tính năng | Giới hạn |
-|-----------|----------|
-| Scanner | Unlimited, 200 coins, 15 patterns, 3 TF |
-| Advanced Stats | Volume, Trend, RSI analysis |
-| Alerts | 10 alerts/coin |
-| Quality Grades | A+, A, B+, B, C, D |
+### Quota Types:
+| Type | FREE | TIER1 | TIER2 | TIER3 |
+|------|------|-------|-------|-------|
+| `scan_daily` | 5 | 15 | 50 | -1 (unlimited) |
+| `paper_trade_positions` | 0 | 5 | 20 | -1 |
+| `ai_messages` | 10 | 50 | 200 | -1 |
+| `voice_messages` | 0 | 5 | 20 | -1 |
+| `tarot_readings` | 1 | 5 | 20 | -1 |
+| `iching_readings` | 1 | 5 | 20 | -1 |
+| `forum_posts` | 0 | 3 | 10 | -1 |
+| `alerts` | 0 | 15 | 100 | -1 |
+| `rituals` | 2 | 5 | 10 | -1 |
 
-### TIER 3 (68M VND)
-| Tính năng | Giới hạn |
-|-----------|----------|
-| Scanner | Unlimited, 437+ coins, 24 patterns, 5 TF |
-| AI Signals | Real-time AI signals |
-| Whale Tracking | Large order detection |
-| Alerts | Unlimited |
-| Priority Support | Personal mentoring |
-
----
-
-## GỢI Ý NỘI DUNG KHÓA HỌC
-
-### Tier 1 - Cơ Bản (11M VND)
-1. **Giới thiệu App GEM**
-   - Cài đặt và setup
-   - Tour các tính năng chính
-   - Cách đọc giao diện Scanner
-
-2. **3 Pattern Cơ Bản**
-   - DPD (Down-Peak-Down) - Khi nào bán
-   - UPU (Up-Peak-Up) - Khi nào mua
-   - Head & Shoulders - Đảo chiều
-
-3. **Paper Trade Cơ Bản**
-   - Cách đặt lệnh từ pattern
-   - Hiểu Stop Loss và Take Profit
-   - Đọc P&L và thống kê
-
-4. **Quản Lý Rủi Ro**
-   - Tính toán position size
-   - Risk/Reward ratio
-   - Không trade khi FOMO
-
-5. **GEM Master AI**
-   - Cách hỏi AI về trading
-   - Karma system
-   - Trading psychology
-
-### Tier 2 - Nâng Cao (21M VND)
-1. **Master 15 Patterns**
-   - Triangles (Ascending, Descending, Symmetrical)
-   - HFZ/LFZ - Frequency Zones
-   - Double Top/Bottom
-   - Inverse Head & Shoulders
-
-2. **Multi-Timeframe Analysis**
-   - Scan 3 timeframe cùng lúc
-   - Confluence detection
-   - Higher timeframe confirmation
-
-3. **Advanced Enhancements**
-   - Volume confirmation
-   - Trend context analysis
-   - RSI divergence
-
-4. **Quality Grading System**
-   - A+ trades vs D trades
-   - Chọn lọc pattern chất lượng
-   - Backtest results
-
-5. **Vision Board Integration**
-   - Đặt mục tiêu trading
-   - Tracking progress
-   - Trading journal
-
-### Tier 3 - Chuyên Gia (68M VND)
-1. **All 24 Patterns Mastery**
-   - Candlestick patterns (Engulfing, Stars, Hammer)
-   - Continuation patterns (Flags, Wedge)
-   - Advanced reversal patterns
-
-2. **AI Signals & Whale Tracking**
-   - Real-time AI signals
-   - Large order detection
-   - Market manipulation awareness
-
-3. **Advanced Risk Management**
-   - Portfolio management
-   - Correlation analysis
-   - Drawdown control
-
-4. **Trading Psychology Deep Dive**
-   - Karma system mastery
-   - Emotional control
-   - Meditation & rituals
-
-5. **Personal Mentoring**
-   - 1-on-1 coaching
-   - Trade review sessions
-   - Custom strategy development
+### Overage Handling:
+- Soft limit: Warning message
+- Hard limit: Feature blocked
+- Upgrade prompt shown
 
 ---
 
-## LƯU Ý
+## 17. DATABASE SCHEMA
 
-- Tất cả 14 tính năng đã được implement đầy đủ trong codebase
-- Báo cáo dựa trên code thực tế, không bịa thêm
-- Database sử dụng Supabase với 161+ migrations
-- Real-time data từ Binance WebSocket
-- AI chatbot sử dụng Google Gemini API
-- Shop tích hợp Shopify GraphQL API
+### Supabase Tables:
+| Table | Mô tả | RLS |
+|-------|-------|-----|
+| `users` | User profiles | ✅ |
+| `user_tiers` | Tier subscriptions | ✅ |
+| `user_quotas` | Quota tracking | ✅ |
+| `paper_positions` | Open positions | ✅ |
+| `paper_history` | Trade history | ✅ |
+| `pending_orders` | Limit orders | ✅ |
+| `chart_drawings` | Drawing tools | ✅ |
+| `trading_mindset_logs` | Mindset assessments | ✅ |
+| `vision_widgets` | Vision board widgets | ✅ |
+| `ritual_history` | Ritual completions | ✅ |
+| `forum_posts` | Forum posts | ✅ |
+| `forum_comments` | Comments | ✅ |
+| `reading_history` | Tarot/I Ching history | ✅ |
+| `alerts` | User alerts | ✅ |
+| `notifications` | Push notifications | ✅ |
+| `affiliate_links` | Referral links | ✅ |
+| `affiliate_commissions` | Commission tracking | ✅ |
+| `course_progress` | Learning progress | ✅ |
+
+### Key Constraints:
+```sql
+-- MindsetAdvisor allowed values
+CHECK (source_screen IN (
+  'paper_trade_modal', 'gemmaster', 'quick_action', 'scanner'
+))
+
+-- Trade direction
+CHECK (direction IN ('LONG', 'SHORT'))
+
+-- Position status
+CHECK (status IN ('OPEN', 'CLOSED', 'PENDING'))
+
+-- Order type
+CHECK (order_type IN ('MARKET', 'LIMIT'))
+```
+
+### Migrations Count:
+- **170+ migrations** applied
+- Latest: `20260124_mindset_logs.sql`
+
+---
+
+## 18. NUMBER FORMATTING (Vietnamese Locale)
+
+### File: `gem-mobile/src/utils/formatters.js`
+
+### Format Rules:
+| Format | EN | VI |
+|--------|----|----|
+| Decimal | `.` | `,` |
+| Thousands | `,` | `.` |
+| Example | `$259,174.55` | `$259.174,55` |
+
+### Functions:
+```javascript
+// Price - dynamic precision
+formatPrice(price, withSeparators = true)
+// >= 1000:    2 decimals (90.363,84)
+// >= 1:       4 decimals (13,5752)
+// >= 0.01:    4 decimals (0,3195) ← Match chart
+// >= 0.0001:  6 decimals
+// < 0.0001:   8 decimals
+
+// Percentages
+formatConfidence(value, decimals = 1)  // 85.234 → "85,2%"
+formatPercent(value, decimals = 1)     // 82.872 → "82,9%"
+formatPercentChange(value)             // +3.2 → "+3,20%"
+
+// Currency
+formatCurrency(amount, decimals = 2)   // 9040 → "9.040,00"
+
+// Large numbers
+formatLargeNumber(num)                 // 1500000 → "1,50M"
+formatVolume(volume)                   // Same
+formatMarketCap(marketCap)             // → "$1,00B"
+
+// Risk/Reward
+formatRiskReward(entry, sl, tp)        // → "1:2,50"
+calculateRR(pattern)                   // Returns number
+
+// Time
+formatTimestamp(timestamp)             // → "24/01/2026, 14:30"
+formatRelativeTime(timestamp)          // → "2 giờ trước"
+```
+
+---
+
+## LƯU Ý QUAN TRỌNG
+
+### Technical Stack:
+- **Frontend:** React Native + Expo SDK 52
+- **Charts:** lightweight-charts v4.1.0 (WebView)
+- **API:** Binance Futures + Spot REST/WebSocket
+- **Database:** Supabase (PostgreSQL + Real-time)
+- **AI:** Google Gemini API
+- **Shop:** Shopify GraphQL API
+- **Auth:** Supabase Auth + Social Login
+
+### Security:
+- Row Level Security (RLS) on all tables
+- JWT token validation
+- API keys stored in environment
+- Secure WebSocket connections
+
+### Performance:
+- 5-minute cache for market data
+- Lazy loading for heavy components
+- Memoization for expensive calculations
+- Batch API requests (50 coins/batch)
+
+### Real-time Features:
+- WebSocket price streaming
+- Chart updates every tick
+- P&L sync via onPriceUpdate callback
+- Auto SL/TP monitoring (10s interval)
+
+---
+
+## CHANGELOG
+
+### v3.1 (2026-01-24)
+- Zone positioning fix (formation_time)
+- P&L real-time sync (onPriceUpdate)
+- MindsetAdvisor integration
+- Vietnamese number formatting
+- Database constraint fixes
+
+### v3.0 (2025-12-20)
+- Drawing Tools (6 tools)
+- Pending Orders (LIMIT)
+- Custom Trade Mode
+- Pattern vs Custom badges
+
+### v2.0 (2025-12-13)
+- Custom initial balance
+- Reset account features
+- Balance recalculation
+- Equity calculation
+
+### v1.0 (Initial)
+- Core scanner
+- 24 patterns
+- Paper trading
+- Tier system
+
+---
+
+**END OF DOCUMENT**

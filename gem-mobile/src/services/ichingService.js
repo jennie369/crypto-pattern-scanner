@@ -6,6 +6,7 @@
 
 import { supabase } from './supabase';
 import { GEMINI_CONFIG } from '../config/gemini.config';
+import HEXAGRAM_DATABASE, { getHexagramByNumber, getTradingInterpretation, getAllHexagrams } from '../data/ichingHexagrams';
 
 // ============ TRIGRAMS (8 Quái) ============
 export const TRIGRAMS = {
@@ -19,35 +20,19 @@ export const TRIGRAMS = {
   lake: { lines: [0, 1, 1], name: 'Duì', nameVi: 'Đoài', element: 'Kim', meaning: 'Hồ', attribute: 'Vui vẻ' },
 };
 
-// ============ 64 HEXAGRAMS ============
-export const HEXAGRAMS = [
-  { number: 1, name: 'Qián', nameVi: 'Càn', meaning: 'The Creative', meaningVi: 'Thuần Càn - Sáng tạo', lines: [1, 1, 1, 1, 1, 1], upper: 'heaven', lower: 'heaven' },
-  { number: 2, name: 'Kūn', nameVi: 'Khôn', meaning: 'The Receptive', meaningVi: 'Thuần Khôn - Tiếp nhận', lines: [0, 0, 0, 0, 0, 0], upper: 'earth', lower: 'earth' },
-  { number: 3, name: 'Zhūn', nameVi: 'Truân', meaning: 'Difficulty at Beginning', meaningVi: 'Thủy Lôi Truân - Khó khăn ban đầu', lines: [0, 1, 0, 1, 0, 0], upper: 'water', lower: 'thunder' },
-  { number: 4, name: 'Méng', nameVi: 'Mông', meaning: 'Youthful Folly', meaningVi: 'Sơn Thủy Mông - Ngu dại', lines: [0, 0, 1, 0, 1, 0], upper: 'mountain', lower: 'water' },
-  { number: 5, name: 'Xū', nameVi: 'Nhu', meaning: 'Waiting', meaningVi: 'Thủy Thiên Nhu - Chờ đợi', lines: [0, 1, 0, 1, 1, 1], upper: 'water', lower: 'heaven' },
-  { number: 6, name: 'Sòng', nameVi: 'Tụng', meaning: 'Conflict', meaningVi: 'Thiên Thủy Tụng - Tranh tụng', lines: [1, 1, 1, 0, 1, 0], upper: 'heaven', lower: 'water' },
-  { number: 7, name: 'Shī', nameVi: 'Sư', meaning: 'The Army', meaningVi: 'Địa Thủy Sư - Quân đội', lines: [0, 0, 0, 0, 1, 0], upper: 'earth', lower: 'water' },
-  { number: 8, name: 'Bǐ', nameVi: 'Tỷ', meaning: 'Holding Together', meaningVi: 'Thủy Địa Tỷ - Liên kết', lines: [0, 1, 0, 0, 0, 0], upper: 'water', lower: 'earth' },
-  { number: 9, name: 'Xiǎo Chù', nameVi: 'Tiểu Súc', meaning: 'Small Taming', meaningVi: 'Phong Thiên Tiểu Súc', lines: [1, 1, 0, 1, 1, 1], upper: 'wind', lower: 'heaven' },
-  { number: 10, name: 'Lǚ', nameVi: 'Lý', meaning: 'Treading', meaningVi: 'Thiên Trạch Lý - Bước đi', lines: [1, 1, 1, 0, 1, 1], upper: 'heaven', lower: 'lake' },
-  { number: 11, name: 'Tài', nameVi: 'Thái', meaning: 'Peace', meaningVi: 'Địa Thiên Thái - Thái hòa', lines: [0, 0, 0, 1, 1, 1], upper: 'earth', lower: 'heaven' },
-  { number: 12, name: 'Pǐ', nameVi: 'Bĩ', meaning: 'Standstill', meaningVi: 'Thiên Địa Bĩ - Bế tắc', lines: [1, 1, 1, 0, 0, 0], upper: 'heaven', lower: 'earth' },
-  { number: 13, name: 'Tóng Rén', nameVi: 'Đồng Nhân', meaning: 'Fellowship', meaningVi: 'Thiên Hỏa Đồng Nhân', lines: [1, 1, 1, 1, 0, 1], upper: 'heaven', lower: 'fire' },
-  { number: 14, name: 'Dà Yǒu', nameVi: 'Đại Hữu', meaning: 'Great Possession', meaningVi: 'Hỏa Thiên Đại Hữu', lines: [1, 0, 1, 1, 1, 1], upper: 'fire', lower: 'heaven' },
-  { number: 15, name: 'Qiān', nameVi: 'Khiêm', meaning: 'Modesty', meaningVi: 'Địa Sơn Khiêm - Khiêm tốn', lines: [0, 0, 0, 0, 0, 1], upper: 'earth', lower: 'mountain' },
-  { number: 16, name: 'Yù', nameVi: 'Dự', meaning: 'Enthusiasm', meaningVi: 'Lôi Địa Dự - Hoan hỉ', lines: [1, 0, 0, 0, 0, 0], upper: 'thunder', lower: 'earth' },
-  { number: 17, name: 'Suí', nameVi: 'Tùy', meaning: 'Following', meaningVi: 'Trạch Lôi Tùy - Theo dõi', lines: [0, 1, 1, 1, 0, 0], upper: 'lake', lower: 'thunder' },
-  { number: 18, name: 'Gǔ', nameVi: 'Cổ', meaning: 'Work on Decayed', meaningVi: 'Sơn Phong Cổ - Sửa chữa', lines: [0, 0, 1, 1, 1, 0], upper: 'mountain', lower: 'wind' },
-  { number: 19, name: 'Lín', nameVi: 'Lâm', meaning: 'Approach', meaningVi: 'Địa Trạch Lâm - Tiếp cận', lines: [0, 0, 0, 0, 1, 1], upper: 'earth', lower: 'lake' },
-  { number: 20, name: 'Guān', nameVi: 'Quán', meaning: 'Contemplation', meaningVi: 'Phong Địa Quán - Chiêm ngưỡng', lines: [1, 1, 0, 0, 0, 0], upper: 'wind', lower: 'earth' },
-  // Continue with remaining hexagrams...
-  { number: 29, name: 'Kǎn', nameVi: 'Khảm', meaning: 'The Abysmal Water', meaningVi: 'Thuần Khảm - Hiểm nguy', lines: [0, 1, 0, 0, 1, 0], upper: 'water', lower: 'water' },
-  { number: 30, name: 'Lí', nameVi: 'Ly', meaning: 'The Clinging Fire', meaningVi: 'Thuần Ly - Lửa sáng', lines: [1, 0, 1, 1, 0, 1], upper: 'fire', lower: 'fire' },
-  { number: 45, name: 'Cuì', nameVi: 'Tụ', meaning: 'Gathering Together', meaningVi: 'Trạch Địa Tụ - Tập hợp', lines: [0, 1, 1, 0, 0, 0], upper: 'lake', lower: 'earth' },
-  { number: 63, name: 'Jì Jì', nameVi: 'Ký Tế', meaning: 'After Completion', meaningVi: 'Thủy Hỏa Ký Tế', lines: [0, 1, 0, 1, 0, 1], upper: 'water', lower: 'fire' },
-  { number: 64, name: 'Wèi Jì', nameVi: 'Vị Tế', meaning: 'Before Completion', meaningVi: 'Hỏa Thủy Vị Tế', lines: [1, 0, 1, 0, 1, 0], upper: 'fire', lower: 'water' },
-];
+// ============ 64 HEXAGRAMS (từ ichingHexagrams.js) ============
+// Sử dụng đầy đủ 64 quẻ từ HEXAGRAM_DATABASE
+export const HEXAGRAMS = getAllHexagrams().map(hex => ({
+  number: hex.number,
+  name: hex.name,
+  nameVi: hex.name,
+  meaning: hex.meaning,
+  meaningVi: hex.meaning,
+  lines: hex.lines,
+  chinese: hex.chinese,
+  essence: hex.essence,
+  trading: hex.trading,
+}));
 
 // ============ THROW COINS ============
 export const throwCoins = () => {
@@ -130,23 +115,50 @@ export const getAIInterpretation = async (hexagram, question) => {
       ? `Quẻ biến: ${hexagram.relatingHexagram.number}. ${hexagram.relatingHexagram.nameVi} (${hexagram.relatingHexagram.meaningVi})`
       : '';
 
-    const prompt = `Bạn là một đạo sĩ Kinh Dịch với 30 năm kinh nghiệm. Hãy giải quẻ sau:
+    // Get trading knowledge from database
+    const hexData = getHexagramByNumber(hexagram.primaryHexagram.number);
+    const tradingInfo = hexData ? getTradingInterpretation(hexData) : null;
+    const tradingContext = tradingInfo
+      ? `\n\n📊 DỮ LIỆU TRADING TỪ KNOWLEDGE BASE:
+- Xu hướng: ${tradingInfo.trend}
+- Tín hiệu: ${tradingInfo.signal}
+- Hành động: ${tradingInfo.actionList.join(', ')}`
+      : '';
 
-Câu hỏi: ${question || 'Điều gì đang chờ đợi tôi?'}
+    const prompt = `Bạn là Master Sư Phụ - một đạo sĩ Kinh Dịch kết hợp với trading crypto. Giải quẻ theo format sau:
 
-Quẻ chính: ${hexagram.primaryHexagram.number}. ${hexagram.primaryHexagram.nameVi} (${hexagram.primaryHexagram.meaningVi})
+Câu hỏi: ${question || 'Thị trường crypto hôm nay như thế nào?'}
+
+**QUẺ ${hexagram.primaryHexagram.number} - ${hexagram.primaryHexagram.nameVi.toUpperCase()}** ${hexData?.chinese || ''}
+
 ${changingLinesText}
 ${relatingText}
+${tradingContext}
 
-Hãy đưa ra:
-1. Ý nghĩa tổng quát của quẻ (2-3 câu)
-2. Giải thích liên quan đến câu hỏi
-3. Nếu có hào động, giải thích ý nghĩa của các hào động
-4. Nếu có quẻ biến, giải thích sự biến đổi
-5. Lời khuyên cụ thể cho người hỏi (3-4 điểm)
-6. Nếu liên quan đến tài chính/đầu tư, đưa ra góc nhìn trading
+---
 
-Trả lời bằng tiếng Việt, giọng văn uyên bác nhưng dễ hiểu. Sử dụng emoji phù hợp.`;
+TRƯỚC TIÊN, cho output NGẮN GỌN như format này:
+
+**Ý nghĩa:** [1 câu ngắn gọn về bản chất quẻ]
+
+**📊 Góc nhìn thị trường:**
+→ [Xu hướng thị trường: sideway/uptrend/downtrend/volatile]
+→ [1 hành động cụ thể]
+→ [1 lời nhắc quan trọng]
+
+**🔮 Lời khuyên:**
+[2-3 câu ngắn, súc tích, dễ hiểu]
+
+---
+
+SAU ĐÓ, nếu có hào động hoặc quẻ biến, giải thích thêm ngắn gọn.
+
+QUAN TRỌNG:
+- Giọng văn uyên bác nhưng DỄ HIỂU
+- Sử dụng emoji phù hợp
+- KHÔNG viết dài dòng
+- Nếu câu hỏi về trading/crypto, ưu tiên góc nhìn thị trường
+- Dùng → để bullet point`;
 
     const apiKey = GEMINI_CONFIG.apiKey;
 

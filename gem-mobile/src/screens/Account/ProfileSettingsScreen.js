@@ -19,6 +19,7 @@ import alertService from '../../services/alertService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import {
   ArrowLeft,
   Camera,
@@ -101,6 +102,16 @@ export default function ProfileSettingsScreen({ navigation }) {
     }
   };
 
+  // Helper to convert base64 to ArrayBuffer (React Native compatible)
+  const base64ToArrayBuffer = (base64) => {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  };
+
   const uploadAvatar = async (uri) => {
     try {
       setUploading(true);
@@ -108,14 +119,18 @@ export default function ProfileSettingsScreen({ navigation }) {
       // Create file name
       const fileName = `avatar_${user.id}_${Date.now()}.jpg`;
 
-      // Fetch the image
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      // Read file as base64 (React Native compatible)
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert to ArrayBuffer
+      const arrayBuffer = base64ToArrayBuffer(base64);
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('avatars')
-        .upload(fileName, blob, {
+        .upload(fileName, arrayBuffer, {
           contentType: 'image/jpeg',
           upsert: true,
         });

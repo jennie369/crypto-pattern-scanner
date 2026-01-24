@@ -226,7 +226,7 @@ const CrystalRecommendationNew = ({ context, limit = 4, onQuickBuy }) => {
       title: product.title || 'Sản phẩm',
       handle: product.handle || '',
       description: product.description || '',
-      descriptionHtml: product.descriptionHtml || product.description || '',
+      descriptionHtml: product.description_html || product.descriptionHtml || product.description || '',
       vendor: product.vendor || '',
       productType: product.productType || '',
       tags: product.tags || [],

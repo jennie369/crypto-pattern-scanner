@@ -161,6 +161,22 @@ class TierService {
         affirmations: -1,
         habits: -1,
       }
+    },
+    MANAGER: {
+      queries: -1,      // Unlimited
+      voice: -1,        // Unlimited voice
+      scanner: 'MANAGER',
+      chatbot: 'MANAGER',
+      patterns: -1,     // Unlimited patterns
+      name: 'Manager',
+      color: '#FF00FF', // Magenta for manager (same as admin)
+      // Vision Board limits - Unlimited
+      visionBoard: {
+        goals: -1,
+        actionsPerGoal: -1,
+        affirmations: -1,
+        habits: -1,
+      }
     }
   };
 
@@ -175,7 +191,8 @@ class TierService {
     'PREMIUM': 2,
     'TIER3': 3,
     'VIP': 3,
-    'ADMIN': 99  // Admin has highest priority
+    'MANAGER': 99,  // Manager has same priority as Admin
+    'ADMIN': 99     // Admin has highest priority
   };
 
   /**
@@ -205,7 +222,7 @@ class TierService {
         console.error('[TierService] Profile error:', profileError);
       }
 
-      // ADMIN CHECK: If user is admin, return ADMIN tier (unlimited access)
+      // ADMIN/MANAGER CHECK: If user is admin or manager, return appropriate tier (unlimited access)
       if (profile) {
         const isAdmin = profile.is_admin === true ||
                         profile.role === 'admin' ||
@@ -213,17 +230,28 @@ class TierService {
                         profile.scanner_tier === 'ADMIN' ||
                         profile.chatbot_tier === 'ADMIN';
 
-        console.log('[TierService] Admin check:', {
+        const isManager = profile.role === 'manager' ||
+                          profile.role === 'MANAGER' ||
+                          profile.scanner_tier === 'MANAGER' ||
+                          profile.chatbot_tier === 'MANAGER';
+
+        console.log('[TierService] Admin/Manager check:', {
           is_admin: profile.is_admin,
           role: profile.role,
           scanner_tier: profile.scanner_tier,
           chatbot_tier: profile.chatbot_tier,
-          isAdminResult: isAdmin
+          isAdminResult: isAdmin,
+          isManagerResult: isManager
         });
 
         if (isAdmin) {
           console.log(`[TierService] User ${userId} is ADMIN - granting ADMIN access (unlimited)`);
           return 'ADMIN'; // Admin gets unlimited access
+        }
+
+        if (isManager) {
+          console.log(`[TierService] User ${userId} is MANAGER - granting MANAGER access (unlimited)`);
+          return 'MANAGER'; // Manager gets unlimited access
         }
       }
 
@@ -314,7 +342,8 @@ class TierService {
       'TIER_1': 'TIER1',
       'TIER_2': 'TIER2',
       'TIER_3': 'TIER3',
-      'ADMIN': 'ADMIN'  // Keep ADMIN as is
+      'ADMIN': 'ADMIN',    // Keep ADMIN as is
+      'MANAGER': 'MANAGER' // Keep MANAGER as is
     };
 
     return tierMap[upperTier] || 'FREE';
@@ -368,8 +397,8 @@ class TierService {
   static getNextTierInfo(currentTier) {
     const normalizedTier = this.normalizeTier(currentTier);
 
-    // ADMIN and TIER3/VIP don't need upgrades
-    if (normalizedTier === 'ADMIN' || normalizedTier === 'TIER3') {
+    // ADMIN, MANAGER and TIER3/VIP don't need upgrades
+    if (normalizedTier === 'ADMIN' || normalizedTier === 'MANAGER' || normalizedTier === 'TIER3') {
       return null;
     }
 

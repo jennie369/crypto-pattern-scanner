@@ -28,25 +28,32 @@ export const useReactions = (conversationId) => {
 
       const { data, error: fetchError } = await supabase
         .from('message_reactions')
-        .select(`
-          id,
-          message_id,
-          user_id,
-          emoji,
-          created_at,
-          users:user_id (
-            id,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('id, message_id, user_id, emoji, created_at')
         .eq('conversation_id', conversationId);
 
       if (fetchError) throw fetchError;
 
+      if (!data || data.length === 0) {
+        setReactions({});
+        return;
+      }
+
+      // Fetch profiles for all users
+      const userIds = [...new Set(data.map(r => r.user_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, username, avatar_url')
+        .in('id', userIds);
+
+      const profilesMap = {};
+      profiles?.forEach(p => {
+        p.display_name = p.full_name || p.display_name || p.username || 'User';
+        profilesMap[p.id] = p;
+      });
+
       // Group reactions by message_id
       const grouped = {};
-      (data || []).forEach((reaction) => {
+      data.forEach((reaction) => {
         const msgId = reaction.message_id;
         if (!grouped[msgId]) {
           grouped[msgId] = [];
@@ -55,7 +62,7 @@ export const useReactions = (conversationId) => {
           id: reaction.id,
           emoji: reaction.emoji,
           user_id: reaction.user_id,
-          user: reaction.users,
+          user: profilesMap[reaction.user_id] || null,
           created_at: reaction.created_at,
         });
       });

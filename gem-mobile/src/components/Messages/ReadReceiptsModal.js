@@ -70,22 +70,35 @@ const ReadReceiptsModal = memo(({
 
         const { data, error } = await supabase
           .from('message_read_receipts')
-          .select(`
-            id,
-            user_id,
-            read_at,
-            users:user_id(
-              id,
-              display_name,
-              avatar_url
-            )
-          `)
+          .select('id, user_id, read_at')
           .eq('message_id', message.id)
           .order('read_at', { ascending: true });
 
         if (error) throw error;
 
-        setReadReceipts(data || []);
+        if (!data || data.length === 0) {
+          setReadReceipts([]);
+          return;
+        }
+
+        // Fetch profiles for all users
+        const userIds = [...new Set(data.map(r => r.user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url')
+          .in('id', userIds);
+
+        const profilesMap = {};
+        profiles?.forEach(p => {
+          p.display_name = p.full_name || p.display_name || p.username || 'User';
+          profilesMap[p.id] = p;
+        });
+
+        // Attach profiles to receipts
+        setReadReceipts(data.map(receipt => ({
+          ...receipt,
+          profiles: profilesMap[receipt.user_id] || null
+        })));
       } catch (err) {
         console.error('[ReadReceiptsModal] Fetch error:', err);
       } finally {
@@ -112,8 +125,8 @@ const ReadReceiptsModal = memo(({
 
       return {
         userId,
-        displayName: participant.users?.display_name || participant.display_name || 'Người dùng',
-        avatarUrl: participant.users?.avatar_url || participant.avatar_url,
+        displayName: participant.profiles?.display_name || participant.display_name || 'Người dùng',
+        avatarUrl: participant.profiles?.avatar_url || participant.avatar_url,
         hasRead: !!receipt,
         readAt: receipt?.read_at,
       };

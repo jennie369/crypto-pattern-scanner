@@ -195,7 +195,7 @@ const CourseCardVertical = ({
         {/* Price or status */}
         {!isEnrolled && (
           <View style={styles.priceContainer}>
-            {is_free || price === 0 ? (
+            {is_free || !price || price === 0 ? (
               <Text style={styles.freeText}>Miễn phí</Text>
             ) : (
               <Text style={styles.priceText}>{price.toLocaleString('vi-VN')}đ</Text>

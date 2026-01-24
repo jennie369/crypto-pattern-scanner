@@ -6,6 +6,15 @@
 import { supabase } from './supabase';
 
 // ========================================
+// BANNER CACHE - for instant display
+// ========================================
+const bannerCache = {
+  data: null,
+  lastFetch: 0,
+  CACHE_DURATION: 30000, // 30 seconds cache
+};
+
+// ========================================
 // ADMIN CRUD OPERATIONS
 // ========================================
 
@@ -33,26 +42,42 @@ export const getAllShopBanners = async () => {
 };
 
 /**
- * Get active shop banners (user view)
- * @returns {Promise<{success: boolean, data: Array, error?: string}>}
+ * Get active shop banners (user view) - with caching for instant display
+ * @param {boolean} forceRefresh - Force refresh from server
+ * @returns {Promise<{success: boolean, data: Array, error?: string, cached?: boolean}>}
  */
-export const getActiveShopBanners = async () => {
+export const getActiveShopBanners = async (forceRefresh = false) => {
   try {
-    const now = new Date().toISOString();
+    const now = Date.now();
+
+    // Return cached data if still fresh and not forcing refresh
+    if (!forceRefresh && bannerCache.data && (now - bannerCache.lastFetch < bannerCache.CACHE_DURATION)) {
+      return { success: true, data: bannerCache.data, cached: true };
+    }
+
+    const nowISO = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('shop_banners')
       .select('*')
       .eq('is_active', true)
-      .or(`start_date.is.null,start_date.lte.${now}`)
-      .or(`end_date.is.null,end_date.gte.${now}`)
+      .or(`start_date.is.null,start_date.lte.${nowISO}`)
+      .or(`end_date.is.null,end_date.gte.${nowISO}`)
       .order('display_order', { ascending: true });
 
     if (error) throw error;
 
+    // Update cache
+    bannerCache.data = data || [];
+    bannerCache.lastFetch = now;
+
     return { success: true, data: data || [] };
   } catch (error) {
     console.error('[shopBannerService] getActiveShopBanners error:', error);
+    // Return cached data on error if available
+    if (bannerCache.data) {
+      return { success: true, data: bannerCache.data, cached: true };
+    }
     return { success: false, data: [], error: error.message };
   }
 };

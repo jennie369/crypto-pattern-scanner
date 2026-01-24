@@ -174,13 +174,16 @@ const PaperTradeContent = ({ pattern, onClose, onSuccess }) => {
 
   // Get take profit value (support multiple field names from different patterns)
   // MUST be defined BEFORE patternTP uses it
+  // Support both camelCase (patternDetection) and snake_case (zoneManager) naming
   const getTakeProfit = () => {
-    return pattern.target || pattern.takeProfit || pattern.takeProfit1 || pattern.targets?.[0] || (pattern.entry * (isLong ? 1.02 : 0.98));
+    return pattern.target || pattern.takeProfit || pattern.takeProfit1 ||
+           pattern.target_1 || pattern.take_profit || pattern.tp ||
+           pattern.targets?.[0] || ((pattern.entry || pattern.entry_price) * (isLong ? 1.02 : 0.98));
   };
 
-  // Pattern values (from props)
-  const patternEntry = pattern?.entry || 0;
-  const patternSL = pattern?.stopLoss || 0;
+  // Pattern values (from props) - support both naming conventions
+  const patternEntry = pattern?.entry || pattern?.entry_price || 0;
+  const patternSL = pattern?.stopLoss || pattern?.stop_loss || pattern?.sl || 0;
   const patternTP = getTakeProfit();
 
   // Active values based on mode
@@ -437,12 +440,20 @@ const PaperTradeContent = ({ pattern, onClose, onSuccess }) => {
         targets: [activeTP],
       };
 
+      // CRITICAL: Ensure user is authenticated before opening position
+      if (!user?.id) {
+        console.error('[PaperTrade] ❌ Cannot open position - user not authenticated!');
+        Alert.alert('Lỗi', 'Bạn cần đăng nhập để mở lệnh Paper Trade');
+        return;
+      }
+
       // Debug: Log values before opening position
       console.log('[PaperTrade] Opening position with:', {
         tradeMode,
         activeEntry,
         currentMarketPrice,
         liveMarketPrice,
+        userId: user.id,
         willBeLimit: tradeMode === 'custom' && currentMarketPrice &&
           (pattern?.direction === 'LONG' ? activeEntry < currentMarketPrice : activeEntry > currentMarketPrice),
       });
@@ -532,11 +543,11 @@ const PaperTradeContent = ({ pattern, onClose, onSuccess }) => {
                       const tradeData = {
                         symbol: pattern.symbol,
                         direction: pattern.direction,
-                        entry: pattern.entry,
-                        stopLoss: pattern.stopLoss,
-                        takeProfit: getTakeProfit(),
+                        entry: patternEntry,  // Use normalized value that supports both naming conventions
+                        stopLoss: patternSL,  // Use normalized value
+                        takeProfit: patternTP, // Use normalized value
                         positionSize: size,
-                        patternType: pattern.type,
+                        patternType: pattern.type || pattern.patternType,
                         confidence: pattern.confidence,
                       };
 

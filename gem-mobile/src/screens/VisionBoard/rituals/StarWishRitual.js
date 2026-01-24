@@ -35,11 +35,12 @@ import { GestureHandlerRootView, Gesture, GestureDetector } from 'react-native-g
 import { Star, Sparkles, Wand2 } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
-import { completeRitual } from '../../../services/ritualService';
+import { completeRitual, saveReflection } from '../../../services/ritualService';
 
 // Cosmic Components
 import {
-  CosmicBackground,
+  VideoBackground,
+  RitualAnimation,
   GlassCard,
   GlassInputCard,
   GlowButton,
@@ -55,6 +56,7 @@ import {
   HAPTIC_PATTERNS,
   COSMIC_TIMING,
 } from '../../../components/Rituals/cosmic';
+import useVideoPause from '../../../hooks/useVideoPause';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -417,6 +419,7 @@ const SelectedStarVisual = memo(({ star }) => {
 const StarWishRitual = ({ navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const shouldPauseVideo = useVideoPause();
 
   // Generate stars
   const stars = useMemo(() => {
@@ -439,6 +442,7 @@ const StarWishRitual = ({ navigation }) => {
   const [streak, setStreak] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showShootingStar, setShowShootingStar] = useState(false);
+  const [reflection, setReflection] = useState('');
 
   // Animation values
   const contentOpacity = useSharedValue(1);
@@ -458,16 +462,11 @@ const StarWishRitual = ({ navigation }) => {
     HAPTIC_PATTERNS.cosmic.starSelect();
   }, []);
 
+  // OPTIMIZED: Instant phase transition
   const handleConfirmStar = useCallback(() => {
     if (selectedStarId === null) return;
-
     HAPTIC_PATTERNS.tap();
-    contentOpacity.value = withTiming(0, { duration: 300 });
-
-    setTimeout(() => {
-      setPhase('wish');
-      contentOpacity.value = withTiming(1, { duration: 400 });
-    }, 300);
+    setPhase('wish'); // Instant transition
   }, [selectedStarId]);
 
   const handleMakeWish = useCallback(async () => {
@@ -492,6 +491,7 @@ const StarWishRitual = ({ navigation }) => {
         const result = await completeRitual(user.id, 'star-wish', {
           wish,
           starId: selectedStarId,
+          reflection,
         });
         setXpEarned(result?.xpEarned || CONFIG.xpReward);
         setStreak(result?.newStreak || 1);
@@ -522,7 +522,6 @@ const StarWishRitual = ({ navigation }) => {
   const renderSelectPhase = () => (
     <Animated.View style={[styles.selectContainer, contentAnimatedStyle]}>
       <View style={styles.instructionTop}>
-        <TitleText text="Chọn Ngôi Sao" color={THEME.primary} />
         <SubtitleText text="Chạm vào ngôi sao bạn muốn gửi điều ước" />
       </View>
 
@@ -611,10 +610,18 @@ const StarWishRitual = ({ navigation }) => {
   // Render Granting Phase
   const renderGrantingPhase = () => (
     <View style={styles.grantingContainer}>
-      <ShootingStarAnimation
-        visible={showShootingStar}
-        onComplete={handleShootingStarComplete}
-      />
+      {/* Lottie Animation - Shooting Star */}
+      {showShootingStar && (
+        <View style={styles.lottieContainer}>
+          <RitualAnimation
+            animationId="shooting-star"
+            autoPlay={true}
+            loop={false}
+            size={SCREEN_WIDTH * 0.9}
+            onAnimationFinish={handleShootingStarComplete}
+          />
+        </View>
+      )}
 
       <View style={styles.grantingMessage}>
         <Sparkles size={40} color="#FFD700" />
@@ -626,13 +633,7 @@ const StarWishRitual = ({ navigation }) => {
   // Main render
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CosmicBackground
-        variant="star"
-        starDensity="high"
-        showNebula={true}
-        showSpotlight={phase === 'wish'}
-        spotlightIntensity={0.4}
-      >
+      <VideoBackground ritualId="star-wish" paused={shouldPauseVideo}>
         {/* Star particles - OPTIMIZED: reduced count */}
         <ParticleField
           variant="stars"
@@ -671,10 +672,16 @@ const StarWishRitual = ({ navigation }) => {
           message="Điều ước của bạn đã được ngôi sao nhận. Hãy tin tưởng và chờ đợi phép màu."
           visible={showCelebration}
           onContinue={handleContinue}
+          onWriteReflection={async (text) => {
+            setReflection(text);
+            if (user?.id) {
+              await saveReflection(user.id, 'star-wish', text);
+            }
+          }}
           showVisionBoardButton={true}
-          showReflectionButton={false}
+          showReflectionButton={true}
         />
-      </CosmicBackground>
+      </VideoBackground>
     </GestureHandlerRootView>
   );
 };
@@ -892,6 +899,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  lottieContainer: {
+    position: 'absolute',
+    top: '20%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
   shootingStar: {
     position: 'absolute',

@@ -37,14 +37,14 @@ const CATEGORY_ICONS = {
   default: FileText,
 };
 
-// Category colors
+// Category colors - Use gold accent for all to maintain theme consistency
 const CATEGORY_COLORS = {
-  spiritual: '#9B59B6',
-  trading: '#3498DB',
-  promo: '#E74C3C',
-  engagement: '#2ECC71',
-  education: '#F39C12',
-  reminder: '#1ABC9C',
+  spiritual: COLORS.gold,
+  trading: COLORS.gold,
+  promo: COLORS.gold,
+  engagement: COLORS.gold,
+  education: COLORS.gold,
+  reminder: COLORS.gold,
   default: COLORS.gold,
 };
 
@@ -118,8 +118,8 @@ const TemplateCard = ({
         onPress={() => onUse?.(template)}
         activeOpacity={0.7}
       >
-        <View style={[styles.compactIcon, { backgroundColor: `${categoryColor}20` }]}>
-          <CategoryIcon size={18} color={categoryColor} />
+        <View style={styles.compactIcon}>
+          <CategoryIcon size={18} color={COLORS.gold} />
         </View>
         <View style={styles.compactContent}>
           <Text style={styles.compactName} numberOfLines={1}>
@@ -138,9 +138,9 @@ const TemplateCard = ({
     <View style={[styles.container, !is_active && styles.containerInactive, style]}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={[styles.categoryBadge, { backgroundColor: `${categoryColor}20` }]}>
-          <CategoryIcon size={14} color={categoryColor} />
-          <Text style={[styles.categoryText, { color: categoryColor }]}>
+        <View style={styles.categoryBadge}>
+          <CategoryIcon size={14} color={COLORS.gold} />
+          <Text style={styles.categoryText}>
             {categoryLabel}
           </Text>
         </View>
@@ -148,7 +148,7 @@ const TemplateCard = ({
         {type === 'push' ? (
           <Bell size={16} color={COLORS.gold} />
         ) : (
-          <FileText size={16} color={COLORS.cyan} />
+          <FileText size={16} color={COLORS.gold} />
         )}
       </View>
 
@@ -179,13 +179,13 @@ const TemplateCard = ({
             icon={BarChart2}
             value={usage_count}
             label="lần dùng"
-            color={COLORS.cyan}
+            color={COLORS.gold}
           />
           <StatsItem
             icon={TrendingUp}
             value={formatRate(avg_open_rate)}
             label="open rate"
-            color={COLORS.success}
+            color={COLORS.gold}
           />
           {type === 'push' && (
             <StatsItem
@@ -260,10 +260,10 @@ const TemplateCard = ({
 // ========== STYLES ==========
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.glassBg,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: GLASS.borderRadius,
     borderWidth: 1,
-    borderColor: 'rgba(106,91,255,0.3)',
+    borderColor: 'rgba(255,255,255,0.06)',
     padding: SPACING.lg,
     overflow: 'hidden',
   },
@@ -283,10 +283,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xxs,
     borderRadius: SPACING.xs,
+    backgroundColor: 'rgba(255,189,89,0.1)',
   },
   categoryText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
   },
   name: {
     fontSize: TYPOGRAPHY.fontSize.xxxl,
@@ -301,10 +303,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   previewBox: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.15)',
     borderRadius: SPACING.sm,
     padding: SPACING.md,
     marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
   },
   previewLabel: {
     fontSize: TYPOGRAPHY.fontSize.xs,
@@ -324,7 +328,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: 'rgba(255,255,255,0.06)',
     marginBottom: SPACING.md,
   },
   statsItem: {
@@ -373,7 +377,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: 'rgba(255,255,255,0.06)',
     paddingTop: SPACING.md,
   },
   useButton: {
@@ -399,27 +403,32 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
 
   // Compact styles
   compactContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.glassBg,
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(106,91,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.06)',
     padding: SPACING.md,
     gap: SPACING.md,
   },
   compactIcon: {
     width: 40,
     height: 40,
-    borderRadius: SPACING.sm,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255,189,89,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,189,89,0.15)',
   },
   compactContent: {
     flex: 1,

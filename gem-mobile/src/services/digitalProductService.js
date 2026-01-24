@@ -26,18 +26,34 @@ class DigitalProductService {
 
   /**
    * Get all digital products
+   * Uses shopifyService cache when available for faster loading
    * @param {boolean} forceRefresh - Force cache refresh
    * @returns {Promise<Array>}
    */
   async getDigitalProducts(forceRefresh = false) {
-    // Check cache
+    // Check our own cache first
     if (!forceRefresh && this._cache && Date.now() - this._cacheTime < this._cacheDuration) {
       return this._cache;
     }
 
     try {
-      // Fetch products with digital tags
-      const products = await shopifyService.getProductsByTags(DIGITAL_PRODUCT_TAGS, 100, false);
+      // Check if shopifyService already has cached products (from ShopScreen preload)
+      // This avoids duplicate API calls
+      const shopifyCache = shopifyService._productsCache;
+      const shopifyCacheValid = shopifyCache &&
+        shopifyCache.length > 0 &&
+        Date.now() - (shopifyService._productsCacheTime || 0) < (shopifyService._cacheValidityMs || 300000);
+
+      let products;
+
+      if (shopifyCacheValid) {
+        // Use shopify cache - filter for digital products locally
+        console.log('[DigitalProductService] Using shopifyService cache');
+        products = this._filterDigitalProducts(shopifyCache);
+      } else {
+        // Fetch products with digital tags
+        products = await shopifyService.getProductsByTags(DIGITAL_PRODUCT_TAGS, 100, false);
+      }
 
       // Enhance products with metadata
       const enhancedProducts = (products || []).map(product => this._enhanceProduct(product));
@@ -55,6 +71,28 @@ class DigitalProductService {
       }
       throw error;
     }
+  }
+
+  /**
+   * Filter products to only include digital products
+   * @param {Array} products - All products
+   * @returns {Array}
+   */
+  _filterDigitalProducts(products) {
+    if (!products || products.length === 0) return [];
+
+    return products.filter(product => {
+      // Check if product has any digital product tags
+      const productTags = Array.isArray(product.tags)
+        ? product.tags.map(t => typeof t === 'string' ? t.toLowerCase().trim() : '')
+        : typeof product.tags === 'string'
+          ? product.tags.split(',').map(t => t.toLowerCase().trim())
+          : [];
+
+      const digitalTagsLower = DIGITAL_PRODUCT_TAGS.map(t => t.toLowerCase().trim());
+
+      return productTags.some(tag => digitalTagsLower.includes(tag));
+    });
   }
 
   /**
@@ -92,12 +130,40 @@ class DigitalProductService {
       return allProducts;
     }
 
-    // Filter products that have any of the category tags
+    // Filter products that have any of the category tags OR title contains category keywords
     return allProducts.filter(product => {
       const productTags = (product.tags || []).map(t =>
         typeof t === 'string' ? t.toLowerCase().trim() : ''
       );
-      return category.tags.some(tag => productTags.includes(tag.toLowerCase().trim()));
+      const productTitle = (product.title || product.name || '').toLowerCase();
+
+      // Check tags match
+      const tagMatch = category.tags.some(tag => productTags.includes(tag.toLowerCase().trim()));
+      if (tagMatch) return true;
+
+      // Fallback: check if product title contains category-specific keywords
+      if (categoryId === 'trading') {
+        // Must contain "trading" in title AND NOT contain mindset keywords
+        const isTrading = productTitle.includes('trading');
+        const isMindset = productTitle.includes('tư duy') || productTitle.includes('tần số') ||
+                          productTitle.includes('tình yêu') || productTitle.includes('khai mở');
+        return isTrading && !isMindset;
+      }
+      if (categoryId === 'mindset') {
+        return productTitle.includes('tư duy') || productTitle.includes('tần số') ||
+               productTitle.includes('tình yêu') || productTitle.includes('khai mở');
+      }
+      if (categoryId === 'chatbot') {
+        return productTitle.includes('chatbot') || productTitle.includes('sư phụ ai');
+      }
+      if (categoryId === 'scanner') {
+        return productTitle.includes('scanner') || productTitle.includes('quét nến');
+      }
+      if (categoryId === 'gems') {
+        return productTitle.includes('gem pack') || productTitle.includes('gems');
+      }
+
+      return false;
     });
   }
 

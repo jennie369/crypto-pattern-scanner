@@ -3,8 +3,7 @@
  * Long-press reaction picker overlay for forum posts (Facebook-style)
  *
  * Performance optimizations:
- * - No Modal (uses absolute positioning)
- * - No BlurView on Android (uses solid background)
+ * - Lightweight Modal (no BlurView)
  * - Fast withTiming instead of withSpring
  * - No staggered animations
  * - Minimal re-renders
@@ -18,12 +17,12 @@ import {
   Pressable,
   Dimensions,
   Platform,
+  Modal,
 } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  runOnJS,
   Easing,
 } from 'react-native-reanimated';
 import { REACTION_CONFIG, REACTION_ORDER, REACTION_SIZES } from '../../constants/reactions';
@@ -38,7 +37,7 @@ try {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Fast animation config
-const FAST_TIMING = { duration: 120, easing: Easing.out(Easing.ease) };
+const FAST_TIMING = { duration: 100, easing: Easing.out(Easing.ease) };
 
 /**
  * Single Reaction Item - Memoized for performance
@@ -48,11 +47,11 @@ const ReactionItem = memo(({ type, onSelect, isSelected }) => {
   const scale = useSharedValue(1);
 
   const handlePressIn = useCallback(() => {
-    scale.value = withTiming(1.3, { duration: 80 });
+    scale.value = withTiming(1.25, { duration: 60 });
   }, []);
 
   const handlePressOut = useCallback(() => {
-    scale.value = withTiming(1, { duration: 80 });
+    scale.value = withTiming(1, { duration: 60 });
   }, []);
 
   const handlePress = useCallback(() => {
@@ -81,7 +80,7 @@ const ReactionItem = memo(({ type, onSelect, isSelected }) => {
 });
 
 /**
- * ForumReactionPicker - Optimized for performance
+ * ForumReactionPicker - Optimized for performance with Modal
  */
 const ForumReactionPicker = ({
   visible,
@@ -91,7 +90,7 @@ const ForumReactionPicker = ({
   onClose,
 }) => {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(10);
+  const translateY = useSharedValue(8);
 
   // Animate when visible changes
   React.useEffect(() => {
@@ -99,8 +98,8 @@ const ForumReactionPicker = ({
       opacity.value = withTiming(1, FAST_TIMING);
       translateY.value = withTiming(0, FAST_TIMING);
     } else {
-      opacity.value = withTiming(0, { duration: 80 });
-      translateY.value = withTiming(10, { duration: 80 });
+      opacity.value = 0;
+      translateY.value = 8;
     }
   }, [visible]);
 
@@ -115,62 +114,71 @@ const ForumReactionPicker = ({
   }));
 
   // Calculate position (centered, clamped to screen)
-  const pickerX = Math.max(16, Math.min(
-    position.x - REACTION_SIZES.PICKER_WIDTH / 2,
-    SCREEN_WIDTH - REACTION_SIZES.PICKER_WIDTH - 16
+  const pickerWidth = 260; // Slightly smaller picker
+  const pickerX = Math.max(12, Math.min(
+    position.x - pickerWidth / 2,
+    SCREEN_WIDTH - pickerWidth - 12
   ));
-  const pickerY = Math.max(60, position.y - 60);
-
-  if (!visible) return null;
+  const pickerY = Math.max(50, position.y - 55);
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      {/* Backdrop */}
-      <Pressable style={styles.backdrop} onPress={onClose} />
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <View style={styles.modalContainer}>
+        {/* Backdrop */}
+        <Pressable style={styles.backdrop} onPress={onClose} />
 
-      {/* Picker */}
-      <Animated.View
-        style={[
-          styles.picker,
-          containerStyle,
-          { left: pickerX, top: pickerY },
-        ]}
-      >
-        <View style={styles.reactionsRow}>
-          {REACTION_ORDER.map((type) => (
-            <ReactionItem
-              key={type}
-              type={type}
-              onSelect={handleSelect}
-              isSelected={currentReaction === type}
-            />
-          ))}
-        </View>
-      </Animated.View>
-    </View>
+        {/* Picker */}
+        <Animated.View
+          style={[
+            styles.picker,
+            containerStyle,
+            { left: pickerX, top: pickerY, width: pickerWidth },
+          ]}
+        >
+          <View style={styles.reactionsRow}>
+            {REACTION_ORDER.map((type) => (
+              <ReactionItem
+                key={type}
+                type={type}
+                onSelect={handleSelect}
+                isSelected={currentReaction === type}
+              />
+            ))}
+          </View>
+        </Animated.View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'transparent',
   },
   picker: {
     position: 'absolute',
-    width: REACTION_SIZES.PICKER_WIDTH,
-    height: 52,
-    borderRadius: 26,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Platform.OS === 'ios' ? 'rgba(30, 30, 50, 0.95)' : 'rgba(20, 20, 40, 0.98)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     // Shadow
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
@@ -179,15 +187,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly',
     flex: 1,
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
   },
   reactionItem: {
-    padding: 4,
+    padding: 3,
   },
   iconWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -195,7 +203,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   emoji: {
-    fontSize: 26,
+    fontSize: 22,
     textAlign: 'center',
     includeFontPadding: false,
   },

@@ -647,7 +647,8 @@ const TarotReadingScreen = () => {
               `${interpretation?.overview || ''}\n\n` +
               `💡 ${interpretation?.advice?.join('\n• ') || ''}`;
 
-            navigation.navigate('GemMaster', {
+            // Navigate to GemMasterMain (inside GemMasterStack) with initialPrompt
+            navigation.navigate('GemMasterMain', {
               initialPrompt: chatMessage,
               fromReading: true,
             });

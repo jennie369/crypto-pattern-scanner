@@ -26,14 +26,38 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 // Vietnamese day names
 const DAY_NAMES = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
+// Ritual name mapping
+const RITUAL_NAMES = {
+  'heart-expansion': 'Mở Rộng Trái Tim',
+  'gratitude-flow': 'Dòng Chảy Biết Ơn',
+  'cleansing-breath': 'Hơi Thở Thanh Lọc',
+  'water-manifest': 'Hiện Thực Hóa Bằng Nước',
+  'letter-to-universe': 'Thư Gửi Vũ Trụ',
+  'burn-release': 'Đốt & Buông Bỏ',
+  'star-wish': 'Ước Nguyện Sao Băng',
+  'crystal-healing': 'Chữa Lành Pha Lê',
+};
+
+// Reading type mapping
+const READING_TYPES = {
+  tarot: { name: 'Tarot', icon: 'Sparkles', color: '#9C0612' },
+  iching: { name: 'I Ching', icon: 'BookOpen', color: '#6A5BFF' },
+  numerology: { name: 'Số Học', icon: 'Hash', color: '#FFBD59' },
+  angel: { name: 'Thiên Thần', icon: 'Feather', color: '#FF69B4' },
+};
+
 const DayDetailModal = ({
   visible,
   date,
   events = [],
+  rituals = [],
+  readings = [],
   onClose,
   onEventPress,
   onEventComplete,
   onAddEvent,
+  onRitualPress,
+  onReadingPress,
 }) => {
   // Format date display
   const formatDate = (dateString) => {
@@ -172,6 +196,97 @@ const DayDetailModal = ({
                     </Text>
                     <Text style={styles.summaryLabel}>Tổng</Text>
                   </View>
+                </View>
+              )}
+
+              {/* Journal Section - Rituals */}
+              {rituals.length > 0 && (
+                <View style={styles.journalSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.Sparkles size={18} color={COLORS.purple} />
+                    <Text style={styles.journalTitle}>Nghi thức đã hoàn thành</Text>
+                  </View>
+                  {rituals.map((ritual, index) => {
+                    const time = ritual.completed_at
+                      ? new Date(ritual.completed_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+                      : '';
+                    return (
+                      <TouchableOpacity
+                        key={ritual.id || index}
+                        style={styles.journalItem}
+                        onPress={() => onRitualPress?.(ritual)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.journalIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
+                          <Icons.Heart size={16} color={COLORS.purple} />
+                        </View>
+                        <View style={styles.journalContent}>
+                          <Text style={styles.journalItemTitle}>
+                            {RITUAL_NAMES[ritual.ritual_slug] || ritual.ritual_slug}
+                          </Text>
+                          {ritual.content?.reflection && (
+                            <Text style={styles.journalReflection} numberOfLines={2}>
+                              "{ritual.content.reflection}"
+                            </Text>
+                          )}
+                          <Text style={styles.journalTime}>{time}</Text>
+                        </View>
+                        <View style={styles.journalXP}>
+                          <Text style={styles.journalXPText}>+{ritual.xp_earned || 0} XP</Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Journal Section - Readings */}
+              {readings.length > 0 && (
+                <View style={styles.journalSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.BookOpen size={18} color={COLORS.burgundy} />
+                    <Text style={styles.journalTitle}>Bói toán đã thực hiện</Text>
+                  </View>
+                  {readings.map((reading, index) => {
+                    const readingType = READING_TYPES[reading.reading_type] || { name: reading.reading_type, icon: 'Sparkles', color: COLORS.burgundy };
+                    const ReadingIcon = Icons[readingType.icon] || Icons.Sparkles;
+                    const time = reading.created_at
+                      ? new Date(reading.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+                      : '';
+                    return (
+                      <TouchableOpacity
+                        key={reading.id || index}
+                        style={styles.journalItem}
+                        onPress={() => onReadingPress?.(reading)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.journalIcon, { backgroundColor: `${readingType.color}20` }]}>
+                          <ReadingIcon size={16} color={readingType.color} />
+                        </View>
+                        <View style={styles.journalContent}>
+                          <Text style={styles.journalItemTitle}>{readingType.name}</Text>
+                          {reading.question && (
+                            <Text style={styles.journalReflection} numberOfLines={2}>
+                              {reading.question}
+                            </Text>
+                          )}
+                          <Text style={styles.journalTime}>{time}</Text>
+                        </View>
+                        <Icons.ChevronRight size={16} color={COLORS.textMuted} />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Empty state for journal when no events but has activities */}
+              {events.length === 0 && (rituals.length > 0 || readings.length > 0) && (
+                <View style={styles.journalSummary}>
+                  <Text style={styles.journalSummaryText}>
+                    {rituals.length > 0 && `${rituals.length} nghi thức`}
+                    {rituals.length > 0 && readings.length > 0 && ' • '}
+                    {readings.length > 0 && `${readings.length} bói toán`}
+                  </Text>
                 </View>
               )}
             </ScrollView>
@@ -360,6 +475,80 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+  },
+
+  // Journal styles
+  journalSection: {
+    marginTop: SPACING.lg,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  journalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+  },
+  journalTitle: {
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  journalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.glassBg,
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+    gap: SPACING.md,
+  },
+  journalIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  journalContent: {
+    flex: 1,
+  },
+  journalItemTitle: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  journalReflection: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontStyle: 'italic',
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  journalTime: {
+    color: COLORS.textHint,
+    fontSize: TYPOGRAPHY.fontSize.xxs,
+    marginTop: 4,
+  },
+  journalXP: {
+    backgroundColor: 'rgba(58, 247, 166, 0.15)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xxs,
+    borderRadius: SPACING.xs,
+  },
+  journalXPText: {
+    color: COLORS.success,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  journalSummary: {
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+  },
+  journalSummaryText: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.sm,
   },
 });
 

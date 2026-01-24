@@ -84,6 +84,9 @@ export default function TierUpgradeScreen() {
   const winRateBonus = calculateWinRateBonus(targetTier);
   const tierProduct = TIER_PRODUCTS[targetTier] || TIER_PRODUCTS.tier1;
 
+  // Get returnTab from route params (passed from wherever user navigated from)
+  const returnTab = route.params?.returnTab || 'Account';
+
   const handleUpgrade = async () => {
     setLoading(true);
     try {
@@ -93,10 +96,15 @@ export default function TierUpgradeScreen() {
       ]);
 
       if (checkoutUrl) {
-        // Navigate to checkout webview
-        navigation.navigate('CheckoutWebView', {
-          url: checkoutUrl,
-          title: `Upgrade to ${tierInfo.label}`,
+        // Navigate to checkout webview with return info
+        navigation.navigate('Shop', {
+          screen: 'CheckoutWebView',
+          params: {
+            checkoutUrl: checkoutUrl,
+            title: `Upgrade to ${tierInfo.label}`,
+            returnScreen: 'TierUpgrade',
+            returnTab: returnTab,
+          },
         });
       } else {
         // Fallback: open shop

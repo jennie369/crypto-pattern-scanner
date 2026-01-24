@@ -90,14 +90,10 @@ const MentionInput = ({
           clearTimeout(debounceTimer.current);
         }
 
-        if (textAfterAt.length >= 1) {
-          debounceTimer.current = setTimeout(() => {
-            searchUsers(textAfterAt);
-          }, 300);
-        } else {
-          setSuggestions([]);
-          setShowSuggestions(false);
-        }
+        // Search for users - show all followed users if no query yet
+        debounceTimer.current = setTimeout(() => {
+          searchUsers(textAfterAt);
+        }, textAfterAt.length === 0 ? 100 : 300);
       } else {
         closeSuggestions();
       }
@@ -109,9 +105,9 @@ const MentionInput = ({
   const searchUsers = async (query) => {
     setLoading(true);
     try {
-      // Only search mutual followers for privacy (users who follow me AND I follow them)
+      // Search users that current user follows (or all users if not following anyone)
       const searchQuery = query || '';
-      const results = await searchService.searchMutualFollowers(searchQuery, 8);
+      const results = await searchService.searchFollowedUsers(searchQuery, 10);
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
     } catch (error) {

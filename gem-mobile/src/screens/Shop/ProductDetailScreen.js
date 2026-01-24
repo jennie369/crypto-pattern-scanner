@@ -54,6 +54,7 @@ import alertService from '../../services/alertService';
 import deepLinkHandler from '../../services/deepLinkHandler';
 import { ProductAffiliateLinkSheet } from '../../components/Affiliate';
 import OptimizedImage from '../../components/Common/OptimizedImage';
+import HTMLRenderer from '../../components/Common/HTMLRenderer';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { DARK_THEME } from '../../theme/darkTheme';
 import { TrendingUp, Eye, Layers, Grid3X3, Link2 } from 'lucide-react-native';
@@ -165,6 +166,13 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageViewerRef = useRef(null);
 
+  // Product image fullscreen viewer state
+  const [productImageViewerVisible, setProductImageViewerVisible] = useState(false);
+  const [productImageIndex, setProductImageIndex] = useState(0);
+  const [imageScale, setImageScale] = useState(new Animated.Value(1));
+  const [imageDimensions, setImageDimensions] = useState({}); // Store dimensions for each image
+  const productImageViewerRef = useRef(null);
+
   // Affiliate link state
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [affiliateLinkSheetVisible, setAffiliateLinkSheetVisible] = useState(false);
@@ -248,9 +256,10 @@ const ProductDetailScreen = ({ navigation, route }) => {
     const fetchFullProductData = async () => {
       // Check if we have enough data or need to fetch
       // Products from posts typically only have: id, handle, title, price, image
-      // Full Shopify products have: variants array, description, multiple images
+      // Full Shopify products have: variants array, description_html, multiple images
       const needsFetch = initialProduct && (initialProduct.handle || initialProduct.id) && (
         !initialProduct.variants?.length ||
+        !initialProduct.description_html || // Need HTML description for rich formatting
         !initialProduct.description ||
         initialProduct.variants?.[0]?.title === 'Default' || // Placeholder variant from PostCard
         (initialProduct.images?.length || 0) <= 1 // Only has 1 or no images
@@ -283,9 +292,9 @@ const ProductDetailScreen = ({ navigation, route }) => {
       }
     };
 
-    // Defer fetch to allow screen to render first
-    const timer = setTimeout(fetchFullProductData, 100);
-    return () => clearTimeout(timer);
+    // Fetch immediately for faster product loading
+    // The fetch runs in background so it won't block the initial render
+    fetchFullProductData();
   }, [initialProduct]);
 
   // Return early if loading from deep link
@@ -624,16 +633,72 @@ const ProductDetailScreen = ({ navigation, route }) => {
     }
   };
 
-  const renderImageItem = ({ item }) => (
-    item ? (
-      <OptimizedImage uri={item} style={styles.productImage} resizeMode="cover" />
+  // Load image dimensions for dynamic aspect ratio
+  useEffect(() => {
+    if (images && images.length > 0) {
+      images.forEach((imageUrl, index) => {
+        if (imageUrl && !imageDimensions[imageUrl]) {
+          Image.getSize(
+            imageUrl,
+            (width, height) => {
+              setImageDimensions(prev => ({
+                ...prev,
+                [imageUrl]: { width, height, aspectRatio: width / height }
+              }));
+            },
+            (error) => {
+              console.log('[ProductDetail] Error getting image size:', error);
+            }
+          );
+        }
+      });
+    }
+  }, [images]);
+
+  // Handle tap on product image to view fullscreen
+  const handleProductImagePress = (index) => {
+    setProductImageIndex(index);
+    setProductImageViewerVisible(true);
+  };
+
+  // Handle scroll in product image viewer
+  const handleProductImageViewerScroll = (event) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / SCREEN_WIDTH);
+    if (newIndex !== productImageIndex && newIndex >= 0 && newIndex < images.length) {
+      setProductImageIndex(newIndex);
+    }
+  };
+
+  // Get aspect ratio for an image (default 1:1)
+  const getImageAspectRatio = (imageUrl) => {
+    const dims = imageDimensions[imageUrl];
+    if (dims) {
+      // Portrait images (9:16 or 3:4) use their ratio, others use 1:1
+      if (dims.aspectRatio < 0.9) {
+        return dims.aspectRatio; // Portrait
+      }
+    }
+    return 1; // Default square 1:1
+  };
+
+  const renderImageItem = ({ item, index }) => {
+    const aspectRatio = getImageAspectRatio(item);
+    return item ? (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => handleProductImagePress(index)}
+        style={[styles.productImage, { aspectRatio }]}
+      >
+        <OptimizedImage uri={item} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      </TouchableOpacity>
     ) : (
       <View style={[styles.productImage, styles.imagePlaceholder]}>
         <Package size={48} color={COLORS.textMuted} />
         <Text style={styles.placeholderText}>No Image</Text>
       </View>
-    )
-  );
+    );
+  };
 
   // FAQ Data
   const faqData = [
@@ -737,26 +802,71 @@ const ProductDetailScreen = ({ navigation, route }) => {
     ));
   };
 
+  // Helper to check if product is out of stock
+  const isProductOutOfStock = (item) => {
+    if (!item) return false;
+
+    // Check for digital products (never out of stock unless explicitly marked)
+    const productType = item.product_type?.toLowerCase() || '';
+    const handle = item.handle?.toLowerCase() || '';
+    const title = item.title?.toLowerCase() || '';
+
+    const isDigitalProduct =
+      productType.includes('digital') ||
+      productType.includes('subscription') ||
+      productType.includes('course') ||
+      productType.includes('ebook') ||
+      handle.includes('course') ||
+      handle.includes('tier-') ||
+      handle.includes('goi-') ||
+      handle.includes('gem-pack') ||
+      handle.includes('chatbot') ||
+      handle.includes('scanner') ||
+      title.includes('khóa học') ||
+      title.includes('gói');
+
+    const firstVariant = item.variants?.[0];
+    const availableForSale = item.availableForSale ?? firstVariant?.availableForSale ?? true;
+    const inventoryQuantity = firstVariant?.inventory_quantity ?? item.inventory_quantity ?? null;
+    const inventoryPolicy = firstVariant?.inventory_policy || item.inventory_policy || 'deny';
+    const inventoryOutOfStock = inventoryQuantity !== null && inventoryQuantity <= 0 && inventoryPolicy === 'deny';
+
+    return isDigitalProduct
+      ? (availableForSale === false)
+      : (!availableForSale || inventoryOutOfStock);
+  };
+
   const renderProductCard = (item, index, sectionName = 'default') => {
     // Use handle instead of id since id is often undefined from Shopify API
     if (!item || (!item.handle && !item.id)) {
       return null;
     }
 
+    const isOutOfStock = isProductOutOfStock(item);
+
     return (
       <TouchableOpacity
         key={`${sectionName}-${index}-${item.handle || item.id}`}
-        style={styles.miniProductCard}
+        style={[styles.miniProductCard, isOutOfStock && styles.miniProductCardOutOfStock]}
         onPress={() => navigation.push('ProductDetail', { product: item })}
       >
-        <OptimizedImage
-          uri={item.image || item.images?.[0]?.url || item.images?.[0]?.src}
-          style={styles.miniProductImage}
-          resizeMode="cover"
-        />
+        <View style={styles.miniProductImageContainer}>
+          <OptimizedImage
+            uri={item.image || item.images?.[0]?.url || item.images?.[0]?.src}
+            style={[styles.miniProductImage, isOutOfStock && styles.miniProductImageOutOfStock]}
+            resizeMode="cover"
+          />
+          {isOutOfStock && (
+            <View style={styles.outOfStockBadge}>
+              <Text style={styles.outOfStockText}>Hết hàng</Text>
+            </View>
+          )}
+        </View>
         <View style={styles.miniProductInfo}>
-          <Text style={styles.miniProductTitle} numberOfLines={2}>{item.title || 'Sản phẩm'}</Text>
-          <Text style={styles.miniProductPrice}>
+          <Text style={[styles.miniProductTitle, isOutOfStock && styles.textOutOfStock]} numberOfLines={2}>
+            {item.title || 'Sản phẩm'}
+          </Text>
+          <Text style={[styles.miniProductPrice, isOutOfStock && styles.textOutOfStock]}>
             {formatPrice(item.variants?.[0]?.price || item.price || 0)}
           </Text>
         </View>
@@ -792,6 +902,9 @@ const ProductDetailScreen = ({ navigation, route }) => {
           contentContainerStyle={styles.scrollContent}
           onScroll={handleMainScroll}
           scrollEventThrottle={16}
+          removeClippedSubviews={true}
+          overScrollMode="never"
+          decelerationRate="fast"
         >
           {/* Image Gallery */}
           <View style={styles.imageGalleryContainer}>
@@ -805,6 +918,15 @@ const ProductDetailScreen = ({ navigation, route }) => {
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={handleImageScroll}
               style={styles.imageGallery}
+              removeClippedSubviews={true}
+              initialNumToRender={1}
+              maxToRenderPerBatch={2}
+              windowSize={3}
+              getItemLayout={(data, index) => ({
+                length: SCREEN_WIDTH,
+                offset: SCREEN_WIDTH * index,
+                index,
+              })}
             />
             {images.length > 1 && (
               <View style={styles.dotsContainer}>
@@ -935,11 +1057,13 @@ const ProductDetailScreen = ({ navigation, route }) => {
               </View>
             </View>
 
-            {/* Description */}
-            {product.description && (
+            {/* Description - supports HTML with tables */}
+            {(product.description_html || product.body_html || product.descriptionHtml || product.description) && (
               <View style={styles.descriptionSection}>
                 <Text style={styles.sectionTitle}>Mô tả sản phẩm</Text>
-                <Text style={styles.descriptionText}>{product.description}</Text>
+                <HTMLRenderer
+                  html={product.description_html || product.body_html || product.descriptionHtml || product.description}
+                />
               </View>
             )}
 
@@ -1218,25 +1342,37 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </View>
               ) : moreToExplore.length > 0 ? (
                 <View style={styles.exploreGrid}>
-                  {moreToExplore.map((item, idx) => (
-                    <TouchableOpacity
-                      key={`explore-${idx}-${item.handle || item.id}`}
-                      style={styles.exploreGridCard}
-                      onPress={() => navigation.push('ProductDetail', { product: item })}
-                    >
-                      <OptimizedImage
-                        uri={item.image || item.images?.[0]?.url || item.images?.[0]?.src}
-                        style={styles.exploreGridImage}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.exploreGridInfo}>
-                        <Text style={styles.exploreGridTitle} numberOfLines={2}>{item.title || 'Sản phẩm'}</Text>
-                        <Text style={styles.exploreGridPrice}>
-                          {formatPrice(item.variants?.[0]?.price || item.price || 0)}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
+                  {moreToExplore.map((item, idx) => {
+                    const isOutOfStock = isProductOutOfStock(item);
+                    return (
+                      <TouchableOpacity
+                        key={`explore-${idx}-${item.handle || item.id}`}
+                        style={[styles.exploreGridCard, isOutOfStock && styles.exploreGridCardOutOfStock]}
+                        onPress={() => navigation.push('ProductDetail', { product: item })}
+                      >
+                        <View style={styles.exploreGridImageContainer}>
+                          <OptimizedImage
+                            uri={item.image || item.images?.[0]?.url || item.images?.[0]?.src}
+                            style={[styles.exploreGridImage, isOutOfStock && styles.exploreGridImageOutOfStock]}
+                            resizeMode="cover"
+                          />
+                          {isOutOfStock && (
+                            <View style={styles.exploreOutOfStockBadge}>
+                              <Text style={styles.exploreOutOfStockText}>Hết hàng</Text>
+                            </View>
+                          )}
+                        </View>
+                        <View style={styles.exploreGridInfo}>
+                          <Text style={[styles.exploreGridTitle, isOutOfStock && styles.textOutOfStock]} numberOfLines={2}>
+                            {item.title || 'Sản phẩm'}
+                          </Text>
+                          <Text style={[styles.exploreGridPrice, isOutOfStock && styles.textOutOfStock]}>
+                            {formatPrice(item.variants?.[0]?.price || item.price || 0)}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               ) : (
                 <Text style={styles.emptyText}>Không có sản phẩm</Text>
@@ -1381,6 +1517,123 @@ const ProductDetailScreen = ({ navigation, route }) => {
             activeOpacity={1}
             onPress={() => setImageViewerVisible(false)}
           />
+        </View>
+      </Modal>
+
+      {/* Product Image Fullscreen Viewer with Pinch-to-Zoom */}
+      <Modal
+        visible={productImageViewerVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setProductImageViewerVisible(false)}
+      >
+        <View style={styles.productImageViewerOverlay}>
+          {/* Tap anywhere to close */}
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setProductImageViewerVisible(false)}
+          />
+
+          {/* Close Button */}
+          <TouchableOpacity
+            style={styles.productImageViewerCloseBtn}
+            onPress={() => setProductImageViewerVisible(false)}
+          >
+            <X size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          {/* Image Counter */}
+          {images.length > 1 && (
+            <View style={styles.productImageViewerCounter}>
+              <Text style={styles.imageViewerCounterText}>
+                {productImageIndex + 1} / {images.length}
+              </Text>
+            </View>
+          )}
+
+          {/* Swipeable Product Image Gallery with Zoom */}
+          <FlatList
+            ref={productImageViewerRef}
+            data={images}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={handleProductImageViewerScroll}
+            initialScrollIndex={productImageIndex}
+            getItemLayout={(data, index) => ({
+              length: SCREEN_WIDTH,
+              offset: SCREEN_WIDTH * index,
+              index,
+            })}
+            keyExtractor={(item, index) => `product-viewer-img-${index}`}
+            renderItem={({ item }) => {
+              // Calculate dimensions based on image aspect ratio
+              const dims = imageDimensions[item];
+              let imgWidth = SCREEN_WIDTH;
+              let imgHeight = SCREEN_WIDTH;
+
+              if (dims) {
+                if (dims.aspectRatio < 1) {
+                  // Portrait image - use full height
+                  imgHeight = SCREEN_WIDTH * 1.5; // Max height
+                  imgWidth = imgHeight * dims.aspectRatio;
+                  if (imgWidth > SCREEN_WIDTH) {
+                    imgWidth = SCREEN_WIDTH;
+                    imgHeight = imgWidth / dims.aspectRatio;
+                  }
+                } else {
+                  // Landscape or square - use full width
+                  imgWidth = SCREEN_WIDTH;
+                  imgHeight = imgWidth / dims.aspectRatio;
+                }
+              }
+
+              return (
+                <View style={styles.productImageViewerSlide}>
+                  <ScrollView
+                    contentContainerStyle={styles.zoomContainer}
+                    maximumZoomScale={5}
+                    minimumZoomScale={1}
+                    showsHorizontalScrollIndicator={false}
+                    showsVerticalScrollIndicator={false}
+                    centerContent={true}
+                    bouncesZoom={true}
+                    pinchGestureEnabled={true}
+                    decelerationRate="fast"
+                  >
+                    <Image
+                      source={{ uri: item }}
+                      style={{
+                        width: imgWidth,
+                        height: imgHeight,
+                      }}
+                      resizeMode="contain"
+                    />
+                  </ScrollView>
+                </View>
+              );
+            }}
+            style={styles.imageViewerList}
+          />
+
+          {/* Swipe Indicator Dots */}
+          {images.length > 1 && (
+            <View style={styles.productImageViewerDots}>
+              {images.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.imageViewerDot,
+                    productImageIndex === index && styles.imageViewerDotActive,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+
+          {/* Instruction text */}
+          <Text style={styles.zoomHintText}>Chạm 2 ngón để zoom • Chạm để đóng</Text>
         </View>
       </Modal>
 
@@ -1535,9 +1788,9 @@ const styles = StyleSheet.create({
 
   // Image Gallery
   imageGalleryContainer: { position: 'relative' },
-  imageGallery: { height: SCREEN_WIDTH },
-  productImage: { width: SCREEN_WIDTH, height: SCREEN_WIDTH },
-  imagePlaceholder: { backgroundColor: COLORS.glassBgHeavy, justifyContent: 'center', alignItems: 'center' },
+  imageGallery: { minHeight: SCREEN_WIDTH },
+  productImage: { width: SCREEN_WIDTH, minHeight: SCREEN_WIDTH },
+  imagePlaceholder: { backgroundColor: COLORS.glassBgHeavy, justifyContent: 'center', alignItems: 'center', height: SCREEN_WIDTH },
   placeholderText: { color: COLORS.textMuted, marginTop: SPACING.sm },
 
   dotsContainer: { position: 'absolute', bottom: SPACING.md, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 },
@@ -1629,10 +1882,18 @@ const styles = StyleSheet.create({
   productsScroll: { gap: SPACING.sm },
 
   miniProductCard: { width: 140, backgroundColor: COLORS.glassBg, borderRadius: 18, overflow: 'hidden', borderWidth: 1.2, borderColor: COLORS.inputBorder },
+  miniProductCardOutOfStock: { opacity: 0.7 },
+  miniProductImageContainer: { position: 'relative' },
   miniProductImage: { width: '100%', height: 140 },
+  miniProductImageOutOfStock: { opacity: 0.6 },
   miniProductInfo: { padding: SPACING.sm },
   miniProductTitle: { fontSize: TYPOGRAPHY.fontSize.xs, fontWeight: TYPOGRAPHY.fontWeight.medium, color: COLORS.textPrimary, marginBottom: 4, lineHeight: 16 },
   miniProductPrice: { fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: TYPOGRAPHY.fontWeight.bold, color: COLORS.cyan },  // Cyan for price
+
+  // Out of stock badge for mini cards
+  outOfStockBadge: { position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(156, 6, 18, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  outOfStockText: { fontSize: 10, fontWeight: '700', color: '#FFFFFF', textTransform: 'uppercase' },
+  textOutOfStock: { color: COLORS.textMuted },
 
   // FAQ - Glass + Purple border
   faqSection: { marginBottom: SPACING.lg, backgroundColor: COLORS.glassBg, borderRadius: 18, padding: SPACING.xl, borderWidth: 1.2, borderColor: COLORS.inputBorder },
@@ -1654,10 +1915,15 @@ const styles = StyleSheet.create({
   // Explore Grid - 2 column layout
   exploreGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, justifyContent: 'space-between' },
   exploreGridCard: { width: (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.sm) / 2, backgroundColor: COLORS.glassBg, borderRadius: 18, overflow: 'hidden', borderWidth: 1.2, borderColor: COLORS.inputBorder, marginBottom: SPACING.sm },
-  exploreGridImage: { width: '100%', height: 150 },
+  exploreGridCardOutOfStock: { opacity: 0.7 },
+  exploreGridImageContainer: { position: 'relative' },
+  exploreGridImage: { width: '100%', aspectRatio: 1 }, // 1:1 ratio for proper fit
+  exploreGridImageOutOfStock: { opacity: 0.6 },
   exploreGridInfo: { padding: SPACING.sm },
   exploreGridTitle: { fontSize: TYPOGRAPHY.fontSize.xs, fontWeight: TYPOGRAPHY.fontWeight.medium, color: COLORS.textPrimary, marginBottom: 4, lineHeight: 16 },
   exploreGridPrice: { fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: TYPOGRAPHY.fontWeight.bold, color: COLORS.cyan },
+  exploreOutOfStockBadge: { position: 'absolute', top: 10, left: 10, backgroundColor: 'rgba(156, 6, 18, 0.9)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6 },
+  exploreOutOfStockText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF', textTransform: 'uppercase' },
 
   // Loading more indicator
   loadingMore: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: SPACING.sm, paddingVertical: SPACING.lg },
@@ -1839,6 +2105,72 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: -1,
+  },
+
+  // Product Image Viewer with Zoom
+  productImageViewerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.98)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  productImageViewerCloseBtn: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  productImageViewerCounter: {
+    position: 'absolute',
+    top: 55,
+    left: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    zIndex: 100,
+  },
+  productImageViewerSlide: {
+    width: SCREEN_WIDTH,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  zoomContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: SCREEN_WIDTH,
+    minHeight: '100%',
+  },
+  productImageViewerImage: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_WIDTH,
+  },
+  productImageViewerDots: {
+    position: 'absolute',
+    bottom: 100,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  zoomHintText: {
+    position: 'absolute',
+    bottom: 60,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 12,
   },
 
   // Write Review Button

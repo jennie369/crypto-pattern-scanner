@@ -8,12 +8,12 @@
 
 import { supabase } from './supabase';
 
-// Life areas for categorization
+// Life areas for categorization - 6 lĩnh vực cuộc sống theo kịch bản demo
 export const LIFE_AREAS = {
   finance: { label: 'Tài chính', icon: 'wallet', color: '#FFBD59' },
   career: { label: 'Sự nghiệp', icon: 'briefcase', color: '#6A5BFF' },
   health: { label: 'Sức khỏe', icon: 'heart', color: '#3AF7A6' },
-  relationships: { label: 'Quan hệ', icon: 'users', color: '#FF6B9D' },
+  relationships: { label: 'Tình yêu', icon: 'heart', color: '#FF6B9D' },
   personal: { label: 'Cá nhân', icon: 'user', color: '#00F0FF' },
   spiritual: { label: 'Tâm thức', icon: 'sparkles', color: '#9C0612' },
 };

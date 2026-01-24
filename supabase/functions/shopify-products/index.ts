@@ -24,9 +24,13 @@ const corsHeaders = {
 // Helper: Transform Shopify product to our format
 function transformProduct(shopifyProduct: any) {
   const firstVariant = shopifyProduct.variants?.[0];
+  const productId = shopifyProduct.id.toString();
 
   return {
-    shopify_product_id: shopifyProduct.id.toString(),
+    // IMPORTANT: Include both `id` and `shopify_product_id` for compatibility
+    // Many components (WishlistButton, CartContext) expect `id` field
+    id: productId,
+    shopify_product_id: productId,
     title: shopifyProduct.title,
     description: shopifyProduct.body_html?.replace(/<[^>]*>/g, ''), // Strip HTML
     description_html: shopifyProduct.body_html,
@@ -48,8 +52,20 @@ function transformProduct(shopifyProduct: any) {
     options: shopifyProduct.options || [],
 
     status: shopifyProduct.status || 'active',
-    inventory_quantity: firstVariant?.inventory_quantity || 0,
+    inventory_quantity: firstVariant?.inventory_quantity ?? null,
     inventory_policy: firstVariant?.inventory_policy || 'deny',
+
+    // availableForSale logic:
+    // 1. Digital products (no inventory tracking) - always available
+    // 2. Physical products with inventory > 0 - available
+    // 3. Products with policy 'continue' (allow overselling) - available
+    // 4. Products with null/undefined inventory - assume available (digital)
+    availableForSale:
+      firstVariant?.inventory_quantity === null ||
+      firstVariant?.inventory_quantity === undefined ||
+      firstVariant?.inventory_quantity > 0 ||
+      firstVariant?.inventory_policy === 'continue' ||
+      firstVariant?.inventory_management === null, // No inventory tracking = digital
 
     published_at: shopifyProduct.published_at || null,
     synced_at: new Date().toISOString(),
@@ -65,7 +81,9 @@ serve(async (req) => {
   try {
     console.log('🛍️ Shopify Products API called');
 
-    const { action, productId, handle, limit = 50, syncToDb = false, query } = await req.json();
+    const { action, productId, id, handle, limit = 50, syncToDb = false, query } = await req.json();
+    // Support both 'productId' and 'id' parameter names
+    const resolvedProductId = productId || id;
 
     let shopifyUrl = '';
     let shopifyData: any;
@@ -125,10 +143,10 @@ serve(async (req) => {
     // ==============================================
     // ACTION: GET SINGLE PRODUCT BY ID
     // ==============================================
-    else if (action === 'getProduct' && productId) {
-      console.log(`📦 Fetching product ${productId} from Shopify...`);
+    else if ((action === 'getProduct' || action === 'getProductById') && resolvedProductId) {
+      console.log(`📦 Fetching product ${resolvedProductId} from Shopify...`);
 
-      shopifyUrl = `https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${productId}.json`;
+      shopifyUrl = `https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${resolvedProductId}.json`;
 
       const response = await fetch(shopifyUrl, {
         headers: {
@@ -138,13 +156,19 @@ serve(async (req) => {
       });
 
       if (!response.ok) {
-        throw new Error(`Product not found: ${productId}`);
+        throw new Error(`Product not found: ${resolvedProductId}`);
       }
 
       shopifyData = await response.json();
       const product = transformProduct(shopifyData.product);
 
-      console.log(`✅ Fetched product: ${product.title}`);
+      // Save to database for caching (with description_html)
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+      await supabase.from('shopify_products').upsert(product, {
+        onConflict: 'shopify_product_id',
+      });
+
+      console.log(`✅ Fetched and saved product: ${product.title}`);
 
       return new Response(JSON.stringify({
         success: true,
@@ -169,8 +193,14 @@ serve(async (req) => {
         .eq('handle', handle)
         .single();
 
-      if (dbProduct && !dbError) {
-        console.log('✅ Found product in database');
+      // Check if DB cache is fresh (synced within last 1 hour)
+      const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
+      const isCacheFresh = dbProduct?.synced_at &&
+        (new Date().getTime() - new Date(dbProduct.synced_at).getTime()) < CACHE_DURATION_MS;
+
+      // Only use DB cache if: has description_html AND synced recently
+      if (dbProduct && !dbError && dbProduct.description_html && isCacheFresh) {
+        console.log('✅ Found fresh product in database (synced within 1 hour)');
         return new Response(JSON.stringify({
           success: true,
           product: dbProduct,
@@ -178,6 +208,12 @@ serve(async (req) => {
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
+      }
+
+      // DB cache is stale or missing data - fetch fresh
+      if (dbProduct) {
+        const reason = !dbProduct.description_html ? 'missing description_html' : 'cache expired';
+        console.log(`⚠️ DB product stale (${reason}), fetching fresh from Shopify...`);
       }
 
       // If not in database, fetch from Shopify

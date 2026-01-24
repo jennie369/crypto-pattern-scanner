@@ -140,6 +140,7 @@ const BuyGemsScreen = ({ navigation }) => {
           params: {
             checkoutUrl,
             returnScreen: 'BuyGems',
+            returnTab: 'Account', // Return to Account tab (Tài Sản)
             productType: 'gems',
             gemAmount: totalGems,
             packageName: pkg.name,

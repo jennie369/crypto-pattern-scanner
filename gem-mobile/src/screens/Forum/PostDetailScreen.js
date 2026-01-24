@@ -345,7 +345,7 @@ const PostDetailScreen = ({ route, navigation }) => {
       alert({
         type: 'error',
         title: 'Lỗi',
-        message: 'Không thể gửi bình luận',
+        message: error?.message || 'Không thể gửi bình luận',
         buttons: [{ text: 'OK' }],
       });
     } finally {

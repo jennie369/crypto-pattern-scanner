@@ -23,11 +23,12 @@ import PostImageCarousel from '../../../components/PostImageCarousel';
 import ReportModal from '../../../components/ReportModal';
 import { ProgressiveImage } from '../../../components/Image';
 import { getImageDisplayHeight } from '../../../utils/imageUtils';
-// Phase 2: New ImageGallery with gesture support
-// Import conditionally to avoid web issues
+// Phase 2: New ImageGallery with gesture support (with pinch zoom)
+// Import from ImageViewer folder (not ImageViewer.js) for zoom support
 let ImageGallery = null;
 try {
-  ImageGallery = require('../../../components/ImageViewer').ImageGallery;
+  // Use explicit folder path for zoom-capable ImageGallery
+  ImageGallery = require('../../../components/ImageViewer/index').ImageGallery;
 } catch (e) {
   console.warn('[PostCard] ImageGallery not available:', e.message);
 }
@@ -47,6 +48,9 @@ import ReactionSummary from '../../../components/Forum/ReactionSummary';
 import ForumReactionTooltip from '../../../components/Forum/ForumReactionTooltip';
 import { usePostReactions } from '../../../hooks/usePostReactions';
 
+// Performance monitoring (dev only)
+import { trackRender } from '../../../services/performanceService';
+
 // Phase 4: View Count & Trending
 import { ViewCount, TrendingBadge } from '../../../components/Forum';
 
@@ -54,6 +58,9 @@ import { ViewCount, TrendingBadge } from '../../../components/Forum';
 import SoundCard from '../../../components/SoundCard';
 import ShoppingTagOverlay from '../../../components/ShoppingTagOverlay';
 import BoostedBadge from '../../../components/BoostedBadge';
+
+// Tagged Product Card with auto-refresh from Shopify
+import TaggedProductCard from '../../../components/Forum/TaggedProductCard';
 
 // Link Preview Components (Phase 3 + Multi-Link Support)
 import LinkPreviewCard from './LinkPreviewCard';
@@ -68,6 +75,9 @@ const DOUBLE_TAP_DELAY = 300; // ms
 const DWELL_TIME_THRESHOLD = 2; // Minimum seconds to count as meaningful view
 
 const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
+  // Track component renders for performance monitoring (dev only)
+  trackRender('PostCard', post?.id);
+
   const navigation = useNavigation();
   const { user, isAuthenticated, isAdmin } = useAuth();
   const insets = useSafeAreaInsets();
@@ -323,7 +333,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
     ]).start();
   }, [bigHeartScale, bigHeartOpacity]);
 
-  // Handle double-tap to like (Instagram style)
+  // Handle double-tap to like (Instagram style) - for content area
   const handleDoubleTap = useCallback(() => {
     const now = Date.now();
     const timeSinceLastTap = now - lastTap.current;
@@ -355,6 +365,33 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
       }, DOUBLE_TAP_DELAY);
     }
   }, [isLiked, isAuthenticated, handleLike, showBigHeart, onPress, navigation, post.id]);
+
+  // Handle double-tap on image - opens image viewer on single tap, likes on double tap
+  const handleImageDoubleTap = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTap.current;
+
+    if (timeSinceLastTap < DOUBLE_TAP_DELAY && timeSinceLastTap > 0) {
+      // Double tap detected - like!
+      if (!isLiked && isAuthenticated) {
+        handleLike();
+        showBigHeart();
+      } else if (isLiked) {
+        showBigHeart();
+      }
+      // Clear lastTap to prevent accidental triggers
+      lastTap.current = 0;
+    } else {
+      // Single tap - open image viewer after delay
+      lastTap.current = now;
+      setTimeout(() => {
+        if (Date.now() - lastTap.current >= DOUBLE_TAP_DELAY) {
+          // No second tap, open image viewer
+          handleImagePress(0);
+        }
+      }, DOUBLE_TAP_DELAY);
+    }
+  }, [isLiked, isAuthenticated, handleLike, showBigHeart, handleImagePress]);
 
   // Load inline comments (Facebook-style preview)
   const loadInlineComments = useCallback(async () => {
@@ -864,7 +901,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
   };
 
   return (
-    <Pressable style={styles.card} onPress={handleDoubleTap}>
+    <View style={styles.card}>
       {/* Boosted Badge - Shows if post is boosted */}
       {post.is_boosted && <BoostedBadge />}
 
@@ -924,8 +961,14 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
 
       {/* Content - with clickable hashtags (first line is bold title) */}
       {/* Tap on content text navigates to post detail */}
+      {/* Fix: Combine title + content if they are different (title was extracted from first line) */}
       <TouchableOpacity activeOpacity={0.8} onPress={() => onPress?.(post)}>
-        {renderContentWithHashtags(post.content)}
+        {renderContentWithHashtags(
+          // If title exists and is different from content, prepend it
+          post.title && post.title !== post.content && !post.content?.startsWith(post.title)
+            ? `${post.title}\n${post.content || ''}`
+            : post.content
+        )}
       </TouchableOpacity>
 
       {/* ========== LINK PREVIEW SECTION ========== */}
@@ -994,9 +1037,8 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
               onImagePress={handleImagePress}
             />
           ) : (
-            <TouchableOpacity
-              activeOpacity={0.95}
-              onPress={() => handleImagePress(0)}
+            <Pressable
+              onPress={handleImageDoubleTap}
             >
               <ProgressiveImage
                 source={{ uri: post.media_urls?.[0] || post.image_url || post.media_url }}
@@ -1011,7 +1053,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
                 ]}
                 resizeMode="cover"
               />
-            </TouchableOpacity>
+            </Pressable>
           )}
 
           {/* Shopping Tags Overlay - Shows clickable product tags on image */}
@@ -1050,6 +1092,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
       )}
 
       {/* Tagged Products - Shows products linked to this post */}
+      {/* Uses TaggedProductCard which auto-refreshes images from Shopify */}
       {post.tagged_products && post.tagged_products.length > 0 && (
         <View style={styles.taggedProductsContainer}>
           <ScrollView
@@ -1057,56 +1100,12 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.taggedProductsScrollContent}
           >
-            {post.tagged_products.map((item, index) => {
-              // Support both old format (item.product) and new format (flat structure)
-              const product = item.product || {
-                id: item.product_id,
-                title: item.product_title,
-                price: item.product_price,
-                image: item.product_image,
-                handle: item.product_handle,
-              };
-              return (
-                <TouchableOpacity
-                  key={item.id || product.id || index}
-                  style={styles.taggedProductCard}
-                  onPress={() => {
-                    // Build full product object with variants array for ProductDetailScreen
-                    const productForDetail = {
-                      id: product.id,
-                      handle: product.handle,
-                      title: product.title,
-                      price: product.price,
-                      image: product.image,
-                      images: product.image ? [{ src: product.image }] : [],
-                      variants: [{
-                        id: product.id,
-                        price: typeof product.price === 'string'
-                          ? parseFloat(product.price.replace(/[^0-9.-]+/g, ''))
-                          : product.price,
-                        title: 'Default',
-                      }],
-                    };
-                    navigation.navigate('Shop', {
-                      screen: 'ProductDetail',
-                      params: { product: productForDetail }
-                    });
-                  }}
-                >
-                  {product.image && (
-                    <Image source={{ uri: product.image }} style={styles.taggedProductImage} />
-                  )}
-                  <View style={styles.taggedProductInfo}>
-                    <Text style={styles.taggedProductName} numberOfLines={1}>{product.title}</Text>
-                    <Text style={styles.taggedProductPrice}>
-                      {typeof product.price === 'number'
-                        ? new Intl.NumberFormat('vi-VN').format(product.price) + 'đ'
-                        : product.price}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+            {post.tagged_products.map((item, index) => (
+              <TaggedProductCard
+                key={item.id || item.product_id || index}
+                item={item}
+              />
+            ))}
           </ScrollView>
         </View>
       )}
@@ -1149,7 +1148,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
             topReactions={topReactions}
             totalCount={totalCount}
             onPress={() => setReactionsVisible(true)}
-            size="medium"
+            size="small"
           />
         </View>
       )}
@@ -1168,7 +1167,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
               disabled={isReacting}
               showCount={false}
               showLabel={false}
-              size="medium"
+              size="small"
             />
           </AuthGate>
 
@@ -1179,7 +1178,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
               onPress={handleComment}
               activeOpacity={0.7}
             >
-              <MessageCircle size={22} color={showComments ? COLORS.cyan : COLORS.textMuted} />
+              <MessageCircle size={18} color={showComments ? COLORS.cyan : COLORS.textMuted} />
               {(commentsCount > 0) && (
                 <Text style={[styles.actionCount, showComments && { color: COLORS.cyan }]}>{commentsCount}</Text>
               )}
@@ -1192,7 +1191,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
             onPress={handleShare}
             activeOpacity={0.7}
           >
-            <Send size={20} color={COLORS.textMuted} />
+            <Send size={16} color={COLORS.textMuted} />
             {(post.share_count > 0) && (
               <Text style={styles.actionCount}>{post.share_count}</Text>
             )}
@@ -1204,14 +1203,14 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
           {/* Repost */}
           <AuthGate action="chia sẻ lại bài viết này">
             <TouchableOpacity style={styles.actionBtn} onPress={handleRepost}>
-              <Repeat2 size={20} color={post.user_reposted ? COLORS.success : COLORS.textMuted} />
+              <Repeat2 size={18} color={post.user_reposted ? COLORS.success : COLORS.textMuted} />
             </TouchableOpacity>
           </AuthGate>
 
           {/* Gift */}
           <AuthGate action="tặng quà cho bài viết này">
             <TouchableOpacity style={styles.actionBtn} onPress={handleGift}>
-              <Gift size={20} color={COLORS.gold} />
+              <Gift size={18} color={COLORS.gold} />
             </TouchableOpacity>
           </AuthGate>
 
@@ -1219,7 +1218,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
           <AuthGate action="lưu bài viết này">
             <TouchableOpacity style={styles.actionBtn} onPress={handleSave}>
               <Bookmark
-                size={20}
+                size={18}
                 color={isSaved ? COLORS.gold : COLORS.textMuted}
                 fill={isSaved ? COLORS.gold : 'transparent'}
               />
@@ -1487,7 +1486,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
       )}
 
       {AlertComponent}
-    </Pressable>
+    </View>
   );
 };
 
@@ -1516,11 +1515,11 @@ const styles = StyleSheet.create({
     borderRadius: 0, // Full width, no rounded corners (Facebook style)
     borderWidth: 0,
     borderTopWidth: 1,
-    borderBottomWidth: 1,
+    // Only top border - no bottom border to avoid double lines between posts
     borderColor: 'rgba(106, 91, 255, 0.15)',
     paddingVertical: SPACING.md,
     // NO paddingHorizontal - allows images to be full bleed
-    marginBottom: SPACING.sm,
+    marginBottom: 0, // No margin - single border separates posts
   },
   header: {
     flexDirection: 'row',
@@ -1598,9 +1597,10 @@ const styles = StyleSheet.create({
   content: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     color: COLORS.textSecondary,
-    lineHeight: 20,
+    lineHeight: 22, // Increased for better readability
     marginBottom: SPACING.md,
     paddingHorizontal: SPACING.lg, // Content needs padding (card no longer has it)
+    paddingTop: 2, // Small padding to ensure first line isn't clipped
   },
   hashtag: {
     color: COLORS.cyan,
@@ -1698,8 +1698,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.lg,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    // No border - reaction summary sits directly above without divider
   },
   actionBarLeft: {
     flexDirection: 'row',
@@ -1717,10 +1716,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  // Action count number (no label text, just number)
+  // Action count number (no label text, just number) - compact
   actionCount: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
     color: COLORS.textMuted,
   },
   // Active state for liked count
@@ -1985,4 +1984,41 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostCard;
+/**
+ * PostCard với React.memo để tránh re-render không cần thiết
+ *
+ * Comparison function chỉ re-render khi:
+ * - post.id thay đổi (post khác)
+ * - post.updated_at thay đổi (content update)
+ * - reaction_counts thay đổi (like/unlike)
+ * - comments_count thay đổi (new comment)
+ */
+const MemoizedPostCard = React.memo(PostCard, (prevProps, nextProps) => {
+  // Return TRUE = không re-render (props giống nhau)
+  // Return FALSE = re-render (props khác nhau)
+
+  const prevPost = prevProps.post || {};
+  const nextPost = nextProps.post || {};
+
+  // So sánh các fields quan trọng
+  const isSamePost = prevPost.id === nextPost.id;
+  const isSameContent = prevPost.updated_at === nextPost.updated_at;
+  const isSameReactions = JSON.stringify(prevPost.reaction_counts || {}) ===
+                          JSON.stringify(nextPost.reaction_counts || {});
+  const isSameComments = prevPost.comments_count === nextPost.comments_count;
+  const isSameLikes = prevPost.likes_count === nextPost.likes_count;
+  const isSameSaved = prevPost.user_saved === nextPost.user_saved;
+  const isSameUserReaction = prevPost.user_reaction === nextPost.user_reaction;
+
+  // Log để debug (chỉ khi có thay đổi)
+  if (__DEV__ && !isSamePost) {
+    console.log('[PostCard] Re-render: Different post', prevPost.id, '->', nextPost.id);
+  }
+
+  return isSamePost && isSameContent && isSameReactions && isSameComments &&
+         isSameLikes && isSameSaved && isSameUserReaction;
+});
+
+MemoizedPostCard.displayName = 'PostCard';
+
+export default MemoizedPostCard;

@@ -197,15 +197,30 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   async init(userId = null) {
-    // If already initialized for same user, skip
-    if (this.initialized && this.currentUserId === userId) return;
+    console.log('[PaperTrade] init called with userId:', userId, 'current state:', {
+      initialized: this.initialized,
+      currentUserId: this.currentUserId,
+      openPositionsCount: this.openPositions?.length || 0,
+    });
 
-    // Reset if switching users
-    if (userId && this.currentUserId !== userId) {
+    // If already initialized for same user, skip
+    if (this.initialized && this.currentUserId === userId) {
+      console.log('[PaperTrade] init - SKIPPING (already initialized for same user)');
+      return;
+    }
+
+    // CRITICAL FIX: Backup existing data before any changes
+    // This prevents data loss if cloud load fails
+    const backupPositions = [...this.openPositions];
+    const backupPending = [...this.pendingOrders];
+    const backupHistory = [...this.tradeHistory];
+    const backupBalance = this.balance;
+    const backupInitialBalance = this.initialBalance;
+    const isSwitchingUsers = userId && this.currentUserId !== userId;
+
+    // Reset flags but DON'T clear data yet
+    if (isSwitchingUsers) {
       this.initialized = false;
-      this.openPositions = [];
-      this.pendingOrders = [];
-      this.tradeHistory = [];
     }
 
     this.currentUserId = userId;
@@ -216,17 +231,37 @@ class PaperTradeService {
       // Try to load from Supabase FIRST (cloud priority)
       let cloudLoaded = false;
       if (userId) {
-        cloudLoaded = await this.loadAllFromSupabase(userId);
-      }
+        // Clear arrays ONLY if we're about to load from cloud
+        // loadAllFromSupabase will populate these arrays
+        this.openPositions = [];
+        this.pendingOrders = [];
+        this.tradeHistory = [];
 
-      // If cloud load failed, fallback to local storage
-      if (!cloudLoaded) {
-        console.log('[PaperTrade] Cloud load failed, using local storage fallback...');
-        await this.loadFromLocalStorage();
+        cloudLoaded = await this.loadAllFromSupabase(userId);
+
+        // If cloud load failed, restore backup for SAME user, or try local storage
+        if (!cloudLoaded) {
+          console.log('[PaperTrade] Cloud load failed...');
+          if (!isSwitchingUsers && backupPositions.length > 0) {
+            // Same user, restore backup
+            console.log('[PaperTrade] Restoring backup data for same user');
+            this.openPositions = backupPositions;
+            this.pendingOrders = backupPending;
+            this.tradeHistory = backupHistory;
+            this.balance = backupBalance;
+            this.initialBalance = backupInitialBalance;
+          } else {
+            // Different user or no backup, try local storage
+            console.log('[PaperTrade] Falling back to local storage...');
+            await this.loadFromLocalStorage();
+          }
+        } else {
+          // Cloud loaded successfully - merge with local storage to recover any orphaned trades
+          await this.mergeLocalOrphanedTrades();
+        }
       } else {
-        // Cloud loaded successfully - merge with local storage to recover any orphaned trades
-        // This handles the case where cloud sync failed silently when saving
-        await this.mergeLocalOrphanedTrades();
+        // No userId - just use local storage
+        await this.loadFromLocalStorage();
       }
 
       this.initialized = true;
@@ -244,11 +279,21 @@ class PaperTradeService {
 
     } catch (error) {
       console.error('[PaperTrade] Init error:', error);
-      this.openPositions = [];
-      this.pendingOrders = [];
-      this.tradeHistory = [];
-      this.initialBalance = DEFAULT_INITIAL_BALANCE;
-      this.balance = DEFAULT_INITIAL_BALANCE;
+      // On error, try to restore backup if same user
+      if (!isSwitchingUsers && backupPositions.length > 0) {
+        console.log('[PaperTrade] Error occurred, restoring backup...');
+        this.openPositions = backupPositions;
+        this.pendingOrders = backupPending;
+        this.tradeHistory = backupHistory;
+        this.balance = backupBalance;
+        this.initialBalance = backupInitialBalance;
+      } else {
+        this.openPositions = [];
+        this.pendingOrders = [];
+        this.tradeHistory = [];
+        this.initialBalance = DEFAULT_INITIAL_BALANCE;
+        this.balance = DEFAULT_INITIAL_BALANCE;
+      }
       this.initialized = true;
     }
   }
@@ -302,12 +347,19 @@ class PaperTradeService {
       }
 
       // 2. Load OPEN positions
+      console.log('[PaperTrade] Querying OPEN positions for userId:', userId);
       const { data: openPositions, error: openError } = await supabase
         .from('paper_trades')
         .select('*')
         .eq('user_id', userId)
         .eq('status', 'OPEN')
         .order('opened_at', { ascending: false });
+
+      console.log('[PaperTrade] OPEN positions query result:', {
+        error: openError?.message || null,
+        count: openPositions?.length || 0,
+        positions: openPositions?.map(p => ({ id: p.id, symbol: p.symbol, status: p.status })) || [],
+      });
 
       if (openError) {
         console.log('[PaperTrade] Open positions load error:', openError.message);
@@ -319,6 +371,7 @@ class PaperTradeService {
       } else {
         this.openPositions = (openPositions || []).map(p => this.mapFromSupabase(p));
         if (openPositions && openPositions.length > 0) hasLoadedAnyData = true;
+        console.log('[PaperTrade] Loaded', this.openPositions.length, 'OPEN positions into memory');
       }
 
       if (criticalError) return false;
@@ -376,7 +429,16 @@ class PaperTradeService {
    * Sync user settings (balance, initial_balance) to Supabase
    */
   async syncSettingsToSupabase(userId) {
-    if (!userId) return;
+    if (!userId) {
+      console.log('[PaperTrade] syncSettingsToSupabase - No userId, skipping');
+      return { success: false, error: 'No userId' };
+    }
+
+    console.log('[PaperTrade] syncSettingsToSupabase:', {
+      userId: userId.substring(0, 8) + '...',
+      balance: this.balance,
+      initialBalance: this.initialBalance,
+    });
 
     try {
       const { error } = await supabase
@@ -391,10 +453,15 @@ class PaperTradeService {
         });
 
       if (error) {
-        console.log('[PaperTrade] syncSettingsToSupabase error:', error.message);
+        console.error('[PaperTrade] ❌ syncSettingsToSupabase FAILED:', error.message);
+        return { success: false, error: error.message };
       }
+
+      console.log('[PaperTrade] ✅ syncSettingsToSupabase SUCCESS');
+      return { success: true };
     } catch (error) {
-      console.log('[PaperTrade] syncSettingsToSupabase error:', error.message);
+      console.error('[PaperTrade] ❌ syncSettingsToSupabase EXCEPTION:', error.message);
+      return { success: false, error: error.message };
     }
   }
 
@@ -536,12 +603,12 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   async openPosition(params) {
-    await this.init();
+    await this.init(this.currentUserId);
 
     const {
       pattern,
       positionSize,
-      userId,
+      userId: paramUserId,  // Renamed to avoid confusion
       leverage = 10,
       positionValue,
       currentMarketPrice = null,  // NEW: For limit order detection
@@ -557,6 +624,16 @@ class PaperTradeService {
       aiFeedback = null,
     } = params;
 
+    // CRITICAL: Determine effective userId - prioritize param, fallback to currentUserId
+    const effectiveUserId = paramUserId || this.currentUserId;
+
+    console.log('[PaperTrade] openPosition - userId check:', {
+      paramUserId,
+      currentUserId: this.currentUserId,
+      effectiveUserId,
+      symbol: pattern?.symbol,
+    });
+
     // Validate
     if (!pattern || !positionSize || positionSize <= 0) {
       throw new Error('Invalid parameters');
@@ -564,6 +641,11 @@ class PaperTradeService {
 
     if (positionSize > this.balance) {
       throw new Error('Insufficient balance');
+    }
+
+    // CRITICAL: Warn if no valid userId - position won't sync to cloud!
+    if (!effectiveUserId || effectiveUserId === 'anonymous') {
+      console.warn('[PaperTrade] ⚠️ WARNING: Opening position without valid userId - will not sync to cloud!');
     }
 
     // Generate UUID for paper trade (compatible with database UUID type)
@@ -613,8 +695,8 @@ class PaperTradeService {
       id,
       orderId: id,
 
-      // User
-      userId: userId || 'anonymous',
+      // User - CRITICAL: Use effectiveUserId for proper cloud sync
+      userId: effectiveUserId || 'anonymous',
 
       // Symbol & Pattern
       symbol: pattern.symbol,
@@ -679,21 +761,39 @@ class PaperTradeService {
       // Store original pattern data for chart navigation
       patternData: {
         ...pattern,
-        // Ensure key fields are stored
+        // Ensure key fields are stored (support both camelCase and snake_case)
         symbol: pattern.symbol,
-        type: pattern.type,
+        type: pattern.type || pattern.patternType,
         patternType: pattern.type || pattern.patternType,
+        pattern_type: pattern.pattern_type || pattern.type || pattern.patternType,
         timeframe: pattern.timeframe,
         direction: pattern.direction,
-        entry: pattern.entry,
-        entryPrice: pattern.entry,
-        stopLoss: pattern.stopLoss,
+        // Entry/SL/TP - normalized values
+        entry: pattern.entry || pattern.entry_price,
+        entryPrice: pattern.entry || pattern.entry_price,
+        entry_price: pattern.entry_price || pattern.entry,
+        stopLoss: pattern.stopLoss || pattern.stop_loss,
+        stop_loss: pattern.stop_loss || pattern.stopLoss,
         // Target fields (different formats for compatibility)
-        target: pattern.targets?.[0] || pattern.target1 || pattern.target,
+        target: pattern.targets?.[0] || pattern.target1 || pattern.target || pattern.target_1,
         targets: pattern.targets,
-        target1: pattern.target1,
-        target2: pattern.target2,
+        target1: pattern.target1 || pattern.target_1,
+        target_1: pattern.target_1 || pattern.target1,
+        target2: pattern.target2 || pattern.target_2,
+        target_2: pattern.target_2 || pattern.target2,
+        take_profit: pattern.take_profit || pattern.takeProfit || pattern.target || pattern.target_1,
         confidence: pattern.confidence,
+        // ═══════════════════════════════════════════════════════════
+        // ZONE DATA - For displaying zone rectangle on chart
+        // ═══════════════════════════════════════════════════════════
+        zone_high: pattern.zone_high || pattern.zoneHigh,
+        zone_low: pattern.zone_low || pattern.zoneLow,
+        zoneHigh: pattern.zoneHigh || pattern.zone_high,
+        zoneLow: pattern.zoneLow || pattern.zone_low,
+        start_time: pattern.start_time || pattern.startTime,
+        end_time: pattern.end_time || pattern.endTime,
+        // Pattern ID for linking
+        pattern_id: pattern.pattern_id || pattern.id,
         // Chart data for labels/lines
         supportLevels: pattern.supportLevels,
         resistanceLevels: pattern.resistanceLevels,
@@ -732,8 +832,17 @@ class PaperTradeService {
     // Save to storage
     await this.saveAll();
 
-    // Sync to Supabase
-    await this.syncPositionToSupabase(position, 'INSERT');
+    // Sync to Supabase - CRITICAL: This must succeed for persistence across app restarts
+    const syncResult = await this.syncPositionToSupabase(position, 'INSERT');
+
+    console.log('[PaperTrade] openPosition complete:', {
+      positionId: position.id,
+      symbol: position.symbol,
+      userId: position.userId,
+      status: position.status,
+      syncedToCloud: syncResult?.success || false,
+      syncError: syncResult?.error || null,
+    });
 
     return position;
   }
@@ -780,7 +889,7 @@ class PaperTradeService {
    * @returns {Object} { filled: filledOrders[], pending: remainingPending[] }
    */
   async checkPendingOrders(currentPrices) {
-    await this.init();
+    await this.init(this.currentUserId);
 
     if (this.pendingOrders.length === 0) {
       return { filled: [], pending: [] };
@@ -850,7 +959,7 @@ class PaperTradeService {
    * @param {string} orderId - ID of the pending order to cancel
    */
   async cancelPendingOrder(orderId) {
-    await this.init();
+    await this.init(this.currentUserId);
 
     const orderIndex = this.pendingOrders.findIndex((o) => o.id === orderId);
 
@@ -903,7 +1012,7 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   async closePosition(positionId, exitPrice, exitReason = 'MANUAL') {
-    await this.init();
+    await this.init(this.currentUserId);
 
     // CRITICAL: Ensure currentUserId is set for proper sync to Supabase
     // If currentUserId is not set, the closed trade won't be saved to cloud
@@ -997,7 +1106,7 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   async updatePositionSLTP(positionId, newStopLoss, newTakeProfit, newLeverage = null, newMargin = null) {
-    await this.init();
+    await this.init(this.currentUserId);
 
     const positionIndex = this.openPositions.findIndex((p) => p.id === positionId);
 
@@ -1107,7 +1216,7 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   async updatePosition(positionId, updates) {
-    await this.init();
+    await this.init(this.currentUserId);
 
     const positionIndex = this.openPositions.findIndex((p) => p.id === positionId);
 
@@ -1157,7 +1266,7 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   async updatePrices(currentPrices) {
-    await this.init();
+    await this.init(this.currentUserId);
 
     if (this.openPositions.length === 0) return { closed: [], updated: [] };
 
@@ -1255,15 +1364,48 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   getOpenPositions(userId = null) {
+    console.log('[PaperTrade] getOpenPositions called:', {
+      requestedUserId: userId,
+      currentUserId: this.currentUserId,
+      totalPositions: this.openPositions.length,
+      positionUserIds: this.openPositions.map(p => p.userId),
+      initialized: this.initialized,
+    });
+
+    // TEMPORARY FIX: If no positions but we're initialized, return all without filtering
+    // This helps debug if the issue is with filtering
+    if (this.openPositions.length > 0) {
+      console.log('[PaperTrade] First position sample:', JSON.stringify(this.openPositions[0], null, 2));
+    }
+
     if (userId) {
-      return this.openPositions.filter((p) => p.userId === userId);
+      const filtered = this.openPositions.filter((p) => {
+        const match1 = p.userId === userId;
+        const match2 = p.userId === 'anonymous' && this.currentUserId === userId;
+        const match3 = (!p.userId || p.userId === '' || p.userId === null) && this.currentUserId === userId;
+        console.log('[PaperTrade] Position filter check:', {
+          positionId: p.id,
+          positionUserId: p.userId,
+          requestedUserId: userId,
+          match1, match2, match3,
+          result: match1 || match2 || match3,
+        });
+        return match1 || match2 || match3;
+      });
+      console.log('[PaperTrade] getOpenPositions filtered result:', filtered.length);
+      return filtered;
     }
     return [...this.openPositions];
   }
 
   getPendingOrders(userId = null) {
     if (userId) {
-      return this.pendingOrders.filter((p) => p.userId === userId);
+      return this.pendingOrders.filter((p) => {
+        if (p.userId === userId) return true;
+        if (p.userId === 'anonymous' && this.currentUserId === userId) return true;
+        if ((!p.userId || p.userId === '' || p.userId === null) && this.currentUserId === userId) return true;
+        return false;
+      });
     }
     return [...this.pendingOrders];
   }
@@ -1663,7 +1805,9 @@ class PaperTradeService {
    * Formula: Balance = initialBalance + sum(realizedPnL) - sum(openPositionSizes) - sum(pendingOrderSizes)
    */
   async recalculateBalance() {
-    await this.init();
+    // CRITICAL: Use currentUserId to preserve cloud sync context
+    // Don't call init() without userId as it will reset currentUserId to null
+    await this.init(this.currentUserId);
 
     // Sum of all realized P&L from closed trades
     const totalRealizedPnL = this.tradeHistory.reduce((sum, t) => {
@@ -1735,28 +1879,63 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   async syncPositionToSupabase(position, action = 'INSERT') {
+    console.log('[PaperTrade] syncPositionToSupabase called:', {
+      action,
+      positionId: position.id,
+      symbol: position.symbol,
+      userId: position.userId,
+      status: position.status,
+      currentUserId: this.currentUserId,
+    });
+
     try {
-      if (!position.userId || position.userId === 'anonymous') return;
+      // CRITICAL: Use currentUserId as fallback if position.userId is not set
+      const effectiveUserId = position.userId || this.currentUserId;
+
+      if (!effectiveUserId || effectiveUserId === 'anonymous') {
+        console.error('[PaperTrade] ❌ SYNC SKIPPED - No valid userId!', {
+          positionUserId: position.userId,
+          currentUserId: this.currentUserId,
+        });
+        return { success: false, error: 'No valid userId' };
+      }
+
+      // Ensure position has userId for future reference
+      if (!position.userId) {
+        position.userId = effectiveUserId;
+      }
+
+      // Map direction to side for database compatibility
+      const sideValue = position.direction === 'LONG' ? 'buy' : 'sell';
 
       const data = {
         id: position.id,
-        user_id: position.userId,
+        user_id: effectiveUserId,
         symbol: position.symbol,
+        // Both direction and side for compatibility
         direction: position.direction,
+        side: sideValue,  // Required by existing table schema
         pattern_type: position.patternType,
         timeframe: position.timeframe,
+        // Both entry_price and price for compatibility
         entry_price: position.entryPrice,
+        price: position.entryPrice,  // Required by existing table schema
         stop_loss: position.stopLoss,
         take_profit: position.takeProfit,
         position_size: position.positionSize,
-        quantity: position.quantity,
+        quantity: position.quantity || (position.positionValue / position.entryPrice),
+        // Both total_value and position_value
+        total_value: position.positionValue || position.positionSize,
         status: position.status,
         opened_at: position.openedAt,
         closed_at: position.closedAt || null,
         exit_price: position.exitPrice || null,
         exit_reason: position.exitReason || null,
+        // Both realized_pnl and pnl for compatibility
         realized_pnl: position.realizedPnL || null,
+        pnl: position.realizedPnL || 0,
         realized_pnl_percent: position.realizedPnLPercent || null,
+        pnl_percent: position.realizedPnLPercent || 0,
         result: position.result || null,
         // Extended fields
         leverage: position.leverage || 10,
@@ -1781,37 +1960,124 @@ class PaperTradeService {
         ai_feedback: position.aiFeedback || null,
       };
 
+      let error = null;
+
       if (action === 'INSERT') {
-        const { error } = await supabase.from('paper_trades').insert(data);
+        const result = await supabase.from('paper_trades').insert(data);
+        error = result.error;
         if (error) {
-          console.log('[PaperTrade] Insert error:', error.message);
+          // Try upsert if insert fails (might already exist)
+          console.log('[PaperTrade] Insert failed, trying upsert...', error.message);
+          const upsertResult = await supabase.from('paper_trades').upsert(data);
+          error = upsertResult.error;
         }
       } else {
-        const { error } = await supabase.from('paper_trades').update(data).eq('id', position.id);
-        if (error) {
-          console.log('[PaperTrade] Update error:', error.message);
-        }
+        const result = await supabase.from('paper_trades').upsert(data);
+        error = result.error;
+      }
+
+      if (error) {
+        console.error('[PaperTrade] ❌ Supabase sync FAILED:', {
+          action,
+          error: error.message,
+          code: error.code,
+          details: error.details,
+        });
+        return { success: false, error: error.message };
+      }
+
+      // VERIFY: Query back to confirm data was saved
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('paper_trades')
+        .select('id, symbol, status, user_id')
+        .eq('id', position.id)
+        .single();
+
+      if (verifyError || !verifyData) {
+        console.error('[PaperTrade] ⚠️ VERIFICATION FAILED - Data may not have been saved!', {
+          verifyError: verifyError?.message,
+          positionId: position.id,
+        });
+      } else {
+        console.log('[PaperTrade] ✅ Supabase sync VERIFIED:', {
+          action,
+          positionId: verifyData.id,
+          symbol: verifyData.symbol,
+          status: verifyData.status,
+          userId: verifyData.user_id,
+        });
       }
 
       // Also update balance in settings
-      if (this.currentUserId) {
-        await this.syncSettingsToSupabase(this.currentUserId);
+      const settingsUserId = this.currentUserId || effectiveUserId;
+      if (settingsUserId) {
+        await this.syncSettingsToSupabase(settingsUserId);
       }
+
+      return { success: true, verified: !verifyError && !!verifyData };
     } catch (error) {
-      console.log('[PaperTrade] Supabase sync error (non-critical):', error.message);
+      console.error('[PaperTrade] ❌ Supabase sync EXCEPTION:', error.message);
+      return { success: false, error: error.message };
     }
   }
 
   /**
    * Force refresh from cloud (useful for manual sync button)
+   * CRITICAL FIX: Don't clear existing data until cloud load succeeds
    */
   async forceRefreshFromCloud(userId) {
     if (!userId) return false;
 
-    this.initialized = false;
-    this.currentUserId = null;
+    console.log('[PaperTrade] forceRefreshFromCloud called for userId:', userId);
 
-    return await this.init(userId);
+    // CRITICAL: Save existing data in case cloud load fails
+    const backupPositions = [...this.openPositions];
+    const backupPending = [...this.pendingOrders];
+    const backupHistory = [...this.tradeHistory];
+    const backupBalance = this.balance;
+    const backupInitialBalance = this.initialBalance;
+
+    try {
+      // Set currentUserId BEFORE calling loadAllFromSupabase
+      // This ensures userId filtering works correctly
+      this.currentUserId = userId;
+
+      // Try to load from cloud
+      const cloudLoaded = await this.loadAllFromSupabase(userId);
+
+      if (cloudLoaded) {
+        console.log('[PaperTrade] forceRefreshFromCloud - Cloud load SUCCESS:', {
+          positions: this.openPositions.length,
+          pending: this.pendingOrders.length,
+          history: this.tradeHistory.length,
+        });
+        this.initialized = true;
+
+        // Save to local storage as cache
+        await this.saveToLocalStorage();
+        return true;
+      } else {
+        // Cloud load failed - RESTORE backup data
+        console.log('[PaperTrade] forceRefreshFromCloud - Cloud load FAILED, restoring backup');
+        this.openPositions = backupPositions;
+        this.pendingOrders = backupPending;
+        this.tradeHistory = backupHistory;
+        this.balance = backupBalance;
+        this.initialBalance = backupInitialBalance;
+        this.initialized = true;
+        return false;
+      }
+    } catch (error) {
+      // Error occurred - RESTORE backup data
+      console.error('[PaperTrade] forceRefreshFromCloud error:', error);
+      this.openPositions = backupPositions;
+      this.pendingOrders = backupPending;
+      this.tradeHistory = backupHistory;
+      this.balance = backupBalance;
+      this.initialBalance = backupInitialBalance;
+      this.initialized = true;
+      return false;
+    }
   }
 
   /**

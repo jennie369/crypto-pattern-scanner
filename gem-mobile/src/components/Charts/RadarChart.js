@@ -14,14 +14,14 @@ import * as Icons from 'lucide-react-native';
 import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
 import { LinearGradient } from 'expo-linear-gradient';
 
-// Life area configuration
+// Life area configuration - 6 lĩnh vực cuộc sống theo kịch bản demo
 const LIFE_AREAS = [
   { key: 'finance', label: 'Tài chính', icon: 'Wallet', color: COLORS.gold },
   { key: 'career', label: 'Sự nghiệp', icon: 'Briefcase', color: COLORS.purple },
   { key: 'health', label: 'Sức khỏe', icon: 'Heart', color: COLORS.success },
-  { key: 'relationships', label: 'Mối quan hệ', icon: 'Users', color: '#FF6B9D' },
+  { key: 'relationships', label: 'Tình yêu', icon: 'Heart', color: '#FF6B9D' },
   { key: 'personal', label: 'Cá nhân', icon: 'User', color: COLORS.cyan || '#00D9FF' },
-  { key: 'spiritual', label: 'Tâm linh', icon: 'Sparkles', color: COLORS.burgundy || '#8B1C3A' },
+  { key: 'spiritual', label: 'Tâm thức', icon: 'Sparkles', color: COLORS.burgundy || '#8B1C3A' },
 ];
 
 const RadarChart = ({

@@ -3,13 +3,14 @@
  * Shows when initiating a call, waiting for callee to answer
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, BackHandler } from 'react-native';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, BackHandler, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Phone, Video } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { CALL_TYPE, CALL_STATUS } from '../../constants/callConstants';
+import { callService } from '../../services/callService';
 import { useCall } from '../../hooks/useCall';
 import { useCallTimer } from '../../hooks/useCallTimer';
 import { CallAvatar, CallTimer, CallControls } from '../../components/Call';
@@ -19,12 +20,67 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 /**
  * OutgoingCallScreen - Screen shown when calling someone
  * @param {Object} props.route.params
- * @param {Object} props.route.params.call - Call object
+ * @param {Object} props.route.params.call - Call object (initially only call_type and conversation_id)
  * @param {Object} props.route.params.callee - Callee user info
  */
 const OutgoingCallScreen = ({ route, navigation }) => {
-  const { call, callee } = route.params || {};
-  const isVideoCall = call?.call_type === CALL_TYPE.VIDEO;
+  const { call: initialCall, callee } = route.params || {};
+  const isVideoCall = initialCall?.call_type === CALL_TYPE.VIDEO;
+
+  // State for the actual call (after initiating)
+  const [call, setCall] = useState(null);
+  const [initiateError, setInitiateError] = useState(null);
+  const [isInitiating, setIsInitiating] = useState(true);
+  const isInitiated = useRef(false);
+
+  // ========== INITIATE CALL ==========
+  useEffect(() => {
+    const initiate = async () => {
+      // Prevent double initialization
+      if (isInitiated.current) return;
+      isInitiated.current = true;
+
+      if (!initialCall?.conversation_id || !callee?.id) {
+        setInitiateError('Thông tin cuộc gọi không hợp lệ');
+        setIsInitiating(false);
+        return;
+      }
+
+      try {
+        console.log('[OutgoingCallScreen] Initiating call...');
+        const result = await callService.initiateCall(
+          initialCall.conversation_id,
+          callee.id,
+          initialCall.call_type
+        );
+
+        if (!result.success) {
+          setInitiateError(result.error || 'Không thể khởi tạo cuộc gọi');
+          setIsInitiating(false);
+          return;
+        }
+
+        console.log('[OutgoingCallScreen] Call initiated:', result.call.id);
+        setCall(result.call);
+        setIsInitiating(false);
+      } catch (err) {
+        console.error('[OutgoingCallScreen] Initiate error:', err);
+        setInitiateError(err.message);
+        setIsInitiating(false);
+      }
+    };
+
+    initiate();
+  }, [initialCall, callee]);
+
+  // Show error and go back
+  useEffect(() => {
+    if (initiateError) {
+      Alert.alert('Lỗi', initiateError, [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
+    }
+  }, [initiateError, navigation]);
 
   // ========== HOOKS ==========
   const {
@@ -38,7 +94,7 @@ const OutgoingCallScreen = ({ route, navigation }) => {
     isRinging,
     isConnecting,
   } = useCall({
-    call,
+    call, // This is now the actual call object with id
     isCaller: true,
     onCallEnded: (reason) => {
       navigation.replace('CallEnded', { call, callee, duration: 0, reason });
@@ -46,7 +102,7 @@ const OutgoingCallScreen = ({ route, navigation }) => {
   });
 
   // Timer for waiting duration
-  const { formattedDuration } = useCallTimer(isRinging);
+  const { formattedDuration } = useCallTimer(isRinging || isInitiating);
 
   // ========== EFFECTS ==========
 
@@ -71,16 +127,19 @@ const OutgoingCallScreen = ({ route, navigation }) => {
   // ========== HANDLERS ==========
 
   const handleCancel = useCallback(async () => {
-    await cancelCall();
+    if (call?.id) {
+      await cancelCall();
+    }
     navigation.goBack();
-  }, [cancelCall, navigation]);
+  }, [cancelCall, navigation, call?.id]);
 
   // ========== RENDER ==========
 
   const getStatusText = () => {
+    if (isInitiating) return 'Đang khởi tạo...';
     if (isConnecting) return 'Đang kết nối...';
     if (isRinging) return 'Đang gọi...';
-    return 'Đang khởi tạo...';
+    return 'Đang chờ...';
   };
 
   return (

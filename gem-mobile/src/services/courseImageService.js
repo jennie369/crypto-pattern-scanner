@@ -5,6 +5,8 @@
  */
 
 import { supabase } from './supabase';
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const BUCKET_NAME = 'course-images';
 const TABLE_NAME = 'course_lesson_images';
@@ -231,15 +233,29 @@ export const hardDelete = async (id, storagePath) => {
  */
 export const uploadFile = async (fileUri, fileName, mimeType, folderPath = 'lessons') => {
   try {
-    // Fetch file as blob
-    const response = await fetch(fileUri);
-    const blob = await response.blob();
+    // Read file - platform specific
+    let fileData;
+    if (Platform.OS === 'web') {
+      const response = await fetch(fileUri);
+      fileData = await response.blob();
+    } else {
+      // React Native: use FileSystem
+      const base64 = await FileSystem.readAsStringAsync(fileUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      fileData = bytes.buffer;
+    }
 
     const filePath = `${folderPath}/${fileName}`;
 
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .upload(filePath, blob, {
+      .upload(filePath, fileData, {
         contentType: mimeType,
         upsert: false,
       });

@@ -70,6 +70,7 @@ import {
   Droplets,
   Play,
   Star,
+  Eye,
 } from 'lucide-react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
@@ -214,14 +215,16 @@ import {
   XPGoalTrackerInline,
 } from '../../components/Charts';
 
-// NEW: Calendar Components with Day Detail Modal
-import { MonthCalendarCompact, DayDetailModal } from '../../components/Calendar';
+// NEW: Calendar Components with Day Detail Modal and Add Event
+import { MonthCalendarCompact, DayDetailModal, AddEventModal } from '../../components/Calendar';
 import { FeaturedRitualSection } from '../../components/Rituals';
+import { preloadVideo } from '../../components/Rituals/cosmic';
 
 // NEW: Services for Calendar/Charts
 import calendarService from '../../services/calendarService';
 import statsService from '../../services/statsService';
 import readingHistoryService from '../../services/readingHistoryService';
+import notificationService from '../../services/notificationService';
 import progressCalculator, {
   LEVELS,
   XP_REWARDS,
@@ -1426,7 +1429,7 @@ const IndividualGoalCard = memo(({
                 <Text style={styles.goalCardTitle} numberOfLines={2}>
                   {goalTitle}
                 </Text>
-                {/* Edit & Expand buttons - FIXED: Better spacing and touch targets */}
+                {/* Edit, Detail & Expand buttons - FIXED: Better spacing and touch targets */}
                 <View style={styles.goalCardActions}>
                   <TouchableOpacity
                     style={styles.goalCardActionBtn}
@@ -1437,6 +1440,17 @@ const IndividualGoalCard = memo(({
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 6 }}
                   >
                     <Edit3 size={16} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                  {/* View Detail Button - Navigate to GoalDetailScreen */}
+                  <TouchableOpacity
+                    style={styles.goalCardActionBtn}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      navigation.navigate('GoalDetail', { goalId: goalWidget?.id });
+                    }}
+                    hitSlop={{ top: 12, bottom: 12, left: 6, right: 6 }}
+                  >
+                    <Eye size={16} color={COLORS.gold} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.goalCardToggleBtn}
@@ -2960,6 +2974,16 @@ const ReadingsSection = memo(({
 
 // =========== MAIN SCREEN ===========
 
+// ============================================
+// GLOBAL CACHE - persists across tab switches
+// ============================================
+const visionBoardCache = {
+  widgets: null,
+  readingHistory: null,
+  lastFetch: 0,
+  CACHE_DURATION: 60000, // 60 seconds
+};
+
 const VisionBoardScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -2968,6 +2992,7 @@ const VisionBoardScreen = () => {
   // Refs for scroll to section functionality
   const scrollViewRef = useRef(null);
   const goalsSectionY = useRef(0);
+  const pendingScrollToGoals = useRef(false); // Track pending scroll request
 
   // Tooltip hook for feature discovery
   const { showTooltipForScreen, initialized: tooltipInitialized } = useTooltip();
@@ -2980,10 +3005,10 @@ const VisionBoardScreen = () => {
     // Context not available
   }
 
-  // State
-  const [loading, setLoading] = useState(true);
+  // State - initialize from global cache for instant display
+  const [loading, setLoading] = useState(!visionBoardCache.widgets);
   const [refreshing, setRefreshing] = useState(false);
-  const [widgets, setWidgets] = useState([]);
+  const [widgets, setWidgets] = useState(() => visionBoardCache.widgets || []);
   const [alertConfig, setAlertConfig] = useState({ visible: false });
 
   // Affirmation state
@@ -3022,6 +3047,12 @@ const VisionBoardScreen = () => {
   // Gamification state
   const [showStreakHistory, setShowStreakHistory] = useState(false);
 
+  // NEW: Settings modal state for daily reminder
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [reminderHour, setReminderHour] = useState(8);
+  const [reminderMinute, setReminderMinute] = useState(0);
+
   // Gamification tracking hooks (4 categories: affirmation, habit, goal, action)
   const { trackAffirmation, trackHabit, trackGoal, trackAction } = useGamificationTracking();
 
@@ -3029,6 +3060,9 @@ const VisionBoardScreen = () => {
   const [calendarEvents, setCalendarEvents] = useState({});
   const [activeTooltip, setActiveTooltip] = useState(null); // 'calendar', 'radar', 'weekly', 'xp'
   const [dayDetailModalVisible, setDayDetailModalVisible] = useState(false);
+  const [addEventModalVisible, setAddEventModalVisible] = useState(false);
+  const [journalRituals, setJournalRituals] = useState([]);
+  const [journalReadings, setJournalReadings] = useState([]);
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -3488,44 +3522,104 @@ const VisionBoardScreen = () => {
           });
         });
         setWidgets(data || []);
+        visionBoardCache.widgets = data || []; // Update global cache
       }
     } catch (err) {
       console.error('[VisionBoard] Error:', err);
       setWidgets([]);
     } finally {
       setLoading(false);
+      // Update global cache time
+      visionBoardCache.lastFetch = Date.now();
     }
   }, [user?.id]);
 
+  // Initial load - only if no cache exists
   useEffect(() => {
-    fetchWidgets();
+    if (!visionBoardCache.widgets) {
+      fetchWidgets();
+    }
   }, [fetchWidgets]);
 
-  // Re-fetch widgets when screen gets focus (e.g., after coming back from GemMaster)
+  // Load Vision Board daily reminder settings
+  useEffect(() => {
+    const loadReminderSettings = async () => {
+      const settings = await notificationService.getVisionBoardReminderSettings();
+      if (settings) {
+        setReminderEnabled(settings.enabled || false);
+        setReminderHour(settings.hour ?? 8);
+        setReminderMinute(settings.minute ?? 0);
+      }
+    };
+    loadReminderSettings();
+  }, []);
+
+  // Re-fetch widgets when screen gets focus - WITH GLOBAL CACHING for instant display
+  // Key principle: NEVER show loading if we have ANY cached data
   useFocusEffect(
     useCallback(() => {
-      console.log('[VisionBoard] Screen focused - refreshing widgets');
-      fetchWidgets();
-      fetchReadingHistory();
-    }, [fetchWidgets])
+      const now = Date.now();
+      const cacheExpired = now - visionBoardCache.lastFetch > visionBoardCache.CACHE_DURATION;
+
+      // If we have cached data, set loading false IMMEDIATELY and sync state
+      if (visionBoardCache.widgets) {
+        console.log('[VisionBoard] Screen focused - using cached data');
+        setLoading(false);
+        // Sync state from cache in case component state is out of sync
+        if (widgets !== visionBoardCache.widgets) {
+          setWidgets(visionBoardCache.widgets);
+        }
+      }
+
+      // Fetch fresh data in background if no cache or cache expired
+      if (!visionBoardCache.widgets || cacheExpired) {
+        console.log('[VisionBoard] Screen focused - loading data in background');
+        Promise.all([
+          fetchWidgets(),
+          fetchReadingHistory(),
+        ]);
+      }
+    }, [fetchWidgets, fetchReadingHistory])
   );
 
   // =========== HANDLE SCROLL TO SECTION FROM NAVIGATION PARAMS ===========
+  // Helper function to scroll to goals section
+  const scrollToGoalsSection = useCallback(() => {
+    if (goalsSectionY.current > 0 && scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({
+        y: goalsSectionY.current - 100, // Offset for header
+        animated: true,
+      });
+      pendingScrollToGoals.current = false;
+      return true;
+    }
+    return false;
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       const scrollToSection = route.params?.scrollToSection;
-      if (scrollToSection === 'goals' && goalsSectionY.current > 0) {
-        // Delay to ensure layout is complete
-        setTimeout(() => {
-          scrollViewRef.current?.scrollTo({
-            y: goalsSectionY.current - 100, // Offset for header
-            animated: true,
-          });
-        }, 300);
-        // Clear the param to prevent re-scrolling on next focus
+      if (scrollToSection === 'goals') {
+        // Clear the param immediately to prevent re-triggering
         navigation.setParams({ scrollToSection: undefined });
+
+        if (goalsSectionY.current > 0) {
+          // Layout already calculated, scroll after short delay
+          setTimeout(() => {
+            scrollToGoalsSection();
+          }, 400);
+        } else {
+          // Layout not ready yet, set pending flag
+          pendingScrollToGoals.current = true;
+          // Also try with longer delay in case layout takes time
+          setTimeout(() => {
+            if (pendingScrollToGoals.current) {
+              scrollToGoalsSection();
+            }
+          }, 800);
+        }
       }
-    }, [route.params?.scrollToSection, navigation])
+    }, [route.params?.scrollToSection, navigation, scrollToGoalsSection])
   );
 
   // =========== FETCH READING HISTORY FROM DATABASE ===========
@@ -3569,11 +3663,44 @@ const VisionBoardScreen = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchWidgets();
-    await fetchReadingHistory();
-    await fetchCalendarAndCharts();
+    // Run all fetches in PARALLEL for faster refresh
+    await Promise.all([
+      fetchWidgets(),
+      fetchReadingHistory(),
+      fetchCalendarAndCharts(),
+    ]);
+    // Cache is updated inside fetchWidgets
     setRefreshing(false);
   }, [fetchWidgets, fetchReadingHistory]);
+
+  // =========== VISION BOARD REMINDER HANDLERS ===========
+  const handleToggleReminder = useCallback(async (enabled) => {
+    setReminderEnabled(enabled);
+    const success = await notificationService.setVisionBoardReminderSettings(
+      enabled,
+      reminderHour,
+      reminderMinute
+    );
+    if (success && enabled) {
+      // Show feedback
+      setAlertConfig({
+        visible: true,
+        type: 'success',
+        title: 'Đã bật nhắc nhở',
+        message: `Bạn sẽ nhận được nhắc nhở xem Vision Board lúc ${reminderHour}:${reminderMinute.toString().padStart(2, '0')} mỗi ngày.`,
+        buttons: [{ text: 'OK', style: 'primary' }],
+      });
+    }
+  }, [reminderHour, reminderMinute]);
+
+  const handleChangeReminderTime = useCallback(async (hour, minute) => {
+    setReminderHour(hour);
+    setReminderMinute(minute);
+    if (reminderEnabled) {
+      // Re-schedule with new time
+      await notificationService.setVisionBoardReminderSettings(true, hour, minute);
+    }
+  }, [reminderEnabled]);
 
   // =========== NEW: FETCH CALENDAR & CHARTS DATA ===========
   const fetchCalendarAndCharts = useCallback(async () => {
@@ -5260,16 +5387,26 @@ const VisionBoardScreen = () => {
   const fetchScenarios = useCallback(async (lifeArea) => {
     console.log('[VisionBoard] Fetching scenarios for:', lifeArea);
     setLoadingScenarios(true);
+
+    // Create timeout promise to prevent infinite loading
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Timeout: Query took too long')), 10000);
+    });
+
     try {
-      const { data, error } = await supabase
+      const queryPromise = supabase
         .from('goal_scenarios')
         .select('*')
         .eq('life_area', lifeArea)
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
 
+      // Race between query and timeout
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
       if (error) {
         console.error('[VisionBoard] Error fetching scenarios:', error);
+        Alert.alert('Lỗi', 'Không thể tải mục tiêu. Vui lòng thử lại sau.');
         setScenarios([]);
       } else {
         console.log('[VisionBoard] Fetched scenarios:', data?.length);
@@ -5277,6 +5414,7 @@ const VisionBoardScreen = () => {
       }
     } catch (err) {
       console.error('[VisionBoard] Fetch scenarios error:', err);
+      Alert.alert('Lỗi', `Không thể tải mục tiêu: ${err.message || 'Lỗi không xác định'}`);
       setScenarios([]);
     } finally {
       setLoadingScenarios(false);
@@ -5626,7 +5764,10 @@ const VisionBoardScreen = () => {
           <Text style={styles.headerTitle}>Vision Board</Text>
           <Text style={styles.headerSubtitle}>Mục tiêu của tôi</Text>
         </View>
-        <TouchableOpacity style={styles.settingsButton}>
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => setShowSettingsModal(true)}
+        >
           <Settings size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
       </View>
@@ -5713,9 +5854,13 @@ const VisionBoardScreen = () => {
             <FeaturedRitualSection
               onRitualPress={(ritual) => {
                 console.log('[VisionBoard] Ritual pressed:', ritual?.id, ritual?.title);
+                // Preload video for smoother transition
+                if (ritual?.id) {
+                  preloadVideo(ritual.id);
+                }
                 // Navigate to dedicated ritual screen based on ritual ID
                 const ritualScreenMap = {
-                  // All 7 Cosmic Glassmorphism ritual screens
+                  // All 8 Cosmic Glassmorphism ritual screens
                   'heart-expansion': 'HeartExpansionRitual',      // Mở Rộng Trái Tim
                   'heart-opening': 'HeartExpansionRitual',        // Alias for heart-expansion
                   'gratitude-flow': 'GratitudeFlowRitual',        // Dòng Chảy Biết Ơn
@@ -5725,6 +5870,7 @@ const VisionBoardScreen = () => {
                   'letter-to-universe': 'LetterToUniverseRitual', // Thư Gửi Vũ Trụ
                   'burn-release': 'BurnReleaseRitual',            // Đốt & Buông Bỏ
                   'star-wish': 'StarWishRitual',                  // Ước Nguyện Sao Băng
+                  'crystal-healing': 'CrystalHealingRitual',      // Chữa Lành Pha Lê
                 };
                 const screenName = ritualScreenMap[ritual?.id] || 'HeartExpansionRitual';
                 navigation.navigate(screenName, { ritual });
@@ -5757,7 +5903,7 @@ const VisionBoardScreen = () => {
                   <HelpCircle size={16} color={COLORS.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('Calendar')}
+                  onPress={() => navigation.navigate('VisionCalendar')}
                   style={styles.seeAllButton}
                 >
                   <Text style={styles.seeAllText}>Xem tất cả</Text>
@@ -5767,12 +5913,20 @@ const VisionBoardScreen = () => {
               <MonthCalendarCompact
                 eventsByDate={calendarEvents}
                 selectedDate={selectedDate}
-                onDateSelect={(date) => {
+                onDateSelect={async (date) => {
                   setSelectedDate(date);
+                  // Fetch journal data for the selected date
+                  if (user?.id) {
+                    const journalResult = await calendarService.getDailyJournal(user.id, date);
+                    if (journalResult.success) {
+                      setJournalRituals(journalResult.rituals);
+                      setJournalReadings(journalResult.readings);
+                    }
+                  }
                   // Show day detail modal when date is selected
                   setDayDetailModalVisible(true);
                 }}
-                onViewFullCalendar={() => navigation.navigate('Calendar')}
+                onViewFullCalendar={() => navigation.navigate('VisionCalendar')}
                 showLegend={true}
               />
             </View>
@@ -5780,16 +5934,59 @@ const VisionBoardScreen = () => {
             {/* Day Detail Modal */}
             <DayDetailModal
               visible={dayDetailModalVisible}
-              onClose={() => setDayDetailModalVisible(false)}
+              onClose={() => {
+                setDayDetailModalVisible(false);
+                setJournalRituals([]);
+                setJournalReadings([]);
+              }}
               date={selectedDate}
               events={calendarEvents[selectedDate] || []}
+              rituals={journalRituals}
+              readings={journalReadings}
               onEventComplete={(eventId) => {
                 console.log('[VisionBoard] Event completed:', eventId);
                 // TODO: Mark event as complete
               }}
               onAddEvent={() => {
                 console.log('[VisionBoard] Add event for date:', selectedDate);
-                // TODO: Navigate to add event screen or show modal
+                setAddEventModalVisible(true);
+              }}
+              onRitualPress={(ritual) => {
+                console.log('[VisionBoard] Ritual pressed:', ritual.ritual_slug);
+                // Could navigate to ritual details in the future
+              }}
+              onReadingPress={(reading) => {
+                console.log('[VisionBoard] Reading pressed:', reading.reading_type);
+                // Could navigate to reading details in the future
+              }}
+            />
+
+            {/* Add Event Modal */}
+            <AddEventModal
+              visible={addEventModalVisible}
+              date={selectedDate}
+              userId={user?.id}
+              onClose={() => setAddEventModalVisible(false)}
+              onEventCreated={async (newEvent) => {
+                console.log('[VisionBoard] Event created:', newEvent);
+                // Refresh calendar events for the current month
+                if (user?.id) {
+                  const now = new Date(selectedDate);
+                  const result = await calendarService.getMonthEventsGrouped(
+                    user.id,
+                    now.getFullYear(),
+                    now.getMonth() + 1
+                  );
+                  if (result.success) {
+                    setCalendarEvents(result.eventsByDate || {});
+                  }
+                  // Also refresh the day detail if open
+                  const journalResult = await calendarService.getDailyJournal(user.id, selectedDate);
+                  if (journalResult.success) {
+                    setJournalRituals(journalResult.rituals);
+                    setJournalReadings(journalResult.readings);
+                  }
+                }
               }}
             />
 
@@ -5822,6 +6019,10 @@ const VisionBoardScreen = () => {
               <View
                 onLayout={(event) => {
                   goalsSectionY.current = event.nativeEvent.layout.y;
+                  // Check for pending scroll request
+                  if (pendingScrollToGoals.current) {
+                    setTimeout(() => scrollToGoalsSection(), 100);
+                  }
                 }}
               >
                 <GoalTabs
@@ -5965,6 +6166,10 @@ const VisionBoardScreen = () => {
                   // Only set if not already set by grouped widgets
                   if (goalsSectionY.current === 0) {
                     goalsSectionY.current = event.nativeEvent.layout.y;
+                    // Check for pending scroll request
+                    if (pendingScrollToGoals.current) {
+                      setTimeout(() => scrollToGoalsSection(), 100);
+                    }
                   }
                 }}
               >
@@ -5986,6 +6191,10 @@ const VisionBoardScreen = () => {
                   // Set for empty state (user just added their first goal)
                   if (goalsSectionY.current === 0) {
                     goalsSectionY.current = event.nativeEvent.layout.y;
+                    // Check for pending scroll request
+                    if (pendingScrollToGoals.current) {
+                      setTimeout(() => scrollToGoalsSection(), 100);
+                    }
                   }
                 }}
               >
@@ -6368,6 +6577,123 @@ const VisionBoardScreen = () => {
         scenario={selectedScenario}
         lifeArea={selectedLifeArea}
       />
+
+      {/* Vision Board Settings Modal - Daily Reminder */}
+      <Modal
+        visible={showSettingsModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSettingsModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowSettingsModal(false)}
+        >
+          <Pressable style={styles.settingsModalContainer} onPress={e => e.stopPropagation()}>
+            {/* Header */}
+            <View style={styles.settingsModalHeader}>
+              <Settings size={22} color={COLORS.gold} />
+              <Text style={styles.settingsModalTitle}>Cài đặt Vision Board</Text>
+              <TouchableOpacity
+                onPress={() => setShowSettingsModal(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <X size={24} color={COLORS.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Daily Reminder Toggle */}
+            <View style={styles.settingsRow}>
+              <View style={styles.settingsRowLeft}>
+                <Clock size={20} color={COLORS.purple} />
+                <View style={styles.settingsRowText}>
+                  <Text style={styles.settingsLabel}>Nhắc nhở hàng ngày</Text>
+                  <Text style={styles.settingsDescription}>
+                    Nhận thông báo để xem Vision Board mỗi ngày
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.toggleButton,
+                  reminderEnabled && styles.toggleButtonActive
+                ]}
+                onPress={() => handleToggleReminder(!reminderEnabled)}
+              >
+                <View style={[
+                  styles.toggleCircle,
+                  reminderEnabled && styles.toggleCircleActive
+                ]} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Time Picker (only show when enabled) */}
+            {reminderEnabled && (
+              <View style={styles.timePickerContainer}>
+                <Text style={styles.timePickerLabel}>Thời gian nhắc nhở:</Text>
+                <View style={styles.timePicker}>
+                  {/* Hour Selector */}
+                  <TouchableOpacity
+                    style={styles.timeButton}
+                    onPress={() => {
+                      const newHour = (reminderHour + 1) % 24;
+                      handleChangeReminderTime(newHour, reminderMinute);
+                    }}
+                  >
+                    <ChevronUp size={16} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                  <Text style={styles.timeValue}>
+                    {reminderHour.toString().padStart(2, '0')}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.timeButton}
+                    onPress={() => {
+                      const newHour = reminderHour === 0 ? 23 : reminderHour - 1;
+                      handleChangeReminderTime(newHour, reminderMinute);
+                    }}
+                  >
+                    <ChevronUp size={16} color={COLORS.textMuted} style={{ transform: [{ rotate: '180deg' }] }} />
+                  </TouchableOpacity>
+
+                  <Text style={styles.timeSeparator}>:</Text>
+
+                  {/* Minute Selector */}
+                  <TouchableOpacity
+                    style={styles.timeButton}
+                    onPress={() => {
+                      const newMinute = (reminderMinute + 15) % 60;
+                      handleChangeReminderTime(reminderHour, newMinute);
+                    }}
+                  >
+                    <ChevronUp size={16} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                  <Text style={styles.timeValue}>
+                    {reminderMinute.toString().padStart(2, '0')}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.timeButton}
+                    onPress={() => {
+                      const newMinute = reminderMinute === 0 ? 45 : reminderMinute - 15;
+                      handleChangeReminderTime(reminderHour, newMinute);
+                    }}
+                  >
+                    <ChevronUp size={16} color={COLORS.textMuted} style={{ transform: [{ rotate: '180deg' }] }} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* Info Text */}
+            <View style={styles.settingsInfo}>
+              <Sparkles size={14} color={COLORS.cyan} />
+              <Text style={styles.settingsInfoText}>
+                Mỗi ngày, hãy dành vài phút nhìn vào Vision Board để tiếp thêm năng lượng cho mục tiêu của bạn.
+              </Text>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       </SafeAreaView>
     </LinearGradient>
   );
@@ -6433,6 +6759,129 @@ const styles = StyleSheet.create({
   },
   settingsButton: {
     padding: SPACING.sm,
+  },
+
+  // Settings Modal Styles
+  settingsModalContainer: {
+    backgroundColor: 'rgba(15, 16, 48, 0.98)',
+    borderRadius: 20,
+    padding: SPACING.lg,
+    marginHorizontal: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.4)',
+    maxWidth: 400,
+    width: '100%',
+  },
+  settingsModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  settingsModalTitle: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+  },
+  settingsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  settingsRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    flex: 1,
+  },
+  settingsRowText: {
+    flex: 1,
+  },
+  settingsLabel: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  settingsDescription: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  toggleButton: {
+    width: 52,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    padding: 2,
+    justifyContent: 'center',
+  },
+  toggleButtonActive: {
+    backgroundColor: COLORS.purple,
+  },
+  toggleCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.textMuted,
+  },
+  toggleCircleActive: {
+    backgroundColor: COLORS.textPrimary,
+    alignSelf: 'flex-end',
+  },
+  timePickerContainer: {
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+  },
+  timePickerLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+  },
+  timePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  timeButton: {
+    padding: SPACING.xs,
+  },
+  timeValue: {
+    fontSize: TYPOGRAPHY.fontSize.xxxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+    width: 50,
+    textAlign: 'center',
+  },
+  timeSeparator: {
+    fontSize: TYPOGRAPHY.fontSize.xxxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+    marginHorizontal: SPACING.xs,
+  },
+  settingsInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+    padding: SPACING.md,
+    backgroundColor: 'rgba(0, 240, 255, 0.08)',
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.cyan,
+  },
+  settingsInfoText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
   },
 
   // Scroll

@@ -26,6 +26,7 @@ export {
   LetterToUniverseRitual,
   BurnReleaseRitual,
   StarWishRitual,
+  CrystalHealingRitual,
   RITUAL_SCREENS,
   RITUAL_METADATA,
   getAllRituals,
