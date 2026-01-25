@@ -810,7 +810,7 @@ const CoursesScreen = ({ navigation, route }) => {
             style={styles.backBtn}
             onPress={() => {
               // Navigate back to source tab (default: Tài Sản/Account)
-              navigation.navigate('Main', { screen: sourceTab });
+              navigation.navigate('MainTabs', { screen: sourceTab });
             }}
           >
             <ArrowLeft size={24} color={COLORS.textPrimary} />

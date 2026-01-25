@@ -24,6 +24,8 @@ import {
   RefreshControl,
   ActivityIndicator,
   Dimensions,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -64,7 +66,7 @@ const DATE_RANGES = [
 const StatCard = ({ icon: Icon, label, value, trend }) => (
   <View style={styles.statCard}>
     <View style={styles.statIconContainer}>
-      <Icon size={20} color={COLORS.primary} />
+      <Icon size={20} color={COLORS.purple} />
     </View>
     <View style={styles.statContent}>
       <Text style={styles.statValue}>{value}</Text>
@@ -113,7 +115,7 @@ const ExchangeRow = ({ exchange, stats }) => {
   return (
     <View style={styles.exchangeRow}>
       <View style={styles.exchangeInfo}>
-        <View style={[styles.exchangeDot, { backgroundColor: config?.color || COLORS.primary }]} />
+        <View style={[styles.exchangeDot, { backgroundColor: config?.color || COLORS.purple }]} />
         <Text style={styles.exchangeName}>{config?.displayName || exchange}</Text>
       </View>
       <View style={styles.exchangeStats}>
@@ -183,7 +185,7 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={COLORS.purple} />
         </View>
       </SafeAreaView>
     );
@@ -210,7 +212,7 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
       <View style={styles.dateRangeContainer}>
         <TouchableOpacity
           style={styles.dateRangeButton}
-          onPress={() => setShowDatePicker(!showDatePicker)}
+          onPress={() => setShowDatePicker(true)}
         >
           <Calendar size={16} color={COLORS.textSecondary} />
           <Text style={styles.dateRangeText}>
@@ -218,9 +220,21 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
           </Text>
           <ChevronDown size={16} color={COLORS.textSecondary} />
         </TouchableOpacity>
+      </View>
 
-        {showDatePicker && (
+      {/* Date Range Picker Modal */}
+      <Modal
+        visible={showDatePicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDatePicker(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowDatePicker(false)}
+        >
           <View style={styles.dateRangePicker}>
+            <Text style={styles.dateRangePickerTitle}>Chọn khoảng thời gian</Text>
             {DATE_RANGES.map((range) => (
               <TouchableOpacity
                 key={range.key}
@@ -242,8 +256,8 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
               </TouchableOpacity>
             ))}
           </View>
-        )}
-      </View>
+        </Pressable>
+      </Modal>
 
       <ScrollView
         style={styles.content}
@@ -253,7 +267,7 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={COLORS.primary}
+            tintColor={COLORS.purple}
           />
         }
       >
@@ -411,7 +425,6 @@ const styles = StyleSheet.create({
   // Date range
   dateRangeContainer: {
     padding: SPACING.md,
-    zIndex: 100,
   },
   dateRangeButton: {
     flexDirection: 'row',
@@ -427,33 +440,43 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textPrimary,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   dateRangePicker: {
-    position: 'absolute',
-    top: 50,
-    left: SPACING.md,
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.xs,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    backgroundColor: COLORS.bgMid,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    minWidth: 200,
+    borderWidth: 1,
+    borderColor: COLORS.purple + '40',
+  },
+  dateRangePickerTitle: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+    textAlign: 'center',
   },
   dateRangeOption: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.sm,
+    marginBottom: SPACING.xs,
   },
   dateRangeOptionActive: {
-    backgroundColor: COLORS.primary + '20',
+    backgroundColor: COLORS.purple + '30',
   },
   dateRangeOptionText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textSecondary,
+    textAlign: 'center',
   },
   dateRangeOptionTextActive: {
-    color: COLORS.primary,
+    color: COLORS.purple,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
   },
   content: {
@@ -551,7 +574,7 @@ const styles = StyleSheet.create({
   funnelBar: {
     height: '100%',
     borderRadius: 4,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.purple,
   },
   funnelConversion: {
     fontSize: 10,
@@ -635,7 +658,7 @@ const styles = StyleSheet.create({
     minHeight: 4,
   },
   trendBarClicks: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.purple,
   },
   trendBarSignups: {
     backgroundColor: COLORS.cyan,
@@ -661,7 +684,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   legendDotClicks: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.purple,
   },
   legendDotSignups: {
     backgroundColor: COLORS.cyan,

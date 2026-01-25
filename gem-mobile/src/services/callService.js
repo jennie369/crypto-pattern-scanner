@@ -658,6 +658,13 @@ class CallService {
           filter: `user_id=eq.${userId}`,
         },
         async (payload) => {
+          console.log('[CallService] Realtime event received:', {
+            role: payload.new.role,
+            status: payload.new.status,
+            call_id: payload.new.call_id,
+            user_id: payload.new.user_id,
+          });
+
           // Check if this is an incoming call (role = callee, status = ringing)
           if (
             payload.new.role === PARTICIPANT_ROLE.CALLEE &&
@@ -667,10 +674,14 @@ class CallService {
 
             // Fetch full call info
             const { call } = await this.getCall(payload.new.call_id);
+            console.log('[CallService] Fetched call:', call?.id, 'status:', call?.status);
 
             if (call && call.status === CALL_STATUS.RINGING) {
+              console.log('[CallService] Triggering incoming call callback');
               onIncomingCall(call);
             }
+          } else {
+            console.log('[CallService] Event ignored - role:', payload.new.role, 'status:', payload.new.status);
           }
         }
       )
