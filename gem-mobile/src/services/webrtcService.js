@@ -170,6 +170,7 @@ class WebRTCService {
 
     // Handle ICE connection state
     this.peerConnection.oniceconnectionstatechange = () => {
+      if (!this.peerConnection) return; // Peer connection was cleaned up
       const state = this.peerConnection.iceConnectionState;
       console.log('[WebRTC] ICE connection state:', state);
 
@@ -194,6 +195,7 @@ class WebRTCService {
 
     // Handle connection state
     this.peerConnection.onconnectionstatechange = () => {
+      if (!this.peerConnection) return; // Peer connection was cleaned up
       const state = this.peerConnection.connectionState;
       console.log('[WebRTC] Connection state:', state);
       this.onConnectionStateChange?.(state);
@@ -206,6 +208,7 @@ class WebRTCService {
 
     // Handle ICE gathering state
     this.peerConnection.onicegatheringstatechange = () => {
+      if (!this.peerConnection) return; // Peer connection was cleaned up
       console.log('[WebRTC] ICE gathering state:',
         this.peerConnection.iceGatheringState);
     };
