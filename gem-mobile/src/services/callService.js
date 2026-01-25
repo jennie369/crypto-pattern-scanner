@@ -580,26 +580,32 @@ class CallService {
    */
   async getCall(callId) {
     try {
-      // Step 1: Fetch call with participants
+      // Step 1: Fetch call WITHOUT participants to avoid RLS recursion
       const { data: call, error } = await supabase
         .from('calls')
-        .select(`
-          *,
-          participants:call_participants(*)
-        `)
+        .select('*')
         .eq('id', callId)
         .single();
 
       if (error) throw error;
 
-      // Step 2: Collect all user IDs (caller + participants)
+      // Step 2: Fetch participants separately (avoids RLS infinite recursion)
+      // Users can always view their own participation
+      const { data: participants } = await supabase
+        .from('call_participants')
+        .select('*')
+        .eq('call_id', callId);
+
+      call.participants = participants || [];
+
+      // Step 3: Collect all user IDs (caller + participants)
       const userIds = new Set();
       if (call.caller_id) userIds.add(call.caller_id);
       call.participants?.forEach(p => {
         if (p.user_id) userIds.add(p.user_id);
       });
 
-      // Step 3: Fetch profiles for all users
+      // Step 4: Fetch profiles for all users
       let profilesMap = {};
       if (userIds.size > 0) {
         const { data: profiles } = await supabase
@@ -615,10 +621,10 @@ class CallService {
         }
       }
 
-      // Step 4: Attach caller profile
+      // Step 5: Attach caller profile
       call.caller = profilesMap[call.caller_id] || null;
 
-      // Step 5: Attach profiles to participants
+      // Step 6: Attach profiles to participants
       call.participants = call.participants?.map(p => ({
         ...p,
         user: profilesMap[p.user_id] || null,

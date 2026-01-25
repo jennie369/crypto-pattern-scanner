@@ -10,13 +10,17 @@
  * - Pause when screen not visible
  * - Renders children on top of video
  * - Video preloading for smoother transitions
+ * - Timeout fallback for iOS video loading issues
  */
 
-import React, { memo, useState, useRef, useEffect, useCallback } from 'react';
-import { StyleSheet, View, InteractionManager } from 'react-native';
+import React, { memo, useState, useRef, useEffect } from 'react';
+import { StyleSheet, View, Platform } from 'react-native';
 import { Video, ResizeMode, Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import useDevicePerformance from '../../../hooks/useDevicePerformance';
+
+// Video load timeout
+const VIDEO_LOAD_TIMEOUT = 12000; // 12 seconds to allow for loading
 
 // Video preload cache
 const preloadedVideos = new Map();
@@ -72,13 +76,53 @@ const VideoBackground = memo(({
   const videoRef = useRef(null);
   const [videoError, setVideoError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
+  const loadTimeoutRef = useRef(null);
 
   // Check device performance to decide whether to use video
-  const { features, isLowEnd } = useDevicePerformance();
-  const shouldUseVideo = features.enableVideoBackground && !isLowEnd && !forceGradient;
+  const { features, isLowEnd, tier } = useDevicePerformance();
+
+  // On iOS, always try videos (iPhones are powerful enough)
+  // On Android, respect the device tier detection
+  const shouldUseVideo = Platform.OS === 'ios'
+    ? !forceGradient
+    : !forceGradient && features.enableVideoBackground;
 
   const videoSource = VIDEO_SOURCES[ritualId];
   const fallbackGradient = FALLBACK_GRADIENTS[ritualId] || FALLBACK_GRADIENTS['letter-universe'];
+
+  // Log debug info on mount
+  useEffect(() => {
+    console.log('[VideoBackground] Mount:', {
+      ritualId,
+      platform: Platform.OS,
+      tier,
+      isLowEnd,
+      enableVideoBackground: features.enableVideoBackground,
+      shouldUseVideo,
+      forceGradient,
+      hasVideoSource: !!videoSource,
+    });
+  }, [ritualId, tier, isLowEnd, features.enableVideoBackground, shouldUseVideo, forceGradient, videoSource]);
+
+  // Timeout fallback - if video doesn't load in time, show gradient
+  useEffect(() => {
+    if (shouldUseVideo && videoSource && !isLoaded && !videoError) {
+      console.log('[VideoBackground] Starting load timeout for:', ritualId);
+      loadTimeoutRef.current = setTimeout(() => {
+        if (!isLoaded) {
+          console.warn('[VideoBackground] Load timeout - falling back to gradient:', ritualId);
+          setLoadTimedOut(true);
+        }
+      }, VIDEO_LOAD_TIMEOUT);
+    }
+
+    return () => {
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+    };
+  }, [shouldUseVideo, videoSource, isLoaded, videoError, ritualId]);
 
   // Handle video pause/play based on paused prop
   useEffect(() => {
@@ -100,8 +144,19 @@ const VideoBackground = memo(({
     };
   }, []);
 
-  // Fallback to gradient if no video, error, or low-end device
-  if (!videoSource || videoError || !shouldUseVideo) {
+  // Fallback to gradient if no video source, error, timeout, or video disabled
+  if (!videoSource || videoError || loadTimedOut || !shouldUseVideo) {
+    // Log why we're showing gradient (only in dev)
+    if (__DEV__) {
+      console.log('[VideoBackground] Showing gradient because:', {
+        ritualId,
+        platform: Platform.OS,
+        noSource: !videoSource,
+        hasError: videoError,
+        timedOut: loadTimedOut,
+        videoDisabled: !shouldUseVideo,
+      });
+    }
     return (
       <View style={styles.container}>
         <LinearGradient
@@ -156,14 +211,49 @@ const VideoBackground = memo(({
         isLooping={true}
         isMuted={true}
         shouldPlay={!paused}
-        onPlaybackStatusUpdate={(status) => {
-          if (status.isLoaded && !isLoaded) {
+        useNativeControls={false}
+        onReadyForDisplay={() => {
+          console.log('[VideoBackground] Ready for display:', ritualId);
+          // Clear timeout since video is ready
+          if (loadTimeoutRef.current) {
+            clearTimeout(loadTimeoutRef.current);
+          }
+          if (!isLoaded) {
             setIsLoaded(true);
           }
         }}
+        onPlaybackStatusUpdate={(status) => {
+          if (status.isLoaded && !isLoaded) {
+            console.log('[VideoBackground] Video loaded:', {
+              ritualId,
+              durationMs: status.durationMillis,
+              isPlaying: status.isPlaying,
+            });
+            // Clear timeout
+            if (loadTimeoutRef.current) {
+              clearTimeout(loadTimeoutRef.current);
+            }
+            setIsLoaded(true);
+          }
+          if (status.error) {
+            console.error('[VideoBackground] Playback status error:', ritualId, status.error);
+            setVideoError(true);
+          }
+        }}
         onError={(error) => {
-          console.warn('[VideoBackground] Error loading video:', ritualId, error);
+          console.error('[VideoBackground] ERROR loading video:', {
+            ritualId,
+            platform: Platform.OS,
+            error: error?.message || error,
+            nativeEvent: error?.nativeEvent,
+          });
           setVideoError(true);
+        }}
+        onLoad={(status) => {
+          console.log('[VideoBackground] onLoad callback:', {
+            ritualId,
+            duration: status?.durationMillis,
+          });
         }}
       />
 
