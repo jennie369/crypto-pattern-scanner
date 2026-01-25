@@ -88,34 +88,20 @@ class CallService {
 
       this.currentCallId = call.id;
 
-      // 4. Add participants
-      const { error: participantError } = await supabase
+      // 4. Add caller participant first
+      const { error: callerError } = await supabase
         .from('call_participants')
-        .insert([
-          {
-            call_id: call.id,
-            user_id: user.id,
-            role: PARTICIPANT_ROLE.CALLER,
-            status: PARTICIPANT_STATUS.CONNECTING,
-            device_type: Platform.OS,
-          },
-          {
-            call_id: call.id,
-            user_id: calleeId,
-            role: PARTICIPANT_ROLE.CALLEE,
-            status: PARTICIPANT_STATUS.INVITED,
-          },
-        ]);
+        .insert({
+          call_id: call.id,
+          user_id: user.id,
+          role: PARTICIPANT_ROLE.CALLER,
+          status: PARTICIPANT_STATUS.CONNECTING,
+          device_type: Platform.OS,
+        });
 
-      if (participantError) throw participantError;
+      if (callerError) throw callerError;
 
-      // 5. Log event
-      await this._logEvent(call.id, CALL_EVENT_TYPE.CALL_INITIATED, {
-        callType,
-        calleeId,
-      });
-
-      // 6. Update status to ringing
+      // 5. Update call status to ringing
       await supabase
         .from('calls')
         .update({
@@ -124,12 +110,24 @@ class CallService {
         })
         .eq('id', call.id);
 
-      // 7. Update callee participant status
-      await supabase
+      // 6. Add callee participant with RINGING status
+      // This triggers the realtime subscription for incoming calls
+      const { error: calleeError } = await supabase
         .from('call_participants')
-        .update({ status: PARTICIPANT_STATUS.RINGING })
-        .eq('call_id', call.id)
-        .eq('user_id', calleeId);
+        .insert({
+          call_id: call.id,
+          user_id: calleeId,
+          role: PARTICIPANT_ROLE.CALLEE,
+          status: PARTICIPANT_STATUS.RINGING,
+        });
+
+      if (calleeError) throw calleeError;
+
+      // 7. Log event
+      await this._logEvent(call.id, CALL_EVENT_TYPE.CALL_INITIATED, {
+        callType,
+        calleeId,
+      });
 
       // 8. Fetch caller profile for notification
       const { data: callerProfile } = await supabase
