@@ -688,6 +688,7 @@ class CallService {
 
   /**
    * Send push notification for incoming call
+   * Uses send-push Edge Function which queries user_push_tokens table
    * @param {string} userId - Target user ID
    * @param {Object} call - Call object
    * @param {Object} caller - Caller profile
@@ -695,26 +696,20 @@ class CallService {
    */
   async _sendCallNotification(userId, call, caller) {
     try {
-      // Get user's push token
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('expo_push_token')
-        .eq('id', userId)
-        .single();
+      console.log('[CallService] Sending push notification to user:', userId);
 
-      if (!profile?.expo_push_token) {
-        console.log('[CallService] No push token for user:', userId);
-        return;
-      }
+      const title = caller.display_name || 'Cuộc gọi đến';
+      const body = call.call_type === CALL_TYPE.VIDEO
+        ? '📹 Cuộc gọi video đến'
+        : '📞 Cuộc gọi thoại đến';
 
-      // Send via Supabase Edge Function
-      await supabase.functions.invoke('send-push-notification', {
+      // Send via send-push Edge Function
+      const { data, error } = await supabase.functions.invoke('send-push', {
         body: {
-          token: profile.expo_push_token,
-          title: caller.display_name || 'Cuộc gọi đến',
-          body: call.call_type === CALL_TYPE.VIDEO
-            ? 'Cuộc gọi video đến'
-            : 'Cuộc gọi thoại đến',
+          user_id: userId,
+          notification_type: 'incoming_call',
+          title,
+          body,
           data: {
             type: 'incoming_call',
             callId: call.id,
@@ -724,13 +719,16 @@ class CallService {
             callType: call.call_type,
             conversationId: call.conversation_id,
           },
-          channelId: 'incoming_call',
-          priority: 'high',
-          sound: 'ringtone.wav',
+          channel_id: 'incoming_call',
         },
       });
 
-      console.log('[CallService] Push notification sent to:', userId);
+      if (error) {
+        console.error('[CallService] Push notification error:', error);
+        return;
+      }
+
+      console.log('[CallService] Push notification sent successfully:', data);
     } catch (error) {
       console.error('[CallService] sendCallNotification error:', error);
     }
@@ -740,11 +738,14 @@ class CallService {
 
   /**
    * Start ring timeout (60s)
+   * Auto-hangup if no one answers within timeout period
    * @param {string} callId - Call ID
    * @private
    */
   _startRingTimeout(callId) {
     this._clearRingTimeout();
+
+    console.log('[CallService] Starting ring timeout for call:', callId, '(', CALL_TIMEOUTS.RING_TIMEOUT / 1000, 's)');
 
     this.callTimeoutId = setTimeout(async () => {
       console.log('[CallService] Ring timeout reached for call:', callId);
@@ -753,23 +754,90 @@ class CallService {
         // Get call details for notification
         const { call } = await this.getCall(callId);
 
-        // Mark as missed
-        await supabase.rpc('mark_call_missed', { p_call_id: callId });
-
-        // Send missed call notification to callee
-        if (call?.caller) {
-          const { notificationService } = await import('./notificationService');
-          await notificationService.sendMissedCallNotification(call.caller, call);
+        // Mark as missed in database
+        try {
+          await supabase.rpc('mark_call_missed', { p_call_id: callId });
+        } catch (rpcErr) {
+          // Fallback: update directly if RPC doesn't exist
+          console.log('[CallService] mark_call_missed RPC failed, using direct update:', rpcErr.message);
+          await supabase
+            .from('calls')
+            .update({
+              status: CALL_STATUS.MISSED,
+              ended_at: new Date().toISOString(),
+              end_reason: END_REASON.NO_ANSWER,
+            })
+            .eq('id', callId);
         }
+
+        // Send end signal to peer so they know call is over
+        try {
+          await callSignalingService.sendEnd(END_REASON.NO_ANSWER);
+        } catch (sigErr) {
+          console.log('[CallService] Failed to send end signal:', sigErr.message);
+        }
+
+        // Send missed call push notification
+        if (call) {
+          const calleeId = call.participants?.find(p => p.role === PARTICIPANT_ROLE.CALLEE)?.user_id;
+          if (calleeId && call.caller) {
+            await this._sendMissedCallNotification(calleeId, call);
+          }
+        }
+
+        // Log event
+        await this._logEvent(callId, CALL_EVENT_TYPE.CALL_MISSED, {
+          reason: END_REASON.NO_ANSWER,
+          timeout: CALL_TIMEOUTS.RING_TIMEOUT,
+        });
+
       } catch (err) {
         console.error('[CallService] Ring timeout error:', err);
       }
 
-      // Cleanup
+      // Cleanup WebRTC and signaling
       webrtcService.cleanup();
       await callSignalingService.cleanup();
       this._cleanup();
+
+      console.log('[CallService] Ring timeout cleanup completed');
     }, CALL_TIMEOUTS.RING_TIMEOUT);
+  }
+
+  /**
+   * Send missed call push notification
+   * @param {string} userId - User ID to notify
+   * @param {Object} call - Call object
+   * @private
+   */
+  async _sendMissedCallNotification(userId, call) {
+    try {
+      const caller = call.caller || {};
+      const { data, error } = await supabase.functions.invoke('send-push', {
+        body: {
+          user_id: userId,
+          notification_type: 'missed_call',
+          title: '📞 Cuộc gọi nhỡ',
+          body: `${caller.display_name || 'Ai đó'} đã gọi cho bạn`,
+          data: {
+            type: 'missed_call',
+            callId: call.id,
+            callerId: caller.id,
+            callerName: caller.display_name,
+            callType: call.call_type,
+          },
+          channel_id: 'missed_call',
+        },
+      });
+
+      if (error) {
+        console.error('[CallService] Missed call notification error:', error);
+      } else {
+        console.log('[CallService] Missed call notification sent:', data);
+      }
+    } catch (err) {
+      console.error('[CallService] _sendMissedCallNotification error:', err);
+    }
   }
 
   /**

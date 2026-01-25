@@ -328,6 +328,46 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
     };
   }, [call?.id, initializeCall]);
 
+  // Monitor call status from database for timeout/missed/ended
+  // This handles cases where signaling doesn't work or timeout fires
+  useEffect(() => {
+    if (!call?.id || callState === CALL_STATUS.ENDED || callState === CALL_STATUS.CONNECTED) {
+      return;
+    }
+
+    const checkCallStatus = async () => {
+      try {
+        const { call: latestCall } = await callService.getCall(call.id);
+
+        if (latestCall) {
+          const status = latestCall.status;
+
+          // Check if call has ended by various means
+          if (
+            status === CALL_STATUS.MISSED ||
+            status === CALL_STATUS.DECLINED ||
+            status === CALL_STATUS.CANCELLED ||
+            status === CALL_STATUS.ENDED ||
+            status === CALL_STATUS.FAILED
+          ) {
+            console.log('[useCall] Call status changed to:', status);
+            handleCallEnded(latestCall.end_reason || status);
+          }
+        }
+      } catch (err) {
+        console.log('[useCall] Check call status error:', err.message);
+      }
+    };
+
+    // Poll every 3 seconds
+    const interval = setInterval(checkCallStatus, 3000);
+
+    // Also check immediately
+    checkCallStatus();
+
+    return () => clearInterval(interval);
+  }, [call?.id, callState, handleCallEnded]);
+
   // ========== RETURN ==========
 
   return {

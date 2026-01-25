@@ -2,9 +2,10 @@
  * Gemral - Course Card Component
  * Reusable card for displaying course in lists
  * With smooth entrance animations
+ * UPDATED: Added cache-busting for images
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,6 +16,15 @@ import {
 } from 'react-native';
 import { Clock, Users, Star, Lock } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
+
+// Helper: Add cache-busting parameter to image URL
+const getCacheBustedUrl = (url, updatedAt) => {
+  if (!url) return null;
+  // Add updated_at timestamp as cache-busting parameter
+  const separator = url.includes('?') ? '&' : '?';
+  const cacheKey = updatedAt ? new Date(updatedAt).getTime() : Date.now();
+  return `${url}${separator}v=${cacheKey}`;
+};
 
 const TIER_COLORS = {
   FREE: COLORS.success,
@@ -30,7 +40,7 @@ const TIER_LABELS = {
   TIER3: 'VIP',
 };
 
-const CourseCard = ({
+const CourseCard = React.memo(({
   course,
   onPress,
   progress = 0,
@@ -41,6 +51,12 @@ const CourseCard = ({
 }) => {
   const tierColor = TIER_COLORS[course.tier_required] || COLORS.textMuted;
   const tierLabel = TIER_LABELS[course.tier_required] || course.tier_required;
+
+  // Cache-busted image URL - use course.updated_at for cache key
+  const thumbnailUrl = useMemo(() =>
+    getCacheBustedUrl(course.thumbnail_url, course.updated_at),
+    [course.thumbnail_url, course.updated_at]
+  );
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -94,7 +110,7 @@ const CourseCard = ({
       {/* Thumbnail */}
       <View style={styles.thumbnailContainer}>
         <Image
-          source={{ uri: course.thumbnail_url }}
+          source={{ uri: thumbnailUrl }}
           style={styles.thumbnail}
           resizeMode="cover"
         />
@@ -172,7 +188,7 @@ const CourseCard = ({
     </TouchableOpacity>
     </Animated.View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -278,5 +294,7 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
   },
 });
+
+CourseCard.displayName = 'CourseCard';
 
 export default CourseCard;

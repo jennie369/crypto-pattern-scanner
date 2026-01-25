@@ -56,38 +56,42 @@ serve(async (req) => {
       channel_id,
     } = await req.json();
 
-    // Get push tokens
+    // Get push tokens - try user_push_tokens first, then fallback to profiles
     let tokens: string[] = [];
+    const targetUserIds = user_id ? [user_id] : (user_ids || []);
 
-    if (user_id) {
-      // Single user
-      const { data: tokenData } = await supabase
-        .from('user_push_tokens')
-        .select('push_token')
-        .eq('user_id', user_id)
-        .eq('is_active', true)
-        .single();
-
-      if (tokenData?.push_token) {
-        tokens.push(tokenData.push_token);
-      }
-    } else if (user_ids && Array.isArray(user_ids)) {
-      // Multiple users
+    if (targetUserIds.length > 0) {
+      // First try user_push_tokens table
       const { data: tokensData } = await supabase
         .from('user_push_tokens')
-        .select('push_token')
-        .in('user_id', user_ids)
+        .select('push_token, user_id')
+        .in('user_id', targetUserIds)
         .eq('is_active', true);
 
       tokens = (tokensData || []).map(t => t.push_token).filter(Boolean);
+
+      // If no tokens found, fallback to profiles.expo_push_token
+      if (tokens.length === 0) {
+        console.log('[SendPush] No tokens in user_push_tokens, checking profiles...');
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('expo_push_token')
+          .in('id', targetUserIds)
+          .not('expo_push_token', 'is', null);
+
+        tokens = (profilesData || []).map(p => p.expo_push_token).filter(Boolean);
+      }
     }
 
     if (tokens.length === 0) {
+      console.log('[SendPush] No push tokens found for users:', targetUserIds);
       return new Response(
         JSON.stringify({ success: false, error: 'No valid push tokens found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
+
+    console.log(`[SendPush] Found ${tokens.length} tokens for ${targetUserIds.length} users`);
 
     // Prepare push messages
     const messages: PushMessage[] = tokens.map(token => ({
@@ -159,6 +163,12 @@ serve(async (req) => {
 
 function getDefaultTitle(type: string): string {
   const titles: Record<string, string> = {
+    // Call notifications
+    incoming_call: '📞 Cuộc gọi đến',
+    missed_call: '📞 Cuộc gọi nhỡ',
+    // Message notifications
+    new_message: '💬 Tin nhắn mới',
+    // Partnership notifications
     application_submitted: '📝 Đơn đăng ký đã gửi',
     application_approved: '🎉 Chúc mừng! Đơn đã được duyệt',
     application_rejected: '❌ Đơn đăng ký không được duyệt',
@@ -176,6 +186,22 @@ function getDefaultTitle(type: string): string {
 
 function getDefaultBody(type: string, data?: Record<string, unknown>): string {
   switch (type) {
+    // Call notifications
+    case 'incoming_call':
+      const callType = data?.callType === 'video' ? 'video' : 'thoại';
+      const callerName = data?.callerName || 'Ai đó';
+      return `${callerName} đang gọi ${callType} cho bạn`;
+
+    case 'missed_call':
+      return `Bạn có cuộc gọi nhỡ từ ${data?.callerName || 'ai đó'}`;
+
+    // Message notifications
+    case 'new_message':
+      return data?.preview
+        ? `${data?.senderName || 'Ai đó'}: ${data.preview}`
+        : `Bạn có tin nhắn mới từ ${data?.senderName || 'ai đó'}`;
+
+    // Partnership notifications
     case 'application_approved':
       return data?.role === 'kol'
         ? 'Bạn đã trở thành KOL Affiliate! Hoa hồng 20% đang chờ bạn.'
@@ -200,14 +226,19 @@ function getDefaultBody(type: string, data?: Record<string, unknown>): string {
       return `Yêu cầu rút tiền bị từ chối. Lý do: ${data?.reason || 'Vui lòng liên hệ hỗ trợ'}`;
 
     default:
-      return 'Bạn có thông báo mới từ GEM Partnership.';
+      return 'Bạn có thông báo mới từ GEMRAL.';
   }
 }
 
 function getChannelId(type: string): string {
+  // Call notifications - high priority
+  if (type === 'incoming_call' || type === 'missed_call') return 'incoming_call';
+  // Message notifications
+  if (type === 'new_message') return 'messages';
+  // Partnership notifications
   if (type.includes('tier')) return 'tier';
   if (type.includes('commission') || type.includes('withdrawal') || type.includes('payment')) return 'commission';
-  return 'partnership';
+  return 'default';
 }
 
 function formatCurrency(amount: number): string {

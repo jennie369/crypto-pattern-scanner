@@ -12,8 +12,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { CALL_TYPE, CALL_STATUS } from '../../constants/callConstants';
 import { callService } from '../../services/callService';
 import { useCall } from '../../hooks/useCall';
-import { useCallTimer } from '../../hooks/useCallTimer';
-import { CallAvatar, CallTimer, CallControls } from '../../components/Call';
+import { CallAvatar, CallControls } from '../../components/Call';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -101,8 +100,8 @@ const OutgoingCallScreen = ({ route, navigation }) => {
     },
   });
 
-  // Timer for waiting duration
-  const { formattedDuration } = useCallTimer(isRinging || isInitiating);
+  // Timer disabled during ringing - only show when connected (industry standard)
+  // Ringing state just shows "Đang gọi..." without timer
 
   // ========== EFFECTS ==========
 
@@ -172,14 +171,6 @@ const OutgoingCallScreen = ({ route, navigation }) => {
               {getStatusText()}
             </Text>
           </View>
-
-          {/* Waiting timer */}
-          {isRinging && (
-            <CallTimer
-              duration={formattedDuration}
-              size="small"
-            />
-          )}
         </View>
 
         {/* Controls */}

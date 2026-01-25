@@ -291,10 +291,82 @@ class MessagingService {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
+      // Send push notification to other participants
+      this._sendMessagePushNotification(conversationId, user.id, profile, content, messageType);
+
       return { ...data, sender: profile, users: profile, tempId };
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Send push notification for a new message
+   * @private
+   */
+  async _sendMessagePushNotification(conversationId, senderId, senderProfile, content, messageType) {
+    try {
+      // Get conversation participants
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('participant_ids, is_group, name')
+        .eq('id', conversationId)
+        .single();
+
+      if (!conversation?.participant_ids) return;
+
+      // Get recipient IDs (exclude sender)
+      const recipientIds = conversation.participant_ids.filter(id => id !== senderId);
+      if (recipientIds.length === 0) return;
+
+      // Create message preview
+      let preview = content;
+      if (messageType === 'image') {
+        preview = '📷 Đã gửi hình ảnh';
+      } else if (messageType === 'video') {
+        preview = '🎬 Đã gửi video';
+      } else if (messageType === 'audio') {
+        preview = '🎵 Đã gửi tin nhắn thoại';
+      } else if (messageType === 'file') {
+        preview = '📎 Đã gửi tệp đính kèm';
+      } else if (messageType === 'sticker') {
+        preview = '🎯 Đã gửi sticker';
+      } else if (messageType === 'gif') {
+        preview = '🎞️ Đã gửi GIF';
+      } else if (content && content.length > 50) {
+        preview = content.substring(0, 50) + '...';
+      }
+
+      const senderName = senderProfile?.display_name || senderProfile?.full_name || 'Ai đó';
+      const title = conversation.is_group && conversation.name
+        ? `${senderName} trong ${conversation.name}`
+        : senderName;
+
+      // Send push notification
+      await supabase.functions.invoke('send-push', {
+        body: {
+          user_ids: recipientIds,
+          notification_type: 'new_message',
+          title: `💬 ${title}`,
+          body: preview,
+          data: {
+            type: 'new_message',
+            conversationId,
+            senderId,
+            senderName,
+            senderAvatar: senderProfile?.avatar_url,
+            isGroup: conversation.is_group,
+            preview,
+          },
+          channel_id: 'messages',
+        },
+      });
+
+      console.log('[MessagingService] Push notification sent to', recipientIds.length, 'recipients');
+    } catch (err) {
+      // Don't throw - push notification failure shouldn't break message sending
+      console.log('[MessagingService] Push notification error:', err.message);
     }
   }
 
