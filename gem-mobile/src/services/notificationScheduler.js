@@ -16,6 +16,7 @@
 
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
@@ -134,16 +135,22 @@ class NotificationScheduler {
    */
   async registerForPushNotifications() {
     try {
+      // Get project ID from Expo config
+      const projectId = Constants?.expoConfig?.extra?.eas?.projectId ||
+                       Constants?.easConfig?.projectId ||
+                       'gem-platform-mobile';
+
       const token = (await Notifications.getExpoPushTokenAsync({
-        projectId: 'gem-platform-mobile', // Replace with your Expo project ID
+        projectId,
       })).data;
 
+      console.log('[NotificationScheduler] Push token obtained:', token?.substring(0, 30) + '...');
       await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
       return token;
     } catch (error) {
       // Firebase not configured - expected in development without FCM setup
       // Push notifications will not work until Firebase is configured
-      console.warn('[NotificationScheduler] Push notifications not available (Firebase not configured)');
+      console.warn('[NotificationScheduler] Push notifications not available:', error?.message);
       return null;
     }
   }
@@ -152,6 +159,28 @@ class NotificationScheduler {
    * Setup Android notification channels
    */
   async setupAndroidChannels() {
+    // Incoming call channel - highest priority
+    await Notifications.setNotificationChannelAsync('incoming_call', {
+      name: 'Cuộc gọi đến',
+      description: 'Thông báo cuộc gọi đến',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 500, 200, 500, 200, 500],
+      lightColor: '#4CAF50',
+      sound: 'default',
+      enableVibrate: true,
+      showBadge: true,
+    });
+
+    // Messages channel
+    await Notifications.setNotificationChannelAsync('messages', {
+      name: 'Tin nhắn',
+      description: 'Thông báo tin nhắn mới',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2196F3',
+      sound: 'default',
+    });
+
     // Widget notifications channel
     await Notifications.setNotificationChannelAsync('widget-notifications', {
       name: 'Widget Reminders',

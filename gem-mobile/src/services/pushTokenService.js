@@ -61,8 +61,30 @@ const PUSH_TOKEN_SERVICE = {
       // Save to database
       await this.savePushToken(token);
 
-      // Configure Android channel for partnership notifications
+      // Configure Android notification channels
       if (Platform.OS === 'android') {
+        // Incoming call channel - highest priority
+        await Notifications.setNotificationChannelAsync('incoming_call', {
+          name: 'Cuộc gọi đến',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 500, 200, 500, 200, 500],
+          lightColor: '#4CAF50',
+          description: 'Thông báo cuộc gọi đến',
+          sound: 'default',
+          enableVibrate: true,
+          showBadge: true,
+        });
+
+        // Messages channel
+        await Notifications.setNotificationChannelAsync('messages', {
+          name: 'Tin nhắn',
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#2196F3',
+          description: 'Thông báo tin nhắn mới',
+        });
+
+        // Partnership channel
         await Notifications.setNotificationChannelAsync('partnership', {
           name: 'Partnership',
           importance: Notifications.AndroidImportance.HIGH,
@@ -107,8 +129,8 @@ const PUSH_TOKEN_SERVICE = {
         return;
       }
 
-      // Upsert push token
-      const { error } = await supabase.from('user_push_tokens').upsert({
+      // Try to save to user_push_tokens table
+      const { error: tokenError } = await supabase.from('user_push_tokens').upsert({
         user_id: user.id,
         push_token: token,
         platform: Platform.OS,
@@ -117,10 +139,22 @@ const PUSH_TOKEN_SERVICE = {
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' });
 
-      if (error) {
-        console.error('[PushToken] Save error:', error);
+      if (tokenError) {
+        console.log('[PushToken] user_push_tokens save failed, trying profiles:', tokenError.message);
       } else {
-        console.log('[PushToken] Saved to database');
+        console.log('[PushToken] Saved to user_push_tokens');
+      }
+
+      // Also save to profiles.expo_push_token as fallback
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ expo_push_token: token })
+        .eq('id', user.id);
+
+      if (profileError) {
+        console.log('[PushToken] profiles save failed:', profileError.message);
+      } else {
+        console.log('[PushToken] Saved to profiles.expo_push_token');
       }
     } catch (err) {
       console.error('[PushToken] Save error:', err);

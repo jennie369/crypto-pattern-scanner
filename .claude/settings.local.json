@@ -124,7 +124,8 @@
       "Bash(ren:*)",
       "Bash(eas secret:list:*)",
       "Bash(eas env:create:*)",
-      "Bash(ffprobe:*)"
+      "Bash(ffprobe:*)",
+      "Bash(ffmpeg:*)"
     ],
     "deny": [],
     "ask": []
