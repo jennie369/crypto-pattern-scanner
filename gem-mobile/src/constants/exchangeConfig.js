@@ -35,34 +35,34 @@ export const EXCHANGE_CONFIGS = {
     displayName: 'Binance',
     affiliateLink: 'https://accounts.binance.com/register?ref=1124799179',
     refCode: '1124799179',
-    color: '#F0B90B',
-    bgColor: 'rgba(240, 185, 11, 0.15)',
-    description: 'San giao dich lon nhat the gioi voi thanh khoan cao nhat',
+    color: '#6A5BFF',
+    bgColor: 'rgba(106, 91, 255, 0.15)',
+    description: 'Sàn giao dịch lớn nhất thế giới với thanh khoản cao nhất',
     features: [
-      'San lon nhat the gioi',
-      'Thanh khoan cao nhat',
-      'Nhieu cap giao dich',
-      'P2P ho tro VND',
-      'Giam 20% phi khi dang ky qua GEM',
+      'Sàn lớn nhất thế giới',
+      'Thanh khoản cao nhất',
+      'Nhiều cặp giao dịch',
+      'P2P hỗ trợ VND',
+      'Giảm 20% phí khi đăng ký qua GEM',
     ],
     depositMethods: [
       {
         id: 'p2p',
         name: 'P2P (VND → USDT)',
         recommended: true,
-        description: 'Mua USDT bang VND truc tiep tu nguoi ban',
+        description: 'Mua USDT bằng VND trực tiếp từ người bán',
         steps: [
-          'Mo Binance app → P2P Trading',
-          'Chon Buy USDT, thanh toan VND',
-          'Chon nguoi ban uy tin (completion rate > 95%)',
-          'Chuyen khoan va xac nhan',
+          'Mở Binance app → P2P Trading',
+          'Chọn Buy USDT, thanh toán VND',
+          'Chọn người bán uy tín (completion rate > 95%)',
+          'Chuyển khoản và xác nhận',
         ],
       },
       {
         id: 'card',
-        name: 'The Visa/Mastercard',
+        name: 'Thẻ Visa/Mastercard',
         recommended: false,
-        description: 'Phi cao hon nhung nhanh chong',
+        description: 'Phí cao hơn nhưng nhanh chóng',
       },
     ],
     commission: {
@@ -81,34 +81,34 @@ export const EXCHANGE_CONFIGS = {
     displayName: 'Nami Exchange',
     affiliateLink: 'https://nami.exchange/ref/gem2025',
     refCode: 'gem2025',
-    color: '#00D4AA',
-    bgColor: 'rgba(0, 212, 170, 0.15)',
-    description: 'San giao dich Viet Nam, ho tro tieng Viet va nap/rut VND truc tiep',
+    color: '#3AF7A6',
+    bgColor: 'rgba(58, 247, 166, 0.15)',
+    description: 'Sàn giao dịch Việt Nam, hỗ trợ tiếng Việt và nạp/rút VND trực tiếp',
     features: [
-      'San Viet Nam 100%',
-      'Ho tro tieng Viet',
-      'Nap/rut VND truc tiep',
-      'Ho tro 24/7 tieng Viet',
-      'Giam 15% phi khi dang ky qua GEM',
+      'Sàn Việt Nam 100%',
+      'Hỗ trợ tiếng Việt',
+      'Nạp/rút VND trực tiếp',
+      'Hỗ trợ 24/7 tiếng Việt',
+      'Giảm 15% phí khi đăng ký qua GEM',
     ],
     depositMethods: [
       {
         id: 'bank',
-        name: 'Chuyen khoan ngan hang',
+        name: 'Chuyển khoản ngân hàng',
         recommended: true,
-        description: 'Nap VND truc tiep tu ngan hang Viet Nam',
+        description: 'Nạp VND trực tiếp từ ngân hàng Việt Nam',
         steps: [
-          'Dang nhap Nami → Vi → Nap tien',
-          'Chon ngan hang va nhap so tien',
-          'Chuyen khoan theo thong tin',
-          'Tien se vao tai khoan trong 5-15 phut',
+          'Đăng nhập Nami → Ví → Nạp tiền',
+          'Chọn ngân hàng và nhập số tiền',
+          'Chuyển khoản theo thông tin',
+          'Tiền sẽ vào tài khoản trong 5-15 phút',
         ],
       },
       {
         id: 'momo',
-        name: 'Vi MoMo',
+        name: 'Ví MoMo',
         recommended: false,
-        description: 'Nap nhanh qua vi dien tu',
+        description: 'Nạp nhanh qua ví điện tử',
       },
     ],
     commission: {
@@ -127,28 +127,28 @@ export const EXCHANGE_CONFIGS = {
     displayName: 'OKX',
     affiliateLink: 'https://www.okx.com/join/GEMRAL2025',
     refCode: 'GEMRAL2025',
-    color: '#000000',
-    bgColor: 'rgba(0, 0, 0, 0.15)',
-    description: 'San giao dich top 3 the gioi voi cong cu giao dich chuyen nghiep',
+    color: '#00F0FF',
+    bgColor: 'rgba(0, 240, 255, 0.15)',
+    description: 'Sàn giao dịch top 3 thế giới với công cụ giao dịch chuyên nghiệp',
     features: [
-      'Top 3 the gioi',
-      'Copy trading tot',
-      'Giao dien than thien',
-      'P2P ho tro VND',
-      'Giam 20% phi khi dang ky qua GEM',
+      'Top 3 thế giới',
+      'Copy trading tốt',
+      'Giao diện thân thiện',
+      'P2P hỗ trợ VND',
+      'Giảm 20% phí khi đăng ký qua GEM',
     ],
     depositMethods: [
       {
         id: 'p2p',
         name: 'P2P (VND → USDT)',
         recommended: true,
-        description: 'Mua USDT bang VND',
+        description: 'Mua USDT bằng VND',
       },
       {
         id: 'card',
-        name: 'The Visa/Mastercard',
+        name: 'Thẻ Visa/Mastercard',
         recommended: false,
-        description: 'Nap nhanh bang the',
+        description: 'Nạp nhanh bằng thẻ',
       },
     ],
     commission: {
@@ -167,28 +167,28 @@ export const EXCHANGE_CONFIGS = {
     displayName: 'Bybit',
     affiliateLink: 'https://www.bybit.com/invite?ref=GEMRAL',
     refCode: 'GEMRAL',
-    color: '#F7A600',
-    bgColor: 'rgba(247, 166, 0, 0.15)',
-    description: 'San chuyen ve Futures voi leverage cao va thanh khoan tot',
+    color: '#FFBD59',
+    bgColor: 'rgba(255, 189, 89, 0.15)',
+    description: 'Sàn chuyên về Futures với leverage cao và thanh khoản tốt',
     features: [
-      'Chuyen ve Futures',
-      'Leverage len toi 100x',
-      'Giao dich nhanh',
-      'P2P ho tro VND',
-      'Giam 20% phi khi dang ky qua GEM',
+      'Chuyên về Futures',
+      'Leverage lên tới 100x',
+      'Giao dịch nhanh',
+      'P2P hỗ trợ VND',
+      'Giảm 20% phí khi đăng ký qua GEM',
     ],
     depositMethods: [
       {
         id: 'p2p',
         name: 'P2P (VND → USDT)',
         recommended: true,
-        description: 'Mua USDT bang VND',
+        description: 'Mua USDT bằng VND',
       },
       {
         id: 'crypto',
-        name: 'Chuyen crypto tu san khac',
+        name: 'Chuyển crypto từ sàn khác',
         recommended: false,
-        description: 'Neu da co crypto o san khac',
+        description: 'Nếu đã có crypto ở sàn khác',
       },
     ],
     commission: {
@@ -218,33 +218,33 @@ export const EXCHANGE_ACCOUNT_STATUS = {
 
 export const EXCHANGE_STATUS_DISPLAY = {
   pending_signup: {
-    label: 'Dang cho dang ky',
+    label: 'Đang chờ đăng ký',
     color: '#9CA3AF',
     icon: 'Clock',
   },
   registered: {
-    label: 'Da dang ky',
-    color: '#3B82F6',
+    label: 'Đã đăng ký',
+    color: '#6A5BFF',
     icon: 'UserCheck',
   },
   kyc_verified: {
-    label: 'Da KYC',
-    color: '#8B5CF6',
+    label: 'Đã KYC',
+    color: '#6A5BFF',
     icon: 'Shield',
   },
   deposited: {
-    label: 'Da nap tien',
-    color: '#10B981',
+    label: 'Đã nạp tiền',
+    color: '#3AF7A6',
     icon: 'Wallet',
   },
   active: {
-    label: 'Dang hoat dong',
-    color: '#22C55E',
+    label: 'Đang hoạt động',
+    color: '#3AF7A6',
     icon: 'Activity',
   },
   disconnected: {
-    label: 'Da ngat ket noi',
-    color: '#EF4444',
+    label: 'Đã ngắt kết nối',
+    color: '#FF6B6B',
     icon: 'Unlink',
   },
 };
@@ -282,33 +282,33 @@ export const DEPOSIT_PROMPT_TYPES = {
 
 export const DEPOSIT_PROMPT_CONTENT = {
   after_signup: {
-    title: 'San sang trade that chua?',
-    message: 'Ban da dang ky {{exchange}} thanh cong! Nap tien de bat dau trade voi cac pattern chat luong.',
-    cta: 'Huong dan nap tien',
+    title: 'Sẵn sàng trade thật chưa?',
+    message: 'Bạn đã đăng ký {{exchange}} thành công! Nạp tiền để bắt đầu trade với các pattern chất lượng.',
+    cta: 'Hướng dẫn nạp tiền',
     icon: 'Wallet',
   },
   winning_streak: {
-    title: 'Xuay sac! {{streak}} wins lien tiep!',
-    message: 'Ban dang co phong do tot! Nen tang trading that de tan dung cac pattern nay.',
-    cta: 'Nap tien {{exchange}}',
+    title: 'Xuất sắc! {{streak}} wins liên tiếp!',
+    message: 'Bạn đang có phong độ tốt! Nên trade thật để tận dụng các pattern này.',
+    cta: 'Nạp tiền {{exchange}}',
     icon: 'TrendingUp',
   },
   high_grade_pattern: {
-    title: 'Pattern {{grade}} xuat hien!',
-    message: '{{pattern}} vua xuat hien - day la co hoi tot de vao lenh. Nap tien de khong bo lo!',
-    cta: 'Nap tien ngay',
+    title: 'Pattern {{grade}} xuất hiện!',
+    message: '{{pattern}} vừa xuất hiện - đây là cơ hội tốt để vào lệnh. Nạp tiền để không bỏ lỡ!',
+    cta: 'Nạp tiền ngay',
     icon: 'Zap',
   },
   first_time_scanner: {
-    title: 'Chao mung den GEM Scanner!',
-    message: 'De trade cac pattern ban tim duoc, can co tai khoan san. Dang ky de nhan uu dai!',
-    cta: 'Dang ky san',
+    title: 'Chào mừng đến GEM Scanner!',
+    message: 'Để trade các pattern bạn tìm được, cần có tài khoản sàn. Đăng ký để nhận ưu đãi!',
+    cta: 'Đăng ký sàn',
     icon: 'Gift',
   },
   paper_profit_milestone: {
-    title: 'Loi nhuan paper: {{profit}} USDT!',
-    message: 'Ban da dat muc loi nhuan tot trong paper trading. Thoi diem tot de trade that!',
-    cta: 'Bat dau trade that',
+    title: 'Lợi nhuận paper: {{profit}} USDT!',
+    message: 'Bạn đã đạt mức lợi nhuận tốt trong paper trading. Thời điểm tốt để trade thật!',
+    cta: 'Bắt đầu trade thật',
     icon: 'DollarSign',
   },
 };
@@ -400,38 +400,38 @@ export const EXCHANGE_SOURCE_SCREENS = {
 export const EXCHANGE_TOOLTIPS = {
   // Exchange selection
   exchange: {
-    binance: 'San giao dich lon nhat the gioi, thanh khoan cao, nhieu coin',
-    nami: 'San Viet Nam, nap/rut VND truc tiep, ho tro tieng Viet 24/7',
-    okx: 'Top 3 the gioi, copy trading tot, giao dien de dung',
-    bybit: 'Chuyen ve Futures, leverage cao, giao dich nhanh',
+    binance: 'Sàn giao dịch lớn nhất thế giới, thanh khoản cao, nhiều coin',
+    nami: 'Sàn Việt Nam, nạp/rút VND trực tiếp, hỗ trợ tiếng Việt 24/7',
+    okx: 'Top 3 thế giới, copy trading tốt, giao diện dễ dùng',
+    bybit: 'Chuyên về Futures, leverage cao, giao dịch nhanh',
   },
 
   // API connection
   api: {
-    apiKey: 'Tao API key tai {{exchange}} → Security → API Management',
-    secretKey: 'Secret key chi hien thi 1 lan khi tao, luu an toan',
-    permissions: 'Chi can quyen "Read" va "Trade". KHONG cho quyen "Withdraw"!',
-    security: 'API key duoc ma hoa truoc khi luu. GEM khong the rut tien tu tai khoan cua ban.',
-    balance: 'So du duoc cap nhat moi 5 phut. Bam Refresh de cap nhat ngay.',
+    apiKey: 'Tạo API key tại {{exchange}} → Security → API Management',
+    secretKey: 'Secret key chỉ hiển thị 1 lần khi tạo, lưu an toàn',
+    permissions: 'Chỉ cần quyền "Read" và "Trade". KHÔNG cho quyền "Withdraw"!',
+    security: 'API key được mã hóa trước khi lưu. GEM không thể rút tiền từ tài khoản của bạn.',
+    balance: 'Số dư được cập nhật mỗi 5 phút. Bấm Refresh để cập nhật ngay.',
   },
 
   // Deposit
   deposit: {
-    p2p: 'Mua USDT bang VND tu nguoi ban truc tiep tren san',
-    recommended: 'Phuong thuc duoc khuyen nghi vi an toan va phi thap',
-    kyc: 'KYC giup nang han muc giao dich va bao mat tai khoan',
+    p2p: 'Mua USDT bằng VND từ người bán trực tiếp trên sàn',
+    recommended: 'Phương thức được khuyên nghị vì an toàn và phí thấp',
+    kyc: 'KYC giúp nâng hạn mức giao dịch và bảo mật tài khoản',
   },
 
   // Commission
   commission: {
-    discount: 'Ban duoc giam phi giao dich khi dang ky qua link GEM',
-    gemEarns: 'GEM nhan hoa hong tu san khi ban giao dich, khong mat phi cua ban',
+    discount: 'Bạn được giảm phí giao dịch khi đăng ký qua link GEM',
+    gemEarns: 'GEM nhận hoa hồng từ sàn khi bạn giao dịch, không mất phí của bạn',
   },
 
   // Prompts
   prompts: {
-    winStreak: 'Nhac nho khi ban co chuoi thang trong paper trading',
-    highGrade: 'Nhac nho khi xuat hien pattern A/A+ chat luong cao',
+    winStreak: 'Nhắc nhở khi bạn có chuỗi thắng trong paper trading',
+    highGrade: 'Nhắc nhở khi xuất hiện pattern A/A+ chất lượng cao',
   },
 };
 
@@ -507,15 +507,15 @@ export const validateAPIKeyFormat = (exchange, apiKey, secretKey, passphrase) =>
   const errors = [];
 
   if (!patterns.apiKey.test(apiKey)) {
-    errors.push('API Key khong dung dinh dang');
+    errors.push('API Key không đúng định dạng');
   }
 
   if (!patterns.secretKey.test(secretKey)) {
-    errors.push('Secret Key khong dung dinh dang');
+    errors.push('Secret Key không đúng định dạng');
   }
 
   if (exchange === 'okx' && patterns.passphrase && !patterns.passphrase.test(passphrase || '')) {
-    errors.push('Passphrase khong dung dinh dang (6-32 ky tu)');
+    errors.push('Passphrase không đúng định dạng (6-32 ký tự)');
   }
 
   return {
@@ -616,23 +616,23 @@ export const getAffiliateLink = (exchangeId, source) => {
 export const EXCHANGE_ONBOARDING_STEPS = [
   {
     id: 'select',
-    title: 'Chon san giao dich',
-    description: 'Chon san phu hop voi ban',
+    title: 'Chọn sàn giao dịch',
+    description: 'Chọn sàn phù hợp với bạn',
   },
   {
     id: 'info',
-    title: 'Thong tin san',
-    description: 'Xem uu dai va tinh nang',
+    title: 'Thông tin sàn',
+    description: 'Xem ưu đãi và tính năng',
   },
   {
     id: 'register',
-    title: 'Dang ky tai khoan',
-    description: 'Mo link va dang ky',
+    title: 'Đăng ký tài khoản',
+    description: 'Mở link và đăng ký',
   },
   {
     id: 'confirm',
-    title: 'Xac nhan',
-    description: 'Nhap email da dang ky',
+    title: 'Xác nhận',
+    description: 'Nhập email đã đăng ký',
   },
 ];
 

@@ -750,6 +750,9 @@ const GemMasterScreen = ({ navigation, route }) => {
         totalQuestions: response.totalQuestions,
         isQuestionMessage: response.isQuestionMessage,
         mode: response.mode,
+        // Rich Response Data (Day 25)
+        responseType: response.responseType,
+        richData: response.richData,
       };
     } catch (error) {
       console.error('[GemMaster] Generate response error:', error);
@@ -1811,6 +1814,65 @@ const GemMasterScreen = ({ navigation, route }) => {
     });
   }, []);
 
+  // Handle rich response actions (Day 25) - checklist, quiz, affirmation, chart
+  const handleRichAction = useCallback((actionType, data, message) => {
+    console.log('[GemMaster] Rich action:', actionType, data);
+
+    switch (actionType) {
+      case 'checklist_toggle':
+        // Update checklist item state locally
+        console.log('[GemMaster] Checklist item toggled:', data.index);
+        break;
+
+      case 'checklist_complete':
+        // Track completion, update karma
+        console.log('[GemMaster] Checklist completed!');
+        break;
+
+      case 'quiz_answer':
+        // Track quiz answer for analytics
+        console.log('[GemMaster] Quiz answered:', data.index);
+        break;
+
+      case 'view_chart':
+        // Navigate to scanner/chart screen
+        console.log('[GemMaster] Navigate to chart:', data.symbol);
+        navigation.navigate('Trading', {
+          screen: 'ScannerMain',
+          params: { symbol: data.symbol },
+        });
+        break;
+
+      case 'affirmation_repeat':
+        // Play affirmation audio or haptic
+        console.log('[GemMaster] Repeat affirmation');
+        break;
+
+      case 'affirmation_save':
+        // Save affirmation to Vision Board
+        console.log('[GemMaster] Save affirmation:', data.text);
+        if (user?.id) {
+          import('../../services/gemMasterService').then(({ saveWidgetToVisionBoard }) => {
+            saveWidgetToVisionBoard({
+              type: 'affirmation',
+              title: 'Câu khẳng định',
+              affirmations: [data.text],
+            }, user.id);
+          });
+        }
+        break;
+
+      case 'comparison_select':
+        // User selected a tier from comparison
+        console.log('[GemMaster] Tier selected:', data.index);
+        navigation.navigate('UpgradeScreen');
+        break;
+
+      default:
+        console.log('[GemMaster] Unknown rich action:', actionType);
+    }
+  }, [navigation, user?.id]);
+
   // Render message item with option selection handler and quick buy
   const renderMessage = useCallback(({ item }) => (
     <MessageBubble
@@ -1818,8 +1880,9 @@ const GemMasterScreen = ({ navigation, route }) => {
       onOptionSelect={(option) => handleOptionSelect(option, item.id)}
       onQuickBuy={handleQuickBuy}
       onFeedback={handleMessageFeedback}
+      onRichAction={handleRichAction}
     />
-  ), [handleOptionSelect, handleQuickBuy, handleMessageFeedback]);
+  ), [handleOptionSelect, handleQuickBuy, handleMessageFeedback, handleRichAction]);
 
   // Key extractor
   const keyExtractor = useCallback((item) => item.id, []);

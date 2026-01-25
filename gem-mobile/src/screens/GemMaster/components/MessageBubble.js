@@ -155,7 +155,7 @@ const renderInlineMarkdown = (text, baseStyle) => {
   return parts;
 };
 
-const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, onOptionSelect, onQuickBuy, onFeedback }) => {
+const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, onOptionSelect, onQuickBuy, onFeedback, onRichAction }) => {
   const isUser = message.type === 'user';
   // Skip template selector - go directly to preview with reading_card template
   const [showPreview, setShowPreview] = useState(false);
@@ -305,7 +305,17 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
 
           {/* Rich Response Renderer (Day 25) - for special response types */}
           {isRichResponse ? (
-            <RichResponseRenderer message={message} />
+            <RichResponseRenderer
+              response={{
+                type: message.responseType,
+                text: message.text,
+                ...message.richData,
+              }}
+              onAction={(actionType, data) => {
+                console.log('[MessageBubble] Rich action:', actionType, data);
+                onRichAction?.(actionType, data, message);
+              }}
+            />
           ) : (
             <Text style={[
               styles.text,

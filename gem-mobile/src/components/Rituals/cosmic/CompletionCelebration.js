@@ -288,8 +288,13 @@ const ReflectionInput = React.memo(({ visible, onClose, onSubmit, color, ritualT
 
     try {
       // Call onSubmit and wait for it (for calendar update)
+      // The onSubmit callback (handleReflectionSubmit) now has its own try-catch and timeout
       await onSubmit?.(text.trim());
+    } catch (error) {
+      // Log but continue - the UI should still close
+      console.error('[ReflectionInput] Submit error:', error?.message || error);
     } finally {
+      // Always reset state and close, even on error
       setIsSaving(false);
       setText('');
       onClose();
@@ -441,11 +446,23 @@ const CompletionCelebration = ({
   }, []);
 
   // Handle reflection submit - now async to support saving
+  // Added proper error handling to prevent UI from getting stuck
   const handleReflectionSubmit = useCallback(async (text) => {
-    // Call onWriteReflection and await if it returns a promise
-    const result = onWriteReflection?.(text);
-    if (result instanceof Promise) {
-      await result;
+    try {
+      // Call onWriteReflection and await if it returns a promise
+      const result = onWriteReflection?.(text);
+      if (result instanceof Promise) {
+        // Add timeout to prevent infinite hanging
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Save timeout after 15 seconds')), 15000);
+        });
+        await Promise.race([result, timeoutPromise]);
+      }
+      console.log('[CompletionCelebration] Reflection saved successfully');
+    } catch (error) {
+      // Log error but don't throw - allow UI to continue
+      console.error('[CompletionCelebration] Failed to save reflection:', error?.message || error);
+      // Still considered "success" from UI perspective - user wrote their reflection
     }
   }, [onWriteReflection]);
 

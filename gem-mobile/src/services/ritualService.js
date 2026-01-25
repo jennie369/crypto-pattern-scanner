@@ -690,12 +690,15 @@ export const getRecommendedRituals = async (userId) => {
 // ============ SAVE REFLECTION (After completion) ============
 /**
  * Save reflection for today's ritual completion and create calendar event
+ * Added robust error handling and timeout to prevent UI hanging
  * @param {string} userId - User ID
  * @param {string} ritualSlug - Ritual slug
  * @param {string} reflection - Reflection text
  * @returns {Promise<Object>}
  */
 export const saveReflection = async (userId, ritualSlug, reflection) => {
+  console.log('[ritualService] saveReflection called:', { userId: !!userId, ritualSlug, reflectionLength: reflection?.length });
+
   if (!userId || !ritualSlug || !reflection?.trim()) {
     console.warn('[ritualService] saveReflection: Missing required params');
     return { success: false, error: 'Missing required parameters' };
@@ -706,97 +709,122 @@ export const saveReflection = async (userId, ritualSlug, reflection) => {
 
   try {
     // Ensure ritual exists in database, create if not
-    const ritual = await ensureRitualExists(ritualSlug);
+    console.log('[ritualService] Step 1: Ensuring ritual exists...');
+    let ritual = null;
+    try {
+      ritual = await ensureRitualExists(ritualSlug);
+    } catch (ritualErr) {
+      console.warn('[ritualService] ensureRitualExists failed:', ritualErr?.message);
+      // Continue without ritual - we can still create calendar event
+    }
+    console.log('[ritualService] Ritual exists:', !!ritual);
 
     // Get today's completion for this ritual
     let completion = null;
     if (ritual) {
-      // Try to get completion with content column first
-      let result = await supabase
-        .from('vision_ritual_completions')
-        .select('id, content')
-        .eq('user_id', userId)
-        .eq('ritual_id', ritual.id)
-        .gte('completed_at', today)
-        .order('completed_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      // If content column doesn't exist, query without it
-      if (result.error?.code === 'PGRST204' && result.error?.message?.includes('content')) {
-        console.warn('[ritualService] content column not found, querying without it');
-        result = await supabase
+      console.log('[ritualService] Step 2: Getting today\'s completion...');
+      try {
+        // Try to get completion with content column first
+        let result = await supabase
           .from('vision_ritual_completions')
-          .select('id')
+          .select('id, content')
           .eq('user_id', userId)
           .eq('ritual_id', ritual.id)
           .gte('completed_at', today)
           .order('completed_at', { ascending: false })
           .limit(1)
           .single();
-      }
 
-      completion = result.data;
+        // If content column doesn't exist or no rows, query without it
+        if (result.error?.code === 'PGRST116' || (result.error?.message?.includes('content'))) {
+          console.warn('[ritualService] content column issue or no rows, querying without content');
+          result = await supabase
+            .from('vision_ritual_completions')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('ritual_id', ritual.id)
+            .gte('completed_at', today)
+            .order('completed_at', { ascending: false })
+            .limit(1)
+            .single();
+        }
+
+        completion = result.data;
+        console.log('[ritualService] Found completion:', !!completion, completion?.id);
+      } catch (queryErr) {
+        console.warn('[ritualService] Completion query failed:', queryErr?.message);
+        // Continue without completion - we can still create calendar event
+      }
     }
 
     // Update completion with reflection (if content column exists)
     if (completion) {
-      const existingContent = completion.content || {};
-      const updatedContent = {
-        ...existingContent,
-        reflection: reflection.trim(),
-      };
+      console.log('[ritualService] Step 3: Updating completion with reflection...');
+      try {
+        const existingContent = completion.content || {};
+        const updatedContent = {
+          ...existingContent,
+          reflection: reflection.trim(),
+        };
 
-      // Try to update with content
-      const updateResult = await supabase
-        .from('vision_ritual_completions')
-        .update({ content: updatedContent })
-        .eq('id', completion.id);
+        // Try to update with content
+        const updateResult = await supabase
+          .from('vision_ritual_completions')
+          .update({ content: updatedContent })
+          .eq('id', completion.id);
 
-      if (updateResult.error?.code === 'PGRST204' && updateResult.error?.message?.includes('content')) {
-        // content column doesn't exist, skip update
-        console.warn('[ritualService] content column not found, skipping reflection update');
-      } else if (updateResult.error) {
-        console.error('[ritualService] Failed to update completion with reflection:', updateResult.error);
-      } else {
-        console.log('[ritualService] Updated completion with reflection:', completion.id);
+        if (updateResult.error) {
+          console.warn('[ritualService] Completion update failed (non-critical):', updateResult.error?.message);
+        } else {
+          console.log('[ritualService] Completion updated successfully');
+        }
+      } catch (updateErr) {
+        console.warn('[ritualService] Completion update error (non-critical):', updateErr?.message);
+        // Non-critical - continue to calendar event
       }
     }
 
     // Create calendar event with reflection
-    // Use completion.id (UUID) as sourceId, NOT ritual.id (VARCHAR)
+    console.log('[ritualService] Step 4: Creating calendar event...');
     const eventTitle = ritualConfig.title || (ritual?.name) || 'Nghi thức hoàn thành';
-    const sourceId = completion?.id || null; // UUID from vision_ritual_completions
+    const sourceId = completion?.id || null;
 
-    const calendarResult = await calendarService.createEvent(userId, {
-      title: `✨ ${eventTitle}`,
-      description: `Suy ngẫm: ${reflection.trim()}`,
-      date: today,
-      sourceType: EVENT_SOURCE_TYPES.DIVINATION,
-      sourceId: sourceId, // Use completion UUID, not ritual.id (VARCHAR)
-      color: ritualConfig.color || '#9C0612',
-      icon: 'sparkles',
-      lifeArea: 'spiritual',
-      isAllDay: true,
-      metadata: {
-        ritual_slug: ritualSlug,
-        ritual_name: eventTitle,
-        reflection: reflection.trim(),
-        saved_after_completion: true,
-        completion_id: completion?.id || null,
-      },
-    });
+    let calendarResult = { success: false };
+    try {
+      calendarResult = await calendarService.createEvent(userId, {
+        title: `✨ ${eventTitle}`,
+        description: `Suy ngẫm: ${reflection.trim()}`,
+        date: today,
+        sourceType: EVENT_SOURCE_TYPES.DIVINATION,
+        sourceId: sourceId,
+        color: ritualConfig.color || '#9C0612',
+        icon: 'sparkles',
+        lifeArea: 'spiritual',
+        isAllDay: true,
+        metadata: {
+          ritual_slug: ritualSlug,
+          ritual_name: eventTitle,
+          reflection: reflection.trim(),
+          saved_after_completion: true,
+          completion_id: completion?.id || null,
+        },
+      });
+      console.log('[ritualService] Calendar event result:', calendarResult.success);
+    } catch (calendarErr) {
+      console.warn('[ritualService] Calendar event creation failed:', calendarErr?.message);
+      // Non-critical - still return success for the reflection save
+    }
 
-    console.log('[ritualService] Calendar event created for reflection:', calendarResult.success);
-
+    console.log('[ritualService] saveReflection completed successfully');
     return {
       success: true,
       calendarEventCreated: calendarResult.success,
       completionId: completion?.id,
     };
   } catch (err) {
-    console.error('[ritualService] saveReflection error:', err);
-    return { success: false, error: err.message };
+    console.error('[ritualService] saveReflection error:', err?.message || err);
+    // Return success false but don't throw - let UI continue
+    return { success: false, error: err?.message || 'Unknown error' };
   }
 };
 

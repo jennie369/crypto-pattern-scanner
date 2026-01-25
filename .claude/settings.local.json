@@ -121,7 +121,10 @@
       "Bash(npx expo doctor)",
       "Bash(npx expo install:*)",
       "Bash(move:*)",
-      "Bash(ren:*)"
+      "Bash(ren:*)",
+      "Bash(eas secret:list:*)",
+      "Bash(eas env:create:*)",
+      "Bash(ffprobe:*)"
     ],
     "deny": [],
     "ask": []

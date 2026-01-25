@@ -37,6 +37,9 @@ import { useAuth } from '../contexts/AuthContext';
 // In-App Notification Provider
 import { InAppNotificationProvider } from '../contexts/InAppNotificationContext';
 
+// Upgrade Success Modal (shows after purchase)
+import UpgradeSuccessModal from '../components/upgrade/UpgradeSuccessModal';
+
 // Tokens
 import { COLORS } from '../utils/tokens';
 
@@ -135,7 +138,7 @@ function MainStack() {
 }
 
 export default function AppNavigator() {
-  const { loading, initialized, isAuthenticated } = useAuth();
+  const { loading, initialized, isAuthenticated, upgradeState, closeUpgradeModal } = useAuth();
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const [hasCompletedWelcome, setHasCompletedWelcome] = useState(null);
   const [welcomeChecked, setWelcomeChecked] = useState(false);
@@ -249,6 +252,27 @@ export default function AppNavigator() {
           <AuthStack hasCompletedWelcome={hasCompletedWelcome} />
         )}
       </InAppNotificationProvider>
+
+      {/* Global Upgrade Success Modal - shows after purchase completion */}
+      {isAuthenticated && upgradeState?.showModal && (
+        <UpgradeSuccessModal
+          visible={upgradeState.showModal}
+          onClose={closeUpgradeModal}
+          tierType={upgradeState.tierType}
+          tierName={upgradeState.tierName}
+          onExplore={() => {
+            closeUpgradeModal();
+            // Navigate based on tier type
+            if (upgradeState.tierType === 'course' || upgradeState.tierType === 'bundle') {
+              navigationRef.current?.navigate('Courses');
+            } else if (upgradeState.tierType === 'scanner') {
+              navigationRef.current?.navigate('Scanner');
+            } else if (upgradeState.tierType === 'chatbot') {
+              navigationRef.current?.navigate('Home');
+            }
+          }}
+        />
+      )}
     </NavigationContainer>
   );
 }

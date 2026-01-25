@@ -11,8 +11,11 @@ import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 
 const ChecklistResponse = memo(({
   title,
+  summary,
+  rootCause,
   items = [],
   duration,
+  crystal,
   onItemToggle,
   onComplete,
 }) => {
@@ -41,6 +44,19 @@ const ChecklistResponse = memo(({
           <Text style={styles.duration}>{duration}</Text>
         )}
       </View>
+
+      {/* Summary - Wisdom explanation */}
+      {summary && (
+        <Text style={styles.summary}>{summary}</Text>
+      )}
+
+      {/* Root Cause */}
+      {rootCause && (
+        <View style={styles.rootCauseContainer}>
+          <Text style={styles.rootCauseLabel}>📍 Nguyên nhân gốc:</Text>
+          <Text style={styles.rootCauseText}>{rootCause}</Text>
+        </View>
+      )}
 
       {/* Progress */}
       <View style={styles.progressContainer}>
@@ -86,6 +102,14 @@ const ChecklistResponse = memo(({
         ))}
       </View>
 
+      {/* Crystal Recommendation */}
+      {crystal && (
+        <View style={styles.crystalContainer}>
+          <Text style={styles.crystalLabel}>💎 Đá phù hợp:</Text>
+          <Text style={styles.crystalText}>{crystal}</Text>
+        </View>
+      )}
+
       {/* Complete Button */}
       {allCompleted && (
         <TouchableOpacity
@@ -121,6 +145,50 @@ const styles = StyleSheet.create({
   duration: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.gold,
+  },
+  summary: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+    marginBottom: SPACING.md,
+    fontStyle: 'italic',
+  },
+  rootCauseContainer: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    padding: SPACING.sm,
+    borderRadius: 8,
+    marginBottom: SPACING.md,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.gold,
+  },
+  rootCauseLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+    marginBottom: SPACING.xs,
+  },
+  rootCauseText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  crystalContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  crystalLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginRight: SPACING.xs,
+  },
+  crystalText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.purple,
   },
   progressContainer: {
     flexDirection: 'row',

@@ -85,9 +85,10 @@ serve(async (req) => {
 
     if (tokens.length === 0) {
       console.log('[SendPush] No push tokens found for users:', targetUserIds);
+      // Return success with warning instead of error - don't break the flow
       return new Response(
-        JSON.stringify({ success: false, error: 'No valid push tokens found' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        JSON.stringify({ success: true, sent: 0, warning: 'No push tokens found for users' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -120,25 +121,28 @@ serve(async (req) => {
 
     const result = await response.json();
 
-    // Log notification in database
-    if (user_id) {
-      await supabase.from('partner_notifications').insert({
-        user_id,
-        notification_type,
-        title: messages[0].title,
-        message: messages[0].body,
-        metadata: data || {},
-      });
-    } else if (user_ids) {
-      // Bulk insert for multiple users
-      const notificationInserts = user_ids.map((uid: string) => ({
-        user_id: uid,
-        notification_type,
-        title: messages[0].title,
-        message: messages[0].body,
-        metadata: data || {},
-      }));
-      await supabase.from('partner_notifications').insert(notificationInserts);
+    // Log notification in database (optional - don't fail if table doesn't exist)
+    try {
+      if (user_id) {
+        await supabase.from('partner_notifications').insert({
+          user_id,
+          notification_type,
+          title: messages[0].title,
+          message: messages[0].body,
+          metadata: data || {},
+        });
+      } else if (user_ids) {
+        const notificationInserts = user_ids.map((uid: string) => ({
+          user_id: uid,
+          notification_type,
+          title: messages[0].title,
+          message: messages[0].body,
+          metadata: data || {},
+        }));
+        await supabase.from('partner_notifications').insert(notificationInserts);
+      }
+    } catch (logErr) {
+      console.log('[SendPush] Failed to log notification (non-critical):', logErr.message);
     }
 
     console.log(`[SendPush] Sent ${messages.length} notifications, type: ${notification_type}`);

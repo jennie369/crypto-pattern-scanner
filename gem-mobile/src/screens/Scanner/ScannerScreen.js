@@ -1461,10 +1461,7 @@ const ScannerScreen = ({ navigation }) => {
           {!hasExchangeAccount && user?.id && (
             <TouchableOpacity
               style={styles.exchangeCTABanner}
-              onPress={() => navigation.navigate('Account', {
-                screen: 'ExchangeOnboarding',
-                params: { source: 'scanner' }
-              })}
+              onPress={() => navigation.navigate('ExchangeOnboarding', { source: 'scanner' })}
               activeOpacity={0.8}
             >
               <View style={styles.exchangeCTAContent}>

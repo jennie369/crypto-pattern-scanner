@@ -136,9 +136,9 @@ const AccountItem = ({
 const EmptyState = ({ onAddExchange }) => (
   <View style={styles.emptyState}>
     <Wallet size={48} color={COLORS.textMuted} />
-    <Text style={styles.emptyTitle}>Chua co tai khoan san</Text>
+    <Text style={styles.emptyTitle}>Chưa có tài khoản sàn</Text>
     <Text style={styles.emptyDescription}>
-      Dang ky san giao dich qua GEM de nhan uu dai giam phi va theo doi so du tren app.
+      Đăng ký sàn giao dịch qua GEM để nhận ưu đãi giảm phí và theo dõi số dư trên app.
     </Text>
     <TouchableOpacity
       style={styles.addButton}
@@ -146,7 +146,7 @@ const EmptyState = ({ onAddExchange }) => (
       activeOpacity={0.8}
     >
       <Plus size={18} color={COLORS.textPrimary} />
-      <Text style={styles.addButtonText}>Dang ky san moi</Text>
+      <Text style={styles.addButtonText}>Đăng ký sàn mới</Text>
     </TouchableOpacity>
   </View>
 );
@@ -237,7 +237,7 @@ const ExchangeAccountsScreen = ({ navigation }) => {
         >
           <ArrowLeft size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Tai khoan san</Text>
+        <Text style={styles.headerTitle}>Tài khoản sàn</Text>
         <TouchableOpacity
           style={styles.settingsButton}
           onPress={() => {}}
@@ -251,12 +251,12 @@ const ExchangeAccountsScreen = ({ navigation }) => {
         <View style={styles.summaryContainer}>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryValue}>{summary.totalAccounts}</Text>
-            <Text style={styles.summaryLabel}>San</Text>
+            <Text style={styles.summaryLabel}>Sàn</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <Text style={styles.summaryValue}>{summary.withDeposit}</Text>
-            <Text style={styles.summaryLabel}>Da nap</Text>
+            <Text style={styles.summaryLabel}>Đã nạp</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
@@ -303,17 +303,17 @@ const ExchangeAccountsScreen = ({ navigation }) => {
               activeOpacity={0.7}
             >
               <Plus size={18} color={COLORS.primary} />
-              <Text style={styles.addMoreText}>Them san khac</Text>
+              <Text style={styles.addMoreText}>Thêm sàn khác</Text>
             </TouchableOpacity>
 
             {/* API Upgrade Prompt */}
             {!canConnectAPI && accounts.some(a => !a.api_key_encrypted) && (
               <View style={styles.upgradePrompt}>
-                <Shield size={20} color={COLORS.warning} />
+                <Shield size={20} color={COLORS.gold} />
                 <View style={styles.upgradeContent}>
-                  <Text style={styles.upgradeTitle}>Ket noi API de xem so du</Text>
+                  <Text style={styles.upgradeTitle}>Kết nối API để xem số dư</Text>
                   <Text style={styles.upgradeDescription}>
-                    Nang cap len TIER 2 de ket noi API va xem so du truc tiep tren GEM.
+                    Nâng cấp lên TIER 2 để kết nối API và xem số dư trực tiếp trên GEM.
                   </Text>
                 </View>
               </View>
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
   upgradePrompt: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
     marginTop: SPACING.lg,
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
   upgradeTitle: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.warning,
+    color: COLORS.gold,
     marginBottom: 4,
   },
   upgradeDescription: {

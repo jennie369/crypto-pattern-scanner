@@ -19,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, Users, FileText, MessageCircle, Image as ImageIcon, Video } from 'lucide-react-native';
 import { forumService } from '../../services/forumService';
+import messagingService from '../../services/messagingService';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { UserBadges } from '../../components/UserBadge';
@@ -43,6 +44,7 @@ const UserProfileScreen = ({ route, navigation }) => {
   const [contentLoading, setContentLoading] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
   const [stats, setStats] = useState({
     followers: 0,
     following: 0,
@@ -168,6 +170,38 @@ const UserProfileScreen = ({ route, navigation }) => {
     }
   };
 
+  // Handle send message - create or get conversation, then navigate
+  const handleSendMessage = async () => {
+    if (!isAuthenticated) {
+      navigation.navigate('Auth');
+      return;
+    }
+
+    if (!resolvedUserId) return;
+
+    try {
+      setMessageLoading(true);
+
+      // Create or get existing conversation
+      const conversation = await messagingService.createConversation([resolvedUserId]);
+
+      if (conversation?.id) {
+        // Navigate to Chat screen through Messages stack
+        navigation.navigate('Messages', {
+          screen: 'Chat',
+          params: {
+            conversationId: conversation.id,
+            conversation: conversation,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('[UserProfile] Message error:', error);
+    } finally {
+      setMessageLoading(false);
+    }
+  };
+
   // Navigate to post detail
   const handlePostPress = (post) => {
     navigation.navigate('PostDetail', { postId: post.id });
@@ -177,6 +211,20 @@ const UserProfileScreen = ({ route, navigation }) => {
   const handlePhotoPress = (photo) => {
     navigation.navigate('PostDetail', { postId: photo.id });
   };
+
+  // Handle post updates (reactions, likes, saves, etc.)
+  const handlePostUpdate = useCallback((postId, updates) => {
+    // If post was deleted, remove it from the list
+    if (updates?.deleted) {
+      setPosts(prev => prev.filter(p => p.id !== postId));
+      return;
+    }
+
+    // Update post data in the list
+    setPosts(prev => prev.map(post =>
+      post.id === postId ? { ...post, ...updates } : post
+    ));
+  }, []);
 
   // Tabs configuration - same as ProfileFullScreen
   const tabs = [
@@ -202,6 +250,7 @@ const UserProfileScreen = ({ route, navigation }) => {
             posts={posts}
             loading={contentLoading}
             onPostPress={handlePostPress}
+            onPostUpdate={handlePostUpdate}
             onEndReached={() => {}}
             hasMore={false}
           />
@@ -374,13 +423,14 @@ const UserProfileScreen = ({ route, navigation }) => {
 
                 <TouchableOpacity
                   style={styles.messageButton}
-                  onPress={() => navigation.navigate('DirectMessage', {
-                    recipientId: resolvedUserId,
-                    recipientName: profile?.full_name || profile?.username || 'Người dùng',
-                    recipientAvatar: profile?.avatar_url,
-                  })}
+                  onPress={handleSendMessage}
+                  disabled={messageLoading}
                 >
-                  <MessageCircle size={18} color={COLORS.textPrimary} />
+                  {messageLoading ? (
+                    <ActivityIndicator size="small" color={COLORS.textPrimary} />
+                  ) : (
+                    <MessageCircle size={18} color={COLORS.textPrimary} />
+                  )}
                 </TouchableOpacity>
               </View>
             )}

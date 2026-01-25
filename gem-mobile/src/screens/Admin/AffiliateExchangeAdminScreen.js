@@ -52,19 +52,19 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
  * Date Range Options
  */
 const DATE_RANGES = [
-  { key: '7d', label: '7 ngay', days: 7 },
-  { key: '30d', label: '30 ngay', days: 30 },
-  { key: '90d', label: '90 ngay', days: 90 },
-  { key: 'all', label: 'Tat ca', days: 365 },
+  { key: '7d', label: '7 ngày', days: 7 },
+  { key: '30d', label: '30 ngày', days: 30 },
+  { key: '90d', label: '90 ngày', days: 90 },
+  { key: 'all', label: 'Tất cả', days: 365 },
 ];
 
 /**
  * Stat Card Component
  */
-const StatCard = ({ icon: Icon, label, value, color, trend }) => (
-  <View style={[styles.statCard, { borderLeftColor: color }]}>
-    <View style={[styles.statIconContainer, { backgroundColor: color + '20' }]}>
-      <Icon size={20} color={color} />
+const StatCard = ({ icon: Icon, label, value, trend }) => (
+  <View style={styles.statCard}>
+    <View style={styles.statIconContainer}>
+      <Icon size={20} color={COLORS.primary} />
     </View>
     <View style={styles.statContent}>
       <Text style={styles.statValue}>{value}</Text>
@@ -82,7 +82,7 @@ const StatCard = ({ icon: Icon, label, value, color, trend }) => (
 /**
  * Funnel Step Component
  */
-const FunnelStep = ({ label, value, total, color, isLast }) => {
+const FunnelStep = ({ label, value, total, isLast }) => {
   const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
   const barWidth = total > 0 ? (value / total) * 100 : 0;
 
@@ -93,11 +93,11 @@ const FunnelStep = ({ label, value, total, color, isLast }) => {
         <Text style={styles.funnelValue}>{value}</Text>
       </View>
       <View style={styles.funnelBarContainer}>
-        <View style={[styles.funnelBar, { width: `${barWidth}%`, backgroundColor: color }]} />
+        <View style={[styles.funnelBar, { width: `${barWidth}%` }]} />
       </View>
       {!isLast && (
         <Text style={styles.funnelConversion}>
-          {percentage}% conversion
+          {percentage}% chuyển đổi
         </Text>
       )}
     </View>
@@ -119,15 +119,15 @@ const ExchangeRow = ({ exchange, stats }) => {
       <View style={styles.exchangeStats}>
         <View style={styles.exchangeStat}>
           <Text style={styles.exchangeStatValue}>{stats.link_clicks || 0}</Text>
-          <Text style={styles.exchangeStatLabel}>Clicks</Text>
+          <Text style={styles.exchangeStatLabel}>Nhấp</Text>
         </View>
         <View style={styles.exchangeStat}>
           <Text style={styles.exchangeStatValue}>{stats.registered || 0}</Text>
-          <Text style={styles.exchangeStatLabel}>Signups</Text>
+          <Text style={styles.exchangeStatLabel}>Đăng ký</Text>
         </View>
         <View style={styles.exchangeStat}>
           <Text style={styles.exchangeStatValue}>{stats.deposited || 0}</Text>
-          <Text style={styles.exchangeStatLabel}>Deposits</Text>
+          <Text style={styles.exchangeStatLabel}>Nạp</Text>
         </View>
         <View style={styles.exchangeStat}>
           <Text style={[
@@ -136,7 +136,7 @@ const ExchangeRow = ({ exchange, stats }) => {
           ]}>
             {stats.click_to_signup_rate || 0}%
           </Text>
-          <Text style={styles.exchangeStatLabel}>CVR</Text>
+          <Text style={styles.exchangeStatLabel}>Tỷ lệ</Text>
         </View>
       </View>
     </View>
@@ -202,7 +202,7 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
         >
           <ArrowLeft size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Exchange Affiliate</Text>
+        <Text style={styles.headerTitle}>Thống kê Affiliate</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -261,63 +261,54 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
         <View style={styles.statsGrid}>
           <StatCard
             icon={Users}
-            label="Link Clicks"
+            label="Lượt nhấp"
             value={summary.total_link_clicks || 0}
-            color="#3B82F6"
           />
           <StatCard
             icon={Users}
-            label="Signups"
+            label="Đăng ký"
             value={summary.total_signups || 0}
-            color="#8B5CF6"
           />
           <StatCard
             icon={Wallet}
-            label="Deposits"
+            label="Nạp tiền"
             value={summary.total_deposits || 0}
-            color="#10B981"
           />
           <StatCard
             icon={Activity}
-            label="First Trades"
+            label="Giao dịch đầu"
             value={summary.total_trades || 0}
-            color="#F59E0B"
           />
         </View>
 
         {/* Conversion Funnel */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Conversion Funnel</Text>
+          <Text style={styles.sectionTitle}>Phễu chuyển đổi</Text>
           <View style={styles.funnelContainer}>
             <FunnelStep
-              label="Link Clicks"
+              label="Lượt nhấp"
               value={summary.total_link_clicks || 0}
               total={summary.total_link_clicks || 1}
-              color="#3B82F6"
             />
             <FunnelStep
-              label="Signups"
+              label="Đăng ký"
               value={summary.total_signups || 0}
               total={summary.total_link_clicks || 1}
-              color="#8B5CF6"
             />
             <FunnelStep
-              label="KYC Verified"
+              label="Xác thực KYC"
               value={summary.total_kyc || 0}
               total={summary.total_signups || 1}
-              color="#06B6D4"
             />
             <FunnelStep
-              label="First Deposit"
+              label="Nạp tiền đầu"
               value={summary.total_deposits || 0}
               total={summary.total_kyc || 1}
-              color="#10B981"
             />
             <FunnelStep
-              label="First Trade"
+              label="Giao dịch đầu"
               value={summary.total_trades || 0}
               total={summary.total_deposits || 1}
-              color="#F59E0B"
               isLast
             />
           </View>
@@ -325,7 +316,7 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
 
         {/* By Exchange */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>By Exchange</Text>
+          <Text style={styles.sectionTitle}>Theo sàn giao dịch</Text>
           <View style={styles.exchangeList}>
             {byExchange.length > 0 ? (
               byExchange.map((item, index) => (
@@ -336,7 +327,7 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
                 />
               ))
             ) : (
-              <Text style={styles.emptyText}>Chua co du lieu</Text>
+              <Text style={styles.emptyText}>Chưa có dữ liệu</Text>
             )}
           </View>
         </View>
@@ -344,7 +335,7 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
         {/* Daily Trend (simplified) */}
         {stats?.daily_trend && stats.daily_trend.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Daily Trend</Text>
+            <Text style={styles.sectionTitle}>Xu hướng theo ngày</Text>
             <View style={styles.trendContainer}>
               {stats.daily_trend.slice(-7).map((day, index) => (
                 <View key={index} style={styles.trendDay}>
@@ -352,19 +343,15 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
                     <View
                       style={[
                         styles.trendBar,
-                        {
-                          height: Math.min((day.clicks || 0) * 2, 60),
-                          backgroundColor: '#3B82F6',
-                        },
+                        styles.trendBarClicks,
+                        { height: Math.min((day.clicks || 0) * 2, 60) },
                       ]}
                     />
                     <View
                       style={[
                         styles.trendBar,
-                        {
-                          height: Math.min((day.signups || 0) * 5, 60),
-                          backgroundColor: '#8B5CF6',
-                        },
+                        styles.trendBarSignups,
+                        { height: Math.min((day.signups || 0) * 5, 60) },
                       ]}
                     />
                   </View>
@@ -376,12 +363,12 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
             </View>
             <View style={styles.trendLegend}>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#3B82F6' }]} />
-                <Text style={styles.legendText}>Clicks</Text>
+                <View style={[styles.legendDot, styles.legendDotClicks]} />
+                <Text style={styles.legendText}>Lượt nhấp</Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#8B5CF6' }]} />
-                <Text style={styles.legendText}>Signups</Text>
+                <View style={[styles.legendDot, styles.legendDotSignups]} />
+                <Text style={styles.legendText}>Đăng ký</Text>
               </View>
             </View>
           </View>
@@ -394,7 +381,7 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.bgDarkest,
   },
   loadingContainer: {
     flex: 1,
@@ -488,7 +475,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
-    borderLeftWidth: 3,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   statIconContainer: {
     width: 36,
@@ -497,6 +485,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.sm,
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
   },
   statContent: {},
   statValue: {
@@ -562,6 +551,7 @@ const styles = StyleSheet.create({
   funnelBar: {
     height: '100%',
     borderRadius: 4,
+    backgroundColor: COLORS.primary,
   },
   funnelConversion: {
     fontSize: 10,
@@ -644,6 +634,12 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     minHeight: 4,
   },
+  trendBarClicks: {
+    backgroundColor: COLORS.primary,
+  },
+  trendBarSignups: {
+    backgroundColor: COLORS.cyan,
+  },
   trendLabel: {
     fontSize: 10,
     color: COLORS.textMuted,
@@ -663,6 +659,12 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  legendDotClicks: {
+    backgroundColor: COLORS.primary,
+  },
+  legendDotSignups: {
+    backgroundColor: COLORS.cyan,
   },
   legendText: {
     fontSize: 11,

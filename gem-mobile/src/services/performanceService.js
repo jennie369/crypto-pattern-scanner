@@ -39,7 +39,7 @@ export const startMeasure = (name) => {
 /**
  * End measuring and log if slow
  * @param {string} name - Marker name
- * @param {number} warningThreshold - Custom warning threshold (ms)
+ * @param {number} warningThreshold - Custom threshold (ms). Logs SLOW if exceeded.
  * @returns {number|null} Duration in ms or null if not in dev mode
  */
 export const endMeasure = (name, warningThreshold = THRESHOLDS.RENDER_TIME_WARNING) => {
@@ -55,11 +55,9 @@ export const endMeasure = (name, warningThreshold = THRESHOLDS.RENDER_TIME_WARNI
   const duration = now - startTime;
   markers.delete(name);
 
-  // Log based on severity
-  if (duration > THRESHOLDS.RENDER_TIME_ERROR) {
-    console.error(SERVICE_NAME, `SLOW: ${name} took ${duration.toFixed(2)}ms`);
-  } else if (duration > warningThreshold) {
-    console.warn(SERVICE_NAME, `WARNING: ${name} took ${duration.toFixed(2)}ms`);
+  // Log based on custom threshold (use passed threshold, not hardcoded)
+  if (duration > warningThreshold) {
+    console.warn(SERVICE_NAME, `SLOW: ${name} took ${duration.toFixed(2)}ms (threshold: ${warningThreshold}ms)`);
   }
 
   return duration;

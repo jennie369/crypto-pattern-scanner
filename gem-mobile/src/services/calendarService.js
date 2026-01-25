@@ -134,12 +134,15 @@ class CalendarService {
 
   /**
    * Create a manual event
+   * Handles table not existing gracefully
    * @param {string} userId - User ID
    * @param {Object} eventData - Event data
    * @returns {Promise<Object>}
    */
   async createEvent(userId, eventData) {
     try {
+      console.log('[Calendar] Creating event:', eventData.title);
+
       const { data, error } = await supabase
         .from('calendar_events')
         .insert({
@@ -164,12 +167,25 @@ class CalendarService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Handle table not existing (42P01) or other expected errors gracefully
+        if (error.code === '42P01') {
+          console.warn('[Calendar] Table calendar_events does not exist yet');
+          return { success: false, error: 'Table not ready', code: error.code };
+        }
+        // Handle RLS policy errors
+        if (error.code === '42501' || error.message?.includes('policy')) {
+          console.warn('[Calendar] RLS policy blocked insert:', error.message);
+          return { success: false, error: 'Permission denied', code: error.code };
+        }
+        throw error;
+      }
 
+      console.log('[Calendar] Event created successfully:', data?.id);
       return { success: true, event: data };
     } catch (error) {
-      console.error('[Calendar] Create event error:', error);
-      return { success: false, error: error.message };
+      console.error('[Calendar] Create event error:', error?.message || error);
+      return { success: false, error: error?.message || 'Unknown error' };
     }
   }
 

@@ -56,18 +56,18 @@ const formatBalance = (value, decimals = 2) => {
  * Format time ago
  */
 const formatTimeAgo = (dateString) => {
-  if (!dateString) return 'Chua cap nhat';
+  if (!dateString) return 'Chưa cập nhật';
 
   const now = new Date();
   const date = new Date(dateString);
   const diffMs = now - date;
   const diffMins = Math.floor(diffMs / 60000);
 
-  if (diffMins < 1) return 'Vua cap nhat';
-  if (diffMins < 60) return `${diffMins} phut truoc`;
+  if (diffMins < 1) return 'Vừa cập nhật';
+  if (diffMins < 60) return `${diffMins} phút trước`;
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours} gio truoc`;
-  return `${Math.floor(diffHours / 24)} ngay truoc`;
+  if (diffHours < 24) return `${diffHours} giờ trước`;
+  return `${Math.floor(diffHours / 24)} ngày trước`;
 };
 
 /**
@@ -123,21 +123,21 @@ const BalanceWidget = ({
           {canConnect ? (
             <>
               <Unlink size={24} color={COLORS.textMuted} />
-              <Text style={styles.disconnectedText}>API chua ket noi</Text>
+              <Text style={styles.disconnectedText}>API chưa kết nối</Text>
               {onConnect && (
                 <TouchableOpacity
                   style={styles.connectButton}
                   onPress={onConnect}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.connectButtonText}>Ket noi API</Text>
+                  <Text style={styles.connectButtonText}>Kết nối API</Text>
                 </TouchableOpacity>
               )}
             </>
           ) : (
             <>
               <Lock size={24} color={COLORS.textMuted} />
-              <Text style={styles.disconnectedText}>Nang cap TIER 2 de ket noi API</Text>
+              <Text style={styles.disconnectedText}>Nâng cấp TIER 2 để kết nối API</Text>
             </>
           )}
         </View>
@@ -163,7 +163,7 @@ const BalanceWidget = ({
     return (
       <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="small" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Dang tai so du...</Text>
+        <Text style={styles.loadingText}>Đang tải số dư...</Text>
       </View>
     );
   }
@@ -198,7 +198,7 @@ const BalanceWidget = ({
 
       {/* Total Balance */}
       <View style={styles.totalSection}>
-        <Text style={styles.totalLabel}>Tong so du</Text>
+        <Text style={styles.totalLabel}>Tổng số dư</Text>
         <Text style={styles.totalValue}>
           {formatBalance(balance?.total)} <Text style={styles.currency}>USDT</Text>
         </Text>
@@ -245,7 +245,7 @@ const BalanceWidget = ({
           ))}
           {balance.assets.length > 5 && (
             <Text style={styles.moreAssets}>
-              +{balance.assets.length - 5} assets khac
+              +{balance.assets.length - 5} assets khác
             </Text>
           )}
         </View>
@@ -265,7 +265,7 @@ const BalanceWidget = ({
           activeOpacity={0.7}
         >
           <Unlink size={14} color="#EF4444" />
-          <Text style={styles.disconnectText}>Ngat ket noi API</Text>
+          <Text style={styles.disconnectText}>Ngắt kết nối API</Text>
         </TouchableOpacity>
       )}
     </View>

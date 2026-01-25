@@ -75,17 +75,17 @@ import { useAuth } from '../../contexts/AuthContext';
 const TierUpgradePrompt = ({ onUpgrade }) => (
   <View style={styles.upgradeContainer}>
     <Lock size={48} color={COLORS.textMuted} />
-    <Text style={styles.upgradeTitle}>TIER 2 Required</Text>
+    <Text style={styles.upgradeTitle}>Yêu cầu TIER 2</Text>
     <Text style={styles.upgradeDescription}>
-      Ket noi API san giao dich yeu cau TIER 2 tro len.
-      Nang cap de xem so du va lich su giao dich truc tiep tren GEM.
+      Kết nối API sàn giao dịch yêu cầu TIER 2 trở lên.
+      Nâng cấp để xem số dư và lịch sử giao dịch trực tiếp trên GEM.
     </Text>
     <TouchableOpacity
       style={styles.upgradeButton}
       onPress={onUpgrade}
       activeOpacity={0.8}
     >
-      <Text style={styles.upgradeButtonText}>Nang cap ngay</Text>
+      <Text style={styles.upgradeButtonText}>Nâng cấp ngay</Text>
     </TouchableOpacity>
   </View>
 );
@@ -98,45 +98,45 @@ const APIGuideSection = ({ exchange }) => {
     binance: {
       url: 'https://www.binance.com/en/my/settings/api-management',
       steps: [
-        'Dang nhap Binance → Account → API Management',
-        'Bam "Create API" → Chon "System generated"',
-        'Dat ten API (vd: GEM App)',
-        'Xac nhan 2FA',
-        'QUAN TRONG: CHI tick "Enable Reading" va "Enable Spot & Margin Trading"',
-        'KHONG tick "Enable Withdrawals"!',
-        'Copy API Key va Secret Key',
+        'Đăng nhập Binance → Account → API Management',
+        'Bấm "Create API" → Chọn "System generated"',
+        'Đặt tên API (vd: GEM App)',
+        'Xác nhận 2FA',
+        'QUAN TRỌNG: CHỈ tick "Enable Reading" và "Enable Spot & Margin Trading"',
+        'KHÔNG tick "Enable Withdrawals"!',
+        'Copy API Key và Secret Key',
       ],
     },
     okx: {
       url: 'https://www.okx.com/account/my-api',
       steps: [
-        'Dang nhap OKX → Account → API',
-        'Bam "Create API key"',
-        'Chon permissions: Read + Trade',
-        'Tao passphrase (6-32 ky tu)',
-        'Xac nhan 2FA',
-        'Luu API Key, Secret Key va Passphrase',
+        'Đăng nhập OKX → Account → API',
+        'Bấm "Create API key"',
+        'Chọn permissions: Read + Trade',
+        'Tạo passphrase (6-32 ký tự)',
+        'Xác nhận 2FA',
+        'Lưu API Key, Secret Key và Passphrase',
       ],
     },
     bybit: {
       url: 'https://www.bybit.com/app/user/api-management',
       steps: [
-        'Dang nhap Bybit → Account → API',
-        'Bam "Create New Key"',
-        'Chon "System-generated API Keys"',
+        'Đăng nhập Bybit → Account → API',
+        'Bấm "Create New Key"',
+        'Chọn "System-generated API Keys"',
         'Permissions: Read-Only + Contract Trading',
-        'Xac nhan email/2FA',
-        'Luu API Key va Secret Key',
+        'Xác nhận email/2FA',
+        'Lưu API Key và Secret Key',
       ],
     },
     nami: {
       url: 'https://nami.exchange/user/api-keys',
       steps: [
-        'Dang nhap Nami → Cai dat → API',
-        'Tao API key moi',
-        'Chon quyen: Doc + Giao dich',
-        'Xac nhan OTP',
-        'Luu API Key va Secret Key',
+        'Đăng nhập Nami → Cài đặt → API',
+        'Tạo API key mới',
+        'Chọn quyền: Đọc + Giao dịch',
+        'Xác nhận OTP',
+        'Lưu API Key và Secret Key',
       ],
     },
   };
@@ -145,7 +145,7 @@ const APIGuideSection = ({ exchange }) => {
 
   return (
     <View style={styles.guideSection}>
-      <Text style={styles.guideSectionTitle}>Huong dan tao API Key</Text>
+      <Text style={styles.guideSectionTitle}>Hướng dẫn tạo API Key</Text>
       {guide.steps.map((step, index) => (
         <View key={index} style={styles.guideStep}>
           <Text style={styles.guideStepNumber}>{index + 1}</Text>
@@ -157,7 +157,7 @@ const APIGuideSection = ({ exchange }) => {
         onPress={() => Linking.openURL(guide.url)}
       >
         <ExternalLink size={14} color={COLORS.primary} />
-        <Text style={styles.guideLinkText}>Mo trang API Management</Text>
+        <Text style={styles.guideLinkText}>Mở trang API Management</Text>
       </TouchableOpacity>
     </View>
   );
@@ -244,9 +244,9 @@ const APIConnectionScreen = ({ navigation, route }) => {
 
       if (result.securityWarning) {
         Alert.alert(
-          'Canh bao bao mat!',
+          'Cảnh báo bảo mật!',
           result.error,
-          [{ text: 'Da hieu', style: 'cancel' }]
+          [{ text: 'Đã hiểu', style: 'cancel' }]
         );
       }
     } catch (error) {
@@ -259,7 +259,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
   // Connect API
   const handleConnect = async () => {
     if (!testResult?.success) {
-      Alert.alert('Loi', 'Vui long test ket noi truoc khi luu');
+      Alert.alert('Lỗi', 'Vui lòng test kết nối trước khi lưu');
       return;
     }
 
@@ -273,15 +273,15 @@ const APIConnectionScreen = ({ navigation, route }) => {
       if (result.success) {
         setConnected(true);
         Alert.alert(
-          'Thanh cong!',
-          'API da duoc ket noi. Ban co the xem so du tren GEM.',
+          'Thành công!',
+          'API đã được kết nối. Bạn có thể xem số dư trên GEM.',
           [{ text: 'OK', onPress: () => loadExistingConnection() }]
         );
       } else {
-        Alert.alert('Loi', result.error);
+        Alert.alert('Lỗi', result.error);
       }
     } catch (error) {
-      Alert.alert('Loi', error.message);
+      Alert.alert('Lỗi', error.message);
     } finally {
       setLoading(false);
     }
@@ -290,12 +290,12 @@ const APIConnectionScreen = ({ navigation, route }) => {
   // Disconnect API
   const handleDisconnect = async () => {
     Alert.alert(
-      'Ngat ket noi API?',
-      'API key se bi xoa. Ban se khong the xem so du tren GEM cho den khi ket noi lai.',
+      'Ngắt kết nối API?',
+      'API key sẽ bị xóa. Bạn sẽ không thể xem số dư trên GEM cho đến khi kết nối lại.',
       [
-        { text: 'Huy', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Ngat ket noi',
+          text: 'Ngắt kết nối',
           style: 'destructive',
           onPress: async () => {
             setLoading(true);
@@ -310,7 +310,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
                 setTestResult(null);
               }
             } catch (error) {
-              Alert.alert('Loi', error.message);
+              Alert.alert('Lỗi', error.message);
             } finally {
               setLoading(false);
             }
@@ -340,7 +340,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
           >
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Ket noi API</Text>
+          <Text style={styles.headerTitle}>Kết nối API</Text>
           <View style={styles.headerRight} />
         </View>
         <TierUpgradePrompt onUpgrade={() => navigation.navigate('Upgrade')} />
@@ -359,7 +359,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
           <ArrowLeft size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          {connected ? 'Quan ly API' : 'Ket noi API'}
+          {connected ? 'Quản lý API' : 'Kết nối API'}
         </Text>
         <View style={styles.headerRight} />
       </View>
@@ -407,12 +407,12 @@ const APIConnectionScreen = ({ navigation, route }) => {
             <View style={styles.securityWarning}>
               <AlertTriangle size={20} color={COLORS.warning} />
               <View style={styles.securityContent}>
-                <Text style={styles.securityTitle}>Bao mat API</Text>
+                <Text style={styles.securityTitle}>Bảo mật API</Text>
                 <Text style={styles.securityText}>
-                  • Chi tao API voi quyen READ va TRADE{'\n'}
-                  • TUYET DOI khong cho quyen WITHDRAW{'\n'}
-                  • GEM ma hoa API key truoc khi luu{'\n'}
-                  • API chi dung de xem so du va lich su
+                  • Chỉ tạo API với quyền READ và TRADE{'\n'}
+                  • TUYỆT ĐỐI không cho quyền WITHDRAW{'\n'}
+                  • GEM mã hóa API key trước khi lưu{'\n'}
+                  • API chỉ dùng để xem số dư và lịch sử
                 </Text>
               </View>
             </View>
@@ -430,7 +430,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
                     style={[styles.textInput, errors.apiKey && styles.textInputError]}
                     value={apiKey}
                     onChangeText={setApiKey}
-                    placeholder="Nhap API Key"
+                    placeholder="Nhập API Key"
                     placeholderTextColor={COLORS.textMuted}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -450,7 +450,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
                     style={[styles.textInput, styles.textInputWithIcon, errors.secretKey && styles.textInputError]}
                     value={secretKey}
                     onChangeText={setSecretKey}
-                    placeholder="Nhap Secret Key"
+                    placeholder="Nhập Secret Key"
                     placeholderTextColor={COLORS.textMuted}
                     secureTextEntry={!showSecret}
                     autoCapitalize="none"
@@ -480,7 +480,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
                       style={[styles.textInput, styles.textInputWithIcon, errors.passphrase && styles.textInputError]}
                       value={passphrase}
                       onChangeText={setPassphrase}
-                      placeholder="Nhap Passphrase"
+                      placeholder="Nhập Passphrase"
                       placeholderTextColor={COLORS.textMuted}
                       secureTextEntry={!showPassphrase}
                       autoCapitalize="none"
@@ -498,7 +498,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                   </View>
                   {errors.passphrase && <Text style={styles.errorText}>{errors.passphrase}</Text>}
-                  <Text style={styles.inputHint}>Passphrase ban tao khi tao API key tren OKX</Text>
+                  <Text style={styles.inputHint}>Passphrase bạn tạo khi tạo API key trên OKX</Text>
                 </View>
               )}
 
@@ -512,7 +512,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
                     <>
                       <Check size={20} color={COLORS.success} />
                       <Text style={styles.testResultText}>
-                        Ket noi thanh cong! Permissions: {testResult.permissions?.enableReading ? 'Read' : ''} {testResult.permissions?.enableSpotAndMarginTrading ? '+ Trade' : ''}
+                        Kết nối thành công! Permissions: {testResult.permissions?.enableReading ? 'Read' : ''} {testResult.permissions?.enableSpotAndMarginTrading ? '+ Trade' : ''}
                       </Text>
                     </>
                   ) : (
@@ -538,7 +538,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
                 ) : (
                   <>
                     <RefreshCw size={18} color={COLORS.primary} />
-                    <Text style={styles.testButtonText}>Test ket noi</Text>
+                    <Text style={styles.testButtonText}>Test kết nối</Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -558,7 +558,7 @@ const APIConnectionScreen = ({ navigation, route }) => {
                 ) : (
                   <>
                     <Shield size={18} color={COLORS.textPrimary} />
-                    <Text style={styles.saveButtonText}>Luu va ket noi</Text>
+                    <Text style={styles.saveButtonText}>Lưu và kết nối</Text>
                   </>
                 )}
               </TouchableOpacity>

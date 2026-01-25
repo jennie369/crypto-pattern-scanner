@@ -1,16 +1,25 @@
 /**
  * GEM Academy - Course Card Vertical
  * Vertical course card for grid/list layouts
+ * UPDATED: Added cache-busting for images
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Clock, Users, Star, PlayCircle, CheckCircle, Lock } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../../utils/tokens';
 import ProgressBar from '../Common/ProgressBar';
 
-const CourseCardVertical = ({
+// Helper: Add cache-busting parameter to image URL
+const getCacheBustedUrl = (url, updatedAt) => {
+  if (!url) return null;
+  const separator = url.includes('?') ? '&' : '?';
+  const cacheKey = updatedAt ? new Date(updatedAt).getTime() : Date.now();
+  return `${url}${separator}v=${cacheKey}`;
+};
+
+const CourseCardVertical = React.memo(({
   course,
   progress = 0,
   isEnrolled = false,
@@ -33,7 +42,14 @@ const CourseCardVertical = ({
     price = 0,
     is_free = false,
     difficulty = 'beginner',
+    updated_at,
   } = course;
+
+  // Cache-busted image URL
+  const cacheBustedThumbnail = useMemo(() =>
+    getCacheBustedUrl(thumbnail_url, updated_at),
+    [thumbnail_url, updated_at]
+  );
 
   // Format duration
   const formatDuration = (minutes) => {
@@ -74,8 +90,8 @@ const CourseCardVertical = ({
         disabled={!onPress}
       >
         <View style={styles.compactThumbnail}>
-          {thumbnail_url ? (
-            <Image source={{ uri: thumbnail_url }} style={styles.compactImage} />
+          {cacheBustedThumbnail ? (
+            <Image source={{ uri: cacheBustedThumbnail }} style={styles.compactImage} />
           ) : (
             <View style={styles.compactPlaceholder}>
               <PlayCircle size={24} color={COLORS.textMuted} />
@@ -114,8 +130,8 @@ const CourseCardVertical = ({
     >
       {/* Thumbnail */}
       <View style={styles.thumbnailContainer}>
-        {thumbnail_url ? (
-          <Image source={{ uri: thumbnail_url }} style={styles.thumbnail} />
+        {cacheBustedThumbnail ? (
+          <Image source={{ uri: cacheBustedThumbnail }} style={styles.thumbnail} />
         ) : (
           <LinearGradient
             colors={['rgba(106, 91, 255, 0.3)', 'rgba(0, 240, 255, 0.2)']}
@@ -205,7 +221,9 @@ const CourseCardVertical = ({
       </View>
     </TouchableOpacity>
   );
-};
+});
+
+CourseCardVertical.displayName = 'CourseCardVertical';
 
 const styles = StyleSheet.create({
   container: {

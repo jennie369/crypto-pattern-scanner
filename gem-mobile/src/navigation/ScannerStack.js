@@ -9,6 +9,13 @@ import { ScannerScreen, PatternDetailScreen, MTFDashboardScreen } from '../scree
 import OpenPositionsScreen from '../screens/Scanner/OpenPositionsScreen';
 import PaperTradeHistoryScreen from '../screens/Account/PaperTradeHistoryScreen';
 
+// Exchange Affiliate Screens (for navigation within Scanner tab)
+import {
+  ExchangeOnboardingScreen,
+  ExchangeAccountsScreen,
+  APIConnectionScreen,
+} from '../screens/Exchange';
+
 const Stack = createNativeStackNavigator();
 
 const ScannerStack = () => {
@@ -47,6 +54,25 @@ const ScannerStack = () => {
         options={{
           animation: 'slide_from_bottom',
         }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* EXCHANGE AFFILIATE (within Scanner tab) */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen
+        name="ExchangeOnboarding"
+        component={ExchangeOnboardingScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ExchangeAccounts"
+        component={ExchangeAccountsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="APIConnection"
+        component={APIConnectionScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

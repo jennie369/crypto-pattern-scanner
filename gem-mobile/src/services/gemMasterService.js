@@ -178,6 +178,163 @@ export const testAPIConnection = async () => {
   }
 };
 
+// ========== RICH RESPONSE TYPE DETECTION (Day 25) ==========
+// Response types for interactive UI components
+const RICH_RESPONSE_TYPES = {
+  TEXT: 'text',
+  CHECKLIST: 'checklist',
+  COMPARISON: 'comparison',
+  CHART_HINT: 'chart_hint',
+  QUIZ: 'quiz',
+  AFFIRMATION: 'affirmation',
+};
+
+/**
+ * Enrich response with rich response type and data for interactive UI
+ * @param {Object} response - The response object from processMessage
+ * @param {string} userMessage - The user's message for context detection
+ * @returns {Object} - Response with responseType and richData
+ */
+const enrichWithRichResponse = (response, userMessage = '') => {
+  const lowerMsg = userMessage.toLowerCase();
+
+  // DEBUG: Log response data to check what we receive
+  console.log('[enrichWithRichResponse] Checking response:', {
+    hasAffirmations: !!response.affirmations,
+    affirmationsLength: response.affirmations?.length,
+    hasActionSteps: !!response.actionSteps,
+    actionStepsLength: response.actionSteps?.length,
+    hasRituals: !!response.rituals,
+    ritualsLength: response.rituals?.length,
+    frequency: response.frequency,
+    scenarioTitle: response.scenario?.title,
+  });
+
+  // CHECKLIST: Priority - When response has actionSteps or rituals (interactive)
+  // Check this BEFORE affirmation because checklist is more engaging
+  if ((response.actionSteps && response.actionSteps.length > 0) ||
+      (response.rituals && response.rituals.length > 0)) {
+    const items = [];
+
+    // Add action steps
+    if (response.actionSteps && response.actionSteps.length > 0) {
+      response.actionSteps.forEach((step, idx) => {
+        items.push({
+          step: idx + 1,
+          text: typeof step === 'string' ? step : step.text || step.title,
+          done: false,
+        });
+      });
+    }
+
+    // Add rituals if no action steps
+    if (items.length === 0 && response.rituals) {
+      response.rituals.forEach((ritual, idx) => {
+        items.push({
+          step: idx + 1,
+          text: typeof ritual === 'string' ? ritual : ritual.name || ritual.title,
+          done: false,
+        });
+      });
+    }
+
+    if (items.length > 0) {
+      console.log('[enrichWithRichResponse] Returning CHECKLIST with', items.length, 'items');
+      return {
+        ...response,
+        responseType: RICH_RESPONSE_TYPES.CHECKLIST,
+        richData: {
+          title: response.scenario?.title || 'Bài tập chữa lành',
+          summary: response.scenario?.description || null,
+          rootCause: response.scenario?.rootCause || null,
+          crystal: response.scenario?.crystal || null,
+          items: items,
+          duration: '21 ngày',
+        },
+      };
+    }
+  }
+
+  // AFFIRMATION: When response has affirmations (but no actionSteps)
+  if (response.affirmations && response.affirmations.length > 0) {
+    // Pick first affirmation as main content
+    const mainAffirmation = response.affirmations[0];
+    console.log('[enrichWithRichResponse] Returning AFFIRMATION');
+    return {
+      ...response,
+      responseType: RICH_RESPONSE_TYPES.AFFIRMATION,
+      richData: {
+        text: typeof mainAffirmation === 'string' ? mainAffirmation : mainAffirmation.text,
+        frequency: response.frequency || 528,
+        backgroundColor: response.scenario?.colorGradient?.[0] || '#6A5BFF',
+        allAffirmations: response.affirmations,
+      },
+    };
+  }
+
+  // COMPARISON: When user asks to compare tiers/plans
+  if (lowerMsg.includes('so sánh') && (lowerMsg.includes('tier') || lowerMsg.includes('gói'))) {
+    return {
+      ...response,
+      responseType: RICH_RESPONSE_TYPES.COMPARISON,
+      richData: {
+        title: 'So sánh các TIER',
+        items: [
+          {
+            name: 'STARTER',
+            price: '299K',
+            features: ['Scanner cơ bản', '5 cặp coin', 'Hỗ trợ community'],
+            highlight: false,
+          },
+          {
+            name: 'TIER 1',
+            price: '11tr',
+            features: ['50-55% win rate', '15 patterns', 'AI Signals cơ bản'],
+            highlight: false,
+          },
+          {
+            name: 'TIER 2',
+            price: '21tr',
+            features: ['70-75% win rate', 'AI Prediction', 'Whale Tracker'],
+            highlight: true,
+          },
+          {
+            name: 'TIER 3',
+            price: '68tr',
+            features: ['80-90% win rate', 'Private mentoring', 'VIP signals'],
+            highlight: false,
+          },
+        ],
+        highlightIndex: 2,
+      },
+    };
+  }
+
+  // CHART_HINT: When response mentions specific trading symbols
+  const symbolMatch = response.text?.match(/\b(BTC|ETH|BNB|SOL|XRP|DOGE|ADA)(?:USDT)?\b/i);
+  if (symbolMatch && (lowerMsg.includes('chart') || lowerMsg.includes('phân tích') ||
+      response.source === 'realtime_analysis' || response.marketData)) {
+    const symbol = symbolMatch[1].toUpperCase() + 'USDT';
+    const patternMatch = response.text?.match(/(DPD|UPU|UPD|DPU|HFZ|LFZ|Zone Retest|Breakout)/i);
+
+    return {
+      ...response,
+      responseType: RICH_RESPONSE_TYPES.CHART_HINT,
+      richData: {
+        symbol: symbol,
+        pattern: patternMatch ? patternMatch[1].toUpperCase() : null,
+        message: response.text?.substring(0, 150) || '',
+      },
+    };
+  }
+
+  // QUIZ: For educational content (future enhancement)
+  // Can be triggered when AI returns quiz-like content
+
+  // Default: TEXT response
+  return response;
+};
+
 // ========== REAL-TIME TRADING ANALYSIS ==========
 
 /**
@@ -475,8 +632,9 @@ let conversationState = {
 let messageCount = 0;
 
 // ========== DETECT KARMA INTENT ==========
-// IMPORTANT: Only trigger questionnaire when user EXPLICITLY REQUESTS karma analysis
-// Do NOT trigger for questions ABOUT karma - those should use FAQ knowledge
+// IMPORTANT: Trigger questionnaire for:
+// 1. Explicit requests: "phân tích nghiệp tình của tôi"
+// 2. Implicit love questions: "người yêu cũ có quay lại không?" (needs energy analysis)
 const detectKarmaIntent = (message) => {
   const m = message.toLowerCase();
 
@@ -487,25 +645,36 @@ const detectKarmaIntent = (message) => {
     return null;
   }
 
-  // CRITICAL: Skip if user is ASKING A QUESTION about karma (not requesting analysis)
-  // These should be answered with FAQ knowledge, not start a questionnaire
-  const questionIndicators = [
-    'có phải', 'là gì', 'tại sao', 'vì sao', 'như thế nào', 'thế nào',
-    'có phải là', 'có phải không', 'phải không', 'đúng không',
-    'giải thích', 'cho hỏi', 'hỏi', 'muốn biết', 'muốn hỏi',
-    'lo lắng', 'lo âu', 'cảm thấy', 'không hiểu'
+  // ========== IMPLICIT LOVE ANALYSIS ==========
+  // Questions about relationships that need energy/karma analysis (not yes/no answers)
+  const implicitLoveQuestions = [
+    'người yêu cũ', 'tình cũ', 'ex quay lại', 'quay lại với',
+    'có nên gặp lại', 'có nên nhắn', 'liên lạc lại',
+    'còn yêu', 'hết yêu', 'quên người cũ', 'nhớ người cũ',
+    'bị ghosted', 'bị block', 'tại sao chia tay',
+    'tại sao bị bỏ', 'không có người yêu', 'mãi không có ai',
+    'luôn bị phản bội', 'luôn bị bỏ rơi', 'pattern tình yêu'
   ];
-  if (questionIndicators.some(q => m.includes(q))) {
-    console.log('[GEM] Skip karma questionnaire - user is asking a QUESTION about karma, not requesting analysis');
-    return null;
+
+  const hasImplicitLoveQuestion = implicitLoveQuestions.some(kw => m.includes(kw));
+  if (hasImplicitLoveQuestion) {
+    console.log('[GEM] Implicit love question detected - trigger love questionnaire');
+    return 'love';
   }
 
-  // Only trigger questionnaire when user EXPLICITLY requests karma analysis
+  // ========== EXPLICIT KARMA ANALYSIS REQUESTS ==========
   // Must include action words: phân tích, khám phá, xem, đo, kiểm tra, tìm hiểu + nghiệp
   const analysisKeywords = ['phân tích', 'khám phá', 'xem', 'đo', 'kiểm tra', 'tìm hiểu', 'của tôi', 'của mình', 'giúp tôi'];
   const hasAnalysisRequest = analysisKeywords.some(kw => m.includes(kw));
 
-  if (!hasAnalysisRequest) {
+  // Also check for question patterns that indicate need for deep analysis
+  const deepAnalysisIndicators = [
+    'tại sao tôi', 'vì sao tôi', 'tại sao mình', 'vì sao mình',
+    'gốc vấn đề', 'nguyên nhân', 'pattern', 'lặp lại'
+  ];
+  const needsDeepAnalysis = deepAnalysisIndicators.some(kw => m.includes(kw));
+
+  if (!hasAnalysisRequest && !needsDeepAnalysis) {
     console.log('[GEM] Skip karma questionnaire - no explicit analysis request');
     return null;
   }
@@ -515,8 +684,12 @@ const detectKarmaIntent = (message) => {
   if (m.includes('nghiệp tiền') || m.includes('nghiệp tài chính') || (m.includes('nghiệp') && (m.includes('tiền') || m.includes('tài')))) {
     return 'money';
   }
-  // Love karma - must mention "nghiệp tình" or "nghiệp duyên"
+  // Love karma - must mention "nghiệp tình" or "nghiệp duyên" or love-related + analysis
   if (m.includes('nghiệp tình') || m.includes('nghiệp duyên') || (m.includes('nghiệp') && (m.includes('tình') || m.includes('yêu')))) {
+    return 'love';
+  }
+  // Also trigger love questionnaire for deep analysis questions about relationships
+  if (needsDeepAnalysis && (m.includes('tình') || m.includes('yêu') || m.includes('quan hệ') || m.includes('bỏ rơi'))) {
     return 'love';
   }
   // Health karma - must mention "nghiệp sức khỏe" or "nghiệp bệnh"
@@ -1647,8 +1820,9 @@ export const processMessage = async (userMessage, history = [], options = {}) =>
           frequency: result.frequency,
           topics: [karmaType],
           // NEW: Include affirmations, actionSteps, and rituals for VisionBoard goal cards
+          // Fallback: healing → actionSteps if actionSteps not defined
           affirmations: result.scenario?.affirmations || [],
-          actionSteps: result.scenario?.actionSteps || [],
+          actionSteps: result.scenario?.actionSteps || result.scenario?.healing || [],
           rituals: result.scenario?.rituals || [],
           widgetSuggestion: getWidgetSuggestion(result.scenario) || WIDGET_SUGGESTIONS[karmaType],
           courseRecommendation: getCourseRecommendation(result.scenario) || COURSE_RECOMMENDATIONS[karmaType],
@@ -1685,8 +1859,32 @@ export const processMessage = async (userMessage, history = [], options = {}) =>
       const karmaName = KARMA_TYPES[karmaIntent]?.name || 'Nghiệp';
       const formattedQ = formatQuestion(firstQ, 0, questions.length);
 
+      // ========== CONTEXTUAL INTRO MESSAGE ==========
+      // Check if triggered by implicit love question (not explicit karma analysis request)
+      const m = userMessage.toLowerCase();
+      const implicitLovePatterns = [
+        'người yêu cũ', 'tình cũ', 'ex quay lại', 'quay lại',
+        'có nên gặp', 'có nên nhắn', 'còn yêu', 'quên người',
+        'bị ghosted', 'bị block', 'tại sao chia tay', 'bị bỏ'
+      ];
+      const isImplicitLoveQuestion = karmaIntent === 'love' &&
+        implicitLovePatterns.some(p => m.includes(p)) &&
+        !m.includes('nghiệp');
+
+      let introText;
+      if (isImplicitLoveQuestion) {
+        // Wisdom-based contextual response for implicit love questions
+        introText = `✨ Tôi hiểu bạn đang muốn biết câu trả lời cho câu hỏi này...\n\n` +
+          `Nhưng **câu trả lời có/không** sẽ không giúp bạn hiểu rõ vấn đề.\n\n` +
+          `Điều quan trọng hơn là hiểu **tại sao pattern này lặp lại** trong cuộc sống của bạn.\n\n` +
+          `Hãy để Sư Phụ đánh giá **năng lượng tình duyên** của bạn qua ${questions.length} câu hỏi ngắn:\n\n${formattedQ.text}`;
+      } else {
+        // Standard intro for explicit karma analysis requests
+        introText = `Tôi sẽ giúp bạn khám phá ${karmaName} của mình!\n\nĐể phân tích chính xác, tôi cần hỏi bạn ${questions.length} câu hỏi ngắn.\n\n${formattedQ.text}`;
+      }
+
       return {
-        text: `Tôi sẽ giúp bạn khám phá ${karmaName} của mình!\n\nĐể phân tích chính xác, tôi cần hỏi bạn ${questions.length} câu hỏi ngắn.\n\n${formattedQ.text}`,
+        text: introText,
         mode: 'questionnaire',
         // Pass options for interactive button rendering
         options: formattedQ.options,
@@ -2380,13 +2578,17 @@ export const sendMessageEnhanced = async (userId, message, options = {}) => {
       console.warn('[GemMasterService] Analytics error:', analyticsErr.message);
     }
 
+    // Apply rich response type detection (Day 25)
+    const enrichedResponse = enrichWithRichResponse(response, message);
+
     console.log('[GemMasterService] sendMessageEnhanced success:', {
       responseTimeMs,
       analyticsId,
+      responseType: enrichedResponse.responseType || 'text',
     });
 
     return {
-      ...response,
+      ...enrichedResponse,
       analyticsId,
     };
   } catch (err) {

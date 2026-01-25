@@ -49,6 +49,9 @@ const RichResponseRenderer = memo(({ response, onAction }) => {
       return (
         <ChecklistResponse
           title={response.title || 'Bài tập'}
+          summary={response.summary}
+          rootCause={response.rootCause}
+          crystal={response.crystal}
           items={response.items || []}
           duration={response.duration}
           onItemToggle={(index) => onAction?.('checklist_toggle', { index })}

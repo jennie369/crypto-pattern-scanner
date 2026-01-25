@@ -1,6 +1,7 @@
 /**
  * GEM Academy - Hero Banner Carousel
  * Auto-sliding promotional banners
+ * OPTIMIZED: Fixed height to prevent layout shift
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -12,7 +13,7 @@ import {
   StyleSheet,
   Dimensions,
   Image,
-  ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight } from 'lucide-react-native';
@@ -23,15 +24,59 @@ import { getPromoBanners } from '../../services/promoBannerService';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BANNER_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
 const BANNER_HEIGHT = 160;
+const TOTAL_HEIGHT = BANNER_HEIGHT + SPACING.md + 20; // Banner + pagination + margin
 const AUTO_SLIDE_INTERVAL = 5000;
 
-const HeroBannerCarousel = ({ userTier = null, style = {} }) => {
+// Skeleton placeholder for loading state
+const SkeletonBanner = React.memo(() => {
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const shimmer = Animated.loop(
+      Animated.timing(shimmerAnim, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      })
+    );
+    shimmer.start();
+    return () => shimmer.stop();
+  }, []);
+
+  const translateX = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-BANNER_WIDTH, BANNER_WIDTH],
+  });
+
+  return (
+    <View style={styles.skeletonContainer}>
+      <View style={styles.skeletonBanner}>
+        <Animated.View
+          style={[
+            styles.shimmer,
+            { transform: [{ translateX }] },
+          ]}
+        />
+      </View>
+      {/* Skeleton pagination dots */}
+      <View style={styles.skeletonPagination}>
+        {[0, 1, 2].map((i) => (
+          <View key={i} style={styles.skeletonDot} />
+        ))}
+      </View>
+    </View>
+  );
+});
+
+const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
   const navigation = useNavigation();
   const flatListRef = useRef(null);
   const [banners, setBanners] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false); // Track if we've loaded once
   const autoSlideTimer = useRef(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Load banners
   useEffect(() => {
@@ -45,15 +90,24 @@ const HeroBannerCarousel = ({ userTier = null, style = {} }) => {
 
   const loadBanners = async () => {
     try {
-      setLoading(true);
+      if (!hasLoaded) setLoading(true);
       const result = await getPromoBanners(userTier);
       if (result.success) {
         setBanners(result.data || []);
+        // Fade in animation after load
+        if (!hasLoaded) {
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
       }
     } catch (error) {
       console.error('[HeroBannerCarousel] loadBanners error:', error);
     } finally {
       setLoading(false);
+      setHasLoaded(true);
     }
   };
 
@@ -156,20 +210,25 @@ const HeroBannerCarousel = ({ userTier = null, style = {} }) => {
     </TouchableOpacity>
   );
 
-  if (loading) {
+  // Show skeleton while loading (first load only)
+  if (loading && !hasLoaded) {
     return (
-      <View style={[styles.loadingContainer, style]}>
-        <ActivityIndicator size="small" color={COLORS.gold} />
+      <View style={[styles.fixedContainer, style]}>
+        <SkeletonBanner />
       </View>
     );
   }
 
+  // Don't collapse space - keep fixed height even when no banners
+  // This prevents layout shift on subsequent loads
   if (banners.length === 0) {
+    // Return empty fixed-height container to prevent layout shift
+    // Or return null if you prefer collapsing (but causes layout shift)
     return null;
   }
 
   return (
-    <View style={[styles.container, style]}>
+    <Animated.View style={[styles.fixedContainer, style, { opacity: fadeAnim }]}>
       <FlatList
         ref={flatListRef}
         data={banners}
@@ -204,13 +263,45 @@ const HeroBannerCarousel = ({ userTier = null, style = {} }) => {
           ))}
         </View>
       )}
-    </View>
+    </Animated.View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
     marginTop: SPACING.md,
+  },
+  fixedContainer: {
+    minHeight: TOTAL_HEIGHT,
+    marginTop: SPACING.md,
+  },
+  // Skeleton styles
+  skeletonContainer: {
+    paddingHorizontal: SPACING.lg,
+  },
+  skeletonBanner: {
+    height: BANNER_HEIGHT,
+    borderRadius: BORDER_RADIUS.xl,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    overflow: 'hidden',
+  },
+  shimmer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  skeletonPagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  skeletonDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: SPACING.xxs,
   },
   loadingContainer: {
     height: BANNER_HEIGHT,
@@ -287,5 +378,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.gold,
   },
 });
+
+SkeletonBanner.displayName = 'SkeletonBanner';
+HeroBannerCarousel.displayName = 'HeroBannerCarousel';
 
 export default HeroBannerCarousel;

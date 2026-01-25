@@ -97,9 +97,9 @@ const ProgressBar = ({ currentStep, totalSteps }) => {
 const SelectExchangeStep = ({ exchanges, selectedExchange, onSelect }) => {
   return (
     <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Chon san giao dich</Text>
+      <Text style={styles.stepTitle}>Chọn sàn giao dịch</Text>
       <Text style={styles.stepDescription}>
-        Chon san phu hop voi ban. Dang ky qua GEM de nhan uu dai giam phi giao dich.
+        Chọn sàn phù hợp với bạn. Đăng ký qua GEM để nhận ưu đãi giảm phí giao dịch.
       </Text>
 
       <ScrollView style={styles.exchangeList} showsVerticalScrollIndicator={false}>
@@ -144,8 +144,8 @@ const ExchangeInfoStep = ({ exchange, onOpenLink, linkOpened }) => {
           </Text>
           {(exchange.isRecommended || exchange.is_recommended) && (
             <View style={styles.recommendedBadge}>
-              <Star size={10} color="#FFD700" fill="#FFD700" />
-              <Text style={styles.recommendedText}>San khuyen nghi</Text>
+              <Star size={10} color={COLORS.gold} fill={COLORS.gold} />
+              <Text style={styles.recommendedText}>Sàn khuyên nghị</Text>
             </View>
           )}
         </View>
@@ -157,7 +157,7 @@ const ExchangeInfoStep = ({ exchange, onOpenLink, linkOpened }) => {
 
       {/* Features */}
       <View style={styles.featuresSection}>
-        <Text style={styles.sectionTitle}>Tinh nang noi bat</Text>
+        <Text style={styles.sectionTitle}>Tính năng nổi bật</Text>
         {exchange.features?.map((feature, index) => (
           <View key={index} style={styles.featureRow}>
             <Check size={14} color={COLORS.success} />
@@ -171,9 +171,9 @@ const ExchangeInfoStep = ({ exchange, onOpenLink, linkOpened }) => {
         <View style={styles.discountBanner}>
           <Gift size={20} color={COLORS.primary} />
           <View style={styles.discountContent}>
-            <Text style={styles.discountTitle}>Uu dai khi dang ky qua GEM</Text>
+            <Text style={styles.discountTitle}>Ưu đãi khi đăng ký qua GEM</Text>
             <Text style={styles.discountValue}>
-              Giam {((exchange.commission?.userDiscount || exchange.user_fee_discount) * 100).toFixed(0)}% phi giao dich
+              Giảm {((exchange.commission?.userDiscount || exchange.user_fee_discount) * 100).toFixed(0)}% phí giao dịch
             </Text>
           </View>
         </View>
@@ -181,7 +181,7 @@ const ExchangeInfoStep = ({ exchange, onOpenLink, linkOpened }) => {
 
       {/* Ref Code */}
       <View style={styles.refCodeSection}>
-        <Text style={styles.refCodeLabel}>Ma gioi thieu:</Text>
+        <Text style={styles.refCodeLabel}>Mã giới thiệu:</Text>
         <TouchableOpacity style={styles.refCodeBox} onPress={handleCopyRef}>
           <Text style={styles.refCodeValue}>
             {exchange.refCode || exchange.affiliate_ref_code}
@@ -203,12 +203,12 @@ const ExchangeInfoStep = ({ exchange, onOpenLink, linkOpened }) => {
         {linkOpened ? (
           <>
             <CheckCircle size={20} color={COLORS.textPrimary} />
-            <Text style={styles.primaryButtonText}>Da mo trang dang ky</Text>
+            <Text style={styles.primaryButtonText}>Đã mở trang đăng ký</Text>
           </>
         ) : (
           <>
             <ExternalLink size={20} color={COLORS.textPrimary} />
-            <Text style={styles.primaryButtonText}>Mo trang dang ky</Text>
+            <Text style={styles.primaryButtonText}>Mở trang đăng ký</Text>
           </>
         )}
       </TouchableOpacity>
@@ -216,7 +216,7 @@ const ExchangeInfoStep = ({ exchange, onOpenLink, linkOpened }) => {
       <View style={styles.instructionBox}>
         <Info size={16} color={COLORS.textSecondary} />
         <Text style={styles.instructionText}>
-          Sau khi dang ky thanh cong, quay lai day de xac nhan tai khoan.
+          Sau khi đăng ký thành công, quay lại đây để xác nhận tài khoản.
         </Text>
       </View>
     </View>
@@ -231,15 +231,15 @@ const ConfirmSignupStep = ({ exchange, email, onEmailChange, onConfirm, loading,
     <View style={styles.stepContent}>
       <View style={styles.confirmHeader}>
         <CheckCircle size={48} color={COLORS.success} />
-        <Text style={styles.stepTitle}>Xac nhan dang ky</Text>
+        <Text style={styles.stepTitle}>Xác nhận đăng ký</Text>
       </View>
 
       <Text style={styles.stepDescription}>
-        Nhap email ban da dung de dang ky {exchange.displayName || exchange.display_name} de chung toi xac nhan va lien ket tai khoan.
+        Nhập email bạn đã dùng để đăng ký {exchange.displayName || exchange.display_name} để chúng tôi xác nhận và liên kết tài khoản.
       </Text>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Email dang ky {exchange.displayName || exchange.display_name}</Text>
+        <Text style={styles.inputLabel}>Email đăng ký {exchange.displayName || exchange.display_name}</Text>
         <TextInput
           style={styles.textInput}
           value={email}
@@ -256,7 +256,7 @@ const ConfirmSignupStep = ({ exchange, email, onEmailChange, onConfirm, loading,
       <View style={styles.privacyNote}>
         <Shield size={14} color={COLORS.textMuted} />
         <Text style={styles.privacyText}>
-          Email chi dung de xac nhan tai khoan, khong chia se voi ben thu ba.
+          Email chỉ dùng để xác nhận tài khoản, không chia sẻ với bên thứ ba.
         </Text>
       </View>
 
@@ -267,7 +267,7 @@ const ConfirmSignupStep = ({ exchange, email, onEmailChange, onConfirm, loading,
         activeOpacity={0.8}
       >
         <Text style={styles.primaryButtonText}>
-          {loading ? 'Dang xac nhan...' : 'Xac nhan dang ky'}
+          {loading ? 'Đang xác nhận...' : 'Xác nhận đăng ký'}
         </Text>
       </TouchableOpacity>
     </View>
@@ -284,21 +284,21 @@ const CompleteStep = ({ exchange, onDeposit, onConnectAPI, canConnectAPI, onDone
         <View style={styles.successIcon}>
           <CheckCircle size={64} color={COLORS.success} />
         </View>
-        <Text style={styles.successTitle}>Dang ky thanh cong!</Text>
+        <Text style={styles.successTitle}>Đăng ký thành công!</Text>
         <Text style={styles.successDescription}>
-          Tai khoan {exchange.displayName || exchange.display_name} da duoc lien ket voi GEM.
+          Tài khoản {exchange.displayName || exchange.display_name} đã được liên kết với GEM.
         </Text>
       </View>
 
-      <Text style={styles.nextStepsTitle}>Buoc tiep theo</Text>
+      <Text style={styles.nextStepsTitle}>Bước tiếp theo</Text>
 
       <View style={styles.nextStepsContainer}>
         <TouchableOpacity style={styles.nextStepCard} onPress={onDeposit}>
           <Wallet size={24} color={COLORS.primary} />
           <View style={styles.nextStepContent}>
-            <Text style={styles.nextStepTitle}>Nap tien vao san</Text>
+            <Text style={styles.nextStepTitle}>Nạp tiền vào sàn</Text>
             <Text style={styles.nextStepDescription}>
-              Nap USDT de bat dau trade cac pattern chat luong
+              Nạp USDT để bắt đầu trade các pattern chất lượng
             </Text>
           </View>
           <ChevronRight size={20} color={COLORS.textSecondary} />
@@ -306,11 +306,11 @@ const CompleteStep = ({ exchange, onDeposit, onConnectAPI, canConnectAPI, onDone
 
         {canConnectAPI && (
           <TouchableOpacity style={styles.nextStepCard} onPress={onConnectAPI}>
-            <Shield size={24} color={COLORS.warning} />
+            <Shield size={24} color={COLORS.gold} />
             <View style={styles.nextStepContent}>
-              <Text style={styles.nextStepTitle}>Ket noi API</Text>
+              <Text style={styles.nextStepTitle}>Kết nối API</Text>
               <Text style={styles.nextStepDescription}>
-                Xem so du truc tiep tren GEM (TIER 2+)
+                Xem số dư trực tiếp trên GEM (TIER 2+)
               </Text>
             </View>
             <ChevronRight size={20} color={COLORS.textSecondary} />
@@ -319,7 +319,7 @@ const CompleteStep = ({ exchange, onDeposit, onConnectAPI, canConnectAPI, onDone
       </View>
 
       <TouchableOpacity style={styles.doneButton} onPress={onDone}>
-        <Text style={styles.doneButtonText}>Hoan tat</Text>
+        <Text style={styles.doneButtonText}>Hoàn tất</Text>
       </TouchableOpacity>
     </View>
   );
@@ -389,12 +389,12 @@ const ExchangeOnboardingScreen = ({ navigation, route }) => {
           await Linking.openURL(result.link);
           setLinkOpened(true);
         } else {
-          Alert.alert('Loi', 'Khong the mo link. Vui long copy ma gioi thieu va dang ky thu cong.');
+          Alert.alert('Lỗi', 'Không thể mở link. Vui lòng copy mã giới thiệu và đăng ký thủ công.');
         }
       }
     } catch (err) {
       console.error('[ExchangeOnboarding] Error opening link:', err);
-      Alert.alert('Loi', 'Khong the mo link. Vui long thu lai.');
+      Alert.alert('Lỗi', 'Không thể mở link. Vui lòng thử lại.');
     }
   }, [selectedExchange, source]);
 
@@ -412,7 +412,7 @@ const ExchangeOnboardingScreen = ({ navigation, route }) => {
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Email khong hop le');
+      setError('Email không hợp lệ');
       return;
     }
 
@@ -428,11 +428,11 @@ const ExchangeOnboardingScreen = ({ navigation, route }) => {
       if (result.success) {
         setCurrentStep(3);
       } else {
-        setError(result.error || 'Khong the xac nhan. Vui long thu lai.');
+        setError(result.error || 'Không thể xác nhận. Vui lòng thử lại.');
       }
     } catch (err) {
       console.error('[ExchangeOnboarding] Error confirming:', err);
-      setError('Loi he thong. Vui long thu lai.');
+      setError('Lỗi hệ thống. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -509,7 +509,7 @@ const ExchangeOnboardingScreen = ({ navigation, route }) => {
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <ArrowLeft size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Dang ky san giao dich</Text>
+        <Text style={styles.headerTitle}>Đăng ký sàn giao dịch</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -545,7 +545,7 @@ const ExchangeOnboardingScreen = ({ navigation, route }) => {
               onPress={handleContinueToConfirm}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryButtonText}>Tiep tuc xac nhan</Text>
+              <Text style={styles.primaryButtonText}>Tiếp tục xác nhận</Text>
               <ChevronRight size={20} color={COLORS.textPrimary} />
             </TouchableOpacity>
           </View>

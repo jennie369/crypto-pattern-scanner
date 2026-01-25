@@ -525,7 +525,7 @@ const ForumScreen = ({ navigation }) => {
       setHasMore(true);
     } finally {
       // End performance measurement (dev only)
-      performanceService.endMeasure(`loadPosts.${reset ? 'reset' : 'page'}`, 1500);
+      performanceService.endMeasure(`loadPosts.${reset ? 'reset' : 'page'}`, 2500);
       setLoading(false);
       setLoadingMore(false);
     }
@@ -543,7 +543,7 @@ const ForumScreen = ({ navigation }) => {
 
       if (reset) {
         // Generate new feed with new session - OPTIMIZED: reduced limit for faster initial load
-        const result = await generateFeed(user.id, null, 30);
+        const result = await generateFeed(user.id, null, 15, false, true);
 
         setFeedItems(result.feed);
         setSessionId(result.sessionId);
@@ -667,7 +667,7 @@ const ForumScreen = ({ navigation }) => {
       setHasMore(result.hasMore);
     } finally {
       // End performance measurement (dev only)
-      performanceService.endMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`, 1500);
+      performanceService.endMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`, 2500);
       setLoading(false);
       setLoadingMore(false);
     }

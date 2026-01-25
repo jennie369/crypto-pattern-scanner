@@ -68,7 +68,6 @@ const ExchangeCard = ({
         styles.container,
         isCompact && styles.containerCompact,
         disabled && styles.containerDisabled,
-        { borderLeftColor: config.color },
       ]}
       onPress={onPress}
       disabled={disabled}
@@ -100,8 +99,8 @@ const ExchangeCard = ({
           <View style={styles.badges}>
             {config.isRecommended || config.is_recommended ? (
               <View style={styles.recommendedBadge}>
-                <Star size={10} color="#FFD700" fill="#FFD700" />
-                <Text style={styles.recommendedText}>Hot</Text>
+                <Star size={10} color={COLORS.gold} fill={COLORS.gold} />
+                <Text style={styles.recommendedText}>Nổi bật</Text>
               </View>
             ) : null}
 
@@ -136,7 +135,7 @@ const ExchangeCard = ({
         {!isCompact && (config.commission?.userDiscount || config.user_fee_discount) && (
           <View style={styles.discountBadge}>
             <Text style={styles.discountText}>
-              -{((config.commission?.userDiscount || config.user_fee_discount) * 100).toFixed(0)}% phi
+              -{((config.commission?.userDiscount || config.user_fee_discount) * 100).toFixed(0)}% phí
             </Text>
           </View>
         )}
@@ -167,7 +166,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
-    borderLeftWidth: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     marginBottom: SPACING.sm,
   },
   containerCompact: {
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   recommendedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -223,10 +223,10 @@ const styles = StyleSheet.create({
   recommendedText: {
     fontSize: 10,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: '#FFD700',
+    color: COLORS.gold,
   },
   vndBadge: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    backgroundColor: 'rgba(58, 247, 166, 0.15)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   vndText: {
     fontSize: 10,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: '#10B981',
+    color: COLORS.success,
   },
   description: {
     fontSize: TYPOGRAPHY.fontSize.sm,

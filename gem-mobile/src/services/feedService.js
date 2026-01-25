@@ -108,7 +108,7 @@ const SEED_POST_SELECT_QUERY = `
 // ============================================
 
 const FEED_CONFIG = {
-  DEFAULT_LIMIT: 20, // REDUCED for faster initial load (was 30)
+  DEFAULT_LIMIT: 15, // REDUCED for faster initial load (was 30 → 20 → 15)
   FOLLOWING_WEIGHT: 0.6,
   DISCOVERY_WEIGHT: 0.3,
   SERENDIPITY_WEIGHT: 0.1,
@@ -241,7 +241,7 @@ async function insertAdsLight(userId, sessionId, feedItems) {
 // MAIN FEED GENERATION FUNCTION
 // ============================================
 
-export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG.DEFAULT_LIMIT, forceRefresh = false) {
+export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG.DEFAULT_LIMIT, forceRefresh = false, skipAds = false) {
   try {
     // Check cache first (unless force refresh)
     if (!forceRefresh) {
@@ -328,13 +328,16 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
 
     // ============================================
     // INLINE ADS: Insert ads for non-premium users
+    // Skip on initial load (skipAds=true) for faster first paint
     // ============================================
     let feedWithAds = feedItems;
     const isPremium = userTier === 'TIER3' || userTier === 'PREMIUM' || userTier === 'PRO';
 
-    if (!isPremium && feedItems.length >= FEED_CONFIG.AD_FIRST_POSITION) {
+    if (!skipAds && !isPremium && feedItems.length >= FEED_CONFIG.AD_FIRST_POSITION) {
       feedWithAds = await insertAdsLight(userId, sessionId, feedItems);
       console.log(`[FeedService] ⚡ Added inline ads for ${userTier} user`);
+    } else if (skipAds) {
+      console.log(`[FeedService] ⚡ Skipped ads for faster initial load`);
     }
 
     console.log(`[FeedService] ⚡ Fast mode complete: ${feedWithAds.length} items (${feedItems.length} posts + ${feedWithAds.length - feedItems.length} ads)`);

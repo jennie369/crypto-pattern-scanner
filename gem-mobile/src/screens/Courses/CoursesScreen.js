@@ -105,6 +105,7 @@ const CoursesScreen = ({ navigation, route }) => {
   const routeCategory = route?.params?.category || null;
   const routeFilterTags = route?.params?.filterTags || null; // Tag-based filtering from category cards
   const pageTitle = route?.params?.title || null;
+  const sourceTab = route?.params?.sourceTab || 'Account'; // Default back to Tài Sản tab
 
   const [activeFilter, setActiveFilter] = useState(routeFilter);
   const [activeFilterTags, setActiveFilterTags] = useState(routeFilterTags);
@@ -518,7 +519,8 @@ const CoursesScreen = ({ navigation, route }) => {
     </View>
   );
 
-  const renderCourseCard = ({ item, index }) => {
+  // Memoized render function for better scroll performance
+  const renderCourseCard = useCallback(({ item, index }) => {
     const enrolled = isEnrolled(item.id);
     const progress = getProgress(item.id);
     const locked = isCourseLocked(item);
@@ -534,7 +536,17 @@ const CoursesScreen = ({ navigation, route }) => {
         style={styles.courseCard}
       />
     );
-  };
+  }, [isEnrolled, getProgress, isCourseLocked, handleCoursePress]);
+
+  // Memoized key extractor for FlatList
+  const keyExtractor = useCallback((item) => item.id, []);
+
+  // Item layout for better scroll performance (fixed height items)
+  const getItemLayout = useCallback((data, index) => ({
+    length: 260, // Approximate height of CourseCard
+    offset: 260 * index,
+    index,
+  }), []);
 
   const renderEmptyState = () => {
     const getMessage = () => {
@@ -796,7 +808,10 @@ const CoursesScreen = ({ navigation, route }) => {
         >
           <TouchableOpacity
             style={styles.backBtn}
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+              // Navigate back to source tab (default: Tài Sản/Account)
+              navigation.navigate('Main', { screen: sourceTab });
+            }}
           >
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
@@ -809,11 +824,11 @@ const CoursesScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </Animated.View>
 
-        {/* Course List with Header Components */}
+        {/* Course List with Header Components - OPTIMIZED */}
         <Animated.FlatList
           data={filteredCourses}
           renderItem={renderCourseCard}
-          keyExtractor={(item) => item.id}
+          keyExtractor={keyExtractor}
           contentContainerStyle={[
             styles.listContent,
             { paddingBottom: 120 } // Space for bottom tab bar
@@ -831,6 +846,13 @@ const CoursesScreen = ({ navigation, route }) => {
               colors={[COLORS.gold]}
             />
           }
+          // Performance optimizations
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={5}
+          windowSize={5}
+          initialNumToRender={4}
+          updateCellsBatchingPeriod={50}
+          getItemLayout={getItemLayout}
         />
 
         {/* Filter Sheet Modal */}

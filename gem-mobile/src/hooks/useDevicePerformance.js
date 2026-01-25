@@ -10,6 +10,12 @@ import * as Device from 'expo-device';
 
 const HOOK_NAME = '[useDevicePerformance]';
 
+// Global cache for device tier (singleton pattern)
+// This ensures ALL components get the same tier
+let globalTier = null;
+let globalFeatures = null;
+let detectionPromise = null;
+
 // Device tiers
 export const DEVICE_TIERS = {
   LOW: 'low',
@@ -134,21 +140,39 @@ const detectDeviceTier = async () => {
  * <ParticleField count={features.particleCount} />
  */
 const useDevicePerformance = () => {
-  const [tier, setTier] = useState(DEVICE_TIERS.MEDIUM);
-  const [features, setFeatures] = useState(TIER_FEATURES[DEVICE_TIERS.MEDIUM]);
-  const [isDetecting, setIsDetecting] = useState(true);
+  // Use global cache if available for instant, consistent results
+  const [tier, setTier] = useState(globalTier || DEVICE_TIERS.MEDIUM);
+  const [features, setFeatures] = useState(globalFeatures || TIER_FEATURES[DEVICE_TIERS.MEDIUM]);
+  const [isDetecting, setIsDetecting] = useState(!globalTier);
 
   useEffect(() => {
+    // If already detected globally, use cached values
+    if (globalTier) {
+      setTier(globalTier);
+      setFeatures(globalFeatures);
+      setIsDetecting(false);
+      return;
+    }
+
     let mounted = true;
 
     const detect = async () => {
-      const detectedTier = await detectDeviceTier();
+      // Use singleton promise to prevent multiple detections
+      if (!detectionPromise) {
+        detectionPromise = detectDeviceTier();
+      }
+
+      const detectedTier = await detectionPromise;
+
+      // Cache globally
+      globalTier = detectedTier;
+      globalFeatures = TIER_FEATURES[detectedTier];
 
       if (mounted) {
         setTier(detectedTier);
         setFeatures(TIER_FEATURES[detectedTier]);
         setIsDetecting(false);
-        console.log(HOOK_NAME, 'Detected tier:', detectedTier);
+        console.log(HOOK_NAME, 'Detected tier (cached globally):', detectedTier);
       }
     };
 

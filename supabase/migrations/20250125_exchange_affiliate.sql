@@ -859,48 +859,61 @@ CREATE OR REPLACE FUNCTION get_affiliate_stats(
 RETURNS JSON AS $$
 DECLARE
   result JSON;
+  summary_data JSON;
+  by_exchange_data JSON;
+  by_source_data JSON;
+  daily_trend_data JSON;
 BEGIN
+  -- Get summary
   SELECT json_build_object(
+    'total_link_clicks', COUNT(*) FILTER (WHERE event_type = 'link_clicked'),
+    'total_signups', COUNT(*) FILTER (WHERE event_type = 'signup_confirmed'),
+    'total_kyc', COUNT(*) FILTER (WHERE event_type = 'kyc_verified'),
+    'total_deposits', COUNT(*) FILTER (WHERE event_type = 'first_deposit'),
+    'total_trades', COUNT(*) FILTER (WHERE event_type = 'first_trade')
+  ) INTO summary_data
+  FROM exchange_affiliate_events
+  WHERE created_at BETWEEN start_date AND end_date;
+
+  -- Get by exchange (from view, but as a separate query)
+  SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json) INTO by_exchange_data
+  FROM (SELECT * FROM exchange_affiliate_stats) t;
+
+  -- Get by source
+  SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json) INTO by_source_data
+  FROM (
+    SELECT
+      source_screen as source,
+      COUNT(*) FILTER (WHERE event_type = 'link_clicked') as clicks,
+      COUNT(*) FILTER (WHERE event_type = 'signup_confirmed') as signups
+    FROM exchange_affiliate_events
+    WHERE created_at BETWEEN start_date AND end_date
+    AND source_screen IS NOT NULL
+    GROUP BY source_screen
+    ORDER BY COUNT(*) DESC
+  ) t;
+
+  -- Get daily trend
+  SELECT COALESCE(json_agg(row_to_json(t) ORDER BY t.date), '[]'::json) INTO daily_trend_data
+  FROM (
+    SELECT
+      date_trunc('day', created_at)::DATE as date,
+      COUNT(*) FILTER (WHERE event_type = 'link_clicked') as clicks,
+      COUNT(*) FILTER (WHERE event_type = 'signup_confirmed') as signups,
+      COUNT(*) FILTER (WHERE event_type = 'first_deposit') as deposits
+    FROM exchange_affiliate_events
+    WHERE created_at BETWEEN start_date AND end_date
+    GROUP BY date_trunc('day', created_at)
+  ) t;
+
+  -- Build result
+  result := json_build_object(
     'period', json_build_object('start', start_date, 'end', end_date),
-    'summary', (
-      SELECT json_build_object(
-        'total_link_clicks', COUNT(*) FILTER (WHERE event_type = 'link_clicked'),
-        'total_signups', COUNT(*) FILTER (WHERE event_type = 'signup_confirmed'),
-        'total_kyc', COUNT(*) FILTER (WHERE event_type = 'kyc_verified'),
-        'total_deposits', COUNT(*) FILTER (WHERE event_type = 'first_deposit'),
-        'total_trades', COUNT(*) FILTER (WHERE event_type = 'first_trade')
-      )
-      FROM exchange_affiliate_events
-      WHERE created_at BETWEEN start_date AND end_date
-    ),
-    'by_exchange', (
-      SELECT json_agg(stats)
-      FROM exchange_affiliate_stats stats
-    ),
-    'by_source', (
-      SELECT json_agg(json_build_object(
-        'source', source_screen,
-        'clicks', COUNT(*) FILTER (WHERE event_type = 'link_clicked'),
-        'signups', COUNT(*) FILTER (WHERE event_type = 'signup_confirmed')
-      ))
-      FROM exchange_affiliate_events
-      WHERE created_at BETWEEN start_date AND end_date
-      AND source_screen IS NOT NULL
-      GROUP BY source_screen
-      ORDER BY COUNT(*) DESC
-    ),
-    'daily_trend', (
-      SELECT json_agg(json_build_object(
-        'date', date_trunc('day', created_at)::DATE,
-        'clicks', COUNT(*) FILTER (WHERE event_type = 'link_clicked'),
-        'signups', COUNT(*) FILTER (WHERE event_type = 'signup_confirmed'),
-        'deposits', COUNT(*) FILTER (WHERE event_type = 'first_deposit')
-      ) ORDER BY date_trunc('day', created_at))
-      FROM exchange_affiliate_events
-      WHERE created_at BETWEEN start_date AND end_date
-      GROUP BY date_trunc('day', created_at)
-    )
-  ) INTO result;
+    'summary', COALESCE(summary_data, '{}'::json),
+    'by_exchange', by_exchange_data,
+    'by_source', by_source_data,
+    'daily_trend', daily_trend_data
+  );
 
   RETURN result;
 END;

@@ -165,7 +165,7 @@ const CallEndedScreen = ({ route, navigation }) => {
           </View>
 
           {/* Duration */}
-          {duration && reason === END_REASON.COMPLETED && (
+          {duration != null && duration !== '' && reason === END_REASON.COMPLETED && (
             <Text style={styles.durationText}>
               Thời lượng: {duration}
             </Text>

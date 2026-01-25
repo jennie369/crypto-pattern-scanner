@@ -135,6 +135,9 @@ const RitualAnimation = forwardRef(({
     };
   }, []);
 
+  // Debug logging
+  console.log('[RitualAnimation] Loading:', { animationId, hasSource: !!source });
+
   if (!source) {
     console.warn('[RitualAnimation] Animation not found:', animationId);
     return null;

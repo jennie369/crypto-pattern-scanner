@@ -24,7 +24,9 @@ import {
   Animated,
   Image,
   Platform,
+  Keyboard,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import alertService from '../../../services/alertService';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -64,6 +66,24 @@ export default function ChatInput({
   currentUserId,
   participants = [], // For @mentions
 }) {
+  const insets = useSafeAreaInsets();
+
+  // Keyboard visibility state
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showListener = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
+    const hideListener = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
+
+    return () => {
+      showListener?.remove();
+      hideListener?.remove();
+    };
+  }, []);
+
   // State
   const [text, setText] = useState('');
   const [attachment, setAttachment] = useState(null);
@@ -464,8 +484,11 @@ export default function ChatInput({
   // RENDER
   // =====================================================
 
+  // Calculate bottom padding - only when keyboard is closed
+  const bottomPadding = keyboardVisible ? 0 : Math.max(insets.bottom, 8);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: bottomPadding }]}>
       {/* Reply Preview (animated component) */}
       {replyTo && (
         <MessageReplyPreview

@@ -155,13 +155,13 @@ const DepositPromptModal = ({
           {/* Deposit Methods */}
           {depositMethods.length > 0 && (
             <View style={styles.methodsSection}>
-              <Text style={styles.methodsTitle}>Cach nap tien:</Text>
+              <Text style={styles.methodsTitle}>Cách nạp tiền:</Text>
 
               {recommendedMethod && (
                 <View style={styles.recommendedMethod}>
                   <View style={styles.methodHeader}>
                     <Shield size={14} color="#10B981" />
-                    <Text style={styles.recommendedLabel}>Khuyen nghi</Text>
+                    <Text style={styles.recommendedLabel}>Khuyến nghị</Text>
                   </View>
                   <Text style={styles.methodName}>{recommendedMethod.name}</Text>
                   <Text style={styles.methodDescription}>{recommendedMethod.description}</Text>
@@ -185,7 +185,7 @@ const DepositPromptModal = ({
             <View style={styles.discountInfo}>
               <Gift size={14} color={COLORS.primary} />
               <Text style={styles.discountText}>
-                Ban duoc giam {(exchangeConfig.commission.userDiscount * 100).toFixed(0)}% phi giao dich khi dang ky qua GEM
+                Bạn được giảm {(exchangeConfig.commission.userDiscount * 100).toFixed(0)}% phí giao dịch khi đăng ký qua GEM
               </Text>
             </View>
           )}
@@ -208,13 +208,13 @@ const DepositPromptModal = ({
               activeOpacity={0.7}
             >
               <Clock size={16} color={COLORS.textSecondary} />
-              <Text style={styles.secondaryButtonText}>Nhac sau 24h</Text>
+              <Text style={styles.secondaryButtonText}>Nhắc sau 24h</Text>
             </TouchableOpacity>
           </View>
 
           {/* Dismiss */}
           <TouchableOpacity onPress={handleDismiss}>
-            <Text style={styles.dismissText}>Khong hien thi lai</Text>
+            <Text style={styles.dismissText}>Không hiển thị lại</Text>
           </TouchableOpacity>
         </View>
       </View>

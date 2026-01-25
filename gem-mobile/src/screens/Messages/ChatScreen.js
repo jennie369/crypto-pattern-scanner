@@ -826,9 +826,6 @@ export default function ChatScreen({ route, navigation }) {
           currentUserId={user?.id}
           participants={participants}
         />
-
-        {/* Safe area bottom padding */}
-        <View style={{ height: Math.max(insets.bottom, 8), backgroundColor: 'rgba(5, 4, 11, 0.9)' }} />
       </KeyboardAvoidingView>
 
       {/* Note: MessageActionSheet replaced by MessageContextMenu inside MessageBubble */}
