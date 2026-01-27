@@ -98,7 +98,9 @@ export const signIn = async (email, password) => {
 
 export const signOut = async () => {
   try {
-    const { error } = await supabase.auth.signOut();
+    // Use 'local' scope to only sign out current device
+    // Default is 'global' which invalidates ALL sessions across all devices
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
     return { error };
   } catch (error) {
     console.error('SignOut error:', error);

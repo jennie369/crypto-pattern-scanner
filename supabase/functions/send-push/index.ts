@@ -61,14 +61,14 @@ serve(async (req) => {
     const targetUserIds = user_id ? [user_id] : (user_ids || []);
 
     if (targetUserIds.length > 0) {
-      // First try user_push_tokens table
+      // First try user_push_tokens table (column is 'token' not 'push_token')
       const { data: tokensData } = await supabase
         .from('user_push_tokens')
-        .select('push_token, user_id')
+        .select('token, user_id')
         .in('user_id', targetUserIds)
         .eq('is_active', true);
 
-      tokens = (tokensData || []).map(t => t.push_token).filter(Boolean);
+      tokens = (tokensData || []).map(t => t.token).filter(Boolean);
 
       // If no tokens found, fallback to profiles.expo_push_token
       if (tokens.length === 0) {

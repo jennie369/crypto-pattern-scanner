@@ -20,7 +20,9 @@ import {
   CALL_TIMEOUTS,
   END_REASON,
   CALL_EVENT_TYPE,
+  SIGNAL_TYPE,
   getIncomingCallChannelName,
+  getSignalingChannelName,
 } from '../constants/callConstants';
 
 class CallService {
@@ -28,6 +30,8 @@ class CallService {
     this.currentCallId = null;
     this.callTimeoutId = null;
     this.incomingCallSubscription = null;
+    this.pendingOffer = null; // Store offer received before useCall initialized
+    this.earlySignalingChannel = null; // Early subscription to catch offers
   }
 
   // ========== CALL INITIATION ==========
@@ -172,11 +176,18 @@ class CallService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Chưa đăng nhập');
 
+      // Prevent duplicate answer attempts
+      if (this.currentCallId === callId) {
+        console.log('[CallService] Already answering this call:', callId);
+        return { success: true, alreadyAnswering: true };
+      }
+
       console.log('[CallService] Answering call:', callId);
 
       this.currentCallId = callId;
 
       // 1. Update call status
+      console.log('[CallService] Updating call status to CONNECTING...');
       const { error: callError } = await supabase
         .from('calls')
         .update({
@@ -185,9 +196,11 @@ class CallService {
         .eq('id', callId);
 
       if (callError) throw callError;
+      console.log('[CallService] Call status updated');
 
       // 2. Update participant status
-      await supabase
+      console.log('[CallService] Updating participant status...');
+      const { error: participantError } = await supabase
         .from('call_participants')
         .update({
           status: PARTICIPANT_STATUS.CONNECTING,
@@ -196,12 +209,23 @@ class CallService {
         .eq('call_id', callId)
         .eq('user_id', user.id);
 
-      // 3. Log event
-      await this._logEvent(callId, CALL_EVENT_TYPE.CALL_ANSWERED, {});
+      if (participantError) {
+        console.warn('[CallService] Participant update error:', participantError);
+      }
+      console.log('[CallService] Participant status updated');
 
+      // 3. Log event (non-critical)
+      try {
+        await this._logEvent(callId, CALL_EVENT_TYPE.CALL_ANSWERED, {});
+      } catch (logError) {
+        console.warn('[CallService] Log event error (non-critical):', logError);
+      }
+
+      console.log('[CallService] Answer call successful:', callId);
       return { success: true };
     } catch (error) {
       console.error('[CallService] answerCall error:', error);
+      this.currentCallId = null; // Clear on error
       return { success: false, error: error.message };
     }
   }
@@ -644,7 +668,7 @@ class CallService {
    * @param {Function} onIncomingCall - Callback when incoming call received
    * @returns {Function} Unsubscribe function
    */
-  subscribeToIncomingCalls(userId, onIncomingCall) {
+  subscribeToIncomingCalls(userId, onIncomingCall, onStatusChange = null) {
     console.log('[CallService] Subscribing to incoming calls for:', userId);
 
     const channel = supabase
@@ -665,18 +689,36 @@ class CallService {
             user_id: payload.new.user_id,
           });
 
-          // Check if this is an incoming call (role = callee, status = ringing)
-          if (
+          // Notify status change callback about the event
+          if (onStatusChange) {
+            onStatusChange({
+              type: 'event',
+              event: 'INSERT',
+              callId: payload.new.call_id,
+              timestamp: new Date().toISOString(),
+            });
+          }
+
+          // Check if this is an incoming call (role = callee, status = ringing OR invited)
+          // Accept both statuses for compatibility with older app versions
+          const isIncomingCall =
             payload.new.role === PARTICIPANT_ROLE.CALLEE &&
-            payload.new.status === PARTICIPANT_STATUS.RINGING
-          ) {
-            console.log('[CallService] Incoming call detected:', payload.new.call_id);
+            (payload.new.status === PARTICIPANT_STATUS.RINGING ||
+             payload.new.status === PARTICIPANT_STATUS.INVITED);
+
+          if (isIncomingCall) {
+            console.log('[CallService] Incoming call detected:', payload.new.call_id, 'status:', payload.new.status);
+
+            // EARLY SUBSCRIPTION: Subscribe to signaling channel immediately to catch offers
+            // This helps when the caller sends offer before IncomingCallScreen mounts
+            this._startEarlySignaling(payload.new.call_id, userId);
 
             // Fetch full call info
             const { call } = await this.getCall(payload.new.call_id);
             console.log('[CallService] Fetched call:', call?.id, 'status:', call?.status);
 
-            if (call && call.status === CALL_STATUS.RINGING) {
+            // Accept call if status is ringing (or initiating for older versions)
+            if (call && (call.status === CALL_STATUS.RINGING || call.status === CALL_STATUS.INITIATING)) {
               console.log('[CallService] Triggering incoming call callback');
               onIncomingCall(call);
             }
@@ -687,6 +729,14 @@ class CallService {
       )
       .subscribe((status) => {
         console.log('[CallService] Incoming call subscription status:', status);
+        // Notify status change callback
+        if (onStatusChange) {
+          onStatusChange({
+            type: 'subscription',
+            status: status,
+            timestamp: new Date().toISOString(),
+          });
+        }
       });
 
     this.incomingCallSubscription = channel;
@@ -866,6 +916,95 @@ class CallService {
     }
   }
 
+  // ========== EARLY SIGNALING ==========
+
+  /**
+   * Start early signaling subscription to catch offers before IncomingCallScreen mounts
+   * @param {string} callId - Call ID
+   * @param {string} userId - Current user ID
+   * @private
+   */
+  _startEarlySignaling(callId, userId) {
+    // Don't start if already subscribed
+    if (this.earlySignalingChannel) {
+      console.log('[CallService] Early signaling already active');
+      return;
+    }
+
+    const channelName = getSignalingChannelName(callId);
+    console.log('[CallService] *** Starting early signaling subscription:', channelName);
+
+    this.pendingOffer = null;
+
+    // Use the same channel name as regular signaling to receive offers
+    this.earlySignalingChannel = supabase
+      .channel(channelName, {
+        config: {
+          broadcast: {
+            self: false,
+          },
+        },
+      })
+      .on('broadcast', { event: 'signal' }, ({ payload }) => {
+        console.log('[CallService] *** Early signaling received signal:', payload.type, 'from:', payload.senderId);
+        // Only capture offers - other signals will be handled by useCall
+        if (payload.type === SIGNAL_TYPE.OFFER && payload.senderId !== userId) {
+          console.log('[CallService] *** CAPTURED OFFER! ***');
+          this.pendingOffer = {
+            offer: payload.offer,
+            senderId: payload.senderId,
+            timestamp: Date.now(),
+          };
+        }
+      })
+      .subscribe((status) => {
+        console.log('[CallService] *** Early signaling status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('[CallService] *** Early signaling READY to receive offers');
+        }
+      });
+  }
+
+  /**
+   * Stop early signaling subscription
+   * @private
+   */
+  async _stopEarlySignaling() {
+    if (this.earlySignalingChannel) {
+      console.log('[CallService] Stopping early signaling');
+      await supabase.removeChannel(this.earlySignalingChannel);
+      this.earlySignalingChannel = null;
+    }
+  }
+
+  /**
+   * Get pending offer captured by early signaling
+   * @returns {Object|null} Pending offer data or null
+   */
+  getPendingOffer() {
+    const offer = this.pendingOffer;
+    if (offer) {
+      console.log('[CallService] Returning pending offer from', offer.senderId);
+      this.pendingOffer = null; // Clear after returning
+    }
+    return offer;
+  }
+
+  /**
+   * Clear pending offer
+   */
+  clearPendingOffer() {
+    this.pendingOffer = null;
+  }
+
+  /**
+   * Stop early signaling (public wrapper)
+   * Call this when useCall takes over signaling
+   */
+  async stopEarlySignaling() {
+    await this._stopEarlySignaling();
+  }
+
   // ========== HELPERS ==========
 
   /**
@@ -896,7 +1035,18 @@ class CallService {
    */
   _cleanup() {
     this._clearRingTimeout();
+    this._stopEarlySignaling();
     this.currentCallId = null;
+    this.pendingOffer = null;
+  }
+
+  /**
+   * Public method to clear call state
+   * Use this when call ends via signaling or external events
+   */
+  clearState() {
+    console.log('[CallService] Clearing call state');
+    this._cleanup();
   }
 
   /**

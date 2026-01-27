@@ -43,6 +43,8 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
   // ========== REFS ==========
   const userId = useRef(null);
   const isInitialized = useRef(false);
+  const offerReceived = useRef(false);
+  const readyRetryInterval = useRef(null);
 
   // ========== INITIALIZATION ==========
 
@@ -110,15 +112,37 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
         await callSignalingService.sendIceCandidate(candidate);
       };
 
+      // Stop early signaling before regular subscription (avoid channel conflicts)
+      // Early signaling was started when incoming call was detected
+      if (!isCaller) {
+        console.log('[useCall] *** Stopping early signaling before regular subscription...');
+        await callService.stopEarlySignaling();
+        console.log('[useCall] *** Early signaling stopped');
+      }
+
       // Subscribe to signaling channel
+      console.log('[useCall] *** Subscribing to signaling channel...');
       await callSignalingService.subscribe(call.id, user.id);
+      console.log('[useCall] *** Subscribed to signaling channel');
 
       // Setup signaling callbacks
       callSignalingService.onOffer = async (offer, senderId) => {
-        console.log('[useCall] Received offer from:', senderId);
+        console.log('[useCall] *** RECEIVED OFFER via signaling from:', senderId);
+        offerReceived.current = true;
+
+        // Stop READY retry since we got the offer
+        if (readyRetryInterval.current) {
+          clearInterval(readyRetryInterval.current);
+          readyRetryInterval.current = null;
+          console.log('[useCall] *** Stopped READY retry - offer received');
+        }
+
+        console.log('[useCall] *** Creating answer...');
         const answer = await webrtcService.handleOffer(offer);
+        console.log('[useCall] *** Sending answer...');
         await callSignalingService.sendAnswer(answer);
         setCallState(CALL_STATUS.CONNECTING);
+        console.log('[useCall] *** State set to CONNECTING');
       };
 
       callSignalingService.onAnswer = async (answer) => {
@@ -152,15 +176,57 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
         setError('Người nhận đang bận');
       };
 
-      // If caller, create and send offer
+      // If caller, create offer and setup ready handler
       if (isCaller) {
         setCallState(CALL_STATUS.RINGING);
         const offer = await webrtcService.createOffer();
 
-        // Get callee ID from participants
+        // Store offer for potential resend
+        const storedOffer = offer;
         const callee = call.participants?.find(p => p.role === 'callee');
+
+        // Handle READY signal from callee - resend offer
+        callSignalingService.onReady = async (senderId) => {
+          console.log('[useCall] Callee ready, resending offer');
+          if (callee) {
+            await callSignalingService.sendOffer(storedOffer, callee.user_id);
+          }
+        };
+
+        // Send initial offer
         if (callee) {
           await callSignalingService.sendOffer(offer, callee.user_id);
+        }
+      } else {
+        // Callee: Check for pending offer from early signaling first
+        console.log('[useCall] *** Callee checking for pending offer...');
+        const pendingOffer = callService.getPendingOffer();
+        console.log('[useCall] *** Pending offer:', pendingOffer ? 'FOUND' : 'NOT FOUND');
+
+        if (pendingOffer) {
+          console.log('[useCall] *** Processing pending offer from early signaling!');
+          offerReceived.current = true;
+          const answer = await webrtcService.handleOffer(pendingOffer.offer);
+          console.log('[useCall] *** Answer created, sending...');
+          await callSignalingService.sendAnswer(answer);
+          setCallState(CALL_STATUS.CONNECTING);
+          console.log('[useCall] *** State set to CONNECTING');
+        } else {
+          // No pending offer - send READY signal to tell caller we're listening
+          console.log('[useCall] *** No pending offer, sending READY signal');
+          await callSignalingService.sendReady();
+
+          // Start retry interval - keep sending READY until offer is received
+          // This helps when caller (iOS) doesn't have READY handler or missed the first one
+          readyRetryInterval.current = setInterval(async () => {
+            if (offerReceived.current) {
+              clearInterval(readyRetryInterval.current);
+              readyRetryInterval.current = null;
+              return;
+            }
+            console.log('[useCall] *** Retrying READY signal (no offer received yet)...');
+            await callSignalingService.sendReady();
+          }, 3000); // Retry every 3 seconds
         }
       }
 
@@ -185,9 +251,22 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
     setCallState(CALL_STATUS.ENDED);
     Vibration.vibrate(VIBRATION_PATTERNS.CALL_ENDED);
 
-    // Cleanup
+    // Clear READY retry interval
+    if (readyRetryInterval.current) {
+      clearInterval(readyRetryInterval.current);
+      readyRetryInterval.current = null;
+    }
+
+    // Reset refs
+    offerReceived.current = false;
+    isInitialized.current = false;
+
+    // Cleanup WebRTC and signaling
     webrtcService.cleanup();
     callSignalingService.cleanup();
+
+    // IMPORTANT: Clear callService state to allow new calls
+    callService.clearState();
 
     // Callback
     onCallEnded?.(reason);
@@ -263,24 +342,36 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
    * Answer the call (for callee)
    */
   const answerCall = useCallback(async () => {
-    if (!call?.id) return;
+    console.log('[useCall] *** answerCall called, call?.id:', call?.id);
+    if (!call?.id) {
+      console.log('[useCall] *** answerCall: No call ID, returning');
+      return;
+    }
 
     try {
-      console.log('[useCall] Answering call:', call.id);
+      console.log('[useCall] *** Answering call:', call.id);
       const result = await callService.answerCall(call.id);
+      console.log('[useCall] *** answerCall result:', result);
 
       if (!result.success) {
-        console.error('[useCall] Answer call failed:', result.error);
+        console.error('[useCall] *** Answer call failed:', result.error);
         setError(result.error);
         return;
       }
 
       // Initialize WebRTC if not already done
+      console.log('[useCall] *** isInitialized:', isInitialized.current);
       if (!isInitialized.current) {
+        console.log('[useCall] *** Calling initializeCall...');
         await initializeCall();
+      } else {
+        // Already initialized - re-send READY signal to trigger offer resend
+        console.log('[useCall] *** Already initialized, re-sending READY signal');
+        await callSignalingService.sendReady();
       }
+      console.log('[useCall] *** answerCall completed successfully');
     } catch (err) {
-      console.error('[useCall] Answer call error:', err);
+      console.error('[useCall] *** Answer call error:', err);
       setError(err.message);
     }
   }, [call?.id, initializeCall]);
@@ -322,6 +413,11 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
     }
 
     return () => {
+      // Clear READY retry interval
+      if (readyRetryInterval.current) {
+        clearInterval(readyRetryInterval.current);
+        readyRetryInterval.current = null;
+      }
       // Cleanup on unmount
       webrtcService.cleanup();
       callSignalingService.cleanup();

@@ -24,6 +24,7 @@ class CallSignalingService {
     this.onVideoChange = null;
     this.onBusy = null;
     this.onReconnect = null;
+    this.onReady = null; // Called when callee is ready to receive offer
   }
 
   // ========== CHANNEL MANAGEMENT ==========
@@ -45,22 +46,35 @@ class CallSignalingService {
       // Unsubscribe from existing channel if any
       await this.unsubscribe();
 
-      this.channel = supabase
-        .channel(channelName, {
-          config: {
-            broadcast: {
-              self: false, // Don't receive own messages
-            },
-          },
-        })
-        .on('broadcast', { event: 'signal' }, ({ payload }) => {
-          this._handleSignal(payload);
-        })
-        .subscribe((status) => {
-          console.log('[Signaling] Channel status:', status);
-        });
+      // Create promise that resolves when channel is SUBSCRIBED
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Signaling channel subscription timeout'));
+        }, 10000); // 10 second timeout
 
-      console.log('[Signaling] Subscribed to channel:', channelName);
+        this.channel = supabase
+          .channel(channelName, {
+            config: {
+              broadcast: {
+                self: false, // Don't receive own messages
+              },
+            },
+          })
+          .on('broadcast', { event: 'signal' }, ({ payload }) => {
+            this._handleSignal(payload);
+          })
+          .subscribe((status) => {
+            console.log('[Signaling] Channel status:', status);
+            if (status === 'SUBSCRIBED') {
+              clearTimeout(timeout);
+              console.log('[Signaling] Channel ready:', channelName);
+              resolve();
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              clearTimeout(timeout);
+              reject(new Error(`Signaling channel error: ${status}`));
+            }
+          });
+      });
     } catch (error) {
       console.error('[Signaling] Subscribe error:', error);
       throw error;
@@ -199,6 +213,16 @@ class CallSignalingService {
     });
   }
 
+  /**
+   * Send ready signal (callee tells caller they're ready to receive offer)
+   */
+  async sendReady() {
+    console.log('[Signaling] Sending ready signal');
+    await this._sendSignal({
+      type: SIGNAL_TYPE.READY,
+    });
+  }
+
   // ========== HANDLE SIGNALS ==========
 
   /**
@@ -247,6 +271,11 @@ class CallSignalingService {
 
       case SIGNAL_TYPE.RECONNECT:
         this.onReconnect?.(payload.senderId);
+        break;
+
+      case SIGNAL_TYPE.READY:
+        console.log('[Signaling] Callee is ready');
+        this.onReady?.(payload.senderId);
         break;
 
       default:

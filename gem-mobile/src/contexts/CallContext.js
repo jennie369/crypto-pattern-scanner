@@ -25,6 +25,13 @@ export function CallProvider({ children }) {
   const [incomingCall, setIncomingCall] = useState(null);
   const [showOverlay, setShowOverlay] = useState(false);
 
+  // Debug state - shows subscription status without console
+  const [debugInfo, setDebugInfo] = useState({
+    subscriptionStatus: 'disconnected',
+    lastEvent: null,
+    lastEventTime: null,
+  });
+
   // Refs
   const ringtoneRef = useRef(null);
   const subscriptionRef = useRef(null);
@@ -172,10 +179,29 @@ export function CallProvider({ children }) {
 
   useEffect(() => {
     if (!isAuthenticated || !user?.id) {
+      setDebugInfo(prev => ({ ...prev, subscriptionStatus: 'not_authenticated' }));
       return;
     }
 
     console.log('[CallProvider] Subscribing to incoming calls for user:', user.id);
+
+    // Status change callback for debugging
+    const handleStatusChange = (info) => {
+      if (info.type === 'subscription') {
+        setDebugInfo(prev => ({
+          ...prev,
+          subscriptionStatus: info.status,
+          lastStatusTime: info.timestamp,
+        }));
+      } else if (info.type === 'event') {
+        setDebugInfo(prev => ({
+          ...prev,
+          lastEvent: info.event,
+          lastEventCallId: info.callId,
+          lastEventTime: info.timestamp,
+        }));
+      }
+    };
 
     // Subscribe to incoming calls - callService returns unsubscribe function directly
     const unsubscribe = callService.subscribeToIncomingCalls(
@@ -183,13 +209,15 @@ export function CallProvider({ children }) {
       (call) => {
         // This callback is called when an incoming call is detected
         handleIncomingCall(call);
-      }
+      },
+      handleStatusChange
     );
 
     subscriptionRef.current = unsubscribe;
 
     return () => {
       console.log('[CallProvider] Cleaning up call subscription');
+      setDebugInfo(prev => ({ ...prev, subscriptionStatus: 'disconnected' }));
       if (subscriptionRef.current) {
         // subscriptionRef.current is the unsubscribe function
         if (typeof subscriptionRef.current === 'function') {
@@ -252,6 +280,8 @@ export function CallProvider({ children }) {
     showOverlay,
     acceptCall: handleAccept,
     declineCall: handleDecline,
+    // Debug info for troubleshooting call issues
+    debugInfo,
   };
 
   return (

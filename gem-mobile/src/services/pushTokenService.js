@@ -129,12 +129,12 @@ const PUSH_TOKEN_SERVICE = {
         return;
       }
 
-      // Try to save to user_push_tokens table
+      // Try to save to user_push_tokens table (column is 'token' not 'push_token')
       const { error: tokenError } = await supabase.from('user_push_tokens').upsert({
         user_id: user.id,
-        push_token: token,
+        token: token,
         platform: Platform.OS,
-        device_name: Device.modelName || 'Unknown',
+        device_info: { model: Device.modelName || 'Unknown' },
         is_active: true,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' });

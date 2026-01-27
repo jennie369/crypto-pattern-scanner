@@ -204,21 +204,20 @@ class NotificationScheduler {
 
   /**
    * Save push token to database
-   * Uses user_push_tokens table per DATABASE_SCHEMA.md
+   * Uses user_push_tokens table
    */
   async savePushToken(userId, token) {
     try {
-      // Save to user_push_tokens table (per DATABASE_SCHEMA.md)
+      // Save to user_push_tokens table (column is 'token' not 'push_token')
       await supabase
         .from('user_push_tokens')
         .upsert(
           {
             user_id: userId,
-            push_token: token,        // Column name per schema
-            device_type: Platform.OS, // 'ios' or 'android'
-            device_name: null,        // Optional
+            token: token,
+            platform: Platform.OS,
+            device_info: { source: 'notificationScheduler' },
             is_active: true,
-            last_used_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'user_id' }
@@ -229,7 +228,6 @@ class NotificationScheduler {
         .from('profiles')
         .update({
           expo_push_token: token,
-          push_enabled: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', userId);

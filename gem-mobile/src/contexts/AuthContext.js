@@ -44,10 +44,21 @@ export const useAuth = () => useContext(AuthContext);
 // Helper: Auto-enable biometric on login if device supports it
 const autoEnableBiometric = async (session) => {
   try {
-    // Check if already enabled
+    const email = session?.user?.email;
+    const refreshToken = session?.refresh_token;
+
+    if (!email || !refreshToken) {
+      console.warn('[AuthContext] Missing email or refresh token for biometric');
+      return;
+    }
+
+    // Check if already enabled - if so, just update the token
     const isAlreadyEnabled = await biometricService.isEnabled();
     if (isAlreadyEnabled) {
-      console.log('[AuthContext] Biometric already enabled');
+      // UPDATE token on every login to ensure it's always fresh
+      // This fixes Face ID failing after user logs in with email/password
+      await biometricService.updateToken(refreshToken);
+      console.log('[AuthContext] Biometric token updated on login');
       return;
     }
 
@@ -55,15 +66,6 @@ const autoEnableBiometric = async (session) => {
     const support = await biometricService.checkSupport();
     if (!support.supported) {
       console.log('[AuthContext] Device does not support biometric');
-      return;
-    }
-
-    // Auto-enable biometric silently (store credentials without prompting)
-    const email = session?.user?.email;
-    const refreshToken = session?.refresh_token;
-
-    if (!email || !refreshToken) {
-      console.warn('[AuthContext] Missing email or refresh token for biometric');
       return;
     }
 

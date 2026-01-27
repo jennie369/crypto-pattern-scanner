@@ -134,6 +134,7 @@ export const SIGNAL_TYPE = {
   VIDEO_OFF: 'video-off',
   RECONNECT: 'reconnect',
   BUSY: 'busy',
+  READY: 'ready', // Callee sends this when ready to receive offer
 };
 
 // ========== END REASONS ==========
