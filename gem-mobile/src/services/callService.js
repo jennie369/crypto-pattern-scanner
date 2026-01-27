@@ -59,6 +59,13 @@ class CallService {
 
       console.log('[CallService] Initiating call:', { conversationId, calleeId, callType });
 
+      // 0. Check privacy settings - can we call this user?
+      const canCallResult = await this._checkCanCallUser(user.id, calleeId);
+      if (!canCallResult.allowed) {
+        console.log('[CallService] Call blocked by privacy:', canCallResult.reason);
+        return { success: false, error: canCallResult.reason };
+      }
+
       // 1. Check if already in a call
       if (this.currentCallId) {
         return { success: false, error: 'Bạn đang trong cuộc gọi khác' };
@@ -76,12 +83,13 @@ class CallService {
         return { success: false, error: 'Người nhận đang bận' };
       }
 
-      // 3. Create call record
+      // 3. Create call record (include callee_id for easier access)
       const { data: call, error: callError } = await supabase
         .from('calls')
         .insert({
           conversation_id: conversationId,
           caller_id: user.id,
+          callee_id: calleeId,  // Store callee_id directly on call
           call_type: callType,
           status: CALL_STATUS.INITIATING,
         })
@@ -1003,6 +1011,45 @@ class CallService {
    */
   async stopEarlySignaling() {
     await this._stopEarlySignaling();
+  }
+
+  // ========== PRIVACY CHECKS ==========
+
+  /**
+   * Check if caller can call callee based on privacy settings
+   * @param {string} callerId - Caller user ID
+   * @param {string} calleeId - Callee user ID
+   * @returns {Promise<{allowed: boolean, reason?: string}>}
+   * @private
+   */
+  async _checkCanCallUser(callerId, calleeId) {
+    try {
+      const { data, error } = await supabase.rpc('can_call_user', {
+        caller_id: callerId,
+        callee_id: calleeId,
+      });
+
+      if (error) {
+        console.error('[CallService] can_call_user RPC error:', error);
+        // If RPC doesn't exist, allow call (fallback)
+        if (error.code === '42883') {
+          return { allowed: true };
+        }
+        return { allowed: true }; // Default allow on error
+      }
+
+      if (data && data.length > 0) {
+        return {
+          allowed: data[0].allowed,
+          reason: data[0].reason,
+        };
+      }
+
+      return { allowed: true };
+    } catch (err) {
+      console.error('[CallService] _checkCanCallUser error:', err);
+      return { allowed: true }; // Default allow on error
+    }
   }
 
   // ========== HELPERS ==========

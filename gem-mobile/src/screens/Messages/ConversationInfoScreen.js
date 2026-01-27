@@ -392,8 +392,16 @@ export default function ConversationInfoScreen({ route, navigation }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile Section */}
-        <View style={styles.profileSection}>
+        {/* Profile Section - Touchable to view full profile */}
+        <TouchableOpacity
+          style={styles.profileSection}
+          onPress={() => {
+            if (!isGroup && otherParticipant?.id) {
+              navigation.navigate('ProfileFull', { userId: otherParticipant.id });
+            }
+          }}
+          activeOpacity={isGroup ? 1 : 0.7}
+        >
           {otherParticipant?.avatar_url ? (
             <Image source={{ uri: otherParticipant.avatar_url }} style={styles.avatar} />
           ) : (
@@ -421,29 +429,47 @@ export default function ConversationInfoScreen({ route, navigation }) {
               </Text>
             </View>
           )}
-        </View>
+
+          {/* Hint to tap for profile */}
+          {!isGroup && otherParticipant?.id && (
+            <Text style={styles.tapHint}>Nhấn để xem hồ sơ</Text>
+          )}
+        </TouchableOpacity>
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
+          {/* View Profile - Only for DM, not group */}
+          {!isGroup && otherParticipant?.id && (
+            <TouchableOpacity
+              style={styles.quickAction}
+              onPress={() => navigation.navigate('ProfileFull', { userId: otherParticipant.id })}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
+                <Ionicons name="person" size={22} color={COLORS.purple} />
+              </View>
+              <Text style={styles.quickActionLabel}>Hồ sơ</Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity style={styles.quickAction} onPress={handleSearchConversation}>
             <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(0, 221, 235, 0.2)' }]}>
               <Ionicons name="search" size={22} color={COLORS.cyan} />
             </View>
-            <Text style={styles.quickActionLabel}>Search</Text>
+            <Text style={styles.quickActionLabel}>Tìm</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.quickAction} onPress={() => setShowMute(true)}>
             <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(255, 189, 89, 0.2)' }]}>
               <Ionicons name={muteUntil ? 'notifications-off' : 'notifications'} size={22} color={COLORS.gold} />
             </View>
-            <Text style={styles.quickActionLabel}>{muteUntil ? 'Muted' : 'Mute'}</Text>
+            <Text style={styles.quickActionLabel}>{muteUntil ? 'Đã tắt' : 'Tắt'}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.quickAction} onPress={() => setShowThemes(true)}>
             <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
               <Ionicons name="color-palette" size={22} color={COLORS.purple} />
             </View>
-            <Text style={styles.quickActionLabel}>Theme</Text>
+            <Text style={styles.quickActionLabel}>Giao diện</Text>
           </TouchableOpacity>
 
           {isGroup && isAdmin && (
@@ -451,7 +477,7 @@ export default function ConversationInfoScreen({ route, navigation }) {
               <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(76, 175, 80, 0.2)' }]}>
                 <Ionicons name="settings" size={22} color={COLORS.success} />
               </View>
-              <Text style={styles.quickActionLabel}>Settings</Text>
+              <Text style={styles.quickActionLabel}>Cài đặt</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -497,6 +523,15 @@ export default function ConversationInfoScreen({ route, navigation }) {
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Privacy</Text>
 
+          {/* Navigate to Message Privacy Settings */}
+          <TouchableOpacity style={styles.actionItem} onPress={() => navigation.navigate('MessagePrivacySettings')}>
+            <View style={styles.actionIcon}>
+              <Ionicons name="shield-checkmark-outline" size={22} color={COLORS.purple} />
+            </View>
+            <Text style={styles.actionText}>Cài đặt quyền riêng tư</Text>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.actionItem} onPress={() => setShowDisappearing(true)}>
             <View style={styles.actionIcon}>
               <Ionicons name="timer-outline" size={22} color={COLORS.warning} />
@@ -512,7 +547,15 @@ export default function ConversationInfoScreen({ route, navigation }) {
             <View style={styles.actionIcon}>
               <Ionicons name="ban-outline" size={22} color={COLORS.textMuted} />
             </View>
-            <Text style={styles.actionText}>Blocked Users</Text>
+            <Text style={styles.actionText}>Người đã chặn</Text>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.actionItem} onPress={() => navigation.navigate('RestrictedUsers')}>
+            <View style={styles.actionIcon}>
+              <Ionicons name="eye-off-outline" size={22} color={COLORS.warning} />
+            </View>
+            <Text style={styles.actionText}>Người bị hạn chế</Text>
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
         </View>
@@ -721,6 +764,11 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     color: COLORS.textMuted,
+  },
+  tapHint: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.purple,
+    marginTop: SPACING.xs,
   },
 
   // Quick Actions

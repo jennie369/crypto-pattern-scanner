@@ -297,6 +297,7 @@ class CallSignalingService {
     this.onVideoChange = null;
     this.onBusy = null;
     this.onReconnect = null;
+    this.onReady = null; // Don't forget to reset onReady
   }
 
   /**

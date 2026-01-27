@@ -20,6 +20,11 @@ import PinnedMessagesScreen from '../screens/Messages/PinnedMessagesScreen';
 import ScheduledMessagesScreen from '../screens/Messages/ScheduledMessagesScreen';
 import StarredMessagesScreen from '../screens/Messages/StarredMessagesScreen';
 import ArchivedChatsScreen from '../screens/Messages/ArchivedChatsScreen';
+// Privacy Features
+import MessageRequestsScreen from '../screens/Messages/MessageRequestsScreen';
+import PrivacySettingsScreen from '../screens/Messages/PrivacySettingsScreen';
+import RestrictedUsersScreen from '../screens/Messages/RestrictedUsersScreen';
+import SpamMessagesScreen from '../screens/Messages/SpamMessagesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -140,6 +145,42 @@ export default function MessagesStack() {
       <Stack.Screen
         name="ArchivedChats"
         component={ArchivedChatsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Message Requests (Tin nhắn chờ) - TikTok-style */}
+      <Stack.Screen
+        name="MessageRequests"
+        component={MessageRequestsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Message Privacy Settings - different from Account PrivacySettings */}
+      <Stack.Screen
+        name="MessagePrivacySettings"
+        component={PrivacySettingsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Restricted Users (Silent Block) */}
+      <Stack.Screen
+        name="RestrictedUsers"
+        component={RestrictedUsersScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Spam Messages */}
+      <Stack.Screen
+        name="SpamMessages"
+        component={SpamMessagesScreen}
         options={{
           animation: 'slide_from_right',
         }}
