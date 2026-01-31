@@ -183,25 +183,19 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
 
         // Store offer for potential resend
         const storedOffer = offer;
-
-        // Get callee ID - prefer direct callee_id, fallback to participants
-        const calleeId = call.callee_id || call.participants?.find(p => p.role === 'callee')?.user_id;
-        console.log('[useCall] Caller - callee_id:', calleeId);
+        const callee = call.participants?.find(p => p.role === 'callee');
 
         // Handle READY signal from callee - resend offer
         callSignalingService.onReady = async (senderId) => {
-          console.log('[useCall] *** Callee ready, resending offer to:', calleeId);
-          if (calleeId) {
-            await callSignalingService.sendOffer(storedOffer, calleeId);
+          console.log('[useCall] Callee ready, resending offer');
+          if (callee) {
+            await callSignalingService.sendOffer(storedOffer, callee.user_id);
           }
         };
 
         // Send initial offer
-        if (calleeId) {
-          console.log('[useCall] *** Sending initial offer to:', calleeId);
-          await callSignalingService.sendOffer(offer, calleeId);
-        } else {
-          console.error('[useCall] *** ERROR: No callee_id found, cannot send offer!');
+        if (callee) {
+          await callSignalingService.sendOffer(offer, callee.user_id);
         }
       } else {
         // Callee: Check for pending offer from early signaling first

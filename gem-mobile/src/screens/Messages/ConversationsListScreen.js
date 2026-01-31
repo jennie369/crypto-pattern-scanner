@@ -28,7 +28,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // Services
 import messagingService from '../../services/messagingService';
 import presenceService from '../../services/presenceService';
-import messageRequestService from '../../services/messageRequestService';
 
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
@@ -54,14 +53,12 @@ export default function ConversationsListScreen({ navigation }) {
   const [archivedIds, setArchivedIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [messageRequestsCount, setMessageRequestsCount] = useState(0);
 
   // Animation refs
   const headerOpacity = useRef(new Animated.Value(1)).current;
 
   // Subscription refs
   const unreadSubscription = useRef(null);
-  const messageRequestsSubscription = useRef(null);
 
   // =====================================================
   // FETCH & REAL-TIME
@@ -69,17 +66,15 @@ export default function ConversationsListScreen({ navigation }) {
 
   const fetchConversations = useCallback(async () => {
     try {
-      // Fetch conversations, pinned IDs, archived IDs, and message requests count in parallel
-      const [data, pinnedData, archivedData, requestsCount] = await Promise.all([
+      // Fetch conversations, pinned IDs, and archived IDs in parallel
+      const [data, pinnedData, archivedData] = await Promise.all([
         messagingService.getConversations(),
         messagingService.getPinnedConversationIds(),
         messagingService.getArchivedConversationIds(),
-        messageRequestService.getMessageRequestsCount(),
       ]);
       setConversations(data);
       setPinnedIds(pinnedData?.data || pinnedData || []);
       setArchivedIds(archivedData || []);
-      setMessageRequestsCount(requestsCount || 0);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -101,24 +96,11 @@ export default function ConversationsListScreen({ navigation }) {
           fetchConversations();
         }
       );
-
-      // Subscribe to message requests count changes
-      messageRequestsSubscription.current = messageRequestService.subscribeToMessageRequests(
-        user.id,
-        (requests) => {
-          // Update count when message requests change
-          setMessageRequestsCount(requests?.length || 0);
-        }
-      );
     }
 
     return () => {
       if (unreadSubscription.current) {
         messagingService.unsubscribe(unreadSubscription.current);
-      }
-      if (messageRequestsSubscription.current) {
-        // subscribeToMessageRequests returns an unsubscribe function
-        messageRequestsSubscription.current();
       }
     };
   }, [user?.id, fetchConversations]);
@@ -149,11 +131,6 @@ export default function ConversationsListScreen({ navigation }) {
 
   const handleSearch = useCallback(() => {
     navigation.navigate('MessageSearch');
-  }, [navigation]);
-
-  // Navigate to message requests (Tin nhắn chờ)
-  const handleOpenMessageRequests = useCallback(() => {
-    navigation.navigate('MessageRequests');
   }, [navigation]);
 
   // Swipe actions
@@ -254,24 +231,6 @@ export default function ConversationsListScreen({ navigation }) {
         </View>
       </TouchableOpacity>
 
-      {/* Message Requests Row - TikTok-style Tin nhắn chờ */}
-      {messageRequestsCount > 0 && (
-        <TouchableOpacity
-          style={styles.messageRequestsRow}
-          onPress={handleOpenMessageRequests}
-          activeOpacity={0.7}
-        >
-          <View style={styles.messageRequestsIcon}>
-            <Ionicons name="chatbubble-ellipses" size={20} color={COLORS.gold} />
-          </View>
-          <Text style={styles.messageRequestsText}>Tin nhắn chờ</Text>
-          <View style={styles.messageRequestsBadge}>
-            <Text style={styles.messageRequestsBadgeText}>{messageRequestsCount}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-        </TouchableOpacity>
-      )}
-
       {/* Quick Actions Row - Archive badge only if has archived */}
       {archivedCount > 0 && (
         <TouchableOpacity
@@ -353,21 +312,13 @@ export default function ConversationsListScreen({ navigation }) {
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.title}>Chats</Text>
-          {/* Header Actions: Settings + Create Group */}
-          <View style={styles.headerActions}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('MessagePrivacySettings')}
-              style={styles.headerAction}
-            >
-              <Ionicons name="settings-outline" size={22} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleCreateGroup}
-              style={styles.headerAction}
-            >
-              <Ionicons name="people-outline" size={24} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-          </View>
+          {/* Create Group in header */}
+          <TouchableOpacity
+            onPress={handleCreateGroup}
+            style={styles.headerAction}
+          >
+            <Ionicons name="people-outline" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
         </View>
         {renderHeader()}
       </View>
@@ -452,10 +403,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   title: {
     fontSize: TYPOGRAPHY.fontSize.xxxl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
@@ -519,44 +466,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
-  },
-
-  // Message Requests Row (Tin nhắn chờ)
-  messageRequestsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.xs,
-    gap: SPACING.sm,
-    marginBottom: SPACING.xs,
-  },
-  messageRequestsIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 184, 0, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  messageRequestsText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.gold,
-  },
-  messageRequestsBadge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: COLORS.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  messageRequestsBadgeText: {
-    fontSize: 11,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: '#000',
   },
 
   // FAB - Floating Action Button
