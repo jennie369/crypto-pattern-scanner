@@ -30,6 +30,7 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
+  InteractionManager,
 } from 'react-native';
 
 // Enable LayoutAnimation on Android
@@ -2984,7 +2985,7 @@ const visionBoardCache = {
   widgets: null,
   readingHistory: null,
   lastFetch: 0,
-  CACHE_DURATION: 60000, // 60 seconds
+  CACHE_DURATION: 300000, // 5 minutes - reduced API calls for better performance
 };
 
 const VisionBoardScreen = () => {
@@ -3575,26 +3576,36 @@ const VisionBoardScreen = () => {
 
   // Re-fetch widgets when screen gets focus - WITH GLOBAL CACHING for instant display
   // Key principle: NEVER show loading if we have ANY cached data
-  // ALWAYS fetch in background to sync progress updates from GoalDetailScreen
+  // Use InteractionManager to defer heavy operations until after animation completes
   useFocusEffect(
     useCallback(() => {
-      // If we have cached data, set loading false IMMEDIATELY and sync state
+      // IMMEDIATELY sync from cache - no waiting
       if (visionBoardCache.widgets) {
         console.log('[VisionBoard] Screen focused - using cached data');
         setLoading(false);
-        // Sync state from cache in case component state is out of sync
         if (widgets !== visionBoardCache.widgets) {
           setWidgets(visionBoardCache.widgets);
         }
       }
 
-      // ALWAYS fetch fresh data in background to sync any updates (e.g., progress changes)
-      console.log('[VisionBoard] Screen focused - refreshing data in background');
-      Promise.all([
-        fetchWidgets(),
-        fetchReadingHistory(),
-      ]);
-    }, [fetchWidgets, fetchReadingHistory])
+      // Defer API calls until AFTER navigation animation completes - makes screen transition instant
+      const task = InteractionManager.runAfterInteractions(() => {
+        const now = Date.now();
+        const cacheExpired = now - visionBoardCache.lastFetch > visionBoardCache.CACHE_DURATION;
+
+        // Only fetch if no cache or cache expired
+        if (!visionBoardCache.widgets || cacheExpired) {
+          console.log('[VisionBoard] Cache expired - refreshing data in background');
+          Promise.all([
+            fetchWidgets(),
+            fetchReadingHistory(),
+            fetchCalendarAndCharts(),
+          ]);
+        }
+      });
+
+      return () => task.cancel();
+    }, [fetchWidgets, fetchReadingHistory, fetchCalendarAndCharts])
   );
 
   // =========== HANDLE SCROLL TO SECTION FROM NAVIGATION PARAMS ===========

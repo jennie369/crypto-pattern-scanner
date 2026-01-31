@@ -75,6 +75,7 @@ import { ScoreRing } from '../../components/Charts';
 import { MilestoneIndicator } from '../../components/VisionBoard';
 import AddActionModal from '../../components/VisionBoard/AddActionModal';
 import { RITUAL_SCREENS, RITUAL_METADATA } from './rituals';
+import statsService from '../../services/statsService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -736,6 +737,16 @@ const GoalDetailScreen = () => {
           one_time_completed: updateInArray(prev.one_time_completed),
         };
       });
+
+      // Recalculate daily score and update stats for VisionBoard integration
+      // This updates: daily score, streak, weekly progress, combo
+      try {
+        console.log('[GoalDetail] Recalculating daily score after action toggle');
+        await statsService.recalculateDailyScore(user.id);
+      } catch (statsError) {
+        console.error('[GoalDetail] Stats update error:', statsError);
+        // Non-blocking - don't fail the action toggle if stats update fails
+      }
     } catch (error) {
       console.error('[GoalDetail] Toggle error:', error);
     }

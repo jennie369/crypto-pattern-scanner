@@ -38,15 +38,39 @@ export const calculateDailyScore = async (userId) => {
   const today = new Date().toISOString().split('T')[0];
 
   try {
-    // 1. Get today's tasks
+    // 1. Get today's tasks from vision_actions table
     const { data: actions } = await supabase
       .from('vision_actions')
       .select('is_completed')
       .eq('user_id', userId)
       .eq('due_date', today);
 
-    const tasksTotal = actions?.length || 0;
-    const tasksCompleted = actions?.filter(a => a.is_completed).length || 0;
+    let tasksTotal = actions?.length || 0;
+    let tasksCompleted = actions?.filter(a => a.is_completed).length || 0;
+
+    // 1b. Also count legacy actions from vision_board_widgets.content.steps
+    // This ensures goals created before the actions table migration are still tracked
+    const { data: goalWidgets } = await supabase
+      .from('vision_board_widgets')
+      .select('content')
+      .eq('user_id', userId)
+      .eq('widget_type', 'goal');
+
+    if (goalWidgets && goalWidgets.length > 0) {
+      goalWidgets.forEach(widget => {
+        let content = widget.content;
+        if (typeof content === 'string') {
+          try { content = JSON.parse(content); } catch (e) { content = {}; }
+        }
+        // Get steps/actionSteps from legacy widget content
+        const steps = [...(content?.steps || []), ...(content?.actionSteps || [])];
+        if (steps.length > 0) {
+          tasksTotal += steps.length;
+          tasksCompleted += steps.filter(s => s.is_completed || s.completed).length;
+        }
+      });
+    }
+
     const taskScore = tasksTotal > 0 ? (tasksCompleted / tasksTotal) * 100 : 0;
 
     // 2. Get today's affirmations
@@ -217,7 +241,7 @@ export const calculateCombo = async (userId) => {
   try {
     let categoriesCompleted = 0;
 
-    // Check tasks
+    // Check tasks from vision_actions table
     const { data: tasks } = await supabase
       .from('vision_actions')
       .select('is_completed')
@@ -225,7 +249,33 @@ export const calculateCombo = async (userId) => {
       .eq('due_date', today)
       .eq('is_completed', true)
       .limit(1);
-    if (tasks && tasks.length > 0) categoriesCompleted++;
+
+    let hasCompletedTask = tasks && tasks.length > 0;
+
+    // Also check legacy widget actions if no task found in vision_actions
+    if (!hasCompletedTask) {
+      const { data: goalWidgets } = await supabase
+        .from('vision_board_widgets')
+        .select('content')
+        .eq('user_id', userId)
+        .eq('widget_type', 'goal');
+
+      if (goalWidgets && goalWidgets.length > 0) {
+        for (const widget of goalWidgets) {
+          let content = widget.content;
+          if (typeof content === 'string') {
+            try { content = JSON.parse(content); } catch (e) { content = {}; }
+          }
+          const steps = [...(content?.steps || []), ...(content?.actionSteps || [])];
+          if (steps.some(s => s.is_completed || s.completed)) {
+            hasCompletedTask = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (hasCompletedTask) categoriesCompleted++;
 
     // Check affirmations
     const { count: affCount } = await supabase
