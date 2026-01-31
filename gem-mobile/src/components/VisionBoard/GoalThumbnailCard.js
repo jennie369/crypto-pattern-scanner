@@ -47,8 +47,13 @@ const LIFE_AREA_CONFIG = {
 
 /**
  * GoalThumbnailCard Component
+ * @param {Object} goal - Goal data
+ * @param {Function} onPress - Press handler
+ * @param {Function} onLongPress - Long press handler (for reorder mode)
+ * @param {number} index - Index in grid
+ * @param {Object} style - Additional styles
  */
-const GoalThumbnailCard = ({ goal, onPress, index = 0, style }) => {
+const GoalThumbnailCard = ({ goal, onPress, onLongPress, index = 0, style }) => {
   if (!goal?.id) return null;
 
   const [imageError, setImageError] = useState(false);
@@ -141,6 +146,8 @@ const GoalThumbnailCard = ({ goal, onPress, index = 0, style }) => {
     <TouchableOpacity
       style={[styles.container, style]}
       onPress={handlePress}
+      onLongPress={onLongPress ? () => onLongPress(goal) : undefined}
+      delayLongPress={500}
       activeOpacity={0.7}
     >
       {/* Image Area */}

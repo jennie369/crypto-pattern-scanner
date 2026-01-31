@@ -3257,18 +3257,10 @@ const VisionBoardScreen = () => {
     goalWidgets.forEach(widget => {
       const content = parseWidgetContent(widget);
       const steps = [...(content?.steps || []), ...(content?.actionSteps || [])];
-
-      // Debug logging
-      console.log('[VisionBoard] Goal widget', widget.id, 'content.steps:', content?.steps?.length || 0, 'content.actionSteps:', content?.actionSteps?.length || 0);
-      steps.forEach((s, i) => {
-        console.log(`  Step ${i}: is_completed=${s?.is_completed}, completed=${s?.completed}, title=${s?.title?.substring(0, 30)}`);
-      });
-
       actionsTotal += steps.length;
       actionsCompleted += steps.filter(s => s?.is_completed || s?.completed).length;
     });
 
-    console.log('[VisionBoard] goalActionStats:', { actionsTotal, actionsCompleted });
     return { actionsTotal, actionsCompleted };
   }, [goalWidgets]);
 
@@ -3600,6 +3592,19 @@ const VisionBoardScreen = () => {
     loadReminderSettings();
   }, []);
 
+  // Load today's activity counts (affirmations, habits) from database
+  const loadTodayActivityCounts = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const counts = await statsService.getTodayActivityCounts(user.id);
+      console.log('[VisionBoard] Loaded today activity counts:', counts);
+      setAffirmationsCompletedToday(counts.affirmationsCompleted || 0);
+      // Note: habitsCompleted could be used if we track habits separately
+    } catch (err) {
+      console.error('[VisionBoard] Error loading activity counts:', err);
+    }
+  }, [user?.id]);
+
   // Re-fetch widgets when screen gets focus - WITH GLOBAL CACHING for instant display
   // Key principle: NEVER show loading if we have ANY cached data
   // ALWAYS fetch fresh data on focus to sync updates from GoalDetailScreen
@@ -3621,8 +3626,9 @@ const VisionBoardScreen = () => {
         fetchWidgets(),
         fetchReadingHistory(),
         fetchCalendarAndCharts(),
+        loadTodayActivityCounts(), // Load affirmation/habit counts from DB
       ]);
-    }, [fetchWidgets, fetchReadingHistory, fetchCalendarAndCharts])
+    }, [fetchWidgets, fetchReadingHistory, fetchCalendarAndCharts, loadTodayActivityCounts])
   );
 
   // =========== HANDLE SCROLL TO SECTION FROM NAVIGATION PARAMS ===========

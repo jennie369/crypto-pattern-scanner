@@ -422,16 +422,12 @@ const GoalsGridSection = ({
     const isSelected = selectedGoalIds.has(item.id);
 
     return (
-      <TouchableOpacity
-        style={styles.goalItemWrapper}
-        onLongPress={() => handleLongPress(item)}
-        delayLongPress={500}
-        activeOpacity={1}
-      >
+      <View style={styles.goalItemWrapper}>
         <GoalThumbnailCard
           goal={item}
           index={index}
           onPress={handleGoalPress}
+          onLongPress={!isEditMode ? handleLongPress : undefined}
         />
         {/* Selection overlay in edit mode - touchable to toggle selection */}
         {isEditMode && (
@@ -445,7 +441,7 @@ const GoalsGridSection = ({
             </View>
           </TouchableOpacity>
         )}
-      </TouchableOpacity>
+      </View>
     );
   }, [handleGoalPress, handleLongPress, isEditMode, selectedGoalIds]);
 

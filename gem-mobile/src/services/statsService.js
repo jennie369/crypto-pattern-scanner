@@ -576,10 +576,54 @@ export const recalculateDailyScore = async (userId) => {
   }
 };
 
+// ============ GET TODAY'S ACTIVITY COUNTS ============
+// Returns counts for affirmations, habits completed today
+export const getTodayActivityCounts = async (userId) => {
+  const today = new Date().toISOString().split('T')[0];
+
+  try {
+    // Get affirmations completed today
+    const { count: affirmationsCount } = await supabase
+      .from('vision_affirmation_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('completed_at', today);
+
+    // Get habits completed today
+    const { count: habitsCount } = await supabase
+      .from('vision_habit_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('log_date', today);
+
+    // Get ritual completions today
+    const { count: ritualsCount } = await supabase
+      .from('vision_ritual_completions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('completed_at', today);
+
+    console.log('[statsService] getTodayActivityCounts:', { affirmationsCount, habitsCount, ritualsCount });
+
+    return {
+      affirmationsCompleted: affirmationsCount || 0,
+      habitsCompleted: habitsCount || 0,
+      ritualsCompleted: ritualsCount || 0,
+    };
+  } catch (err) {
+    console.error('[statsService] getTodayActivityCounts error:', err);
+    return {
+      affirmationsCompleted: 0,
+      habitsCompleted: 0,
+      ritualsCompleted: 0,
+    };
+  }
+};
+
 // ============ GET FULL STATS ============
 export const getFullStats = async (userId) => {
   try {
-    const [dailyScore, streak, combo, todayXP, level, weeklyProgress, lifeScores] = await Promise.all([
+    const [dailyScore, streak, combo, todayXP, level, weeklyProgress, lifeScores, todayActivity] = await Promise.all([
       calculateDailyScore(userId),
       calculateStreak(userId),
       calculateCombo(userId),
@@ -587,6 +631,7 @@ export const getFullStats = async (userId) => {
       getUserLevel(userId),
       getWeeklyProgress(userId),
       getLifeAreaScores(userId),
+      getTodayActivityCounts(userId),
     ]);
 
     return {
@@ -597,6 +642,7 @@ export const getFullStats = async (userId) => {
       level,
       weeklyProgress,
       lifeScores,
+      todayActivity,
     };
   } catch (err) {
     console.error('[statsService] getFullStats error:', err);
@@ -612,6 +658,7 @@ export default {
   calculateCombo,
   getTodayXP,
   getTotalXP,
+  getTodayActivityCounts,
   getUserLevel,
   getLevelFromXP,
   getWeeklyProgress,
