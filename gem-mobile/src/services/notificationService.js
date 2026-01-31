@@ -1805,15 +1805,34 @@ class NotificationService {
   /**
    * Get user's notifications from database (including broadcasts)
    * Key: user_id IS NULL means broadcast to all users
+   * Joins with profiles to get from_user data (name, avatar) for Facebook-style display
    */
-  async getUserNotificationsFromDB(userId, page = 1, limit = 20) {
+  async getUserNotificationsFromDB(userId, page = 1, limit = 50) {
     try {
-      const { data, error } = await supabase
+      // Join with profiles to get from_user data
+      let { data, error } = await supabase
         .from('notifications')
-        .select('*')
+        .select(`
+          *,
+          from_user:from_user_id(id, full_name, username, avatar_url)
+        `)
         .or(`user_id.eq.${userId},user_id.is.null`) // User's + Broadcasts
         .order('created_at', { ascending: false })
         .range((page - 1) * limit, page * limit - 1);
+
+      // If join fails (relationship not set up), fallback to basic query
+      if (error && (error.code === 'PGRST200' || error.message?.includes('relationship'))) {
+        console.warn('[Notifications] Profile join failed, fetching without user data');
+        const fallback = await supabase
+          .from('notifications')
+          .select('*')
+          .or(`user_id.eq.${userId},user_id.is.null`)
+          .order('created_at', { ascending: false })
+          .range((page - 1) * limit, page * limit - 1);
+
+        data = fallback.data;
+        error = fallback.error;
+      }
 
       if (error) throw error;
 

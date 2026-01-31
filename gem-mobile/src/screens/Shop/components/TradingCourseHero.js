@@ -14,13 +14,11 @@ import {
   Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Crown, ChevronRight, Play } from 'lucide-react-native';
+import { ChevronRight, Play } from 'lucide-react-native';
 import OptimizedImage from '../../../components/Common/OptimizedImage';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../../utils/tokens';
 import {
   HERO_CONFIG,
-  TIER_COLORS,
-  TIER_NAMES,
   formatPrice,
 } from '../../../utils/digitalProductsConfig';
 import { extractImageUrl, PLACEHOLDER_IMAGE } from '../../../utils/digitalProductHelpers';
@@ -165,9 +163,6 @@ const TradingCourseHero = ({
 
 // Individual Hero Slide
 const HeroSlide = memo(({ product, onPress, isActive }) => {
-  const tier = product?.tier;
-  const tierColor = tier ? (TIER_COLORS[tier] || TIER_COLORS.tier1) : TIER_COLORS.tier1;
-  const tierName = tier ? (TIER_NAMES[tier] || tier) : 'Course';
   const imageUrl = extractImageUrl(product, PLACEHOLDER_IMAGE);
   const price = product?.variants?.[0]?.price || product?.price || 0;
 
@@ -184,24 +179,15 @@ const HeroSlide = memo(({ product, onPress, isActive }) => {
         resizeMode="cover"
       />
 
-      {/* Gradient Overlay - lighter for better image visibility */}
+      {/* Gradient Overlay - darker at bottom for text readability */}
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.4)']}
-        locations={[0.5, 1]}
+        colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.85)']}
+        locations={[0.3, 0.6, 1]}
         style={styles.slideGradient}
       />
 
-      {/* Colored Top Border */}
-      <View style={[styles.topBorder, { backgroundColor: tierColor.text }]} />
-
       {/* Content */}
       <View style={styles.slideContent}>
-        {/* Tier Badge */}
-        <View style={[styles.tierBadge, { backgroundColor: tierColor.bg, borderColor: tierColor.border }]}>
-          <Crown size={12} color={tierColor.text} />
-          <Text style={[styles.tierText, { color: tierColor.text }]}>{tierName}</Text>
-        </View>
-
         {/* Title & Subtitle */}
         <Text style={styles.slideTitle} numberOfLines={2}>
           {product?.title || 'Khóa Học Trading'}
@@ -278,34 +264,12 @@ const styles = StyleSheet.create({
   slideGradient: {
     ...StyleSheet.absoluteFillObject,
   },
-  topBorder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 3,
-  },
 
   // Slide Content
   slideContent: {
     flex: 1,
     justifyContent: 'flex-end',
     padding: SPACING.lg,
-  },
-  tierBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    marginBottom: SPACING.sm,
-    gap: 4,
-  },
-  tierText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
   slideTitle: {
     fontSize: TYPOGRAPHY.fontSize.xxl,

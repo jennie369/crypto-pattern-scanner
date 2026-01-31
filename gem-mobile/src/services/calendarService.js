@@ -113,6 +113,25 @@ class CalendarService {
   }
 
   /**
+   * Get calendar events for a month (accepts Date object)
+   * This is the method CalendarScreen expects
+   * @param {string} userId - User ID
+   * @param {Date} monthDate - Date object representing the month
+   * @returns {Promise<Array>} - Array of events
+   */
+  async getCalendarEvents(userId, monthDate) {
+    try {
+      const year = monthDate.getFullYear();
+      const month = monthDate.getMonth() + 1; // getMonth() returns 0-11
+      const result = await this.getMonthEvents(userId, year, month);
+      return result.events || [];
+    } catch (error) {
+      console.error('[Calendar] getCalendarEvents error:', error);
+      return [];
+    }
+  }
+
+  /**
    * Get events for today
    * @param {string} userId - User ID
    * @returns {Promise<Object>}
@@ -402,6 +421,31 @@ class CalendarService {
   }
 
   /**
+   * Get events grouped by date for a date range
+   * @param {string} userId - User ID
+   * @param {string} startDate - Start date (YYYY-MM-DD)
+   * @param {string} endDate - End date (YYYY-MM-DD)
+   * @returns {Promise<Object>}
+   */
+  async getEventsGroupedByRange(userId, startDate, endDate) {
+    const result = await this.getEvents(userId, startDate, endDate);
+
+    if (!result.success) return result;
+
+    // Group events by date
+    const grouped = {};
+    (result.events || []).forEach(event => {
+      const date = event.event_date;
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(event);
+    });
+
+    return { success: true, eventsByDate: grouped };
+  }
+
+  /**
    * Generate recurring events for display
    * (Does not persist - just for calendar visualization)
    * @param {Object} event - Recurring event
@@ -452,55 +496,115 @@ class CalendarService {
   }
 
   /**
-   * Get daily journal data - rituals and divination readings for a specific date
+   * Get daily journal data - rituals, readings, trades, and actions for a specific date
    * @param {string} userId - User ID
    * @param {string} date - Date (YYYY-MM-DD)
    * @returns {Promise<Object>}
    */
   async getDailyJournal(userId, date) {
     try {
-      // Fetch ritual completions for the date with ritual details
-      const { data: rituals, error: ritualsError } = await supabase
-        .from('vision_ritual_completions')
-        .select('*, ritual:vision_rituals(id, slug, name)')
-        .eq('user_id', userId)
-        .gte('completed_at', `${date}T00:00:00`)
-        .lt('completed_at', `${date}T23:59:59`)
-        .order('completed_at', { ascending: true });
+      // Fetch all data in parallel for better performance
+      const [ritualsResult, readingsResult, paperTradesResult, tradingJournalResult, actionsResult] = await Promise.all([
+        // 1. Ritual completions
+        supabase
+          .from('vision_ritual_completions')
+          .select('*, ritual:vision_rituals(id, slug, name)')
+          .eq('user_id', userId)
+          .gte('completed_at', `${date}T00:00:00`)
+          .lt('completed_at', `${date}T23:59:59`)
+          .order('completed_at', { ascending: true }),
 
-      if (ritualsError && ritualsError.code !== '42P01') {
-        console.warn('[Calendar] Rituals fetch error:', ritualsError);
+        // 2. Divination readings
+        supabase
+          .from('divination_readings')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('created_at', `${date}T00:00:00`)
+          .lt('created_at', `${date}T23:59:59`)
+          .order('created_at', { ascending: true }),
+
+        // 3. Paper trades
+        supabase
+          .from('paper_trades')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('created_at', `${date}T00:00:00`)
+          .lt('created_at', `${date}T23:59:59`)
+          .order('created_at', { ascending: true }),
+
+        // 4. Trading journal entries
+        supabase
+          .from('trading_journal_entries')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('trade_date', date)
+          .order('created_at', { ascending: true }),
+
+        // 5. Completed actions for the date
+        // Note: Actions are stored in vision_board_widgets.content, not a separate table
+        // For now, return empty result - actions are shown via widget content
+        Promise.resolve({ data: [], error: null }),
+      ]);
+
+      // Handle errors gracefully (tables may not exist)
+      // Error codes: 42P01 = relation does not exist, PGRST205 = table not found in schema cache
+      const isTableNotFoundError = (err) => err?.code === '42P01' || err?.code === 'PGRST205';
+
+      if (ritualsResult.error && !isTableNotFoundError(ritualsResult.error)) {
+        console.warn('[Calendar] Rituals fetch error:', ritualsResult.error);
+      }
+      if (readingsResult.error && !isTableNotFoundError(readingsResult.error)) {
+        console.warn('[Calendar] Readings fetch error:', readingsResult.error);
+      }
+      if (paperTradesResult.error && !isTableNotFoundError(paperTradesResult.error)) {
+        console.warn('[Calendar] Paper trades fetch error:', paperTradesResult.error);
+      }
+      if (tradingJournalResult.error && !isTableNotFoundError(tradingJournalResult.error)) {
+        console.warn('[Calendar] Trading journal fetch error:', tradingJournalResult.error);
+      }
+      if (actionsResult.error && !isTableNotFoundError(actionsResult.error)) {
+        console.warn('[Calendar] Actions fetch error:', actionsResult.error);
       }
 
       // Map ritual_slug from joined ritual data
-      const mappedRituals = (rituals || []).map(r => ({
+      const mappedRituals = (ritualsResult.data || []).map(r => ({
         ...r,
         ritual_slug: r.ritual?.slug || r.ritual_slug,
         ritual_name: r.ritual?.name,
       }));
 
-      // Fetch divination readings for the date
-      const { data: readings, error: readingsError } = await supabase
-        .from('reading_history')
-        .select('*')
-        .eq('user_id', userId)
-        .gte('created_at', `${date}T00:00:00`)
-        .lt('created_at', `${date}T23:59:59`)
-        .order('created_at', { ascending: true });
+      // Map actions with goal title
+      const mappedActions = (actionsResult.data || []).map(a => ({
+        ...a,
+        goal_title: a.goal?.title,
+      }));
 
-      if (readingsError && readingsError.code !== '42P01') {
-        console.warn('[Calendar] Readings fetch error:', readingsError);
-      }
+      const rituals = mappedRituals || [];
+      const readings = readingsResult.data || [];
+      const paperTrades = paperTradesResult.data || [];
+      const tradingJournal = tradingJournalResult.data || [];
+      const actions = mappedActions || [];
 
       return {
         success: true,
-        rituals: mappedRituals || [],
-        readings: readings || [],
-        totalActivities: (mappedRituals?.length || 0) + (readings?.length || 0),
+        rituals,
+        readings,
+        paperTrades,
+        tradingJournal,
+        actions,
+        totalActivities: rituals.length + readings.length + paperTrades.length + tradingJournal.length + actions.length,
       };
     } catch (error) {
       console.error('[Calendar] Get daily journal error:', error);
-      return { success: false, rituals: [], readings: [], error: error.message };
+      return {
+        success: false,
+        rituals: [],
+        readings: [],
+        paperTrades: [],
+        tradingJournal: [],
+        actions: [],
+        error: error.message,
+      };
     }
   }
 
@@ -531,7 +635,7 @@ class CalendarService {
 
       // Fetch readings for the month
       const { data: readings, error: readingsError } = await supabase
-        .from('reading_history')
+        .from('divination_readings')
         .select('created_at, reading_type')
         .eq('user_id', userId)
         .gte('created_at', `${startDate}T00:00:00`)

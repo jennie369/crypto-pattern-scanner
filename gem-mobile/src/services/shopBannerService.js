@@ -901,6 +901,188 @@ export const getFeaturedProductStats = async () => {
 };
 
 // ========================================
+// SECTION BANNERS CRUD
+// For Manifest & Course section hero banners
+// ========================================
+
+// Cache for section banners
+let sectionBannersCache = {};
+const SECTION_BANNER_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Cache for ALL section banners (used by ShopScreen for instant display)
+let allSectionBannersCache = {
+  data: null,
+  timestamp: 0,
+};
+
+/**
+ * Get all section banners (with caching for instant display)
+ * @param {boolean} forceRefresh - Force refresh from database
+ */
+const getAllSectionBanners = async (forceRefresh = false) => {
+  try {
+    // Return cached data if fresh and not forcing refresh
+    if (!forceRefresh && allSectionBannersCache.data &&
+        Date.now() - allSectionBannersCache.timestamp < SECTION_BANNER_CACHE_TTL) {
+      return { success: true, data: allSectionBannersCache.data, cached: true };
+    }
+
+    const { data, error } = await supabase
+      .from('section_banners')
+      .select('*')
+      .order('section_id', { ascending: true });
+
+    if (error) throw error;
+
+    // Update cache
+    allSectionBannersCache = {
+      data: data || [],
+      timestamp: Date.now(),
+    };
+
+    return { success: true, data: data || [] };
+  } catch (error) {
+    console.error('[shopBannerService] getAllSectionBanners error:', error);
+    // Return cached data on error if available
+    if (allSectionBannersCache.data) {
+      return { success: true, data: allSectionBannersCache.data, cached: true };
+    }
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Get cached section banners synchronously (for instant UI display)
+ * Returns null if no cache available
+ */
+const getCachedSectionBanners = () => {
+  if (allSectionBannersCache.data &&
+      Date.now() - allSectionBannersCache.timestamp < SECTION_BANNER_CACHE_TTL) {
+    return allSectionBannersCache.data;
+  }
+  return null;
+};
+
+/**
+ * Get section banner by sectionId (public, cached)
+ */
+const getSectionBanner = async (sectionId) => {
+  try {
+    // Check cache first
+    const cached = sectionBannersCache[sectionId];
+    if (cached && Date.now() - cached.timestamp < SECTION_BANNER_CACHE_TTL) {
+      return { success: true, data: cached.data };
+    }
+
+    const { data, error } = await supabase
+      .from('section_banners')
+      .select('*')
+      .eq('section_id', sectionId)
+      .eq('is_active', true)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+
+    // Cache result
+    sectionBannersCache[sectionId] = {
+      data: data || null,
+      timestamp: Date.now(),
+    };
+
+    return { success: true, data: data || null };
+  } catch (error) {
+    console.error('[shopBannerService] getSectionBanner error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Upsert section banner (admin)
+ */
+const upsertSectionBanner = async (sectionId, bannerData) => {
+  try {
+    const { data, error } = await supabase
+      .from('section_banners')
+      .upsert({
+        section_id: sectionId,
+        ...bannerData,
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'section_id',
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Invalidate cache
+    delete sectionBannersCache[sectionId];
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('[shopBannerService] upsertSectionBanner error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Delete section banner (admin)
+ */
+const deleteSectionBanner = async (sectionId) => {
+  try {
+    const { error } = await supabase
+      .from('section_banners')
+      .delete()
+      .eq('section_id', sectionId);
+
+    if (error) throw error;
+
+    // Invalidate cache
+    delete sectionBannersCache[sectionId];
+
+    return { success: true };
+  } catch (error) {
+    console.error('[shopBannerService] deleteSectionBanner error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Toggle section banner active state (admin)
+ */
+const toggleSectionBannerActive = async (sectionId, isActive) => {
+  try {
+    const { data, error } = await supabase
+      .from('section_banners')
+      .update({
+        is_active: isActive,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('section_id', sectionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Invalidate cache
+    delete sectionBannersCache[sectionId];
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('[shopBannerService] toggleSectionBannerActive error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Clear section banners cache
+ */
+const clearSectionBannersCache = () => {
+  sectionBannersCache = {};
+  allSectionBannersCache = { data: null, timestamp: 0 };
+};
+
+// ========================================
 // DEFAULT EXPORT
 // ========================================
 
@@ -942,4 +1124,12 @@ export default {
   recordFeaturedProductView,
   recordFeaturedProductClick,
   getFeaturedProductStats,
+  // Section Banners CRUD
+  getAllSectionBanners,
+  getCachedSectionBanners,
+  getSectionBanner,
+  upsertSectionBanner,
+  deleteSectionBanner,
+  toggleSectionBannerActive,
+  clearSectionBannersCache,
 };

@@ -136,13 +136,14 @@ const ProductCard = ({
 
   const imageUrl = getProductImageUrl(product);
 
-  const handleQuickAdd = async () => {
+  // OPTIMIZED: useCallback prevents re-creation on every render
+  const handleQuickAdd = useCallback(async () => {
     if (isOutOfStock) {
       alertService.showWarning('Hết hàng', 'Sản phẩm này hiện đã hết hàng.');
       return;
     }
-    await addItem(product, null, 1);
-  };
+    addItem(product, null, 1); // Don't await - let it run in background
+  }, [product, isOutOfStock, addItem]);
 
   const formatPrice = (value) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -164,7 +165,8 @@ const ProductCard = ({
         style,
       ]}
       onPress={onPress}
-      activeOpacity={0.9}
+      activeOpacity={0.85}
+      delayPressIn={0}
     >
       {/* Image - Using OptimizedImage for fast loading with caching */}
       <View style={[styles.imageContainer, dynamicStyles.imageContainer]}>
@@ -206,6 +208,8 @@ const ProductCard = ({
             style={[styles.quickAddBtn, dynamicStyles.quickAddBtn]}
             onPress={handleQuickAdd}
             disabled={loading}
+            activeOpacity={0.7}
+            delayPressIn={0}
           >
             <ShoppingBag size={16} color="#FFFFFF" />
           </TouchableOpacity>

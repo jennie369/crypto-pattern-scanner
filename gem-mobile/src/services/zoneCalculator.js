@@ -341,6 +341,253 @@ export const calculateATR = (candles, period = 14) => {
 };
 
 // ═══════════════════════════════════════════════════════════
+// SMART TP/SL CALCULATIONS
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Find swing highs from candles
+ * @param {Array} candles - OHLCV candles
+ * @param {number} lookback - Number of candles to look back (default 50)
+ * @param {number} strength - Swing strength (candles on each side, default 3)
+ * @returns {Array} Array of swing high prices sorted by recency
+ */
+export const findSwingHighs = (candles, lookback = 50, strength = 3) => {
+  if (!candles || candles.length < lookback) return [];
+
+  const recentCandles = candles.slice(-lookback);
+  const swingHighs = [];
+
+  for (let i = strength; i < recentCandles.length - strength; i++) {
+    const current = recentCandles[i];
+    let isSwingHigh = true;
+
+    // Check if current high is higher than surrounding candles
+    for (let j = 1; j <= strength; j++) {
+      if (recentCandles[i - j].high >= current.high ||
+          recentCandles[i + j].high >= current.high) {
+        isSwingHigh = false;
+        break;
+      }
+    }
+
+    if (isSwingHigh) {
+      swingHighs.push({
+        price: current.high,
+        index: candles.length - lookback + i,
+        timestamp: current.timestamp || current.time,
+      });
+    }
+  }
+
+  // Sort by index (most recent first)
+  return swingHighs.sort((a, b) => b.index - a.index);
+};
+
+/**
+ * Find swing lows from candles
+ * @param {Array} candles - OHLCV candles
+ * @param {number} lookback - Number of candles to look back (default 50)
+ * @param {number} strength - Swing strength (candles on each side, default 3)
+ * @returns {Array} Array of swing low prices sorted by recency
+ */
+export const findSwingLows = (candles, lookback = 50, strength = 3) => {
+  if (!candles || candles.length < lookback) return [];
+
+  const recentCandles = candles.slice(-lookback);
+  const swingLows = [];
+
+  for (let i = strength; i < recentCandles.length - strength; i++) {
+    const current = recentCandles[i];
+    let isSwingLow = true;
+
+    // Check if current low is lower than surrounding candles
+    for (let j = 1; j <= strength; j++) {
+      if (recentCandles[i - j].low <= current.low ||
+          recentCandles[i + j].low <= current.low) {
+        isSwingLow = false;
+        break;
+      }
+    }
+
+    if (isSwingLow) {
+      swingLows.push({
+        price: current.low,
+        index: candles.length - lookback + i,
+        timestamp: current.timestamp || current.time,
+      });
+    }
+  }
+
+  // Sort by index (most recent first)
+  return swingLows.sort((a, b) => b.index - a.index);
+};
+
+/**
+ * Calculate smart Take Profit with ATR capping and swing targets
+ * @param {Object} params - Parameters for TP calculation
+ * @returns {Object} Smart TP result with price and reasoning
+ */
+export const calculateSmartTP = ({
+  entry,
+  stopLoss,
+  direction, // 'LONG' or 'SHORT'
+  candles,
+  atr = null,
+  minRR = 2.0, // Minimum Risk:Reward ratio
+  maxATRMultiple = 3.5, // Maximum TP distance in ATR units
+  patternHeight = null, // Optional pattern-based target
+}) => {
+  if (!entry || !stopLoss || !candles || candles.length < 20) {
+    return { price: null, reasoning: 'Insufficient data' };
+  }
+
+  // Calculate ATR if not provided
+  const calculatedATR = atr || calculateATR(candles, 14);
+  if (calculatedATR <= 0) {
+    return { price: null, reasoning: 'Invalid ATR' };
+  }
+
+  // Calculate risk (distance from entry to SL)
+  const risk = Math.abs(entry - stopLoss);
+
+  // Calculate minimum TP based on R:R
+  const minTPDistance = risk * minRR;
+
+  // Calculate max TP based on ATR (prevent unrealistic targets)
+  const maxTPDistance = calculatedATR * maxATRMultiple;
+
+  let targetPrice;
+  let reasoning = [];
+  let method = 'default';
+
+  if (direction === 'LONG') {
+    // === LONG TRADE ===
+    // Find swing highs as potential resistance/targets
+    const swingHighs = findSwingHighs(candles, 100, 3);
+
+    // Filter swing highs that are above entry
+    const validTargets = swingHighs
+      .filter(sh => sh.price > entry)
+      .sort((a, b) => a.price - b.price); // Sort by price (lowest first = nearest target)
+
+    // Find the recent high (potential ATH or local high)
+    const recentHigh = Math.max(...candles.slice(-100).map(c => c.high));
+
+    // Start with minimum TP based on R:R
+    let baseTP = entry + minTPDistance;
+    reasoning.push(`Base TP (${minRR}:1 R:R): ${baseTP.toFixed(6)}`);
+
+    // If we have valid swing targets, use the nearest one above base TP
+    if (validTargets.length > 0) {
+      const nearestTarget = validTargets.find(t => t.price >= baseTP);
+      if (nearestTarget) {
+        baseTP = nearestTarget.price;
+        method = 'swing_high';
+        reasoning.push(`Swing high target: ${baseTP.toFixed(6)}`);
+      }
+    }
+
+    // If pattern height is provided and reasonable, consider it
+    if (patternHeight && patternHeight > 0) {
+      const patternTP = entry + patternHeight;
+      // Only use pattern TP if it's between min and max
+      if (patternTP >= entry + minTPDistance && patternTP <= entry + maxTPDistance) {
+        baseTP = Math.min(baseTP, patternTP);
+        method = 'pattern_height';
+        reasoning.push(`Pattern-based target: ${patternTP.toFixed(6)}`);
+      }
+    }
+
+    // Cap by ATR maximum
+    const maxTP = entry + maxTPDistance;
+    if (baseTP > maxTP) {
+      baseTP = maxTP;
+      method = 'atr_capped';
+      reasoning.push(`ATR capped (${maxATRMultiple}x ATR): ${maxTP.toFixed(6)}`);
+    }
+
+    // Never exceed recent high (practical limit)
+    if (baseTP > recentHigh) {
+      baseTP = recentHigh * 0.995; // 0.5% below recent high
+      method = 'recent_high_capped';
+      reasoning.push(`Capped below recent high: ${baseTP.toFixed(6)}`);
+    }
+
+    targetPrice = baseTP;
+
+  } else {
+    // === SHORT TRADE ===
+    // Find swing lows as potential support/targets
+    const swingLows = findSwingLows(candles, 100, 3);
+
+    // Filter swing lows that are below entry
+    const validTargets = swingLows
+      .filter(sl => sl.price < entry)
+      .sort((a, b) => b.price - a.price); // Sort by price (highest first = nearest target)
+
+    // Find the recent low
+    const recentLow = Math.min(...candles.slice(-100).map(c => c.low));
+
+    // Start with minimum TP based on R:R
+    let baseTP = entry - minTPDistance;
+    reasoning.push(`Base TP (${minRR}:1 R:R): ${baseTP.toFixed(6)}`);
+
+    // If we have valid swing targets, use the nearest one below base TP
+    if (validTargets.length > 0) {
+      const nearestTarget = validTargets.find(t => t.price <= baseTP);
+      if (nearestTarget) {
+        baseTP = nearestTarget.price;
+        method = 'swing_low';
+        reasoning.push(`Swing low target: ${baseTP.toFixed(6)}`);
+      }
+    }
+
+    // If pattern height is provided and reasonable, consider it
+    if (patternHeight && patternHeight > 0) {
+      const patternTP = entry - patternHeight;
+      // Only use pattern TP if it's between min and max
+      if (patternTP <= entry - minTPDistance && patternTP >= entry - maxTPDistance) {
+        baseTP = Math.max(baseTP, patternTP);
+        method = 'pattern_height';
+        reasoning.push(`Pattern-based target: ${patternTP.toFixed(6)}`);
+      }
+    }
+
+    // Cap by ATR maximum
+    const maxTP = entry - maxTPDistance;
+    if (baseTP < maxTP) {
+      baseTP = maxTP;
+      method = 'atr_capped';
+      reasoning.push(`ATR capped (${maxATRMultiple}x ATR): ${maxTP.toFixed(6)}`);
+    }
+
+    // Never go below recent low (practical limit)
+    if (baseTP < recentLow) {
+      baseTP = recentLow * 1.005; // 0.5% above recent low
+      method = 'recent_low_capped';
+      reasoning.push(`Capped above recent low: ${baseTP.toFixed(6)}`);
+    }
+
+    targetPrice = baseTP;
+  }
+
+  // Calculate final R:R
+  const finalReward = Math.abs(targetPrice - entry);
+  const finalRR = risk > 0 ? finalReward / risk : 0;
+
+  return {
+    price: targetPrice,
+    method,
+    reasoning: reasoning.join(' → '),
+    riskReward: parseFloat(finalRR.toFixed(2)),
+    atr: calculatedATR,
+    risk,
+    reward: finalReward,
+    isValid: finalRR >= 1.5, // At least 1.5:1 R:R
+  };
+};
+
+// ═══════════════════════════════════════════════════════════
 // DEFAULT EXPORT
 // ═══════════════════════════════════════════════════════════
 
@@ -353,6 +600,10 @@ const zoneCalculator = {
   createZoneResult,
   extractPauseCandles,
   calculateATR,
+  // Smart TP functions
+  findSwingHighs,
+  findSwingLows,
+  calculateSmartTP,
 };
 
 export default zoneCalculator;

@@ -653,21 +653,8 @@ export default function AccountScreen() {
     );
   }
 
-  // Loading state
-  if (loading) {
-    return (
-      <LinearGradient
-        colors={GRADIENTS.background}
-        locations={GRADIENTS.backgroundLocations}
-        style={styles.gradient}
-      >
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.gold} />
-          <Text style={styles.loadingText}>Đang tải...</Text>
-        </View>
-      </LinearGradient>
-    );
-  }
+  // REMOVED: Blocking loading state - UI should always render immediately
+  // Data loads in background, content shows from cache or with defaults
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
   const username = profile?.username || user?.email?.split('@')[0] || '';

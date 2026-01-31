@@ -14,6 +14,8 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -561,58 +563,71 @@ const BurnReleaseRitual = ({ navigation }) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.keyboardAvoid}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <Animated.View style={[styles.writeContainer, contentAnimatedStyle]}>
-        <View style={styles.iconContainer}>
-          <View style={styles.flameIconWrapper}>
-            <View style={styles.flameIconGlow} />
-            <Flame size={60} color={THEME.primary} strokeWidth={1.5} />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View style={[styles.writeContainer, contentAnimatedStyle]}>
+          <View style={styles.iconContainer}>
+            <View style={styles.flameIconWrapper}>
+              <View style={styles.flameIconGlow} />
+              <Flame size={60} color={THEME.primary} strokeWidth={1.5} />
+            </View>
           </View>
-        </View>
 
-        <View style={styles.textContainer}>
-          <TitleText text="Đốt & Buông Bỏ" color={THEME.primary} />
-          <SubtitleText text="Viết điều bạn muốn buông bỏ và đốt cháy" />
-        </View>
+          <View style={styles.textContainer}>
+            <TitleText text="Đốt & Buông Bỏ" color={THEME.primary} />
+            <SubtitleText text="Viết điều bạn muốn buông bỏ và đốt cháy" />
+          </View>
 
-        <InstructionText
-          text="Hãy viết ra những suy nghĩ tiêu cực, nỗi sợ hãi, hay điều gì đang cản trở bạn. Sau đó, nhìn chúng cháy thành tro."
-          variant="default"
-          color={COSMIC_COLORS.text.secondary}
-          style={styles.instruction}
-        />
-
-        <GlassInputCard
-          focused={inputFocused}
-          glowColor={THEME.glow}
-          style={styles.inputCard}
-        >
-          <TextInput
-            style={styles.releaseInput}
-            placeholder="Tôi buông bỏ..."
-            placeholderTextColor={COSMIC_COLORS.text.hint}
-            multiline
-            value={releaseText}
-            onChangeText={setReleaseText}
-            onFocus={() => setInputFocused(true)}
-            onBlur={() => setInputFocused(false)}
-            maxLength={CONFIG.maxChars}
-            textAlignVertical="top"
+          <InstructionText
+            text="Hãy viết ra những suy nghĩ tiêu cực, nỗi sợ hãi, hay điều gì đang cản trở bạn. Sau đó, nhìn chúng cháy thành tro."
+            variant="default"
+            color={COSMIC_COLORS.text.secondary}
+            style={styles.instruction}
           />
-          <Text style={styles.charCount}>{releaseText.length}/{CONFIG.maxChars}</Text>
-        </GlassInputCard>
 
-        <GlowButton
-          label="Đốt & Buông Bỏ"
-          icon={<Flame />}
-          variant="burn"
-          size="large"
-          fullWidth
-          disabled={!releaseText.trim()}
-          onPress={handleStartBurn}
-          style={styles.burnButton}
-        />
-      </Animated.View>
+          <GlassInputCard
+            focused={inputFocused}
+            glowColor={THEME.glow}
+            style={styles.inputCard}
+          >
+            <TextInput
+              style={styles.releaseInput}
+              placeholder="Tôi buông bỏ..."
+              placeholderTextColor={COSMIC_COLORS.text.hint}
+              multiline
+              value={releaseText}
+              onChangeText={setReleaseText}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
+              maxLength={CONFIG.maxChars}
+              textAlignVertical="top"
+              returnKeyType="done"
+              blurOnSubmit={true}
+              onSubmitEditing={() => Keyboard.dismiss()}
+            />
+            <Text style={styles.charCount}>{releaseText.length}/{CONFIG.maxChars}</Text>
+          </GlassInputCard>
+
+          <GlowButton
+            label="Đốt & Buông Bỏ"
+            icon={<Flame />}
+            variant="burn"
+            size="large"
+            fullWidth
+            disabled={!releaseText.trim()}
+            onPress={() => {
+              Keyboard.dismiss();
+              handleStartBurn();
+            }}
+            style={styles.burnButton}
+          />
+        </Animated.View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 
@@ -749,12 +764,14 @@ const styles = StyleSheet.create({
   keyboardAvoid: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
 
   // Write phase
   writeContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingBottom: 20,
+    paddingBottom: 40,
   },
   iconContainer: {
     alignItems: 'center',

@@ -1,0 +1,36 @@
+/**
+ * GlassCard Styles
+ */
+
+.glass-card {
+  background: rgba(13, 13, 43, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  transition: all 0.3s ease;
+}
+
+.glass-card-hoverable {
+  cursor: pointer;
+}
+
+.glass-card-hoverable:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px var(--glow-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .glass-card {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+  }
+}
+
+@media (max-width: 640px) {
+  .glass-card {
+    padding: var(--spacing-base);
+  }
+}

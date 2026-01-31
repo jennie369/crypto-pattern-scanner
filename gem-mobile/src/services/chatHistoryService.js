@@ -105,8 +105,9 @@ const saveConversation = async (conversationId, messages, userId) => {
     }
 
     // Ensure messages are serializable (remove any functions, circular refs)
-    const cleanMessages = messages.map(m => ({
-      id: m?.id || '',
+    // Generate unique IDs for any messages missing them to avoid React key warnings
+    const cleanMessages = messages.map((m, index) => ({
+      id: m?.id || `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
       type: m?.type || 'user',
       text: m?.text || '',
       timestamp: m?.timestamp || new Date().toISOString(),
@@ -161,6 +162,20 @@ const loadConversation = async (conversationId) => {
       .single();
 
     if (error) throw error;
+
+    // Ensure loaded messages have unique IDs to prevent React key warnings
+    if (data && Array.isArray(data.messages)) {
+      const seenIds = new Set();
+      data.messages = data.messages.map((m, index) => {
+        let id = m?.id;
+        // Generate new ID if missing or duplicate
+        if (!id || seenIds.has(id)) {
+          id = `loaded_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+        seenIds.add(id);
+        return { ...m, id };
+      });
+    }
 
     console.log('[ChatHistory] Loaded conversation:', conversationId);
     return data;
@@ -348,6 +363,20 @@ const getRecentConversation = async (userId) => {
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
       throw error;
+    }
+
+    // Ensure loaded messages have unique IDs to prevent React key warnings
+    if (data && Array.isArray(data.messages)) {
+      const seenIds = new Set();
+      data.messages = data.messages.map((m, index) => {
+        let id = m?.id;
+        // Generate new ID if missing or duplicate
+        if (!id || seenIds.has(id)) {
+          id = `loaded_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+        seenIds.add(id);
+        return { ...m, id };
+      });
     }
 
     return data || null;

@@ -12,6 +12,8 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -33,6 +35,7 @@ import { Droplet, Sparkles, ChevronRight, Zap, Heart } from 'lucide-react-native
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual, saveReflection } from '../../../services/ritualService';
+import ritualSoundService from '../../../services/ritualSoundService';
 
 // Cosmic Components
 import {
@@ -470,6 +473,30 @@ const WaterManifestRitual = ({ navigation }) => {
     };
   }, []);
 
+  // ===== SOUND MANAGEMENT =====
+  useEffect(() => {
+    ritualSoundService.init();
+    return () => {
+      ritualSoundService.stopAll();
+    };
+  }, []);
+
+  // Start/stop ambient based on phase and sound toggle
+  useEffect(() => {
+    if (isSoundOn && phase === 'ritual') {
+      ritualSoundService.startAmbient('water-manifest', 0.4);
+    } else if (phase === 'completed') {
+      ritualSoundService.stopAmbient();
+    }
+  }, [phase, isSoundOn]);
+
+  // Play water splash on charging
+  useEffect(() => {
+    if (isSoundOn && isCharging) {
+      ritualSoundService.playRitualSound('water-manifest', 'action', 0.8);
+    }
+  }, [isCharging, isSoundOn]);
+
   // Handlers - OPTIMIZED: Instant phase transitions
   const handleStart = useCallback(() => {
     HAPTIC_PATTERNS.tap();
@@ -544,6 +571,12 @@ const WaterManifestRitual = ({ navigation }) => {
     HAPTIC_PATTERNS.success();
     setShowCelebration(true);
 
+    // Play completion sound and stop ambient
+    if (isSoundOn) {
+      ritualSoundService.stopAmbient();
+      ritualSoundService.playComplete('water-manifest');
+    }
+
     try {
       if (user?.id) {
         const result = await completeRitual(user.id, 'water-manifest', {
@@ -615,6 +648,11 @@ const WaterManifestRitual = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.keyboardAvoid}
     >
+      <ScrollView
+        contentContainerStyle={styles.ritualScrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       <Animated.View style={[styles.ritualContainer, contentAnimatedStyle]}>
         {/* Step indicator */}
         <StepIndicator
@@ -671,6 +709,9 @@ const WaterManifestRitual = ({ navigation }) => {
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
+                returnKeyType="done"
+                blurOnSubmit={true}
+                onSubmitEditing={() => Keyboard.dismiss()}
               />
             </GlassInputCard>
           )}
@@ -694,12 +735,16 @@ const WaterManifestRitual = ({ navigation }) => {
               size="large"
               fullWidth
               disabled={currentStepData.input && !intention.trim()}
-              onPress={handleNextStep}
+              onPress={() => {
+                Keyboard.dismiss();
+                handleNextStep();
+              }}
               style={styles.actionButton}
             />
           )}
         </View>
       </Animated.View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 
@@ -777,6 +822,9 @@ const styles = StyleSheet.create({
   },
   keyboardAvoid: {
     flex: 1,
+  },
+  ritualScrollContent: {
+    flexGrow: 1,
   },
   phaseContainer: {
     flex: 1,

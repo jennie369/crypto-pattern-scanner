@@ -32,6 +32,7 @@ import { Gift, Sparkles, Plus, X, Send, Check, Star } from 'lucide-react-native'
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual, saveReflection } from '../../../services/ritualService';
+import ritualSoundService from '../../../services/ritualSoundService';
 import useVideoPause from '../../../hooks/useVideoPause';
 
 // Cosmic Components
@@ -234,6 +235,23 @@ const GratitudeFlowRitual = ({ navigation }) => {
     };
   }, []);
 
+  // ===== SOUND MANAGEMENT =====
+  useEffect(() => {
+    ritualSoundService.init();
+    return () => {
+      ritualSoundService.stopAll();
+    };
+  }, []);
+
+  // Start/stop ambient based on phase and sound toggle
+  useEffect(() => {
+    if (isSoundOn && (phase === 'input' || phase === 'sending')) {
+      ritualSoundService.startAmbient('gratitude-flow', 0.4);
+    } else if (phase === 'completed') {
+      ritualSoundService.stopAmbient();
+    }
+  }, [phase, isSoundOn]);
+
   // Content animation style
   const contentAnimatedStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
@@ -249,10 +267,12 @@ const GratitudeFlowRitual = ({ navigation }) => {
     if (!currentInput.trim() || gratitudes.length >= CONFIG.maxGratitudes) return;
 
     HAPTIC_PATTERNS.gratitude.add();
+    // Play chime sound when adding gratitude
+    if (isSoundOn) ritualSoundService.playChime();
     setGratitudes(prev => [...prev, currentInput.trim()]);
     setCurrentInput('');
     Keyboard.dismiss();
-  }, [currentInput, gratitudes.length]);
+  }, [currentInput, gratitudes.length, isSoundOn]);
 
   const handleRemoveGratitude = useCallback((index) => {
     HAPTIC_PATTERNS.tap();
@@ -275,6 +295,12 @@ const GratitudeFlowRitual = ({ navigation }) => {
   const handleComplete = async () => {
     HAPTIC_PATTERNS.gratitude.complete();
     setShowCelebration(true);
+
+    // Play completion sound and stop ambient
+    if (isSoundOn) {
+      ritualSoundService.stopAmbient();
+      ritualSoundService.playComplete('gratitude-flow');
+    }
 
     try {
       if (user?.id) {
@@ -404,9 +430,12 @@ const GratitudeFlowRitual = ({ navigation }) => {
                   }, 100);
                 }}
                 onBlur={() => setInputFocused(false)}
-                onSubmitEditing={handleAddGratitude}
+                onSubmitEditing={() => {
+                  Keyboard.dismiss();
+                  handleAddGratitude();
+                }}
                 returnKeyType="done"
-                blurOnSubmit={false}
+                blurOnSubmit={true}
               />
               <GlowIconButton
                 icon={<Plus />}

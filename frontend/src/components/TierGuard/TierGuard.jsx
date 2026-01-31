@@ -82,6 +82,24 @@ export default function TierGuard({
     )
   }
 
+  // ⚡ ADMIN BYPASS - Admin has unlimited access to ALL features
+  const isAdmin = profile?.role === 'admin' ||
+                  profile?.role === 'ADMIN' ||
+                  profile?.is_admin === true ||
+                  profile?.scanner_tier === 'ADMIN' ||
+                  profile?.chatbot_tier === 'ADMIN'
+
+  // ⚡ MANAGER BYPASS - Manager has unlimited access to ALL features
+  const isManager = profile?.role === 'manager' ||
+                    profile?.role === 'MANAGER' ||
+                    profile?.scanner_tier === 'MANAGER' ||
+                    profile?.chatbot_tier === 'MANAGER'
+
+  if (isAdmin || isManager) {
+    console.log(`✅ [TierGuard] ${isAdmin ? 'Admin' : 'Manager'} bypass - Full access granted for ${featureName}`)
+    return <>{children}</>
+  }
+
   // Normalize tier values (handle case-sensitivity and whitespace)
   const normalizeTier = (tier) => {
     if (!tier) return 'FREE'

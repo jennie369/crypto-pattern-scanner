@@ -4,7 +4,7 @@
  * Includes: Reviews, Best Sellers, FAQ, Best For You sections
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -604,18 +604,27 @@ const ProductDetailScreen = ({ navigation, route }) => {
     }).format(value);
   };
 
-  const handleAddToCart = async () => {
+  // OPTIMIZED: useCallback prevents re-creation on every render
+  const handleAddToCart = useCallback(async () => {
+    // Immediate UI feedback
+    setAddedToCart(true);
+
+    // Background operation
     const result = await addItem(product, selectedVariant, quantity);
-    if (result.success) {
-      setAddedToCart(true);
+    if (!result.success) {
+      setAddedToCart(false);
+    } else {
       setTimeout(() => setAddedToCart(false), 2000);
     }
-  };
+  }, [product, selectedVariant, quantity, addItem]);
 
-  const handleBuyNow = async () => {
-    await addItem(product, selectedVariant, quantity);
+  const handleBuyNow = useCallback(async () => {
+    // Navigate immediately for perceived speed
     navigation.navigate('Cart');
-  };
+
+    // Add item in background (will appear when Cart screen loads)
+    addItem(product, selectedVariant, quantity);
+  }, [product, selectedVariant, quantity, addItem, navigation]);
 
   const handleThumbnailPress = (index) => {
     setSelectedImageIndex(index);
@@ -1409,6 +1418,8 @@ const ProductDetailScreen = ({ navigation, route }) => {
         <TouchableOpacity
           style={[styles.addToCartBtn, addedToCart && styles.addedBtn]}
           onPress={handleAddToCart}
+          activeOpacity={0.7}
+          delayPressIn={0}
         >
           {addedToCart ? (
             <>
@@ -1423,7 +1434,12 @@ const ProductDetailScreen = ({ navigation, route }) => {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buyNowBtn} onPress={handleBuyNow}>
+        <TouchableOpacity
+          style={styles.buyNowBtn}
+          onPress={handleBuyNow}
+          activeOpacity={0.7}
+          delayPressIn={0}
+        >
           <Text style={styles.buyNowText}>Mua ngay</Text>
         </TouchableOpacity>
       </Animated.View>

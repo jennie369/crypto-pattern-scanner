@@ -52,12 +52,17 @@ const DayDetailModal = ({
   events = [],
   rituals = [],
   readings = [],
+  paperTrades = [],
+  tradingJournal = [],
+  actions = [],
   onClose,
   onEventPress,
   onEventComplete,
   onAddEvent,
   onRitualPress,
   onReadingPress,
+  onTradePress,
+  onActionPress,
 }) => {
   // Format date display
   const formatDate = (dateString) => {
@@ -279,13 +284,144 @@ const DayDetailModal = ({
                 </View>
               )}
 
+              {/* Journal Section - Paper Trades */}
+              {paperTrades.length > 0 && (
+                <View style={styles.journalSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.LineChart size={18} color="#3AF7A6" />
+                    <Text style={styles.journalTitle}>Paper Trades</Text>
+                  </View>
+                  {paperTrades.map((trade, index) => {
+                    const isProfit = trade.pnl_percent > 0;
+                    const time = trade.created_at
+                      ? new Date(trade.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+                      : '';
+                    return (
+                      <TouchableOpacity
+                        key={trade.id || index}
+                        style={styles.journalItem}
+                        onPress={() => onTradePress?.(trade)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.journalIcon, { backgroundColor: isProfit ? 'rgba(58, 247, 166, 0.2)' : 'rgba(255, 107, 107, 0.2)' }]}>
+                          {isProfit ? (
+                            <Icons.TrendingUp size={16} color="#3AF7A6" />
+                          ) : (
+                            <Icons.TrendingDown size={16} color="#FF6B6B" />
+                          )}
+                        </View>
+                        <View style={styles.journalContent}>
+                          <Text style={styles.journalItemTitle}>
+                            {trade.symbol} • {trade.direction?.toUpperCase()}
+                          </Text>
+                          <Text style={styles.journalReflection}>
+                            {trade.pattern_type || 'Manual'} • {trade.timeframe || ''}
+                          </Text>
+                          <Text style={styles.journalTime}>{time}</Text>
+                        </View>
+                        <View style={styles.tradePnL}>
+                          <Text style={[styles.tradePnLText, { color: isProfit ? '#3AF7A6' : '#FF6B6B' }]}>
+                            {isProfit ? '+' : ''}{trade.pnl_percent?.toFixed(2)}%
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Journal Section - Trading Journal */}
+              {tradingJournal.length > 0 && (
+                <View style={styles.journalSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.FileText size={18} color="#FFBD59" />
+                    <Text style={styles.journalTitle}>Nhật ký giao dịch</Text>
+                  </View>
+                  {tradingJournal.map((entry, index) => {
+                    const isWin = entry.result === 'win';
+                    const time = entry.created_at
+                      ? new Date(entry.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+                      : '';
+                    return (
+                      <TouchableOpacity
+                        key={entry.id || index}
+                        style={styles.journalItem}
+                        onPress={() => onTradePress?.(entry)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.journalIcon, { backgroundColor: 'rgba(255, 189, 89, 0.2)' }]}>
+                          <Icons.FileText size={16} color="#FFBD59" />
+                        </View>
+                        <View style={styles.journalContent}>
+                          <Text style={styles.journalItemTitle}>
+                            {entry.symbol} • {entry.direction?.toUpperCase()}
+                          </Text>
+                          {entry.lessons_learned && (
+                            <Text style={styles.journalReflection} numberOfLines={2}>
+                              "{entry.lessons_learned}"
+                            </Text>
+                          )}
+                          <Text style={styles.journalTime}>{time}</Text>
+                        </View>
+                        <View style={[styles.resultBadge, { backgroundColor: isWin ? 'rgba(58, 247, 166, 0.2)' : 'rgba(255, 107, 107, 0.2)' }]}>
+                          <Text style={[styles.resultText, { color: isWin ? '#3AF7A6' : '#FF6B6B' }]}>
+                            {entry.result === 'win' ? 'WIN' : entry.result === 'loss' ? 'LOSS' : entry.result?.toUpperCase()}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Journal Section - Completed Actions */}
+              {actions.length > 0 && (
+                <View style={styles.journalSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.CheckCircle size={18} color="#6A5BFF" />
+                    <Text style={styles.journalTitle}>Hành động hoàn thành</Text>
+                  </View>
+                  {actions.map((action, index) => {
+                    const time = action.completed_at
+                      ? new Date(action.completed_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+                      : '';
+                    return (
+                      <TouchableOpacity
+                        key={action.id || index}
+                        style={styles.journalItem}
+                        onPress={() => onActionPress?.(action)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.journalIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
+                          <Icons.CheckCircle size={16} color="#6A5BFF" />
+                        </View>
+                        <View style={styles.journalContent}>
+                          <Text style={styles.journalItemTitle}>{action.title}</Text>
+                          {action.goal_title && (
+                            <Text style={styles.journalReflection} numberOfLines={1}>
+                              Mục tiêu: {action.goal_title}
+                            </Text>
+                          )}
+                          <Text style={styles.journalTime}>{time}</Text>
+                        </View>
+                        <Icons.Check size={16} color="#3AF7A6" />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+
               {/* Empty state for journal when no events but has activities */}
-              {events.length === 0 && (rituals.length > 0 || readings.length > 0) && (
+              {events.length === 0 && (rituals.length > 0 || readings.length > 0 || paperTrades.length > 0 || tradingJournal.length > 0 || actions.length > 0) && (
                 <View style={styles.journalSummary}>
                   <Text style={styles.journalSummaryText}>
                     {rituals.length > 0 && `${rituals.length} nghi thức`}
                     {rituals.length > 0 && readings.length > 0 && ' • '}
                     {readings.length > 0 && `${readings.length} bói toán`}
+                    {(rituals.length > 0 || readings.length > 0) && paperTrades.length > 0 && ' • '}
+                    {paperTrades.length > 0 && `${paperTrades.length} trades`}
+                    {(rituals.length > 0 || readings.length > 0 || paperTrades.length > 0) && actions.length > 0 && ' • '}
+                    {actions.length > 0 && `${actions.length} hành động`}
                   </Text>
                 </View>
               )}
@@ -549,6 +685,26 @@ const styles = StyleSheet.create({
   journalSummaryText: {
     color: COLORS.textMuted,
     fontSize: TYPOGRAPHY.fontSize.sm,
+  },
+  // Trading styles
+  tradePnL: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xxs,
+    borderRadius: SPACING.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  tradePnLText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  resultBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xxs,
+    borderRadius: SPACING.xs,
+  },
+  resultText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
 });
 

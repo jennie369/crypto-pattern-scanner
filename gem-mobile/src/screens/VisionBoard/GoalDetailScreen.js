@@ -1,18 +1,19 @@
 /**
  * Goal Detail Screen - Vision Board 2.0
- * View and manage a specific goal with actions grouped by type
+ * Redesigned with consistent theme, swipe actions, TTS
  *
  * Features:
- * - Actions grouped by type: daily, weekly, monthly, one_time
- * - XP tracking on completion
- * - Auto-reset indicators
- * - Add new actions with type selection
+ * - Consistent purple/gold theme
+ * - Swipe to delete actions/affirmations
+ * - Edit inline for actions/affirmations
+ * - TTS for affirmations
+ * - Working checkboxes
+ * - Edit goal title
  *
- * Created: December 9, 2025
- * Updated: December 11, 2025 - Action types + XP tracking
+ * Updated: February 1, 2026 - Major UI redesign
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -24,13 +25,47 @@ import {
   TextInput,
   Vibration,
   Image,
+  Alert,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as Speech from 'expo-speech';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Icons from 'lucide-react-native';
+import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
+import {
+  ArrowLeft,
+  Edit3,
+  Check,
+  Sparkles,
+  Target,
+  Wallet,
+  Briefcase,
+  Heart,
+  User,
+  ListTodo,
+  Plus,
+  Trash2,
+  AlertCircle,
+  ImagePlus,
+  Camera,
+  Quote,
+  Moon,
+  Flower2,
+  Info,
+  Repeat,
+  Calendar,
+  CalendarDays,
+  ClipboardList,
+  Play,
+  Pause,
+  X,
+  MoreHorizontal,
+  ChevronRight,
+} from 'lucide-react-native';
 
 import { COLORS, TYPOGRAPHY, SPACING, GLASS, GRADIENTS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
@@ -39,105 +74,347 @@ import CustomAlert from '../../components/Common/CustomAlert';
 import { ScoreRing } from '../../components/Charts';
 import { MilestoneIndicator } from '../../components/VisionBoard';
 import AddActionModal from '../../components/VisionBoard/AddActionModal';
+import { RITUAL_SCREENS, RITUAL_METADATA } from './rituals';
 
-// Import action service for XP tracking
-import {
-  toggleActionWithLog,
-  createActionWithType,
-  getGoalActionsGrouped,
-} from '../../services/actionService';
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Import goal service for cover image
-import {
-  uploadGoalCoverImage,
-  removeGoalCoverImage,
-} from '../../services/goalService';
+// Consistent theme colors - Purple & Gold only
+const THEME = {
+  primary: '#8B5CF6',      // Purple
+  primaryLight: 'rgba(139, 92, 246, 0.15)',
+  primaryBorder: 'rgba(139, 92, 246, 0.3)',
+  accent: '#FFBD59',       // Gold
+  accentLight: 'rgba(255, 189, 89, 0.15)',
+  accentBorder: 'rgba(255, 189, 89, 0.3)',
+  text: '#FFFFFF',
+  textSecondary: 'rgba(255, 255, 255, 0.7)',
+  textMuted: 'rgba(255, 255, 255, 0.5)',
+  cardBg: 'rgba(30, 35, 60, 0.6)',
+  danger: '#EF4444',
+  dangerLight: 'rgba(239, 68, 68, 0.15)',
+};
 
-// Life area configuration - 6 lĩnh vực cuộc sống theo kịch bản demo
+// Life area configuration
 const LIFE_AREA_CONFIG = {
-  finance: { label: 'Tài chính', icon: 'Wallet', color: COLORS.gold },
-  career: { label: 'Sự nghiệp', icon: 'Briefcase', color: COLORS.purple },
-  health: { label: 'Sức khỏe', icon: 'Heart', color: COLORS.success },
-  relationships: { label: 'Tình yêu', icon: 'Heart', color: '#FF6B9D' },
-  personal: { label: 'Cá nhân', icon: 'User', color: COLORS.cyan },
-  spiritual: { label: 'Tâm thức', icon: 'Sparkles', color: COLORS.burgundy },
+  finance: { label: 'Tài chính', icon: Wallet },
+  career: { label: 'Sự nghiệp', icon: Briefcase },
+  health: { label: 'Sức khỏe', icon: Heart },
+  relationships: { label: 'Tình yêu', icon: Heart },
+  personal: { label: 'Cá nhân', icon: User },
+  spiritual: { label: 'Tâm thức', icon: Sparkles },
 };
 
-// Action type configuration
+// Action type configuration - simplified, same color theme
 const ACTION_TYPE_CONFIG = {
-  daily: {
-    label: 'Hàng ngày',
-    icon: 'Repeat',
-    color: '#3AF7A6',
-    bgColor: 'rgba(58, 247, 166, 0.15)',
-    description: 'Reset mỗi ngày',
-  },
-  weekly: {
-    label: 'Hàng tuần',
-    icon: 'Calendar',
-    color: '#3B82F6',
-    bgColor: 'rgba(59, 130, 246, 0.15)',
-    description: 'Reset mỗi 7 ngày',
-  },
-  monthly: {
-    label: 'Hàng tháng',
-    icon: 'CalendarDays',
-    color: '#A855F7',
-    bgColor: 'rgba(168, 85, 247, 0.15)',
-    description: 'Reset mỗi 30 ngày',
-  },
-  one_time: {
-    label: 'Một lần',
-    icon: 'Check',
-    color: '#FFBD59',
-    bgColor: 'rgba(255, 189, 89, 0.15)',
-    description: 'Hoàn thành 1 lần',
-  },
+  daily: { label: 'Hàng ngày', icon: Repeat, hint: 'Reset mỗi ngày' },
+  weekly: { label: 'Hàng tuần', icon: Calendar, hint: 'Reset mỗi 7 ngày' },
+  monthly: { label: 'Hàng tháng', icon: CalendarDays, hint: 'Reset mỗi tháng' },
+  one_time: { label: 'Một lần', icon: Check, hint: '' },
 };
 
+// ========== SWIPEABLE ACTION ITEM COMPONENT ==========
+const SwipeableActionItem = ({
+  action,
+  onToggle,
+  onEdit,
+  onDelete,
+  isCompleted,
+}) => {
+  const swipeableRef = useRef(null);
+
+  const renderRightActions = (progress, dragX) => {
+    const translateX = dragX.interpolate({
+      inputRange: [-120, 0],
+      outputRange: [0, 120],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <View style={styles.swipeActionsContainer}>
+        <Animated.View style={[styles.swipeAction, { transform: [{ translateX }] }]}>
+          <TouchableOpacity
+            style={[styles.swipeBtn, styles.editBtn]}
+            onPress={() => {
+              swipeableRef.current?.close();
+              onEdit(action);
+            }}
+          >
+            <Edit3 size={18} color="#FFF" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.swipeBtn, styles.deleteBtn]}
+            onPress={() => {
+              swipeableRef.current?.close();
+              onDelete(action);
+            }}
+          >
+            <Trash2 size={18} color="#FFF" />
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    );
+  };
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      rightThreshold={40}
+      overshootRight={false}
+    >
+      <TouchableOpacity
+        style={[styles.actionItem, isCompleted && styles.actionItemCompleted]}
+        onPress={() => onToggle(action)}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.checkbox, isCompleted && styles.checkboxCompleted]}>
+          {isCompleted && <Check size={14} color={COLORS.bgDarkest} />}
+        </View>
+        <Text
+          style={[styles.actionText, isCompleted && styles.actionTextCompleted]}
+          numberOfLines={2}
+        >
+          {action.title}
+        </Text>
+      </TouchableOpacity>
+    </Swipeable>
+  );
+};
+
+// ========== SWIPEABLE AFFIRMATION ITEM COMPONENT ==========
+const SwipeableAffirmationItem = ({
+  affirmation,
+  onEdit,
+  onDelete,
+  onPlay,
+  isPlaying,
+}) => {
+  const swipeableRef = useRef(null);
+
+  const renderRightActions = (progress, dragX) => {
+    const translateX = dragX.interpolate({
+      inputRange: [-160, 0],
+      outputRange: [0, 160],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <View style={styles.swipeActionsContainer}>
+        <Animated.View style={[styles.swipeAction, { transform: [{ translateX }] }]}>
+          <TouchableOpacity
+            style={[styles.swipeBtn, styles.playBtn]}
+            onPress={() => {
+              swipeableRef.current?.close();
+              onPlay(affirmation);
+            }}
+          >
+            {isPlaying ? <Pause size={18} color="#FFF" /> : <Play size={18} color="#FFF" />}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.swipeBtn, styles.editBtn]}
+            onPress={() => {
+              swipeableRef.current?.close();
+              onEdit(affirmation);
+            }}
+          >
+            <Edit3 size={18} color="#FFF" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.swipeBtn, styles.deleteBtn]}
+            onPress={() => {
+              swipeableRef.current?.close();
+              onDelete(affirmation);
+            }}
+          >
+            <Trash2 size={18} color="#FFF" />
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    );
+  };
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      rightThreshold={40}
+      overshootRight={false}
+    >
+      <View style={styles.affirmationItem}>
+        <Quote size={16} color={THEME.accent} style={styles.quoteIcon} />
+        <Text style={styles.affirmationText}>{affirmation.text}</Text>
+        <TouchableOpacity
+          style={styles.inlinePlayBtn}
+          onPress={() => onPlay(affirmation)}
+        >
+          {isPlaying ? (
+            <Pause size={16} color={THEME.accent} />
+          ) : (
+            <Play size={16} color={THEME.accent} />
+          )}
+        </TouchableOpacity>
+      </View>
+    </Swipeable>
+  );
+};
+
+// ========== MAIN COMPONENT ==========
 const GoalDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { goalId } = route.params || {};
+  const { goalId, goalData: initialGoalData } = route.params || {};
   const { user } = useAuth();
 
-  const [loading, setLoading] = useState(true);
+  // Parse initial goal data from navigation - used for instant display
+  const parsedInitialGoal = React.useMemo(() => {
+    if (!initialGoalData) return null;
+    const content = typeof initialGoalData.content === 'string'
+      ? JSON.parse(initialGoalData.content || '{}')
+      : (initialGoalData.content || initialGoalData._content || {});
+    return {
+      id: initialGoalData.id || goalId,
+      title: initialGoalData.title || content?.title || content?.goalText || 'Mục tiêu',
+      cover_image: initialGoalData.cover_image || content?.cover_image || content?.coverImage || null,
+      life_area: (initialGoalData.life_area || content?.lifeArea || content?.life_area || 'personal').toLowerCase(),
+      progress_percent: initialGoalData.progress_percent || content?.progress || 0,
+      _isLegacy: initialGoalData._isLegacy || false,
+      _content: content,
+    };
+  }, [initialGoalData, goalId]);
+
+  // ========== EXTRACT INITIAL DATA FOR INSTANT DISPLAY ==========
+  // Extract affirmations immediately from content for instant display
+  const initialAffirmations = useMemo(() => {
+    const content = parsedInitialGoal?._content;
+    if (!content) return [];
+
+    let extracted = [];
+    if (content?.affirmations) {
+      const affs = Array.isArray(content.affirmations) ? content.affirmations : [content.affirmations];
+      extracted = [...extracted, ...affs];
+    }
+    if (content?.goals?.[0]?.affirmations) {
+      const affs = Array.isArray(content.goals[0].affirmations) ? content.goals[0].affirmations : [content.goals[0].affirmations];
+      extracted = [...extracted, ...affs];
+    }
+
+    return extracted.map((a, i) => ({
+      id: a?.id || `aff_${i}`,
+      text: typeof a === 'string' ? a : (a?.text || a?.content || a?.affirmation || ''),
+    })).filter(a => a.text);
+  }, [parsedInitialGoal]);
+
+  // Extract actions immediately from content for instant display
+  const initialGroupedActions = useMemo(() => {
+    const content = parsedInitialGoal?._content;
+    const empty = { daily: [], weekly: [], monthly: [], one_time_pending: [], one_time_completed: [] };
+    if (!content) return empty;
+
+    let legacyActions = [];
+    // From steps
+    if (content?.steps) {
+      legacyActions = [...legacyActions, ...(Array.isArray(content.steps) ? content.steps : [content.steps])];
+    }
+    // From actionSteps
+    if (content?.actionSteps) {
+      legacyActions = [...legacyActions, ...(Array.isArray(content.actionSteps) ? content.actionSteps : [content.actionSteps])];
+    }
+    // From goals[0].steps
+    if (content?.goals?.[0]?.steps) {
+      legacyActions = [...legacyActions, ...(Array.isArray(content.goals[0].steps) ? content.goals[0].steps : [content.goals[0].steps])];
+    }
+
+    if (legacyActions.length === 0) return empty;
+
+    const normalized = legacyActions.map((s, i) => ({
+      id: `legacy_${i}_${s.id || s.title || i}`,
+      title: typeof s === 'string' ? s : (s?.title || s?.text || s?.step || ''),
+      action_type: s?.action_type || s?.frequency || 'daily',
+      is_completed: s?.is_completed || s?.completed || false,
+      _isLegacy: true,
+    })).filter(a => a.title);
+
+    return {
+      daily: normalized.filter(a => a.action_type === 'daily'),
+      weekly: normalized.filter(a => a.action_type === 'weekly'),
+      monthly: normalized.filter(a => a.action_type === 'monthly'),
+      one_time_pending: normalized.filter(a => a.action_type === 'one_time' && !a.is_completed),
+      one_time_completed: normalized.filter(a => a.action_type === 'one_time' && a.is_completed),
+    };
+  }, [parsedInitialGoal]);
+
+  // Extract rituals immediately from content for instant display
+  const initialRituals = useMemo(() => {
+    const content = parsedInitialGoal?._content;
+    if (!content) return [];
+
+    let extracted = [];
+    if (content?.rituals) {
+      extracted = Array.isArray(content.rituals) ? content.rituals : [content.rituals];
+    }
+    if (content?.goals?.[0]?.rituals) {
+      const r = content.goals[0].rituals;
+      extracted = [...extracted, ...(Array.isArray(r) ? r : [r])];
+    }
+
+    const normalized = extracted.map((r, i) => ({
+      id: r?.id || `ritual_${i}`,
+      title: typeof r === 'string' ? r : (r?.title || r?.name || ''),
+      description: r?.description || '',
+      frequency: r?.frequency || 'daily',
+    })).filter(r => r.title);
+
+    // Deduplicate by title
+    const seenTitles = new Set();
+    return normalized.filter(r => {
+      const titleLower = r.title.toLowerCase().trim();
+      if (seenTitles.has(titleLower)) return false;
+      seenTitles.add(titleLower);
+      return true;
+    });
+  }, [parsedInitialGoal]);
+
+  // States - Start with extracted data for instant display
+  const [loading, setLoading] = useState(!parsedInitialGoal);
   const [refreshing, setRefreshing] = useState(false);
+  const [goal, setGoal] = useState(parsedInitialGoal);
+  const [groupedActions, setGroupedActions] = useState(initialGroupedActions);
+  const [affirmations, setAffirmations] = useState(initialAffirmations);
+  const [rituals, setRituals] = useState(initialRituals);
 
-  // Goal data
-  const [goal, setGoal] = useState(null);
-  const [groupedActions, setGroupedActions] = useState({
-    daily: [],
-    weekly: [],
-    monthly: [],
-    one_time_pending: [],
-    one_time_completed: [],
-  });
+  // Edit states
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitle, setEditTitle] = useState(parsedInitialGoal?.title || '');
+  const [editingActionId, setEditingActionId] = useState(null);
+  const [editingActionText, setEditingActionText] = useState('');
+  const [editingAffirmationId, setEditingAffirmationId] = useState(null);
+  const [editingAffirmationText, setEditingAffirmationText] = useState('');
 
-  // Edit mode
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState('');
-
-  // Add action modal
+  // Modal states
   const [showAddActionModal, setShowAddActionModal] = useState(false);
+  const [showAddAffirmationModal, setShowAddAffirmationModal] = useState(false);
   const [savingAction, setSavingAction] = useState(false);
+  const [newAffirmationText, setNewAffirmationText] = useState('');
 
   // Alert
   const [alertConfig, setAlertConfig] = useState({ visible: false });
 
-  // XP earned feedback
+  // TTS state
+  const [playingAffirmationId, setPlayingAffirmationId] = useState(null);
+
+  // Cover image
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  // XP feedback
   const [xpEarned, setXpEarned] = useState(0);
   const [showXpFeedback, setShowXpFeedback] = useState(false);
 
-  // Cover image state
-  const [uploadingImage, setUploadingImage] = useState(false);
-
-  // Load goal and actions
+  // ========== LOAD DATA ==========
   const loadGoalData = useCallback(async () => {
     if (!user?.id || !goalId) return;
 
     try {
-      // First try to load from vision_goals table (new structure)
+      // First try vision_goals table
       let { data: goalData, error: goalError } = await supabase
         .from('vision_goals')
         .select('*')
@@ -145,7 +422,7 @@ const GoalDetailScreen = () => {
         .eq('user_id', user.id)
         .single();
 
-      // If not found in vision_goals, try vision_board_widgets (legacy)
+      // Fallback to vision_board_widgets
       if (goalError || !goalData) {
         const { data: widgetData } = await supabase
           .from('vision_board_widgets')
@@ -155,27 +432,113 @@ const GoalDetailScreen = () => {
           .single();
 
         if (widgetData) {
-          // Convert widget to goal format
           const content = typeof widgetData.content === 'string'
             ? JSON.parse(widgetData.content)
             : widgetData.content;
 
+          const actualGoalTitle = content?.goals?.[0]?.title
+            || content?.goalText
+            || content?.title
+            || widgetData.title
+            || 'Mục tiêu';
+
           goalData = {
             id: widgetData.id,
             user_id: widgetData.user_id,
-            title: widgetData.title || content?.title || content?.goals?.[0]?.title,
-            life_area: content?.lifeArea || 'personal',
+            title: actualGoalTitle,
+            life_area: content?.lifeArea || content?.life_area || 'personal',
             progress_percent: content?.progress || 0,
-            cover_image: content?.cover_image || null, // Extract cover_image from content
+            cover_image: content?.cover_image || null,
             created_at: widgetData.created_at,
             _isLegacy: true,
             _content: content,
           };
+
+          // Load linked widgets
+          const linkedId = widgetData.id;
+          const { data: potentialLinkedWidgets } = await supabase
+            .from('vision_board_widgets')
+            .select('*')
+            .eq('user_id', user.id)
+            .or('type.in.(affirmation,action_plan),widget_type.in.(affirmation,action_plan)');
+
+          const linkedIdStr = String(linkedId);
+          const linkedWidgets = (potentialLinkedWidgets || []).filter(w => {
+            if (w.id === widgetData.id) return false;
+            const c = typeof w.content === 'string' ? JSON.parse(w.content) : w.content;
+            const cLinkedId = c?.linked_goal_id ? String(c.linked_goal_id) : null;
+            const cGoalId = c?.goalId ? String(c.goalId) : null;
+            return cLinkedId === linkedIdStr || cGoalId === linkedIdStr;
+          });
+
+          // Extract affirmations and actions from linked widgets
+          let extractedAffirmations = [];
+          linkedWidgets.forEach(w => {
+            const c = typeof w.content === 'string' ? JSON.parse(w.content) : w.content;
+            const wType = w.type || w.widget_type;
+
+            if (wType === 'affirmation' && c?.affirmations) {
+              const affs = Array.isArray(c.affirmations) ? c.affirmations : [c.affirmations];
+              extractedAffirmations = [...extractedAffirmations, ...affs];
+            }
+
+            if ((wType === 'action_plan' || wType === 'habit') && c?.steps) {
+              goalData._linkedSteps = c.steps;
+            }
+          });
+
+          // Also check goal content for embedded data
+          if (content?.affirmations) {
+            const affs = Array.isArray(content.affirmations) ? content.affirmations : [content.affirmations];
+            extractedAffirmations = [...extractedAffirmations, ...affs];
+          }
+          if (content?.goals?.[0]?.affirmations) {
+            const affs = Array.isArray(content.goals[0].affirmations) ? content.goals[0].affirmations : [content.goals[0].affirmations];
+            extractedAffirmations = [...extractedAffirmations, ...affs];
+          }
+
+          // Normalize affirmations
+          const normalizedAffirmations = extractedAffirmations.map((a, i) => ({
+            id: a?.id || `aff_${i}`,
+            text: typeof a === 'string' ? a : (a?.text || a?.content || a?.affirmation || ''),
+          })).filter(a => a.text);
+
+          setAffirmations(normalizedAffirmations);
+
+          // Extract rituals - DEDUPLICATE by title to avoid showing same ritual twice
+          let extractedRituals = [];
+          if (content?.rituals) {
+            extractedRituals = Array.isArray(content.rituals) ? content.rituals : [content.rituals];
+          }
+          if (content?.goals?.[0]?.rituals) {
+            const r = content.goals[0].rituals;
+            extractedRituals = [...extractedRituals, ...(Array.isArray(r) ? r : [r])];
+          }
+          const normalizedRituals = extractedRituals.map((r, i) => ({
+            id: r?.id || `ritual_${i}`,
+            title: typeof r === 'string' ? r : (r?.title || r?.name || ''),
+            description: r?.description || '',
+            frequency: r?.frequency || 'daily',
+          })).filter(r => r.title);
+
+          // Deduplicate by title (case-insensitive)
+          const seenTitles = new Set();
+          const uniqueRituals = normalizedRituals.filter(r => {
+            const titleLower = r.title.toLowerCase().trim();
+            if (seenTitles.has(titleLower)) {
+              return false;
+            }
+            seenTitles.add(titleLower);
+            return true;
+          });
+          setRituals(uniqueRituals);
         }
+      } else {
+        setAffirmations([]);
+        setRituals([]);
       }
 
       if (!goalData) {
-        console.log('[GoalDetail] Goal not found');
         setLoading(false);
         return;
       }
@@ -183,61 +546,79 @@ const GoalDetailScreen = () => {
       setGoal(goalData);
       setEditTitle(goalData.title || '');
 
-      // Load actions - try RPC first, then fallback
-      try {
-        const { data: rpcResult } = await supabase.rpc('get_goal_actions_grouped', {
-          p_user_id: user.id,
-          p_goal_id: goalId,
+      // Load actions
+      let actionsLoaded = false;
+
+      // Try vision_actions table first
+      const { data: actionsData } = await supabase
+        .from('vision_actions')
+        .select('*')
+        .eq('goal_id', goalId)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (actionsData && actionsData.length > 0) {
+        setGroupedActions({
+          daily: actionsData.filter(a => a.action_type === 'daily'),
+          weekly: actionsData.filter(a => a.action_type === 'weekly'),
+          monthly: actionsData.filter(a => a.action_type === 'monthly'),
+          one_time_pending: actionsData.filter(a => a.action_type === 'one_time' && !a.is_completed),
+          one_time_completed: actionsData.filter(a => a.action_type === 'one_time' && a.is_completed),
         });
+        actionsLoaded = true;
+      }
 
-        if (rpcResult) {
-          setGroupedActions({
-            daily: rpcResult.daily || [],
-            weekly: rpcResult.weekly || [],
-            monthly: rpcResult.monthly || [],
-            one_time_pending: rpcResult.one_time_pending || [],
-            one_time_completed: rpcResult.one_time_completed || [],
-          });
+      // Fallback to legacy widget actions
+      if (!actionsLoaded && goalData._isLegacy) {
+        let legacyActions = [];
+
+        // From goal content
+        if (goalData._content?.steps) {
+          legacyActions = [...legacyActions, ...goalData._content.steps.map((s, i) => ({
+            id: s.id !== undefined ? `step_${s.id}` : `step_${i}`,
+            title: typeof s === 'string' ? s : (s.title || s.text || ''),
+            action_type: s.action_type || s.frequency || 'daily',
+            is_completed: s.completed || s.is_completed || false,
+            _isLegacy: true,
+          }))];
         }
-      } catch (rpcError) {
-        console.log('[GoalDetail] RPC not available, using fallback');
+        if (goalData._content?.actionSteps) {
+          legacyActions = [...legacyActions, ...goalData._content.actionSteps.map((s, i) => ({
+            id: s.id !== undefined ? `action_${s.id}` : `action_${i}`,
+            title: typeof s === 'string' ? s : (s.title || s.text || ''),
+            action_type: s.action_type || s.frequency || 'daily',
+            is_completed: s.completed || s.is_completed || false,
+            _isLegacy: true,
+          }))];
+        }
+        if (goalData._linkedSteps) {
+          legacyActions = [...legacyActions, ...goalData._linkedSteps.map((s, i) => ({
+            id: s.id !== undefined ? `linked_${s.id}` : `linked_${i}`,
+            title: typeof s === 'string' ? s : (s.title || s.text || ''),
+            action_type: s.action_type || s.frequency || 'daily',
+            is_completed: s.completed || s.is_completed || false,
+            _isLegacy: true,
+          }))];
+        }
+        if (goalData._content?.goals?.[0]?.actionSteps) {
+          legacyActions = [...legacyActions, ...goalData._content.goals[0].actionSteps.map((s, i) => ({
+            id: s.id !== undefined ? `gm_${s.id}` : `gm_${i}`,
+            title: typeof s === 'string' ? s : (s.title || s.text || ''),
+            action_type: s.action_type || s.frequency || 'daily',
+            is_completed: s.completed || s.is_completed || false,
+            _isLegacy: true,
+          }))];
+        }
 
-        // Fallback: Load from vision_actions directly
-        const { data: actionsData } = await supabase
-          .from('vision_actions')
-          .select('*')
-          .eq('goal_id', goalId)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: true });
-
-        if (actionsData) {
-          const grouped = {
-            daily: actionsData.filter(a => a.action_type === 'daily'),
-            weekly: actionsData.filter(a => a.action_type === 'weekly'),
-            monthly: actionsData.filter(a => a.action_type === 'monthly'),
-            one_time_pending: actionsData.filter(a => a.action_type === 'one_time' && !a.is_completed),
-            one_time_completed: actionsData.filter(a => a.action_type === 'one_time' && a.is_completed),
-          };
-          setGroupedActions(grouped);
-        } else {
-          // Try legacy widget actions
-          if (goalData._isLegacy && goalData._content?.steps) {
-            const legacyActions = goalData._content.steps.map((step, i) => ({
-              id: step.id || `legacy_${i}`,
-              title: step.title || step,
-              action_type: step.action_type || 'daily',
-              is_completed: step.completed || false,
-              _isLegacy: true,
-            }));
-
-            setGroupedActions({
-              daily: legacyActions.filter(a => a.action_type === 'daily'),
-              weekly: legacyActions.filter(a => a.action_type === 'weekly'),
-              monthly: legacyActions.filter(a => a.action_type === 'monthly'),
-              one_time_pending: legacyActions.filter(a => a.action_type === 'one_time' && !a.is_completed),
-              one_time_completed: legacyActions.filter(a => a.action_type === 'one_time' && a.is_completed),
-            });
-          }
+        legacyActions = legacyActions.filter(a => a.title);
+        if (legacyActions.length > 0) {
+          setGroupedActions({
+            daily: legacyActions.filter(a => a.action_type === 'daily'),
+            weekly: legacyActions.filter(a => a.action_type === 'weekly'),
+            monthly: legacyActions.filter(a => a.action_type === 'monthly'),
+            one_time_pending: legacyActions.filter(a => a.action_type === 'one_time' && !a.is_completed),
+            one_time_completed: legacyActions.filter(a => a.action_type === 'one_time' && a.is_completed),
+          });
         }
       }
     } catch (error) {
@@ -247,291 +628,20 @@ const GoalDetailScreen = () => {
     }
   }, [user?.id, goalId]);
 
-  // Initial load
   useEffect(() => {
     if (user?.id && goalId) {
       loadGoalData();
     }
   }, [user?.id, goalId, loadGoalData]);
 
-  // Refresh
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadGoalData();
     setRefreshing(false);
   };
 
-  // Toggle action with XP tracking
-  const handleToggleAction = async (action) => {
-    if (!user?.id) return;
-
-    Vibration.vibrate(10);
-
-    try {
-      const result = await toggleActionWithLog(user.id, action.id, action.is_completed);
-
-      if (result.success) {
-        // Show XP feedback if earned
-        if (result.xpEarned > 0) {
-          setXpEarned(result.xpEarned);
-          setShowXpFeedback(true);
-          setTimeout(() => setShowXpFeedback(false), 2000);
-        }
-
-        // Reload data
-        await loadGoalData();
-      }
-    } catch (error) {
-      console.error('[GoalDetail] Toggle action error:', error);
-      // Fallback for legacy actions
-      if (action._isLegacy) {
-        // Handle legacy toggle
-        await loadGoalData();
-      }
-    }
-  };
-
-  // Add new action
-  const handleAddAction = async (actionData) => {
-    if (!user?.id || !goalId) return;
-
-    setSavingAction(true);
-
-    try {
-      const result = await createActionWithType(user.id, goalId, {
-        title: actionData.title,
-        action_type: actionData.action_type,
-      });
-
-      if (result.success) {
-        setShowAddActionModal(false);
-        await loadGoalData();
-
-        setAlertConfig({
-          visible: true,
-          type: 'success',
-          title: 'Đã thêm!',
-          message: `Hành động "${actionData.title}" đã được thêm.`,
-          buttons: [{ text: 'OK', style: 'primary' }],
-        });
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (error) {
-      console.error('[GoalDetail] Add action error:', error);
-      setAlertConfig({
-        visible: true,
-        type: 'error',
-        title: 'Lỗi',
-        message: 'Không thể thêm hành động. Vui lòng thử lại.',
-        buttons: [{ text: 'OK', style: 'primary' }],
-      });
-    } finally {
-      setSavingAction(false);
-    }
-  };
-
-  // Delete action
-  const handleDeleteAction = (action) => {
-    setAlertConfig({
-      visible: true,
-      type: 'warning',
-      title: 'Xóa hành động',
-      message: `Bạn có chắc muốn xóa "${action.title}"?`,
-      buttons: [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Xóa',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await supabase
-                .from('vision_actions')
-                .delete()
-                .eq('id', action.id);
-              await loadGoalData();
-            } catch (error) {
-              console.error('[GoalDetail] Delete action error:', error);
-            }
-          },
-        },
-      ],
-    });
-  };
-
-  // Pick and upload cover image
-  const handlePickCoverImage = async () => {
-    try {
-      // Request permission
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        setAlertConfig({
-          visible: true,
-          type: 'warning',
-          title: 'Cần quyền truy cập',
-          message: 'Vui lòng cho phép ứng dụng truy cập thư viện ảnh để chọn hình.',
-          buttons: [{ text: 'OK', style: 'primary' }],
-        });
-        return;
-      }
-
-      // Launch image picker
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [16, 9],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        setUploadingImage(true);
-        const imageUri = result.assets[0].uri;
-
-        // Upload to Supabase Storage
-        const fileExt = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
-        const fileName = `${goalId}-${Date.now()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        // Read file as base64 (React Native compatible)
-        const base64 = await FileSystem.readAsStringAsync(imageUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        // Convert base64 to ArrayBuffer
-        const binaryString = atob(base64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const arrayBuffer = bytes.buffer;
-
-        const { error: uploadError } = await supabase.storage
-          .from('vision-board')
-          .upload(filePath, arrayBuffer, {
-            contentType: `image/${fileExt}`,
-            cacheControl: '3600',
-            upsert: true,
-          });
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('vision-board')
-          .getPublicUrl(filePath);
-
-        // Update the correct table based on goal type
-        if (goal?._isLegacy) {
-          // Update vision_board_widgets for legacy goals
-          const currentContent = goal._content || {};
-          const { error: updateError } = await supabase
-            .from('vision_board_widgets')
-            .update({
-              content: { ...currentContent, cover_image: publicUrl },
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', goalId);
-
-          if (updateError) throw updateError;
-        } else {
-          // Update vision_goals for new goals
-          const { error: updateError } = await supabase
-            .from('vision_goals')
-            .update({
-              cover_image: publicUrl,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', goalId);
-
-          if (updateError) throw updateError;
-        }
-
-        // Update local state
-        setGoal(prev => ({ ...prev, cover_image: publicUrl }));
-        setAlertConfig({
-          visible: true,
-          type: 'success',
-          title: 'Đã thêm hình!',
-          message: 'Hình ảnh minh họa đã được thêm vào mục tiêu.',
-          buttons: [{ text: 'OK', style: 'primary' }],
-        });
-      }
-    } catch (error) {
-      console.error('[GoalDetail] Pick cover image error:', error);
-      setAlertConfig({
-        visible: true,
-        type: 'error',
-        title: 'Lỗi',
-        message: 'Không thể tải hình lên. Vui lòng thử lại.',
-        buttons: [{ text: 'OK', style: 'primary' }],
-      });
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  // Remove cover image
-  const handleRemoveCoverImage = () => {
-    setAlertConfig({
-      visible: true,
-      type: 'warning',
-      title: 'Xóa hình ảnh',
-      message: 'Bạn có chắc muốn xóa hình ảnh minh họa này?',
-      buttons: [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Xóa',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setUploadingImage(true);
-
-              // Delete from storage if URL exists
-              if (goal?.cover_image) {
-                const urlParts = goal.cover_image.split('/vision-board/');
-                if (urlParts.length > 1) {
-                  const filePath = urlParts[1];
-                  await supabase.storage
-                    .from('vision-board')
-                    .remove([filePath]);
-                }
-              }
-
-              // Update the correct table based on goal type
-              if (goal?._isLegacy) {
-                const currentContent = goal._content || {};
-                delete currentContent.cover_image;
-                await supabase
-                  .from('vision_board_widgets')
-                  .update({
-                    content: currentContent,
-                    updated_at: new Date().toISOString(),
-                  })
-                  .eq('id', goalId);
-              } else {
-                await supabase
-                  .from('vision_goals')
-                  .update({
-                    cover_image: null,
-                    updated_at: new Date().toISOString(),
-                  })
-                  .eq('id', goalId);
-              }
-
-              setGoal(prev => ({ ...prev, cover_image: null }));
-            } catch (error) {
-              console.error('[GoalDetail] Remove cover image error:', error);
-            } finally {
-              setUploadingImage(false);
-            }
-          },
-        },
-      ],
-    });
-  };
-
-  // Calculate progress
-  const calculateProgress = () => {
+  // ========== CALCULATE PROGRESS ==========
+  const calculateProgress = useCallback(() => {
     const allActions = [
       ...groupedActions.daily,
       ...groupedActions.weekly,
@@ -539,80 +649,340 @@ const GoalDetailScreen = () => {
       ...groupedActions.one_time_pending,
       ...groupedActions.one_time_completed,
     ];
-
     if (allActions.length === 0) return 0;
-
     const completed = allActions.filter(a => a.is_completed).length;
     return Math.round((completed / allActions.length) * 100);
+  }, [groupedActions]);
+
+  const progress = calculateProgress() || goal?.progress_percent || 0;
+
+  // ========== SYNC PROGRESS TO WIDGET ==========
+  // Automatically sync progress to widget whenever it changes
+  // This ensures thumbnails in VisionBoardScreen show updated progress
+  useEffect(() => {
+    if (!goalId || !goal) return;
+
+    const syncProgress = async () => {
+      try {
+        const currentContent = goal._content || {};
+        // Only update if progress actually changed
+        if (currentContent.progress !== progress) {
+          await supabase
+            .from('vision_board_widgets')
+            .update({
+              content: {
+                ...currentContent,
+                progress: progress,
+              },
+            })
+            .eq('id', goalId);
+          console.log('[GoalDetail] Progress synced to widget:', progress);
+        }
+      } catch (err) {
+        console.error('[GoalDetail] Failed to sync progress:', err);
+      }
+    };
+
+    // Debounce the sync to avoid too many updates
+    const timeout = setTimeout(syncProgress, 500);
+    return () => clearTimeout(timeout);
+  }, [progress, goalId, goal]);
+
+  // ========== ACTION HANDLERS ==========
+  const handleToggleAction = async (action) => {
+    if (!user?.id) return;
+    Vibration.vibrate(10);
+
+    try {
+      if (action._isLegacy) {
+        // Toggle in widget content
+        const currentContent = goal._content || {};
+        const allSteps = [
+          ...(currentContent.steps || []),
+          ...(currentContent.actionSteps || []),
+          ...(goal._linkedSteps || []),
+        ];
+
+        const updatedSteps = allSteps.map(s => {
+          const sId = s.id !== undefined ? String(s.id) : s.title;
+          const aId = action.id.includes('_') ? action.id.split('_').pop() : action.id;
+          if (sId === aId || s.title === action.title) {
+            return { ...s, is_completed: !action.is_completed, completed: !action.is_completed };
+          }
+          return s;
+        });
+
+        await supabase
+          .from('vision_board_widgets')
+          .update({ content: { ...currentContent, steps: updatedSteps } })
+          .eq('id', goalId);
+      } else {
+        await supabase
+          .from('vision_actions')
+          .update({ is_completed: !action.is_completed })
+          .eq('id', action.id);
+      }
+
+      // Update local state immediately (progress sync handled by useEffect)
+      setGroupedActions(prev => {
+        const updateInArray = (arr) => arr.map(a =>
+          a.id === action.id ? { ...a, is_completed: !a.is_completed } : a
+        );
+        return {
+          daily: updateInArray(prev.daily),
+          weekly: updateInArray(prev.weekly),
+          monthly: updateInArray(prev.monthly),
+          one_time_pending: updateInArray(prev.one_time_pending),
+          one_time_completed: updateInArray(prev.one_time_completed),
+        };
+      });
+    } catch (error) {
+      console.error('[GoalDetail] Toggle error:', error);
+    }
   };
 
-  // Get config
+  const handleDeleteAction = async (action) => {
+    // Delete directly without confirmation
+    try {
+      if (action._isLegacy) {
+        const currentContent = goal._content || {};
+        const filterSteps = (arr) => arr?.filter(s =>
+          (s.id !== undefined ? String(s.id) : s.title) !== (action.id.includes('_') ? action.id.split('_').pop() : action.id) &&
+          s.title !== action.title
+        ) || [];
+
+        await supabase
+          .from('vision_board_widgets')
+          .update({
+            content: {
+              ...currentContent,
+              steps: filterSteps(currentContent.steps),
+              actionSteps: filterSteps(currentContent.actionSteps),
+            }
+          })
+          .eq('id', goalId);
+      } else {
+        await supabase.from('vision_actions').delete().eq('id', action.id);
+      }
+      await loadGoalData();
+    } catch (error) {
+      console.error('[GoalDetail] Delete error:', error);
+    }
+  };
+
+  const handleEditAction = (action) => {
+    setEditingActionId(action.id);
+    setEditingActionText(action.title);
+  };
+
+  const handleSaveEditAction = async () => {
+    if (!editingActionText.trim()) return;
+
+    try {
+      setGroupedActions(prev => {
+        const updateInArray = (arr) => arr.map(a =>
+          a.id === editingActionId ? { ...a, title: editingActionText.trim() } : a
+        );
+        return {
+          daily: updateInArray(prev.daily),
+          weekly: updateInArray(prev.weekly),
+          monthly: updateInArray(prev.monthly),
+          one_time_pending: updateInArray(prev.one_time_pending),
+          one_time_completed: updateInArray(prev.one_time_completed),
+        };
+      });
+
+      // TODO: Save to database
+      setEditingActionId(null);
+      setEditingActionText('');
+    } catch (error) {
+      console.error('[GoalDetail] Save edit error:', error);
+    }
+  };
+
+  const handleAddAction = async (actionData) => {
+    if (!user?.id || !goalId) return;
+    setSavingAction(true);
+
+    try {
+      if (goal?._isLegacy) {
+        const currentContent = goal._content || {};
+        const newAction = {
+          id: Date.now(),
+          title: actionData.title,
+          action_type: actionData.action_type || 'daily',
+          is_completed: false,
+        };
+        const updatedSteps = [...(currentContent.steps || []), newAction];
+
+        await supabase
+          .from('vision_board_widgets')
+          .update({ content: { ...currentContent, steps: updatedSteps } })
+          .eq('id', goalId);
+      } else {
+        await supabase.from('vision_actions').insert({
+          user_id: user.id,
+          goal_id: goalId,
+          title: actionData.title,
+          action_type: actionData.action_type || 'daily',
+          is_completed: false,
+        });
+      }
+
+      setShowAddActionModal(false);
+      await loadGoalData();
+    } catch (error) {
+      console.error('[GoalDetail] Add action error:', error);
+    } finally {
+      setSavingAction(false);
+    }
+  };
+
+  // ========== AFFIRMATION HANDLERS ==========
+  const handlePlayAffirmation = async (affirmation) => {
+    if (playingAffirmationId === affirmation.id) {
+      Speech.stop();
+      setPlayingAffirmationId(null);
+    } else {
+      setPlayingAffirmationId(affirmation.id);
+      Speech.speak(affirmation.text, {
+        language: 'vi-VN',
+        rate: 0.85, // Slower for better comprehension
+        onDone: () => setPlayingAffirmationId(null),
+        onError: () => setPlayingAffirmationId(null),
+      });
+    }
+  };
+
+  const handleDeleteAffirmation = (affirmation) => {
+    // Delete directly without confirmation
+    setAffirmations(prev => prev.filter(a => a.id !== affirmation.id));
+    // TODO: Save to database
+  };
+
+  const handleEditAffirmation = (affirmation) => {
+    setEditingAffirmationId(affirmation.id);
+    setEditingAffirmationText(affirmation.text);
+  };
+
+  const handleSaveEditAffirmation = () => {
+    if (!editingAffirmationText.trim()) return;
+    setAffirmations(prev => prev.map(a =>
+      a.id === editingAffirmationId ? { ...a, text: editingAffirmationText.trim() } : a
+    ));
+    setEditingAffirmationId(null);
+    setEditingAffirmationText('');
+    // TODO: Save to database
+  };
+
+  const handleAddAffirmation = () => {
+    if (!newAffirmationText.trim()) return;
+    const newAff = {
+      id: `aff_${Date.now()}`,
+      text: newAffirmationText.trim(),
+    };
+    setAffirmations(prev => [...prev, newAff]);
+    setNewAffirmationText('');
+    setShowAddAffirmationModal(false);
+    // TODO: Save to database
+  };
+
+  // ========== TITLE EDIT HANDLER ==========
+  const handleSaveTitle = async () => {
+    if (!editTitle.trim()) return;
+
+    try {
+      if (goal?._isLegacy) {
+        const currentContent = goal._content || {};
+        await supabase
+          .from('vision_board_widgets')
+          .update({
+            title: editTitle.trim(),
+            content: {
+              ...currentContent,
+              title: editTitle.trim(),
+              goals: currentContent.goals?.map((g, i) =>
+                i === 0 ? { ...g, title: editTitle.trim() } : g
+              ) || [{ title: editTitle.trim() }],
+            }
+          })
+          .eq('id', goalId);
+      } else {
+        await supabase
+          .from('vision_goals')
+          .update({ title: editTitle.trim() })
+          .eq('id', goalId);
+      }
+
+      setGoal(prev => ({ ...prev, title: editTitle.trim() }));
+      setIsEditingTitle(false);
+    } catch (error) {
+      console.error('[GoalDetail] Save title error:', error);
+    }
+  };
+
+  // ========== COVER IMAGE HANDLERS ==========
+  const handlePickCoverImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Cần quyền truy cập', 'Vui lòng cho phép truy cập thư viện ảnh.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setUploadingImage(true);
+        const imageUri = result.assets[0].uri;
+        const fileExt = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
+        const fileName = `${goalId}-${Date.now()}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const base64 = await FileSystem.readAsStringAsync(imageUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const bytes = new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
+
+        await supabase.storage.from('vision-board').upload(filePath, bytes.buffer, {
+          contentType: `image/${fileExt}`,
+          upsert: true,
+        });
+
+        const { data: { publicUrl } } = supabase.storage.from('vision-board').getPublicUrl(filePath);
+
+        if (goal?._isLegacy) {
+          await supabase.from('vision_board_widgets').update({
+            content: { ...goal._content, cover_image: publicUrl },
+          }).eq('id', goalId);
+        } else {
+          await supabase.from('vision_goals').update({ cover_image: publicUrl }).eq('id', goalId);
+        }
+
+        setGoal(prev => ({ ...prev, cover_image: publicUrl }));
+      }
+    } catch (error) {
+      console.error('[GoalDetail] Upload error:', error);
+      Alert.alert('Lỗi', 'Không thể tải hình lên.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // ========== RENDER ==========
   const lifeArea = goal?.life_area || 'personal';
   const config = LIFE_AREA_CONFIG[lifeArea] || LIFE_AREA_CONFIG.personal;
-  const IconComponent = Icons[config.icon] || Icons.Target;
-  const progress = goal?.progress_percent || calculateProgress();
-
-  // Render action group
-  const renderActionGroup = (title, actions, actionType) => {
-    if (!actions || actions.length === 0) return null;
-
-    const typeConfig = ACTION_TYPE_CONFIG[actionType] || ACTION_TYPE_CONFIG.daily;
-    const TypeIcon = Icons[typeConfig.icon] || Icons.Check;
-
-    return (
-      <View style={styles.actionGroup}>
-        {/* Group Header */}
-        <View style={styles.groupHeader}>
-          <View style={[styles.groupIconContainer, { backgroundColor: typeConfig.bgColor }]}>
-            <TypeIcon size={16} color={typeConfig.color} />
-          </View>
-          <Text style={[styles.groupTitle, { color: typeConfig.color }]}>{title}</Text>
-          <Text style={styles.groupCount}>
-            {actions.filter(a => a.is_completed).length}/{actions.length}
-          </Text>
-        </View>
-
-        {/* Actions */}
-        {actions.map((action) => (
-          <TouchableOpacity
-            key={action.id}
-            style={[styles.actionItem, action.is_completed && styles.actionItemCompleted]}
-            onPress={() => handleToggleAction(action)}
-            onLongPress={() => handleDeleteAction(action)}
-            activeOpacity={0.7}
-          >
-            <View style={[
-              styles.checkbox,
-              action.is_completed && [styles.checkboxCompleted, { backgroundColor: typeConfig.color }]
-            ]}>
-              {action.is_completed && (
-                <Icons.Check size={14} color={COLORS.bgDarkest} />
-              )}
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={[
-                styles.actionText,
-                action.is_completed && styles.actionTextCompleted
-              ]}>
-                {action.title}
-              </Text>
-              {!action.is_completed && actionType !== 'one_time' && (
-                <Text style={[styles.actionHint, { color: typeConfig.color }]}>
-                  {typeConfig.description}
-                </Text>
-              )}
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
-    );
-  };
+  const AreaIcon = config.icon || Target;
 
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <LinearGradient colors={GRADIENTS.darkPurple} style={StyleSheet.absoluteFill} />
-        <ActivityIndicator size="large" color={COLORS.purple} />
+        <ActivityIndicator size="large" color={THEME.primary} />
         <Text style={styles.loadingText}>Đang tải...</Text>
       </SafeAreaView>
     );
@@ -624,201 +994,386 @@ const GoalDetailScreen = () => {
         <LinearGradient colors={GRADIENTS.darkPurple} style={StyleSheet.absoluteFill} />
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Icons.ArrowLeft size={24} color={COLORS.textPrimary} />
+            <ArrowLeft size={24} color={THEME.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chi tiết mục tiêu</Text>
-          <View style={styles.placeholder} />
+          <View style={{ width: 32 }} />
         </View>
         <View style={styles.errorContainer}>
-          <Icons.AlertCircle size={48} color={COLORS.error} />
+          <AlertCircle size={48} color={THEME.danger} />
           <Text style={styles.errorText}>Không tìm thấy mục tiêu</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <LinearGradient colors={GRADIENTS.darkPurple} style={StyleSheet.absoluteFill} />
+  // Render action group
+  const renderActionGroup = (title, actions, actionType) => {
+    if (!actions || actions.length === 0) return null;
+    const typeConfig = ACTION_TYPE_CONFIG[actionType] || ACTION_TYPE_CONFIG.daily;
+    const TypeIcon = typeConfig.icon;
+    const completedCount = actions.filter(a => a.is_completed).length;
 
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icons.ArrowLeft size={24} color={COLORS.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chi tiết mục tiêu</Text>
-        <TouchableOpacity onPress={() => setIsEditing(!isEditing)} style={styles.editButton}>
-          <Icons.Edit3 size={20} color={COLORS.purple} />
-        </TouchableOpacity>
-      </View>
-
-      {/* XP Feedback */}
-      {showXpFeedback && (
-        <View style={styles.xpFeedback}>
-          <Icons.Sparkles size={18} color={COLORS.gold} />
-          <Text style={styles.xpFeedbackText}>+{xpEarned} XP</Text>
+    return (
+      <View style={styles.actionGroup}>
+        {/* Group Header - with hint only once */}
+        <View style={styles.groupHeader}>
+          <View style={styles.groupHeaderLeft}>
+            <View style={styles.groupIconContainer}>
+              <TypeIcon size={16} color={THEME.primary} />
+            </View>
+            <View>
+              <Text style={styles.groupTitle}>{title}</Text>
+              {typeConfig.hint ? (
+                <Text style={styles.groupHint}>{typeConfig.hint}</Text>
+              ) : null}
+            </View>
+          </View>
+          <Text style={styles.groupCount}>{completedCount}/{actions.length}</Text>
         </View>
-      )}
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={COLORS.purple}
-          />
-        }
-      >
-        {/* Goal Card */}
-        <View style={[styles.goalCard, { borderColor: `${config.color}50` }]}>
-          {/* Cover Image Section */}
-          {goal?.cover_image ? (
-            <View style={styles.coverImageContainer}>
-              <Image
-                source={{ uri: goal.cover_image }}
-                style={styles.coverImage}
-                resizeMode="cover"
+        {/* Actions */}
+        {actions.map((action) => (
+          editingActionId === action.id ? (
+            <View key={action.id} style={styles.editingContainer}>
+              <TextInput
+                style={styles.editInput}
+                value={editingActionText}
+                onChangeText={setEditingActionText}
+                autoFocus
+                onSubmitEditing={handleSaveEditAction}
               />
-              <View style={styles.coverImageOverlay}>
-                <TouchableOpacity
-                  style={styles.coverImageButton}
-                  onPress={handlePickCoverImage}
-                  disabled={uploadingImage}
-                >
-                  <Icons.Camera size={16} color={COLORS.textPrimary} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.coverImageButton, styles.coverImageButtonDanger]}
-                  onPress={handleRemoveCoverImage}
-                  disabled={uploadingImage}
-                >
-                  <Icons.Trash2 size={16} color={COLORS.error} />
-                </TouchableOpacity>
-              </View>
-              {uploadingImage && (
-                <View style={styles.coverImageLoading}>
-                  <ActivityIndicator size="small" color={COLORS.gold} />
-                </View>
-              )}
+              <TouchableOpacity onPress={handleSaveEditAction} style={styles.saveBtn}>
+                <Check size={18} color={THEME.accent} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setEditingActionId(null)} style={styles.cancelBtn}>
+                <X size={18} color={THEME.textMuted} />
+              </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity
-              style={styles.addCoverImageButton}
-              onPress={handlePickCoverImage}
-              disabled={uploadingImage}
-            >
-              {uploadingImage ? (
-                <ActivityIndicator size="small" color={COLORS.gold} />
-              ) : (
-                <>
-                  <Icons.ImagePlus size={24} color={COLORS.gold} />
-                  <Text style={styles.addCoverImageText}>Thêm hình ảnh minh họa</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
-
-          {/* Icon and Title */}
-          <View style={styles.goalHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: `${config.color}20` }]}>
-              <IconComponent size={32} color={config.color} />
-            </View>
-
-            <View style={styles.goalInfo}>
-              <Text style={[styles.lifeAreaLabel, { color: config.color }]}>
-                {config.label}
-              </Text>
-              <Text style={styles.goalTitle}>{goal.title || 'Mục tiêu'}</Text>
-            </View>
-          </View>
-
-          {/* Progress Ring */}
-          <View style={styles.progressSection}>
-            <ScoreRing
-              score={progress}
-              label="Tiến độ"
-              size={100}
-              gradientColors={[config.color, `${config.color}80`]}
+            <SwipeableActionItem
+              key={action.id}
+              action={action}
+              onToggle={handleToggleAction}
+              onEdit={handleEditAction}
+              onDelete={handleDeleteAction}
+              isCompleted={action.is_completed}
             />
-          </View>
+          )
+        ))}
+      </View>
+    );
+  };
 
-          {/* Milestones */}
-          <View style={styles.milestonesSection}>
-            <MilestoneIndicator progress={progress} />
-          </View>
-        </View>
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <LinearGradient colors={GRADIENTS.darkPurple} style={StyleSheet.absoluteFill} />
 
-        {/* Actions Sections - Grouped by Type */}
-        <View style={styles.actionsContainer}>
-          <View style={styles.actionsSectionHeader}>
-            <Icons.ListTodo size={20} color={COLORS.textPrimary} />
-            <Text style={styles.actionsSectionTitle}>Kế hoạch hành động</Text>
-          </View>
-
-          {renderActionGroup('Hàng ngày', groupedActions.daily, 'daily')}
-          {renderActionGroup('Hàng tuần', groupedActions.weekly, 'weekly')}
-          {renderActionGroup('Hàng tháng', groupedActions.monthly, 'monthly')}
-          {renderActionGroup('Cần làm', groupedActions.one_time_pending, 'one_time')}
-          {groupedActions.one_time_completed.length > 0 && (
-            renderActionGroup('Đã hoàn thành', groupedActions.one_time_completed, 'one_time')
-          )}
-
-          {/* Empty State */}
-          {Object.values(groupedActions).flat().length === 0 && (
-            <View style={styles.emptyActions}>
-              <Icons.ClipboardList size={32} color={COLORS.textMuted} />
-              <Text style={styles.emptyActionsText}>
-                Chưa có hành động nào. Thêm hành động để bắt đầu!
-              </Text>
-            </View>
-          )}
-
-          {/* Add Action Button */}
-          <TouchableOpacity
-            style={styles.addActionButton}
-            onPress={() => setShowAddActionModal(true)}
-          >
-            <Icons.Plus size={20} color={COLORS.gold} />
-            <Text style={styles.addActionText}>Thêm hành động</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <ArrowLeft size={24} color={THEME.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Chi tiết mục tiêu</Text>
+          <TouchableOpacity onPress={() => setIsEditingTitle(true)} style={styles.editButton}>
+            <Edit3 size={20} color={THEME.primary} />
           </TouchableOpacity>
         </View>
 
-        {/* Tips */}
-        <View style={styles.tipsCard}>
-          <Icons.Info size={16} color={COLORS.cyan} />
-          <Text style={styles.tipsText}>
-            Hành động hàng ngày sẽ tự reset mỗi ngày mới. Giữ lâu để xóa.
-          </Text>
-        </View>
+        {/* XP Feedback */}
+        {showXpFeedback && (
+          <View style={styles.xpFeedback}>
+            <Sparkles size={18} color={THEME.accent} />
+            <Text style={styles.xpFeedbackText}>+{xpEarned} XP</Text>
+          </View>
+        )}
 
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={THEME.primary}
+            />
+          }
+        >
+          {/* Goal Card */}
+          <View style={styles.goalCard}>
+            {/* Cover Image */}
+            {goal?.cover_image ? (
+              <View style={styles.coverImageContainer}>
+                <Image source={{ uri: goal.cover_image }} style={styles.coverImage} resizeMode="cover" />
+                <View style={styles.coverImageOverlay}>
+                  <TouchableOpacity style={styles.coverImageButton} onPress={handlePickCoverImage} disabled={uploadingImage}>
+                    <Camera size={16} color={THEME.text} />
+                  </TouchableOpacity>
+                </View>
+                {uploadingImage && (
+                  <View style={styles.coverImageLoading}>
+                    <ActivityIndicator size="small" color={THEME.accent} />
+                  </View>
+                )}
+              </View>
+            ) : (
+              <TouchableOpacity style={styles.addCoverImageButton} onPress={handlePickCoverImage} disabled={uploadingImage}>
+                {uploadingImage ? (
+                  <ActivityIndicator size="small" color={THEME.accent} />
+                ) : (
+                  <>
+                    <ImagePlus size={24} color={THEME.accent} />
+                    <Text style={styles.addCoverImageText}>Thêm hình ảnh</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
 
-      {/* Add Action Modal */}
-      <AddActionModal
-        visible={showAddActionModal}
-        onClose={() => setShowAddActionModal(false)}
-        onSave={handleAddAction}
-        goalTitle={goal?.title}
-        isLoading={savingAction}
-      />
+            {/* Title */}
+            <View style={styles.goalHeader}>
+              <View style={styles.iconContainer}>
+                <AreaIcon size={28} color={THEME.primary} />
+              </View>
+              <View style={styles.goalInfo}>
+                <Text style={styles.lifeAreaLabel}>{config.label}</Text>
+                {isEditingTitle ? (
+                  <View style={styles.editTitleContainer}>
+                    <TextInput
+                      style={styles.editTitleInput}
+                      value={editTitle}
+                      onChangeText={setEditTitle}
+                      autoFocus
+                      onSubmitEditing={handleSaveTitle}
+                    />
+                    <TouchableOpacity onPress={handleSaveTitle}>
+                      <Check size={20} color={THEME.accent} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setIsEditingTitle(false)}>
+                      <X size={20} color={THEME.textMuted} />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Text style={styles.goalTitle}>{goal.title || 'Mục tiêu'}</Text>
+                )}
+              </View>
+            </View>
 
-      {/* Alert */}
-      <CustomAlert
-        visible={alertConfig.visible}
-        type={alertConfig.type}
-        title={alertConfig.title}
-        message={alertConfig.message}
-        buttons={alertConfig.buttons}
-        onClose={() => setAlertConfig({ visible: false })}
-      />
-    </SafeAreaView>
+            {/* Progress */}
+            <View style={styles.progressSection}>
+              <ScoreRing
+                score={progress}
+                label="Tiến độ"
+                size={100}
+                gradientColors={[THEME.primary, THEME.accent]}
+              />
+            </View>
+
+            <MilestoneIndicator progress={progress} />
+          </View>
+
+          {/* Actions Section */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <ListTodo size={20} color={THEME.text} />
+              <Text style={styles.sectionTitle}>Kế hoạch hành động</Text>
+            </View>
+
+            {renderActionGroup('Hàng ngày', groupedActions.daily, 'daily')}
+            {renderActionGroup('Hàng tuần', groupedActions.weekly, 'weekly')}
+            {renderActionGroup('Hàng tháng', groupedActions.monthly, 'monthly')}
+            {renderActionGroup('Cần làm', groupedActions.one_time_pending, 'one_time')}
+            {groupedActions.one_time_completed.length > 0 &&
+              renderActionGroup('Đã hoàn thành', groupedActions.one_time_completed, 'one_time')}
+
+            {Object.values(groupedActions).flat().length === 0 && (
+              <View style={styles.emptyState}>
+                <ClipboardList size={32} color={THEME.textMuted} />
+                <Text style={styles.emptyStateText}>Chưa có hành động nào</Text>
+              </View>
+            )}
+
+            <TouchableOpacity style={styles.addButton} onPress={() => setShowAddActionModal(true)}>
+              <Plus size={18} color={THEME.accent} />
+              <Text style={styles.addButtonText}>Thêm hành động</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Affirmations Section */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Sparkles size={20} color={THEME.accent} />
+              <Text style={styles.sectionTitle}>Câu khẳng định</Text>
+            </View>
+
+            {affirmations.length > 0 ? (
+              affirmations.map((aff) => (
+                editingAffirmationId === aff.id ? (
+                  <View key={aff.id} style={styles.editingContainer}>
+                    <TextInput
+                      style={[styles.editInput, { flex: 1 }]}
+                      value={editingAffirmationText}
+                      onChangeText={setEditingAffirmationText}
+                      autoFocus
+                      multiline
+                      onSubmitEditing={handleSaveEditAffirmation}
+                    />
+                    <TouchableOpacity onPress={handleSaveEditAffirmation} style={styles.saveBtn}>
+                      <Check size={18} color={THEME.accent} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setEditingAffirmationId(null)} style={styles.cancelBtn}>
+                      <X size={18} color={THEME.textMuted} />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <SwipeableAffirmationItem
+                    key={aff.id}
+                    affirmation={aff}
+                    onEdit={handleEditAffirmation}
+                    onDelete={handleDeleteAffirmation}
+                    onPlay={handlePlayAffirmation}
+                    isPlaying={playingAffirmationId === aff.id}
+                  />
+                )
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Quote size={32} color={THEME.textMuted} />
+                <Text style={styles.emptyStateText}>Chưa có câu khẳng định</Text>
+              </View>
+            )}
+
+            <TouchableOpacity style={styles.addButton} onPress={() => setShowAddAffirmationModal(true)}>
+              <Plus size={18} color={THEME.accent} />
+              <Text style={styles.addButtonText}>Thêm câu khẳng định</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Rituals Section */}
+          {rituals.length > 0 && (
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeader}>
+                <Moon size={20} color={THEME.primary} />
+                <Text style={styles.sectionTitle}>Nghi thức</Text>
+              </View>
+              {rituals.map((ritual, index) => {
+                // Find matching ritual screen by title
+                const ritualTitle = ritual.title?.toLowerCase().trim() || '';
+                let screenName = null;
+
+                // Match by title to find the correct ritual screen
+                for (const [ritualId, metadata] of Object.entries(RITUAL_METADATA)) {
+                  if (metadata.name?.toLowerCase().trim() === ritualTitle) {
+                    screenName = RITUAL_SCREENS[ritualId];
+                    break;
+                  }
+                }
+
+                // Also try matching by ID if title didn't match
+                if (!screenName && ritual.id) {
+                  screenName = RITUAL_SCREENS[ritual.id];
+                }
+
+                return (
+                  <TouchableOpacity
+                    key={`ritual_${index}_${ritual?.id || 'unknown'}`}
+                    style={styles.ritualItem}
+                    onPress={() => {
+                      if (screenName) {
+                        navigation.navigate(screenName, { goalId: goal?.id });
+                      }
+                    }}
+                    activeOpacity={screenName ? 0.7 : 1}
+                  >
+                    <View style={styles.ritualIconContainer}>
+                      <Flower2 size={18} color={THEME.primary} />
+                    </View>
+                    <View style={styles.ritualContent}>
+                      <Text style={styles.ritualTitle}>{ritual.title}</Text>
+                      {ritual.description ? (
+                        <Text style={styles.ritualDescription}>{ritual.description}</Text>
+                      ) : null}
+                    </View>
+                    {screenName && (
+                      <ChevronRight size={20} color={THEME.textMuted} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+
+          {/* Tips */}
+          <View style={styles.tipsCard}>
+            <Info size={16} color={THEME.primary} />
+            <Text style={styles.tipsText}>
+              Vuốt sang trái để xóa hoặc chỉnh sửa. Bấm vào checkbox để hoàn thành.
+            </Text>
+          </View>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+
+        {/* Add Action Modal */}
+        <AddActionModal
+          visible={showAddActionModal}
+          onClose={() => setShowAddActionModal(false)}
+          onSave={handleAddAction}
+          goalTitle={goal?.title}
+          isLoading={savingAction}
+        />
+
+        {/* Add Affirmation Modal */}
+        {showAddAffirmationModal && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Thêm câu khẳng định</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Nhập câu khẳng định..."
+                placeholderTextColor={THEME.textMuted}
+                value={newAffirmationText}
+                onChangeText={setNewAffirmationText}
+                multiline
+                autoFocus
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalButtonCancel]}
+                  onPress={() => {
+                    setShowAddAffirmationModal(false);
+                    setNewAffirmationText('');
+                  }}
+                >
+                  <Text style={styles.modalButtonCancelText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalButtonSave]}
+                  onPress={handleAddAffirmation}
+                >
+                  <Text style={styles.modalButtonSaveText}>Thêm</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Alert */}
+        <CustomAlert
+          visible={alertConfig.visible}
+          type={alertConfig.type}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          buttons={alertConfig.buttons}
+          onClose={() => setAlertConfig({ visible: false })}
+        />
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 
+// ========== STYLES ==========
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -828,11 +1383,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.bgDarkest,
   },
   loadingText: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.md,
+    color: THEME.textSecondary,
     marginTop: SPACING.md,
   },
   errorContainer: {
@@ -841,8 +1394,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.md,
+    color: THEME.textSecondary,
     marginTop: SPACING.md,
   },
 
@@ -856,20 +1408,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
-  backButton: {
-    padding: SPACING.xs,
-  },
+  backButton: { padding: SPACING.xs },
   headerTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: THEME.text,
+    fontSize: 18,
+    fontWeight: '700',
   },
-  editButton: {
-    padding: SPACING.xs,
-  },
-  placeholder: {
-    width: 32,
-  },
+  editButton: { padding: SPACING.xs },
 
   // XP Feedback
   xpFeedback: {
@@ -878,7 +1423,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    backgroundColor: THEME.accentLight,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
     borderRadius: 20,
@@ -886,15 +1431,13 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   xpFeedbackText: {
-    color: COLORS.gold,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: THEME.accent,
+    fontSize: 16,
+    fontWeight: '700',
   },
 
   // Scroll
-  scrollView: {
-    flex: 1,
-  },
+  scrollView: { flex: 1 },
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
@@ -902,14 +1445,13 @@ const styles = StyleSheet.create({
 
   // Goal Card
   goalCard: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: GLASS.borderRadius,
+    backgroundColor: THEME.cardBg,
+    borderRadius: 16,
     padding: SPACING.lg,
-    borderWidth: GLASS.borderWidth,
+    borderWidth: 1,
+    borderColor: THEME.primaryBorder,
     marginBottom: SPACING.lg,
   },
-
-  // Cover Image Styles
   coverImageContainer: {
     position: 'relative',
     marginBottom: SPACING.lg,
@@ -918,33 +1460,24 @@ const styles = StyleSheet.create({
   },
   coverImage: {
     width: '100%',
-    height: 160,
+    aspectRatio: 1,
     borderRadius: 12,
   },
   coverImageOverlay: {
     position: 'absolute',
     top: SPACING.sm,
     right: SPACING.sm,
-    flexDirection: 'row',
-    gap: SPACING.xs,
   },
   coverImageButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  coverImageButtonDanger: {
-    backgroundColor: 'rgba(255, 0, 0, 0.4)',
-  },
   coverImageLoading: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -954,20 +1487,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: SPACING.sm,
-    paddingVertical: SPACING.lg,
+    paddingVertical: SPACING.xl,
     marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderColor: THEME.accentBorder,
     borderStyle: 'dashed',
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 189, 89, 0.08)',
+    backgroundColor: THEME.accentLight,
   },
   addCoverImageText: {
-    color: COLORS.gold,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: THEME.accent,
+    fontWeight: '600',
   },
-
   goalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -977,48 +1508,61 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
+    backgroundColor: THEME.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
   },
-  goalInfo: {
-    flex: 1,
-  },
+  goalInfo: { flex: 1 },
   lifeAreaLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    marginBottom: 2,
+    color: THEME.primary,
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
   },
   goalTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: THEME.text,
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  editTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  editTitleInput: {
+    flex: 1,
+    color: THEME.text,
+    fontSize: 18,
+    fontWeight: '600',
+    borderBottomWidth: 1,
+    borderBottomColor: THEME.primary,
+    paddingVertical: 4,
   },
   progressSection: {
     alignItems: 'center',
     marginBottom: SPACING.md,
   },
-  milestonesSection: {
-    marginTop: SPACING.sm,
-  },
 
-  // Actions Container
-  actionsContainer: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: GLASS.borderRadius,
+  // Section Card
+  sectionCard: {
+    backgroundColor: THEME.cardBg,
+    borderRadius: 16,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
-  actionsSectionHeader: {
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.lg,
     gap: SPACING.sm,
   },
-  actionsSectionTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  sectionTitle: {
+    color: THEME.text,
+    fontSize: 16,
+    fontWeight: '700',
   },
 
   // Action Group
@@ -1028,104 +1572,217 @@ const styles = StyleSheet.create({
   groupHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: SPACING.sm,
   },
+  groupHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
   groupIconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: THEME.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: SPACING.sm,
   },
   groupTitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    flex: 1,
+    color: THEME.primary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  groupHint: {
+    color: THEME.textMuted,
+    fontSize: 11,
   },
   groupCount: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
+    color: THEME.textMuted,
+    fontSize: 13,
   },
 
   // Action Item
   actionItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderRadius: 12,
     padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   actionItemCompleted: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: THEME.primaryBorder,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
-    marginTop: 2,
   },
   checkboxCompleted: {
-    borderWidth: 0,
-  },
-  actionContent: {
-    flex: 1,
+    backgroundColor: THEME.primary,
+    borderColor: THEME.primary,
   },
   actionText: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.md,
+    flex: 1,
+    color: THEME.text,
+    fontSize: 14,
   },
   actionTextCompleted: {
     textDecorationLine: 'line-through',
-    color: COLORS.textMuted,
+    color: THEME.textMuted,
   },
-  actionHint: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginTop: 2,
+
+  // Swipe Actions
+  swipeActionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    height: 52, // Match action item height
+    marginBottom: SPACING.xs,
+  },
+  swipeAction: {
+    flexDirection: 'row',
+    height: '100%',
+  },
+  swipeBtn: {
+    width: 56,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editBtn: {
+    backgroundColor: THEME.primary,
+  },
+  deleteBtn: {
+    backgroundColor: THEME.danger,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  playBtn: {
+    backgroundColor: THEME.accent,
+  },
+
+  // Editing
+  editingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: SPACING.sm,
+    marginBottom: SPACING.xs,
+    gap: SPACING.sm,
+  },
+  editInput: {
+    flex: 1,
+    color: THEME.text,
+    fontSize: 14,
+    padding: SPACING.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 8,
+  },
+  saveBtn: {
+    padding: SPACING.xs,
+  },
+  cancelBtn: {
+    padding: SPACING.xs,
   },
 
   // Empty State
-  emptyActions: {
+  emptyState: {
     alignItems: 'center',
     paddingVertical: SPACING.xl,
   },
-  emptyActionsText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    textAlign: 'center',
+  emptyStateText: {
+    color: THEME.textMuted,
     marginTop: SPACING.sm,
   },
 
-  // Add Action Button
-  addActionButton: {
+  // Add Button
+  addButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    backgroundColor: THEME.accentLight,
     borderRadius: 12,
     paddingVertical: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderColor: THEME.accentBorder,
     borderStyle: 'dashed',
     gap: SPACING.sm,
   },
-  addActionText: {
-    color: COLORS.gold,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  addButtonText: {
+    color: THEME.accent,
+    fontWeight: '600',
+  },
+
+  // Affirmation Item
+  affirmationItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: THEME.accentLight,
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: THEME.accent,
+  },
+  quoteIcon: {
+    marginRight: SPACING.sm,
+    marginTop: 2,
+  },
+  affirmationText: {
+    flex: 1,
+    color: THEME.text,
+    fontSize: 14,
+    fontStyle: 'italic',
+    lineHeight: 20,
+  },
+  inlinePlayBtn: {
+    padding: SPACING.xs,
+    marginLeft: SPACING.sm,
+  },
+
+  // Ritual Item
+  ritualItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: THEME.primaryLight,
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  ritualIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  ritualContent: { flex: 1 },
+  ritualTitle: {
+    color: THEME.text,
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  ritualDescription: {
+    color: THEME.textSecondary,
+    fontSize: 12,
+    lineHeight: 16,
   },
 
   // Tips
   tipsCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 240, 255, 0.08)',
+    backgroundColor: THEME.primaryLight,
     borderRadius: 12,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
@@ -1133,13 +1790,67 @@ const styles = StyleSheet.create({
   },
   tipsText: {
     flex: 1,
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    lineHeight: 18,
+    color: THEME.textSecondary,
+    fontSize: 12,
+    lineHeight: 16,
   },
 
-  bottomSpacing: {
-    height: 100,
+  // Modal
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: THEME.cardBg,
+    borderRadius: 16,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: THEME.primaryBorder,
+  },
+  modalTitle: {
+    color: THEME.text,
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: SPACING.lg,
+    textAlign: 'center',
+  },
+  modalInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    color: THEME.text,
+    fontSize: 14,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: SPACING.lg,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  modalButtonCancel: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  modalButtonCancelText: {
+    color: THEME.textSecondary,
+    fontWeight: '600',
+  },
+  modalButtonSave: {
+    backgroundColor: THEME.accent,
+  },
+  modalButtonSaveText: {
+    color: '#000',
+    fontWeight: '700',
   },
 });
 

@@ -121,11 +121,19 @@ export const calculateDailyScore = async (userId) => {
 // ============ CALCULATE STREAK ============
 export const calculateStreak = async (userId) => {
   try {
-    const { data: stats } = await supabase
+    console.log('[statsService] calculateStreak - fetching for user:', userId);
+
+    const { data: stats, error } = await supabase
       .from('vision_user_stats')
       .select('current_streak, best_streak')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle() instead of single() to avoid error when no row exists
+
+    if (error) {
+      console.error('[statsService] calculateStreak query error:', error);
+    }
+
+    console.log('[statsService] calculateStreak result:', stats);
 
     return {
       currentStreak: stats?.current_streak || 0,
@@ -140,23 +148,35 @@ export const calculateStreak = async (userId) => {
 // ============ UPDATE STREAK ============
 export const updateStreak = async (userId) => {
   try {
+    console.log('[statsService] updateStreak - updating for user:', userId);
+
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
     // Check if user completed something yesterday
-    const { data: yesterdaySummary } = await supabase
+    const { data: yesterdaySummary, error: yesterdayError } = await supabase
       .from('vision_daily_summary')
       .select('daily_score')
       .eq('user_id', userId)
       .eq('summary_date', yesterday)
-      .single();
+      .maybeSingle(); // Use maybeSingle to avoid error when no row exists
+
+    if (yesterdayError) {
+      console.error('[statsService] updateStreak yesterday query error:', yesterdayError);
+    }
 
     // Get current streak
-    const { data: stats } = await supabase
+    const { data: stats, error: statsError } = await supabase
       .from('vision_user_stats')
       .select('current_streak, best_streak')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle to avoid error when no row exists
+
+    if (statsError) {
+      console.error('[statsService] updateStreak stats query error:', statsError);
+    }
+
+    console.log('[statsService] updateStreak - yesterday summary:', yesterdaySummary, 'current stats:', stats);
 
     let newStreak = 1;
 
@@ -168,14 +188,20 @@ export const updateStreak = async (userId) => {
     const newBestStreak = Math.max(stats?.best_streak || 0, newStreak);
 
     // Update
-    await supabase
+    const { error: upsertError } = await supabase
       .from('vision_user_stats')
       .upsert({
         user_id: userId,
         current_streak: newStreak,
         best_streak: newBestStreak,
         updated_at: new Date().toISOString(),
-      });
+      }, { onConflict: 'user_id' });
+
+    if (upsertError) {
+      console.error('[statsService] updateStreak upsert error:', upsertError);
+    }
+
+    console.log('[statsService] updateStreak result:', { currentStreak: newStreak, bestStreak: newBestStreak });
 
     return { currentStreak: newStreak, bestStreak: newBestStreak };
   } catch (err) {
@@ -321,31 +347,55 @@ export const getLevelFromXP = (totalXP) => {
 export const getWeeklyProgress = async (userId) => {
   try {
     const today = new Date();
-    const days = [];
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 6);
 
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = today.toISOString().split('T')[0];
+
+    console.log('[statsService] getWeeklyProgress - fetching for user:', userId, 'from', startDateStr, 'to', endDateStr);
+
+    // Fetch all summaries for the week in one query
+    const { data: summaries, error } = await supabase
+      .from('vision_daily_summary')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('summary_date', startDateStr)
+      .lte('summary_date', endDateStr);
+
+    if (error) {
+      console.error('[statsService] getWeeklyProgress query error:', error);
+    }
+
+    console.log('[statsService] getWeeklyProgress - found summaries:', summaries?.length || 0);
+
+    // Create a map for quick lookup
+    const summaryMap = {};
+    (summaries || []).forEach(s => {
+      summaryMap[s.summary_date] = s;
+    });
+
+    // Build days array
+    const days = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-
-      const { data } = await supabase
-        .from('vision_daily_summary')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('summary_date', dateStr)
-        .single();
+      const summary = summaryMap[dateStr];
 
       days.push({
         date: dateStr,
         dayName: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][date.getDay()],
-        score: data?.daily_score || 0,
-        tasksCompleted: data?.actions_completed || 0,
-        xpEarned: data?.xp_earned || 0,
+        score: summary?.daily_score || 0,
+        tasksCompleted: summary?.actions_completed || 0,
+        xpEarned: summary?.xp_earned || 0,
       });
     }
 
     const average = Math.round(days.reduce((sum, d) => sum + d.score, 0) / 7);
     const totalXP = days.reduce((sum, d) => sum + d.xpEarned, 0);
+
+    console.log('[statsService] getWeeklyProgress result:', { daysCount: days.length, average, totalXP });
 
     return { days, average, totalXP };
   } catch (err) {
@@ -357,36 +407,53 @@ export const getWeeklyProgress = async (userId) => {
 // ============ GET LIFE AREA SCORES (for Radar Chart) ============
 export const getLifeAreaScores = async (userId) => {
   const areas = ['finance', 'career', 'health', 'relationships', 'personal', 'spiritual'];
-  const scores = {};
 
   try {
-    for (const area of areas) {
-      // Get goals
-      const { data: goals } = await supabase
+    console.log('[statsService] getLifeAreaScores - fetching for user:', userId);
+
+    // Fetch all goals and habits in parallel (2 queries instead of 12)
+    const [goalsResult, habitsResult] = await Promise.all([
+      supabase
         .from('vision_goals')
-        .select('progress_percent')
+        .select('life_area, progress_percent')
         .eq('user_id', userId)
-        .eq('life_area', area)
-        .eq('status', 'active');
-
-      // Get habits
-      const { data: habits } = await supabase
+        .eq('status', 'active'),
+      supabase
         .from('vision_habits')
-        .select('current_streak, target_streak')
-        .eq('user_id', userId)
-        .eq('life_area', area);
+        .select('life_area, current_streak, target_streak')
+        .eq('user_id', userId),
+    ]);
 
-      // Calculate score
-      const goalScore = goals?.length > 0
-        ? goals.reduce((sum, g) => sum + (g.progress_percent || 0), 0) / goals.length
+    if (goalsResult.error) {
+      console.error('[statsService] getLifeAreaScores goals error:', goalsResult.error);
+    }
+    if (habitsResult.error) {
+      console.error('[statsService] getLifeAreaScores habits error:', habitsResult.error);
+    }
+
+    const goals = goalsResult.data || [];
+    const habits = habitsResult.data || [];
+
+    console.log('[statsService] getLifeAreaScores - found goals:', goals.length, 'habits:', habits.length);
+
+    // Calculate scores for each area
+    const scores = {};
+    for (const area of areas) {
+      const areaGoals = goals.filter(g => g.life_area === area);
+      const areaHabits = habits.filter(h => h.life_area === area);
+
+      const goalScore = areaGoals.length > 0
+        ? areaGoals.reduce((sum, g) => sum + (g.progress_percent || 0), 0) / areaGoals.length
         : 50;
 
-      const habitScore = habits?.length > 0
-        ? habits.reduce((sum, h) => sum + Math.min(100, ((h.current_streak || 0) / (h.target_streak || 30)) * 100), 0) / habits.length
+      const habitScore = areaHabits.length > 0
+        ? areaHabits.reduce((sum, h) => sum + Math.min(100, ((h.current_streak || 0) / (h.target_streak || 30)) * 100), 0) / areaHabits.length
         : 50;
 
       scores[area] = Math.round((goalScore * 0.6) + (habitScore * 0.4));
     }
+
+    console.log('[statsService] getLifeAreaScores result:', scores);
 
     return scores;
   } catch (err) {
@@ -403,7 +470,9 @@ export const saveDailySummary = async (userId, summaryData) => {
   const today = new Date().toISOString().split('T')[0];
 
   try {
-    await supabase
+    console.log('[statsService] saveDailySummary - saving for user:', userId, 'date:', today, 'data:', summaryData);
+
+    const { error } = await supabase
       .from('vision_daily_summary')
       .upsert({
         user_id: userId,
@@ -415,8 +484,14 @@ export const saveDailySummary = async (userId, summaryData) => {
         habits_completed: summaryData.habits?.completed || 0,
         ritual_completed: summaryData.ritualCompleted || false,
         xp_earned: summaryData.xpEarned || 0,
-      });
+      }, { onConflict: 'user_id,summary_date' });
 
+    if (error) {
+      console.error('[statsService] saveDailySummary upsert error:', error);
+      return false;
+    }
+
+    console.log('[statsService] saveDailySummary - saved successfully');
     return true;
   } catch (err) {
     console.error('[statsService] saveDailySummary error:', err);

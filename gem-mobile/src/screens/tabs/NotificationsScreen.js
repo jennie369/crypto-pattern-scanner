@@ -64,6 +64,7 @@ const NOTIFICATION_CONFIG = {
   // Social
   like: { icon: Heart, color: '#FF6B6B', fill: '#FF6B6B' },
   forum_like: { icon: Heart, color: '#FF6B6B', fill: '#FF6B6B' },
+  reaction: { icon: Heart, color: '#FF6B6B', fill: '#FF6B6B' },
   comment: { icon: MessageCircle, color: COLORS.cyan, fill: 'transparent' },
   forum_comment: { icon: MessageCircle, color: COLORS.cyan, fill: 'transparent' },
   reply: { icon: MessageCircle, color: COLORS.gold, fill: 'transparent' },
@@ -160,37 +161,42 @@ export default function NotificationsScreen() {
 
   const loadNotifications = async () => {
     try {
-      // Get notifications from database (includes broadcasts where user_id IS NULL)
-      if (user?.id) {
-        const { success, data } = await notificationService.getUserNotificationsFromDB(user.id);
-        if (success && data) {
-          // Data already has category added by the service
-          // Normalize read field (notifications table uses 'read', forum_notifications uses 'is_read')
-          const normalizedData = data.map(n => ({
-            ...n,
-            read: n.read || n.is_read || false,
-          }));
-          updateNotifications(normalizedData);
-        } else {
-          // Fallback to forumService if database query fails
-          const forumData = await forumService.getNotifications();
-          const enrichedData = forumData.map(n => ({
-            ...n,
-            category: TYPE_TO_CATEGORY[n.type] || 'system',
-            read: n.read || n.is_read || false,
-          }));
-          updateNotifications(enrichedData);
-        }
-      } else {
-        // No user, try forumService
-        const data = await forumService.getNotifications();
-        const enrichedData = data.map(n => ({
-          ...n,
-          category: TYPE_TO_CATEGORY[n.type] || 'system',
-          read: n.read || n.is_read || false,
-        }));
-        updateNotifications(enrichedData);
+      if (!user?.id) {
+        setLoading(false);
+        return;
       }
+
+      // Fetch from BOTH tables in parallel and merge results
+      // - notifications table: system notifications, trading alerts, orders, etc.
+      // - forum_notifications table: social notifications (likes, comments, follows) with user data
+      const [systemResult, forumData] = await Promise.all([
+        notificationService.getUserNotificationsFromDB(user.id),
+        forumService.getNotifications(),
+      ]);
+
+      // Process system notifications (from notifications table)
+      const systemNotifications = (systemResult.success && systemResult.data)
+        ? systemResult.data.map(n => ({
+            ...n,
+            source: 'system',
+            read: n.read || n.is_read || false,
+          }))
+        : [];
+
+      // Process forum notifications (from forum_notifications table)
+      // These have from_user data with name and avatar
+      const forumNotifications = (forumData || []).map(n => ({
+        ...n,
+        source: 'forum',
+        category: TYPE_TO_CATEGORY[n.type] || 'social',
+        read: n.read || n.is_read || false,
+      }));
+
+      // Merge and sort by created_at descending
+      const allNotifications = [...systemNotifications, ...forumNotifications]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      updateNotifications(allNotifications);
     } catch (error) {
       console.error('[Notifications] Load error:', error);
     } finally {
@@ -359,12 +365,18 @@ export default function NotificationsScreen() {
     }
   };
 
-  // Mark all as read
+  // Mark all as read - persist to BOTH notification tables
   const handleMarkAllAsRead = async () => {
     if (user?.id) {
-      await notificationService.markAllNotificationsAsRead(user.id);
+      // Update both tables in parallel for complete persistence
+      await Promise.all([
+        notificationService.markAllNotificationsAsRead(user.id),
+        forumService.markAllAsRead(),
+      ]);
     }
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    // Update state AND global cache so it persists across tab switches/reloads
+    const updatedNotifications = notifications.map(n => ({ ...n, read: true, is_read: true }));
+    updateNotifications(updatedNotifications);
   };
 
   // Format timestamp
@@ -381,6 +393,176 @@ export default function NotificationsScreen() {
     const diffDays = Math.floor(diffHours / 24);
     if (diffDays < 7) return `${diffDays} ngày`;
     return date.toLocaleDateString('vi-VN');
+  };
+
+  // Generate Facebook-style notification message
+  // Priority: Combine title + body if title has user name, otherwise generate from type
+  const getNotificationMessage = (item) => {
+    const fromUser = item.from_user;
+    const userName = fromUser?.full_name || fromUser?.username || null;
+    const data = item.data || {};
+
+    // Database notifications often have:
+    // - title: "Nguyen Van A đã thả cảm xúc" (contains user name + action)
+    // - body: "với bài viết của bạn" (contains the object)
+    // We need to combine them for full message
+
+    // Check if title contains action verb (meaning it has user name + action)
+    if (item.title) {
+      const titleLower = item.title.toLowerCase();
+      const titleHasAction = titleLower.includes('đã ') ||
+                              titleLower.includes('bắt đầu') ||
+                              titleLower.includes('đang ') ||
+                              titleLower.includes('vừa ');
+
+      if (titleHasAction) {
+        // Combine title + body for complete message
+        const fullMessage = item.body
+          ? `${item.title} ${item.body}`
+          : item.title;
+        return { userName: null, action: fullMessage };
+      }
+    }
+
+    // Check if body already contains complete message with action verb
+    if (item.body) {
+      const bodyLower = item.body.toLowerCase();
+      const hasActionVerb = bodyLower.includes('đã ') ||
+                            bodyLower.includes('bắt đầu') ||
+                            bodyLower.includes('đang ') ||
+                            bodyLower.includes('mới') ||
+                            bodyLower.includes('vừa ');
+
+      // If body already contains action info, use it directly
+      if (hasActionVerb) {
+        return { userName: null, action: item.body };
+      }
+    }
+
+    // If we have from_user data, generate Facebook-style message
+    // Otherwise fall back to body/title
+    switch (item.type) {
+      // Social - Likes
+      case 'like':
+      case 'forum_like':
+        if (userName) return { userName, action: 'đã thích bài viết của bạn' };
+        return { userName: null, action: item.body || 'Ai đó đã thích bài viết của bạn' };
+
+      // Social - Reactions (emoji reactions on posts)
+      case 'reaction':
+        // Title has "Nguyen Van A đã thả cảm xúc", body has "với bài viết của bạn"
+        // Already handled by title+body combination above, this is fallback
+        if (userName) {
+          const reactionType = data.reaction_type || '❤️';
+          return { userName, action: `đã thả ${reactionType} với bài viết của bạn` };
+        }
+        // Combine title and body if available
+        if (item.title && item.body) {
+          return { userName: null, action: `${item.title} ${item.body}` };
+        }
+        return { userName: null, action: item.title || item.body || 'Ai đó đã thả cảm xúc với bài viết của bạn' };
+
+      // Social - Comments
+      case 'comment':
+      case 'forum_comment':
+        if (userName) {
+          const preview = data.comment_preview || data.content?.substring(0, 50);
+          return { userName, action: preview ? `đã bình luận: "${preview}"` : 'đã bình luận về bài viết của bạn' };
+        }
+        return { userName: null, action: item.body || 'Ai đó đã bình luận về bài viết của bạn' };
+
+      // Social - Replies
+      case 'reply':
+      case 'forum_reply':
+        if (userName) {
+          const preview = data.reply_preview || data.content?.substring(0, 50);
+          return { userName, action: preview ? `đã trả lời: "${preview}"` : 'đã trả lời bình luận của bạn' };
+        }
+        return { userName: null, action: item.body || 'Ai đó đã trả lời bình luận của bạn' };
+
+      // Social - Follow
+      case 'follow':
+      case 'forum_follow':
+        if (userName) return { userName, action: 'đã bắt đầu theo dõi bạn' };
+        return { userName: null, action: item.body || 'Ai đó đã bắt đầu theo dõi bạn' };
+
+      // Social - Mention
+      case 'mention':
+        if (userName) return { userName, action: 'đã nhắc đến bạn trong một bài viết' };
+        return { userName: null, action: item.body || 'Ai đó đã nhắc đến bạn' };
+
+      // Gift
+      case 'gift_received':
+        const giftAmount = data.gem_amount || data.amount;
+        if (userName) {
+          return { userName, action: giftAmount ? `đã tặng bạn ${giftAmount} 💎` : 'đã tặng quà cho bạn' };
+        }
+        return { userName: null, action: item.body || `Bạn nhận được ${giftAmount || ''} 💎` };
+
+      case 'gift_sent':
+        return { userName: null, action: item.body || 'Bạn đã gửi quà thành công' };
+
+      // Trading
+      case 'pattern_detected':
+        const pattern = data.pattern || 'mẫu hình';
+        const symbol = data.symbol || '';
+        return { userName: null, action: item.body || `🔔 Phát hiện ${pattern} trên ${symbol}` };
+
+      case 'price_alert':
+        return { userName: null, action: item.body || `🎯 ${data.symbol || 'Coin'} đã đạt mức giá ${data.price || 'mục tiêu'}` };
+
+      case 'trade_executed':
+        return { userName: null, action: item.body || `⚡ Lệnh giao dịch ${data.symbol || ''} đã được thực hiện` };
+
+      case 'breakout':
+        return { userName: null, action: item.body || `📈 ${data.symbol || 'Coin'} đang breakout ${data.direction === 'up' ? 'tăng' : 'giảm'}` };
+
+      case 'stop_loss':
+        return { userName: null, action: item.body || `🛑 Stop loss đã kích hoạt cho ${data.symbol || 'vị thế'}` };
+
+      case 'take_profit':
+        return { userName: null, action: item.body || `✅ Take profit đã đạt cho ${data.symbol || 'vị thế'}` };
+
+      case 'market_alert':
+        return { userName: null, action: item.body || `⚠️ ${data.message || 'Cảnh báo thị trường'}` };
+
+      // System - Orders
+      case 'order':
+        const orderStatus = data.status || 'cập nhật';
+        return { userName: null, action: item.body || `📦 Đơn hàng #${data.orderId || ''} ${orderStatus}` };
+
+      // Partnership
+      case 'partnership_approved':
+        return { userName: null, action: item.body || '🎉 Chúc mừng! Đơn đăng ký CTV đã được duyệt' };
+
+      case 'partnership_rejected':
+        return { userName: null, action: item.body || '❌ Đơn đăng ký CTV chưa được duyệt' };
+
+      case 'partnership_pending':
+        return { userName: null, action: item.body || '⏳ Đơn đăng ký CTV đang chờ xét duyệt' };
+
+      case 'affiliate_commission':
+        const commission = data.amount || data.commission;
+        return { userName: null, action: item.body || `💰 Bạn nhận được hoa hồng ${commission || ''}` };
+
+      // Admin
+      case 'admin_partnership_application':
+        if (userName) return { userName, action: 'đã gửi đơn đăng ký CTV mới' };
+        return { userName: null, action: item.body || 'Có đơn đăng ký CTV mới' };
+
+      case 'admin_withdraw_request':
+        if (userName) return { userName, action: 'yêu cầu rút tiền cần xét duyệt' };
+        return { userName: null, action: item.body || 'Có yêu cầu rút tiền mới' };
+
+      // System/Promotion
+      case 'promotion':
+        return { userName: null, action: item.body || item.title || '🎁 Khuyến mãi mới' };
+
+      case 'system':
+      default:
+        // Fallback to original body/title
+        return { userName: null, action: item.body || item.title || 'Thông báo mới' };
+    }
   };
 
   // Get notification config
@@ -412,15 +594,48 @@ export default function NotificationsScreen() {
     );
   };
 
-  // Render notification item
+  // Extract user name from body/title for avatar generation
+  // Format: "Nguyen Van A đã thích bài viết..."
+  const extractUserNameFromText = (text) => {
+    if (!text) return null;
+    // Try to extract name before action verbs
+    const actionVerbs = ['đã ', ' đang ', ' bắt đầu ', ' vừa '];
+    for (const verb of actionVerbs) {
+      const index = text.indexOf(verb);
+      if (index > 0) {
+        const name = text.substring(0, index).trim();
+        // Validate it looks like a name (2-50 chars, not starting with emoji/special char)
+        if (name.length >= 2 && name.length <= 50 && /^[A-Za-zÀ-ỹ]/.test(name)) {
+          return name;
+        }
+      }
+    }
+    return null;
+  };
+
+  // Render notification item - Facebook style
   const renderNotification = ({ item }) => {
     const config = getConfig(item.type);
     const IconComponent = config.icon;
     const fromUser = item.from_user;
+
+    // Try to get user info from from_user, or extract from title/body
+    const extractedName = !fromUser?.full_name
+      ? (extractUserNameFromText(item.title) || extractUserNameFromText(item.body))
+      : null;
+    const displayName = fromUser?.full_name || fromUser?.username || extractedName;
+
+    // Determine if we should show user avatar
+    const isSocialType = ['like', 'forum_like', 'reaction', 'comment', 'forum_comment', 'reply', 'forum_reply', 'follow', 'forum_follow', 'mention', 'gift_received'].includes(item.type);
+    const hasUserInfo = displayName || fromUser?.avatar_url;
+
     const avatarUrl = fromUser?.avatar_url ||
-      `https://ui-avatars.com/api/?name=${encodeURIComponent(fromUser?.full_name || 'U')}&background=6A5BFF&color=fff`;
+      (displayName
+        ? `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6A5BFF&color=fff`
+        : null);
 
     const isDeleting = deletingIds.has(item.id);
+    const { userName, action } = getNotificationMessage(item);
 
     return (
       <Swipeable
@@ -443,43 +658,37 @@ export default function NotificationsScreen() {
           activeOpacity={0.7}
           disabled={isDeleting}
         >
-          {/* Avatar with icon badge */}
+          {/* Avatar - Show user photo/initials for social, icon for system */}
           <View style={styles.avatarContainer}>
-            {item.category === 'social' ? (
+            {isSocialType && avatarUrl ? (
               <Image source={{ uri: avatarUrl }} style={styles.avatar} />
             ) : (
               <View style={[styles.iconAvatar, { backgroundColor: `${config.color}20` }]}>
-                <IconComponent size={24} color={config.color} />
+                <IconComponent size={20} color={config.color} />
               </View>
             )}
+            {/* Action type badge on avatar */}
             <View style={[styles.iconBadge, { backgroundColor: config.color }]}>
               <IconComponent
-                size={10}
+                size={9}
                 color="#FFFFFF"
                 fill={config.fill === config.color ? config.fill : 'transparent'}
               />
             </View>
           </View>
 
-          {/* Content */}
+          {/* Content - Facebook style compact */}
           <View style={styles.contentContainer}>
             <Text style={styles.notificationText} numberOfLines={2}>
-              {item.category === 'social' && fromUser && (
-                <Text style={styles.userName}>{fromUser.full_name || 'Ai đó'} </Text>
+              {userName && (
+                <Text style={styles.userName}>{userName} </Text>
               )}
-              {item.body || item.title}
+              <Text style={styles.actionText}>{action}</Text>
             </Text>
-            <View style={styles.metaRow}>
-              <Text style={styles.timeText}>{formatTime(item.created_at)}</Text>
-              <View style={[styles.categoryBadge, { backgroundColor: `${config.color}20` }]}>
-                <Text style={[styles.categoryText, { color: config.color }]}>
-                  {CATEGORY_LABELS[item.category]}
-                </Text>
-              </View>
-            </View>
+            <Text style={styles.timeText}>{formatTime(item.created_at)}</Text>
           </View>
 
-          {/* Unread indicator */}
+          {/* Unread indicator dot */}
           {!item.read && <View style={styles.unreadDot} />}
         </TouchableOpacity>
       </Swipeable>
@@ -718,45 +927,41 @@ const styles = StyleSheet.create({
 
   // List
   listContent: {
-    padding: SPACING.md,
     paddingBottom: CONTENT_BOTTOM_PADDING,
   },
   emptyListContent: {
     flex: 1,
   },
 
-  // Notification Card
+  // Notification Row - Facebook style (no card, just divider)
   notificationCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GLASS.background,
-    padding: SPACING.md,
-    borderRadius: 12,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.15)',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
   unreadCard: {
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderColor: 'rgba(106, 91, 255, 0.3)',
+    backgroundColor: 'rgba(106, 91, 255, 0.08)',
   },
   deletingCard: {
     opacity: 0.5,
   },
   avatarContainer: {
     position: 'relative',
-    marginRight: SPACING.md,
+    marginRight: SPACING.sm,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: COLORS.glassBg,
   },
   iconAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -764,9 +969,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -2,
     right: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
@@ -776,7 +981,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notificationText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
+    fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textSecondary,
     lineHeight: 20,
   },
@@ -784,32 +989,47 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textPrimary,
   },
+  actionText: {
+    color: COLORS.textSecondary,
+  },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 6,
+    gap: 6,
+    marginTop: 2,
   },
   timeText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: 12,
     color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  newBadge: {
+    backgroundColor: COLORS.gold,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 8,
+  },
+  newBadgeText: {
+    fontSize: 9,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.bgDarkest,
   },
   categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
   },
   categoryText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     textTransform: 'uppercase',
   },
   unreadDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: COLORS.gold,
-    marginLeft: SPACING.sm,
+    marginLeft: SPACING.xs,
   },
 
   // Delete Action
@@ -817,9 +1037,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6465D',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    marginBottom: SPACING.sm,
-    borderRadius: 12,
-    width: 100,
+    width: 80,
   },
   deleteButton: {
     justifyContent: 'center',

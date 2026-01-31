@@ -52,7 +52,7 @@ export const DIGITAL_CATEGORIES = [
   },
   {
     id: 'trading',
-    label: 'Trading',
+    label: 'Khóa học Trading',
     icon: TrendingUp,
     // ONLY match trading-specific tags - NOT generic tier tags
     // Generic 'Tier 1', 'Tier 2', 'Tier 3' removed to avoid mixing with mindset courses
@@ -60,7 +60,7 @@ export const DIGITAL_CATEGORIES = [
   },
   {
     id: 'mindset',
-    label: 'Tư duy',
+    label: 'Khóa học Tư duy',
     icon: Sparkles,
     // Mindset/spiritual courses - "Tái Tạo Tư Duy", "7 Ngày Khai Mở", "Kích Hoạt Tình Yêu"
     tags: ['Khóa học Tư duy', 'Khóa học Tâm Thức', 'tan-so-goc', 'khai-mo', 'Tái Tạo Tư Duy', 'Tần Số Gốc', 'Tình Yêu', 'Mindset'],

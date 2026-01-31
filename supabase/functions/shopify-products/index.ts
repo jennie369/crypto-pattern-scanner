@@ -281,10 +281,133 @@ serve(async (req) => {
     }
 
     // ==============================================
+    // ACTION: SYNC COURSE THUMBNAILS FROM SHOPIFY
+    // ==============================================
+    else if (action === 'syncCourseThumbnails') {
+      console.log('🔄 Syncing course thumbnails from Shopify...');
+
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+      // Get all courses with shopify_product_id
+      const { data: courses, error: coursesError } = await supabase
+        .from('courses')
+        .select('id, title, shopify_product_id, thumbnail_url')
+        .not('shopify_product_id', 'is', null);
+
+      if (coursesError) {
+        throw new Error(`Failed to fetch courses: ${coursesError.message}`);
+      }
+
+      console.log(`📚 Found ${courses?.length || 0} courses with Shopify product IDs`);
+
+      const results: any[] = [];
+      let updated = 0;
+      let failed = 0;
+
+      for (const course of courses || []) {
+        try {
+          console.log(`📦 Fetching product ${course.shopify_product_id} for course: ${course.title}`);
+
+          // Fetch product from Shopify Admin API
+          const productUrl = `https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${course.shopify_product_id}.json`;
+
+          const response = await fetch(productUrl, {
+            headers: {
+              'X-Shopify-Access-Token': SHOPIFY_ADMIN_TOKEN,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            console.warn(`⚠️ Product not found: ${course.shopify_product_id}`);
+            results.push({
+              course_id: course.id,
+              title: course.title,
+              status: 'product_not_found',
+              shopify_product_id: course.shopify_product_id,
+            });
+            failed++;
+            continue;
+          }
+
+          const productData = await response.json();
+          const imageUrl = productData.product?.image?.src || productData.product?.images?.[0]?.src;
+
+          if (!imageUrl) {
+            console.warn(`⚠️ No image for product: ${course.shopify_product_id}`);
+            results.push({
+              course_id: course.id,
+              title: course.title,
+              status: 'no_image',
+              shopify_product_id: course.shopify_product_id,
+            });
+            failed++;
+            continue;
+          }
+
+          // Update course thumbnail_url
+          const { error: updateError } = await supabase
+            .from('courses')
+            .update({
+              thumbnail_url: imageUrl,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', course.id);
+
+          if (updateError) {
+            console.error(`❌ Failed to update course ${course.id}: ${updateError.message}`);
+            results.push({
+              course_id: course.id,
+              title: course.title,
+              status: 'update_failed',
+              error: updateError.message,
+            });
+            failed++;
+            continue;
+          }
+
+          console.log(`✅ Updated: ${course.title}`);
+          results.push({
+            course_id: course.id,
+            title: course.title,
+            status: 'updated',
+            old_thumbnail: course.thumbnail_url,
+            new_thumbnail: imageUrl,
+          });
+          updated++;
+
+        } catch (err) {
+          console.error(`❌ Error processing course ${course.id}:`, err);
+          results.push({
+            course_id: course.id,
+            title: course.title,
+            status: 'error',
+            error: err instanceof Error ? err.message : String(err),
+          });
+          failed++;
+        }
+      }
+
+      console.log(`✅ Sync complete: ${updated} updated, ${failed} failed`);
+
+      return new Response(JSON.stringify({
+        success: true,
+        summary: {
+          total: courses?.length || 0,
+          updated,
+          failed,
+        },
+        results,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ==============================================
     // INVALID ACTION
     // ==============================================
     else {
-      throw new Error(`Invalid action: ${action}. Valid actions: getProducts, getProduct, getProductByHandle, search`);
+      throw new Error(`Invalid action: ${action}. Valid actions: getProducts, getProduct, getProductByHandle, search, syncCourseThumbnails`);
     }
 
   } catch (error) {
@@ -332,5 +455,11 @@ serve(async (req) => {
    {
      "action": "search",
      "query": "crystal"
+   }
+
+   5. Sync course thumbnails from Shopify:
+   POST /functions/v1/shopify-products
+   {
+     "action": "syncCourseThumbnails"
    }
    ============================================== */

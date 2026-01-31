@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  Linking,
   Clipboard,
   Platform,
 } from 'react-native';
@@ -19,6 +18,7 @@ import { X, Copy, ExternalLink } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { supabase } from '../../services/supabase';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import InAppBrowser from '../Common/InAppBrowser';
 
 const PromoBar = ({ style, onDismiss }) => {
   const [promo, setPromo] = useState(null);
@@ -26,6 +26,11 @@ const PromoBar = ({ style, onDismiss }) => {
   const [copied, setCopied] = useState(false);
   const heightAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  // InAppBrowser state for URL links
+  const [browserVisible, setBrowserVisible] = useState(false);
+  const [browserUrl, setBrowserUrl] = useState('');
+  const [browserTitle, setBrowserTitle] = useState('');
 
   // Fetch active promo
   const fetchPromo = useCallback(async () => {
@@ -119,7 +124,10 @@ const PromoBar = ({ style, onDismiss }) => {
     if (promo?.link_url) {
       // Navigate based on link type
       if (promo.link_url.startsWith('http')) {
-        Linking.openURL(promo.link_url);
+        // Open URL in InAppBrowser (WebView) instead of external browser
+        setBrowserUrl(promo.link_url);
+        setBrowserTitle(promo.link_text || 'Promo');
+        setBrowserVisible(true);
       } else {
         // Internal navigation would be handled here
         // navigation.navigate(promo.link_url);
@@ -135,17 +143,18 @@ const PromoBar = ({ style, onDismiss }) => {
   const textColor = promo.text_color || COLORS.textPrimary;
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          height: heightAnim,
-          opacity: opacityAnim,
-          backgroundColor,
-        },
-        style,
-      ]}
-    >
+    <>
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            height: heightAnim,
+            opacity: opacityAnim,
+            backgroundColor,
+          },
+          style,
+        ]}
+      >
       <View style={styles.content}>
         {/* Message */}
         <Text style={[styles.message, { color: textColor }]} numberOfLines={1}>
@@ -195,7 +204,16 @@ const PromoBar = ({ style, onDismiss }) => {
       >
         <X size={16} color={textColor} />
       </TouchableOpacity>
-    </Animated.View>
+      </Animated.View>
+
+      {/* InAppBrowser for URL links */}
+      <InAppBrowser
+        visible={browserVisible}
+        url={browserUrl}
+        title={browserTitle}
+        onClose={() => setBrowserVisible(false)}
+      />
+    </>
   );
 };
 

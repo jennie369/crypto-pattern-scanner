@@ -235,6 +235,9 @@ import {
   DailyScoreCard,
   QuickStatsRow,
   DivinationSection,
+  GoalThumbnailCard,
+  GoalsGridSection,
+  CalendarHeatMap,
 } from '../../components/VisionBoard';
 
 // NEW: Goal Setup Questionnaire for deeper personalization
@@ -592,6 +595,8 @@ const GoalTabs = memo(({
     </View>
   );
 });
+
+// NOTE: GoalThumbnailGrid removed - now using GoalsGridSection from components/VisionBoard
 
 /**
  * AnimatedCheckButton - Check button with "Done!" text animation
@@ -1310,7 +1315,7 @@ const IndividualGoalCard = memo(({
         {/* Delete Button - Uses onDeleteMultiple for array of widget IDs */}
         <TouchableOpacity
           style={[styles.swipeActionBtn, styles.swipeDeleteBtn]}
-          onPress={() => onDeleteMultiple?.(validIds, `Xóa mục tiêu "${goalTitle}" và các widget liên quan?`)}
+          onPress={() => onDeleteMultiple?.(validIds)}
           activeOpacity={0.7}
         >
           <Trash2 size={20} color="#FFFFFF" />
@@ -1666,7 +1671,7 @@ const IndividualGoalCard = memo(({
 
                         return (
                           <TouchableOpacity
-                            key={ritual?.id || `library_ritual_${index}`}
+                            key={`library_ritual_${index}_${ritual?.id || 'unknown'}`}
                             style={[styles.ritualCardSmall, { borderColor: `${ritualColor}40` }]}
                             onPress={() => {
                               // Navigate to dedicated cosmic ritual screen
@@ -1726,7 +1731,7 @@ const IndividualGoalCard = memo(({
                     <View style={styles.spiritualRitualsContainer}>
                       {spiritualRituals.map((ritual, index) => (
                         <EditableSpiritualRitualItem
-                          key={ritual?.id || `spiritual_ritual_${index}`}
+                          key={`spiritual_ritual_${index}_${ritual?.id || 'unknown'}`}
                           index={index}
                           ritual={ritual}
                           widgetId={goalWidget?.id}
@@ -1768,9 +1773,7 @@ const IndividualGoalCard = memo(({
           {/* Delete this goal and linked widgets - FIXED: use onDeleteMultiple instead of forEach */}
           <TouchableOpacity
             style={styles.deleteIndividualGoalBtn}
-            onPress={() => {
-              onDeleteMultiple?.(validIds, `Xóa mục tiêu "${goalTitle}" và các widgets liên quan?`);
-            }}
+            onPress={() => onDeleteMultiple?.(validIds)}
           >
             <Trash2 size={12} color="#E74C3C" />
             <Text style={styles.deleteIndividualGoalText}>Xóa mục tiêu này</Text>
@@ -3063,6 +3066,9 @@ const VisionBoardScreen = () => {
   const [addEventModalVisible, setAddEventModalVisible] = useState(false);
   const [journalRituals, setJournalRituals] = useState([]);
   const [journalReadings, setJournalReadings] = useState([]);
+  const [journalPaperTrades, setJournalPaperTrades] = useState([]);
+  const [journalTradingJournal, setJournalTradingJournal] = useState([]);
+  const [journalActions, setJournalActions] = useState([]);
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -3087,6 +3093,18 @@ const VisionBoardScreen = () => {
 
   // NEW: Reading history from database (tarot_readings + iching_readings)
   const [savedReadings, setSavedReadings] = useState([]);
+
+  // DEBUG: Log stats state changes
+  useEffect(() => {
+    console.log('[VisionBoard] Stats state updated:', {
+      user: user?.id,
+      streakDays,
+      comboCount,
+      xpToday,
+      weeklyProgressLength: weeklyProgress?.length,
+      lifeAreaScores,
+    });
+  }, [user?.id, streakDays, comboCount, xpToday, weeklyProgress, lifeAreaScores]);
 
   // Computed level data for XPGoalTracker full card
   const currentLevelData = useMemo(() => {
@@ -3224,8 +3242,9 @@ const VisionBoardScreen = () => {
   // Current affirmation
   const currentAffirmation = allAffirmations[currentAffirmationIndex] || '';
 
-  // Check if empty
-  const isVisionBoardEmpty = widgets.length === 0;
+  // Check if empty - only show empty state when NOT loading AND no widgets
+  // During loading, we show the content (with skeleton if needed) instead of empty state
+  const isVisionBoardEmpty = !loading && widgets.length === 0;
 
   // Stats for overview
   const stats = {
@@ -3556,11 +3575,9 @@ const VisionBoardScreen = () => {
 
   // Re-fetch widgets when screen gets focus - WITH GLOBAL CACHING for instant display
   // Key principle: NEVER show loading if we have ANY cached data
+  // ALWAYS fetch in background to sync progress updates from GoalDetailScreen
   useFocusEffect(
     useCallback(() => {
-      const now = Date.now();
-      const cacheExpired = now - visionBoardCache.lastFetch > visionBoardCache.CACHE_DURATION;
-
       // If we have cached data, set loading false IMMEDIATELY and sync state
       if (visionBoardCache.widgets) {
         console.log('[VisionBoard] Screen focused - using cached data');
@@ -3571,14 +3588,12 @@ const VisionBoardScreen = () => {
         }
       }
 
-      // Fetch fresh data in background if no cache or cache expired
-      if (!visionBoardCache.widgets || cacheExpired) {
-        console.log('[VisionBoard] Screen focused - loading data in background');
-        Promise.all([
-          fetchWidgets(),
-          fetchReadingHistory(),
-        ]);
-      }
+      // ALWAYS fetch fresh data in background to sync any updates (e.g., progress changes)
+      console.log('[VisionBoard] Screen focused - refreshing data in background');
+      Promise.all([
+        fetchWidgets(),
+        fetchReadingHistory(),
+      ]);
     }, [fetchWidgets, fetchReadingHistory])
   );
 
@@ -3704,29 +3719,131 @@ const VisionBoardScreen = () => {
 
   // =========== NEW: FETCH CALENDAR & CHARTS DATA ===========
   const fetchCalendarAndCharts = useCallback(async () => {
-    if (!user?.id) return;
+    console.log('[VisionBoard] fetchCalendarAndCharts called, user?.id:', user?.id);
+    if (!user?.id) {
+      console.log('[VisionBoard] fetchCalendarAndCharts - no user, returning early');
+      return;
+    }
 
     try {
-      // ========== 1. CALENDAR: Generate events from widgets ==========
+      console.log('[VisionBoard] fetchCalendarAndCharts - starting fetch');
+      // ========== 1. CALENDAR: Generate events from widgets + Load history from DB ==========
       const eventsMap = {};
       const now = new Date();
       const today = now.toISOString().split('T')[0];
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
 
-      // Add widget deadlines and goals as calendar events
+      // Calculate date range for ALL HISTORY (from 2020 to now)
+      const startDate = '2020-01-01';
+
+      // End date is last day of current month
+      const lastDay = new Date(year, month, 0).getDate();
+      const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
+      // ========== 1a. Load history from database ==========
+      // Fetch ritual completions, paper trades for 3 months range
+      const [ritualsResult, paperTradesResult, calendarEventsResult] = await Promise.all([
+        supabase
+          .from('vision_ritual_completions')
+          .select('id, ritual_id, completed_at, xp_earned')
+          .eq('user_id', user.id)
+          .gte('completed_at', `${startDate}T00:00:00`)
+          .lte('completed_at', `${endDate}T23:59:59`),
+        supabase
+          .from('paper_trades')
+          .select('id, symbol, side, pnl, created_at')
+          .eq('user_id', user.id)
+          .gte('created_at', `${startDate}T00:00:00`)
+          .lte('created_at', `${endDate}T23:59:59`),
+        calendarService.getEventsGroupedByRange(user.id, startDate, endDate),
+      ]);
+
+      // DEBUG: Log fetched data
+      console.log('[VisionBoard] Date range:', startDate, 'to', endDate);
+      console.log('[VisionBoard] Rituals fetched:', ritualsResult.data?.length || 0, ritualsResult.error ? `Error: ${ritualsResult.error.message}` : 'OK');
+      console.log('[VisionBoard] Paper trades fetched:', paperTradesResult.data?.length || 0, paperTradesResult.error ? `Error: ${paperTradesResult.error.message}` : 'OK');
+      console.log('[VisionBoard] Calendar events:', calendarEventsResult.success ? 'OK' : 'FAIL', Object.keys(calendarEventsResult.eventsByDate || {}).length, 'dates');
+
+      // Add ritual completions to eventsMap
+      if (ritualsResult.data) {
+        ritualsResult.data.forEach(ritual => {
+          const date = ritual.completed_at?.split('T')[0];
+          if (date) {
+            if (!eventsMap[date]) eventsMap[date] = [];
+            eventsMap[date].push({
+              id: ritual.id,
+              title: ritual.ritual_id?.replace(/-/g, ' ') || 'Ritual',
+              type: 'ritual',
+              color: '#EC4899', // Pink for rituals
+            });
+          }
+        });
+      }
+
+      // Add paper trades to eventsMap
+      if (paperTradesResult.data) {
+        paperTradesResult.data.forEach(trade => {
+          const date = trade.created_at?.split('T')[0];
+          if (date) {
+            if (!eventsMap[date]) eventsMap[date] = [];
+            eventsMap[date].push({
+              id: trade.id,
+              title: `${trade.side} ${trade.symbol}`,
+              type: 'paper_trade',
+              color: trade.pnl >= 0 ? '#3AF7A6' : '#FF6B6B', // Green for profit, red for loss
+            });
+          }
+        });
+      }
+
+      // Add calendar events from database
+      if (calendarEventsResult.success && calendarEventsResult.eventsByDate) {
+        Object.entries(calendarEventsResult.eventsByDate).forEach(([date, events]) => {
+          if (!eventsMap[date]) eventsMap[date] = [];
+          events.forEach(event => {
+            eventsMap[date].push({
+              id: event.id,
+              title: event.title,
+              type: event.source_type || 'event',
+              color: event.color || '#6A5BFF',
+            });
+          });
+        });
+      }
+
+      // ========== 1b. Add widget deadlines and goals as calendar events ==========
       widgets.forEach(w => {
         const content = parseWidgetContent(w);
         const widgetType = w.widget_type || w.type;
 
         // Add goal deadlines
         if (widgetType === 'goal' && content?.deadline) {
-          const deadlineDate = content.deadline.split('T')[0];
-          if (!eventsMap[deadlineDate]) eventsMap[deadlineDate] = [];
-          eventsMap[deadlineDate].push({
-            id: w.id,
-            title: content?.title || 'Mục tiêu',
-            type: 'goal_deadline',
-            color: '#6A5BFF',
-          });
+          // Handle deadline as string, Date, or object with date property
+          let deadlineDate = null;
+          try {
+            if (typeof content.deadline === 'string') {
+              deadlineDate = content.deadline.split('T')[0];
+            } else if (content.deadline instanceof Date) {
+              deadlineDate = content.deadline.toISOString().split('T')[0];
+            } else if (content.deadline?.date) {
+              deadlineDate = typeof content.deadline.date === 'string'
+                ? content.deadline.date.split('T')[0]
+                : new Date(content.deadline.date).toISOString().split('T')[0];
+            }
+          } catch (e) {
+            console.warn('[VisionBoard] Error parsing deadline:', content.deadline, e);
+          }
+
+          if (deadlineDate && !eventsMap[deadlineDate]) eventsMap[deadlineDate] = [];
+          if (deadlineDate) {
+            eventsMap[deadlineDate].push({
+              id: w.id,
+              title: content?.title || 'Mục tiêu',
+              type: 'goal_deadline',
+              color: '#6A5BFF',
+            });
+          }
         }
 
         // Add affirmations as daily events
@@ -3752,25 +3869,10 @@ const VisionBoardScreen = () => {
         }
       });
 
-      // Add some sample events for demo if empty
-      if (Object.keys(eventsMap).length === 0) {
-        const sampleDates = [];
-        for (let i = 0; i < 5; i++) {
-          const d = new Date();
-          d.setDate(d.getDate() + Math.floor(Math.random() * 14) - 3);
-          sampleDates.push(d.toISOString().split('T')[0]);
-        }
-        sampleDates.forEach((date, idx) => {
-          if (!eventsMap[date]) eventsMap[date] = [];
-          eventsMap[date].push({
-            id: `sample_${idx}`,
-            title: ['Check-in', 'Review', 'Deadline', 'Meeting', 'Task'][idx],
-            type: ['goal', 'habit', 'goal_deadline', 'affirmation', 'habit'][idx],
-            color: ['#6A5BFF', '#00F0FF', '#FF6B6B', '#FFD700', '#3AF7A6'][idx],
-          });
-        });
-      }
+      console.log('[VisionBoard] Calendar events loaded:', Object.keys(eventsMap).length, 'dates with events');
+      console.log('[VisionBoard] Calendar eventsMap:', JSON.stringify(eventsMap).substring(0, 500));
       setCalendarEvents(eventsMap);
+      console.log('[VisionBoard] setCalendarEvents called successfully');
 
       // ========== 2. XP & LEVEL: Calculate from actual progress ==========
       // XP formula: goals=50 each, affirmations=10 each, habits=5 per %, streak bonus
@@ -3798,17 +3900,36 @@ const VisionBoardScreen = () => {
       setXpForNextLevel(level * 100);
       setXpProgress((calculatedXP % 100) / 100);
 
-      // ========== 3. WEEKLY PROGRESS: Get from database via statsService ==========
+      // ========== 3. WEEKLY PROGRESS & STREAK: Get from database via statsService ==========
       try {
-        const weeklyResult = await statsService.getWeeklyProgress(user?.id);
+        console.log('[VisionBoard] Fetching weekly progress and streak for user:', user?.id);
+
+        // Fetch weekly progress and streak in parallel
+        const [weeklyResult, streakResult] = await Promise.all([
+          statsService.getWeeklyProgress(user?.id),
+          statsService.calculateStreak(user?.id),
+        ]);
+
+        console.log('[VisionBoard] Weekly progress result:', weeklyResult);
+        console.log('[VisionBoard] Streak result:', streakResult);
+
+        // Set streak from database
+        if (streakResult?.currentStreak !== undefined) {
+          setStreakDays(streakResult.currentStreak);
+        }
+
         if (weeklyResult?.days && weeklyResult.days.length > 0) {
-          // Transform to expected format
+          // Transform to expected format (component expects day_name, not day)
           const weeklyData = weeklyResult.days.map((day, i) => ({
-            day: day.dayName,
-            date: day.date,
+            day_name: day.dayName,
+            day_date: day.date,
             total_score: day.score || 0,
+            xp_earned: day.xpEarned || 0,
+            actions_completed: day.tasksCompleted || 0,
+            actions_total: 0,
             isToday: i === weeklyResult.days.length - 1,
           }));
+          console.log('[VisionBoard] Setting weeklyProgress:', weeklyData);
           setWeeklyProgress(weeklyData);
         } else {
           // Fallback: Calculate today's score, past days default to 0
@@ -3832,113 +3953,168 @@ const VisionBoardScreen = () => {
             // Past days: keep at 0 if no data (not random)
 
             weeklyData.push({
-              day: dayName,
-              date: dateStr,
+              day_name: dayName,
+              day_date: dateStr,
               total_score: totalScore,
+              xp_earned: 0,
+              actions_completed: 0,
+              actions_total: 0,
               isToday,
             });
           }
+          console.log('[VisionBoard] Setting weeklyProgress (fallback):', weeklyData);
           setWeeklyProgress(weeklyData);
         }
       } catch (err) {
         console.error('[VisionBoard] Error fetching weekly progress:', err);
       }
 
-      // ========== 4. LIFE AREA SCORES: Calculate from widget life areas ==========
-      const scores = {
-        finance: 0,
-        career: 0,
-        health: 0,
-        relationships: 0,
-        personal: 0,
-        spiritual: 0
-      };
-      const scoreCounts = { ...scores };
+      // ========== 4. LIFE AREA SCORES: Get from database or calculate from widgets ==========
+      try {
+        // First try to get from database (vision_goals + vision_habits)
+        const dbLifeScores = await statsService.getLifeAreaScores(user?.id);
+        console.log('[VisionBoard] Life area scores from DB:', dbLifeScores);
 
-      widgets.forEach(w => {
-        const content = parseWidgetContent(w);
-        // Try multiple ways to get life area
-        const lifeArea = content?.lifeArea || content?.life_area || w.life_area || w.lifeArea;
+        // Check if we have any non-default data from DB
+        const hasDbData = dbLifeScores && Object.values(dbLifeScores).some(v => v !== 50);
 
-        if (lifeArea && scores[lifeArea] !== undefined) {
-          const widgetType = w.widget_type || w.type;
-          let widgetScore = 0;
+        if (hasDbData) {
+          setLifeAreaScores(dbLifeScores);
+        } else {
+          // Fallback: Calculate from widget life areas
+          const scores = {
+            finance: 0,
+            career: 0,
+            health: 0,
+            relationships: 0,
+            personal: 0,
+            spiritual: 0
+          };
+          const scoreCounts = { ...scores };
 
-          if (widgetType === 'goal') {
-            const goals = extractGoals(content, w.id);
-            const completedGoals = goals.filter(g => g?.completed).length;
-            const totalGoals = goals.length || 1;
-            widgetScore = Math.round((completedGoals / totalGoals) * 100);
-          } else if (widgetType === 'affirmation') {
-            widgetScore = affirmationsCompletedToday > 0 ? 100 : 30;
-          } else if (widgetType === 'habit' || widgetType === 'action') {
-            const steps = content?.steps || content?.habits || [];
-            const completedSteps = steps.filter(s => s?.completed || s?.done).length;
-            widgetScore = steps.length > 0 ? Math.round((completedSteps / steps.length) * 100) : 50;
+          widgets.forEach(w => {
+            const content = parseWidgetContent(w);
+            // Try multiple ways to get life area
+            const lifeArea = content?.lifeArea || content?.life_area || w.life_area || w.lifeArea;
+
+            if (lifeArea && scores[lifeArea] !== undefined) {
+              const widgetType = w.widget_type || w.type;
+              let widgetScore = 0;
+
+              if (widgetType === 'goal') {
+                const goals = extractGoals(content, w.id);
+                const completedGoals = goals.filter(g => g?.completed).length;
+                const totalGoals = goals.length || 1;
+                widgetScore = Math.round((completedGoals / totalGoals) * 100);
+              } else if (widgetType === 'affirmation') {
+                widgetScore = affirmationsCompletedToday > 0 ? 100 : 30;
+              } else if (widgetType === 'habit' || widgetType === 'action') {
+                const steps = content?.steps || content?.habits || [];
+                const completedSteps = steps.filter(s => s?.completed || s?.done).length;
+                widgetScore = steps.length > 0 ? Math.round((completedSteps / steps.length) * 100) : 50;
+              }
+
+              scores[lifeArea] += widgetScore;
+              scoreCounts[lifeArea]++;
+            }
+          });
+
+          // Average scores for each life area
+          Object.keys(scores).forEach(area => {
+            if (scoreCounts[area] > 0) {
+              scores[area] = Math.round(scores[area] / scoreCounts[area]);
+            }
+          });
+
+          // If no data, show demo values
+          const hasData = Object.values(scores).some(v => v > 0);
+          if (!hasData) {
+            scores.finance = 45;
+            scores.career = 60;
+            scores.health = 35;
+            scores.relationships = 70;
+            scores.personal = 55;
+            scores.spiritual = 40;
           }
 
-          scores[lifeArea] += widgetScore;
-          scoreCounts[lifeArea]++;
+          console.log('[VisionBoard] Life area scores (from widgets):', scores);
+          setLifeAreaScores(scores);
         }
-      });
-
-      // Average scores for each life area
-      Object.keys(scores).forEach(area => {
-        if (scoreCounts[area] > 0) {
-          scores[area] = Math.round(scores[area] / scoreCounts[area]);
-        }
-      });
-
-      // If no data, show demo values
-      const hasData = Object.values(scores).some(v => v > 0);
-      if (!hasData) {
-        scores.finance = 45;
-        scores.career = 60;
-        scores.health = 35;
-        scores.relationships = 70;
-        scores.personal = 55;
-        scores.spiritual = 40;
+      } catch (err) {
+        console.error('[VisionBoard] Error fetching life area scores:', err);
       }
-
-      setLifeAreaScores(scores);
 
       // ========== 5. STREAK & COMBO: Calculate (don't setState here to avoid infinite loop) ==========
       // Streak and combo are calculated but we don't call setState inside useCallback
       // to prevent infinite re-render loop
       // Instead, we track if streak needs update and handle it outside
-      const hasActivityToday = stats.goalsCompleted > 0 || stats.affirmationsCompleted > 0 || stats.habitsPercent > 0;
+      const hasActivityToday = (stats?.goalsCompleted || 0) > 0 || (stats?.affirmationsCompleted || 0) > 0 || (stats?.habitsPercent || 0) > 0;
 
       // Calculate combo (count categories completed today)
-      const combo = (stats.affirmationsCompleted > 0 ? 1 : 0) +
-                   (stats.habitsPercent >= 50 ? 1 : 0) +
-                   (stats.goalsCompleted > 0 ? 1 : 0);
+      const combo = ((stats?.affirmationsCompleted || 0) > 0 ? 1 : 0) +
+                   ((stats?.habitsPercent || 0) >= 50 ? 1 : 0) +
+                   ((stats?.goalsCompleted || 0) > 0 ? 1 : 0);
+
+      // ========== 6. SAVE DAILY SUMMARY & UPDATE STREAK ==========
+      // This enables getWeeklyProgress to return historical data
+      try {
+        if (hasActivityToday) {
+          const dailyScore = Math.round(
+            ((stats?.goalsCompleted || 0) / Math.max(stats?.goalsTotal || 1, 1)) * 40 +
+            ((stats?.affirmationsCompleted || 0) > 0 ? 20 : 0) +
+            ((stats?.habitsPercent || 0) / 100) * 30 +
+            (combo > 0 ? 10 : 0)
+          );
+
+          // Calculate today's XP (same as todayXP calculated earlier in this function)
+          const todayXPToSave = ((stats?.goalsCompleted || 0) * 50) + ((stats?.affirmationsCompleted || 0) * 10);
+
+          // Save to database (upsert - will update if exists)
+          statsService.saveDailySummary(user?.id, {
+            dailyScore,
+            tasks: { completed: stats?.goalsCompleted || 0, total: stats?.goalsTotal || 0 },
+            affirmations: { completed: stats?.affirmationsCompleted || 0, total: (allAffirmations?.length || 0) * 3 },
+            habits: { completed: Math.round(stats?.habitsPercent || 0), total: 100 },
+            ritualCompleted: false, // Will be updated by ritual completion handler
+            xpEarned: todayXPToSave,
+          }).then(async () => {
+            // After saving daily summary, update streak (checks yesterday's summary)
+            const newStreak = await statsService.updateStreak(user?.id);
+            console.log('[VisionBoard] Updated streak:', newStreak);
+            if (newStreak?.currentStreak) {
+              setStreakDays(newStreak.currentStreak);
+            }
+          }).catch(err => console.warn('[VisionBoard] Error saving daily summary:', err));
+        }
+      } catch (saveSummaryErr) {
+        console.warn('[VisionBoard] Error in section 6 (save summary):', saveSummaryErr);
+      }
 
       // Return calculated values instead of setting state directly
       return { hasActivityToday, combo };
 
     } catch (err) {
-      console.warn('[VisionBoard] Error fetching calendar/charts:', err.message);
+      console.error('[VisionBoard] Error fetching calendar/charts:', err.message, err.stack);
       return { hasActivityToday: false, combo: 0 };
     }
   }, [user?.id, widgets, stats, affirmationsCompletedToday]);
 
-  // Fetch calendar/charts data when widgets change
+  // Fetch calendar/charts data when widgets change or user is set
   useEffect(() => {
-    if (widgets.length > 0) {
+    if (user?.id && widgets.length >= 0) {
       const runFetch = async () => {
+        console.log('[VisionBoard] Running fetchCalendarAndCharts - user:', user?.id, 'widgets:', widgets.length);
         const result = await fetchCalendarAndCharts();
         if (result) {
-          // Update streak and combo state outside of the useCallback
-          if (result.hasActivityToday && streakDays === 0) {
-            setStreakDays(1);
-          }
+          // Update combo state outside of the useCallback
+          // Note: streak is now fetched from database in fetchCalendarAndCharts
           setComboCount(result.combo);
         }
       };
       runFetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [widgets]);
+  }, [widgets, user?.id]);
 
   // =========== NAVIGATION ===========
   const navigateToGemMaster = useCallback((prompt = '') => {
@@ -4928,6 +5104,7 @@ const VisionBoardScreen = () => {
 
   // Delete single widget - with cascade delete for linked widgets
   // When a goal widget is deleted, also delete linked affirmation/action_plan widgets
+  // NO CONFIRMATION - delete directly
   const handleDeleteWidget = useCallback(async (widgetId) => {
     if (!widgetId) return;
 
@@ -4935,77 +5112,52 @@ const VisionBoardScreen = () => {
     const widgetToDelete = widgets.find(w => w?.id === widgetId);
     const isGoalWidget = widgetToDelete?.type === 'goal';
 
-    // If deleting a goal, find linked widgets to show in confirmation message
+    // If deleting a goal, find linked widgets to cascade delete
     const linkedWidgets = isGoalWidget
       ? widgets.filter(w => w?.content?.linked_goal_id === widgetId)
       : [];
 
-    const confirmMessage = isGoalWidget && linkedWidgets.length > 0
-      ? `Bạn có chắc chắn muốn xóa mục tiêu này?\n\nSẽ xóa luôn ${linkedWidgets.length} widget liên kết (khẳng định và kế hoạch hành động).`
-      : 'Bạn có chắc chắn muốn xóa widget này?';
+    try {
+      // If it's a goal widget, also delete linked affirmation/action_plan widgets
+      if (isGoalWidget && linkedWidgets.length > 0) {
+        const linkedIds = linkedWidgets.map(w => w.id);
+        console.log('[VisionBoard] Cascade deleting linked widgets:', linkedIds);
 
-    setAlertConfig({
-      visible: true,
-      type: 'error',
-      title: isGoalWidget ? 'Xóa Mục Tiêu?' : 'Xóa Widget?',
-      message: confirmMessage,
-      buttons: [
-        { text: 'Hủy', style: 'secondary' },
-        {
-          text: 'Xóa',
-          style: 'primary',
-          onPress: async () => {
-            try {
-              // If it's a goal widget, also delete linked affirmation/action_plan widgets
-              if (isGoalWidget && linkedWidgets.length > 0) {
-                const linkedIds = linkedWidgets.map(w => w.id);
-                console.log('[VisionBoard] Cascade deleting linked widgets:', linkedIds);
+        const { error: linkedError } = await supabase
+          .from('vision_board_widgets')
+          .delete()
+          .in('id', linkedIds);
 
-                const { error: linkedError } = await supabase
-                  .from('vision_board_widgets')
-                  .delete()
-                  .in('id', linkedIds);
+        if (linkedError) {
+          console.error('[VisionBoard] Error deleting linked widgets:', linkedError);
+          // Continue with main delete even if linked delete fails
+        }
+      }
 
-                if (linkedError) {
-                  console.error('[VisionBoard] Error deleting linked widgets:', linkedError);
-                  // Continue with main delete even if linked delete fails
-                }
-              }
+      // Delete the main widget
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .delete()
+        .eq('id', widgetId);
 
-              // Delete the main widget
-              const { error } = await supabase
-                .from('vision_board_widgets')
-                .delete()
-                .eq('id', widgetId);
+      if (error) throw error;
 
-              if (error) throw error;
+      // Update local state - remove both the widget and any linked widgets
+      setWidgets(prev => prev.filter(w => {
+        if (w?.id === widgetId) return false;
+        if (isGoalWidget && w?.content?.linked_goal_id === widgetId) return false;
+        return true;
+      }));
 
-              // Update local state - remove both the widget and any linked widgets
-              setWidgets(prev => prev.filter(w => {
-                if (w?.id === widgetId) return false;
-                if (isGoalWidget && w?.content?.linked_goal_id === widgetId) return false;
-                return true;
-              }));
-
-              console.log('[VisionBoard] Deleted widget:', widgetId, isGoalWidget ? `+ ${linkedWidgets.length} linked` : '');
-            } catch (err) {
-              console.error('[VisionBoard] Delete error:', err);
-              setAlertConfig({
-                visible: true,
-                type: 'error',
-                title: 'Lỗi',
-                message: 'Không thể xóa widget. Vui lòng thử lại.',
-                buttons: [{ text: 'OK', style: 'primary' }],
-              });
-            }
-          },
-        },
-      ],
-    });
+      console.log('[VisionBoard] Deleted widget:', widgetId, isGoalWidget ? `+ ${linkedWidgets.length} linked` : '');
+    } catch (err) {
+      console.error('[VisionBoard] Delete error:', err);
+    }
   }, [widgets]);
 
   // Delete multiple widgets (batch delete) - with cascade delete for linked widgets
-  const handleDeleteMultipleWidgets = useCallback(async (widgetIds, confirmMessage = 'Bạn có chắc chắn muốn xóa các widget này?') => {
+  // NO CONFIRMATION - delete directly
+  const handleDeleteMultipleWidgets = useCallback(async (widgetIds) => {
     if (!widgetIds || widgetIds.length === 0) return;
     if (!user?.id) {
       console.error('[VisionBoard] No user ID for delete');
@@ -5033,62 +5185,35 @@ const VisionBoardScreen = () => {
     // Combine all widget IDs to delete
     const allIdsToDelete = [...validIds, ...linkedWidgetIds];
 
-    // Update message if there are linked widgets
-    const finalMessage = linkedWidgetIds.length > 0
-      ? `${confirmMessage}\n\n(+ ${linkedWidgetIds.length} widget liên kết sẽ bị xóa)`
-      : confirmMessage;
+    try {
+      console.log('[VisionBoard] Batch deleting widgets:', allIdsToDelete);
 
-    setAlertConfig({
-      visible: true,
-      type: 'error',
-      title: `Xóa ${validIds.length} Widget?`,
-      message: finalMessage,
-      buttons: [
-        { text: 'Hủy', style: 'secondary' },
-        {
-          text: 'Xóa tất cả',
-          style: 'primary',
-          onPress: async () => {
-            try {
-              console.log('[VisionBoard] Batch deleting widgets:', allIdsToDelete);
+      // Delete widgets one by one to avoid RLS issues
+      let successCount = 0;
+      for (const id of allIdsToDelete) {
+        const { error } = await supabase
+          .from('vision_board_widgets')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
 
-              // Delete widgets one by one to avoid RLS issues
-              let successCount = 0;
-              for (const id of allIdsToDelete) {
-                const { error } = await supabase
-                  .from('vision_board_widgets')
-                  .delete()
-                  .eq('id', id)
-                  .eq('user_id', user.id);
+        if (!error) {
+          successCount++;
+        } else {
+          console.error('[VisionBoard] Failed to delete widget:', id, error);
+        }
+      }
 
-                if (!error) {
-                  successCount++;
-                } else {
-                  console.error('[VisionBoard] Failed to delete widget:', id, error);
-                }
-              }
+      // Update local state - remove all deleted widgets including linked ones
+      setWidgets(prev => prev.filter(w => !allIdsToDelete.includes(w?.id)));
 
-              // Update local state - remove all deleted widgets including linked ones
-              setWidgets(prev => prev.filter(w => !allIdsToDelete.includes(w?.id)));
+      // Reset selected lifeArea if all its widgets were deleted
+      setSelectedGoalLifeArea(null);
 
-              // Reset selected lifeArea if all its widgets were deleted
-              setSelectedGoalLifeArea(null);
-
-              console.log('[VisionBoard] Successfully deleted', successCount, 'of', allIdsToDelete.length, 'widgets (including', linkedWidgetIds.length, 'linked)');
-            } catch (err) {
-              console.error('[VisionBoard] Batch delete error:', err);
-              setAlertConfig({
-                visible: true,
-                type: 'error',
-                title: 'Lỗi',
-                message: 'Không thể xóa widgets. Vui lòng thử lại.',
-                buttons: [{ text: 'OK', style: 'primary' }],
-              });
-            }
-          },
-        },
-      ],
-    });
+      console.log('[VisionBoard] Successfully deleted', successCount, 'of', allIdsToDelete.length, 'widgets (including', linkedWidgetIds.length, 'linked)');
+    } catch (err) {
+      console.error('[VisionBoard] Batch delete error:', err);
+    }
   }, [user?.id, widgets]);
 
   // GLOBAL selection handlers (for cross-group multi-select)
@@ -5121,10 +5246,7 @@ const VisionBoardScreen = () => {
 
   const handleGlobalDeleteSelected = useCallback(() => {
     if (globalSelectedItems.size > 0) {
-      handleDeleteMultipleWidgets(
-        Array.from(globalSelectedItems),
-        `Xóa ${globalSelectedItems.size} mục tiêu đã chọn?`
-      );
+      handleDeleteMultipleWidgets(Array.from(globalSelectedItems));
       handleGlobalCancelSelection();
     }
   }, [globalSelectedItems, handleDeleteMultipleWidgets, handleGlobalCancelSelection]);
@@ -5537,16 +5659,19 @@ const VisionBoardScreen = () => {
           : goalResult.content,
       });
 
-      // Update affirmationData content with goalId
+      // Update affirmationData with goalId in content
+      // NOTE: linked_goal_id column doesn't exist, store in content.linked_goal_id instead
       affirmationData.content = {
         ...affirmationData.content,
         goalId: goalId,
+        linked_goal_id: goalId, // Store in content for GoalDetailScreen query
       };
 
-      // Update actionPlanData content with goalId
+      // Update actionPlanData with goalId in content
       actionPlanData.content = {
         ...actionPlanData.content,
         goalId: goalId,
+        linked_goal_id: goalId, // Store in content for GoalDetailScreen query
       };
 
       const { data: affirmResult, error: affirmError } = await supabase
@@ -5727,23 +5852,8 @@ const VisionBoardScreen = () => {
   }, [user?.id, widgetForm, editingWidget]);
 
   // =========== RENDER ===========
-
-  if (loading) {
-    return (
-      <LinearGradient
-        colors={GRADIENTS.background}
-        locations={GRADIENTS.backgroundLocations}
-        style={styles.gradient}
-      >
-        <SafeAreaView style={styles.container} edges={['top']}>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.gold} />
-            <Text style={styles.loadingText}>Đang tải Vision Board...</Text>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
+  // REMOVED: Blocking loading state - UI always renders immediately
+  // Data loads in background, content shows from cache or empty state
 
   return (
     <LinearGradient
@@ -5850,6 +5960,9 @@ const VisionBoardScreen = () => {
               weeklyXP={weeklyXPEarned}
             />
 
+            {/* Spacing before Featured Ritual Section */}
+            <View style={{ height: SPACING.lg }} />
+
             {/* =========== NEW: FEATURED RITUAL SECTION =========== */}
             <FeaturedRitualSection
               onRitualPress={(ritual) => {
@@ -5890,130 +6003,7 @@ const VisionBoardScreen = () => {
               }}
             />
 
-            {/* =========== NEW: CHARTS & CALENDAR SECTIONS =========== */}
-            {/* Monthly Calendar */}
-            <View style={styles.newSection}>
-              <View style={styles.newSectionHeader}>
-                <Clock size={18} color={COLORS.cyan} />
-                <Text style={styles.newSectionTitle}>Lịch tháng này</Text>
-                <TouchableOpacity
-                  onPress={() => setActiveTooltip('calendar')}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <HelpCircle size={16} color={COLORS.textMuted} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('VisionCalendar')}
-                  style={styles.seeAllButton}
-                >
-                  <Text style={styles.seeAllText}>Xem tất cả</Text>
-                  <ChevronRight size={14} color={COLORS.textMuted} />
-                </TouchableOpacity>
-              </View>
-              <MonthCalendarCompact
-                eventsByDate={calendarEvents}
-                selectedDate={selectedDate}
-                onDateSelect={async (date) => {
-                  setSelectedDate(date);
-                  // Fetch journal data for the selected date
-                  if (user?.id) {
-                    const journalResult = await calendarService.getDailyJournal(user.id, date);
-                    if (journalResult.success) {
-                      setJournalRituals(journalResult.rituals);
-                      setJournalReadings(journalResult.readings);
-                    }
-                  }
-                  // Show day detail modal when date is selected
-                  setDayDetailModalVisible(true);
-                }}
-                onViewFullCalendar={() => navigation.navigate('VisionCalendar')}
-                showLegend={true}
-              />
-            </View>
-
-            {/* Day Detail Modal */}
-            <DayDetailModal
-              visible={dayDetailModalVisible}
-              onClose={() => {
-                setDayDetailModalVisible(false);
-                setJournalRituals([]);
-                setJournalReadings([]);
-              }}
-              date={selectedDate}
-              events={calendarEvents[selectedDate] || []}
-              rituals={journalRituals}
-              readings={journalReadings}
-              onEventComplete={(eventId) => {
-                console.log('[VisionBoard] Event completed:', eventId);
-                // TODO: Mark event as complete
-              }}
-              onAddEvent={() => {
-                console.log('[VisionBoard] Add event for date:', selectedDate);
-                setAddEventModalVisible(true);
-              }}
-              onRitualPress={(ritual) => {
-                console.log('[VisionBoard] Ritual pressed:', ritual.ritual_slug);
-                // Could navigate to ritual details in the future
-              }}
-              onReadingPress={(reading) => {
-                console.log('[VisionBoard] Reading pressed:', reading.reading_type);
-                // Could navigate to reading details in the future
-              }}
-            />
-
-            {/* Add Event Modal */}
-            <AddEventModal
-              visible={addEventModalVisible}
-              date={selectedDate}
-              userId={user?.id}
-              onClose={() => setAddEventModalVisible(false)}
-              onEventCreated={async (newEvent) => {
-                console.log('[VisionBoard] Event created:', newEvent);
-                // Refresh calendar events for the current month
-                if (user?.id) {
-                  const now = new Date(selectedDate);
-                  const result = await calendarService.getMonthEventsGrouped(
-                    user.id,
-                    now.getFullYear(),
-                    now.getMonth() + 1
-                  );
-                  if (result.success) {
-                    setCalendarEvents(result.eventsByDate || {});
-                  }
-                  // Also refresh the day detail if open
-                  const journalResult = await calendarService.getDailyJournal(user.id, selectedDate);
-                  if (journalResult.success) {
-                    setJournalRituals(journalResult.rituals);
-                    setJournalReadings(journalResult.readings);
-                  }
-                }
-              }}
-            />
-
-            {/* Life Balance Radar Chart - New Full Card UI */}
-            <LifeBalanceCard
-              data={lifeAreaScores}
-              onAreaPress={(areaKey) => {
-                // Navigate to that life area's goals
-                setSelectedGoalLifeArea(areaKey);
-              }}
-              onViewDetails={() => setActiveTooltip('radar')}
-            />
-
-            {/* Weekly Progress - New Full Card UI */}
-            <WeeklyProgressCard
-              data={weeklyProgress}
-              previousWeekAvg={0}
-              onViewDetails={() => setActiveTooltip('weekly')}
-            />
-
-            {/* Info Tooltip Modal */}
-            <InfoTooltip
-              tooltip={activeTooltip ? SECTION_TOOLTIPS[activeTooltip] : ''}
-              isVisible={!!activeTooltip}
-              onClose={() => setActiveTooltip(null)}
-            />
-
+            {/* =========== MỤC TIÊU CỦA TÔI (Goals Section - moved above Calendar) =========== */}
             {/* Goal Tabs - Selectable cards by Life Area */}
             {hasGroupedWidgets && (
               <View
@@ -6025,137 +6015,15 @@ const VisionBoardScreen = () => {
                   }
                 }}
               >
-                <GoalTabs
+                {/* GoalsGridSection - Grid layout with category filter chips, thumbnail cards, and delete buttons */}
+                <GoalsGridSection
                   groupedByLifeArea={groupedByLifeArea}
-                  selectedLifeArea={selectedGoalLifeArea}
-                  onSelectLifeArea={setSelectedGoalLifeArea}
+                  selectedCategory={selectedGoalLifeArea || 'all'}
+                  onCategoryChange={setSelectedGoalLifeArea}
+                  onAddGoal={() => setShowLifeAreaPicker(true)}
+                  onDeleteGoal={handleDeleteWidget}
+                  navigation={navigation}
                 />
-
-                {/* GLOBAL Selection Mode Bar - Single bar for all goals */}
-                {globalSelectionMode && (
-                  <View style={styles.globalSelectionModeBar}>
-                    <Text style={styles.selectionModeText}>
-                      Đã chọn {globalSelectedItems.size}/{allGoalIds.length}
-                    </Text>
-                    <View style={styles.selectionModeActions}>
-                      <TouchableOpacity
-                        style={styles.selectionModeBtn}
-                        onPress={() => handleGlobalSelectAll(allGoalIds)}
-                      >
-                        <Check size={16} color={COLORS.gold} />
-                        <Text style={[styles.selectionModeBtnText, { color: COLORS.gold }]}>Tất cả</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.selectionModeBtn}
-                        onPress={handleGlobalCancelSelection}
-                      >
-                        <X size={16} color={COLORS.textMuted} />
-                        <Text style={styles.selectionModeBtnText}>Hủy</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.selectionModeBtn, styles.selectionModeBtnDanger]}
-                        onPress={handleGlobalDeleteSelected}
-                        disabled={globalSelectedItems.size === 0}
-                      >
-                        <Trash2 size={16} color={globalSelectedItems.size > 0 ? "#E74C3C" : COLORS.textMuted} />
-                        <Text style={[styles.selectionModeBtnText, { color: globalSelectedItems.size > 0 ? '#E74C3C' : COLORS.textMuted }]}>Xóa</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-
-                {/* Selected Goal Content - Shows affirmations & action plan */}
-                {/* When 'all' is selected or initial state (null), render ALL life areas */}
-                {(selectedGoalLifeArea === 'all' || selectedGoalLifeArea === null) && Object.keys(groupedByLifeArea.groups).map((lifeArea) => (
-                  <SelectedGoalContent
-                    key={lifeArea}
-                    lifeArea={lifeArea}
-                    group={groupedByLifeArea.groups[lifeArea]}
-                    onToggleHabit={(id) => handleToggleItem(id, 'habit')}
-                    onToggleGoalComplete={(id) => handleToggleItem(id, 'goal')}
-                    onDelete={handleDeleteWidget}
-                    onArchive={handleArchiveWidgets}
-                    onDeleteMultiple={handleDeleteMultipleWidgets}
-                    onEdit={handleEditWidget}
-                    onEditGoalTitle={handleEditGoalTitle}
-                    onEditAffirmation={handleEditAffirmation}
-                    onEditActionStep={handleEditActionStep}
-                    onSaveAffirmation={handleSaveAffirmation}
-                    onSaveGoalTitle={handleSaveGoalTitle}
-                    onSaveActionStep={handleSaveActionStep}
-                    onSaveRitual={handleSaveRitual}
-                    onToggleRitual={handleToggleRitual}
-                    onDeleteAffirmation={handleDeleteAffirmation}
-                    onDeleteActionStep={handleDeleteActionStep}
-                    onDeleteRitual={handleDeleteRitual}
-                    onAddAffirmation={handleAddAffirmation}
-                    onAddActionStep={handleAddActionStep}
-                    onAddRitual={handleAddRitual}
-                    onAffirmationComplete={handleGoalAffirmationComplete}
-                    onReadAloud={handleGoalReadAloud}
-                    completedToday={affirmationsCompletedToday}
-                    streak={affirmationStreak}
-                    isSelectionMode={globalSelectionMode}
-                    selectedItems={globalSelectedItems}
-                    onLongPressGlobal={handleGlobalLongPress}
-                    onToggleSelectGlobal={handleGlobalToggleSelect}
-                    onCancelSelectionGlobal={handleGlobalCancelSelection}
-                    onDeleteSelectedGlobal={handleGlobalDeleteSelected}
-                    onSelectAllGlobal={handleGlobalSelectAll}
-                    allGoalIds={allGoalIds}
-                  />
-                ))}
-
-                {/* When specific life area is selected */}
-                {selectedGoalLifeArea && selectedGoalLifeArea !== 'all' && groupedByLifeArea.groups[selectedGoalLifeArea] && (
-                  <SelectedGoalContent
-                    lifeArea={selectedGoalLifeArea}
-                    group={groupedByLifeArea.groups[selectedGoalLifeArea]}
-                    onToggleHabit={(id) => handleToggleItem(id, 'habit')}
-                    onToggleGoalComplete={(id) => handleToggleItem(id, 'goal')}
-                    onDelete={handleDeleteWidget}
-                    onArchive={handleArchiveWidgets}
-                    onDeleteMultiple={handleDeleteMultipleWidgets}
-                    onEdit={handleEditWidget}
-                    onEditGoalTitle={handleEditGoalTitle}
-                    onEditAffirmation={handleEditAffirmation}
-                    onEditActionStep={handleEditActionStep}
-                    onSaveAffirmation={handleSaveAffirmation}
-                    onSaveGoalTitle={handleSaveGoalTitle}
-                    onSaveActionStep={handleSaveActionStep}
-                    onSaveRitual={handleSaveRitual}
-                    onToggleRitual={handleToggleRitual}
-                    onDeleteAffirmation={handleDeleteAffirmation}
-                    onDeleteActionStep={handleDeleteActionStep}
-                    onDeleteRitual={handleDeleteRitual}
-                    onAddAffirmation={handleAddAffirmation}
-                    onAddActionStep={handleAddActionStep}
-                    onAddRitual={handleAddRitual}
-                    onAffirmationComplete={handleGoalAffirmationComplete}
-                    onReadAloud={handleGoalReadAloud}
-                    completedToday={affirmationsCompletedToday}
-                    streak={affirmationStreak}
-                    isSelectionMode={globalSelectionMode}
-                    selectedItems={globalSelectedItems}
-                    onLongPressGlobal={handleGlobalLongPress}
-                    onToggleSelectGlobal={handleGlobalToggleSelect}
-                    onCancelSelectionGlobal={handleGlobalCancelSelection}
-                    onDeleteSelectedGlobal={handleGlobalDeleteSelected}
-                    onSelectAllGlobal={handleGlobalSelectAll}
-                    allGoalIds={allGoalIds}
-                  />
-                )}
-
-                {/* Hint when no goal is selected - HIDDEN when in "All" tab mode since goals are auto-displayed */}
-                {/* This hint only shows when a specific category is selected but hasn't expanded any goal */}
-                {selectedGoalLifeArea && selectedGoalLifeArea !== 'all' && selectedGoalLifeArea !== null && (
-                  <View style={styles.selectGoalHint}>
-                    <ChevronUp size={18} color={COLORS.textMuted} style={{ marginBottom: 4 }} />
-                    <Text style={styles.selectGoalHintText}>
-                      Bấm vào mục tiêu để xem chi tiết
-                    </Text>
-                  </View>
-                )}
               </View>
             )}
 
@@ -6209,6 +6077,156 @@ const VisionBoardScreen = () => {
               </View>
             )}
 
+            {/* Add Goal Button - Below Goals Section */}
+            <TouchableOpacity
+              style={[styles.addWidgetButton, { marginBottom: SPACING.xl }]}
+              onPress={handleAddWidget}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Plus size={20} color={COLORS.gold} />
+              <Text style={styles.addWidgetText}>Thêm Mục Tiêu Mới</Text>
+            </TouchableOpacity>
+
+            {/* =========== NEW: CHARTS & CALENDAR SECTIONS =========== */}
+            {/* Monthly Calendar */}
+            <View style={styles.newSection}>
+              <View style={styles.newSectionHeader}>
+                <Clock size={18} color={COLORS.cyan} />
+                <Text style={styles.newSectionTitle}>Lịch tháng này</Text>
+                <TouchableOpacity
+                  onPress={() => setActiveTooltip('calendar')}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <HelpCircle size={16} color={COLORS.textMuted} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('VisionCalendar')}
+                  style={styles.seeAllButton}
+                >
+                  <Text style={styles.seeAllText}>Xem tất cả</Text>
+                  <ChevronRight size={14} color={COLORS.textMuted} />
+                </TouchableOpacity>
+              </View>
+              <MonthCalendarCompact
+                eventsByDate={calendarEvents}
+                selectedDate={selectedDate}
+                onDateSelect={async (date) => {
+                  setSelectedDate(date);
+                  // Fetch journal data for the selected date
+                  if (user?.id) {
+                    const journalResult = await calendarService.getDailyJournal(user.id, date);
+                    if (journalResult.success) {
+                      setJournalRituals(journalResult.rituals);
+                      setJournalReadings(journalResult.readings);
+                      setJournalPaperTrades(journalResult.paperTrades || []);
+                      setJournalTradingJournal(journalResult.tradingJournal || []);
+                      setJournalActions(journalResult.actions || []);
+                    }
+                  }
+                  // Show day detail modal when date is selected
+                  setDayDetailModalVisible(true);
+                }}
+                onViewFullCalendar={() => navigation.navigate('VisionCalendar')}
+                showLegend={true}
+              />
+            </View>
+
+            {/* Day Detail Modal */}
+            <DayDetailModal
+              visible={dayDetailModalVisible}
+              onClose={() => {
+                setDayDetailModalVisible(false);
+                setJournalRituals([]);
+                setJournalReadings([]);
+                setJournalPaperTrades([]);
+                setJournalTradingJournal([]);
+                setJournalActions([]);
+              }}
+              date={selectedDate}
+              events={calendarEvents[selectedDate] || []}
+              rituals={journalRituals}
+              readings={journalReadings}
+              paperTrades={journalPaperTrades}
+              tradingJournal={journalTradingJournal}
+              actions={journalActions}
+              onEventComplete={(eventId) => {
+                console.log('[VisionBoard] Event completed:', eventId);
+                // TODO: Mark event as complete
+              }}
+              onAddEvent={() => {
+                console.log('[VisionBoard] Add event for date:', selectedDate);
+                setAddEventModalVisible(true);
+              }}
+              onRitualPress={(ritual) => {
+                console.log('[VisionBoard] Ritual pressed:', ritual.ritual_slug);
+                // Could navigate to ritual details in the future
+              }}
+              onReadingPress={(reading) => {
+                console.log('[VisionBoard] Reading pressed:', reading.reading_type);
+                // Could navigate to reading details in the future
+              }}
+            />
+
+            {/* Add Event Modal */}
+            <AddEventModal
+              visible={addEventModalVisible}
+              date={selectedDate}
+              userId={user?.id}
+              onClose={() => setAddEventModalVisible(false)}
+              onEventCreated={async (newEvent) => {
+                console.log('[VisionBoard] Event created:', newEvent);
+                // Refresh calendar events for the current month
+                if (user?.id) {
+                  const now = new Date(selectedDate);
+                  const result = await calendarService.getMonthEventsGrouped(
+                    user.id,
+                    now.getFullYear(),
+                    now.getMonth() + 1
+                  );
+                  if (result.success) {
+                    setCalendarEvents(result.eventsByDate || {});
+                  }
+                  // Also refresh the day detail if open
+                  const journalResult = await calendarService.getDailyJournal(user.id, selectedDate);
+                  if (journalResult.success) {
+                    setJournalRituals(journalResult.rituals);
+                    setJournalReadings(journalResult.readings);
+                    setJournalPaperTrades(journalResult.paperTrades || []);
+                    setJournalTradingJournal(journalResult.tradingJournal || []);
+                    setJournalActions(journalResult.actions || []);
+                  }
+                }
+              }}
+            />
+
+            {/* Life Balance Radar Chart - New Full Card UI */}
+            <LifeBalanceCard
+              data={lifeAreaScores}
+              onAreaPress={(areaKey) => {
+                // Navigate to that life area's goals
+                setSelectedGoalLifeArea(areaKey);
+              }}
+              onViewDetails={() => setActiveTooltip('radar')}
+            />
+
+            {/* Spacing between Life Balance and Weekly Progress */}
+            <View style={{ height: SPACING.lg }} />
+
+            {/* Weekly Progress - New Full Card UI */}
+            <WeeklyProgressCard
+              data={weeklyProgress}
+              previousWeekAvg={0}
+              onViewDetails={() => setActiveTooltip('weekly')}
+            />
+
+            {/* Info Tooltip Modal */}
+            <InfoTooltip
+              tooltip={activeTooltip ? SECTION_TOOLTIPS[activeTooltip] : ''}
+              isVisible={!!activeTooltip}
+              onClose={() => setActiveTooltip(null)}
+            />
+
             {/* Ungrouped Affirmations Section - ONLY show when NO grouped widgets
                 When user has goal tabs, affirmations should be shown within SelectedGoalContent */}
             {!hasGroupedWidgets && ungroupedAffirmations.length > 0 && (
@@ -6258,6 +6276,9 @@ const VisionBoardScreen = () => {
               />
             )}
 
+            {/* Spacing before Divination Section */}
+            <View style={{ height: SPACING.lg }} />
+
             {/* Divination Section (Trải bài & Gieo quẻ) - Redesigned */}
             <DivinationSection
               readings={allReadings}
@@ -6285,17 +6306,6 @@ const VisionBoardScreen = () => {
               }}
               loading={loading}
             />
-
-            {/* Add Goal Button */}
-            <TouchableOpacity
-              style={styles.addWidgetButton}
-              onPress={handleAddWidget}
-              activeOpacity={0.7}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Plus size={20} color={COLORS.gold} />
-              <Text style={styles.addWidgetText}>Thêm Mục Tiêu Mới</Text>
-            </TouchableOpacity>
 
             {/* Quick Link to GemMaster */}
             <TouchableOpacity
@@ -6371,11 +6381,11 @@ const VisionBoardScreen = () => {
                     return (
                       <TouchableOpacity
                         key={area.key}
-                        style={[styles.lifeAreaCard, { borderColor: area.color }]}
+                        style={styles.lifeAreaCard}
                         onPress={() => handleSelectLifeArea(area.key)}
                       >
-                        <View style={[styles.lifeAreaIconContainer, { backgroundColor: `${area.color}15` }]}>
-                          <IconComponent size={32} color={area.color} />
+                        <View style={[styles.lifeAreaIconContainer, { backgroundColor: `${area.color}20` }]}>
+                          <IconComponent size={28} color={area.color} />
                         </View>
                         <Text style={styles.lifeAreaLabel}>{area.label}</Text>
                       </TouchableOpacity>
@@ -7567,6 +7577,30 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
   },
 
+  // Goal Thumbnail Grid
+  goalGridContainer: {
+    marginTop: SPACING.sm,
+  },
+  goalGridRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  emptyGoalsGrid: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xl * 2,
+    marginTop: SPACING.md,
+  },
+  emptyGoalsText: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    marginTop: SPACING.md,
+  },
+  emptyGoalsHint: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    marginTop: SPACING.xs,
+  },
+
   // Goal Tabs Section
   goalTabsContainer: {
     marginTop: SPACING.lg,
@@ -8731,29 +8765,24 @@ const styles = StyleSheet.create({
   },
   lifeAreaCard: {
     width: '47%',
-    backgroundColor: GLASS.background,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.md,
+    backgroundColor: 'rgba(30, 35, 60, 0.6)',
+    borderRadius: 16,
+    padding: SPACING.lg,
     alignItems: 'center',
-    borderWidth: GLASS.borderWidth,
-    borderColor: 'rgba(106, 91, 255, 0.25)',
+    borderWidth: 2,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
     gap: SPACING.sm,
-    shadowColor: GLASS.glowColor,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
   },
   lifeAreaIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.xs,
   },
   lifeAreaLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textPrimary,
     textAlign: 'center',
@@ -8831,7 +8860,6 @@ const styles = StyleSheet.create({
     backgroundColor: GLASS.background,
     borderRadius: GLASS.borderRadius,
     padding: SPACING.lg,
-    marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
     borderWidth: GLASS.borderWidth,
     borderColor: 'rgba(106, 91, 255, 0.3)',

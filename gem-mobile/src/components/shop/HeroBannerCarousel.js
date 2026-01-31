@@ -4,7 +4,7 @@
  * Fetches banners from Supabase shop_banners table
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import shopBannerService from '../../services/shopBannerService';
 import OptimizedImage, { prefetchImages } from '../Common/OptimizedImage';
+import InAppBrowser from '../Common/InAppBrowser';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BANNER_WIDTH = SCREEN_WIDTH - (SPACING.lg * 2);
@@ -33,6 +34,11 @@ const HeroBannerCarousel = ({ style }) => {
   const [banners, setBanners] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // InAppBrowser state for URL links
+  const [browserVisible, setBrowserVisible] = useState(false);
+  const [browserUrl, setBrowserUrl] = useState('');
+  const [browserTitle, setBrowserTitle] = useState('');
 
   // Fetch banners from service - only once on mount
   useEffect(() => {
@@ -110,13 +116,11 @@ const HeroBannerCarousel = ({ style }) => {
         });
         break;
       case 'url':
-        // Open external URL in browser
+        // Open URL in InAppBrowser (WebView) instead of external browser
         if (banner.link_value) {
-          try {
-            await Linking.openURL(banner.link_value);
-          } catch (err) {
-            console.error('[HeroBannerCarousel] Open URL error:', err);
-          }
+          setBrowserUrl(banner.link_value);
+          setBrowserTitle(banner.title || 'Landing Page');
+          setBrowserVisible(true);
         }
         break;
       case 'screen':
@@ -206,32 +210,42 @@ const HeroBannerCarousel = ({ style }) => {
   }
 
   return (
-    <View style={[styles.container, style]}>
-      <FlatList
-        ref={flatListRef}
-        data={banners}
-        renderItem={renderBanner}
-        keyExtractor={(item) => item.id}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onMomentumScrollEnd}
-        decelerationRate="fast"
-        snapToInterval={BANNER_WIDTH + SPACING.md}
-        snapToAlignment="start"
-        contentContainerStyle={styles.flatListContent}
-        getItemLayout={(_, index) => ({
-          length: BANNER_WIDTH + SPACING.md,
-          offset: (BANNER_WIDTH + SPACING.md) * index,
-          index,
-        })}
-        removeClippedSubviews={true}
-        initialNumToRender={2}
-        maxToRenderPerBatch={2}
-        windowSize={3}
+    <>
+      <View style={[styles.container, style]}>
+        <FlatList
+          ref={flatListRef}
+          data={banners}
+          renderItem={renderBanner}
+          keyExtractor={(item) => item.id}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={onMomentumScrollEnd}
+          decelerationRate="fast"
+          snapToInterval={BANNER_WIDTH + SPACING.md}
+          snapToAlignment="start"
+          contentContainerStyle={styles.flatListContent}
+          getItemLayout={(_, index) => ({
+            length: BANNER_WIDTH + SPACING.md,
+            offset: (BANNER_WIDTH + SPACING.md) * index,
+            index,
+          })}
+          removeClippedSubviews={true}
+          initialNumToRender={2}
+          maxToRenderPerBatch={2}
+          windowSize={3}
+        />
+        {banners.length > 1 && renderPagination()}
+      </View>
+
+      {/* InAppBrowser for URL links */}
+      <InAppBrowser
+        visible={browserVisible}
+        url={browserUrl}
+        title={browserTitle}
+        onClose={() => setBrowserVisible(false)}
       />
-      {banners.length > 1 && renderPagination()}
-    </View>
+    </>
   );
 };
 

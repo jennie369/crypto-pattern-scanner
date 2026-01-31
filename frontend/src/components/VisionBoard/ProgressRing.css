@@ -1,0 +1,67 @@
+/**
+ * ProgressRing Styles
+ */
+
+.progress-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.progress-ring-background {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.progress-ring-progress {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.progress-ring-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring-value {
+  font-weight: 700;
+}
+
+/* Size variants */
+.progress-ring-sm .progress-ring-value {
+  font-size: var(--font-size-sm);
+}
+
+.progress-ring-md .progress-ring-value {
+  font-size: var(--font-size-lg);
+}
+
+.progress-ring-lg .progress-ring-value {
+  font-size: var(--font-size-xl);
+}
+
+.progress-ring-xl .progress-ring-value {
+  font-size: var(--font-size-2xl);
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .progress-ring-lg {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .progress-ring-xl {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}

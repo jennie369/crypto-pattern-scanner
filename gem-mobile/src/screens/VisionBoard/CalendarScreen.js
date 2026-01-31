@@ -60,6 +60,7 @@ const CalendarScreen = () => {
 
     try {
       const data = await calendarService.getCalendarEvents(userId, currentMonth);
+      console.log('[Calendar] Loaded events:', data?.length || 0);
       setEvents(data || []);
     } catch (error) {
       console.error('[Calendar] Load events error:', error);

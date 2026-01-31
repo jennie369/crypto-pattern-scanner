@@ -1,7 +1,7 @@
 # BÁO CÁO TÍNH NĂNG APP GEM MOBILE
 
-**Ngày:** 2026-01-24
-**Version:** 3.1
+**Ngày:** 2026-01-28
+**Version:** 3.2
 **Platform:** React Native (Expo)
 **Codebase:** gem-mobile/src/
 
@@ -42,11 +42,11 @@
 | 6 | Trader Ritual | ✅ Hoạt động | RitualPlaygroundScreen.js | 2.0 |
 | 7 | Partnership/Affiliate | ✅ Hoạt động | affiliateService.js | 3.0 |
 | 8 | Tier System | ✅ Hoạt động | tierAccess.js | 3.1 |
-| 9 | Shop (Crystal Shop) | ✅ Hoạt động | shopifyService.js | 2.0 |
+| 9 | Shop (Crystal Shop) | ✅ Hoạt động | shopifyService.js | 3.2 |
 | 10 | Tarot | ✅ Hoạt động | TarotScreen.js | 2.0 |
 | 11 | I Ching | ✅ Hoạt động | IChingScreen.js | 2.0 |
 | 12 | Community/Forum | ✅ Hoạt động | ForumScreen.js | 2.0 |
-| 13 | Courses | ✅ Hoạt động | CoursesScreen.js | 3.0 |
+| 13 | Courses | ✅ Hoạt động | CoursesScreen.js | 3.2 |
 | 14 | Alerts/Notifications | ✅ Hoạt động | alertManager.js | 2.0 |
 | 15 | Market Data | ✅ Hoạt động | binanceService.js | 3.1 |
 | 16 | Mindset Advisor | ✅ MỚI | MindsetAdvisor.js | 3.1 |
@@ -734,6 +734,75 @@ gem-mobile/src/
 - Product filtering by tags
 - Variant selection
 
+### Shopify-Courses Sync (v3.2):
+| Feature | Mô tả |
+|---------|-------|
+| Product ID Mapping | `courses.shopify_product_id` links to Shopify |
+| Thumbnail Sync | Auto-sync từ Shopify product images |
+| Price Sync | Match price với Shopify variant |
+| Sync Function | `sync_course_thumbnails_from_shopify()` RPC |
+
+```javascript
+// Edge Function: shopify-products
+// Actions: getProducts, getProductById, syncCourseThumbnails
+const { data } = await supabase.functions.invoke('shopify-products', {
+  body: { action: 'syncCourseThumbnails' }
+});
+```
+
+### PromoBar Component (v3.2):
+
+#### File: `gem-mobile/src/components/PromoBar.js`
+
+#### Features:
+| Feature | Mô tả |
+|---------|-------|
+| Module-Level Cache | 5-minute cache prevents re-fetch |
+| Fixed Height | 48px container prevents layout shift |
+| Internal Navigation | Supports app:// URLs for in-app navigation |
+| External Links | Opens in browser for http:// URLs |
+| Admin Configurable | Managed via `promo_bar_config` table |
+
+#### Module-Level Caching:
+```javascript
+let cachedPromo = null;
+let hasLoadedOnce = false;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+export const resetPromoBarCache = () => {
+  cachedPromo = null;
+  hasLoadedOnce = false;
+  cacheTimestamp = null;
+};
+```
+
+#### Navigation Support:
+```javascript
+// Internal navigation (stays in app)
+link_url: 'app://Courses'           // → navigation.navigate('Courses')
+link_url: 'app://Shop/ProductDetail' // → navigation.navigate('Shop', { screen: 'ProductDetail' })
+
+// External links (opens browser)
+link_url: 'https://example.com'     // → Linking.openURL(url)
+```
+
+#### Database Table:
+```sql
+CREATE TABLE promo_bar_config (
+  id UUID PRIMARY KEY,
+  message TEXT NOT NULL,
+  link_url TEXT,
+  link_text VARCHAR(50),
+  background_color VARCHAR(20) DEFAULT 'gold',
+  text_color VARCHAR(20) DEFAULT 'dark',
+  is_active BOOLEAN DEFAULT true,
+  start_date TIMESTAMPTZ,
+  end_date TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
 ---
 
 ## 10. TAROT
@@ -855,21 +924,38 @@ gem-mobile/src/
 
 ## 13. COURSES
 
-### Trạng thái: ✅ Hoạt động
+### Trạng thái: ✅ Hoạt động (v3.2 - Major Update)
 
 ### Files liên quan:
 ```
 gem-mobile/src/
 ├── screens/Courses/
-│   ├── CoursesScreen.js          # Course catalog
+│   ├── CoursesScreen.js          # Course catalog (main)
 │   ├── CourseDetailScreen.js     # Chi tiết khóa học
 │   ├── CourseLearning.jsx        # Learning interface
-│   └── CertificateScreen.js      # Chứng chỉ
+│   ├── LessonPlayerScreen.js     # Video player
+│   ├── QuizScreen.js             # Quiz interface
+│   ├── CertificateScreen.js      # Chứng chỉ
+│   ├── CourseCheckout.js         # Checkout flow
+│   └── components/
+│       └── CourseCard.js         # Course card (list view)
+├── components/courses/
+│   ├── CourseCardVertical.js     # Grid card component
+│   ├── CourseFlashSaleSection.js # Flash sale carousel
+│   └── HighlightedCourseSection.js # Featured course hero
+├── screens/tabs/components/
+│   └── MyCoursesSection.js       # User courses panel (Account tab)
 ├── services/
 │   └── courseService.js          # Course logic
 ├── contexts/
 │   └── CourseContext.js          # State management
-└── screens/Admin/Courses/        # Admin screens
+├── navigation/
+│   ├── AccountStack.js           # User-facing course screens
+│   └── ShopStack.js              # Shop course screens
+└── screens/Admin/Courses/        # Admin management screens
+    ├── AdminCoursesScreen.js     # Course list management
+    ├── AdminCourseHighlightsScreen.js # Highlighted course config
+    └── AdminCourseModulesScreen.js    # Module/lesson management
 ```
 
 ### Chi tiết tính năng:
@@ -881,6 +967,9 @@ gem-mobile/src/
 | Quiz System | Câu hỏi sau bài học |
 | Certificates | Chứng chỉ hoàn thành |
 | Progress | Theo dõi tiến độ |
+| Flash Sale | Khóa học giảm giá với countdown |
+| Highlighted Course | Featured course hero section |
+| Shopify Sync | Auto-sync thumbnails from Shopify |
 
 ### Course Types:
 | Type | Tier Required | Mô tả |
@@ -895,6 +984,164 @@ gem-mobile/src/
 - Đang học (In Progress)
 - Hoàn thành (Completed)
 - Bookmark (Đã lưu)
+
+### Navigation Structure (v3.2):
+
+#### AccountStack - User Courses:
+```javascript
+// User-facing course screens in Account tab
+<Stack.Screen name="UserCourses" component={CoursesScreen} />
+<Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
+<Stack.Screen name="LessonPlayer" component={LessonPlayerScreen} />
+<Stack.Screen name="Quiz" component={QuizScreen} />
+<Stack.Screen name="Certificate" component={CertificateScreen} />
+<Stack.Screen name="CourseCheckout" component={CourseCheckout} />
+```
+
+#### ShopStack - Course Shopping:
+```javascript
+// Shopping-focused course screens in Shop tab
+<Stack.Screen name="CourseList" component={CoursesScreen} />
+<Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
+```
+
+#### MyCoursesSection Navigation:
+```javascript
+// From Account tab → stays in AccountStack
+navigation.navigate('UserCourses', { sourceTab: 'Account' })
+navigation.navigate('UserCourses', { filter: 'enrolled', sourceTab: 'Account' })
+navigation.navigate('UserCourses', { filter: 'completed', sourceTab: 'Account' })
+```
+
+### Thumbnail Design (v3.2):
+
+#### Square Aspect Ratio (1:1):
+All course thumbnails use square aspect ratio matching Shop tab design:
+
+| Component | Style | Usage |
+|-----------|-------|-------|
+| CourseCardVertical | `aspectRatio: 1` | Grid cards in catalog |
+| CourseCard | `aspectRatio: 1` | List cards |
+| CourseFlashSaleSection | `aspectRatio: 1` | Flash sale carousel |
+| HighlightedCourseSection | `aspectRatio: 1` | Featured course hero |
+
+```javascript
+// Example: CourseCardVertical.js
+thumbnailContainer: {
+  aspectRatio: 1, // Square thumbnail like Shop
+  position: 'relative',
+}
+```
+
+### Module-Level Caching (v3.2):
+
+#### HighlightedCourseSection:
+```javascript
+// Module-level cache - persists across remounts
+let cachedHighlightData = null;
+let hasLoadedOnce = false;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Reset function for pull-to-refresh
+export const resetHighlightedCourseCache = () => {
+  cachedHighlightData = null;
+  hasLoadedOnce = false;
+  cacheTimestamp = null;
+};
+```
+
+#### PromoBar:
+```javascript
+// Module-level cache for promo bar
+let cachedPromo = null;
+let hasLoadedOnce = false;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+```
+
+### Shopify Integration (v3.2):
+
+#### Product ID Mapping:
+```javascript
+// courses table column: shopify_product_id
+// Maps course to Shopify product for:
+// - Price sync
+// - Thumbnail sync
+// - Inventory status
+```
+
+#### Thumbnail Sync:
+```sql
+-- Supabase RPC function
+CREATE OR REPLACE FUNCTION sync_course_thumbnails_from_shopify()
+RETURNS INTEGER AS $$
+-- Syncs course.thumbnail from Shopify product images
+-- Called via Admin panel or Edge Function
+$$;
+```
+
+### Admin Features:
+
+#### AdminCourseHighlightsScreen:
+| Feature | Mô tả |
+|---------|-------|
+| Select Course | Chọn khóa học làm nổi bật |
+| Custom Title | Tiêu đề tùy chỉnh |
+| Custom Subtitle | Phụ đề tùy chỉnh |
+| Custom Image | Hình ảnh tùy chỉnh |
+| Badge Text | Text badge (Nổi bật, Hot, etc.) |
+| Badge Color | Màu badge (gold, purple, cyan, etc.) |
+| CTA Text | Text nút CTA |
+| Show/Hide Stats | Toggle hiển thị rating, students, lessons, price |
+| Sync Thumbnails | Sync thumbnails từ Shopify |
+
+### Database Tables:
+
+```sql
+-- courses table
+CREATE TABLE courses (
+  id UUID PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  thumbnail TEXT,
+  price DECIMAL(10,2),
+  level VARCHAR(20),
+  duration_hours DECIMAL(5,2),
+  instructor VARCHAR(255),
+  shopify_product_id VARCHAR(255),  -- Shopify mapping
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- highlighted_course_config table
+CREATE TABLE highlighted_course_config (
+  id UUID PRIMARY KEY,
+  course_id UUID REFERENCES courses(id),
+  custom_title VARCHAR(255),
+  custom_subtitle TEXT,
+  custom_description TEXT,
+  custom_image_url TEXT,
+  badge_text VARCHAR(50),
+  badge_color VARCHAR(20),
+  cta_text VARCHAR(50),
+  show_price BOOLEAN DEFAULT true,
+  show_students BOOLEAN DEFAULT true,
+  show_rating BOOLEAN DEFAULT true,
+  show_lessons BOOLEAN DEFAULT true,
+  is_active BOOLEAN DEFAULT true,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- course_enrollments table
+CREATE TABLE course_enrollments (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
+  course_id UUID REFERENCES courses(id),
+  progress DECIMAL(5,2) DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'enrolled',
+  enrolled_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
 
 ---
 
@@ -1056,6 +1303,12 @@ CREATE TABLE user_quotas (
 | `affiliate_links` | Referral links | ✅ |
 | `affiliate_commissions` | Commission tracking | ✅ |
 | `course_progress` | Learning progress | ✅ |
+| `courses` | Course catalog | ✅ |
+| `course_modules` | Course modules | ✅ |
+| `course_lessons` | Course lessons | ✅ |
+| `course_enrollments` | User enrollments | ✅ |
+| `highlighted_course_config` | Featured course settings | ✅ |
+| `promo_bar_config` | Promotional bar settings | ✅ |
 
 ### Key Constraints:
 ```sql
@@ -1157,6 +1410,28 @@ formatRelativeTime(timestamp)          // → "2 giờ trước"
 ---
 
 ## CHANGELOG
+
+### v3.2 (2026-01-28)
+- **Courses Major Update:**
+  - Square thumbnail aspect ratio (1:1) for all course cards
+  - Navigation structure fix: UserCourses in AccountStack
+  - Module-level caching for HighlightedCourseSection
+  - Module-level caching for PromoBar
+  - PromoBar fixed height container (no layout shift)
+  - PromoBar internal link navigation support
+  - Shopify product ID mapping for courses
+  - Thumbnail sync from Shopify products
+  - AdminCourseHighlightsScreen sync button
+  - Removed deprecated `is_free` column usage
+- **Components Updated:**
+  - CourseCardVertical.js - square thumbnails
+  - CourseCard.js - square thumbnails
+  - CourseFlashSaleSection.js - square thumbnails
+  - HighlightedCourseSection.js - square thumbnails + caching
+  - MyCoursesSection.js - fixed navigation to AccountStack
+  - CoursesScreen.js - simplified back button
+  - PromoBar.js - complete rewrite with caching
+  - AccountStack.js - added user-facing course screens
 
 ### v3.1 (2026-01-24)
 - Zone positioning fix (formation_time)

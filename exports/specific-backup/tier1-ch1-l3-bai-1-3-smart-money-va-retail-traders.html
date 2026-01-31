@@ -1,0 +1,1669 @@
+
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 1.3: Smart Money và Retail Traders | GEM Trading Academy</title>
+  
+  <!-- ============================================
+       🖼️ IMAGE CONFIGURATION - DỄ CHỈNH SỬA
+       ============================================
+       
+       HƯỚNG DẪN: Thay đổi URL hình ảnh trong section này
+       
+       TIER: 1 | CHAPTER: 1 | LESSON: 1.3
+       TOPIC: Smart Money và Retail Traders
+       ============================================ -->
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - DESIGN TOKENS V5.1
+       Ultra-Optimized for Mobile
+       ========================================== */
+    :root {
+      /* Colors */
+      --color-navy: #112250;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-burgundy: #9C0612;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-muted: #A0A0A0;
+      --color-bg-dark: #0A0F1A;
+      --color-bg-card: rgba(255, 255, 255, 0.03);
+      
+      /* ========================================
+         V5.1: ULTRA-COMPACT MOBILE SPACING
+         ======================================== */
+      --space-xs: 0.125rem;   /* 2px */
+      --space-sm: 0.25rem;    /* 4px */
+      --space-md: 0.5rem;     /* 8px */
+      --space-lg: 0.75rem;    /* 12px */
+      --space-xl: 1rem;       /* 16px */
+      --space-2xl: 1.25rem;   /* 20px */
+      --space-3xl: 1.5rem;    /* 24px */
+      
+      /* Container & Card Padding - MOBILE */
+      --container-padding: 0.5rem;  /* 8px - giảm từ 16px */
+      --card-padding: 0.5rem;       /* 8px - giảm từ 16px */
+      --table-padding: 0.375rem;    /* 6px */
+      
+      /* Border Radius - Compact */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      /* Shadows */
+      --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      
+      /* Glassmorphism */
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(40px);
+    }
+    
+    /* Tablet & Desktop Overrides */
+    @media (min-width: 600px) {
+      :root {
+        --space-sm: 0.5rem;
+        --space-md: 0.75rem;
+        --space-lg: 1rem;
+        --space-xl: 1.5rem;
+        --space-2xl: 2rem;
+        --space-3xl: 3rem;
+        --container-padding: 1.5rem;
+        --card-padding: 1rem;
+        --table-padding: 0.75rem;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+      }
+    }
+    
+    /* ==========================================
+       🌐 BASE STYLES
+       ========================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      background: linear-gradient(180deg, var(--color-bg-dark) 0%, var(--color-navy) 50%, var(--color-bg-dark) 100%);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+      font-size: 0.9rem;
+    }
+    
+    @media (min-width: 600px) {
+      body {
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+    }
+    
+    /* Background layers - Bokeh Effects */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    /* Container - SINGLE PADDING LAYER */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--container-padding);
+    }
+    
+    /* ==========================================
+       📝 TYPOGRAPHY - Compact
+       ========================================== */
+    h1, h2, h3, h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    
+    h1 {
+      font-size: clamp(1.4rem, 5vw, 2.5rem);
+      color: var(--color-gold);
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.4);
+    }
+    
+    h2 {
+      font-size: clamp(1.1rem, 4vw, 1.6rem);
+      color: var(--color-cyan);
+      margin: var(--space-xl) 0 var(--space-md);
+      padding-bottom: var(--space-xs);
+      border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+    }
+    
+    h3 {
+      font-size: 1rem;
+      color: var(--color-gold);
+      margin: var(--space-lg) 0 var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      h3 {
+        font-size: 1.2rem;
+      }
+    }
+    
+    p {
+      margin-bottom: var(--space-md);
+      color: var(--color-text);
+    }
+    
+    strong {
+      color: var(--color-gold);
+      font-weight: 600;
+    }
+    
+    /* ==========================================
+       🎴 HEADER - Compact
+       ========================================== */
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) 0;
+      position: relative;
+    }
+    
+    .lesson-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--color-gold), #FFD700);
+      color: var(--color-navy);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+      box-shadow: var(--shadow-glow-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-badge {
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-lg);
+      }
+    }
+    
+    .lesson-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-top: var(--space-sm);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-subtitle {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+    }
+    
+    @media (min-width: 600px) {
+      .meta-item {
+        font-size: 0.9rem;
+        gap: var(--space-sm);
+      }
+    }
+    
+    .meta-icon {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+    }
+    
+    @media (min-width: 600px) {
+      .meta-icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    /* ==========================================
+       📦 CARDS & SECTIONS - V5.1 Ultra-Compact
+       ========================================== */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      margin: var(--space-md) 0;
+      box-shadow: var(--shadow-card);
+    }
+    
+    .content-section {
+      margin: var(--space-lg) 0;
+    }
+    
+    /* Objectives Section */
+    .objectives-section {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.05));
+      border-left: 3px solid var(--color-gold);
+    }
+    
+    .objectives-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-xs) 0;
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .objectives-list li {
+        font-size: 1rem;
+        gap: var(--space-md);
+      }
+    }
+    
+    .objectives-list li::before {
+      content: '✓';
+      color: var(--color-green);
+      font-weight: bold;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    
+    /* ==========================================
+       👥 PLAYER CARDS - V5.1 Compact
+       ========================================== */
+    .player-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+      margin: var(--space-md) 0;
+    }
+    
+    @media (min-width: 500px) {
+      .player-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .player-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      border: 1px solid var(--glass-border);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .player-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .player-card.smart-money {
+      border-color: rgba(0, 240, 255, 0.3);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+    }
+    
+    .player-card.retail {
+      border-color: rgba(239, 68, 68, 0.3);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+    }
+    
+    .player-icon {
+      font-size: 2rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .player-icon {
+        font-size: 2.5rem;
+      }
+    }
+    
+    .player-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .player-title {
+        font-size: 1.2rem;
+      }
+    }
+    
+    .player-card.smart-money .player-title {
+      color: var(--color-cyan);
+    }
+    
+    .player-card.retail .player-title {
+      color: var(--color-red);
+    }
+    
+    .player-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .player-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .player-list li {
+      padding: 2px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-xs);
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    
+    @media (min-width: 600px) {
+      .player-list li {
+        font-size: 0.9rem;
+        padding: var(--space-xs) 0;
+      }
+    }
+    
+    .player-list li::before {
+      content: '•';
+      color: var(--color-gold);
+      flex-shrink: 0;
+    }
+    
+    /* ==========================================
+       📊 COMPARISON TABLE - V5.1 Compact
+       ========================================== */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: var(--space-md) 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      min-width: 400px;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table {
+        font-size: 0.9rem;
+      }
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: var(--table-padding);
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .comparison-table th {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      color: var(--color-gold);
+      background: rgba(255, 189, 89, 0.1);
+      white-space: nowrap;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table th {
+        font-size: 0.85rem;
+      }
+    }
+    
+    .comparison-table th:first-child {
+      border-radius: var(--radius-sm) 0 0 0;
+    }
+    
+    .comparison-table th:last-child {
+      border-radius: 0 var(--radius-sm) 0 0;
+    }
+    
+    .comparison-table td:first-child {
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    
+    .comparison-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .table-smart {
+      color: var(--color-cyan);
+    }
+    
+    .table-retail {
+      color: var(--color-red);
+    }
+    
+    /* ==========================================
+       🔄 CYCLE DIAGRAM - V5.1 Compact
+       ========================================== */
+    .cycle-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      margin: var(--space-md) 0;
+    }
+    
+    .cycle-step {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      background: var(--glass-bg);
+      border-radius: var(--radius-sm);
+      padding: var(--card-padding);
+      border-left: 3px solid;
+      position: relative;
+    }
+    
+    .cycle-step:nth-child(1) { border-color: var(--color-cyan); }
+    .cycle-step:nth-child(2) { border-color: var(--color-gold); }
+    .cycle-step:nth-child(3) { border-color: var(--color-purple); }
+    .cycle-step:nth-child(4) { border-color: var(--color-red); }
+    
+    .cycle-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .cycle-number {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+    }
+    
+    .cycle-step:nth-child(1) .cycle-number {
+      background: rgba(0, 240, 255, 0.2);
+      color: var(--color-cyan);
+    }
+    
+    .cycle-step:nth-child(2) .cycle-number {
+      background: rgba(255, 189, 89, 0.2);
+      color: var(--color-gold);
+    }
+    
+    .cycle-step:nth-child(3) .cycle-number {
+      background: rgba(106, 91, 255, 0.2);
+      color: var(--color-purple);
+    }
+    
+    .cycle-step:nth-child(4) .cycle-number {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--color-red);
+    }
+    
+    .cycle-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .cycle-content h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .cycle-content h4 {
+        font-size: 1rem;
+      }
+    }
+    
+    .cycle-step:nth-child(1) .cycle-content h4 { color: var(--color-cyan); }
+    .cycle-step:nth-child(2) .cycle-content h4 { color: var(--color-gold); }
+    .cycle-step:nth-child(3) .cycle-content h4 { color: var(--color-purple); }
+    .cycle-step:nth-child(4) .cycle-content h4 { color: var(--color-red); }
+    
+    .cycle-content p {
+      font-size: 0.8rem;
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .cycle-content p {
+        font-size: 0.9rem;
+      }
+    }
+    
+    .cycle-arrow {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 1rem;
+      margin: var(--space-xs) 0;
+    }
+    
+    /* ==========================================
+       💡 INSIGHT BOX - V5.1 Compact
+       ========================================== */
+    .insight-box {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      padding-top: calc(var(--card-padding) + 8px);
+      margin: var(--space-md) 0;
+      position: relative;
+    }
+    
+    .insight-box::before {
+      content: '💡';
+      position: absolute;
+      top: -10px;
+      left: 12px;
+      background: var(--color-navy);
+      padding: 0 var(--space-xs);
+      font-size: 1.2rem;
+    }
+    
+    .insight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--color-cyan);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .insight-box p {
+      font-size: 0.85rem;
+    }
+    
+    /* ==========================================
+       ⚠️ WARNING BOX - V5.1 Compact
+       ========================================== */
+    .warning-box {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(156, 6, 18, 0.05));
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      padding-top: calc(var(--card-padding) + 8px);
+      margin: var(--space-md) 0;
+      position: relative;
+    }
+    
+    .warning-box::before {
+      content: '⚠️';
+      position: absolute;
+      top: -10px;
+      left: 12px;
+      background: var(--color-navy);
+      padding: 0 var(--space-xs);
+      font-size: 1.2rem;
+    }
+    
+    .warning-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--color-red);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .warning-box ol {
+      margin-left: var(--space-md);
+      font-size: 0.85rem;
+    }
+    
+    .warning-box li {
+      margin-bottom: var(--space-sm);
+    }
+    
+    /* ==========================================
+       📈 MINDSET SHIFT - V5.1 Compact
+       ========================================== */
+    .mindset-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      align-items: stretch;
+      margin: var(--space-md) 0;
+    }
+    
+    @media (min-width: 500px) {
+      .mindset-grid {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+    
+    .mindset-old,
+    .mindset-new {
+      background: var(--glass-bg);
+      border-radius: var(--radius-sm);
+      padding: var(--card-padding);
+      text-align: center;
+      flex: 1;
+    }
+    
+    .mindset-old {
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .mindset-new {
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .mindset-label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .mindset-label {
+        font-size: 0.75rem;
+      }
+    }
+    
+    .mindset-old .mindset-label {
+      color: var(--color-red);
+    }
+    
+    .mindset-new .mindset-label {
+      color: var(--color-green);
+    }
+    
+    .mindset-text {
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    
+    @media (min-width: 600px) {
+      .mindset-text {
+        font-size: 0.9rem;
+      }
+    }
+    
+    .mindset-arrow {
+      color: var(--color-gold);
+      font-size: 1.5rem;
+      text-align: center;
+      transform: rotate(90deg);
+      padding: var(--space-xs) 0;
+    }
+    
+    @media (min-width: 500px) {
+      .mindset-arrow {
+        transform: none;
+        padding: 0 var(--space-sm);
+      }
+    }
+    
+    /* ==========================================
+       📝 SUMMARY BOX - V5.1 Compact
+       ========================================== */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(0, 240, 255, 0.08));
+      border: 2px solid var(--color-gold);
+      border-radius: var(--radius-lg);
+      padding: var(--card-padding);
+      margin: var(--space-lg) 0;
+      box-shadow: var(--shadow-glow-gold);
+    }
+    
+    .summary-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      text-align: center;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .summary-title {
+        font-size: 1.3rem;
+      }
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-sm);
+    }
+    
+    @media (min-width: 500px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .summary-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+    
+    .summary-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    
+    .summary-text {
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-text {
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       ❓ QUIZ SECTION - V5.1 Compact
+       ========================================== */
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+      border: 1px solid rgba(106, 91, 255, 0.3);
+      border-radius: var(--radius-lg);
+      padding: var(--card-padding);
+      margin: var(--space-lg) 0;
+    }
+    
+    .quiz-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--color-purple);
+      text-align: center;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-title {
+        font-size: 1.3rem;
+      }
+    }
+    
+    .quiz-question {
+      background: var(--glass-bg);
+      border-radius: var(--radius-sm);
+      padding: var(--card-padding);
+      margin-bottom: var(--space-md);
+    }
+    
+    .question-number {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--color-purple);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .question-text {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: var(--space-sm);
+      color: var(--color-white);
+    }
+    
+    @media (min-width: 600px) {
+      .question-text {
+        font-size: 0.95rem;
+      }
+    }
+    
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    
+    .quiz-option {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option {
+        font-size: 0.9rem;
+        padding: var(--space-md);
+      }
+    }
+    
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--color-purple);
+    }
+    
+    .quiz-option input {
+      display: none;
+    }
+    
+    .quiz-option .radio-custom {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-text-muted);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option .radio-custom {
+        width: 18px;
+        height: 18px;
+      }
+    }
+    
+    .quiz-option.selected .radio-custom {
+      border-color: var(--color-purple);
+      background: var(--color-purple);
+    }
+    
+    .quiz-option.correct {
+      border-color: var(--color-green);
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .quiz-option.incorrect {
+      border-color: var(--color-red);
+      background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .quiz-feedback {
+      margin-top: var(--space-sm);
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      display: none;
+      font-size: 0.8rem;
+    }
+    
+    .quiz-feedback.show {
+      display: block;
+    }
+    
+    .quiz-feedback.correct {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--color-green);
+      color: var(--color-green);
+    }
+    
+    .quiz-feedback.incorrect {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--color-red);
+      color: var(--color-red);
+    }
+    
+    .quiz-submit {
+      display: block;
+      width: 100%;
+      max-width: 250px;
+      margin: var(--space-md) auto 0;
+      padding: var(--space-sm) var(--space-lg);
+      background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+      color: var(--color-white);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .quiz-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(106, 91, 255, 0.4);
+    }
+    
+    /* ==========================================
+       🖼️ IMAGES - V5.1 Full Width
+       ========================================== */
+    .lesson-image {
+      border-radius: var(--radius-md);
+      margin: var(--space-md) 0;
+      text-align: center;
+      overflow: hidden;
+      /* Negative margin to make image full-width */
+      margin-left: calc(-1 * var(--container-padding));
+      margin-right: calc(-1 * var(--container-padding));
+      border-radius: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-image {
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: var(--radius-md);
+      }
+    }
+    
+    .lesson-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-image img {
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
+      }
+    }
+    
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      margin-top: var(--space-sm);
+      font-style: italic;
+      padding: 0 var(--container-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .image-caption {
+        font-size: 0.85rem;
+        padding: 0;
+      }
+    }
+    
+    /* ==========================================
+       📱 FOOTER - V5.1 Compact
+       ========================================== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-lg) 0;
+      border-top: 1px solid var(--glass-border);
+      margin-top: var(--space-lg);
+    }
+    
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .footer-link {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+    
+    .footer-link a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+
+  </style>
+
+
+  <div class="container">
+    
+    <!-- ==========================================
+         🎴 HEADER
+         ========================================== -->
+    <header class="lesson-header"><span class="lesson-badge">ER 1 • Chapter 1 • Bài 1.3</span>
+      <h1>Smart Money và Retail Traders</h1>
+      <p class="lesson-subtitle">
+        Hiểu về hai nhóm người chơi chính trên thị trường và tại sao đa số Retail Traders thua lỗ
+      </p>
+      <div class="lesson-meta">
+        <span class="meta-item">
+          <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+          10-12 phút đọc
+        </span>
+        <span class="meta-item">
+          <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+          </svg>
+          3 câu quiz
+        </span>
+        <span class="meta-item">
+          <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          Độ khó: Cơ bản
+        </span>
+      </div>
+    </header>
+    
+    <!-- ==========================================
+         🎯 MỤC TIÊU BÀI HỌC
+         ========================================== -->
+    <section class="glass-card objectives-section">
+      <h2 style="margin-top: 0; border: none;">🎯 Mục Tiêu Bài Học</h2>
+      <ul class="objectives-list">
+        <li>Hiểu Smart Money là ai và họ hoạt động như thế nào</li>
+        <li>Nhận biết các đặc điểm và sai lầm phổ biến của Retail Traders</li>
+        <li>Nắm vững chu kỳ tích lũy và phân phối của Smart Money</li>
+        <li>Chuyển đổi tư duy giao dịch để đi theo Smart Money</li>
+      </ul>
+    </section>
+    
+    <!-- ==========================================
+         👥 SECTION 1: HAI NHÓM NGƯỜI CHƠI
+         ========================================== -->
+    <section class="content-section">
+      <h2>👥 Hai Nhóm Người Chơi Trên Thị Trường</h2>
+      
+      <p>
+        Trên thị trường tài chính, có hai nhóm người chơi chính với nguồn lực, thông tin và cách tiếp cận hoàn toàn khác nhau. Hiểu rõ sự khác biệt này là bước đầu tiên để bạn không còn là "con mồi" trên thị trường.
+      </p>
+      
+      <!-- ============================================
+           🖼️ HÌNH 1: SO SÁNH SMART MONEY VS RETAIL
+           - Tier: 1 | Chapter: 1 | Lesson: 1.3
+           - Nội dung: Infographic so sánh 2 nhóm với icons, stats
+           - Kích thước gợi ý: 800x600px (tỷ lệ 4:3)
+           ============================================ -->
+      <div class="lesson-image">
+        
+      </div>
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img1.webp" alt="gemini-generated-image-urh923urh923-mxju">
+      
+      <div class="player-grid">
+        <!-- Smart Money Card -->
+        <div class="player-card smart-money">
+          <div class="player-icon">🏦</div>
+          <h3 class="player-title">Smart Money</h3>
+          <p class="player-subtitle">"Những người chơi thông minh"</p>
+          <ul class="player-list">
+            <li>Ngân hàng đầu tư (Goldman Sachs, JPMorgan...)</li>
+            <li>Quỹ đầu tư lớn (Hedge Funds, Pension Funds)</li>
+            <li>Tổ chức tài chính (Insurance Companies)</li>
+            <li>Whale (Cá voi) - Tài khoản cực lớn</li>
+            <li>Market Makers - Nhà tạo lập thị trường</li>
+          </ul>
+        </div>
+        
+        <!-- Retail Card -->
+        <div class="player-card retail">
+          <div class="player-icon">👤</div>
+          <h3 class="player-title">Retail Traders</h3>
+          <p class="player-subtitle">"Nhà đầu tư cá nhân"</p>
+          <ul class="player-list">
+            <li>Trader cá nhân giao dịch tại nhà</li>
+            <li>Nhà đầu tư nhỏ lẻ với tài khoản $100-$100K</li>
+            <li>Người mới tham gia thị trường</li>
+            <li>Trader part-time (làm thêm ngoài công việc chính)</li>
+            <li>Chiếm ~10-15% khối lượng giao dịch</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📊 SECTION 2: SỰ KHÁC BIỆT VỀ NGUỒN LỰC
+         ========================================== -->
+    <section class="content-section">
+      <h2>📊 Sự Khác Biệt Về Nguồn Lực</h2>
+      
+      <p>
+        Smart Money có những lợi thế mà Retail Traders không thể cạnh tranh trực tiếp. Tuy nhiên, điều này <strong>không có nghĩa là bạn không thể thắng</strong> - chỉ cần bạn học cách đi theo họ thay vì chống lại họ.</p><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img2.webp" alt="gemini-generated-image-lq8vmelq8vme-gyxf">
+      
+      <div class="glass-card">
+        <div class="table-wrapper">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Tiêu Chí</th>
+                <th class="table-smart">Smart Money</th>
+                <th class="table-retail">Retail</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>💰 Vốn</td>
+                <td class="table-smart">$100M - $100B</td>
+                <td class="table-retail">$100 - $100K</td>
+              </tr>
+              <tr>
+                <td>📰 Thông tin</td>
+                <td class="table-smart">Truy cập sớm, chuyên sâu</td>
+                <td class="table-retail">Tin tức công khai, chậm</td>
+              </tr>
+              <tr>
+                <td>🔧 Công cụ</td>
+                <td class="table-smart">AI, Bloomberg Terminal</td>
+                <td class="table-retail">TradingView, app cơ bản</td>
+              </tr>
+              <tr>
+                <td>⏱️ Thời gian</td>
+                <td class="table-smart">24/7, đội ngũ liên tục</td>
+                <td class="table-retail">Part-time, sau giờ làm</td>
+              </tr>
+              <tr>
+                <td>🧠 Kinh nghiệm</td>
+                <td class="table-smart">Hàng chục năm, đào tạo bài bản</td>
+                <td class="table-retail">Tự học, thường 1-3 năm</td>
+              </tr>
+              <tr>
+                <td>😌 Tâm lý</td>
+                <td class="table-smart">Kỷ luật cao, quy trình rõ</td>
+                <td class="table-retail">Dễ bị cảm xúc chi phối</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         ❌ SECTION 3: TẠI SAO RETAIL THƯỜNG THUA LỖ
+         ========================================== -->
+    <section class="content-section">
+      <h2>❌ Tại Sao Retail Traders Thường Thua Lỗ?</h2>
+      
+      <p>
+        Theo thống kê, <strong>70-90% Retail Traders thua lỗ</strong> trong dài hạn. Đây không phải là do thị trường "gian lận" hay vì họ không may mắn - mà vì họ mắc phải những sai lầm có hệ thống.
+      </p>
+      
+      <!-- ============================================
+           🖼️ HÌNH 2: 5 SAI LẦM PHỔ BIẾN
+           - Tier: 1 | Chapter: 1 | Lesson: 1.3
+           - Nội dung: 5 icons với mô tả sai lầm
+           - Kích thước gợi ý: 800x600px (tỷ lệ 4:3)
+           ============================================ -->
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img3.webp" alt="gemini-generated-image-o8k2q4o8k2q4-7lct" class="">
+      </div>
+      
+      
+      <div class="warning-box">
+        <h4 class="warning-title">5 Sai Lầm Phổ Biến Nhất</h4>
+        <ol>
+          <li>
+            <strong>Mua ở đỉnh, bán ở đáy (FOMO &amp; Panic)</strong><br>
+            <span style="color: var(--color-text-muted);">Thấy giá tăng mạnh → sợ bỏ lỡ → mua vào → giá đảo chiều giảm</span>
+          </li>
+          <li>
+            <strong>Không có kế hoạch giao dịch</strong><br>
+            <span style="color: var(--color-text-muted);">Vào lệnh theo cảm xúc, không có entry/stop loss/target rõ ràng</span>
+          </li>
+          <li>
+            <strong>Quản lý vốn kém</strong><br>
+            <span style="color: var(--color-text-muted);">Đặt cược quá lớn, không có stop loss, all-in một lệnh</span>
+          </li>
+          <li>
+            <strong>Chạy theo tin tức</strong><br>
+            <span style="color: var(--color-text-muted);">Khi tin ra, Smart Money đã hành động xong - bạn là người đến sau</span>
+          </li>
+          <li class="">
+            <strong>Giao dịch ngược trend</strong><br>
+            <span style="color: var(--color-text-muted);">Cố bắt đỉnh/đáy thay vì đi theo xu hướng lớn</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         🔄 SECTION 4: CHU KỲ TÍCH LŨY VÀ PHÂN PHỐI
+         ========================================== -->
+    <section class="content-section">
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img4.webp" alt="gemini-generated-image-62wdvl62wdvl-sw1u"><h2 class="">🔄 Cách Smart Money Tích Lũy và Phân Phối</h2>
+      
+      <p class="">
+        Smart Money không thể mua hoặc bán một lượng lớn tài sản cùng một lúc - làm vậy sẽ khiến giá biến động quá mạnh và gây bất lợi cho chính họ. Vì vậy, họ phải thực hiện theo <strong>chu kỳ tích lũy và phân phối</strong>.</p><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img5.webp" alt="gemini-generated-image-m9ndfum9ndfu-vi3a">
+      
+      <!-- ============================================
+           🖼️ HÌNH 3: CHU KỲ 4 GIAI ĐOẠN
+           - Tier: 1 | Chapter: 1 | Lesson: 1.3
+           - Nội dung: Diagram vòng tròn 4 giai đoạn
+           - Kích thước gợi ý: 800x800px (1:1 vuông)
+           ============================================ -->
+      <div class="lesson-image">
+        
+      </div>
+      
+      
+      <div class="cycle-container">
+        <div class="cycle-step">
+          <div class="cycle-number">1</div>
+          <div class="cycle-content">
+            <h4>TÍCH LŨY (Accumulation)</h4>
+            <p>
+              Smart Money <strong>âm thầm mua vào</strong> khi giá đang thấp và thị trường bi quan. Họ mua từ từ trong một khoảng thời gian dài để không đẩy giá lên. Retail thường bán ra trong giai đoạn này vì sợ giá giảm thêm.
+            </p>
+            <p style="color: var(--color-cyan); font-style: italic; margin-bottom: 0;">
+              → Đây là lúc LFZ (Vùng Mua) được tạo ra!
+            </p>
+          </div>
+        </div>
+        
+        <div class="cycle-arrow">↓</div>
+        
+        <div class="cycle-step">
+          <div class="cycle-number">2</div>
+          <div class="cycle-content">
+            <h4>MARKUP (Đẩy Giá Lên)</h4>
+            <p>
+              Sau khi tích lũy đủ, Smart Money <strong>để giá tăng lên</strong>. Tin tức tích cực bắt đầu xuất hiện. Retail bắt đầu chú ý và FOMO mua vào. Đây là giai đoạn uptrend mạnh.
+            </p>
+            <p style="color: var(--color-gold); font-style: italic; margin-bottom: 0;">
+              → Giá tạo pattern UPU (Up-Pause-Up), tiếp tục xu hướng tăng
+            </p>
+          </div>
+        </div>
+        
+        <div class="cycle-arrow">↓</div>
+        
+        <div class="cycle-step">
+          <div class="cycle-number">3</div>
+          <div class="cycle-content">
+            <h4>PHÂN PHỐI (Distribution)</h4>
+            <p>
+              Smart Money <strong>âm thầm bán ra</strong> khi giá đang cao và thị trường lạc quan. Tin tức vẫn rất tích cực, Retail đang FOMO mua vào mạnh - chính là người mua hàng của Smart Money.
+            </p>
+            <p style="color: var(--color-purple); font-style: italic; margin-bottom: 0;">
+              → Đây là lúc HFZ (Vùng Bán) được tạo ra!
+            </p>
+          </div>
+        </div>
+        
+        <div class="cycle-arrow">↓</div>
+        
+        <div class="cycle-step">
+          <div class="cycle-number">4</div>
+          <div class="cycle-content">
+            <h4>MARKDOWN (Giá Giảm)</h4>
+            <p>
+              Sau khi phân phối xong, Smart Money <strong>để giá giảm xuống</strong>. Tin tức tiêu cực xuất hiện. Retail bắt đầu panic sell (bán tháo) - chính là lúc Smart Money chuẩn bị tích lũy lại!
+            </p>
+            <p style="color: var(--color-red); font-style: italic; margin-bottom: 0;">
+              → Giá tạo pattern DPD (Down-Pause-Down), tiếp tục xu hướng giảm
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="insight-box">
+        <h4 class="insight-title">Insight Quan Trọng</h4>
+        <p>
+          <strong>Retail Traders luôn đến SAU Smart Money:</strong> Khi bạn thấy tin tức tốt và muốn mua, có thể Smart Money đã mua xong từ lâu và đang chuẩn bị bán. Khi bạn hoảng sợ muốn bán, Smart Money có thể đang tích lũy mua vào.
+        </p>
+        <p style="margin-bottom: 0;" class="">
+          <strong>Giải pháp:</strong> Thay vì chạy theo tin tức, hãy học cách đọc "dấu chân" của Smart Money qua các zone HFZ/LFZ - đây chính là cốt lõi của phương pháp GEM Frequency!
+        </p>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         🧠 SECTION 5: TƯ DUY GIAO DỊCH THEO SMART MONEY
+         ========================================== -->
+    <section class="content-section">
+      <h2 class="">🧠 Tư Duy Giao Dịch Theo Smart Money</h2>
+      
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img6.webp" alt="gemini-generated-image-rso4rbrso4rb-5s7b"><p class="">Để thành công trong trading, bạn cần <strong>thay đổi hoàn toàn cách tư duy</strong>. Thay vì cố đánh bại Smart Money (điều không thể), hãy học cách đọc hành vi của họ và đi theo.
+      </p>
+      
+      <!-- ============================================
+           🖼️ HÌNH 4: CHUYỂN ĐỔI TƯ DUY
+           - Tier: 1 | Chapter: 1 | Lesson: 1.3
+           - Nội dung: Bảng so sánh tư duy cũ vs mới
+           - Kích thước gợi ý: 800x600px (tỷ lệ 4:3)
+           ============================================ -->
+      <div class="lesson-image">
+        
+      </div>
+      
+      
+      <h3>Chuyển Đổi Tư Duy</h3>
+      
+      <div class="mindset-grid">
+        <div class="mindset-old">
+          <div class="mindset-label">❌ Tư Duy Cũ</div>
+          <div class="mindset-text">"Giá đang tăng mạnh, mình phải mua ngay kẻo lỡ!"</div>
+        </div>
+        <div class="mindset-arrow">→</div>
+        <div class="mindset-new">
+          <div class="mindset-label">✓ Tư Duy Mới</div>
+          <div class="mindset-text">"Giá đang tăng, Smart Money có thể đang phân phối. Đợi giá quay về vùng LFZ để vào lệnh."</div>
+        </div>
+      </div>
+      
+      <div class="mindset-grid">
+        <div class="mindset-old">
+          <div class="mindset-label">❌ Tư Duy Cũ</div>
+          <div class="mindset-text">"Tin tức rất xấu, phải bán gấp trước khi mất hết!"</div>
+        </div>
+        <div class="mindset-arrow">→</div>
+        <div class="mindset-new">
+          <div class="mindset-label">✓ Tư Duy Mới</div>
+          <div class="mindset-text">"Tin xấu = Retail đang panic. Smart Money có thể đang tích lũy. Quan sát vùng LFZ."</div>
+        </div>
+      </div>
+      
+      <div class="mindset-grid">
+        <div class="mindset-old">
+          <div class="mindset-label">❌ Tư Duy Cũ</div>
+          <div class="mindset-text">"Giá phá vỡ resistance, vào lệnh BUY ngay!"</div>
+        </div>
+        <div class="mindset-arrow">→</div>
+        <div class="mindset-new">
+          <div class="mindset-label">✓ Tư Duy Mới</div>
+          <div class="mindset-text">"Breakout có thể là bẫy. Đợi giá RETEST vùng zone trước khi vào lệnh."</div>
+        </div>
+      </div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 5: NGUYÊN TẮC ĐI THEO SMART MONEY
+           - Tier: 1 | Chapter: 1 | Lesson: 1.3
+           - Nội dung: 4 nguyên tắc vàng với icons
+           - Kích thước gợi ý: 800x600px (tỷ lệ 4:3)
+           ============================================ -->
+      <div class="lesson-image">
+        
+      </div>
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img7.webp" alt="gemini-generated-image-75pskv75pskv-3x1e">
+      
+      <div class="glass-card">
+        <h3 style="color: var(--color-gold); margin-top: 0;">4 Nguyên Tắc Vàng</h3>
+        <ol style="margin-left: var(--space-md); font-size: 0.85rem;">
+          <li style="margin-bottom: var(--space-md);">
+            <strong style="color: var(--color-cyan);">Tìm "Dấu Chân" Của Smart Money</strong><br>
+            Zones HFZ/LFZ là nơi Smart Money đã đặt lệnh chờ. Khi giá quay lại, lệnh của họ sẽ được kích hoạt.
+          </li>
+          <li style="margin-bottom: var(--space-md);">
+            <strong style="color: var(--color-cyan);">Đợi Giá Quay Lại (Retest)</strong><br>
+            Không chase theo giá. Đợi giá quay về zone để vào lệnh với xác suất cao hơn.
+          </li>
+          <li style="margin-bottom: var(--space-md);">
+            <strong style="color: var(--color-cyan);">Ưu Tiên Zone Mới (Fresh Zone)</strong><br>
+            Zone mới = Lệnh của Smart Money chưa được khớp. Zone càng mới càng mạnh.
+          </li>
+          <li style="margin-bottom: 0;">
+            <strong style="color: var(--color-cyan);">Đi Theo Xu Hướng Lớn</strong><br>
+            Smart Money không chống lại trend. Trade theo hướng của Higher Timeframe.<img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img8.webp" alt="gemini-generated-image-uf12yguf12yg-74oa"></li>
+        </ol>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📝 TÓM TẮT BÀI HỌC
+         ========================================== -->
+    <section class="summary-box">
+      <h3 class="summary-title">📝 Tóm Tắt Bài Học</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="summary-icon">🏦</span>
+          <div class="summary-text"><strong>Smart Money</strong> là các tổ chức lớn có nguồn lực, thông tin và kỷ luật vượt trội.</div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">📉</span>
+          <div class="summary-text"><strong>70-90% Retail thua lỗ</strong> vì FOMO, thiếu kế hoạch, và giao dịch theo cảm xúc.</div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">🔄</span>
+          <div class="summary-text"><strong>4 giai đoạn chu kỳ:</strong> Tích lũy → Markup → Phân phối → Markdown.</div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">👣</span>
+          <div class="summary-text"><strong>HFZ/LFZ là "dấu chân"</strong> mà Smart Money để lại - cơ sở của phương pháp GEM.</div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">🧠</span>
+          <div class="summary-text"><strong>Đổi tư duy:</strong> Không chạy theo tin tức, đợi retest zone, đi theo xu hướng lớn.</div>
+        </div>
+        <div class="summary-item">
+          <span class="summary-icon">🎯</span>
+          <div class="summary-text"><strong>Mục tiêu:</strong> Đi theo Smart Money, không cố đánh bại họ.</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         ❓ QUIZ SECTION
+         ========================================== -->
+    <section class="quiz-section">
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlbreic-z9wxiz-img9.webp" alt="gemini-generated-image-qz8aksqz8aks-943r"><h3 class="quiz-title">❓ Kiểm Tra Kiến Thức</h3>
+      
+      <!-- Quiz 1 -->
+      <div class="quiz-question" data-correct="b">
+        <div class="question-number">Câu hỏi 1/3</div>
+        <p class="question-text">Smart Money thường làm gì trong giai đoạn TÍCH LŨY (Accumulation)?</p>
+        <div class="quiz-options">
+          <label class="quiz-option" data-value="a">
+            <input type="radio" name="q1" value="a">
+            <span class="radio-custom"></span>
+            <span>Bán ra mạnh khi tin tức tích cực</span>
+          </label>
+          <label class="quiz-option" data-value="b">
+            <input type="radio" name="q1" value="b">
+            <span class="radio-custom"></span>
+            <span>Âm thầm mua vào khi giá thấp và thị trường bi quan</span>
+          </label>
+          <label class="quiz-option" data-value="c">
+            <input type="radio" name="q1" value="c">
+            <span class="radio-custom"></span>
+            <span>Đẩy giá lên cao để thu hút Retail Traders</span>
+          </label>
+          <label class="quiz-option" data-value="d">
+            <input type="radio" name="q1" value="d">
+            <span class="radio-custom"></span>
+            <span>Chờ đợi và không giao dịch</span>
+          </label>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      
+      <!-- Quiz 2 -->
+      <div class="quiz-question" data-correct="c">
+        <div class="question-number">Câu hỏi 2/3</div>
+        <p class="question-text">Tại sao Retail Traders thường mua ở đỉnh và bán ở đáy?</p>
+        <div class="quiz-options">
+          <label class="quiz-option" data-value="a">
+            <input type="radio" name="q2" value="a">
+            <span class="radio-custom"></span>
+            <span>Vì họ có ít vốn hơn Smart Money</span>
+          </label>
+          <label class="quiz-option" data-value="b">
+            <input type="radio" name="q2" value="b">
+            <span class="radio-custom"></span>
+            <span>Vì thị trường bị thao túng</span>
+          </label>
+          <label class="quiz-option" data-value="c">
+            <input type="radio" name="q2" value="c">
+            <span class="radio-custom"></span>
+            <span>Vì họ bị cảm xúc FOMO và Panic chi phối</span>
+          </label>
+          <label class="quiz-option" data-value="d">
+            <input type="radio" name="q2" value="d">
+            <span class="radio-custom"></span>
+            <span>Vì họ không có công cụ phân tích</span>
+          </label>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      
+      <!-- Quiz 3 -->
+      <div class="quiz-question" data-correct="d">
+        <div class="question-number">Câu hỏi 3/3</div>
+        <p class="question-text">Theo phương pháp GEM, cách tốt nhất để đi theo Smart Money là gì?</p>
+        <div class="quiz-options">
+          <label class="quiz-option" data-value="a">
+            <input type="radio" name="q3" value="a">
+            <span class="radio-custom"></span>
+            <span>Mua ngay khi thấy giá tăng mạnh (breakout)</span>
+          </label>
+          <label class="quiz-option" data-value="b">
+            <input type="radio" name="q3" value="b">
+            <span class="radio-custom"></span>
+            <span>Giao dịch theo tin tức tài chính</span>
+          </label>
+          <label class="quiz-option" data-value="c">
+            <input type="radio" name="q3" value="c">
+            <span class="radio-custom"></span>
+            <span>Cố gắng bắt đỉnh và đáy</span>
+          </label>
+          <label class="quiz-option" data-value="d">
+            <input type="radio" name="q3" value="d">
+            <span class="radio-custom"></span>
+            <span>Tìm các zone HFZ/LFZ và đợi giá quay lại retest</span>
+          </label>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      
+      <button class="quiz-submit" onclick="checkQuiz()">Kiểm Tra Đáp Án</button>
+    </section>
+    
+    <!-- ==========================================
+         📱 FOOTER
+         ========================================== -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+    
+  </div>
+  
+  <!-- ==========================================
+       📜 JAVASCRIPT
+       ========================================== -->
+  <script>
+    function checkQuiz() {
+      const questions = document.querySelectorAll('.quiz-question');
+      let score = 0;
+      
+      questions.forEach((question) => {
+        const correctAnswer = question.dataset.correct;
+        const selectedOption = question.querySelector('input:checked');
+        const feedback = question.querySelector('.quiz-feedback');
+        const options = question.querySelectorAll('.quiz-option');
+        
+        // Reset styles
+        options.forEach(opt => {
+          opt.classList.remove('correct', 'incorrect', 'selected');
+        });
+        
+        if (selectedOption) {
+          const selectedValue = selectedOption.value;
+          const selectedLabel = selectedOption.closest('.quiz-option');
+          
+          if (selectedValue === correctAnswer) {
+            score++;
+            selectedLabel.classList.add('correct');
+            feedback.textContent = '✓ Chính xác! Bạn đã hiểu đúng.';
+            feedback.className = 'quiz-feedback show correct';
+          } else {
+            selectedLabel.classList.add('incorrect');
+            // Highlight correct answer
+            options.forEach(opt => {
+              if (opt.dataset.value === correctAnswer) {
+                opt.classList.add('correct');
+              }
+            });
+            feedback.textContent = '✗ Chưa đúng. Đáp án đúng đã được đánh dấu màu xanh.';
+            feedback.className = 'quiz-feedback show incorrect';
+          }
+        } else {
+          feedback.textContent = '⚠️ Vui lòng chọn một đáp án.';
+          feedback.className = 'quiz-feedback show incorrect';
+        }
+      });
+      
+      // Show final score
+      setTimeout(() => {
+        alert(`Kết quả: ${score}/${questions.length} câu đúng!\n\n${
+          score === questions.length 
+            ? '🎉 Xuất sắc! Bạn đã nắm vững bài học!' 
+            : score >= questions.length / 2 
+              ? '👍 Khá tốt! Hãy xem lại những phần chưa đúng.' 
+              : '📚 Cần ôn tập lại bài học nhé!'
+        }`);
+      }, 500);
+    }
+    
+    // Add click handler for options
+    document.querySelectorAll('.quiz-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const input = this.querySelector('input');
+        input.checked = true;
+        
+        // Remove selected from siblings
+        this.closest('.quiz-options').querySelectorAll('.quiz-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        
+        // Add selected to this option
+        this.classList.add('selected');
+      });
+    });
+  </script>
+

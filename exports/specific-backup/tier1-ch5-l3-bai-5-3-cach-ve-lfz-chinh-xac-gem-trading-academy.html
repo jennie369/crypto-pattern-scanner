@@ -1,0 +1,965 @@
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.3: Cách Vẽ LFZ Chính Xác - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        .pattern-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .pattern-flow {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-phase {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-phase {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        .flow-phase.up { border-left-color: var(--success); }
+        .flow-phase.pause { border-left-color: var(--gold); }
+        .phase-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        .phase-content { flex: 1; }
+        .phase-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-phase.up .phase-title { color: var(--success); }
+        .flow-phase.pause .phase-title { color: var(--gold); }
+        .phase-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 600px) {
+            .stat-value { font-size: 1.25rem; }
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .stat-card.green .stat-value {
+            background: linear-gradient(135deg, var(--success), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card.gold .stat-value {
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: -16px;
+                margin-right: -16px;
+                margin-left: calc(-16px - 4px);
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+
+
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📈</span>
+                <span>Reversal Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - DPU Pattern Mastery</div>
+            <h1 class="lesson-title">Cách Vẽ LFZ Chính Xác</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mở Đầu - Tầm Quan Trọng Của LFZ</h2>
+            <p>Bạn đã hiểu cấu trúc 3 phases của DPU từ bài trước. Nhưng kiến thức đó chỉ thực sự có giá trị khi bạn biết cách vẽ LFZ chính xác. Nhiều trader nhận diện đúng pattern nhưng entry sai vị trí vì vẽ LFZ không đúng cách - hoặc quá hẹp dẫn đến bị stop out bởi nhiễu thị trường, hoặc quá rộng khiến Risk:Reward không đủ hấp dẫn.</p>
+
+            <p>Trong bài học này, bạn sẽ học quy trình 4 bước để vẽ LFZ chuẩn xác trên mọi timeframe. Đây là kỹ năng nền tảng mà bạn sẽ áp dụng không chỉ cho DPU mà còn cho UPU, UPD và nhiều pattern khác trong các bài học sau.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> LFZ Là Gì?</div>
+                <p><strong>LFZ (Low Frequency Zone)</strong> là vùng tích lũy hình thành trong Phase PAUSE của DPU, nơi Smart Money âm thầm mua vào với volume thấp. Tên gọi "Low Frequency" phản ánh đặc điểm volume cạn kiệt trong vùng này - tần suất giao dịch thấp vì phe bán đã kiệt sức và đa số retail traders đã mất hứng thú với thị trường. Đây chính là vùng giá bạn sẽ đánh dấu để chờ entry khi có cơ hội retest trong tương lai.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> LFZ vs HFZ - Hiểu Rõ Sự Khác Biệt</h2>
+            <p>Trước khi học cách vẽ LFZ, bạn cần hiểu sự khác biệt giữa LFZ và HFZ để tránh nhầm lẫn trong quá trình phân tích chart.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <div class="stat-value">LFZ</div>
+                    <div class="stat-label">Vùng mua (Long)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">vs</div>
+                    <div class="stat-label">So sánh</div>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid #EF4444;">
+                    <div class="stat-value" style="color: #EF4444;">HFZ</div>
+                    <div class="stat-label">Vùng bán (Short)</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Phân Biệt LFZ và HFZ</div>
+                <p><strong>LFZ (Low Frequency Zone):</strong> Xuất hiện trong DPU và UPU - các pattern LONG. Đây là vùng tích lũy tại ĐÁY, nơi Smart Money mua vào. Vẽ bằng cách đánh dấu vùng sideway sau sóng DOWN.<br><br>
+                <strong>HFZ (High Frequency Zone):</strong> Xuất hiện trong UPD và DPD - các pattern SHORT. Đây là vùng phân phối tại ĐỈNH, nơi Smart Money bán ra. Vẽ bằng cách đánh dấu vùng sideway sau sóng UP.<br><br>
+                Cách vẽ tương tự nhau, chỉ khác vị trí trên chart (đáy vs đỉnh) và hướng giao dịch (Long vs Short).</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📐</span> Quy Trình 4 Bước Vẽ LFZ Chuẩn</h2>
+            <p>Dưới đây là quy trình 4 bước mà bạn cần ghi nhớ và áp dụng mỗi khi nhận diện DPU pattern trên chart. Thực hiện đúng trình tự sẽ giúp bạn vẽ LFZ chính xác và nhất quán.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.3/5-3-1.webp" alt="4 Bước Vẽ LFZ" style="cursor: grab;">
+            </div>
+            <div class="image-caption">Hình 1: Quy trình 4 bước vẽ LFZ trong DPU pattern</div>
+
+            <div class="pattern-flow">
+                <div class="flow-phase">
+                    <div class="phase-icon">1️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Bước 1: Xác Định Phase DOWN Đã Hoàn Tất</div>
+                        <div class="phase-desc">
+                            Đợi sóng DOWN kết thúc - giá ngừng tạo lower low mới. Dấu hiệu nhận biết: Volume bắt đầu giảm, xuất hiện nến đảo chiều (hammer, doji, bullish engulfing) tại đáy, hoặc có divergence RSI/MACD. Đây là bước quan trọng nhất vì nếu vẽ LFZ khi giá chưa thực sự dừng giảm, bạn sẽ bị stop out.
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-phase">
+                    <div class="phase-icon">2️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Bước 2: Đánh Dấu Đáy Của Phase DOWN</div>
+                        <div class="phase-desc">
+                            Kẻ đường ngang tại mức giá thấp nhất (LOW) của nến đáy, bao gồm cả bóng (wick). Đây là cạnh DƯỚI của LFZ và cũng là mức tham chiếu cho Stop Loss. Lưu ý: Lấy LOW của cả cụm nến tạo đáy, không chỉ một nến đơn lẻ.
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-phase pause">
+                    <div class="phase-icon">3️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Bước 3: Xác Định Đỉnh Của Vùng Sideway</div>
+                        <div class="phase-desc">
+                            Đợi ít nhất 3-5 nến sideway, sau đó kẻ đường ngang tại HIGH của các nến trong Phase PAUSE. Đây là cạnh TRÊN của LFZ - mức breakout mà giá cần vượt qua để xác nhận pattern. Nếu giá break đường này với volume tăng, pattern được xác nhận.
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-phase up">
+                    <div class="phase-icon">4️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Bước 4: Tô Màu Và Đặt Tên Vùng</div>
+                        <div class="phase-desc">
+                            Tô màu xanh (green) cho vùng giữa 2 đường đã vẽ. Ghi chú "LFZ" hoặc "LFZ - DPU" để dễ theo dõi. Vùng này sẽ được lưu lại trên chart để chờ cơ hội retest trong tương lai - đây mới là điểm entry tối ưu.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Quy Tắc Vàng Khi Vẽ LFZ</div>
+                <p>LFZ PHẢI bao gồm cả phần bóng (wick) của nến, không chỉ phần thân (body). Lý do: Bóng nến đại diện cho vùng giá mà Smart Money đã giao dịch. Nếu bạn chỉ vẽ theo body, LFZ sẽ quá hẹp và dễ bị false breakout. Một LFZ hợp lệ thường có độ rộng từ 2-5% của giá (tùy timeframe).</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Ví Dụ Thực Tế: Vẽ LFZ Trên ETH/USDT</h2>
+            <p class="" style="max-height: 2000px;">Hãy cùng áp dụng 4 bước trên vào một case study thực tế để bạn hiểu rõ hơn cách vẽ LFZ trong điều kiện thị trường thực.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.3/5-3-2.webp" alt="ETH LFZ Case Study" style="cursor: grab;">
+            </div>
+            <div class="image-caption">Hình 2: Ví dụ vẽ LFZ trên ETH/USDT khung 4H - Tháng 10/2024</div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Case Study: ETH/USDT 4H - Tháng 10/2024</div>
+                <p>
+                    <strong>Bối cảnh:</strong> ETH giảm mạnh sau tin FED giữ nguyên lãi suất, retail panic sell.<br><br>
+                    <strong>Phase DOWN:</strong> ETH giảm từ $2,720 xuống $2,380 trong 8 nến 4H (-12.5%). Volume tăng 2.1x so với trung bình.<br><br>
+                    <strong>Bước 1 - Xác định đáy:</strong> Nến hammer xuất hiện tại $2,380, RSI divergence dương.<br><br>
+                    <strong>Bước 2 - Đánh dấu đáy:</strong> LFZ Bottom = $2,380 (low của nến hammer).<br><br>
+                    <strong>Bước 3 - Đánh dấu đỉnh:</strong> Sau 6 nến sideway, LFZ Top = $2,480 (high của vùng consolidation).<br><br>
+                    <strong>Bước 4 - Tô màu:</strong> LFZ = $2,380 - $2,480 (range 4.2%).<br><br>
+                    <strong>Kết quả:</strong> Giá break $2,480 với volume tăng 1.8x → Pattern confirmed. ETH tiếp tục tăng lên $2,850 (+15% từ breakout).
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💰</span> Cách Sử Dụng LFZ Để Entry</div>
+                <p>Sau khi vẽ xong LFZ và giá đã break UP, ĐỪNG entry ngay tại điểm break. Thay vào đó, đánh dấu LFZ và chờ giá retest vùng này trong tương lai. Khi giá quay lại test LFZ (thường sau 2-7 ngày), đây mới là điểm entry tối ưu với Risk:Reward tốt nhất. Entry tại $2,480-$2,520 (vùng LFZ top + buffer) | Stop Loss dưới $2,380 | Target $2,800+.</p>
+            </div>
+        </section>
+
+        <section class="section" style="max-height: 2000px;">
+            <h2 class="section-title selected-for-delete"><span>⚠️</span> Sai Lầm Thường Gặp Khi Vẽ LFZ</h2>
+            <p>Qua kinh nghiệm giảng dạy hàng trăm học viên, tôi nhận thấy có 3 lỗi phổ biến nhất khi vẽ LFZ mà bạn cần tránh tuyệt đối.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.3/5-3-3.webp" alt="Common LFZ Mistakes" style="cursor: grab;">
+            </div>
+            <div class="image-caption">Hình 3: Các lỗi thường gặp khi vẽ LFZ và cách khắc phục</div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❌</span> Lỗi #1: Vẽ LFZ Quá Sớm</div>
+                <p>Nhiều trader vội vàng vẽ LFZ chỉ sau 1-2 nến sideway vì sợ bỏ lỡ cơ hội. Đây là sai lầm nghiêm trọng vì chưa đủ thời gian để xác nhận Phase PAUSE thực sự. Giá có thể chỉ đang "nghỉ ngơi" trước khi tiếp tục giảm (continuation pattern). Quy tắc: Đợi ít nhất 3-5 nến sideway với volume giảm rõ rệt (40-70% so với Phase DOWN) trước khi vẽ LFZ.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❌</span> Lỗi #2: Chỉ Vẽ Theo Body, Bỏ Qua Wick</div>
+                <p>Một số trader chỉ vẽ LFZ dựa trên phần thân nến (body), bỏ qua phần bóng (wick). Điều này khiến LFZ quá hẹp và không phản ánh đúng vùng giao dịch thực tế. Khi giá retest, nó thường chạm vào vùng wick trước - và nếu LFZ của bạn không bao gồm wick, bạn sẽ bỏ lỡ entry hoặc bị stop out sớm. Quy tắc: LFZ phải bao gồm từ low thấp nhất đến high cao nhất của vùng PAUSE, bao gồm cả wick.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❌</span> Lỗi #3: Nhầm Bounce Với DPU Pattern</div>
+                <p>Không phải mọi bounce từ đáy đều là DPU pattern hợp lệ. Một bounce bình thường (dead cat bounce) có đặc điểm: chỉ 1-2 nến tăng nhẹ, volume không có sự thay đổi đáng kể, sau đó giá tiếp tục giảm. DPU thực sự cần có Phase PAUSE rõ ràng với volume cạn kiệt (ít nhất 40% thấp hơn Phase DOWN) và thời gian sideway đủ dài (3-10 nến). Quy tắc: Luôn xác nhận volume trước khi kết luận pattern.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Độ Rộng LFZ Theo Timeframe</h2>
+            <p>Độ rộng của LFZ thay đổi tùy theo timeframe bạn đang phân tích. Hiểu được điều này giúp bạn đánh giá LFZ hợp lệ và tránh vẽ zone quá hẹp hoặc quá rộng so với tiêu chuẩn.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">1-2%</div>
+                    <div class="stat-label">M15 - H1 (Scalp)</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-value">2-5%</div>
+                    <div class="stat-label">H4 - D1 (Swing)</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value">5-15%</div>
+                    <div class="stat-label">Weekly (Position)</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Multi-Timeframe Confluence</div>
+                <p>LFZ mạnh nhất khi trùng với support của timeframe cao hơn. Ví dụ: LFZ trên khung H4 trùng với vùng support của Weekly → xác suất thành công tăng đáng kể (từ 60% lên 70-75%). Luôn kiểm tra timeframe cao hơn trước khi quyết định entry. Nếu LFZ H4 nằm giữa vùng "không khí" trên Weekly (không có support/resistance rõ ràng), hãy cẩn thận hơn với position size.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Hành Động Thực Tế</h2>
+            <p>Kiến thức chỉ có giá trị khi bạn áp dụng vào thực tế. Dưới đây là bài tập để bạn luyện kỹ năng vẽ LFZ ngay hôm nay.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bài Tập Thực Hành - 15 Phút</div>
+                <p>
+                    <strong>1. Mở TradingView</strong> và chọn BTC/USDT hoặc ETH/USDT khung 4H.<br><br>
+                    <strong>2. Tìm một đợt giảm mạnh</strong> (ít nhất -10%) trong 3 tháng gần đây.<br><br>
+                    <strong>3. Áp dụng 4 bước</strong> để vẽ LFZ. Đảm bảo bao gồm cả wick và đợi đủ 3-5 nến sideway.<br><br>
+                    <strong>4. Đo lường:</strong> LFZ có bao nhiêu %? Có trùng với support của Weekly không?<br><br>
+                    <strong>5. Kiểm tra kết quả:</strong> Giá có break LFZ không? Có retest không? Kết quả ra sao?<br><br>
+                    <strong>6. Ghi chép</strong> vào nhật ký giao dịch để so sánh với các ví dụ khác.
+                </p>
+            </div>
+        </section>
+
+        <div class="summary-box">
+            <div class="summary-title"><span>📝</span> Tóm Tắt Bài Học - Key Takeaways</div>
+            <ul class="summary-list">
+                <li><strong>LFZ (Low Frequency Zone)</strong> là vùng tích lũy trong Phase PAUSE của DPU, nơi Smart Money mua vào với volume thấp. Đây là vùng entry tối ưu khi giá retest.</li>
+                <li><strong>4 bước vẽ LFZ:</strong> (1) Xác định Phase DOWN hoàn tất → (2) Đánh dấu đáy (low nhất) → (3) Đánh dấu đỉnh sideway (high nhất) → (4) Tô màu và đặt tên.</li>
+                <li><strong>LFZ phải bao gồm cả wick</strong>, không chỉ body nến. Đợi ít nhất 3-5 nến sideway trước khi vẽ để tránh vẽ quá sớm.</li>
+                <li><strong>Độ rộng LFZ</strong> thay đổi theo timeframe: H4-D1 thường 2-5%, Weekly 5-15%. LFZ mạnh nhất khi trùng với support của timeframe cao hơn.</li>
+                <li><strong>Entry tối ưu:</strong> Không entry ngay tại breakout mà đợi giá retest LFZ sau đó. Đây là cách có Risk:Reward tốt nhất.</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">🎯 Kiểm Tra Hiểu Biết</h2>
+            <div class="quiz-content">
+                <div class="quiz-question" data-correct="1">
+                    <h4>Câu 1: Cạnh trên của LFZ được xác định từ đâu?</h4>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. Low của nến đáy</div>
+                        <div class="quiz-option" data-index="1">B. High của các nến trong phase PAUSE</div>
+                        <div class="quiz-option" data-index="2">C. Close của nến cuối</div>
+                        <div class="quiz-option" data-index="3">D. Open của nến đầu</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="2">
+                    <h4>Câu 2: Cần bao nhiêu nến sideway tối thiểu để vẽ LFZ?</h4>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. 1 nến</div>
+                        <div class="quiz-option" data-index="1">B. 2 nến</div>
+                        <div class="quiz-option" data-index="2">C. 3-5 nến</div>
+                        <div class="quiz-option" data-index="3">D. 10+ nến</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="0">
+                    <h4>Câu 3: Khi vẽ LFZ, nên bao gồm phần nào của nến?</h4>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. Cả body và wicks</div>
+                        <div class="quiz-option" data-index="1">B. Chỉ body</div>
+                        <div class="quiz-option" data-index="2">C. Chỉ wicks</div>
+                        <div class="quiz-option" data-index="3">D. Chỉ close price</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-score">
+                    <h3>🏆 Hoàn Thành!</h3>
+                    <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi</p>
+                    <button class="retake-btn" onclick="retakeQuiz()">Làm Lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 5.3</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 5.4 - Chiến Lược Entry DPU</strong></p>
+        </footer>
+    </div>
+
+    <script style="max-height: 2000px;">
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                q.classList.remove('answered');
+                q.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct', 'incorrect'));
+                q.querySelector('.quiz-result').className = 'quiz-result';
+            });
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+
+

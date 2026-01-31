@@ -24,6 +24,7 @@ import { Wind, Leaf, Play, Pause, RotateCcw } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual, saveReflection } from '../../../services/ritualService';
+import ritualSoundService from '../../../services/ritualSoundService';
 
 // Cosmic Components
 import {
@@ -198,6 +199,36 @@ const CleansingBreathRitual = ({ navigation }) => {
     };
   }, []);
 
+  // ===== SOUND MANAGEMENT =====
+  useEffect(() => {
+    ritualSoundService.init();
+    return () => {
+      ritualSoundService.stopAll();
+    };
+  }, []);
+
+  // Start/stop ambient based on phase and sound toggle
+  useEffect(() => {
+    if (isSoundOn && ritualPhase === 'breathing' && !isPaused) {
+      ritualSoundService.startAmbient('cleansing-breath', 0.3);
+    } else {
+      ritualSoundService.pauseAmbient();
+    }
+  }, [ritualPhase, isSoundOn, isPaused]);
+
+  // Play breath cue sounds
+  useEffect(() => {
+    if (!isSoundOn || ritualPhase !== 'breathing') return;
+
+    if (breathPhase === 'inhale') {
+      ritualSoundService.playInhale();
+    } else if (breathPhase === 'hold' || breathPhase === 'rest') {
+      ritualSoundService.playHold();
+    } else if (breathPhase === 'exhale') {
+      ritualSoundService.playExhale();
+    }
+  }, [breathPhase, isSoundOn, ritualPhase]);
+
   // Breathing logic
   const startBreathing = useCallback(() => {
     setRitualPhase('breathing');
@@ -270,6 +301,12 @@ const CleansingBreathRitual = ({ navigation }) => {
   const handleComplete = async () => {
     HAPTIC_PATTERNS.breath.cycleComplete();
     setShowCelebration(true);
+
+    // Play completion sound and stop ambient
+    if (isSoundOn) {
+      ritualSoundService.stopAmbient();
+      ritualSoundService.playComplete('cleansing-breath');
+    }
 
     try {
       if (user?.id) {

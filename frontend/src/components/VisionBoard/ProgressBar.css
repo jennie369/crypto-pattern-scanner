@@ -1,0 +1,61 @@
+/**
+ * ProgressBar Styles
+ */
+
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.progress-bar-track {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  min-width: 2px;
+}
+
+.progress-bar-label {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Size Variants */
+.progress-bar-sm .progress-bar-track {
+  height: 4px;
+}
+
+.progress-bar-sm .progress-bar-label {
+  font-size: var(--font-size-xs);
+}
+
+.progress-bar-md .progress-bar-track {
+  height: 6px;
+}
+
+.progress-bar-md .progress-bar-label {
+  font-size: var(--font-size-sm);
+}
+
+.progress-bar-lg .progress-bar-track {
+  height: 8px;
+}
+
+.progress-bar-lg .progress-bar-label {
+  font-size: var(--font-size-base);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .progress-bar-lg .progress-bar-track {
+    height: 6px;
+  }
+}

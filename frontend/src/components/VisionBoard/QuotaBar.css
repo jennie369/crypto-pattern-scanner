@@ -1,0 +1,87 @@
+/**
+ * QuotaBar Styles
+ */
+
+.quota-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.quota-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quota-bar-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.quota-bar-info {
+  display: flex;
+  cursor: help;
+  color: var(--color-text-muted);
+}
+
+.quota-bar-count {
+  font-size: var(--font-size-sm);
+}
+
+.quota-bar-current {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.quota-bar-separator {
+  color: var(--color-text-muted);
+  margin: 0 2px;
+}
+
+.quota-bar-limit {
+  color: var(--color-text-muted);
+}
+
+.quota-bar-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.quota-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  min-width: 2px;
+}
+
+.quota-bar-upgrade {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: rgba(106, 91, 255, 0.1);
+  border: 1px solid rgba(106, 91, 255, 0.2);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quota-bar-upgrade:hover {
+  background: rgba(106, 91, 255, 0.2);
+}
+
+.quota-bar-warning {
+  margin: var(--spacing-xs) 0 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-warning);
+}

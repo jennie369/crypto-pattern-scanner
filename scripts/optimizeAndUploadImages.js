@@ -38,13 +38,14 @@ function formatSize(bytes) {
 }
 
 function parseImageFilename(filename) {
-  // Parse: 3.2-1.png → { lesson: '3.2', imageNum: 1 }
-  // Also handle: 3.2-1.png.png or 3.2-1.PNG
-  const match = filename.match(/^(\d+\.\d+)-(\d+)/i);
+  // Parse: 3.2.1.png → { lesson: '3.2', imageNum: 1 }
+  // Format: {chapter}.{lesson}.{imageNum}.png (e.g., 9.1.1.png = Chapter 9, Lesson 1, Image 1)
+  // Also handle: 3.2.1.png.png or 3.2.1.PNG
+  const match = filename.match(/^(\d+)\.(\d+)\.(\d+)/i);
   if (!match) return null;
   return {
-    lesson: match[1],
-    imageNum: parseInt(match[2])
+    lesson: `${match[1]}.${match[2]}`,
+    imageNum: parseInt(match[3])
   };
 }
 
@@ -257,7 +258,7 @@ async function processChapterFolder(chapterFolder, specificLesson = null) {
 
   // Filter by specific lesson if provided
   if (specificLesson) {
-    files = files.filter(f => f.startsWith(`${specificLesson}-`));
+    files = files.filter(f => f.startsWith(`${specificLesson}.`));
     if (files.length === 0) {
       console.log(`   ⚠️  Không tìm thấy hình ảnh cho bài ${specificLesson}`);
       return { uploaded: 0, updated: 0, saved: 0 };

@@ -1,0 +1,267 @@
+/**
+ * RitualPlaygroundPage Styles
+ */
+
+.ritual-playground {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ritual-playground-exit {
+  position: fixed;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  z-index: 100;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.ritual-playground-exit:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-text-primary);
+}
+
+.ritual-playground-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 500px;
+  padding: var(--spacing-xl);
+}
+
+/* Phase Base */
+.ritual-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-lg);
+}
+
+.ritual-phase-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.ritual-phase-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Intro Phase */
+.ritual-intro-icon {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.ritual-intro-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.ritual-intro-desc {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 400px;
+}
+
+.ritual-intro-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Breath Phase */
+.ritual-phase-breath {
+  justify-content: center;
+  min-height: 400px;
+}
+
+/* Interaction Phase */
+.ritual-interaction-write,
+.ritual-interaction-intention,
+.ritual-interaction-visualize,
+.ritual-interaction-wish,
+.ritual-interaction-default {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.ritual-interaction-write label,
+.ritual-interaction-intention label {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.ritual-interaction-write textarea {
+  width: 100%;
+  padding: var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  resize: none;
+  min-height: 160px;
+}
+
+.ritual-interaction-write textarea:focus,
+.ritual-interaction-intention input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.ritual-interaction-intention input {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  text-align: center;
+}
+
+.ritual-interaction-visualize p,
+.ritual-interaction-wish p {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.ritual-interaction-hint {
+  font-size: var(--font-size-sm) !important;
+  color: var(--color-text-muted) !important;
+}
+
+.ritual-heart-container,
+.ritual-water-container,
+.ritual-star-container {
+  margin: var(--spacing-xl) 0;
+}
+
+/* Complete Phase */
+.ritual-complete-icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.ritual-complete-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-success);
+  margin: 0;
+}
+
+.ritual-complete-message {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.ritual-complete-xp {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: rgba(255, 189, 89, 0.1);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: var(--spacing-lg) 0;
+}
+
+/* Error */
+.ritual-playground-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: var(--spacing-lg);
+  color: var(--color-text-muted);
+}
+
+.ritual-playground-error button {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ritual-playground-exit {
+    top: var(--spacing-base);
+    right: var(--spacing-base);
+    width: 44px;
+    height: 44px;
+  }
+
+  .ritual-playground-content {
+    padding: var(--spacing-base);
+  }
+
+  .ritual-intro-icon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .ritual-intro-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .ritual-intro-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .ritual-intro-desc {
+    font-size: var(--font-size-base);
+  }
+
+  .ritual-complete-title {
+    font-size: var(--font-size-2xl);
+  }
+}

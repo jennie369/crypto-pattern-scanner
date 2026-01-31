@@ -29,6 +29,7 @@ import { ScannerProvider } from './src/contexts/ScannerContext';
 import { VisionBoardProvider } from './src/contexts/VisionBoardContext';
 import { LivestreamProvider } from './src/contexts/LivestreamContext';
 import { CallProvider } from './src/contexts/CallContext';
+import { CalendarProvider } from './src/contexts/CalendarContext';
 
 // Tooltip Provider for feature discovery
 import TooltipProvider from './src/components/Common/TooltipProvider';
@@ -118,18 +119,20 @@ function AppContent() {
       <CourseProvider>
         <ScannerProvider>
           <VisionBoardProvider>
-            <LivestreamProvider>
-              <TooltipProvider>
-                <UpgradeProvider>
-                  <CallProvider>
-                    <TabBarProvider>
-                      <StatusBar style="light" />
-                      <AppNavigator />
-                    </TabBarProvider>
-                  </CallProvider>
-                </UpgradeProvider>
-              </TooltipProvider>
-            </LivestreamProvider>
+            <CalendarProvider>
+              <LivestreamProvider>
+                <TooltipProvider>
+                  <UpgradeProvider>
+                    <CallProvider>
+                      <TabBarProvider>
+                        <StatusBar style="light" />
+                        <AppNavigator />
+                      </TabBarProvider>
+                    </CallProvider>
+                  </UpgradeProvider>
+                </TooltipProvider>
+              </LivestreamProvider>
+            </CalendarProvider>
           </VisionBoardProvider>
         </ScannerProvider>
       </CourseProvider>

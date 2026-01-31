@@ -96,6 +96,12 @@ import AffiliateDashboard from './pages/AffiliateDashboard';
 import AccountDashboard from './pages/Account/AccountDashboard';
 import ProfilePage from './pages/Account/ProfilePage';
 
+// Vision Board
+import { VisionBoardPage, CreateGoalPage, GoalDetailPage } from './pages/VisionBoard';
+
+// Trader Rituals
+import { RitualsPage, RitualPlaygroundPage } from './pages/Rituals';
+
 // Toast Notifications
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -457,6 +463,62 @@ function App() {
                 <AuthenticatedLayout>
                   <ProfilePage />
                 </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ═══════════════════════════════════════════════════════════════
+              VISION BOARD ROUTES
+              ═══════════════════════════════════════════════════════════════ */}
+          <Route
+            path="/vision-board"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <VisionBoardPage />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vision-board/goals/new"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <CreateGoalPage />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vision-board/goals/:id"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <GoalDetailPage />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ═══════════════════════════════════════════════════════════════
+              TRADER RITUALS ROUTES
+              ═══════════════════════════════════════════════════════════════ */}
+          <Route
+            path="/rituals"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <RitualsPage />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rituals/:ritualId"
+            element={
+              <ProtectedRoute>
+                <RitualPlaygroundPage />
               </ProtectedRoute>
             }
           />

@@ -2,6 +2,7 @@
  * Comment Service
  * API service for threaded comments
  * Phase 3: Comment Threading (30/12/2024)
+ * Fixed: Removed reply_to_user_id (column doesn't exist in DB)
  */
 
 import { supabase } from './supabase';
@@ -22,7 +23,7 @@ class CommentService {
         .from('forum_comments')
         .select(`
           *,
-          author:user_id(
+          author:profiles!user_id(
             id,
             display_name,
             full_name,
@@ -63,17 +64,11 @@ class CommentService {
         .from('forum_comments')
         .select(`
           *,
-          author:user_id(
+          author:profiles!user_id(
             id,
             display_name,
             full_name,
             avatar_url,
-            username
-          ),
-          reply_to_user:reply_to_user_id(
-            id,
-            display_name,
-            full_name,
             username
           )
         `)
@@ -88,7 +83,6 @@ class CommentService {
         author_name: comment.author?.display_name || comment.author?.full_name || comment.author?.username || 'Người dùng',
         author_avatar: comment.author?.avatar_url,
         author_username: comment.author?.username,
-        reply_to_name: comment.reply_to_user?.display_name || comment.reply_to_user?.full_name || comment.reply_to_user?.username,
       }));
     } catch (err) {
       console.error('[CommentService] getReplies error:', err);
@@ -107,17 +101,11 @@ class CommentService {
         .from('forum_comments')
         .select(`
           *,
-          author:user_id(
+          author:profiles!user_id(
             id,
             display_name,
             full_name,
             avatar_url,
-            username
-          ),
-          reply_to_user:reply_to_user_id(
-            id,
-            display_name,
-            full_name,
             username
           )
         `)
@@ -131,11 +119,44 @@ class CommentService {
         author_name: data.author?.display_name || data.author?.full_name || data.author?.username || 'Người dùng',
         author_avatar: data.author?.avatar_url,
         author_username: data.author?.username,
-        reply_to_name: data.reply_to_user?.display_name || data.reply_to_user?.full_name || data.reply_to_user?.username,
       };
     } catch (err) {
       console.error('[CommentService] getComment error:', err);
       throw err;
+    }
+  }
+
+  /**
+   * Get parent comment's author info (for reply context)
+   * @param {string} parentId - Parent comment ID
+   * @returns {Object} Parent author info
+   */
+  async getParentAuthor(parentId) {
+    try {
+      const { data, error } = await supabase
+        .from('forum_comments')
+        .select(`
+          user_id,
+          author:profiles!user_id(
+            id,
+            display_name,
+            full_name,
+            username
+          )
+        `)
+        .eq('id', parentId)
+        .single();
+
+      if (error) throw error;
+
+      return {
+        user_id: data.user_id,
+        name: data.author?.display_name || data.author?.full_name || data.author?.username || 'Người dùng',
+        username: data.author?.username,
+      };
+    } catch (err) {
+      console.error('[CommentService] getParentAuthor error:', err);
+      return null;
     }
   }
 
@@ -146,7 +167,6 @@ class CommentService {
    * @param {string} params.user_id - User ID
    * @param {string} params.content - Comment content
    * @param {string} params.parent_id - Parent comment ID (for replies)
-   * @param {string} params.reply_to_user_id - User being replied to
    * @returns {Object} Created comment
    */
   async createComment({
@@ -154,9 +174,9 @@ class CommentService {
     user_id,
     content,
     parent_id = null,
-    reply_to_user_id = null,
   }) {
     try {
+      // Insert without reply_to_user_id (column doesn't exist)
       const { data, error } = await supabase
         .from('forum_comments')
         .insert({
@@ -164,7 +184,6 @@ class CommentService {
           user_id,
           content,
           parent_id,
-          reply_to_user_id,
         })
         .select()
         .single();
@@ -192,8 +211,6 @@ class CommentService {
         .update({
           content,
           updated_at: new Date().toISOString(),
-          edited_at: new Date().toISOString(),
-          edit_count: supabase.rpc('increment', { row_id: commentId }),
         })
         .eq('id', commentId)
         .select()
@@ -251,7 +268,7 @@ class CommentService {
    * Like/unlike a comment
    * @param {string} commentId - Comment ID
    * @param {string} userId - User ID
-   * @returns {boolean} Is now liked
+   * @returns {Object} { isLiked, likesCount }
    */
   async toggleCommentLike(commentId, userId) {
     try {
@@ -261,7 +278,9 @@ class CommentService {
         .select('id')
         .eq('comment_id', commentId)
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+
+      let isLiked = false;
 
       if (existing) {
         // Unlike
@@ -269,7 +288,10 @@ class CommentService {
           .from('forum_likes')
           .delete()
           .eq('id', existing.id);
-        return false;
+
+        // Decrement likes_count
+        await supabase.rpc('decrement_comment_likes', { comment_id: commentId });
+        isLiked = false;
       } else {
         // Like
         await supabase
@@ -278,11 +300,48 @@ class CommentService {
             comment_id: commentId,
             user_id: userId,
           });
-        return true;
+
+        // Increment likes_count
+        await supabase.rpc('increment_comment_likes', { comment_id: commentId });
+        isLiked = true;
       }
+
+      // Get updated likes count
+      const { data: comment } = await supabase
+        .from('forum_comments')
+        .select('likes_count')
+        .eq('id', commentId)
+        .single();
+
+      return {
+        isLiked,
+        likesCount: comment?.likes_count || 0,
+      };
     } catch (err) {
       console.error('[CommentService] toggleCommentLike error:', err);
       throw err;
+    }
+  }
+
+  /**
+   * Check if user has liked a comment
+   * @param {string} commentId - Comment ID
+   * @param {string} userId - User ID
+   * @returns {boolean} Is liked
+   */
+  async isCommentLiked(commentId, userId) {
+    try {
+      const { data } = await supabase
+        .from('forum_likes')
+        .select('id')
+        .eq('comment_id', commentId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      return !!data;
+    } catch (err) {
+      console.error('[CommentService] isCommentLiked error:', err);
+      return false;
     }
   }
 }

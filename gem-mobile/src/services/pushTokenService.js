@@ -1,7 +1,13 @@
 /**
  * Push Token Service
- * Manages Expo Push Tokens for GEM Partnership v3.0
+ * Manages Expo Push Tokens and VoIP tokens for GEM
  * Reference: GEM_PARTNERSHIP_IMPLEMENTATION_PHASE5.md
+ *
+ * Features:
+ * - Expo Push Token registration
+ * - iOS VoIP PushKit token registration (for CallKeep)
+ * - Android notification channels
+ * - Token persistence in Supabase
  */
 
 import * as Notifications from 'expo-notifications';
@@ -9,6 +15,17 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { supabase } from './supabase';
+import callKeepService from './callKeepService';
+
+// Dynamic import for VoIP push (iOS only, may not be installed)
+let VoipPushNotification = null;
+try {
+  if (Platform.OS === 'ios') {
+    VoipPushNotification = require('react-native-voip-push-notification').default;
+  }
+} catch (e) {
+  console.log('[PushToken] VoIP push not available:', e.message);
+}
 
 // Configure notification handler
 Notifications.setNotificationHandler({
@@ -115,6 +132,198 @@ const PUSH_TOKEN_SERVICE = {
       console.error('[PushToken] Register error:', err);
       return null;
     }
+  },
+
+  /**
+   * Register for VoIP push notifications (iOS only)
+   * This enables native incoming call UI via CallKeep
+   * @returns {Promise<string|null>} VoIP token or null
+   */
+  async registerVoIPPush() {
+    // Only iOS supports VoIP PushKit
+    if (Platform.OS !== 'ios') {
+      console.log('[PushToken] VoIP push is iOS only');
+      return null;
+    }
+
+    if (!VoipPushNotification) {
+      console.log('[PushToken] VoIP push module not available');
+      return null;
+    }
+
+    if (!Device.isDevice) {
+      console.log('[PushToken] VoIP push requires physical device');
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      try {
+        console.log('[PushToken] Registering for VoIP push...');
+
+        // Listen for VoIP token
+        VoipPushNotification.addEventListener('register', async (token) => {
+          console.log('[PushToken] VoIP token received:', token?.substring(0, 20) + '...');
+
+          // Save to database
+          await this.saveVoIPToken(token);
+
+          resolve(token);
+        });
+
+        // Listen for incoming VoIP notifications
+        VoipPushNotification.addEventListener('notification', (notification) => {
+          console.log('[PushToken] VoIP notification received:', notification);
+
+          // Extract call data
+          const { callId, callerName, callType, callerId, conversationId } = notification;
+
+          // Display native incoming call UI via CallKeep
+          if (callId && callerName && callKeepService.available) {
+            callKeepService.displayIncomingCall(
+              callId,
+              callerName,
+              callType === 'video',
+              '',
+              { callerId, conversationId, callType }
+            );
+          }
+        });
+
+        // Listen for when remote notifications are registered
+        VoipPushNotification.addEventListener('didLoadWithEvents', (events) => {
+          console.log('[PushToken] VoIP didLoadWithEvents:', events?.length);
+
+          // Process any queued events
+          if (events && Array.isArray(events)) {
+            events.forEach((event) => {
+              if (event.name === 'RNVoipPushRemoteNotificationsRegisteredEvent') {
+                // Token event
+                console.log('[PushToken] Processing queued token event');
+              } else if (event.name === 'RNVoipPushRemoteNotificationReceivedEvent') {
+                // Notification event - process incoming call
+                const notification = event.data;
+                if (notification) {
+                  const { callId, callerName, callType, callerId, conversationId } = notification;
+                  if (callId && callerName && callKeepService.available) {
+                    callKeepService.displayIncomingCall(
+                      callId,
+                      callerName,
+                      callType === 'video',
+                      '',
+                      { callerId, conversationId, callType }
+                    );
+                  }
+                }
+              }
+            });
+          }
+        });
+
+        // Request VoIP push registration
+        VoipPushNotification.registerVoipToken();
+
+        // Timeout after 10 seconds if no token
+        setTimeout(() => {
+          console.log('[PushToken] VoIP registration timeout');
+          resolve(null);
+        }, 10000);
+      } catch (err) {
+        console.error('[PushToken] VoIP registration error:', err);
+        resolve(null);
+      }
+    });
+  },
+
+  /**
+   * Save VoIP token to database
+   * @param {string} token - VoIP PushKit token
+   */
+  async saveVoIPToken(token) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('[PushToken] No user logged in, cannot save VoIP token');
+        return;
+      }
+
+      // Use RPC function to upsert VoIP token
+      const { error: rpcError } = await supabase.rpc('update_voip_token', {
+        p_user_id: user.id,
+        p_voip_token: token,
+        p_platform: 'ios',
+      });
+
+      if (rpcError) {
+        // Fallback to direct upsert if RPC doesn't exist
+        console.log('[PushToken] RPC failed, trying direct upsert:', rpcError.message);
+
+        const { error: upsertError } = await supabase.from('user_push_tokens').upsert(
+          {
+            user_id: user.id,
+            voip_token: token,
+            platform: 'ios',
+            is_active: true,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
+
+        if (upsertError) {
+          console.error('[PushToken] VoIP token save failed:', upsertError.message);
+        } else {
+          console.log('[PushToken] VoIP token saved via upsert');
+        }
+      } else {
+        console.log('[PushToken] VoIP token saved via RPC');
+      }
+    } catch (err) {
+      console.error('[PushToken] saveVoIPToken error:', err);
+    }
+  },
+
+  /**
+   * Remove VoIP token (on logout)
+   */
+  async removeVoIPToken() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('user_push_tokens')
+        .update({ voip_token: null })
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('[PushToken] Remove VoIP token error:', error);
+      } else {
+        console.log('[PushToken] VoIP token removed');
+      }
+    } catch (err) {
+      console.error('[PushToken] removeVoIPToken error:', err);
+    }
+  },
+
+  /**
+   * Register all push notifications (Expo + VoIP)
+   * Call this when user logs in
+   * @returns {Promise<{expoPushToken: string|null, voipToken: string|null}>}
+   */
+  async registerAllPushTokens() {
+    console.log('[PushToken] Registering all push tokens...');
+
+    // Register Expo push token
+    const expoPushToken = await this.registerForPushNotifications();
+
+    // Register VoIP token (iOS only)
+    const voipToken = await this.registerVoIPPush();
+
+    console.log('[PushToken] Registration complete:', {
+      hasExpoPushToken: !!expoPushToken,
+      hasVoIPToken: !!voipToken,
+    });
+
+    return { expoPushToken, voipToken };
   },
 
   /**

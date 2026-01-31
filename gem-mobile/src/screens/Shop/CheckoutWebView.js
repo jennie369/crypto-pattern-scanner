@@ -17,7 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { useRoute, useNavigation, CommonActions } from '@react-navigation/native';
-import { ArrowLeft, X } from 'lucide-react-native';
+import { ArrowLeft, X, CheckCircle, QrCode } from 'lucide-react-native';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING } from '../../utils/tokens';
@@ -37,6 +37,10 @@ const CheckoutWebView = () => {
   const [cancelConfirmed, setCancelConfirmed] = useState(false);
   const [affiliateCode, setAffiliateCode] = useState(null);
   const webViewRef = useRef(null);
+
+  // Bank transfer payment states
+  const [showBankTransferOverlay, setShowBankTransferOverlay] = useState(false);
+  const [pendingOrderData, setPendingOrderData] = useState(null);
 
   // Get user_id for tracking (enables webhook to match user directly)
   const userId = user?.id || null;
@@ -356,10 +360,53 @@ const CheckoutWebView = () => {
       });
 
       // ============================================
-      // PART 2: DETECT SUCCESS PAGE INSTANTLY
+      // PART 2: DETECT SUCCESS PAGE & PAYMENT METHOD
       // ============================================
 
       let successDetected = false;
+      let paymentMethodDetected = null;
+
+      // Detect if the page has bank transfer / QR code payment info
+      function detectBankTransferPayment() {
+        // Check for QR code images
+        const hasQRCode =
+          document.querySelector('img[src*="qr"]') !== null ||
+          document.querySelector('img[alt*="QR"]') !== null ||
+          document.querySelector('img[alt*="qr"]') !== null ||
+          document.querySelector('[class*="qr"]') !== null ||
+          document.querySelector('[class*="QR"]') !== null ||
+          document.querySelector('canvas') !== null; // QR codes often rendered as canvas
+
+        // Check for bank transfer related text
+        const pageText = document.body?.innerText?.toLowerCase() || '';
+        const hasBankTransferText =
+          pageText.includes('chuyển khoản') ||
+          pageText.includes('transfer') ||
+          pageText.includes('bank') ||
+          pageText.includes('ngân hàng') ||
+          pageText.includes('quét mã') ||
+          pageText.includes('scan') ||
+          pageText.includes('vietqr') ||
+          pageText.includes('napas') ||
+          pageText.includes('vnpay');
+
+        // Check for COD (Cash on Delivery)
+        const isCOD =
+          pageText.includes('thanh toán khi nhận hàng') ||
+          pageText.includes('cod') ||
+          pageText.includes('cash on delivery') ||
+          pageText.includes('trả tiền mặt');
+
+        console.log('[WebView] Payment detection:', { hasQRCode, hasBankTransferText, isCOD });
+
+        if (hasQRCode || hasBankTransferText) {
+          return 'bank_transfer';
+        }
+        if (isCOD) {
+          return 'cod';
+        }
+        return 'card'; // Default to card/instant payment
+      }
 
       function detectSuccessPage() {
         if (successDetected) return true;
@@ -398,11 +445,18 @@ const CheckoutWebView = () => {
           console.log('[WebView] SUCCESS PAGE DETECTED!');
           successDetected = true;
 
-          // Extract order information
-          const orderInfo = extractOrderInfo();
+          // Wait a moment for page to fully load, then detect payment method
+          setTimeout(() => {
+            paymentMethodDetected = detectBankTransferPayment();
+            console.log('[WebView] Payment method:', paymentMethodDetected);
 
-          // Send message to React Native
-          sendSuccessMessage(orderInfo);
+            // Extract order information
+            const orderInfo = extractOrderInfo();
+            orderInfo.paymentMethod = paymentMethodDetected;
+
+            // Send message to React Native
+            sendSuccessMessage(orderInfo);
+          }, 500);
 
           return true;
         }
@@ -618,6 +672,56 @@ const CheckoutWebView = () => {
     }
   };
 
+  // Navigate to success screen (called after bank transfer user taps "Done" or for card payments)
+  const navigateToSuccessScreen = async (orderData) => {
+    try {
+      // Clear affiliate code after successful checkout
+      try {
+        await deepLinkHandler.clearCheckoutAffiliate();
+        console.log('[CheckoutWebView] Cleared affiliate code');
+      } catch (err) {
+        console.log('[CheckoutWebView] Error clearing affiliate code:', err);
+      }
+
+      // Get params from route to determine product type
+      const { productType, gemAmount, packageName } = route.params || {};
+
+      console.log('[CheckoutWebView] Navigating to success screen...');
+
+      // Check if this is a GEM purchase
+      if (productType === 'gems') {
+        console.log('[CheckoutWebView] GEM purchase detected!');
+        navigation.replace('GemPurchasePending', {
+          orderId: orderData?.orderId,
+          orderNumber: orderData?.orderNumber,
+          orderUrl: orderData?.url,
+          gemAmount: gemAmount,
+          packageName: packageName,
+        });
+      } else {
+        // Regular shop order - navigate to OrderSuccess
+        navigation.replace('OrderSuccess', {
+          orderId: orderData?.orderId,
+          orderNumber: orderData?.orderNumber,
+          orderUrl: orderData?.url,
+        });
+
+        // Clear cart for regular shop orders
+        completeCheckout(orderData?.orderId, orderData?.orderNumber);
+      }
+    } catch (error) {
+      console.error('[CheckoutWebView] Error navigating:', error);
+      navigation.replace('OrderSuccess', { orderId: null, orderNumber: null });
+    }
+  };
+
+  // Handle "Done" button press for bank transfer payments
+  const handleBankTransferDone = () => {
+    console.log('[CheckoutWebView] Bank transfer user tapped Done');
+    setShowBankTransferOverlay(false);
+    navigateToSuccessScreen(pendingOrderData);
+  };
+
   // Handle checkout success
   const handleCheckoutSuccess = async (orderData) => {
     if (checkoutCompleted) {
@@ -628,50 +732,25 @@ const CheckoutWebView = () => {
     try {
       console.log('[CheckoutWebView] Processing checkout success...');
       console.log('[CheckoutWebView] Affiliate code:', affiliateCode || orderData.affiliateCode || 'none');
+      console.log('[CheckoutWebView] Payment method:', orderData.paymentMethod);
 
       setCheckoutCompleted(true);
 
-      // Clear affiliate code after successful checkout
-      try {
-        await deepLinkHandler.clearCheckoutAffiliate();
-        console.log('[CheckoutWebView] Cleared affiliate code');
-      } catch (err) {
-        console.log('[CheckoutWebView] Error clearing affiliate code:', err);
+      // Check if this is a bank transfer payment
+      const isBankTransfer = orderData.paymentMethod === 'bank_transfer';
+
+      if (isBankTransfer) {
+        // For bank transfer: Show overlay, let user scan QR code
+        console.log('[CheckoutWebView] Bank transfer detected - showing overlay');
+        setPendingOrderData(orderData);
+        setShowBankTransferOverlay(true);
+        // Don't auto-navigate - user will tap "Done" when ready
+        return;
       }
 
-      // Get params from route to determine product type
-      const { productType, gemAmount, packageName, returnScreen } = route.params || {};
-
-      // Close WebView with small delay to ensure smooth transition
+      // For card/COD payments: Navigate immediately
       setTimeout(() => {
-        console.log('[CheckoutWebView] Navigating to success screen...');
-
-        // Check if this is a GEM purchase
-        if (productType === 'gems') {
-          console.log('[CheckoutWebView] GEM purchase detected!');
-          console.log('[CheckoutWebView] NOTE: This is ORDER CREATED, not payment confirmed!');
-
-          // IMPORTANT: Navigate to PENDING screen, NOT success screen
-          // Gems will only be added after webhook confirms payment (orders/paid)
-          // The thank_you page means "order created", NOT "payment completed"
-          navigation.replace('GemPurchasePending', {
-            orderId: orderData.orderId,
-            orderNumber: orderData.orderNumber,
-            orderUrl: orderData.url,
-            gemAmount: gemAmount,
-            packageName: packageName,
-          });
-        } else {
-          // Regular shop order - navigate to OrderSuccess
-          navigation.replace('OrderSuccess', {
-            orderId: orderData.orderId,
-            orderNumber: orderData.orderNumber,
-            orderUrl: orderData.url,
-          });
-
-          // Clear cart for regular shop orders
-          completeCheckout(orderData.orderId, orderData.orderNumber);
-        }
+        navigateToSuccessScreen(orderData);
       }, 300);
 
     } catch (error) {
@@ -681,7 +760,6 @@ const CheckoutWebView = () => {
       const { productType, gemAmount, packageName } = route.params || {};
 
       if (productType === 'gems') {
-        // Show pending screen - payment not confirmed yet
         navigation.replace('GemPurchasePending', {
           orderId: null,
           orderNumber: null,
@@ -817,6 +895,40 @@ const CheckoutWebView = () => {
           thirdPartyCookiesEnabled: true,
         })}
       />
+
+      {/* Bank Transfer Overlay - Shows after detecting QR code payment */}
+      {showBankTransferOverlay && (
+        <View style={styles.bankTransferOverlay}>
+          <View style={styles.bankTransferCard}>
+            <View style={styles.qrIconContainer}>
+              <QrCode size={32} color={COLORS.gold} />
+            </View>
+
+            <Text style={styles.bankTransferTitle}>
+              Quét mã QR để thanh toán
+            </Text>
+
+            <Text style={styles.bankTransferDescription}>
+              Vui lòng quét mã QR ở trên để hoàn tất thanh toán.{'\n'}
+              Nhấn "Hoàn tất" khi bạn đã thanh toán xong.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.bankTransferDoneButton}
+              onPress={handleBankTransferDone}
+              activeOpacity={0.8}
+            >
+              <CheckCircle size={20} color="#FFFFFF" />
+              <Text style={styles.bankTransferDoneText}>Hoàn tất</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.bankTransferNote}>
+              Đơn hàng sẽ được xử lý sau khi chúng tôi xác nhận thanh toán
+            </Text>
+          </View>
+        </View>
+      )}
+
       {AlertComponent}
     </SafeAreaView>
   );
@@ -871,6 +983,86 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+
+  // Bank Transfer Overlay Styles
+  bankTransferOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingTop: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+
+  bankTransferCard: {
+    backgroundColor: '#1A1A2E',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: Platform.OS === 'android' ? 100 : 40, // Extra padding for Android tab bar
+    alignItems: 'center',
+  },
+
+  qrIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+  },
+
+  bankTransferTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+
+  bankTransferDescription: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+
+  bankTransferDoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3AF7A6',
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    borderRadius: 12,
+    gap: 10,
+    marginBottom: 16,
+    shadowColor: '#3AF7A6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+
+  bankTransferDoneText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A2E',
+  },
+
+  bankTransferNote: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.5)',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
 

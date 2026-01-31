@@ -13,6 +13,8 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -33,6 +35,7 @@ import { Heart, Sparkles, Send } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual, saveReflection } from '../../../services/ritualService';
+import ritualSoundService from '../../../services/ritualSoundService';
 import useVideoPause from '../../../hooks/useVideoPause';
 
 // Cosmic Components
@@ -192,6 +195,26 @@ const HeartExpansionRitual = ({ navigation }) => {
     };
   }, []);
 
+  // ===== SOUND MANAGEMENT =====
+  useEffect(() => {
+    // Initialize sound service
+    ritualSoundService.init();
+
+    return () => {
+      // Cleanup sounds on unmount
+      ritualSoundService.stopAll();
+    };
+  }, []);
+
+  // Start/stop ambient based on phase and sound toggle
+  useEffect(() => {
+    if (isSoundOn && (phase === 'breath' || phase === 'expansion')) {
+      ritualSoundService.startAmbient('heart-expansion', 0.4);
+    } else {
+      ritualSoundService.stopAmbient();
+    }
+  }, [phase, isSoundOn]);
+
   // ===== BREATH LOGIC =====
   const runBreathPhase = useCallback((phaseType) => {
     setBreathPhase(phaseType);
@@ -274,8 +297,10 @@ const HeartExpansionRitual = ({ navigation }) => {
 
     if (phase === 'expansion') {
       setEnergyLevel(prev => Math.min(100, prev + 5));
+      // Play sparkle sound on heart tap
+      if (isSoundOn) ritualSoundService.playSparkle();
     }
-  }, [phase]);
+  }, [phase, isSoundOn]);
 
   const handleHeartLongPress = useCallback(() => {
     HAPTIC_PATTERNS.energy.build(1);
@@ -291,6 +316,12 @@ const HeartExpansionRitual = ({ navigation }) => {
   const handleComplete = async () => {
     HAPTIC_PATTERNS.celebration();
     setShowCelebration(true);
+
+    // Play completion sound and stop ambient
+    if (isSoundOn) {
+      ritualSoundService.stopAmbient();
+      ritualSoundService.playComplete('heart-expansion');
+    }
 
     try {
       if (user?.id) {

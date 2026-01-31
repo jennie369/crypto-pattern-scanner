@@ -2739,11 +2739,12 @@ export const forumService = {
       if (!user) return [];
 
       // Get user's notifications AND broadcasts (is_broadcast = true)
+      // Include full user profile data for Facebook-style notifications
       let { data, error } = await supabase
         .from('forum_notifications')
         .select(`
           *,
-          from_user:from_user_id(id, full_name)
+          from_user:from_user_id(id, full_name, username, avatar_url)
         `)
         .or(`user_id.eq.${user.id},is_broadcast.eq.true`)
         .order('created_at', { ascending: false })

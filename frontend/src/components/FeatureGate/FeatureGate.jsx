@@ -7,9 +7,28 @@ export default function FeatureGate({
   requiredTier,
   userTier,
   featureName,
-  children
+  children,
+  profile // Add profile prop for role check
 }) {
   const navigate = useNavigate()
+
+  // ⚡ ADMIN BYPASS - Admin has unlimited access to ALL features
+  const isAdmin = profile?.role === 'admin' ||
+                  profile?.role === 'ADMIN' ||
+                  profile?.is_admin === true ||
+                  userTier === 'admin' ||
+                  userTier === 'ADMIN'
+
+  // ⚡ MANAGER BYPASS - Manager has unlimited access to ALL features
+  const isManager = profile?.role === 'manager' ||
+                    profile?.role === 'MANAGER' ||
+                    userTier === 'manager' ||
+                    userTier === 'MANAGER'
+
+  if (isAdmin || isManager) {
+    console.log(`✅ [FeatureGate] ${isAdmin ? 'Admin' : 'Manager'} bypass - Full access granted for ${featureName}`)
+    return <>{children}</>
+  }
 
   const tierLevels = {
     free: 0,
@@ -18,7 +37,9 @@ export default function FeatureGate({
     tier3: 3
   }
 
-  const hasAccess = tierLevels[userTier] >= tierLevels[requiredTier]
+  const normalizedUserTier = (userTier || 'free').toLowerCase()
+  const normalizedRequiredTier = (requiredTier || 'free').toLowerCase()
+  const hasAccess = (tierLevels[normalizedUserTier] || 0) >= (tierLevels[normalizedRequiredTier] || 0)
 
   if (hasAccess) {
     return <>{children}</>

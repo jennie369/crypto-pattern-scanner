@@ -122,8 +122,59 @@ export const SHOP_CATEGORIES = SHOP_TABS;
 
 // ═══════════════════════════════════════════════════════════
 // PRODUCT SECTIONS - Các section hiển thị trên tab "TẤT CẢ"
+// Thứ tự: Manifest sections → Dành cho bạn → Trending → ...
 // ═══════════════════════════════════════════════════════════
 export const SHOP_SECTIONS = [
+  // Manifest sections (có hero banner) - hiển thị đầu tiên
+  {
+    id: 'manifest-money',
+    title: 'Manifest Tiền Bạc',
+    subtitle: 'Thu hút tài lộc, thịnh vượng',
+    icon: Coins,
+    type: 'tagged',
+    tags: [
+      'Thạch Anh Vàng',
+      'Cây Tài Lộc',
+    ],
+    layout: 'horizontal',
+    limit: 6,
+    showViewAll: true,
+    showHeroBanner: true, // Hiển thị hero banner từ admin
+  },
+  {
+    id: 'manifest-love',
+    title: 'Manifest Tình Yêu',
+    subtitle: 'Chiêu cảm tình duyên',
+    icon: Heart,
+    type: 'tagged',
+    tags: [
+      'Thạch Anh Hồng',
+      'Aura',
+    ],
+    layout: 'horizontal',
+    limit: 6,
+    showViewAll: true,
+    showHeroBanner: true, // Hiển thị hero banner từ admin
+  },
+  {
+    id: 'manifest-abundance',
+    title: 'Manifest Thịnh Vượng',
+    subtitle: 'Năng lượng sự nghiệp, thành công',
+    icon: Crown,
+    type: 'tagged',
+    tags: [
+      'Cây Tài Lộc',
+      'Thạch Anh Tím',
+      'Thạch Anh Trắng',
+      'Special set',
+      'Bestseller',
+    ],
+    layout: 'horizontal',
+    limit: 6,
+    showViewAll: true,
+    showHeroBanner: true, // Hiển thị hero banner từ admin
+  },
+  // Personalized section
   {
     id: 'for-you',
     title: 'Dành Cho Bạn',
@@ -159,51 +210,6 @@ export const SHOP_SECTIONS = [
     showViewAll: true,
   },
   {
-    id: 'manifest-money',
-    title: 'Manifest Tiền Bạc',
-    subtitle: 'Thu hút tài lộc, thịnh vượng',
-    icon: Coins,
-    type: 'tagged',
-    tags: [
-      'Thạch Anh Vàng',
-      'Cây Tài Lộc',
-    ],
-    layout: 'horizontal',
-    limit: 6,
-    showViewAll: true,
-  },
-  {
-    id: 'manifest-love',
-    title: 'Manifest Tình Yêu',
-    subtitle: 'Chiêu cảm tình duyên',
-    icon: Heart,
-    type: 'tagged',
-    tags: [
-      'Thạch Anh Hồng',
-      'Aura',
-    ],
-    layout: 'horizontal',
-    limit: 6,
-    showViewAll: true,
-  },
-  {
-    id: 'manifest-abundance',
-    title: 'Manifest Thịnh Vượng',
-    subtitle: 'Năng lượng sự nghiệp, thành công',
-    icon: Crown,
-    type: 'tagged',
-    tags: [
-      'Cây Tài Lộc',
-      'Thạch Anh Tím',
-      'Thạch Anh Trắng',
-      'Special set',
-      'Bestseller',
-    ],
-    layout: 'horizontal',
-    limit: 6,
-    showViewAll: true,
-  },
-  {
     id: 'courses',
     title: 'Khóa Học Trading & Tư Duy',
     subtitle: 'Nâng cao kiến thức, làm chủ tài chính',
@@ -212,6 +218,7 @@ export const SHOP_SECTIONS = [
     layout: 'featured',
     limit: 4,
     showViewAll: true,
+    showHeroBanner: true, // Hiển thị hero banner từ admin
   },
   {
     id: 'sets',

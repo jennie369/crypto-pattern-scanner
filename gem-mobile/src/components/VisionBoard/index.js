@@ -18,6 +18,9 @@ export { default as DailyScoreCard, DailyScoreCardCompact } from './DailyScoreCa
 export { default as QuickStatsRow, QuickStatsGrid, StatCard } from './QuickStatsRow';
 export { default as TodayTasksList, TaskItem, TodayTasksCompact } from './TodayTasksList';
 export { default as GoalCard, GoalCardsRow, GoalCardCompact, MilestoneIndicator } from './GoalCard';
+export { default as GoalThumbnailCard } from './GoalThumbnailCard';
+export { default as GoalsGridSection } from './GoalsGridSection';
+export { default as CalendarHeatMap } from './CalendarHeatMap';
 
 // Divination Section (Trải bài & Gieo quẻ) - Redesigned
 export { default as DivinationSection } from './DivinationSection';

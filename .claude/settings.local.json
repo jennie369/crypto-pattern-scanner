@@ -125,7 +125,22 @@
       "Bash(eas secret:list:*)",
       "Bash(eas env:create:*)",
       "Bash(ffprobe:*)",
-      "Bash(ffmpeg:*)"
+      "Bash(ffmpeg:*)",
+      "Bash(git ls-files:*)",
+      "WebFetch(domain:fapi.binance.com)",
+      "Bash(test:*)",
+      "Bash(npx react-native log-android)",
+      "Bash(adb logcat:*)",
+      "Bash(npx babel:*)",
+      "Bash(CI=1 timeout 20 npx expo start:*)",
+      "Bash(npm run:*)",
+      "Bash(CI=1 timeout 15 npx expo export:*)",
+      "Bash(CI=1 timeout 25 npx expo export:*)",
+      "Bash(CI=1 timeout 30 npx expo export:*)",
+      "Bash(CI=1 timeout 45 npx expo export:*)",
+      "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" log --oneline -20 -- gem-mobile/src/screens/VisionBoard/GoalDetailScreen.js)",
+      "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" diff HEAD -- gem-mobile/src/screens/VisionBoard/GoalDetailScreen.js)",
+      "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" status -- gem-mobile/src/screens/VisionBoard/)"
     ],
     "deny": [],
     "ask": []

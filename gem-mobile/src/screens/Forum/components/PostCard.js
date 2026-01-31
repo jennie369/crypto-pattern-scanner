@@ -79,7 +79,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
   trackRender('PostCard', post?.id);
 
   const navigation = useNavigation();
-  const { user, isAuthenticated, isAdmin } = useAuth();
+  const { user, profile, isAuthenticated, isAdmin } = useAuth();
   const insets = useSafeAreaInsets();
   const { alert, AlertComponent } = useCustomAlert();
 
@@ -440,12 +440,16 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
     try {
       const { data } = await forumService.createComment(post.id, commentText.trim(), null);
       if (data) {
+        // Use profile data (from profiles table) instead of user_metadata
+        const displayName = profile?.full_name || profile?.display_name || user?.user_metadata?.full_name || 'Bạn';
+        const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
+
         const newComment = {
           ...data,
           author: {
             id: user?.id,
-            full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Bạn',
-            avatar_url: user?.user_metadata?.avatar_url,
+            full_name: displayName,
+            avatar_url: avatarUrl,
           },
           replies: [],
         };
@@ -1140,60 +1144,58 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
         <QuotedPost post={post.original_post} />
       )}
 
-      {/* Reaction Summary - Shows top reactions (above action bar) */}
-      {totalCount > 0 && (
-        <View style={styles.reactionSummaryContainer}>
-          <ReactionSummary
-            reactionCounts={reactionCounts}
-            topReactions={topReactions}
-            totalCount={totalCount}
-            onPress={() => setReactionsVisible(true)}
-            size="small"
-          />
-        </View>
-      )}
+      {/* Reaction Summary - REMOVED: Now showing count directly in action bar */}
 
       {/* Facebook-style Action Bar - Left icons + Right icons */}
       <View style={styles.actionBar}>
-        {/* Left side - Reaction, Comment, Share */}
+        {/* Left side - Reaction, Comment, Share - with counts */}
         <View style={styles.actionBarLeft}>
-          {/* NEW: Forum Reaction Button (Phase 1) */}
+          {/* Reaction Button with count */}
           <AuthGate action="thả cảm xúc bài viết này">
-            <ForumReactionButton
-              userReaction={userReaction}
-              totalCount={0}
-              onReactionSelect={addReaction}
-              onToggle={toggleReaction}
-              disabled={isReacting}
-              showCount={false}
-              showLabel={false}
-              size="small"
-            />
-          </AuthGate>
-
-          {/* Comment Button */}
-          <AuthGate action="bình luận bài viết này">
-            <TouchableOpacity
-              style={styles.actionBtn}
-              onPress={handleComment}
-              activeOpacity={0.7}
-            >
-              <MessageCircle size={18} color={showComments ? COLORS.cyan : COLORS.textMuted} />
-              {(commentsCount > 0) && (
-                <Text style={[styles.actionCount, showComments && { color: COLORS.cyan }]}>{commentsCount}</Text>
+            <View style={styles.actionBtnWithCount}>
+              <ForumReactionButton
+                userReaction={userReaction}
+                totalCount={totalCount}
+                onReactionSelect={addReaction}
+                onToggle={toggleReaction}
+                disabled={isReacting}
+                showCount={false}
+                showLabel={false}
+                size="small"
+              />
+              {totalCount > 0 && (
+                <Text style={[styles.actionCountText, hasReacted && styles.actionCountActive]}>
+                  {totalCount > 999 ? `${(totalCount / 1000).toFixed(1)}K` : totalCount}
+                </Text>
               )}
-            </TouchableOpacity>
+            </View>
           </AuthGate>
 
-          {/* Share Button */}
+          {/* Comment Button with count */}
           <TouchableOpacity
-            style={styles.actionBtn}
+            style={styles.actionBtnWithCount}
+            onPress={handleComment}
+            activeOpacity={0.7}
+          >
+            <MessageCircle size={20} color={showComments ? COLORS.cyan : COLORS.textMuted} />
+            {commentsCount > 0 && (
+              <Text style={[styles.actionCountText, showComments && { color: COLORS.cyan }]}>
+                {commentsCount > 999 ? `${(commentsCount / 1000).toFixed(1)}K` : commentsCount}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Share Button with count */}
+          <TouchableOpacity
+            style={styles.actionBtnWithCount}
             onPress={handleShare}
             activeOpacity={0.7}
           >
-            <Send size={16} color={COLORS.textMuted} />
+            <Send size={18} color={COLORS.textMuted} />
             {(post.share_count > 0) && (
-              <Text style={styles.actionCount}>{post.share_count}</Text>
+              <Text style={styles.actionCountText}>
+                {post.share_count > 999 ? `${(post.share_count / 1000).toFixed(1)}K` : post.share_count}
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -1203,14 +1205,14 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
           {/* Repost */}
           <AuthGate action="chia sẻ lại bài viết này">
             <TouchableOpacity style={styles.actionBtn} onPress={handleRepost}>
-              <Repeat2 size={18} color={post.user_reposted ? COLORS.success : COLORS.textMuted} />
+              <Repeat2 size={20} color={post.user_reposted ? COLORS.success : COLORS.textMuted} />
             </TouchableOpacity>
           </AuthGate>
 
           {/* Gift */}
           <AuthGate action="tặng quà cho bài viết này">
             <TouchableOpacity style={styles.actionBtn} onPress={handleGift}>
-              <Gift size={18} color={COLORS.gold} />
+              <Gift size={20} color={COLORS.gold} />
             </TouchableOpacity>
           </AuthGate>
 
@@ -1218,7 +1220,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
           <AuthGate action="lưu bài viết này">
             <TouchableOpacity style={styles.actionBtn} onPress={handleSave}>
               <Bookmark
-                size={18}
+                size={20}
                 color={isSaved ? COLORS.gold : COLORS.textMuted}
                 fill={isSaved ? COLORS.gold : 'transparent'}
               />
@@ -1276,11 +1278,13 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
                 </View>
                 <View style={styles.inlineCommentMeta}>
                   <Text style={styles.inlineCommentTime}>{formatCommentTime(comment.created_at)}</Text>
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('PostDetail', { postId: post.id, focusComment: true, highlightCommentId: comment.id })}
+                  >
                     <Text style={styles.inlineCommentAction}>Thích</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('PostDetail', { postId: post.id, focusComment: true })}
+                    onPress={() => navigation.navigate('PostDetail', { postId: post.id, focusComment: true, replyToCommentId: comment.id })}
                   >
                     <Text style={styles.inlineCommentAction}>Trả lời</Text>
                   </TouchableOpacity>
@@ -1320,8 +1324,8 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
           <View style={styles.inlineCommentInputContainer}>
             <Image
               source={{
-                uri: user?.user_metadata?.avatar_url ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || 'U')}&background=6A5BFF&color=fff`
+                uri: profile?.avatar_url || user?.user_metadata?.avatar_url ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'U')}&background=6A5BFF&color=fff`
               }}
               style={styles.inlineCommentInputAvatar}
             />
@@ -1696,27 +1700,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
-    // No border - reaction summary sits directly above without divider
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl, // Increased horizontal padding
+    marginLeft: SPACING.sm, // Extra left margin to move away from edge
   },
   actionBarLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.lg,
+    gap: SPACING.xxl, // More gap between buttons for counts
   },
   actionBarRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
+    gap: SPACING.lg, // Increased gap
   },
-  // Compact action button
+  // Compact action button (no count)
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    padding: SPACING.xs,
   },
-  // Action count number (no label text, just number) - compact
+  // Action button with count - wider touch target
+  actionBtnWithCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: 2,
+    minWidth: 50, // Minimum width to prevent layout shift
+  },
+  // Action count text - visible and readable
+  actionCountText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textMuted,
+    minWidth: 20, // Ensure space for numbers
+  },
+  // Legacy: Action count number (no label text, just number) - compact
   actionCount: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.medium,

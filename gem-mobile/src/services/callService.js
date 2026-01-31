@@ -11,6 +11,7 @@
 import { supabase } from './supabase';
 import { callSignalingService } from './callSignalingService';
 import { webrtcService } from './webrtcService';
+import callKeepService from './callKeepService';
 import { Platform } from 'react-native';
 import {
   CALL_STATUS,
@@ -153,13 +154,22 @@ class CallService {
         caller.display_name = callerProfile.full_name || callerProfile.display_name || callerProfile.username || 'User';
       }
 
-      // 9. Send push notification to callee
-      await this._sendCallNotification(calleeId, call, caller);
+      // 9. Display native outgoing call UI via CallKeep
+      if (callKeepService.available) {
+        callKeepService.startCall(
+          call.id,
+          caller.display_name || 'Người dùng GEM',
+          callType === CALL_TYPE.VIDEO
+        );
+      }
 
-      // 10. Start ring timeout
+      // 10. Send VoIP push notification (preferred) or regular push
+      await this._sendVoIPPushNotification(call, caller, calleeId);
+
+      // 11. Start ring timeout
       this._startRingTimeout(call.id);
 
-      // 11. Log ringing event
+      // 12. Log ringing event
       await this._logEvent(call.id, CALL_EVENT_TYPE.CALL_RINGING, {});
 
       console.log('[CallService] Call initiated successfully:', call.id);
@@ -250,6 +260,11 @@ class CallService {
       // Clear ring timeout
       this._clearRingTimeout();
 
+      // Report connected to CallKeep
+      if (callKeepService.available) {
+        callKeepService.reportConnected(callId);
+      }
+
       // Update call
       await supabase
         .from('calls')
@@ -291,6 +306,11 @@ class CallService {
       if (!user) throw new Error('Chưa đăng nhập');
 
       console.log('[CallService] Declining call:', callId);
+
+      // End call in CallKeep (dismiss native UI)
+      if (callKeepService.available) {
+        callKeepService.endCall(callId);
+      }
 
       // Update call status
       await supabase
@@ -337,6 +357,11 @@ class CallService {
     try {
       console.log('[CallService] Ending call:', callId, reason);
 
+      // End call in CallKeep (dismiss native UI)
+      if (callKeepService.available) {
+        callKeepService.endCall(callId);
+      }
+
       // Use database function to end call
       const { data, error } = await supabase.rpc('end_call', {
         p_call_id: callId,
@@ -372,6 +397,11 @@ class CallService {
   async cancelCall(callId) {
     try {
       console.log('[CallService] Cancelling call:', callId);
+
+      // End call in CallKeep (dismiss native UI)
+      if (callKeepService.available) {
+        callKeepService.endCall(callId);
+      }
 
       await supabase
         .from('calls')
@@ -727,6 +757,25 @@ class CallService {
 
             // Accept call if status is ringing (or initiating for older versions)
             if (call && (call.status === CALL_STATUS.RINGING || call.status === CALL_STATUS.INITIATING)) {
+              // Display native incoming call UI via CallKeep
+              // This shows the call even when app is in background
+              if (callKeepService.available) {
+                const callerName = call.caller?.display_name || call.caller?.full_name || 'Người dùng GEM';
+                const hasVideo = call.call_type === CALL_TYPE.VIDEO;
+
+                callKeepService.displayIncomingCall(
+                  call.id,
+                  callerName,
+                  hasVideo,
+                  '',
+                  {
+                    callerId: call.caller_id,
+                    conversationId: call.conversation_id,
+                    callType: call.call_type,
+                  }
+                );
+              }
+
               console.log('[CallService] Triggering incoming call callback');
               onIncomingCall(call);
             }
@@ -758,6 +807,47 @@ class CallService {
   }
 
   // ========== PUSH NOTIFICATIONS ==========
+
+  /**
+   * Send VoIP push notification for incoming call
+   * Uses send-voip-push Edge Function for native call UI
+   * Falls back to regular push if VoIP push fails
+   * @param {Object} call - Call object
+   * @param {Object} caller - Caller profile
+   * @param {string} calleeId - Target user ID
+   * @private
+   */
+  async _sendVoIPPushNotification(call, caller, calleeId) {
+    try {
+      console.log('[CallService] Sending VoIP push notification to:', calleeId);
+
+      // Try VoIP push first (preferred for native call UI)
+      const { data, error } = await supabase.functions.invoke('send-voip-push', {
+        body: {
+          callId: call.id,
+          calleeId: calleeId,
+          callerId: caller.id,
+          callerName: caller.display_name || 'Người dùng GEM',
+          callerAvatar: caller.avatar_url,
+          callType: call.call_type,
+          conversationId: call.conversation_id,
+        },
+      });
+
+      if (error) {
+        console.log('[CallService] VoIP push failed, falling back to regular push:', error.message);
+        // Fallback to regular push notification
+        await this._sendCallNotification(calleeId, call, caller);
+        return;
+      }
+
+      console.log('[CallService] VoIP push sent successfully:', data);
+    } catch (error) {
+      console.error('[CallService] _sendVoIPPushNotification error:', error);
+      // Fallback to regular push notification
+      await this._sendCallNotification(calleeId, call, caller);
+    }
+  }
 
   /**
    * Send push notification for incoming call

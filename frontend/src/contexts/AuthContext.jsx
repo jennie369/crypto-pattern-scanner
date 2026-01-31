@@ -497,23 +497,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Get scanner tier level
-  // Admin users always get tier3 (full access)
+  // Admin and Manager users always get tier3 (full access)
   const getScannerTier = () => {
-    if (profile?.role === 'admin') return 'tier3';
+    if (profile?.role === 'admin' || profile?.role === 'ADMIN') return 'tier3';
+    if (profile?.role === 'manager' || profile?.role === 'MANAGER') return 'tier3';
     return profile?.scanner_tier || 'free';
   };
 
   // Get course tier level
-  // Admin users always get tier3 (full access)
+  // Admin and Manager users always get tier3 (full access)
   const getCourseTier = () => {
-    if (profile?.role === 'admin') return 'tier3';
+    if (profile?.role === 'admin' || profile?.role === 'ADMIN') return 'tier3';
+    if (profile?.role === 'manager' || profile?.role === 'MANAGER') return 'tier3';
     return profile?.course_tier || 'free';
   };
 
   // Get chatbot tier level
-  // Admin users always get tier3 (full access)
+  // Admin and Manager users always get tier3 (full access)
   const getChatbotTier = () => {
-    if (profile?.role === 'admin') return 'tier3';
+    if (profile?.role === 'admin' || profile?.role === 'ADMIN') return 'tier3';
+    if (profile?.role === 'manager' || profile?.role === 'MANAGER') return 'tier3';
     return profile?.chatbot_tier || 'free';
   };
 

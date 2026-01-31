@@ -1605,10 +1605,10 @@ const GemMasterScreen = ({ navigation, route }) => {
           };
           setMessages(prev => [...prev, briefMsg]);
         }
-        // Navigate to ritual screen
+        // Navigate to ritual screen - rituals are in AccountStack, not VisionBoard
         setTimeout(() => {
-          navigation.navigate('VisionBoard', {
-            screen: 'LetterToUniverseRitual',
+          navigation.navigate('Account', {
+            screen: question.screen || 'LetterToUniverseRitual',
           });
         }, 1000);
         break;

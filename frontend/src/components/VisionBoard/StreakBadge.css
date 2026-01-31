@@ -1,0 +1,63 @@
+/**
+ * StreakBadge Styles
+ */
+
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(255, 189, 89, 0.1);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: var(--radius-full);
+}
+
+.streak-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.streak-badge-count {
+  font-weight: 700;
+}
+
+.streak-badge-label {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+/* Size variants */
+.streak-badge-sm {
+  padding: 2px var(--spacing-xs);
+  gap: 2px;
+}
+
+.streak-badge-sm .streak-badge-count {
+  font-size: var(--font-size-xs);
+}
+
+.streak-badge-sm .streak-badge-label {
+  font-size: var(--font-size-xs);
+}
+
+.streak-badge-md .streak-badge-count {
+  font-size: var(--font-size-sm);
+}
+
+.streak-badge-md .streak-badge-label {
+  font-size: var(--font-size-xs);
+}
+
+.streak-badge-lg {
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-sm);
+}
+
+.streak-badge-lg .streak-badge-count {
+  font-size: var(--font-size-lg);
+}
+
+.streak-badge-lg .streak-badge-label {
+  font-size: var(--font-size-sm);
+}

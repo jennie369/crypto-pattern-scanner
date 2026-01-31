@@ -20,8 +20,8 @@ import { X, ChevronRight } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { getTopicById, getQuestionsForTopic } from './FAQPanelData';
 
-// Unified gold color for consistent styling
-const GOLD_COLOR = '#FFBD59';
+// Theme blue color for consistent styling
+const THEME_COLOR = COLORS.primary || '#8B5CF6';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PANEL_HEIGHT = SCREEN_HEIGHT * 0.5; // 50% of screen height
@@ -110,7 +110,7 @@ const FAQPanel = ({
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.iconContainer}>
-              <IconComponent size={20} color={GOLD_COLOR} strokeWidth={2} />
+              <IconComponent size={20} color={THEME_COLOR} strokeWidth={2} />
             </View>
             <Text style={styles.headerTitle}>
               {topic.label}
@@ -136,21 +136,25 @@ const FAQPanel = ({
           keyboardShouldPersistTaps="always"
         >
           {questions.map((question, index) => (
-            <TouchableOpacity
-              key={question.id}
-              style={styles.questionItem}
-              onPress={() => handleQuestionPress(question)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.questionText} numberOfLines={2}>
-                {question.text}
-              </Text>
-              <ChevronRight
-                size={18}
-                color={GOLD_COLOR}
-                style={styles.chevron}
-              />
-            </TouchableOpacity>
+            <React.Fragment key={question.id}>
+              <TouchableOpacity
+                style={styles.questionItem}
+                onPress={() => handleQuestionPress(question)}
+                activeOpacity={0.6}
+              >
+                <Text style={styles.questionText} numberOfLines={2}>
+                  {question.text}
+                </Text>
+                <ChevronRight
+                  size={18}
+                  color={THEME_COLOR}
+                  style={styles.chevron}
+                />
+              </TouchableOpacity>
+              {index < questions.length - 1 && (
+                <View style={styles.questionDivider} />
+              )}
+            </React.Fragment>
           ))}
         </ScrollView>
       </Animated.View>
@@ -165,7 +169,7 @@ const styles = StyleSheet.create({
   },
   backdropInner: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker backdrop for better focus
   },
   panel: {
     position: 'absolute',
@@ -173,16 +177,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: PANEL_HEIGHT,
-    backgroundColor: COLORS.glassBg || '#1a1a2e',
+    backgroundColor: '#0D1117', // Solid dark background for better readability
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: SPACING.md,
     // Shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 15,
   },
   header: {
     flexDirection: 'row',
@@ -200,16 +204,16 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     borderWidth: 1.5,
-    borderColor: GOLD_COLOR,
+    borderColor: COLORS.primary || '#8B5CF6',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: GOLD_COLOR,
+    color: COLORS.primary || '#8B5CF6',
   },
   closeButton: {
     width: 36,
@@ -221,7 +225,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(139, 92, 246, 0.3)',
     marginHorizontal: SPACING.md,
     marginBottom: SPACING.sm,
   },
@@ -236,24 +240,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 189, 89, 0.05)',
-    borderRadius: 12,
     paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.2)',
+    paddingHorizontal: SPACING.sm,
+  },
+  questionDivider: {
+    height: 1,
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    marginHorizontal: SPACING.sm,
   },
   questionText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '500',
     color: COLORS.textPrimary || '#FFFFFF',
-    lineHeight: 20,
+    lineHeight: 22,
     marginRight: SPACING.sm,
   },
   chevron: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
 });
 

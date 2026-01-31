@@ -126,9 +126,14 @@ import {
   AchievementsScreen,
   CalendarScreen,
   GoalDetailScreen,
+  AllGoalsScreen,
   DailyRecapScreen,
   RitualPlaygroundScreen,
   RitualHistoryScreen,
+  // Calendar & Journal Screens (Smart Journal)
+  JournalEntryScreen,
+  TradingJournalScreen,
+  CalendarSettingsScreen,
   // New Ritual Screens (Vision Board 2.0 - Cosmic Glassmorphism)
   HeartExpansionRitual,
   GratitudeFlowRitual,
@@ -293,7 +298,13 @@ export default function AccountStack() {
       <Stack.Screen name="Achievements" component={AchievementsScreen} />
       <Stack.Screen name="VisionCalendar" component={CalendarScreen} />
       <Stack.Screen name="GoalDetail" component={GoalDetailScreen} />
+      <Stack.Screen name="AllGoals" component={AllGoalsScreen} />
       <Stack.Screen name="DailyRecap" component={DailyRecapScreen} />
+
+      {/* Calendar & Journal Screens (Smart Journal) */}
+      <Stack.Screen name="JournalEntry" component={JournalEntryScreen} />
+      <Stack.Screen name="TradingJournal" component={TradingJournalScreen} />
+      <Stack.Screen name="CalendarSettings" component={CalendarSettingsScreen} />
 
       {/* Ritual Playground Screens */}
       <Stack.Screen

@@ -58,6 +58,8 @@ export const NAV_ITEMS = [
       { label: 'Tarot', path: '/chatbot?mode=tarot', icon: 'Sparkles' },
       { label: 'Crystal Guide', path: '/chatbot?mode=crystal', icon: 'Gem' },
       { label: 'Trading AI', path: '/chatbot?mode=trading', icon: 'TrendingUp' },
+      { label: 'Vision Board', path: '/vision-board', icon: 'Target', requiresAuth: true },
+      { label: 'Rituals', path: '/rituals', icon: 'Moon', requiresAuth: true },
       { label: 'Tin Nhắn', path: '/messages', icon: 'Mail', requiresAuth: true },
     ],
   },

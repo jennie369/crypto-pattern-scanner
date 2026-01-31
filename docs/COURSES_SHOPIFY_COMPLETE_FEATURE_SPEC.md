@@ -1,7 +1,7 @@
 # COURSES + SHOPIFY INTEGRATION - COMPLETE FEATURE SPECIFICATION
 
-**Version:** 2.0
-**Last Updated:** December 24, 2024
+**Version:** 3.0
+**Last Updated:** January 28, 2026
 **Platforms:** Web (React), Mobile (React Native), Backend (Supabase + Deno Edge Functions)
 
 ---
@@ -22,6 +22,136 @@
 | Course Analytics | DONE | CourseAnalyticsScreen.js |
 | Student Progress Detail | DONE | StudentProgressScreen.js |
 | 3 Trading Courses Seed | DONE | TIER1, TIER2, TIER3 courses |
+| Square Thumbnails (1:1) | DONE | All course cards use square aspect ratio |
+| Image Cache-Busting | DONE | updated_at timestamp for fresh images |
+| Module-Level Caching | DONE | PromoBar, HeroBannerCarousel caching |
+| Shopify Thumbnail Sync | DONE | Edge Function to sync thumbnails |
+| Navigation Fix | DONE | UserCourses in AccountStack |
+
+---
+
+## RECENT UPDATES (January 2026)
+
+### v3.0 Changes
+
+#### 1. Thumbnail Aspect Ratio - Square (1:1)
+All course thumbnails changed from landscape to square ratio for consistency with Shop tab:
+
+| Component | Before | After |
+|-----------|--------|-------|
+| CourseCardVertical | `height: 100` | `aspectRatio: 1` |
+| CourseCardVertical (compact) | `height: 80` | `aspectRatio: 1` |
+| CourseCard (list) | `height: 160` | `aspectRatio: 1` |
+| CourseFlashSaleSection | `height: 90` | `aspectRatio: 1` |
+| HighlightedCourseSection | `minHeight: 320` | `aspectRatio: 1` |
+
+#### 2. Navigation Structure Fix
+Separated user courses from Shop tab to prevent navigation issues:
+
+**Before:**
+```
+Account Tab → "My Courses" → Shop > CourseList (wrong tab highlighted)
+```
+
+**After:**
+```
+Account Tab → "My Courses" → UserCourses (stays in AccountStack)
+```
+
+**AccountStack.js additions:**
+```javascript
+// User-facing course screens
+<Stack.Screen name="UserCourses" component={CoursesScreen} />
+<Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
+<Stack.Screen name="LessonPlayer" component={LessonPlayerScreen} />
+<Stack.Screen name="Quiz" component={QuizScreen} />
+<Stack.Screen name="Certificate" component={CertificateScreen} />
+<Stack.Screen name="CourseCheckout" component={CourseCheckout} />
+```
+
+#### 3. Image Cache-Busting System
+Added `updated_at` timestamp to image URLs to force cache refresh:
+
+```javascript
+// Example from CourseCardVertical.js
+const cacheKey = course.updated_at
+  ? new Date(course.updated_at).getTime()
+  : course.id;
+const imageUrl = `${course.thumbnail_url}?v=${cacheKey}`;
+```
+
+**SQL Trigger for auto-updating updated_at:**
+```sql
+CREATE OR REPLACE FUNCTION update_courses_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER courses_updated_at_trigger
+  BEFORE UPDATE ON courses
+  FOR EACH ROW
+  EXECUTE FUNCTION update_courses_updated_at();
+```
+
+#### 4. Module-Level Caching (Layout Shift Prevention)
+Components with module-level cache to prevent re-fetch on remount:
+
+| Component | Cache Duration | Reset Function |
+|-----------|----------------|----------------|
+| HeroBannerCarousel | 5 minutes | `resetBannerCache()` |
+| CourseFlashSaleSection | 5 minutes | `resetFlashSaleCache()` |
+| HighlightedCourseSection | 5 minutes | `resetHighlightedCourseCache()` |
+| PromoBar | 5 minutes | `resetPromoBarCache()` |
+
+**Usage in pull-to-refresh:**
+```javascript
+import { resetAllCourseSectionCaches } from '../../components/courses';
+import { resetPromoBarCache } from '../../components/shop';
+
+const handleRefresh = () => {
+  resetAllCourseSectionCaches();
+  resetPromoBarCache();
+  refresh();
+};
+```
+
+#### 5. Shopify Thumbnail Sync
+Edge Function to sync course thumbnails from Shopify products:
+
+**Endpoint:** `POST /functions/v1/shopify-products`
+```json
+{
+  "action": "syncCourseThumbnails"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "summary": {
+    "total": 7,
+    "updated": 5,
+    "failed": 2
+  },
+  "results": [...]
+}
+```
+
+**Mobile Service:**
+```javascript
+// shopifyService.js
+async syncCourseThumbnails() {
+  return this.callEdgeFunction('shopify-products', {
+    action: 'syncCourseThumbnails',
+  });
+}
+```
+
+**Admin UI:** Sync button in AdminCourseHighlightsScreen header.
 
 ---
 
@@ -42,6 +172,7 @@
 13. [API Endpoints](#13-api-endpoints)
 14. [Real-time Sync](#14-real-time-sync)
 15. [Mobile Specifications](#15-mobile-specifications)
+16. [Performance Optimizations](#16-performance-optimizations)
 
 ---
 
@@ -72,6 +203,7 @@ The GEM Platform Courses system is a comprehensive learning management system (L
 | HTML Builder | Rich HTML content with custom tags |
 | Admin Builder | Full course management with drag-drop |
 | Analytics | Student progress, revenue, completion rates |
+| Thumbnail Sync | Auto-sync images from Shopify products |
 
 ---
 
@@ -110,29 +242,41 @@ frontend/src/
 gem-mobile/src/
 ├── screens/
 │   ├── Courses/
-│   │   ├── CoursesScreen.js         # Main courses tab
+│   │   ├── CoursesScreen.js         # Main courses listing
 │   │   ├── CourseDetailScreen.js    # Course details + enrollment
 │   │   ├── LessonPlayerScreen.js    # Video/Article/Quiz player
 │   │   ├── QuizScreen.js            # Full quiz experience
 │   │   ├── CertificateScreen.js     # Certificate display
-│   │   └── CourseCheckout.js        # Shopify WebView checkout
+│   │   ├── CourseCheckout.js        # Shopify WebView checkout
+│   │   └── components/
+│   │       └── CourseCard.js        # Full-width course card (1:1 thumbnail)
 │   └── Admin/
 │       └── Courses/
 │           ├── CourseListScreen.js      # Admin course list
-│           ├── CourseBuilderScreen.js   # Create/edit course (1720 lines)
-│           ├── ModuleBuilderScreen.js   # Module/chapter editor (926 lines)
-│           ├── LessonBuilderScreen.js   # Lesson editor with HTML (1363 lines)
+│           ├── CourseBuilderScreen.js   # Create/edit course
+│           ├── ModuleBuilderScreen.js   # Module/chapter editor
+│           ├── LessonBuilderScreen.js   # Lesson editor with HTML
 │           ├── QuizBuilderScreen.js     # Quiz question management
-│           ├── CourseStudentsScreen.js  # Student management (959 lines)
+│           ├── CourseStudentsScreen.js  # Student management
 │           ├── StudentProgressScreen.js # Individual student progress
 │           ├── CourseAnalyticsScreen.js # Course statistics
 │           ├── GrantAccessScreen.js     # Manual access granting
 │           ├── CoursePreviewScreen.js   # Preview course content
 │           └── index.js                 # Barrel exports
+├── components/
+│   └── courses/
+│       ├── CourseCardVertical.js        # Grid card (1:1 thumbnail)
+│       ├── CourseSection.js             # Horizontal scroll section
+│       ├── CourseFlashSaleSection.js    # Flash sale with caching
+│       ├── HighlightedCourseSection.js  # Featured course (1:1)
+│       ├── HeroBannerCarousel.js        # Banner with caching
+│       ├── CourseCategoryGrid.js        # Category navigation
+│       └── index.js                     # Exports + resetAllCourseSectionCaches
 ├── services/
 │   ├── courseService.js         # Course API + AsyncStorage
 │   ├── courseAccessService.js   # Access validation
 │   ├── progressService.js       # Progress tracking
+│   ├── shopifyService.js        # Shopify API + syncCourseThumbnails
 │   └── htmlLessonParser.js      # Regex-based HTML parser
 └── contexts/
     └── CourseContext.js         # Mobile course state
@@ -143,8 +287,10 @@ gem-mobile/src/
 ```
 supabase/
 ├── functions/
-│   └── shopify-webhook/
-│       └── index.ts             # Webhook handler
+│   ├── shopify-webhook/
+│   │   └── index.ts             # Webhook handler
+│   └── shopify-products/
+│       └── index.ts             # Products API + syncCourseThumbnails
 └── migrations/
     ├── 20251125_courses_CLEAN_START.sql
     ├── 20251129_course_access_system.sql
@@ -152,7 +298,8 @@ supabase/
     ├── 20251130_html_course_content.sql
     ├── 20251209_course_access_via_shopify.sql
     ├── 20251209_link_courses_to_shopify.sql
-    └── 20251224_trading_courses_seed.sql   # 3 trading courses
+    ├── 20251224_trading_courses_seed.sql
+    └── 20260127_fix_courses_updated_at_trigger.sql  # Cache-busting trigger
 ```
 
 ---
@@ -179,6 +326,8 @@ CREATE TABLE courses (
 
   -- Stats
   estimated_duration TEXT,
+  duration_hours INT,
+  total_lessons INT,
   difficulty_level TEXT,  -- beginner, intermediate, advanced
   rating DECIMAL,
   students_count INT DEFAULT 0,
@@ -197,10 +346,16 @@ CREATE TABLE courses (
   -- Settings
   drip_enabled BOOLEAN DEFAULT false,
 
-  -- Timestamps
+  -- Timestamps (updated_at used for cache-busting)
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Auto-update trigger for cache-busting
+CREATE TRIGGER courses_updated_at_trigger
+  BEFORE UPDATE ON courses
+  FOR EACH ROW
+  EXECUTE FUNCTION update_courses_updated_at();
 ```
 
 #### course_modules
@@ -383,7 +538,7 @@ CREATE TABLE quiz_attempts (
 );
 ```
 
-### 3.3 Certificate Table
+### 3.3 Certificate & Display Tables
 
 #### course_certificates
 ```sql
@@ -402,6 +557,38 @@ CREATE TABLE course_certificates (
 );
 ```
 
+#### course_highlights
+```sql
+CREATE TABLE course_highlights (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+
+  -- Custom display settings
+  custom_title TEXT,
+  custom_subtitle TEXT,
+  custom_description TEXT,
+  custom_image_url TEXT,
+
+  -- Badge
+  badge_text TEXT DEFAULT 'Nổi bật',
+  badge_color TEXT DEFAULT 'gold',
+
+  -- CTA
+  cta_text TEXT DEFAULT 'Xem chi tiết',
+
+  -- Display options
+  is_active BOOLEAN DEFAULT true,
+  display_order INT DEFAULT 0,
+  show_price BOOLEAN DEFAULT true,
+  show_students BOOLEAN DEFAULT true,
+  show_rating BOOLEAN DEFAULT true,
+  show_lessons BOOLEAN DEFAULT true,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
 ---
 
 ## 4. ADMIN COURSE BUILDER SYSTEM
@@ -412,24 +599,33 @@ The Admin Course Builder is a comprehensive system for creating and managing cou
 
 ### 4.2 Admin Screens
 
-| Screen | File | Lines | Description |
-|--------|------|-------|-------------|
-| CourseListScreen | `CourseListScreen.js` | ~400 | List all courses with filters |
-| CourseBuilderScreen | `CourseBuilderScreen.js` | 1720 | Create/edit course with modules |
-| ModuleBuilderScreen | `ModuleBuilderScreen.js` | 926 | Edit module, manage lessons (drag-drop) |
-| LessonBuilderScreen | `LessonBuilderScreen.js` | 1363 | Video/Article/Quiz editor, HTML paste |
-| QuizBuilderScreen | `QuizBuilderScreen.js` | ~600 | Quiz question management |
-| CourseStudentsScreen | `CourseStudentsScreen.js` | 959 | Student list, progress, access control |
-| StudentProgressScreen | `StudentProgressScreen.js` | ~500 | Individual student progress detail |
-| CourseAnalyticsScreen | `CourseAnalyticsScreen.js` | ~600 | Course statistics and metrics |
-| GrantAccessScreen | `GrantAccessScreen.js` | ~400 | Manual access granting |
-| CoursePreviewScreen | `CoursePreviewScreen.js` | ~300 | Preview course as student |
+| Screen | File | Description |
+|--------|------|-------------|
+| CourseListScreen | `CourseListScreen.js` | List all courses with filters |
+| CourseBuilderScreen | `CourseBuilderScreen.js` | Create/edit course with modules |
+| ModuleBuilderScreen | `ModuleBuilderScreen.js` | Edit module, manage lessons (drag-drop) |
+| LessonBuilderScreen | `LessonBuilderScreen.js` | Video/Article/Quiz editor, HTML paste |
+| QuizBuilderScreen | `QuizBuilderScreen.js` | Quiz question management |
+| CourseStudentsScreen | `CourseStudentsScreen.js` | Student list, progress, access control |
+| StudentProgressScreen | `StudentProgressScreen.js` | Individual student progress detail |
+| CourseAnalyticsScreen | `CourseAnalyticsScreen.js` | Course statistics and metrics |
+| GrantAccessScreen | `GrantAccessScreen.js` | Manual access granting |
+| CoursePreviewScreen | `CoursePreviewScreen.js` | Preview course as student |
+| AdminCourseHighlightsScreen | `AdminCourseHighlightsScreen.js` | Manage featured courses + Sync thumbnails |
 
 ### 4.3 Navigation Registration
 
 **File:** `gem-mobile/src/navigation/AccountStack.js`
 
 ```javascript
+// User-facing Course Screens (LMS)
+import CoursesScreen from '../screens/Courses/CoursesScreen';
+import CourseDetailScreen from '../screens/Courses/CourseDetailScreen';
+import LessonPlayerScreen from '../screens/Courses/LessonPlayerScreen';
+import QuizScreen from '../screens/Courses/QuizScreen';
+import CertificateScreen from '../screens/Courses/CertificateScreen';
+import CourseCheckout from '../screens/Courses/CourseCheckout';
+
 // Admin Course Screens
 import {
   CourseListScreen,
@@ -444,7 +640,15 @@ import {
   CourseAnalyticsScreen,
 } from '../screens/Admin/Courses';
 
-// Stack.Screen registrations (lines 529-580)
+// User Courses (within AccountStack - NOT Shop)
+<Stack.Screen name="UserCourses" component={CoursesScreen} />
+<Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
+<Stack.Screen name="LessonPlayer" component={LessonPlayerScreen} />
+<Stack.Screen name="Quiz" component={QuizScreen} />
+<Stack.Screen name="Certificate" component={CertificateScreen} />
+<Stack.Screen name="CourseCheckout" component={CourseCheckout} />
+
+// Admin Course Management
 <Stack.Screen name="AdminCourses" component={CourseListScreen} />
 <Stack.Screen name="CourseBuilder" component={CourseBuilderScreen} />
 <Stack.Screen name="ModuleBuilder" component={ModuleBuilderScreen} />
@@ -485,29 +689,12 @@ import {
 - Attachment management
 - Preview toggle
 
-#### CourseStudentsScreen
-- List enrolled students with progress
-- Search and filter students
-- Sort by date, progress, name
-- Filter by status (active, expired, completed)
-- Grant access extension
-- Revoke access
-- Navigate to StudentProgress
-
-#### StudentProgressScreen
-- Student info card
-- Progress circle (percentage)
-- Stats: lessons completed, watch time, quiz pass count
-- Lesson-by-lesson progress list
-- Quiz attempt history with scores
-
-#### CourseAnalyticsScreen
-- Overview cards: total students, active, completed, avg progress
-- Revenue card with total earnings
-- Course info: modules, lessons, quiz pass rate
-- Enrollment chart by month
-- Recent enrollments list
-- Quick actions: manage students, edit course
+#### AdminCourseHighlightsScreen
+- Manage featured courses
+- **Sync Thumbnails button** - Fetches images from Shopify and updates courses table
+- Custom display settings per highlight
+- Badge customization
+- Display order management
 
 ---
 
@@ -525,82 +712,46 @@ Three trading courses are available, one for each tier:
 
 **Total:** 19 modules, 40+ lessons, 5 quizzes
 
-### 5.2 TIER 1: NEN TANG TRADER CHUYEN NGHIEP
+### 5.2 Shopify Product ID Mapping
 
-**Target:** Nguoi moi bat dau trading
-**Duration:** 30 gio
-**Difficulty:** Beginner
+```
+course-tier1-trading    -> 8863027921073 (GEM Trading Academy - Gói 1) ₫11,000,000
+course-tier2-trading    -> 8863031066801 (GEM Trading Academy - Gói 2) ₫21,000,000
+course-tier3-trading    -> 8863031460017 (GEM Trading Academy - Gói 3) ₫68,000,000
+course-tier-starter     -> 8904646820017 (Trading Tier Starter)        ₫299,000
 
-| Chapter | Title | Lessons |
-|---------|-------|---------|
-| 1 | Gioi thieu Trading | Trading la gi, Thi truong Crypto, Cac san, Quiz |
-| 2 | Doc Bieu Do Co Ban | Candlestick, Timeframes, Volume, Quiz |
-| 3 | Pattern Co Ban | DPD, UPU, Head & Shoulders, Quiz |
-| 4 | Support & Resistance | Support Zone, Resistance Zone, Breakout, Quiz |
-| 5 | Quan Ly Von | Risk management, Position sizing |
-| 6 | Tam Ly Trading | Kiem soat cam xuc, Ky luat |
-| 7 | Thuc Hanh Scanner | Su dung GEM Scanner |
-| 8 | Paper Trading | Thuc hanh giao dich mo phong |
-
-### 5.3 TIER 2: TAN SO TRADER THINH VUONG
-
-**Target:** Trader da co nen tang
-**Duration:** 25 gio
-**Difficulty:** Intermediate
-
-| Chapter | Title | Lessons |
-|---------|-------|---------|
-| 1 | Pattern Nang Cao | Double Top/Bottom, Triangles, HFZ/LFZ, Inv H&S, Quiz |
-| 2 | Multi-Timeframe | Top-Down Analysis, 3 TF Strategy, Confluence, Quiz |
-| 3 | Volume Profile | Advanced volume analysis |
-| 4 | GEM Master AI | AI trong Trading, Features, Karma System, Quiz |
-| 5 | Tam Linh & Trading | Tarot, I Ching integration |
-| 6 | Chien Luoc Tong Hop | Xay dung he thong trading |
-
-### 5.4 TIER 3: DE CHE TRADER BAC THAY
-
-**Target:** Trader muon dat den dinh cao
-**Duration:** 40 gio + Mentoring
-**Difficulty:** Advanced
-
-| Chapter | Title | Lessons |
-|---------|-------|---------|
-| 1 | 24 Pattern Mastery | Flag, Wedge, Cup & Handle, Candlestick Mastery, Quiz |
-| 2 | AI Signals | Signal Interpretation, Entry/Exit AI, R/R AI, Quiz |
-| 3 | Whale Tracking | On-chain Analysis, Whale Alerts, Smart Money, Quiz |
-| 4 | Portfolio Management | Quan ly danh muc chuyen nghiep |
-| 5 | VIP Mentoring | Setup Guide, Trading Plan, Live Sessions, VIP Community |
-
-### 5.5 Seed Data Migration
-
-**File:** `supabase/migrations/20251224_trading_courses_seed.sql`
-
-```sql
--- Creates:
--- - 3 courses (course-tier1-trading-foundation, course-tier2-trading-advanced, course-tier3-trading-mastery)
--- - 19 modules across all courses
--- - 40+ lessons with video/article/quiz types
--- - 5 quizzes with sample questions
+TƯ DUY (MINDSET) COURSES:
+course-7-ngay-khai-mo   -> 8904651342001 (7 Ngày Khai Mở Tần Số Gốc)   ₫1,990,000
+course-tan-so-tinh-yeu  -> 8904653111473 (Kích Hoạt Tần Số Tình Yêu)   ₫399,000
+course-tu-duy-trieu-phu -> 8904656257201 (Tái Tạo Tư Duy Triệu Phú)    ₫499,000
 ```
 
 ---
 
 ## 6. COMPLETE USER FLOWS
 
-### 6.1 Flow: Browse & Enroll in Free Course
+### 6.1 Flow: Browse Courses from Account Tab
 
 ```
-User navigates to Courses tab
-    -> courseService.getPublishedCourses()
-    -> Display CourseCard grid with tier badges
-    -> User clicks FREE course
-    -> CourseDetailScreen loads
-    -> User clicks "Dang ky mien phi"
-    -> enrollmentService.enroll(userId, courseId)
-    -> Navigate to first lesson
+User in Account tab
+    -> Clicks "Khóa học của tôi" section
+    -> Clicks "Tất Cả Khóa Học"
+    -> navigation.navigate('UserCourses')  // Stays in AccountStack
+    -> CoursesScreen loads with courses
+    -> Back button -> navigation.goBack() -> Account tab
 ```
 
-### 6.2 Flow: Purchase Paid Course (Shopify)
+### 6.2 Flow: Browse Courses from Shop Tab
+
+```
+User in Shop tab
+    -> Clicks "Khóa Học Trading" section
+    -> navigation.navigate('CourseList')  // Within ShopStack
+    -> CoursesScreen loads
+    -> Back button -> goBack() -> Shop tab
+```
+
+### 6.3 Flow: Purchase Paid Course (Shopify)
 
 ```
 User clicks PAID course card
@@ -614,32 +765,18 @@ User clicks PAID course card
     -> User returns to app with access
 ```
 
-### 6.3 Flow: Admin Creates Course
+### 6.4 Flow: Admin Syncs Thumbnails from Shopify
 
 ```
-Admin navigates to AdminDashboard
-    -> Clicks "Quan ly khoa hoc"
-    -> CourseListScreen loads
-    -> Clicks "Tao moi"
-    -> CourseBuilderScreen opens
-    -> Fills course info (title, description, tier, price)
-    -> Adds modules
-    -> For each module -> ModuleBuilderScreen
-    -> For each lesson -> LessonBuilderScreen
-    -> For quiz lessons -> QuizBuilderScreen
-    -> Publishes course
-```
-
-### 6.4 Flow: Admin Views Student Progress
-
-```
-Admin in CourseStudentsScreen
-    -> Clicks "Chi tiet" on student row
-    -> Navigate to StudentProgress
-    -> StudentProgressScreen loads
-    -> Shows student info, overall progress
-    -> Lists each lesson with completion status
-    -> Shows quiz attempt history
+Admin in AdminCourseHighlightsScreen
+    -> Clicks sync button (RefreshCw icon) in header
+    -> shopifyService.syncCourseThumbnails()
+    -> Edge Function fetches all courses with shopify_product_id
+    -> For each course, fetches product image from Shopify Admin API
+    -> Updates thumbnail_url in courses table
+    -> Returns summary: updated/failed count
+    -> Admin sees success alert
+    -> Data reloads with new thumbnails
 ```
 
 ---
@@ -655,26 +792,37 @@ The webhook listens for Shopify events:
 - `orders/paid` - Payment confirmed
 - `orders/updated` - Status changed
 
-### 7.2 Security: HMAC Verification
+### 7.2 Thumbnail Sync Function
+
+**File:** `supabase/functions/shopify-products/index.ts`
 
 ```typescript
-const hmacHeader = req.headers.get('X-Shopify-Hmac-Sha256');
-const shopifySecret = Deno.env.get('SHOPIFY_WEBHOOK_SECRET');
+// Action: syncCourseThumbnails
+else if (action === 'syncCourseThumbnails') {
+  // 1. Get all courses with shopify_product_id
+  const { data: courses } = await supabase
+    .from('courses')
+    .select('id, title, shopify_product_id, thumbnail_url')
+    .not('shopify_product_id', 'is', null);
 
-const encoder = new TextEncoder();
-const key = await crypto.subtle.importKey(
-  'raw',
-  encoder.encode(shopifySecret),
-  { name: 'HMAC', hash: 'SHA-256' },
-  false,
-  ['sign']
-);
+  // 2. For each course, fetch product from Shopify
+  for (const course of courses) {
+    const productUrl = `https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${course.shopify_product_id}.json`;
+    const response = await fetch(productUrl, {
+      headers: { 'X-Shopify-Access-Token': SHOPIFY_ADMIN_TOKEN }
+    });
 
-const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(bodyText));
-const computedHmac = btoa(String.fromCharCode(...new Uint8Array(signature)));
+    const productData = await response.json();
+    const imageUrl = productData.product?.image?.src;
 
-if (computedHmac !== hmacHeader) {
-  return new Response('Unauthorized', { status: 401 });
+    // 3. Update course thumbnail
+    if (imageUrl) {
+      await supabase.from('courses').update({
+        thumbnail_url: imageUrl,
+        updated_at: new Date().toISOString()
+      }).eq('id', course.id);
+    }
+  }
 }
 ```
 
@@ -697,37 +845,6 @@ const { data: course } = await supabase
   .select('id')
   .eq('shopify_product_id', productId)
   .single();
-```
-
-### 7.4 Access Grant Function
-
-```typescript
-async function grantCourseAccess(userId, courseId, orderData) {
-  // Check existing enrollment
-  const { data: existing } = await supabase
-    .from('course_enrollments')
-    .select('id, expires_at')
-    .eq('user_id', userId)
-    .eq('course_id', courseId)
-    .single();
-
-  if (existing) {
-    // Extend existing
-    await supabase.from('course_enrollments').update({
-      expires_at: calculateNewExpiry(existing.expires_at),
-      updated_at: new Date().toISOString()
-    }).eq('id', existing.id);
-  } else {
-    // Create new enrollment
-    await supabase.from('course_enrollments').insert({
-      user_id: userId,
-      course_id: courseId,
-      access_type: 'purchase',
-      enrolled_at: new Date().toISOString(),
-      metadata: { shopify_order_id: orderData.id }
-    });
-  }
-}
 ```
 
 ---
@@ -836,12 +953,25 @@ async function generateCertificate(userId, courseId, userName) {
 
 ## 11. UI/UX COMPONENTS
 
-### 11.1 Course Card
-- Thumbnail with tier badge
+### 11.1 Course Card (Square Thumbnail)
+
+All course cards now use **1:1 aspect ratio** for thumbnails:
+
+```javascript
+// CourseCardVertical.js
+thumbnailContainer: {
+  aspectRatio: 1, // Square thumbnail like Shop
+  position: 'relative',
+},
+```
+
+Features:
+- Square thumbnail with tier badge
 - Title and description
 - Progress bar (if enrolled)
 - Price or "Mien phi"
 - "Bat dau" / "Tiep tuc" button
+- Cache-busted image URL with updated_at
 
 ### 11.2 Module Accordion
 - Expandable module list
@@ -855,6 +985,12 @@ async function generateCertificate(userId, courseId, userName) {
 - Quiz interface
 - Progress tracking
 - Next/Previous navigation
+
+### 11.4 PromoBar (with caching)
+- Fixed height (48px) to prevent layout shift
+- Module-level cache for 5 minutes
+- Reset on pull-to-refresh
+- Navigation support for internal links
 
 ---
 
@@ -942,19 +1078,13 @@ export const SPACING = {
 | POST | `/enrollments` | Enroll in course |
 | DELETE | `/enrollments/:id` | Unenroll |
 
-### 13.3 Progress Endpoints
+### 13.3 Edge Function Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/progress/:courseId` | Get course progress |
-| POST | `/progress/lesson/:id/complete` | Mark lesson complete |
-
-### 13.4 Quiz Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/quizzes/:lessonId` | Get quiz for lesson |
-| POST | `/quizzes/:quizId/submit` | Submit answers |
+| Endpoint | Action | Description |
+|----------|--------|-------------|
+| `/shopify-products` | `getProducts` | List Shopify products |
+| `/shopify-products` | `getProduct` | Get single product |
+| `/shopify-products` | `syncCourseThumbnails` | Sync course thumbnails from Shopify |
 
 ---
 
@@ -967,11 +1097,13 @@ export const SPACING = {
 - AsyncStorage for offline support
 - Supabase for persistence
 
-### 14.2 Enrollment Sync
+### 14.2 Image Cache-Busting
 
-- Shopify webhook grants access
-- App polls for new access on focus
-- Real-time subscription optional
+All course images include `updated_at` timestamp in URL:
+```javascript
+const cacheKey = course.updated_at ? new Date(course.updated_at).getTime() : course.id;
+const imageUrl = `${course.thumbnail_url}?v=${cacheKey}`;
+```
 
 ---
 
@@ -980,20 +1112,35 @@ export const SPACING = {
 ### 15.1 Navigation Structure
 
 ```
-AccountStack
-  └── Admin Screens
-      ├── AdminDashboard
-      └── Course Management
-          ├── AdminCourses (CourseListScreen)
-          ├── CourseBuilder
-          ├── ModuleBuilder
-          ├── LessonBuilder
-          ├── QuizBuilder
-          ├── CourseStudents
-          ├── StudentProgress
-          ├── CourseAnalytics
-          ├── GrantAccess
-          └── CoursePreview
+MainTabs
+├── Home
+├── Shop
+│   └── ShopStack
+│       ├── CourseList (courses in shop context)
+│       ├── CourseDetail
+│       └── ...
+├── Trading
+├── GemMaster
+├── Notifications
+└── Account
+    └── AccountStack
+        ├── UserCourses (user's courses)
+        ├── CourseDetail
+        ├── LessonPlayer
+        ├── Quiz
+        ├── Certificate
+        ├── CourseCheckout
+        └── Admin Screens
+            ├── AdminCourses
+            ├── CourseBuilder
+            ├── ModuleBuilder
+            ├── LessonBuilder
+            ├── QuizBuilder
+            ├── CourseStudents
+            ├── StudentProgress
+            ├── CourseAnalytics
+            ├── GrantAccess
+            └── CoursePreview
 ```
 
 ### 15.2 Key Dependencies
@@ -1002,6 +1149,57 @@ AccountStack
 - `expo-clipboard`: HTML paste functionality
 - `expo-document-picker`: Attachment uploads
 - `react-native-webview`: Shopify checkout
+- `@react-navigation/native`: Navigation with goBack support
+
+---
+
+## 16. PERFORMANCE OPTIMIZATIONS
+
+### 16.1 Module-Level Caching
+
+Components cache data at module level to prevent re-fetch on tab switch:
+
+```javascript
+// Module-level cache (outside component)
+let cachedData = null;
+let hasLoadedOnce = false;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+export const resetCache = () => {
+  cachedData = null;
+  hasLoadedOnce = false;
+  cacheTimestamp = null;
+};
+
+const Component = () => {
+  const [data, setData] = useState(() => cachedData);
+
+  useEffect(() => {
+    if (isCacheValid()) {
+      setData(cachedData);
+      return;
+    }
+    // Fetch fresh data...
+  }, []);
+};
+```
+
+### 16.2 Components with Caching
+
+| Component | Cache Key | Reset Function |
+|-----------|-----------|----------------|
+| HeroBannerCarousel | `cachedBanners` | `resetBannerCache()` |
+| CourseFlashSaleSection | `cachedCourses` | `resetFlashSaleCache()` |
+| HighlightedCourseSection | `cachedHighlight` | `resetHighlightedCourseCache()` |
+| PromoBar | `cachedPromo` | `resetPromoBarCache()` |
+
+### 16.3 Image Optimization
+
+- Square aspect ratio (1:1) for consistent layout
+- Cache-busting with `updated_at` timestamp
+- Placeholder while loading
+- Error fallback images
 
 ---
 
@@ -1016,14 +1214,36 @@ SUPABASE_ANON_KEY=xxx
 SUPABASE_SERVICE_ROLE_KEY=xxx
 
 # Shopify
-SHOPIFY_STORE_DOMAIN=xxx.myshopify.com
-SHOPIFY_STOREFRONT_ACCESS_TOKEN=xxx
+SHOPIFY_DOMAIN=xxx.myshopify.com
+SHOPIFY_ADMIN_TOKEN=xxx
+SHOPIFY_STOREFRONT_TOKEN=xxx
 SHOPIFY_WEBHOOK_SECRET=xxx
 ```
 
 ### B. File Locations Reference
 
 ```
+# User Course Screens
+gem-mobile/src/screens/Courses/CoursesScreen.js
+gem-mobile/src/screens/Courses/CourseDetailScreen.js
+gem-mobile/src/screens/Courses/LessonPlayerScreen.js
+gem-mobile/src/screens/Courses/QuizScreen.js
+gem-mobile/src/screens/Courses/CertificateScreen.js
+gem-mobile/src/screens/Courses/CourseCheckout.js
+gem-mobile/src/screens/Courses/components/CourseCard.js
+
+# Course Components (with caching)
+gem-mobile/src/components/courses/CourseCardVertical.js
+gem-mobile/src/components/courses/CourseSection.js
+gem-mobile/src/components/courses/CourseFlashSaleSection.js
+gem-mobile/src/components/courses/HighlightedCourseSection.js
+gem-mobile/src/components/courses/HeroBannerCarousel.js
+gem-mobile/src/components/courses/index.js
+
+# Shop Components
+gem-mobile/src/components/shop/PromoBar.js
+gem-mobile/src/components/shop/index.js
+
 # Admin Course Screens
 gem-mobile/src/screens/Admin/Courses/CourseListScreen.js
 gem-mobile/src/screens/Admin/Courses/CourseBuilderScreen.js
@@ -1036,23 +1256,28 @@ gem-mobile/src/screens/Admin/Courses/CourseAnalyticsScreen.js
 gem-mobile/src/screens/Admin/Courses/GrantAccessScreen.js
 gem-mobile/src/screens/Admin/Courses/CoursePreviewScreen.js
 gem-mobile/src/screens/Admin/Courses/index.js
+gem-mobile/src/screens/Admin/AdminCourseHighlightsScreen.js
 
 # Navigation
 gem-mobile/src/navigation/AccountStack.js
+gem-mobile/src/navigation/ShopStack.js
+gem-mobile/src/navigation/CourseStack.js
 
 # Services
 gem-mobile/src/services/courseService.js
 gem-mobile/src/services/courseAccessService.js
 gem-mobile/src/services/progressService.js
-gem-mobile/src/services/courseBuilderService.js
+gem-mobile/src/services/shopifyService.js
 
 # Migrations
 supabase/migrations/20251125_courses_CLEAN_START.sql
 supabase/migrations/20251129_course_quiz_system.sql
 supabase/migrations/20251224_trading_courses_seed.sql
+supabase/migrations/20260127_fix_courses_updated_at_trigger.sql
 
 # Backend Functions
 supabase/functions/shopify-webhook/index.ts
+supabase/functions/shopify-products/index.ts
 ```
 
 ### C. Testing Checklist
@@ -1074,11 +1299,17 @@ supabase/functions/shopify-webhook/index.ts
 - [x] Admin: View student progress
 - [x] Admin: View course analytics
 - [x] Admin: Grant/revoke access
+- [x] Admin: Sync thumbnails from Shopify
 - [x] 3 Trading courses seeded
+- [x] Square thumbnails (1:1 ratio)
+- [x] Image cache-busting with updated_at
+- [x] Module-level caching (no layout shift)
+- [x] Navigation: UserCourses in AccountStack
+- [x] Back button works correctly from all contexts
 
 ---
 
-**Document Version:** 2.0
+**Document Version:** 3.0
 **Created:** December 2024
-**Last Updated:** December 24, 2024
+**Last Updated:** January 28, 2026
 **Maintained by:** GEM Development Team

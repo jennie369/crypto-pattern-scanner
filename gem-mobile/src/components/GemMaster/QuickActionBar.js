@@ -20,8 +20,8 @@ import {
 import { COLORS, SPACING } from '../../utils/tokens';
 import { FAQ_TOPICS } from './FAQPanelData';
 
-// Unified gold color for all Quick Select buttons
-const BUTTON_COLOR = '#FFBD59'; // Gold color matching tab style
+// Theme blue/purple color for Quick Select buttons
+const BUTTON_COLOR = COLORS.primary || '#8B5CF6';
 
 /**
  * QuickActionBar Component
@@ -116,10 +116,10 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 189, 89, 0.08)',
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: BUTTON_COLOR,
+    borderColor: COLORS.primary || '#8B5CF6',
     paddingVertical: 6,
     paddingHorizontal: 12,
     marginRight: 6,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   buttonLabel: {
-    color: BUTTON_COLOR,
+    color: COLORS.primary || '#8B5CF6',
     fontSize: 12,
     fontWeight: '600',
   },

@@ -9,6 +9,7 @@ import { Audio } from 'expo-av';
 
 import { useAuth } from './AuthContext';
 import { callService } from '../services/callService';
+import callKeepService from '../services/callKeepService';
 import { CALL_STATUS, VIBRATION_PATTERNS } from '../constants/callConstants';
 import { IncomingCallOverlay } from '../components/Call';
 import { navigationRef } from '../navigation/navigationRef';
@@ -24,18 +25,21 @@ export function CallProvider({ children }) {
   const { user, isAuthenticated } = useAuth();
   const [incomingCall, setIncomingCall] = useState(null);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [callKeepReady, setCallKeepReady] = useState(false);
 
   // Debug state - shows subscription status without console
   const [debugInfo, setDebugInfo] = useState({
     subscriptionStatus: 'disconnected',
     lastEvent: null,
     lastEventTime: null,
+    callKeepAvailable: false,
   });
 
   // Refs
   const ringtoneRef = useRef(null);
   const subscriptionRef = useRef(null);
   const appStateRef = useRef(AppState.currentState);
+  const pendingCallKeepAnswerRef = useRef(null);
 
   // ========== RINGTONE MANAGEMENT ==========
 
@@ -97,13 +101,26 @@ export function CallProvider({ children }) {
       return;
     }
 
+    // Check if CallKeep already answered this call (user answered from native UI)
+    if (pendingCallKeepAnswerRef.current === call.id) {
+      console.log('[CallProvider] Call already answered via CallKeep');
+      pendingCallKeepAnswerRef.current = null;
+
+      // Navigate directly to call screen
+      const caller = call.caller;
+      navigateToCallScreen(call, caller);
+      return;
+    }
+
     // Set incoming call and show overlay
     setIncomingCall(call);
     setShowOverlay(true);
 
     // Play ringtone and vibrate
+    // Note: If CallKeep is available, native UI handles ringtone
+    // but we still vibrate as backup
     playRingtone();
-  }, [incomingCall, playRingtone]);
+  }, [incomingCall, playRingtone, navigateToCallScreen]);
 
   const handleCallEnded = useCallback((call) => {
     console.log('[CallProvider] Call ended:', call);
@@ -132,27 +149,14 @@ export function CallProvider({ children }) {
       )?.profiles;
 
       // Navigate to IncomingCall screen to handle connection
-      const navReady = navigationRef.current &&
-        (typeof navigationRef.current.isReady === 'function'
-          ? navigationRef.current.isReady()
-          : true);
-
-      if (navReady) {
-        navigationRef.current.navigate('Call', {
-          screen: 'IncomingCall',
-          params: {
-            call: incomingCall,
-            caller,
-          },
-        });
-      }
+      navigateToCallScreen(incomingCall, caller);
 
       // Clear incoming call state
       setIncomingCall(null);
     } catch (error) {
       console.error('[CallProvider] Error accepting call:', error);
     }
-  }, [incomingCall, user?.id, stopRingtone]);
+  }, [incomingCall, user?.id, stopRingtone, navigateToCallScreen]);
 
   const handleDecline = useCallback(async () => {
     if (!incomingCall) return;
@@ -174,6 +178,116 @@ export function CallProvider({ children }) {
       setIncomingCall(null);
     }
   }, [incomingCall, stopRingtone]);
+
+  // ========== CALLKEEP SETUP ==========
+
+  useEffect(() => {
+    const setupCallKeep = async () => {
+      if (!isAuthenticated || !user?.id) return;
+
+      console.log('[CallProvider] Setting up CallKeep...');
+
+      try {
+        const success = await callKeepService.setup();
+        setCallKeepReady(success);
+        setDebugInfo(prev => ({ ...prev, callKeepAvailable: success }));
+
+        if (!success) {
+          console.log('[CallProvider] CallKeep setup failed or not available');
+          return;
+        }
+
+        // Handle answer from native CallKeep UI
+        callKeepService.setOnAnswerCallback(async (callUUID, callInfo) => {
+          console.log('[CallProvider] CallKeep answer callback:', callUUID);
+
+          // Stop ringtone
+          await stopRingtone();
+
+          // If we already have the call info, navigate to call screen
+          if (incomingCall && incomingCall.id === callUUID) {
+            const caller = incomingCall.caller || incomingCall.call_participants?.find(
+              p => p.user_id !== user?.id
+            )?.profiles;
+
+            navigateToCallScreen(incomingCall, caller);
+            setShowOverlay(false);
+            setIncomingCall(null);
+          } else {
+            // We got answer from native UI before realtime subscription
+            // Store the call UUID and handle when we get call data
+            pendingCallKeepAnswerRef.current = callUUID;
+
+            // Try to fetch the call
+            const { call } = await callService.getCall(callUUID);
+            if (call) {
+              const caller = call.caller;
+              navigateToCallScreen(call, caller);
+            }
+          }
+        });
+
+        // Handle end/decline from native CallKeep UI
+        callKeepService.setOnEndCallback(async (callUUID, callInfo) => {
+          console.log('[CallProvider] CallKeep end callback:', callUUID);
+
+          // Stop ringtone
+          await stopRingtone();
+
+          // If this matches our incoming call, decline it
+          if (incomingCall && incomingCall.id === callUUID) {
+            await callService.declineCall(callUUID);
+            setShowOverlay(false);
+            setIncomingCall(null);
+          } else {
+            // Try to decline anyway in case we don't have local state
+            try {
+              await callService.declineCall(callUUID);
+            } catch (e) {
+              console.log('[CallProvider] Could not decline call:', e.message);
+            }
+          }
+        });
+
+        // Handle mute toggle from native CallKeep UI
+        callKeepService.setOnMuteCallback((muted, callUUID) => {
+          console.log('[CallProvider] CallKeep mute callback:', muted, callUUID);
+          // This will be handled by the InCallScreen via context or direct service call
+          // The webrtcService will be updated directly in useCall hook
+        });
+
+        console.log('[CallProvider] CallKeep setup complete');
+      } catch (error) {
+        console.error('[CallProvider] CallKeep setup error:', error);
+        setCallKeepReady(false);
+      }
+    };
+
+    setupCallKeep();
+
+    return () => {
+      console.log('[CallProvider] Cleaning up CallKeep');
+      callKeepService.cleanup();
+    };
+  }, [isAuthenticated, user?.id, incomingCall, stopRingtone]);
+
+  // Helper function to navigate to call screen
+  const navigateToCallScreen = useCallback((call, caller) => {
+    const navReady = navigationRef.current &&
+      (typeof navigationRef.current.isReady === 'function'
+        ? navigationRef.current.isReady()
+        : true);
+
+    if (navReady) {
+      navigationRef.current.navigate('Call', {
+        screen: 'IncomingCall',
+        params: {
+          call,
+          caller,
+        },
+      });
+    }
+  }, []);
 
   // ========== SUBSCRIBE TO INCOMING CALLS ==========
 
@@ -280,6 +394,8 @@ export function CallProvider({ children }) {
     showOverlay,
     acceptCall: handleAccept,
     declineCall: handleDecline,
+    // CallKeep availability
+    callKeepReady,
     // Debug info for troubleshooting call issues
     debugInfo,
   };

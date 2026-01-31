@@ -323,7 +323,7 @@ const enrichWithRichResponse = (response, userMessage = '') => {
       richData: {
         symbol: symbol,
         pattern: patternMatch ? patternMatch[1].toUpperCase() : null,
-        message: response.text?.substring(0, 150) || '',
+        message: response.text || '', // Full text, no truncation
       },
     };
   }
@@ -2494,10 +2494,11 @@ export const saveWidgetToVisionBoard = async (widget, userId, linkedGoalId = nul
         type: widget.type || 'affirmation',
         title: widget.title || 'Widget',
         icon: widget.icon || '✨',
-        content: content, // JSONB column - pass object directly, Supabase handles serialization
+        content: content, // JSONB column - linked_goal_id stored inside content
         explanation: widget.explanation || '',
         is_active: true,
         streak: 0,
+        // NOTE: linked_goal_id is stored in content JSON, not as column
       })
       .select()
       .single();

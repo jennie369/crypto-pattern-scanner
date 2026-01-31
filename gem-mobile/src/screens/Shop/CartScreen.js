@@ -137,6 +137,8 @@ const CartScreen = ({ navigation }) => {
         <TouchableOpacity
           style={styles.deleteBtn}
           onPress={() => handleRemoveItem(item.variantId, item.title)}
+          activeOpacity={0.6}
+          delayPressIn={0}
         >
           <Trash2 size={18} color={COLORS.error} />
         </TouchableOpacity>
@@ -145,6 +147,8 @@ const CartScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.quantityBtn}
             onPress={() => updateQuantity(item.variantId, item.quantity - 1)}
+            activeOpacity={0.6}
+            delayPressIn={0}
           >
             <Minus size={14} color={COLORS.textPrimary} />
           </TouchableOpacity>
@@ -152,6 +156,8 @@ const CartScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.quantityBtn}
             onPress={() => updateQuantity(item.variantId, item.quantity + 1)}
+            activeOpacity={0.6}
+            delayPressIn={0}
           >
             <Plus size={14} color={COLORS.textPrimary} />
           </TouchableOpacity>
@@ -230,6 +236,8 @@ const CartScreen = ({ navigation }) => {
                 style={styles.checkoutBtn}
                 onPress={handleCheckout}
                 disabled={loading}
+                activeOpacity={0.7}
+                delayPressIn={0}
               >
                 <Text style={styles.checkoutText}>
                   {loading ? 'Đang xử lý...' : 'Thanh toán'}

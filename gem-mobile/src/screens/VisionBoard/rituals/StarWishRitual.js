@@ -15,6 +15,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -564,6 +566,11 @@ const StarWishRitual = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.keyboardAvoid}
     >
+      <ScrollView
+        contentContainerStyle={styles.wishScrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       <Animated.View style={[styles.wishContainer, contentAnimatedStyle]}>
         {/* Selected star visual */}
         <SelectedStarVisual star={selectedStar} />
@@ -589,6 +596,9 @@ const StarWishRitual = ({ navigation }) => {
             onBlur={() => setInputFocused(false)}
             maxLength={CONFIG.maxChars}
             textAlignVertical="top"
+            returnKeyType="done"
+            blurOnSubmit={true}
+            onSubmitEditing={() => Keyboard.dismiss()}
           />
           <Text style={styles.charCount}>{wish.length}/{CONFIG.maxChars}</Text>
         </GlassInputCard>
@@ -600,10 +610,14 @@ const StarWishRitual = ({ navigation }) => {
           size="large"
           fullWidth
           disabled={!wish.trim()}
-          onPress={handleMakeWish}
+          onPress={() => {
+            Keyboard.dismiss();
+            handleMakeWish();
+          }}
           style={styles.wishButton}
         />
       </Animated.View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 
@@ -702,6 +716,9 @@ const styles = StyleSheet.create({
   },
   keyboardAvoid: {
     flex: 1,
+  },
+  wishScrollContent: {
+    flexGrow: 1,
   },
 
   // Select phase

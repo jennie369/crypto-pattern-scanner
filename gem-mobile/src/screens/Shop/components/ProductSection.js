@@ -7,9 +7,10 @@
  * - Horizontal scroll (default)
  * - Grid layout
  * - Infinite scroll cho section "Khám phá thêm"
+ * - Hero banner với InAppBrowser WebView
  */
 
-import React, { useEffect, memo } from 'react';
+import React, { useEffect, memo, useState } from 'react';
 import {
   View,
   Text,
@@ -18,14 +19,18 @@ import {
   StyleSheet,
   ActivityIndicator,
   Dimensions,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
+// Note: Not using useNavigation - InAppBrowser is used as modal component
 import ProductCard from './ProductCard';
 import { prefetchImages } from '../../../components/Common/OptimizedImage';
+import InAppBrowser from '../../../components/Common/InAppBrowser';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GRID_CARD_WIDTH = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2;
+const HERO_BANNER_IMAGE_HEIGHT = 200; // Taller banner image for better visibility
 
 const ProductSection = ({
   title,
@@ -43,7 +48,22 @@ const ProductSection = ({
   onLoadMore,
   loadingMore = false,
   hasMore = true,
+  // Hero banner props
+  heroBanner = null, // { image_url, title, subtitle, link_url }
 }) => {
+  // InAppBrowser state for hero banner URL links
+  const [browserVisible, setBrowserVisible] = useState(false);
+  const [browserUrl, setBrowserUrl] = useState('');
+  const [browserTitle, setBrowserTitle] = useState('');
+
+  // Handle hero banner press - open InAppBrowser WebView
+  const handleHeroBannerPress = () => {
+    if (heroBanner?.link_url) {
+      setBrowserUrl(heroBanner.link_url);
+      setBrowserTitle(heroBanner.title || title || 'Chi tiết');
+      setBrowserVisible(true);
+    }
+  };
   // Prefetch images when products change
   useEffect(() => {
     if (products && products.length > 0) {
@@ -197,6 +217,42 @@ const ProductSection = ({
         )}
       </View>
 
+      {/* Hero Banner - displayed BELOW section header with text below image */}
+      {heroBanner?.image_url && heroBanner?.is_active !== false && (
+        <TouchableOpacity
+          style={styles.heroBannerContainer}
+          onPress={handleHeroBannerPress}
+          activeOpacity={0.9}
+          disabled={!heroBanner?.link_url}
+        >
+          {/* Banner Image */}
+          <Image
+            source={{ uri: heroBanner.image_url }}
+            style={styles.heroBannerImage}
+            resizeMode="cover"
+          />
+          {/* Banner text BELOW image (not overlaid) */}
+          {(heroBanner.title || heroBanner.subtitle || heroBanner.link_url) && (
+            <View style={styles.heroBannerContent}>
+              <View style={styles.heroBannerTextContainer}>
+                {heroBanner.title && (
+                  <Text style={styles.heroBannerTitle} numberOfLines={2}>{heroBanner.title}</Text>
+                )}
+                {heroBanner.subtitle && (
+                  <Text style={styles.heroBannerSubtitle} numberOfLines={2}>{heroBanner.subtitle}</Text>
+                )}
+              </View>
+              {heroBanner.link_url && (
+                <View style={styles.heroBannerCTA}>
+                  <Text style={styles.heroBannerCTAText}>Xem ngay</Text>
+                  <Ionicons name="chevron-forward" size={14} color={COLORS.gold} />
+                </View>
+              )}
+            </View>
+          )}
+        </TouchableOpacity>
+      )}
+
       {/* Content */}
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -211,6 +267,14 @@ const ProductSection = ({
       ) : (
         renderGridList()
       )}
+
+      {/* InAppBrowser for hero banner URL links */}
+      <InAppBrowser
+        visible={browserVisible}
+        url={browserUrl}
+        title={browserTitle}
+        onClose={() => setBrowserVisible(false)}
+      />
     </View>
   );
 };
@@ -219,6 +283,56 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: SPACING.xxl, // 20
   },
+
+  // Hero Banner Styles - Text BELOW image layout
+  heroBannerContainer: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: GLASS.background,
+  },
+  heroBannerImage: {
+    width: '100%',
+    height: HERO_BANNER_IMAGE_HEIGHT,
+  },
+  heroBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+    backgroundColor: GLASS.background,
+  },
+  heroBannerTextContainer: {
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
+  heroBannerTitle: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xxs,
+  },
+  heroBannerSubtitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  heroBannerCTA: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+  },
+  heroBannerCTAText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+    marginRight: 4,
+  },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',

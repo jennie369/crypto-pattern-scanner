@@ -48,6 +48,8 @@ import {
 } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const MODAL_HORIZONTAL_MARGIN = 16; // SPACING.lg
+const CONTAINER_WIDTH = SCREEN_WIDTH - MODAL_HORIZONTAL_MARGIN * 2;
 
 // Design tokens
 const COLORS = {
@@ -320,7 +322,7 @@ const GoalSetupQuestionnaire = ({
     if (currentStep < QUESTIONNAIRE_STEPS.length - 1) {
       Vibration.vibrate(10);
       Animated.timing(slideAnim, {
-        toValue: -(currentStep + 1) * SCREEN_WIDTH,
+        toValue: -(currentStep + 1) * CONTAINER_WIDTH,
         duration: 300,
         useNativeDriver: true,
       }).start();
@@ -336,7 +338,7 @@ const GoalSetupQuestionnaire = ({
     if (currentStep > 0) {
       Vibration.vibrate(10);
       Animated.timing(slideAnim, {
-        toValue: -(currentStep - 1) * SCREEN_WIDTH,
+        toValue: -(currentStep - 1) * CONTAINER_WIDTH,
         duration: 300,
         useNativeDriver: true,
       }).start();
@@ -662,7 +664,7 @@ const GoalSetupQuestionnaire = ({
             style={[
               styles.stepsCarousel,
               {
-                width: SCREEN_WIDTH * QUESTIONNAIRE_STEPS.length,
+                width: CONTAINER_WIDTH * QUESTIONNAIRE_STEPS.length,
                 transform: [{ translateX: slideAnim }],
               },
             ]}
@@ -909,7 +911,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   stepContainer: {
-    width: SCREEN_WIDTH - SPACING.lg * 2,
+    width: CONTAINER_WIDTH,
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.lg,
   },
@@ -1088,7 +1090,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.lg,
-    paddingBottom: Platform.OS === 'ios' ? SPACING.xxl : SPACING.lg,
+    paddingBottom: Platform.OS === 'ios' ? 34 : SPACING.xl,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
   },

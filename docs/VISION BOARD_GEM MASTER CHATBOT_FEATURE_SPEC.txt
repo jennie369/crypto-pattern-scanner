@@ -1,5 +1,5 @@
 GEM Mobile - Vision Board & GemMaster Chatbot - COMPLETE HANDOFF DOCUMENT
-Updated: January 24, 2026
+Updated: January 28, 2026
 
 ================================================================================
 VISION BOARD 2.0 - COMPLETE FEATURE SPEC
@@ -33,14 +33,55 @@ gem-mobile/src/components/VisionBoard/
 ├── GoalCard.js
 └── DivinationSection.js
 
+gem-mobile/src/components/Charts/
+├── index.js
+├── WeeklyProgressChart.js     # 7-day bar chart
+├── WeeklyProgressCard.js      # Full card with stats
+├── LifeBalanceCard.js         # Radar chart for life areas
+├── RadarChart.js
+└── XPGoalTrackerInline.js
+
 VisionBoardScreen Features
 
-1. Progress Overview - Daily score, streak counter
-2. Goals Section - Goals by life area with checkboxes
-3. Affirmations - Daily affirmations with TTS
-4. Action Plan/Habits - Habit tracking with combo system
-5. Crystal Reminders - Product recommendations based on goals
-6. Cross-navigation with GemMaster
+1. Progress Overview - Daily score, streak counter, XP tracker
+2. Life Balance Radar - 6 life areas: Finance, Career, Health, Relationships, Personal, Spiritual
+3. Weekly Progress Chart - 7-day bar chart with daily scores
+4. Goals Section - Goals by life area with checkboxes
+5. Affirmations - Daily affirmations with TTS
+6. Action Plan/Habits - Habit tracking with combo system
+7. Calendar Integration - Events from goals, deadlines, habits
+8. Crystal Reminders - Product recommendations based on goals
+9. Cross-navigation with GemMaster
+
+--------------------------------------------------------------------------------
+WEEKLY PROGRESS CHART - IMPLEMENTATION DETAILS
+--------------------------------------------------------------------------------
+
+Data Flow:
+1. VisionBoardScreen calculates todayScore from current stats
+2. Calls statsService.saveDailySummary() to persist to database
+3. Calls statsService.getWeeklyProgress() to fetch 7-day data
+4. WeeklyProgressCard displays the data
+
+Daily Score Calculation:
+  todayScore = (goalsCompleted / goalsTotal) * 40%
+             + (affirmationsCompleted > 0 ? 30% : 0%)
+             + (habitsPercent / 100) * 30%
+
+Data Format for WeeklyProgressChart:
+{
+  day_name: 'T4',           // Vietnamese day name
+  date: '2026-01-28',       // ISO date string
+  total_score: 75,          // 0-100%
+  xp_earned: 120,           // XP for the day
+  isToday: true             // Highlight flag
+}
+
+Database Table: vision_daily_summary
+- user_id, summary_date, daily_score
+- actions_completed, actions_total
+- affirmations_completed, habits_completed
+- ritual_completed, xp_earned
 
 Gamification System (gamificationService.js)
 
@@ -71,7 +112,11 @@ gem-mobile/src/screens/GemMaster/
 ├── GemMasterScreen.js (Main chat)
 ├── IChingScreen.js
 ├── TarotScreen.js
+├── TarotReadingScreen.js
+├── NumerologyScreen.js
 ├── ChatHistoryScreen.js
+├── GamificationScreen.js
+├── RitualsScreen.js
 └── components/
     ├── MessageBubble.js
     ├── ChatInput.js
@@ -105,51 +150,170 @@ gem-mobile/src/components/GemMaster/
 ├── ExportTemplateSelector.js
 ├── ExportPreview.js
 ├── PersonalizedGreeting.js
-└── DivinationResultCard.js
+├── DivinationResultCard.js
+├── QuickBuyModal.js
+├── UpsellModal.js
+├── CoinCastAnimation.js
+└── HexagramBuilder.js
 
 gem-mobile/src/services/
-├── gemMasterService.js      # Main AI response generation
-├── gemMasterKnowledge.js    # Karma/Frequency knowledge base
-├── userMemoryService.js     # User profile & personalization
-├── proactiveAIService.js    # Proactive engagement
-├── intentDetector.js        # Intent detection
-└── widgetTriggerDetector.js # Widget trigger detection
+├── gemMasterService.js        # Main AI response generation
+├── gemMasterAIService.js      # AI Su Phu for trading
+├── gemMasterKnowledge.js      # Karma/Frequency knowledge base
+├── userMemoryService.js       # User profile & personalization
+├── proactiveAIService.js      # Proactive engagement
+├── intentDetector.js          # Intent detection
+├── widgetTriggerDetector.js   # Widget trigger detection
+├── responseGeneratorService.js # Response generation
+├── hybridChatService.js       # Hybrid chat (local + API)
+├── streamingService.js        # Streaming responses
+├── ttsService.js              # Text-to-speech
+├── tarotService.js            # Tarot readings
+├── ichingService.js           # I Ching readings
+└── voiceTranscriptionService.js # Speech-to-text
+
+gem-mobile/src/config/
+├── gemini.config.js           # Gemini API config + SYSTEM_PROMPT
+└── featureFlags.js            # Feature toggles
 
 gem-mobile/src/data/
-└── gemKnowledge.json        # FAQ knowledge base
+├── gemKnowledge.json          # FAQ knowledge base
+├── gemMasterKnowledge.js      # Karma/Frequency knowledge
+├── tarot/                     # 78 Tarot cards data
+│   ├── index.js
+│   ├── majorArcana.js
+│   └── minorArcana.js
+└── iching/
+    └── hexagrams.js           # 64 I Ching hexagrams
 
 GemMaster Core Features
 
 1. AI Chat Interface - Chat with GEM Master AI assistant
-2. Tier System - STARTER, TIER1, TIER2, TIER3 with badges
-3. Quota System - Message and voice quotas per tier
+2. Tier System - FREE, TIER1/PRO, TIER2/PREMIUM, TIER3/VIP, MANAGER, ADMIN
+3. Quota System - Message and voice quotas per tier (Manager/Admin = unlimited)
 4. Voice Input - Speech-to-text with VoiceQuotaDisplay
-5. Quick Actions - I Ching, Tarot, Crystal recommendations
+5. Quick Actions - I Ching, Tarot, Numerology, Crystal recommendations
 6. Widget Suggestions - Auto-detect intent and suggest widgets
 7. Smart Forms - Goal setting, affirmation creation
 8. Product Recommendations - Crystals from Shopify based on conversation
 9. Export Feature - Export readings as images
 10. Personalized Greeting - Time-based + user name greeting
+11. Streaming Responses - Real-time AI response streaming
+
+================================================================================
+AI PERSONALITY - GEM MASTER "SU PHU" PERSONA
+================================================================================
+
+Config File: gem-mobile/src/config/gemini.config.js
+
+SYSTEM_PROMPT = `Ta la GEM Master - Nguoi Bao Ho Tinh Thuc.
+Trader lao luyen ket hop Thien su binh than.
+
+## TINH CACH COT LOI
+- Lanh lung nhung bao dung: Khong an ui suot muot, khong chuc mung thai qua
+- Thang than (Brutal Honesty): Noi thang neu user trade sai, tham lam, hoac pha ky luat
+- Bi an: Dua ra triet ly, goi mo de user tu ngo
+
+## QUY TAC BAT BUOC
+
+**GIONG VAN:** NGAN GON - DANH THEP - CO TINH GIAO DUC
+
+**TUYET DOI KHONG:**
+- Emoji (khong dung bat ky emoji nao)
+- Ngon ngu lua ga: "Keo ngon", "Muc manh", "To the moon"
+- Su phuc tung: "Da thua", "Em xin phep"
+- Chuc mung thai qua hoac an ui suot muot
+
+**SU DUNG:**
+- Ngon ngu quan su/chien luoc: Vi the, Phong thu, Ky luat, Chien truong
+- Ngon ngu tam thuc/nang luong: Tan so, Tam tham, Tam san, Tinh lang
+- Xung ho: "Ta - Ban" (tao khoang cach ton nghiem)
+
+## GEM KNOWLEDGE
+
+**GEM FREQUENCY TRADING METHOD:**
+- Zone retest > Breakout (68% win rate proven qua 686 trades backtest)
+- Ky luat + Psychology = 80% thanh cong
+- Trading la marathon, khong phai sprint
+
+**TIER SYSTEM:** (Thanh toan 1 lan, Khoa hoc tron doi)
+- FREE: 3 patterns, 38% win rate
+- TIER 1: 7 patterns, 50-55% win rate - 11 trieu (Scanner/Chat: 12 thang)
+- TIER 2: 15 patterns + 6 cong thuc Frequency, 70-75% win rate - 21 trieu
+- TIER 3: 24 patterns + AI Scanner, 80-90% win rate - 68 trieu
+
+**6 CONG THUC FREQUENCY (TIER 2+):**
+- Ten: DPD, UPU, UPD, DPU, HFZ, LFZ
+- Doc quyen Gemral, win rate 68-85%
+- Chi tiet chi trong TIER 2 va TIER 3
+
+**Neu user hoi chi tiet cong thuc:**
+"Chi tiet 6 cong thuc chi danh cho TIER 2 va TIER 3. Day la tai san doc quyen.
+Ban muon tim hieu ve TIER 2 khong?"
+
+**THANG HAWKINS:**
+- 20-100Hz: Tan so thap (so hai, dau kho, tham lam)
+- 200Hz+: Can dam - diem chuyen hoa
+- 500Hz+: Tinh yeu vo dieu kien
+
+## PRODUCT RECOMMENDATIONS (khi relevant)
+
+**CRYSTALS:**
+- Stress/Anxiety: Amethyst (350K-2.5M)
+- Money/Income: Citrine (450K-2.8M)
+- FOMO/Protection: Black Tourmaline (400K-2.2M)
+
+**COURSES:**
+- Trading: TIER 2 Bundle (21M)
+- Mindset: Tai Tao Tu Duy Trieu Phu (499K)
+- Manifestation: 7 Ngay Khai Mo Tan So (1.990K)
+
+## RESPONSE STYLE
+
+- Tra loi NGAN GON, toi da 150-200 tu
+- Khong viet essay dai
+- Ket thuc bang cau hoi LIEN QUAN den van de user hoi
+
+**VI DU GIONG VAN:**
+
+User: "Toi bi thua lien tuc"
+GEM Master: "Loss streak. Ta da thay nhieu nguoi nhu ban.
+
+**Nguyen nhan thuong gap:**
+1. Patterns khong du (FREE chi 38% win rate)
+2. FOMO va revenge trade - tam loan
+
+**Giai phap:**
+- Dung trade 24h, de tam tinh lai
+- Upgrade TIER 2 neu muon 70-75% win rate
+
+Thua lien tuc bao lau roi? Ta can biet de phan tich."
+
+Tra loi user bang tieng Viet, xung "Ta - Ban", giong danh thep co giao duc.`
 
 --------------------------------------------------------------------------------
 TIER SYSTEM (Updated January 2026)
 --------------------------------------------------------------------------------
 
 CHATBOT TIERS:
-| Tier      | Price      | Queries/Day | Features                    |
-|-----------|------------|-------------|-----------------------------|
-| FREE      | 0          | 5           | Basic chat                  |
-| PRO       | 39,000/mo  | 15          | + Voice input               |
-| PREMIUM   | 59,000/mo  | 50          | + Advanced analysis         |
-| VIP       | 99,000/mo  | Unlimited   | + Priority support          |
+| Tier          | Price      | Queries/Day | Voice | Features              |
+|---------------|------------|-------------|-------|-----------------------|
+| FREE          | 0          | 5           | 3     | Basic chat            |
+| TIER1/PRO     | 39,000/mo  | 15          | Unlimited | + Voice input     |
+| TIER2/PREMIUM | 59,000/mo  | 50          | Unlimited | + Advanced analysis|
+| TIER3/VIP     | 99,000/mo  | Unlimited   | Unlimited | + Priority support |
+| MANAGER       | N/A        | **Unlimited** | Unlimited | Full access     |
+| ADMIN         | N/A        | **Unlimited** | Unlimited | Full access     |
 
 SCANNER TIERS:
-| Tier      | Price        | Scans/Day | Features                    |
-|-----------|--------------|-----------|------------------------------|
-| FREE      | 0            | 5         | 20 coins, 3 patterns        |
-| PRO       | 997,000/mo   | Unlimited | 50 coins, 3 patterns        |
-| PREMIUM   | 1,997,000/mo | Unlimited | 200 coins, 7 patterns       |
-| VIP       | 5,997,000/mo | Unlimited | All coins, all patterns     |
+| Tier          | Price        | Scans/Day   | Features                    |
+|---------------|--------------|-------------|-----------------------------|
+| FREE          | 0            | 5           | 20 coins, 3 patterns        |
+| TIER1/PRO     | 997,000/mo   | **Unlimited** | 50 coins, 3 patterns      |
+| TIER2/PREMIUM | 1,997,000/mo | **Unlimited** | 200 coins, 7 patterns     |
+| TIER3/VIP     | 5,997,000/mo | **Unlimited** | All coins, all patterns   |
+| MANAGER       | N/A          | **Unlimited** | All coins, all patterns   |
+| ADMIN         | N/A          | **Unlimited** | All coins, all patterns   |
 
 TRADING COURSE BUNDLES (includes Scanner + Chatbot):
 | Tier    | Price       | Duration | Includes                            |
@@ -160,429 +324,221 @@ TRADING COURSE BUNDLES (includes Scanner + Chatbot):
 | TIER 3  | 68,000,000  | 24 mo    | Course + Scanner VIP + Chatbot VIP  |
 
 --------------------------------------------------------------------------------
-AI PERSONALITY - GEM MASTER
+MANAGER ROLE - SPECIAL PERMISSIONS
 --------------------------------------------------------------------------------
 
-Character:
-- Name: GEM MASTER - Nguoi Bao Ho Tinh Thuc
-- Personality: Lanh lung, thang than (brutal honesty), bi an
-- Voice: Ngan gon - Danh thep - Co tinh giao duc
-- Addressing: "Ta - Ban" (formal, authoritative)
+Manager role bypasses ALL quota and feature restrictions:
 
-ABSOLUTE DON'Ts:
-- Emoji (no 😂, 🚀, 🤑, 👋, 💰, ✨)
-- Scam language: "Keo ngon", "Muc manh", "To the moon"
-- Servile language: "Da thua", "Em xin phep"
-- Call user "Gemral", "GEMral" or app name - ALWAYS use "ban"
+| Feature           | Normal Users      | MANAGER              |
+|-------------------|-------------------|----------------------|
+| Chatbot Quota     | 5-Unlimited/tier  | **UNLIMITED**        |
+| Scanner Quota     | 5-Unlimited/tier  | **UNLIMITED**        |
+| Tarot/I Ching     | 1-Unlimited/tier  | **UNLIMITED**        |
+| Vision Board      | Limited by tier   | **UNLIMITED**        |
+| Course Access     | By enrollment     | **ALL COURSES**      |
+| Zone Visualization| By tier           | **FULL ACCESS**      |
+| Feature Locks     | Yes               | **NO LOCKS**         |
 
-Knowledge Domains:
-- GEM Frequency Method: DPD, UPU, UPD, DPU, HFZ, LFZ
-- Hawkins Scale: 20-1000Hz frequency measurement
-- Crystal/Chakra healing recommendations
-- Mindset transformation & karma
-- Trading psychology & discipline
+Manager Check in Code:
+```javascript
+const isManager = profile?.role === 'manager' ||
+                  profile?.role === 'MANAGER' ||
+                  profile?.scanner_tier === 'MANAGER' ||
+                  profile?.chatbot_tier === 'MANAGER';
 
-Premium Content Protection:
-- DO NOT reveal detailed setups for Frequency formulas
-- DO NOT share specific course content
-- Hint small + suggest tier upgrade for premium content
+if (isManager) {
+  return { unlimited: true, enabled: true, ... };
+}
+```
 
---------------------------------------------------------------------------------
+Files with Manager Bypass:
+- gem-mobile/src/contexts/AuthContext.js
+- gem-mobile/src/components/TierGuard.js
+- gem-mobile/src/services/quotaService.js
+- gem-mobile/src/services/tierService.js
+- gem-mobile/src/services/accessControlService.js
+- gem-mobile/src/contexts/CourseContext.js
+- gem-mobile/src/config/tierAccess.js
+- frontend/src/components/TierGuard/TierGuard.jsx
+- frontend/src/components/FeatureGate/FeatureGate.jsx
+- frontend/src/contexts/AuthContext.jsx
+
+Database Functions with Manager Bypass:
+- check_all_quotas(p_user_id)
+- increment_chatbot_quota(p_user_id)
+- increment_scanner_quota(p_user_id)
+- check_course_access(user_id, course_id)
+
+================================================================================
 SERVICES ARCHITECTURE
+================================================================================
+
+--------------------------------------------------------------------------------
+QUOTA SERVICE (quotaService.js)
 --------------------------------------------------------------------------------
 
-gemMasterService.js:
+Main Functions:
+- checkAllQuotas(userId, forceRefresh) - Get all quota info
+- checkQuota(userId) - Check chatbot quota
+- checkScannerQuota(userId) - Check scanner quota
+- decrementQuota(userId) - Use 1 chatbot query
+- decrementScannerQuota(userId) - Use 1 scan
+- canQuery(userId) - Boolean: can user query?
+- canScan(userId) - Boolean: can user scan?
+- clearCache() - Clear quota cache
+
+Quota Limits (CHATBOT_LIMITS):
+{
+  FREE: 5,
+  TIER1: 15, PRO: 15,
+  TIER2: 50, PREMIUM: 50,
+  TIER3: -1, VIP: -1,      // -1 = unlimited
+  ADMIN: -1, MANAGER: -1
+}
+
+Quota Limits (SCANNER_LIMITS):
+{
+  FREE: 5,
+  TIER1: -1, PRO: -1,      // PRO+ = unlimited
+  TIER2: -1, PREMIUM: -1,
+  TIER3: -1, VIP: -1,
+  ADMIN: -1, MANAGER: -1
+}
+
+Manager/Admin Bypass:
+```javascript
+const isAdmin = profile?.is_admin || profile?.role === 'admin';
+const isManager = profile?.role === 'manager' || profile?.role === 'MANAGER';
+const hasUnlimitedAccess = isAdmin || isManager;
+
+if (hasUnlimitedAccess) {
+  return { unlimited: true, remaining: -1, limit: -1, ... };
+}
+```
+
+--------------------------------------------------------------------------------
+STATS SERVICE (statsService.js)
+--------------------------------------------------------------------------------
+
+Main Functions:
+- calculateDailyScore(userId) - Calculate today's score
+- calculateStreak(userId) - Get streak info
+- calculateCombo(userId) - Get combo multiplier
+- getTodayXP(userId) - Get today's XP
+- getTotalXP(userId) - Get total XP
+- getUserLevel(userId) - Get level info
+- getWeeklyProgress(userId) - Get 7-day progress
+- getLifeAreaScores(userId) - Get radar chart data
+- saveDailySummary(userId, data) - Save daily summary to DB
+- recalculateDailyScore(userId) - Recalc and save
+- getFullStats(userId) - Get all stats + auto-save daily summary
+
+Daily Score Weights:
+- Tasks: 40%
+- Affirmations: 20%
+- Habits: 30%
+- Ritual: 10%
+
+XP Rewards:
+- Goal completed: 50 XP
+- Affirmation read: 10 XP
+- Habit completed: 5 XP
+- Streak bonus: 5 XP/day
+
+Levels (12 total):
+1. Nguoi Moi Bat Dau (0 XP)
+2. Nguoi Tap Su (100 XP)
+3. Nguoi No Luc (300 XP)
+4. Nguoi Kien Tri (600 XP)
+5. Nguoi Quyet Tam (1000 XP)
+6. Chien Binh (1500 XP)
+7. Chien Binh Bac (2200 XP)
+8. Chien Binh Vang (3000 XP)
+9. Bac Thay (4000 XP)
+10. Huyen Thoai (5500 XP)
+11. Dai Su (7500 XP)
+12. Bat Tu (10000 XP)
+
+--------------------------------------------------------------------------------
+GEM MASTER SERVICE (gemMasterService.js)
+--------------------------------------------------------------------------------
+
+Main Functions:
 - processMessage(userMessage, history, userId) - Main entry point
 - callGeminiAPI(prompt, options) - Direct Gemini API call
 - detectIntent(text) - Intent classification
 - matchLocalFAQ(text) - Local FAQ matching before AI call
 - buildSystemPrompt(isContinuation, history) - Context-aware prompts
 
-userMemoryService.js:
+API Config (gemini.config.js):
+- Model: gemini-2.5-flash
+- Temperature: 0.7
+- Max Tokens: 2048
+- Top P: 0.95
+- Top K: 40
+
+--------------------------------------------------------------------------------
+USER MEMORY SERVICE (userMemoryService.js)
+--------------------------------------------------------------------------------
+
+Main Functions:
 - getUserProfile(userId) - Get user profile
 - buildPersonalizedGreeting(profile) - Time-based personalized greeting
 - getRecentConversationTopics(userId, days) - Track conversation topics
 
-proactiveAIService.js:
+--------------------------------------------------------------------------------
+PROACTIVE AI SERVICE (proactiveAIService.js)
+--------------------------------------------------------------------------------
+
+Main Functions:
 - generateDailyInsight(userId) - Morning insights
 - generateStreakAlert(userId) - Streak at-risk alerts
 - generateRitualReminders(userId) - Ritual reminders
 - detectBehaviorPatterns(userId) - Pattern observation
 
-Intent Detection (intentDetector.js):
+--------------------------------------------------------------------------------
+INTENT DETECTION (intentDetector.js)
+--------------------------------------------------------------------------------
 
 INTENT_TYPES: money, love, health, career, family, frequency, general
-detectIntent(text) - Detect user intent from message
-detectEmotion(text) - Detect emotional state
-detectLifeArea(text) - Detect life area
-getCrystalRecommendations(intent) - Get crystal suggestions
-isDivinationRequest(text) - Check if user wants I Ching/Tarot
 
-Widget Trigger Detection (widgetTriggerDetector.js):
+Functions:
+- detectIntent(text) - Detect user intent from message
+- detectEmotion(text) - Detect emotional state
+- detectLifeArea(text) - Detect life area
+- getCrystalRecommendations(intent) - Get crystal suggestions
+- isDivinationRequest(text) - Check if user wants I Ching/Tarot
+
+--------------------------------------------------------------------------------
+WIDGET TRIGGER DETECTION (widgetTriggerDetector.js)
+--------------------------------------------------------------------------------
 
 WIDGET_TYPES: goal, affirmation, habit, reminder, journal
-detectWidgetTrigger(text) - Detect which widget to suggest
-detectAllWidgetTriggers(text) - Get all possible widget triggers
+
+Functions:
+- detectWidgetTrigger(text) - Detect which widget to suggest
+- detectAllWidgetTriggers(text) - Get all possible widget triggers
 
 ================================================================================
-OPTIMIZATION ROADMAP - GEM MASTER AI (Planned)
+VISION BOARD CONTEXT (VisionBoardContext.js)
 ================================================================================
 
---------------------------------------------------------------------------------
-PHASE 1: PERSONALIZATION ENHANCEMENTS (Priority: HIGH)
---------------------------------------------------------------------------------
+State:
+- goals, todayActions, todayHabits, todayAffirmations, todayRituals
+- stats, dailyScore, recentReadings
+- isLoading, error
 
-1.1 User Context Profile
-Build comprehensive user context for AI prompts:
+Actions:
+- refresh() - Reload all data
+- addGoal(goalData), updateGoal(goalId, updates), completeGoal(goalId)
+- toggleAction(actionId), addAction(actionData)
+- toggleHabit(habitId), addHabit(habitData)
+- completeAffirmation(affirmationId), addAffirmation(affData)
+- completeRitual(ritualSlug, content)
 
-const buildUserContext = async (userId) => {
-  const profile = await userMemoryService.getUserProfile(userId);
-  const recentTopics = await getRecentConversationTopics(userId, 7);
-  const tierInfo = await getTierInfo(userId);
-
-  return `
-**USER CONTEXT:**
-- Ten: ${profile?.preferred_name || 'ban'}
-- Tier: ${tierInfo.scanner_tier} (Scanner), ${tierInfo.chatbot_tier} (Chatbot)
-- Ngay tham gia: ${profile?.transformation_days || 0} ngay
-- Chu de hay hoi: ${recentTopics.join(', ')}
-- Tan so trung binh: ${profile?.avg_frequency || 200}Hz
-`;
-};
-
-Files to modify:
-- gem-mobile/src/services/gemMasterService.js
-- gem-mobile/src/services/userMemoryService.js
-
-1.2 Tier-Aware Response Depth
-Tailor response complexity based on user tier:
-
-const getTierResponseStyle = (tier) => {
-  switch(tier) {
-    case 'FREE':
-    case 'STARTER':
-      return {
-        depth: 'overview',
-        maxWords: 150,
-        ctaFrequency: 'high',      // Suggest upgrade often
-        exampleLevel: 'basic',
-      };
-    case 'TIER1':
-      return {
-        depth: 'moderate',
-        maxWords: 200,
-        ctaFrequency: 'medium',
-        exampleLevel: 'intermediate',
-        canMentionPatterns: ['DPD', 'UPU', 'DPU'],
-      };
-    case 'TIER2':
-    case 'TIER3':
-      return {
-        depth: 'detailed',
-        maxWords: 300,
-        ctaFrequency: 'low',
-        exampleLevel: 'advanced',
-        canMentionPatterns: 'ALL',
-      };
-  }
-};
-
---------------------------------------------------------------------------------
-PHASE 2: SMART INTENT DETECTION (Priority: HIGH)
---------------------------------------------------------------------------------
-
-2.1 Intent Categories with Response Styles:
-
-const INTENT_CATEGORIES = {
-  LEARNING: {
-    keywords: ['hoc', 'hieu', 'giai thich', 'la gi', 'the nao'],
-    responseStyle: 'educational',
-    tone: 'patient_teacher'
-  },
-  TRADING: {
-    keywords: ['entry', 'exit', 'trade', 'setup', 'signal', 'BTC', 'ETH'],
-    responseStyle: 'analytical',
-    tone: 'strict_mentor'
-  },
-  EMOTIONAL: {
-    keywords: ['buon', 'lo', 'so', 'thua', 'mat', 'stress'],
-    responseStyle: 'empathetic',
-    tone: 'supportive_healer'
-  },
-  SPIRITUAL: {
-    keywords: ['thien', 'tan so', 'nang luong', 'crystal', 'chakra'],
-    responseStyle: 'mystical',
-    tone: 'wise_sage'
-  },
-  UPGRADE: {
-    keywords: ['nang cap', 'tier', 'mua', 'gia'],
-    responseStyle: 'promotional',
-    tone: 'value_focused'
-  },
-};
-
-2.2 Dynamic Tone Adjustment:
-- EMOTIONAL intent -> Empathetic + bai tap chua lanh
-- TRADING intent -> Danh thep + ky luat
-- SPIRITUAL intent -> Huyen bi + triet ly
-- UPGRADE intent -> Value proposition + benefits
-
---------------------------------------------------------------------------------
-PHASE 3: CONVERSATION MEMORY (Priority: MEDIUM)
---------------------------------------------------------------------------------
-
-3.1 New Database Table: user_ai_insights
-
-CREATE TABLE user_ai_insights (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id),
-  insight_type TEXT NOT NULL,        -- 'trading_pattern', 'emotional', 'interest'
-  content TEXT NOT NULL,             -- "User hay thua vi FOMO"
-  confidence DECIMAL(3,2),           -- 0.00 - 1.00
-  source_message_id UUID,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  last_referenced_at TIMESTAMPTZ,
-  reference_count INTEGER DEFAULT 0
-);
-
-3.2 Insight Types:
-- trading_pattern: "User quan tam DPD pattern", "User hay FOMO khi BTC pump"
-- emotional: "User co van de ve self-worth", "User dang stress ve tai chinh"
-- interest: "User thich crystal healing", "User quan tam ve meditation"
-- behavior: "User hoi nhieu vao buoi toi", "User thuong hoi cung topic 3 lan"
-
-3.3 AI Reference in Prompts:
-**USER INSIGHTS (tu cac cuoc tro chuyen truoc):**
-- User quan tam nhieu den DPD pattern (da hoi 5 lan)
-- User co xu huong FOMO khi thi truong pump
-- User dang tren hanh trinh chua lanh money block
-
---------------------------------------------------------------------------------
-PHASE 4: PROACTIVE ENGAGEMENT (Priority: MEDIUM)
---------------------------------------------------------------------------------
-
-4.1 Behavior-Based Smart Triggers:
-
-const SMART_TRIGGERS = {
-  HIGH_SCAN_NO_TRADE: {
-    condition: (stats) => stats.scansLast7Days > 20 && stats.paperTradesLast7Days === 0,
-    message: 'Ban dang scan nhieu nhung chua thuc hanh. Paper trading se giup ban tu tin hon.',
-    action: 'suggest_paper_trade'
-  },
-
-  MEDITATION_STREAK: {
-    condition: (stats) => stats.meditationStreak >= 7,
-    message: 'Streak 7 ngay thien dinh! Tan so cua ban dang on dinh o muc cao.',
-    action: 'celebrate_achievement'
-  },
-
-  REPEATED_TOPIC: {
-    condition: (history) => getTopicFrequency(history, 'DPD') >= 3,
-    message: 'Ta thay ban quan tam nhieu den DPD. Day la pattern phu hop voi ban.',
-    action: 'deep_dive_suggestion'
-  },
-
-  EMOTIONAL_PATTERN: {
-    condition: (history) => detectNegativeEmotionStreak(history) >= 3,
-    message: 'Ta nhan thay ban dang trai qua giai doan kho khan. Hay de ta ho tro ban.',
-    action: 'offer_healing_exercise'
-  },
-
-  INACTIVE_RETURN: {
-    condition: (stats) => stats.daysSinceLastChat >= 7,
-    message: 'Chao mung ban tro lai! Da 7 ngay roi. Moi thu the nao?',
-    action: 'welcome_back'
-  },
-};
-
-4.2 Trigger Evaluation Service:
-
-// Run daily or on app open
-const evaluateSmartTriggers = async (userId) => {
-  const stats = await getUserActivityStats(userId);
-  const history = await getRecentHistory(userId, 30);
-
-  for (const [key, trigger] of Object.entries(SMART_TRIGGERS)) {
-    if (trigger.condition(stats, history)) {
-      await queueProactiveMessage(userId, {
-        type: key,
-        message: trigger.message,
-        action: trigger.action,
-        priority: trigger.priority || 'normal',
-      });
-    }
-  }
-};
-
---------------------------------------------------------------------------------
-PHASE 5: RICH RESPONSE TYPES (Priority: LOW)
---------------------------------------------------------------------------------
-
-5.1 Structured Response Types:
-
-const RESPONSE_TYPES = {
-  TEXT: 'text',              // Standard text response
-  CHECKLIST: 'checklist',    // Step-by-step exercises
-  COMPARISON: 'comparison',  // Tier/pattern comparison table
-  CHART_HINT: 'chart_hint',  // Suggest looking at specific chart
-  QUIZ: 'quiz',              // Knowledge check
-  AFFIRMATION: 'affirmation',// Affirmation + audio option
-  CRYSTAL: 'crystal',        // Crystal recommendation card
-  UPGRADE_CTA: 'upgrade_cta',// Upgrade suggestion card
-};
-
-5.2 Example: Checklist Response
-
-{
-  type: 'checklist',
-  title: 'Bai tap Chi Tien Trong Hanh Phuc',
-  items: [
-    { step: 1, text: 'Moi khi chi tien, dung lai 3 giay', done: false },
-    { step: 2, text: 'Noi tham: "Toi vui ve chia se..."', done: false },
-    { step: 3, text: 'Hinh dung tien quay lai gap 10 lan', done: false },
-    { step: 4, text: 'Cam on nguoi nhan', done: false },
-  ],
-  duration: '21 ngay',
-  crystal: 'Thach Anh Vang',
-  saveToVisionBoard: true,
-}
-
-5.3 UI Components Needed:
-- ChecklistResponseCard.js
-- ComparisonTableCard.js
-- QuizCard.js
-- ChartHintCard.js
-
---------------------------------------------------------------------------------
-PHASE 6: ANALYTICS & CONTINUOUS LEARNING (Priority: LOW)
---------------------------------------------------------------------------------
-
-6.1 Query Analytics Table:
-
-CREATE TABLE chatbot_analytics (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id),
-  query TEXT NOT NULL,
-  matched_faq TEXT,
-  confidence DECIMAL(3,2),
-  response_source TEXT,       -- 'faq', 'gemini_api', 'fallback'
-  user_feedback TEXT,         -- 'thumbs_up', 'thumbs_down', null
-  response_time_ms INTEGER,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-6.2 Weekly Analysis:
-- Queries with low confidence (< 0.6) -> Review for FAQ addition
-- Queries with thumbs_down -> Improve response quality
-- Popular topics -> Expand knowledge base
-- Failed queries -> Add to FAQ or improve intent detection
-
-6.3 Knowledge Base Auto-Improvement:
-
-// Weekly job
-const analyzeUnmatchedQueries = async () => {
-  const unmatchedQueries = await getQueriesWithLowConfidence(7); // Last 7 days
-
-  // Cluster similar queries
-  const clusters = clusterSimilarQueries(unmatchedQueries);
-
-  // Generate suggestions for new FAQ entries
-  const suggestions = clusters.map(cluster => ({
-    suggestedKeywords: extractKeywords(cluster),
-    sampleQueries: cluster.slice(0, 5),
-    suggestedAnswer: generateAnswerSuggestion(cluster),
-  }));
-
-  return suggestions; // For admin review
-};
-
-================================================================================
-DESIGN TOKENS (tokens.js)
-================================================================================
-
-Colors
-
-COLORS = {
-  // Brand
-  burgundy: '#9C0612',
-  gold: '#FFBD59', goldBright: '#FFD700',
-
-  // Background
-  bgDarkest: '#05040B', bgMid: '#0F1030', bgLight: '#1a0b2e',
-
-  // Accent
-  purple: '#6A5BFF', purpleGlow: '#8C64FF',
-  cyan: '#00F0FF',
-
-  // Functional
-  success: '#3AF7A6', error: '#FF6B6B', warning: '#FFB800', info: '#3B82F6',
-
-  // Text
-  textPrimary: '#FFFFFF',
-  textSecondary: 'rgba(255, 255, 255, 0.8)',
-  textMuted: 'rgba(255, 255, 255, 0.6)',
-
-  // Glass
-  glassBg: 'rgba(15, 16, 48, 0.55)',
-}
-
-Gradients
-
-GRADIENTS = {
-  background: ['#05040B', '#0F1030', '#1a0b2e'],
-  primaryButton: ['#9C0612', '#6B0F1A'],
-  glassBorder: ['#6A5BFF', '#00F0FF'],
-  toggleActive: ['#3AF7A6', '#00F0FF'],
-  gold: ['#FFBD59', '#FFD700'],
-}
-
-Glass Card Style
-
-GLASS = {
-  background: 'rgba(15, 16, 48, 0.55)',
-  blur: 18,
-  borderWidth: 1.2,
-  borderRadius: 18,
-  borderStart: '#6A5BFF', borderEnd: '#00F0FF',
-  shadowColor: 'rgba(0, 0, 0, 0.7)',
-  glowColor: '#8C64FF', glowOpacity: 0.22,
-  padding: 20,
-}
-
-Typography
-
-TYPOGRAPHY = {
-  fontSize: {
-    xs: 10, sm: 11, md: 12, base: 13, lg: 14,
-    xl: 15, xxl: 16, xxxl: 18, display: 20, hero: 32, giant: 42
-  },
-  fontWeight: {
-    regular: '400', medium: '500', semibold: '600', bold: '700'
-  }
-}
-
-Spacing
-
-SPACING = {
-  xxs: 2, xs: 4, sm: 8, md: 12, lg: 16, xl: 18, xxl: 20, xxxl: 24
-}
-
-Button
-
-BUTTON = {
-  primary: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#FFBD59' }
-}
-
-Burn Ritual Colors
-
-FLAME_COLORS = {
-  core: '#FFFFFF',
-  inner: '#FFC940',
-  outer: '#FF9330',
-  tip: '#FF6B6B',
-  mystical: '#A45CFF'
-}
-PAPER_COLOR = '#FCE2BF'
+Auto-save Daily Summary:
+- After any toggle (action/habit/affirmation/ritual)
+- Context calls getFullStats() which auto-saves daily summary
 
 ================================================================================
 AI SU PHU (AI TRADING MENTOR) - COMPLETE FEATURE SPEC
@@ -617,16 +573,6 @@ gem-mobile/src/components/Trading/
 
 gem-mobile/src/hooks/
 └── useAITradeAnalysis.js     # Hook for AI trade analysis
-
-gem-mobile/src/screens/Karma/
-├── index.js
-└── KarmaDashboardScreen.js   # Main karma dashboard
-
-gem-mobile/src/screens/ShadowMode/
-├── index.js
-├── ShadowModeScreen.js       # Shadow mode dashboard
-├── ConnectBinanceScreen.js   # Connect Binance API
-└── ShadowReportScreen.js     # View shadow reports
 
 AI Moods (gemMasterAIService.js)
 
@@ -746,64 +692,92 @@ Inactivity:
 - inactive_14_days: -50
 - streak_break: -20
 
-KarmaDashboard Features
-
-1. Karma Progress Bar - Animated voi level gradient
-2. Next Level Info - Con bao nhieu Karma
-3. Stats Grid (2x2):
-   - Tong tich luy
-   - Da mat
-   - Chuoi ky luat
-   - Ky luc
-4. Benefits Section - Quyen loi cap bac
-5. Recent History - 5 hoat dong gan day
-6. Leaderboard - Top 5 karma
-
-================================================================================
-SHADOW MODE - COMPLETE FEATURE SPEC
-Implemented: December 15, 2025
-================================================================================
-
-Purpose: So sanh Paper Trade vs Real Trade de phat hien van de tam ly
-
-Features
-
-1. Connect Binance API (READ-ONLY only!)
-   - Ma hoa API keys voi AES
-   - Chi cho phep Enable Reading
-   - Khong the trade/withdraw
-
-2. Sync Trades
-   - Dong bo giao dich thuc tu Binance
-   - So sanh voi Paper Trade trong cung ky
-
-3. Comparison Stats (30 ngay)
-   - PnL gap %
-   - Win rate gap %
-   - So lenh
-
-4. AI Analysis
-   - Phat hien van de (FOMO thuc > paper, v.v.)
-   - Khuyen nghi cai thien
-   - Karma adjustment dua tren gap
-
-5. Shadow Reports (Weekly/Monthly)
-   - Bao cao chi tiet
-   - Issues voi severity levels
-   - AI recommendations
-
-Security Notes
-
-- CHI CHAP NHAN API READ-ONLY
-- API keys duoc ma hoa
-- Khong luu credentials tho
-- User co the disconnect bat cu luc nao
-
 ================================================================================
 DATABASE TABLES (Supabase)
 ================================================================================
 
-AI Master System (20251215_ai_master_system.sql)
+Vision Board Tables (20251210_vision_board_complete.sql)
+
+vision_goals:
+  - id, user_id, title, description
+  - life_area (finance/career/health/relationships/personal/spiritual)
+  - target_date, progress_percent, status
+  - priority, is_public
+
+vision_actions:
+  - id, user_id, goal_id, title
+  - due_date, is_completed, completed_at
+  - priority
+
+vision_affirmations:
+  - id, user_id, content
+  - frequency, times_per_day
+  - life_area, is_active
+
+vision_affirmation_logs:
+  - id, affirmation_id, user_id, completed_at
+
+vision_habits:
+  - id, user_id, name
+  - frequency, life_area
+  - current_streak, best_streak
+
+vision_habit_logs:
+  - id, habit_id, user_id, log_date
+
+vision_ritual_completions:
+  - id, user_id, ritual_slug
+  - content, completed_at
+
+vision_daily_summary:
+  - id, user_id, summary_date
+  - daily_score (0-100)
+  - actions_completed, actions_total
+  - affirmations_completed, habits_completed
+  - ritual_completed, xp_earned
+  - UNIQUE(user_id, summary_date) - Note: needs constraint
+
+vision_user_stats:
+  - user_id, total_xp
+  - current_streak, best_streak
+  - goals_created, goals_completed
+
+Quota System Tables
+
+chatbot_quota:
+  - user_id, date, queries_used
+  - UNIQUE(user_id, date)
+
+scanner_quota:
+  - user_id, date, scans_used
+  - UNIQUE(user_id, date)
+
+RPC Functions:
+- check_all_quotas(p_user_id) - Returns all quota info with Manager bypass
+- increment_chatbot_quota(p_user_id) - Increment chatbot usage
+- increment_scanner_quota(p_user_id) - Increment scanner usage
+- get_weekly_progress(p_user_id, p_days) - Get weekly progress data
+
+Karma System Tables (20251215_karma_system.sql)
+
+user_karma:
+  - user_id, karma_points (0-9999), karma_level
+  - total_earned, total_lost
+  - current_discipline_streak, best_discipline_streak
+  - trades_today, daily_trade_limit
+  - is_frozen, frozen_until
+
+karma_history:
+  - user_id, change_amount, new_total
+  - action_type, action_detail
+  - related_trade_id
+
+karma_levels:
+  - id, name_vi, name_en
+  - min_karma, max_karma
+  - benefits (JSONB), restrictions (JSONB)
+
+AI Master System Tables (20251215_ai_master_system.sql)
 
 ai_master_interactions:
   - id, user_id, scenario_type, trade_id
@@ -811,45 +785,12 @@ ai_master_interactions:
   - ai_message, ai_mood
   - user_action, karma_change
 
-ai_master_config:
-  - id (PK), scenario_category
-  - message_template, mood
-  - karma_impact, block_trade
-  - block_duration_minutes, require_unlock
-
 user_trade_blocks:
   - user_id, block_reason
   - blocked_at, blocked_until
   - unlock_method, is_active
 
-Karma System (20251215_karma_system.sql)
-
-user_karma:
-  - user_id, karma_points (0-9999), karma_level
-  - total_earned, total_lost
-  - highest_karma, lowest_karma
-  - current_discipline_streak, best_discipline_streak
-  - karma_earned_today, karma_lost_today
-  - trades_today, daily_trade_limit
-  - is_frozen, frozen_until
-
-karma_history:
-  - user_id, change_amount, new_total
-  - action_type, action_detail
-  - related_trade_id, level_changed
-
-karma_levels:
-  - id (novice/student/warrior/master/guardian)
-  - name_vi, name_en, min_karma, max_karma
-  - benefits (JSONB), restrictions (JSONB)
-  - icon, color
-
-karma_actions:
-  - id, category, name_vi
-  - karma_change, is_positive
-  - conditions (JSONB), daily_limit
-
-Shadow Mode (20251215_shadow_mode.sql)
+Shadow Mode Tables (20251215_shadow_mode.sql)
 
 user_exchange_connections:
   - user_id, exchange
@@ -867,36 +808,78 @@ shadow_reports:
   - period_start, period_end
   - paper vs real stats
   - pnl_gap_percent, win_rate_gap
-  - ai_analysis, ai_issues, ai_recommendations
+  - ai_analysis, ai_recommendations
 
-Quota System (20260123_scanner_pro_premium_unlimited.sql)
+================================================================================
+DESIGN TOKENS (tokens.js)
+================================================================================
 
-chatbot_quota:
-  - user_id, date, queries_used
+Colors
 
-scanner_quota:
-  - user_id, date, scans_used
+COLORS = {
+  // Brand
+  burgundy: '#9C0612',
+  gold: '#FFBD59', goldBright: '#FFD700',
 
-RPC Functions:
-- check_all_quotas(p_user_id) - Returns all quota info
-- increment_chatbot_quota(p_user_id) - Increment chatbot usage
-- increment_scanner_quota(p_user_id) - Increment scanner usage
-- get_karma_level(p_points)
-- update_user_karma(p_user_id, p_change, p_action_type, ...)
-- get_user_karma_full(p_user_id)
-- is_user_trade_blocked(p_user_id)
+  // Background
+  bgDarkest: '#05040B', bgMid: '#0F1030', bgLight: '#1a0b2e',
 
-Future Tables (for AI Optimization):
+  // Accent
+  purple: '#6A5BFF', purpleGlow: '#8C64FF',
+  cyan: '#00F0FF',
 
-user_ai_insights:
-  - user_id, insight_type, content, confidence
-  - source_message_id, created_at
-  - last_referenced_at, reference_count
+  // Functional
+  success: '#3AF7A6', error: '#FF6B6B', warning: '#FFB800', info: '#3B82F6',
 
-chatbot_analytics:
-  - user_id, query, matched_faq, confidence
-  - response_source, user_feedback
-  - response_time_ms, created_at
+  // Text
+  textPrimary: '#FFFFFF',
+  textSecondary: 'rgba(255, 255, 255, 0.8)',
+  textMuted: 'rgba(255, 255, 255, 0.6)',
+
+  // Glass
+  glassBg: 'rgba(15, 16, 48, 0.55)',
+}
+
+Gradients
+
+GRADIENTS = {
+  background: ['#05040B', '#0F1030', '#1a0b2e'],
+  primaryButton: ['#9C0612', '#6B0F1A'],
+  glassBorder: ['#6A5BFF', '#00F0FF'],
+  toggleActive: ['#3AF7A6', '#00F0FF'],
+  gold: ['#FFBD59', '#FFD700'],
+}
+
+Glass Card Style
+
+GLASS = {
+  background: 'rgba(15, 16, 48, 0.55)',
+  blur: 18,
+  borderWidth: 1.2,
+  borderRadius: 18,
+  borderStart: '#6A5BFF', borderEnd: '#00F0FF',
+  shadowColor: 'rgba(0, 0, 0, 0.7)',
+  glowColor: '#8C64FF', glowOpacity: 0.22,
+  padding: 20,
+}
+
+Typography
+
+TYPOGRAPHY = {
+  fontSize: {
+    xs: 10, sm: 11, md: 12, base: 13, lg: 14,
+    xl: 15, xxl: 16, xxxl: 18, display: 20, hero: 32, giant: 42
+  },
+  fontWeight: {
+    regular: '400', medium: '500', semibold: '600', bold: '700'
+  }
+}
+
+Spacing
+
+SPACING = {
+  xxs: 2, xs: 4, sm: 8, md: 12, lg: 16, xl: 18, xxl: 20, xxxl: 24
+}
 
 ================================================================================
 NAVIGATION (AccountStack.js)
@@ -919,23 +902,41 @@ Karma & Shadow Mode screens:
 <Stack.Screen name="ShadowReport" component={ShadowReportScreen} />
 
 ================================================================================
-IMPLEMENTATION PRIORITY MATRIX
+TROUBLESHOOTING
 ================================================================================
 
-| Phase | Feature                    | Effort | Impact | Priority |
-|-------|----------------------------|--------|--------|----------|
-| 1.1   | User Context Profile       | Medium | High   | P0       |
-| 1.2   | Tier-Aware Responses       | Low    | High   | P0       |
-| 2.1   | Intent Categories          | Medium | High   | P1       |
-| 2.2   | Dynamic Tone Adjustment    | Low    | Medium | P1       |
-| 3.1   | user_ai_insights Table     | Medium | High   | P1       |
-| 3.2   | Insight Extraction         | High   | High   | P2       |
-| 4.1   | Smart Triggers             | Medium | Medium | P2       |
-| 4.2   | Trigger Evaluation Service | Medium | Medium | P2       |
-| 5.1   | Rich Response Types        | High   | Medium | P3       |
-| 5.2   | UI Components              | High   | Medium | P3       |
-| 6.1   | chatbot_analytics Table    | Low    | Medium | P3       |
-| 6.2   | Weekly Analysis Job        | Medium | Low    | P3       |
+Weekly Progress Chart Shows 0%:
+1. Check vision_daily_summary table has data
+2. Ensure saveDailySummary is called (auto in getFullStats)
+3. Check statsService.getWeeklyProgress returns correct data
+4. Verify data format: { day_name, total_score, xp_earned }
+
+Manager Still Has Quota Limits:
+1. Run supabase/RUN_THIS_fix_manager_quota_FINAL.sql
+2. Check profile.role = 'manager' in database
+3. Clear quota cache: QuotaService.clearCache()
+4. Logout and login again
+
+Chatbot Not Responding:
+1. Check EXPO_PUBLIC_GEMINI_API_KEY in environment
+2. Verify quota not exceeded (FREE = 5/day)
+3. Check network connectivity
+4. Review console for API errors
+
+================================================================================
+CHANGELOG
+================================================================================
+
+| Date       | Version | Changes                                          |
+|------------|---------|--------------------------------------------------|
+| 2026-01-28 | 2.1.0   | Added Manager role bypass documentation          |
+|            |         | Added Weekly Progress Chart fix details          |
+|            |         | Added statsService auto-save functionality       |
+|            |         | Added full System Prompt documentation           |
+|            |         | Added Troubleshooting section                    |
+| 2026-01-24 | 2.0.0   | Major update with AI optimization roadmap        |
+| 2025-12-15 | 1.5.0   | Added AI Su Phu, Karma System, Shadow Mode       |
+| 2025-12-10 | 1.0.0   | Initial Vision Board 2.0 + GemMaster spec        |
 
 ================================================================================
 END OF DOCUMENT

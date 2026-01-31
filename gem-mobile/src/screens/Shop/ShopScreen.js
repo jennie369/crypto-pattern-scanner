@@ -48,6 +48,7 @@ import RecentlyViewedSection from '../../components/shop/RecentlyViewedSection';
 import ShopOnboarding from '../../components/shop/ShopOnboarding';
 import { getWishlistCount } from '../../services/wishlistService';
 import shopOnboardingService from '../../services/shopOnboardingService';
+import shopBannerService from '../../services/shopBannerService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.md * 3) / 2;
@@ -62,6 +63,7 @@ const shopCache = {
   allProducts: null,
   sectionsData: null,
   exploreProducts: null,
+  sectionBanners: null, // Cache for section banners (manifest sections)
   lastFetch: 0,
   CACHE_DURATION: 60000, // 60 seconds cache for shop data
 };
@@ -91,6 +93,10 @@ const ShopScreen = ({ navigation }) => {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [showPromoBar, setShowPromoBar] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Section banners state (for hero banners in manifest sections)
+  // Initialize from cache for instant display
+  const [sectionBanners, setSectionBanners] = useState(() => shopCache.sectionBanners || {});
 
   // Sections data từ Shopify tags - Initialize from cache
   const [sectionsData, setSectionsData] = useState(() => shopCache.sectionsData || {});
@@ -175,6 +181,24 @@ const ShopScreen = ({ navigation }) => {
     const now = Date.now();
     const cacheExpired = now - shopCache.lastFetch > shopCache.CACHE_DURATION;
 
+    // Prefetch section banners immediately (non-blocking) for instant display
+    // This runs in parallel with product loading
+    if (!shopCache.sectionBanners) {
+      shopBannerService.getAllSectionBanners().then(result => {
+        if (result.success && result.data) {
+          const bannersMap = {};
+          result.data.forEach(banner => {
+            if (banner.is_active) {
+              bannersMap[banner.section_id] = banner;
+            }
+          });
+          setSectionBanners(bannersMap);
+          shopCache.sectionBanners = bannersMap;
+          console.log('[ShopScreen] Section banners prefetched:', Object.keys(bannersMap));
+        }
+      });
+    }
+
     // Check if service-level cache has data (from preload)
     const serviceHasCache = shopifyService._productsCache && shopifyService._productsCache.length > 0;
 
@@ -235,11 +259,25 @@ const ShopScreen = ({ navigation }) => {
         .filter(Boolean);
       prefetchImages(imageUrls);
 
-      // Load sections and explore in parallel
-      const [newSectionsData] = await Promise.all([
+      // Load sections, explore, and section banners in parallel
+      const [newSectionsData, , sectionBannersResult] = await Promise.all([
         loadSections(productsData),
         loadExploreProducts(productsData, true),
+        shopBannerService.getAllSectionBanners(),
       ]);
+
+      // Process section banners into a map by section_id
+      if (sectionBannersResult.success && sectionBannersResult.data) {
+        const bannersMap = {};
+        sectionBannersResult.data.forEach(banner => {
+          if (banner.is_active) {
+            bannersMap[banner.section_id] = banner;
+          }
+        });
+        setSectionBanners(bannersMap);
+        shopCache.sectionBanners = bannersMap; // Cache for instant display
+        console.log('[ShopScreen] Section banners loaded:', Object.keys(bannersMap));
+      }
 
       // Update cache
       shopCache.sectionsData = newSectionsData;
@@ -254,9 +292,30 @@ const ShopScreen = ({ navigation }) => {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Load tất cả sản phẩm
-      const productsData = await shopifyService.getProducts({ limit: 100 });
+      // Load tất cả sản phẩm và section banners in parallel
+      const [productsData, sectionBannersResult] = await Promise.all([
+        shopifyService.getProducts({ limit: 100 }),
+        shopBannerService.getAllSectionBanners(),
+      ]);
+
       setAllProducts(productsData);
+
+      // Process section banners into a map by section_id
+      if (sectionBannersResult.success && sectionBannersResult.data) {
+        const bannersMap = {};
+        console.log('[ShopScreen] Raw section banners from DB:', sectionBannersResult.data.length);
+        sectionBannersResult.data.forEach(banner => {
+          console.log(`[ShopScreen] Banner: ${banner.section_id}, active: ${banner.is_active}, image: ${banner.image_url ? 'yes' : 'no'}`);
+          if (banner.is_active) {
+            bannersMap[banner.section_id] = banner;
+          }
+        });
+        setSectionBanners(bannersMap);
+        shopCache.sectionBanners = bannersMap; // Cache for instant display
+        console.log('[ShopScreen] Active section banners:', Object.keys(bannersMap));
+      } else {
+        console.log('[ShopScreen] Failed to load section banners:', sectionBannersResult.error);
+      }
 
       // Update cache immediately for products
       shopCache.allProducts = productsData;
@@ -425,6 +484,14 @@ const ShopScreen = ({ navigation }) => {
     const data = sectionsData[sectionConfig.id];
     const isLoading = sectionsLoading[sectionConfig.id];
 
+    // Get hero banner for this section if configured
+    const heroBanner = sectionConfig.showHeroBanner ? sectionBanners[sectionConfig.id] : null;
+
+    // Debug logging for manifest sections
+    if (sectionConfig.showHeroBanner) {
+      console.log(`[ShopScreen] Section ${sectionConfig.id}: showHeroBanner=${sectionConfig.showHeroBanner}, heroBanner=${heroBanner ? `{image: ${heroBanner.image_url ? 'yes' : 'no'}, active: ${heroBanner.is_active}}` : 'null'}`);
+    }
+
     // Special handling for "courses" section
     // CourseSection handles its own data loading and navigation
     if (sectionConfig.type === 'courses') {
@@ -434,6 +501,7 @@ const ShopScreen = ({ navigation }) => {
           title={sectionConfig.title}
           subtitle={sectionConfig.subtitle}
           limit={sectionConfig.limit}
+          heroBanner={heroBanner}
         />
       );
     }
@@ -459,7 +527,7 @@ const ShopScreen = ({ navigation }) => {
       );
     }
 
-    // Normal sections
+    // Normal sections - with hero banner support
     return (
       <ProductSection
         key={sectionConfig.id}
@@ -471,6 +539,7 @@ const ShopScreen = ({ navigation }) => {
         showViewAll={sectionConfig.showViewAll}
         onViewAll={() => handleViewAll(sectionConfig)}
         onProductPress={handleProductPress}
+        heroBanner={heroBanner}
       />
     );
   };

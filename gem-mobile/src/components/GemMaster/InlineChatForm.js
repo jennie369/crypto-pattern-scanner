@@ -895,7 +895,7 @@ const InlineChatForm = ({
         content: {
           affirmations: selectedAffirmations,
           lifeArea: selectedArea,
-          linked_goal_id: linkedGoalId,
+          linked_goal_id: linkedGoalId, // Stored in content for GoalDetailScreen query
         },
         is_active: true,
       };
@@ -948,21 +948,57 @@ const InlineChatForm = ({
               frequency: 'monthly',
             })),
           lifeArea: selectedArea,
-          linked_goal_id: linkedGoalId,
+          linked_goal_id: linkedGoalId, // Stored in content for GoalDetailScreen query
         },
         is_active: true,
       };
 
       // Insert affirmation and action plan
-      const { error: affError } = await supabase
-        .from('vision_board_widgets')
-        .insert(affirmationWidget);
-      if (affError) console.warn('[InlineChatForm] Affirmation insert error:', affError);
+      console.log('[InlineChatForm] Inserting affirmation widget with linked_goal_id:', linkedGoalId);
+      console.log('[InlineChatForm] Affirmation content:', JSON.stringify(affirmationWidget.content));
 
-      const { error: actionError } = await supabase
+      const { data: affData, error: affError } = await supabase
         .from('vision_board_widgets')
-        .insert(actionPlanWidget);
-      if (actionError) console.warn('[InlineChatForm] Action plan insert error:', actionError);
+        .insert(affirmationWidget)
+        .select()
+        .single();
+
+      if (affError) {
+        console.error('[InlineChatForm] Affirmation insert error:', affError);
+      } else {
+        console.log('[InlineChatForm] Affirmation created with id:', affData?.id, 'linked_goal_id in content:', affData?.content?.linked_goal_id);
+      }
+
+      console.log('[InlineChatForm] Inserting action_plan widget with linked_goal_id:', linkedGoalId);
+      console.log('[InlineChatForm] Action plan content:', JSON.stringify(actionPlanWidget.content));
+
+      const { data: actionData, error: actionError } = await supabase
+        .from('vision_board_widgets')
+        .insert(actionPlanWidget)
+        .select()
+        .single();
+
+      if (actionError) {
+        console.error('[InlineChatForm] Action plan insert error:', actionError);
+      } else {
+        console.log('[InlineChatForm] Action plan created with id:', actionData?.id, 'linked_goal_id in content:', actionData?.content?.linked_goal_id);
+      }
+
+      // VERIFY: Query database to confirm widgets were created with correct linked_goal_id
+      const { data: verifyWidgets } = await supabase
+        .from('vision_board_widgets')
+        .select('id, type, content')
+        .eq('user_id', user.id)
+        .in('type', ['affirmation', 'action_plan'])
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      console.log('[InlineChatForm] VERIFICATION - Recent affirmation/action_plan widgets:');
+      (verifyWidgets || []).forEach(w => {
+        const content = typeof w.content === 'string' ? JSON.parse(w.content) : w.content;
+        console.log(`  - Widget ${w.id}: type=${w.type}, linked_goal_id=${content?.linked_goal_id}, goalId=${content?.goalId}`);
+      });
+      console.log('[InlineChatForm] Expected linkedGoalId:', linkedGoalId);
 
       setShowSuccess(true);
 

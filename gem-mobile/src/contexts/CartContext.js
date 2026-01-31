@@ -95,17 +95,18 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Save cart - Local + Cloud sync
+  // Save cart - Local storage (fast) + Background cloud sync
   const saveCartToStorage = async (newItems, newCartId = null) => {
     try {
+      // Local storage first (fast) - await this for data safety
       await AsyncStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newItems));
       if (newCartId) {
         await AsyncStorage.setItem(CART_ID_KEY, newCartId);
       }
 
-      // Sync to Supabase if logged in
+      // Cloud sync in background (don't await) - fire and forget
       if (user?.id) {
-        await supabase
+        supabase
           .from('user_cart_sync')
           .upsert({
             user_id: user.id,
@@ -116,16 +117,17 @@ export const CartProvider = ({ children }) => {
             updated_at: new Date().toISOString(),
           }, {
             onConflict: 'user_id',
-          });
+          })
+          .then(() => console.log('[Cart] Cloud sync completed'))
+          .catch(err => console.warn('[Cart] Cloud sync failed:', err));
       }
     } catch (err) {
       console.error('[Cart] Error saving to storage:', err);
     }
   };
 
-  // Add item to cart
+  // Add item to cart - OPTIMIZED for instant UI response
   const addItem = useCallback(async (product, variant = null, quantity = 1) => {
-    setLoading(true);
     setError(null);
 
     try {
@@ -165,35 +167,42 @@ export const CartProvider = ({ children }) => {
         newItems = [...items, newItem];
       }
 
+      // OPTIMISTIC UPDATE: Update UI immediately
       setItems(newItems);
-      await saveCartToStorage(newItems, cartId);
 
-      // Sync with Shopify if we have a cart
-      if (cartId) {
+      // Return success IMMEDIATELY for instant UI feedback
+      const result = { success: true };
+
+      // Background operations (don't block UI)
+      // Use setTimeout to push to next tick, ensuring UI updates first
+      setTimeout(async () => {
         try {
-          const updatedCart = await shopifyService.addToCart(cartId, [
-            { merchandiseId: variantId, quantity }
-          ]);
-          setCart(updatedCart);
-        } catch (syncError) {
-          console.warn('[Cart] Shopify sync failed:', syncError);
-        }
-      }
+          // Save to local storage + cloud sync (background)
+          await saveCartToStorage(newItems, cartId);
 
-      return { success: true };
+          // Sync with Shopify if we have a cart (background)
+          if (cartId) {
+            shopifyService.addToCart(cartId, [
+              { merchandiseId: variantId, quantity }
+            ])
+              .then(updatedCart => setCart(updatedCart))
+              .catch(err => console.warn('[Cart] Shopify sync failed:', err));
+          }
+        } catch (bgError) {
+          console.warn('[Cart] Background sync error:', bgError);
+        }
+      }, 0);
+
+      return result;
     } catch (err) {
       console.error('[Cart] addItem error:', err);
       setError(err.message);
       return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
     }
   }, [items, cartId]);
 
-  // Update item quantity
+  // Update item quantity - OPTIMIZED for instant UI response
   const updateQuantity = useCallback(async (variantId, quantity) => {
-    setLoading(true);
-
     try {
       if (quantity <= 0) {
         return removeItem(variantId);
@@ -205,36 +214,44 @@ export const CartProvider = ({ children }) => {
           : item
       );
 
+      // OPTIMISTIC UPDATE: Update UI immediately
       setItems(newItems);
-      await saveCartToStorage(newItems, cartId);
+
+      // Background sync (don't block UI)
+      setTimeout(() => {
+        saveCartToStorage(newItems, cartId).catch(err =>
+          console.warn('[Cart] Background save error:', err)
+        );
+      }, 0);
 
       return { success: true };
     } catch (err) {
       console.error('[Cart] updateQuantity error:', err);
       setError(err.message);
       return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
     }
   }, [items, cartId]);
 
-  // Remove item from cart
+  // Remove item from cart - OPTIMIZED for instant UI response
   const removeItem = useCallback(async (variantId) => {
-    setLoading(true);
-
     try {
       const newItems = items.filter(item => item.variantId !== variantId);
 
+      // OPTIMISTIC UPDATE: Update UI immediately
       setItems(newItems);
-      await saveCartToStorage(newItems, cartId);
+
+      // Background sync (don't block UI)
+      setTimeout(() => {
+        saveCartToStorage(newItems, cartId).catch(err =>
+          console.warn('[Cart] Background save error:', err)
+        );
+      }, 0);
 
       return { success: true };
     } catch (err) {
       console.error('[Cart] removeItem error:', err);
       setError(err.message);
       return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
     }
   }, [items, cartId]);
 

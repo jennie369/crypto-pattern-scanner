@@ -39,6 +39,7 @@ export default function TabNavigator() {
       screenOptions={{
         headerShown: false,
       }}
+      backBehavior="history"
     >
       {/* TAB 1: HOME (Forum) */}
       <Tab.Screen name="Home" component={HomeStack} />

@@ -154,10 +154,9 @@ export const useComments = (postId) => {
         content: content.trim(),
       };
 
-      // If replying
+      // If replying (only pass parent_id, reply_to_user_id doesn't exist in DB)
       if (replyTo) {
         commentData.parent_id = replyTo.commentId;
-        commentData.reply_to_user_id = replyTo.userId;
       }
 
       console.log('[useComments] Creating comment:', commentData);
@@ -240,7 +239,7 @@ export const useComments = (postId) => {
     setReplyTo({
       commentId: comment.parent_id || comment.id, // Reply to root if nested
       userId: comment.user_id,
-      userName: comment.author_name || 'Nguoi dung',
+      authorName: comment.author_name || comment.author?.full_name || comment.author?.display_name || 'Người dùng',
     });
   }, []);
 

@@ -40,6 +40,7 @@ import {
   validateZoneWidth,
   calculateATR,
   extractPauseCandles,
+  calculateSmartTP,
 } from './zoneCalculator';
 
 // Enhancement utilities (TIER2/3 features)
@@ -1520,7 +1521,26 @@ class PatternDetectionService {
     const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL
     const stopLoss = Math.max(top1.price, top2.price) * (1 + slPercent);
     const patternHeight = top1.price - trough.price;
-    const target = entry - patternHeight; // Target based on pattern height (naturally scales)
+
+    // SMART TP: Use ATR capping + swing targets instead of raw pattern height
+    const smartTP = calculateSmartTP({
+      entry,
+      stopLoss,
+      direction: 'SHORT',
+      candles,
+      minRR: 2.0,
+      maxATRMultiple: 3.5,
+      patternHeight,
+    });
+
+    // Use smart TP if valid, otherwise fallback to capped pattern height
+    const target = smartTP.isValid
+      ? smartTP.price
+      : entry - Math.min(patternHeight, calculateATR(candles, 14) * 3);
+
+    const risk = stopLoss - entry;
+    const reward = entry - target;
+    const riskReward = risk > 0 ? (reward / risk).toFixed(1) : '2.0';
 
     // ⚠️ FIX: Extract timestamps for zone positioning
     const top1Time = top1.timestamp > 9999999999 ? Math.floor(top1.timestamp / 1000) : top1.timestamp;
@@ -1540,11 +1560,17 @@ class PatternDetectionService {
       entry,
       stopLoss,
       target,
-      riskReward: (patternHeight / (stopLoss - entry)).toFixed(1),
+      riskReward,
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
       points: { top1, top2, trough },
+      // Smart TP metadata
+      smartTP: smartTP.isValid ? {
+        method: smartTP.method,
+        reasoning: smartTP.reasoning,
+        atr: smartTP.atr,
+      } : null,
       // ⚠️ FIX: Explicit zone data for zone rendering
       // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
       zoneHigh: stopLoss,
@@ -1606,7 +1632,26 @@ class PatternDetectionService {
     const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL
     const stopLoss = Math.min(bottom1.price, bottom2.price) * (1 - slPercent);
     const patternHeight = peak.price - bottom1.price;
-    const target = entry + patternHeight; // Target based on pattern height (naturally scales)
+
+    // SMART TP: Use ATR capping + swing targets instead of raw pattern height
+    const smartTP = calculateSmartTP({
+      entry,
+      stopLoss,
+      direction: 'LONG',
+      candles,
+      minRR: 2.0,
+      maxATRMultiple: 3.5,
+      patternHeight, // Consider pattern height but cap it
+    });
+
+    // Use smart TP if valid, otherwise fallback to capped pattern height
+    const target = smartTP.isValid
+      ? smartTP.price
+      : entry + Math.min(patternHeight, calculateATR(candles, 14) * 3);
+
+    const risk = entry - stopLoss;
+    const reward = target - entry;
+    const riskReward = risk > 0 ? (reward / risk).toFixed(1) : '2.0';
 
     // ⚠️ FIX: Extract timestamps for zone positioning
     const bottom1Time = bottom1.timestamp > 9999999999 ? Math.floor(bottom1.timestamp / 1000) : bottom1.timestamp;
@@ -1626,11 +1671,17 @@ class PatternDetectionService {
       entry,
       stopLoss,
       target,
-      riskReward: (patternHeight / (entry - stopLoss)).toFixed(1),
+      riskReward,
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
       points: { bottom1, bottom2, peak },
+      // Smart TP metadata
+      smartTP: smartTP.isValid ? {
+        method: smartTP.method,
+        reasoning: smartTP.reasoning,
+        atr: smartTP.atr,
+      } : null,
       // ⚠️ FIX: Explicit zone data for zone rendering
       // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
       zoneHigh: entry,
@@ -1680,6 +1731,26 @@ class PatternDetectionService {
       const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL below head
       const entry = neckline * (1 + entryBuffer);
       const stopLoss = head.price * (1 - slPercent);
+      const patternHeight = neckline - head.price;
+
+      // SMART TP: Use ATR capping + swing targets
+      const smartTP = calculateSmartTP({
+        entry,
+        stopLoss,
+        direction: 'LONG',
+        candles,
+        minRR: 2.0,
+        maxATRMultiple: 3.5,
+        patternHeight,
+      });
+
+      const target = smartTP.isValid
+        ? smartTP.price
+        : entry + Math.min(patternHeight, calculateATR(candles, 14) * 3);
+
+      const risk = entry - stopLoss;
+      const reward = target - entry;
+      const riskReward = risk > 0 ? parseFloat((reward / risk).toFixed(1)) : 2.4;
 
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const leftShoulderTime = leftShoulder.timestamp > 9999999999 ? Math.floor(leftShoulder.timestamp / 1000) : leftShoulder.timestamp;
@@ -1698,13 +1769,19 @@ class PatternDetectionService {
         description: signal.description,
         entry,
         stopLoss,
-        target: neckline + (neckline - head.price),
-        riskReward: 2.4,
+        target,
+        riskReward,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
         neckline,
         points: { leftShoulder, head, rightShoulder },
+        // Smart TP metadata
+        smartTP: smartTP.isValid ? {
+          method: smartTP.method,
+          reasoning: smartTP.reasoning,
+          atr: smartTP.atr,
+        } : null,
         // FIX: Explicit zone data for zone rendering
         // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
         zoneHigh: entry,
@@ -1947,10 +2024,27 @@ class PatternDetectionService {
       // TIMEFRAME-SCALED TP/SL
       const entryBuffer = this.scaleSL(0.01, timeframe); // 1% below current
       const slPercent = this.scaleSL(0.01, timeframe); // 1% above avg high
-      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base target
       const entry = currentPrice * (1 - entryBuffer);
       const stopLoss = avgHigh * (1 + slPercent);
-      const targetPrice = currentPrice * (1 - tpPercent);
+
+      // SMART TP: Use ATR capping + swing targets
+      const smartTP = calculateSmartTP({
+        entry,
+        stopLoss,
+        direction: 'SHORT',
+        candles,
+        minRR: 2.0,
+        maxATRMultiple: 3.5,
+      });
+
+      // Use smart TP if valid, otherwise fallback
+      const targetPrice = smartTP.isValid
+        ? smartTP.price
+        : entry - (calculateATR(candles, 14) * 2.5);
+
+      const risk = stopLoss - entry;
+      const reward = entry - targetPrice;
+      const riskReward = risk > 0 ? parseFloat((reward / risk).toFixed(1)) : 2.0;
 
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const firstHighTime = firstHigh.timestamp > 9999999999 ? Math.floor(firstHigh.timestamp / 1000) : firstHigh.timestamp;
@@ -1969,12 +2063,18 @@ class PatternDetectionService {
         entry,
         stopLoss,
         target: targetPrice,
-        riskReward: 2.3,
+        riskReward,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
         zone: { top: avgHigh * 1.005, bottom: avgHigh * 0.995, mid: avgHigh },
         points: { firstHigh, lastHigh, cluster: recentHighs },
+        // Smart TP metadata
+        smartTP: smartTP.isValid ? {
+          method: smartTP.method,
+          reasoning: smartTP.reasoning,
+          atr: smartTP.atr,
+        } : null,
         // FIX: Explicit zone data for zone rendering
         // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
         zoneHigh: stopLoss,
@@ -2014,10 +2114,27 @@ class PatternDetectionService {
       // TIMEFRAME-SCALED TP/SL
       const entryBuffer = this.scaleSL(0.01, timeframe); // 1% above current
       const slPercent = this.scaleSL(0.01, timeframe); // 1% below avg low
-      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base target
       const entry = currentPrice * (1 + entryBuffer);
       const stopLoss = avgLow * (1 - slPercent);
-      const targetPrice = currentPrice * (1 + tpPercent);
+
+      // SMART TP: Use ATR capping + swing targets
+      const smartTP = calculateSmartTP({
+        entry,
+        stopLoss,
+        direction: 'LONG',
+        candles,
+        minRR: 2.0,
+        maxATRMultiple: 3.5,
+      });
+
+      // Use smart TP if valid, otherwise fallback
+      const targetPrice = smartTP.isValid
+        ? smartTP.price
+        : entry + (calculateATR(candles, 14) * 2.5);
+
+      const risk = entry - stopLoss;
+      const reward = targetPrice - entry;
+      const riskReward = risk > 0 ? parseFloat((reward / risk).toFixed(1)) : 2.0;
 
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const firstLowTime = firstLow.timestamp > 9999999999 ? Math.floor(firstLow.timestamp / 1000) : firstLow.timestamp;
@@ -2036,12 +2153,18 @@ class PatternDetectionService {
         entry,
         stopLoss,
         target: targetPrice,
-        riskReward: 2.3,
+        riskReward,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
         zone: { top: avgLow * 1.005, bottom: avgLow * 0.995, mid: avgLow },
         points: { firstLow, lastLow, cluster: recentLows },
+        // Smart TP metadata
+        smartTP: smartTP.isValid ? {
+          method: smartTP.method,
+          reasoning: smartTP.reasoning,
+          atr: smartTP.atr,
+        } : null,
         // FIX: Explicit zone data for zone rendering
         // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
         zoneHigh: entry,

@@ -101,6 +101,7 @@ const TAB_OPTIONS = [
   { key: 'banners', label: 'Carousel', icon: Layers },
   { key: 'promos', label: 'Promo Bar', icon: Megaphone },
   { key: 'featured', label: 'Nổi Bật', icon: Star },
+  { key: 'sections', label: 'Sections', icon: Tag },
 ];
 
 // Initial featured product form state
@@ -177,6 +178,12 @@ export default function AdminShopBannersScreen({ navigation }) {
   const [featuredDeeplinkPickerVisible, setFeaturedDeeplinkPickerVisible] = useState(false);
   const [featuredUploading, setFeaturedUploading] = useState(false);
 
+  // Section Banner State
+  const [sectionBanners, setSectionBanners] = useState([]);
+  const [sectionModalVisible, setSectionModalVisible] = useState(false);
+  const [editingSection, setEditingSection] = useState(null);
+  const [sectionUploading, setSectionUploading] = useState(false);
+
   // Form state
   const [form, setForm] = useState(INITIAL_FORM);
 
@@ -207,6 +214,7 @@ export default function AdminShopBannersScreen({ navigation }) {
         promoStatsResult,
         featuredResult,
         featuredStatsResult,
+        sectionBannersResult,
       ] = await Promise.all([
         shopBannerService.getAllShopBanners(),
         shopBannerService.getBannerStats(),
@@ -214,6 +222,7 @@ export default function AdminShopBannersScreen({ navigation }) {
         shopBannerService.getPromoBarStats(),
         shopBannerService.getAllFeaturedProducts(),
         shopBannerService.getFeaturedProductStats(),
+        shopBannerService.getAllSectionBanners(),
       ]);
 
       if (bannersResult.success) {
@@ -238,6 +247,10 @@ export default function AdminShopBannersScreen({ navigation }) {
 
       if (featuredStatsResult.success) {
         setFeaturedStats(featuredStatsResult.data);
+      }
+
+      if (sectionBannersResult.success) {
+        setSectionBanners(sectionBannersResult.data);
       }
 
       // Load seen tooltips - onboarding disabled for now
@@ -332,7 +345,8 @@ export default function AdminShopBannersScreen({ navigation }) {
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
+        // Disable editing on Android due to CropImageContract bug
+        allowsEditing: Platform.OS === 'ios',
         aspect: [16, 9],
         quality: 0.8,
       });
@@ -746,7 +760,8 @@ export default function AdminShopBannersScreen({ navigation }) {
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
+        // Disable editing on Android due to CropImageContract bug
+        allowsEditing: Platform.OS === 'ios',
         aspect: [1, 1],
         quality: 0.8,
       });
@@ -807,6 +822,154 @@ export default function AdminShopBannersScreen({ navigation }) {
       item.description?.toLowerCase().includes(query)
     );
   });
+
+  // ========================================
+  // SECTION BANNER HANDLERS
+  // ========================================
+
+  // Section banner form state
+  const [sectionForm, setSectionForm] = useState({
+    title: '',
+    subtitle: '',
+    image_url: '',
+    link_url: '', // URL để mở WebView khi nhấn vào banner
+    is_active: true,
+  });
+
+  // Open edit section banner modal
+  const openEditSectionModal = (section) => {
+    setEditingSection(section);
+    setSectionForm({
+      title: section.title || '',
+      subtitle: section.subtitle || '',
+      image_url: section.image_url || '',
+      link_url: section.link_url || '',
+      is_active: section.is_active ?? true,
+    });
+    setSectionModalVisible(true);
+  };
+
+  // Handle save section banner
+  const handleSaveSectionBanner = async () => {
+    if (!sectionForm.image_url.trim()) {
+      showAlert('Lỗi', 'Vui lòng chọn hình ảnh banner', [{ text: 'OK' }], 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const result = await shopBannerService.upsertSectionBanner(editingSection.section_id, sectionForm);
+
+      if (result.success) {
+        showAlert('Thành công', 'Đã cập nhật section banner!', [{ text: 'OK' }], 'success');
+        setSectionModalVisible(false);
+        setEditingSection(null);
+        await loadData();
+      } else {
+        showAlert('Lỗi', result.error || 'Không thể lưu banner', [{ text: 'OK' }], 'error');
+      }
+    } catch (error) {
+      console.error('[AdminShopBanners] Save section banner error:', error);
+      showAlert('Lỗi', 'Đã xảy ra lỗi khi lưu', [{ text: 'OK' }], 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Handle toggle section banner active
+  const handleToggleSectionActive = async (section) => {
+    const result = await shopBannerService.toggleSectionBannerActive(section.section_id, !section.is_active);
+    if (result.success) {
+      await loadData();
+    } else {
+      showAlert('Lỗi', result.error || 'Không thể thay đổi trạng thái', [{ text: 'OK' }], 'error');
+    }
+  };
+
+  // Handle section image pick
+  const handlePickSectionImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        showAlert('Lỗi', 'Cần quyền truy cập thư viện ảnh', [{ text: 'OK' }], 'error');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // Disable editing on Android due to CropImageContract bug
+        allowsEditing: Platform.OS === 'ios',
+        aspect: [16, 9],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        await uploadSectionImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('[AdminShopBanners] Pick section image error:', error);
+      showAlert('Lỗi', 'Không thể chọn hình ảnh', [{ text: 'OK' }], 'error');
+    }
+  };
+
+  // Upload section banner image
+  const uploadSectionImage = async (uri) => {
+    setSectionUploading(true);
+    try {
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const arrayBuffer = base64ToArrayBuffer(base64);
+      const filename = `section-banner-${Date.now()}.jpg`;
+      const filePath = `shop-banners/${filename}`;
+
+      const { data, error } = await supabase.storage
+        .from('forum-images')
+        .upload(filePath, arrayBuffer, {
+          contentType: 'image/jpeg',
+          upsert: true,
+        });
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from('forum-images')
+        .getPublicUrl(filePath);
+
+      setSectionForm((prev) => ({ ...prev, image_url: urlData.publicUrl }));
+    } catch (error) {
+      console.error('[AdminShopBanners] Upload section image error:', error);
+      showAlert('Lỗi', 'Không thể tải lên hình ảnh', [{ text: 'OK' }], 'error');
+    } finally {
+      setSectionUploading(false);
+    }
+  };
+
+  // Filter section banners by search
+  const filteredSectionBanners = sectionBanners.filter((section) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      section.section_id?.toLowerCase().includes(query) ||
+      section.title?.toLowerCase().includes(query) ||
+      section.subtitle?.toLowerCase().includes(query)
+    );
+  });
+
+  // Get section label from section_id
+  const getSectionLabel = (sectionId) => {
+    const labels = {
+      'manifest-money': '💰 Manifest Tiền Bạc',
+      'manifest-love': '❤️ Manifest Tình Yêu',
+      'manifest-abundance': '✨ Manifest Thịnh Vượng',
+      'courses': '📚 Khóa Học',
+      'for-you': '🎯 Dành Cho Bạn',
+      'trending': '🔥 Xu Hướng',
+    };
+    return labels[sectionId] || sectionId;
+  };
 
   // Loading state
   if (loading) {
@@ -1271,8 +1434,293 @@ export default function AdminShopBannersScreen({ navigation }) {
             </>
           )}
 
+          {/* Content - Sections Tab */}
+          {activeTab === 'sections' && (
+            <>
+              {/* Section Banners Stats */}
+              <View style={styles.statsRow}>
+                <View style={styles.statCard}>
+                  <Tag size={16} color={COLORS.gold} />
+                  <Text style={styles.statValue}>{sectionBanners.length}</Text>
+                  <Text style={styles.statLabel}>Tổng sections</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Eye size={16} color={COLORS.success} />
+                  <Text style={styles.statValue}>{sectionBanners.filter(s => s.is_active).length}</Text>
+                  <Text style={styles.statLabel}>Đang hiển thị</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <EyeOff size={16} color={COLORS.textMuted} />
+                  <Text style={styles.statValue}>{sectionBanners.filter(s => !s.is_active).length}</Text>
+                  <Text style={styles.statLabel}>Đã ẩn</Text>
+                </View>
+              </View>
+
+              {filteredSectionBanners.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Tag size={60} color={COLORS.textMuted} />
+                  <Text style={styles.emptyTitle}>
+                    {searchQuery ? 'Không tìm thấy section' : 'Chưa có section banner nào'}
+                  </Text>
+                  <Text style={styles.emptyText}>
+                    {searchQuery
+                      ? 'Thử tìm kiếm với từ khóa khác'
+                      : 'Chạy migration để tạo section banners mặc định'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.bannerList}>
+                  {filteredSectionBanners.map((section) => (
+                    <View key={section.section_id} style={styles.sectionCard}>
+                      {/* Section Preview */}
+                      <View style={styles.sectionPreviewContainer}>
+                        {section.image_url ? (
+                          <Image
+                            source={{ uri: section.image_url }}
+                            style={styles.sectionImage}
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <View style={styles.sectionImagePlaceholder}>
+                            <ImageIcon size={32} color={COLORS.textMuted} />
+                            <Text style={styles.placeholderText}>Chưa có ảnh</Text>
+                          </View>
+                        )}
+                        {/* Section ID Badge */}
+                        <View style={styles.sectionIdBadge}>
+                          <Text style={styles.sectionIdText}>{section.section_id}</Text>
+                        </View>
+                      </View>
+
+                      {/* Section Info */}
+                      <View style={styles.sectionInfo}>
+                        <View style={styles.sectionHeader}>
+                          <Text style={styles.sectionTitle}>
+                            {getSectionLabel(section.section_id)}
+                          </Text>
+                          <View
+                            style={[
+                              styles.statusBadge,
+                              {
+                                backgroundColor: section.is_active
+                                  ? `${COLORS.success}20`
+                                  : `${COLORS.error}20`,
+                              },
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.statusText,
+                                { color: section.is_active ? COLORS.success : COLORS.error },
+                              ]}
+                            >
+                              {section.is_active ? 'Hiển thị' : 'Ẩn'}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {section.title && (
+                          <Text style={styles.sectionSubtitle} numberOfLines={1}>
+                            {section.title}
+                          </Text>
+                        )}
+
+                        {section.subtitle && (
+                          <Text style={styles.sectionDescription} numberOfLines={1}>
+                            {section.subtitle}
+                          </Text>
+                        )}
+
+                        {/* Link Info */}
+                        {section.link_value && (
+                          <View style={styles.sectionLinkRow}>
+                            <ExternalLink size={12} color={COLORS.textMuted} />
+                            <Text style={styles.sectionLinkText} numberOfLines={1}>
+                              {section.link_type}: {section.link_value}
+                            </Text>
+                          </View>
+                        )}
+
+                        {/* Actions */}
+                        <View style={styles.sectionActions}>
+                          <TouchableOpacity
+                            style={styles.actionButton}
+                            onPress={() => handleToggleSectionActive(section)}
+                          >
+                            {section.is_active ? (
+                              <EyeOff size={18} color={COLORS.textMuted} />
+                            ) : (
+                              <Eye size={18} color={COLORS.success} />
+                            )}
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.actionButton}
+                            onPress={() => openEditSectionModal(section)}
+                          >
+                            <Edit2 size={18} color={COLORS.purple} />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </>
+          )}
+
           <View style={{ height: 100 }} />
         </ScrollView>
+
+        {/* Section Banner Edit Modal */}
+        <Modal
+          visible={sectionModalVisible}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={() => setSectionModalVisible(false)}
+        >
+          <LinearGradient colors={GRADIENTS.background} style={styles.modalGradient}>
+            <SafeAreaView style={styles.modalContainer} edges={['top', 'bottom']}>
+              {/* Modal Header */}
+              <View style={styles.modalHeader}>
+                <TouchableOpacity
+                  onPress={() => setSectionModalVisible(false)}
+                  style={styles.modalCloseBtn}
+                >
+                  <X size={24} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+                <Text style={styles.modalTitle}>
+                  Sửa Section Banner
+                </Text>
+                <View style={{ width: 40 }} />
+              </View>
+
+              {/* Form */}
+              <KeyboardAvoidingView
+                style={styles.formContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+              >
+                <ScrollView
+                  style={styles.formScroll}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={{ paddingBottom: 300 }}
+                >
+                  {/* Section ID (Read-only) */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Section</Text>
+                    <View style={styles.readOnlyInput}>
+                      <Text style={styles.readOnlyText}>
+                        {getSectionLabel(editingSection?.section_id)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Image Picker */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Hình ảnh Banner *</Text>
+                    <TouchableOpacity
+                      style={styles.imagePicker}
+                      onPress={handlePickSectionImage}
+                      disabled={sectionUploading}
+                    >
+                      {sectionForm.image_url ? (
+                        <Image
+                          source={{ uri: sectionForm.image_url }}
+                          style={styles.imagePreview}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View style={styles.imagePickerPlaceholder}>
+                          {sectionUploading ? (
+                            <ActivityIndicator color={COLORS.gold} />
+                          ) : (
+                            <>
+                              <Upload size={32} color={COLORS.textMuted} />
+                              <Text style={styles.imagePickerText}>Chọn hình ảnh (16:9)</Text>
+                            </>
+                          )}
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Title */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Tiêu đề</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={sectionForm.title}
+                      onChangeText={(text) => setSectionForm((prev) => ({ ...prev, title: text }))}
+                      placeholder="Nhập tiêu đề banner"
+                      placeholderTextColor={COLORS.textMuted}
+                    />
+                  </View>
+
+                  {/* Subtitle */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Phụ đề</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={sectionForm.subtitle}
+                      onChangeText={(text) => setSectionForm((prev) => ({ ...prev, subtitle: text }))}
+                      placeholder="Nhập phụ đề"
+                      placeholderTextColor={COLORS.textMuted}
+                    />
+                  </View>
+
+                  {/* Link URL - WebView navigation */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Link URL (WebView)</Text>
+                    <Text style={styles.inputHint}>
+                      Khi người dùng nhấn vào banner sẽ mở trang web này
+                    </Text>
+                    <TextInput
+                      style={styles.input}
+                      value={sectionForm.link_url}
+                      onChangeText={(text) => setSectionForm((prev) => ({ ...prev, link_url: text }))}
+                      placeholder="https://example.com/page"
+                      placeholderTextColor={COLORS.textMuted}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      keyboardType="url"
+                    />
+                  </View>
+
+                  {/* Active Toggle */}
+                  <View style={styles.switchRow}>
+                    <Text style={styles.inputLabel}>Hiển thị banner</Text>
+                    <Switch
+                      value={sectionForm.is_active}
+                      onValueChange={(value) =>
+                        setSectionForm((prev) => ({ ...prev, is_active: value }))
+                      }
+                      trackColor={{ false: COLORS.bgGray, true: COLORS.success }}
+                      thumbColor={COLORS.textPrimary}
+                    />
+                  </View>
+
+                  <View style={{ height: 100 }} />
+                </ScrollView>
+
+                {/* Save Button */}
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+                    onPress={handleSaveSectionBanner}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <ActivityIndicator color={COLORS.textPrimary} />
+                    ) : (
+                      <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </KeyboardAvoidingView>
+            </SafeAreaView>
+          </LinearGradient>
+        </Modal>
 
         {/* Create/Edit Modal */}
         <Modal
@@ -3154,5 +3602,108 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  // Section Banner Card Styles
+  sectionCard: {
+    backgroundColor: GLASS.background,
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginBottom: SPACING.md,
+    flexDirection: 'row',
+  },
+  sectionPreviewContainer: {
+    width: 120,
+    height: 90,
+    position: 'relative',
+  },
+  sectionImage: {
+    width: '100%',
+    height: '100%',
+  },
+  sectionImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginTop: 4,
+  },
+  sectionIdBadge: {
+    position: 'absolute',
+    bottom: 4,
+    left: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  sectionIdText: {
+    fontSize: 8,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  sectionInfo: {
+    flex: 1,
+    padding: SPACING.sm,
+    justifyContent: 'space-between',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    flex: 1,
+    marginRight: SPACING.xs,
+  },
+  sectionSubtitle: {
+    fontSize: 11,
+    color: COLORS.gold,
+    marginTop: 2,
+  },
+  sectionDescription: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  sectionLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  sectionLinkText: {
+    fontSize: 10,
+    color: COLORS.textSubtle,
+    flex: 1,
+  },
+  sectionActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 4,
+  },
+
+  // Read-only input for section ID
+  readOnlyInput: {
+    height: 48,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 10,
+    paddingHorizontal: SPACING.md,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  readOnlyText: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
   },
 });

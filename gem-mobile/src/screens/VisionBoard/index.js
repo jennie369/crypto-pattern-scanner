@@ -11,7 +11,13 @@ export { default as VisionBoardScreen } from './VisionBoardScreen';
 export { default as AchievementsScreen } from './AchievementsScreen';
 export { default as CalendarScreen } from './CalendarScreen';
 export { default as GoalDetailScreen } from './GoalDetailScreen';
+export { default as AllGoalsScreen } from './AllGoalsScreen';
 export { default as DailyRecapScreen } from './DailyRecapScreen';
+
+// Calendar & Journal Screens (Smart Journal)
+export { default as JournalEntryScreen } from './JournalEntryScreen';
+export { default as TradingJournalScreen } from './TradingJournalScreen';
+export { default as CalendarSettingsScreen } from './CalendarSettingsScreen';
 
 // Ritual Playground Screens
 export { default as RitualPlaygroundScreen } from './RitualPlaygroundScreen';

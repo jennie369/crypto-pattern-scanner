@@ -1,0 +1,271 @@
+/**
+ * RitualsPage Styles
+ */
+
+.rituals-page {
+  min-height: 100vh;
+  position: relative;
+}
+
+.rituals-page-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+/* Header */
+.rituals-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.rituals-page-header h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.rituals-page-header p {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin: var(--spacing-xs) 0 0 0;
+}
+
+/* Progress Card */
+.rituals-page-progress {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.rituals-page-progress-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.rituals-page-progress-circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.rituals-page-progress-circle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.rituals-page-progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.rituals-page-progress-info h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.rituals-page-progress-info p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Grid */
+.rituals-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* Card */
+.rituals-page-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  min-height: 280px;
+}
+
+.rituals-page-card.locked {
+  opacity: 0.7;
+}
+
+.rituals-page-card.completed {
+  border-color: rgba(58, 247, 166, 0.3);
+}
+
+/* Badges */
+.rituals-page-card-locked,
+.rituals-page-card-completed {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.rituals-page-card-locked {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-muted);
+}
+
+.rituals-page-card-completed {
+  background: rgba(58, 247, 166, 0.15);
+  color: var(--color-success);
+}
+
+/* Icon */
+.rituals-page-card-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Title */
+.rituals-page-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+/* Description */
+.rituals-page-card-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--spacing-lg) 0;
+  flex: 1;
+}
+
+/* Meta */
+.rituals-page-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-top: auto;
+}
+
+.rituals-page-card-duration,
+.rituals-page-card-xp {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Error State */
+.rituals-page-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  color: var(--color-text-muted);
+  z-index: 10;
+}
+
+.rituals-page-error p {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.rituals-page-error button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.rituals-page-error button:hover {
+  opacity: 0.9;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 768px) {
+  .rituals-page-content {
+    padding: var(--spacing-lg);
+  }
+
+  .rituals-page-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .rituals-page-header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .rituals-page-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 640px) {
+  .rituals-page-content {
+    padding: var(--spacing-base);
+  }
+
+  .rituals-page-header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .rituals-page-progress-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .rituals-page-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rituals-page-card {
+    padding: var(--spacing-xl) var(--spacing-base);
+    min-height: 240px;
+  }
+
+  .rituals-page-card-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .rituals-page-card-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+}

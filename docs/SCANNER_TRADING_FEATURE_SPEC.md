@@ -1,10 +1,167 @@
 # GEM Mobile - Scanner/Trading Tab
 # COMPLETE FEATURE SPECIFICATION
 
-**Version:** 3.1
-**Last Updated:** 2026-01-24
+**Version:** 3.2
+**Last Updated:** 2026-01-29
 **Platform:** React Native (Expo)
 **Author:** GEM Development Team
+
+---
+
+# GIỚI THIỆU TÍNH NĂNG - TRADING SCANNER
+
+## Tổng Quan
+
+**GEM Scanner** là công cụ quét và phân tích mẫu hình kỹ thuật (chart patterns) tự động dành cho trader crypto. Tính năng này giúp người dùng phát hiện cơ hội giao dịch tiềm năng trên hơn 500+ cặp tiền điện tử, với độ chính xác cao và tốc độ xử lý nhanh chóng.
+
+### Dành Cho Ai?
+
+- **Trader mới bắt đầu**: Học cách nhận diện mẫu hình qua các pattern được AI phát hiện
+- **Trader có kinh nghiệm**: Tiết kiệm thời gian quét thị trường, tập trung vào phân tích và ra quyết định
+- **Day Trader & Swing Trader**: Theo dõi nhiều coin cùng lúc trên nhiều khung thời gian
+- **Paper Trader**: Luyện tập chiến lược không rủi ro với vốn giả lập
+
+---
+
+## Lợi Ích Chính
+
+### 1. Phát Hiện Mẫu Hình Tự Động
+- **24 mẫu hình kỹ thuật** được hỗ trợ: Head & Shoulders, Double Top/Bottom, Flag, Wedge, Triangle, và nhiều hơn nữa
+- **Độ chính xác cao** với thuật toán AI phân tích hành động giá
+- **Tỷ lệ thắng lịch sử** hiển thị cho từng pattern (dựa trên backtest data)
+- **Tự động tính Entry, Stop Loss, Take Profit** - không cần tính toán thủ công
+
+### 2. Quét Đa Coin & Đa Khung Thời Gian
+- **500+ cặp USDT Perpetual** từ Binance Futures
+- **8 khung thời gian**: 1m, 5m, 15m, 30m, 1h, 4h, 1D, 1W
+- **Multi-Timeframe Confluence** (TIER2+): Xác nhận tín hiệu trên nhiều TF cùng lúc
+- **Batch scanning**: Quét tối đa 1000 coin song song, cho kết quả trong vài giây
+
+### 3. Paper Trading - Giao Dịch Giả Lập
+- **Vốn giả lập $10,000 USDT** để luyện tập không rủi ro
+- **Đòn bẩy linh hoạt**: 1x đến 125x (tùy theo tier)
+- **Theo dõi P&L thời gian thực** với giá live từ Binance
+- **Tự động đóng lệnh** khi chạm Take Profit hoặc Stop Loss
+- **Lịch sử giao dịch đầy đủ** với thống kê win rate, tổng P&L
+
+### 4. Hai Chế Độ Giao Dịch
+
+#### Pattern Mode (Chế Độ GEM AI)
+- Entry/SL/TP được **tối ưu hóa bởi AI** - không cần chỉnh sửa
+- Lệnh **MARKET** - khớp ngay lập tức
+- Phù hợp cho người mới hoặc muốn theo 100% tín hiệu AI
+
+#### Custom Mode (Chế Độ Tùy Chỉnh)
+- **Tự điều chỉnh** Entry, Stop Loss, Take Profit theo ý muốn
+- **Lệnh LIMIT** nếu Entry khác giá thị trường (chờ khớp)
+- **AI Score** đánh giá chất lượng setup của bạn (0-100 điểm)
+- Phù hợp cho trader có chiến lược riêng
+
+### 5. Công Cụ Vẽ Chart Chuyên Nghiệp
+- **6 công cụ vẽ**: Đường ngang, Đường xu hướng, Chữ nhật, Fibonacci, Long/Short Position
+- **Magnet Mode**: Tự động bắt dính vào giá OHLC của nến
+- **Lưu trữ cloud**: Các đường vẽ được lưu và sync giữa các thiết bị
+- **Hiển thị theo timeframe**: Tùy chọn hiển thị vẽ trên một hoặc nhiều khung thời gian
+
+### 6. Các Tính Năng Nâng Cao (TIER2/TIER3)
+- **Confluence Score**: Điểm hội tụ tín hiệu đa timeframe
+- **Volume Confirmation**: Xác nhận khối lượng
+- **Trend Alignment**: Đánh giá xu hướng lớn
+- **RSI Divergence**: Phát hiện phân kỳ RSI
+- **Quality Grade**: Xếp hạng chất lượng pattern (A+, A, B+, B, C, D)
+- **Enhancement Stats**: Thống kê chi tiết về độ mạnh của setup
+
+---
+
+## Điểm Nổi Bật So Với Đối Thủ
+
+| Tính Năng | GEM Scanner | TradingView | Coinigy |
+|-----------|-------------|-------------|---------|
+| Quét tự động 500+ coin | ✅ | ❌ Manual | ❌ Limited |
+| Paper Trading tích hợp | ✅ | ❌ | ❌ |
+| AI đề xuất Entry/SL/TP | ✅ | ❌ | ❌ |
+| Multi-TF Confluence | ✅ | ❌ | ❌ |
+| Mobile-first | ✅ | ⚠️ Web-based | ⚠️ Web-based |
+| Định dạng số Việt Nam | ✅ | ❌ | ❌ |
+| Mindset Check trước giao dịch | ✅ | ❌ | ❌ |
+
+---
+
+## Các Trường Hợp Sử Dụng
+
+### 1. Tìm Cơ Hội Giao Dịch Nhanh
+> "Tôi có 15 phút buổi sáng, muốn xem thị trường có setup nào tốt không"
+
+→ Mở Scanner → Chọn Top 20 coin → Scan Now → Xem patterns với confidence > 80%
+
+### 2. Luyện Tập Không Rủi Ro
+> "Tôi mới học trading, muốn thử chiến lược mà không mất tiền thật"
+
+→ Sử dụng Paper Trading → Mở lệnh theo pattern → Theo dõi P&L → Học từ kết quả
+
+### 3. Xác Nhận Setup Cá Nhân
+> "Tôi thấy 1 setup trên BTCUSDT, muốn AI đánh giá xem có tốt không"
+
+→ Chọn Custom Mode → Nhập Entry/SL/TP của bạn → Xem AI Score (0-100)
+
+### 4. Theo Dõi Đa Coin
+> "Tôi muốn biết coin nào đang có pattern trên H4"
+
+→ Chọn ALL coins → Scan trên H4 → Xem kết quả grouped theo coin
+
+### 5. Phân Tích Multi-Timeframe
+> "Pattern này có mạnh không? Các TF khác có confirm không?"
+
+→ Scan 1 coin → Xem Multi-TF Results (TIER2+) → Check Confluence Score
+
+---
+
+## Bảng So Sánh Các Gói
+
+| Tính Năng | FREE | TIER1 | TIER2 | TIER3 |
+|-----------|------|-------|-------|-------|
+| Số mẫu hình | 3 | 7 | 15 | **24** |
+| Coin/lần quét | 1 | 5 | 20 | **Không giới hạn** |
+| Khung thời gian | 1 | 1 | 3 | **5+** |
+| Multi-TF Scan | ❌ | ❌ | ✅ | ✅ |
+| Custom Mode | ❌ | ❌ | ✅ | ✅ |
+| Pending Orders | ❌ | ❌ | ✅ | ✅ |
+| Enhancement Stats | ❌ | ❌ | ✅ | ✅ |
+| Quality Grade | ❌ | ❌ | ✅ | ✅ |
+| Drawing Tools | ✅ | ✅ | ✅ | ✅ |
+| Paper Trading | ✅ | ✅ | ✅ | ✅ |
+| Scan quota/ngày | 5 | 15 | 50 | **Không giới hạn** |
+| Đòn bẩy tối đa | 10x | 20x | 50x | **125x** |
+
+---
+
+## Hỗ Trợ Kỹ Thuật
+
+### Dữ Liệu Giá
+- **Nguồn**: Binance Futures API (realtime)
+- **Fallback**: Binance Spot API
+- **Cập nhật**: WebSocket streaming cho giá live
+
+### Lưu Trữ Dữ Liệu
+- **Paper Trades**: AsyncStorage (local) + Supabase (cloud sync)
+- **Drawings**: Supabase (cloud, cross-device)
+- **Settings**: AsyncStorage (local)
+
+### Hiển Thị
+- **Chart**: lightweight-charts v4.1.0 (WebView)
+- **Định dạng số**: Vietnamese locale (dấu phẩy là phần thập phân)
+
+---
+
+## Keywords (SEO/ASO)
+
+`crypto scanner`, `pattern detection`, `trading bot`, `paper trading`, `binance futures`, `technical analysis`, `chart patterns`, `head and shoulders`, `fibonacci`, `multi-timeframe`, `AI trading`, `quét pattern crypto`, `giao dịch giả lập`, `phân tích kỹ thuật`
+
+---
+
+# TÀI LIỆU KỸ THUẬT CHI TIẾT
+
+*Phần dưới đây dành cho developers và technical reference.*
 
 ---
 
@@ -2615,6 +2772,10 @@ gem-mobile/src/
 │   │   ├── ScannerScreen.js           # Main trading screen
 │   │   ├── OpenPositionsScreen.js     # Paper trade positions
 │   │   ├── PatternDetailScreen.js     # Pattern analysis
+│   │   ├── MTFDashboardScreen.js      # Multi-timeframe dashboard
+│   │   ├── AlertsManagementScreen.js  # Price alerts management
+│   │   ├── OddsAnalysisScreen.js      # Odds/probability analysis
+│   │   ├── ZoneDetailScreen.js        # Zone detail view
 │   │   └── components/
 │   │       ├── CoinSelector.js        # Coin picker
 │   │       ├── TradingChart.js        # Candlestick chart + drawings
@@ -2623,6 +2784,8 @@ gem-mobile/src/
 │   │       ├── MultiTFResultsSection.js # Multi-TF results
 │   │       ├── PaperTradeModal.js     # Trade entry
 │   │       ├── ConfidenceBar.js       # Confidence display
+│   │       ├── TimeframeButtons.js    # TF selector
+│   │       ├── TimeframeSelector.js   # TF selector (alternative)
 │   │       └── index.js
 │   └── Account/
 │       ├── PortfolioScreen.js         # Real portfolio
@@ -2631,21 +2794,49 @@ gem-mobile/src/
 │   └── Trading/
 │       ├── ChartToolbar.js            # Chart controls
 │       ├── DrawingToolbar.js          # Drawing tools
+│       ├── DrawingListModal.js        # Drawing list management
 │       ├── PendingOrdersSection.js    # Pending orders
+│       ├── OpenPositionsSection.js    # Open positions
 │       ├── PaperTradeModal.js         # Trade modal (deprecated)
 │       ├── PaperTradeModalV2.js       # Trade modal with MindsetAdvisor
-│       ├── MindsetCheckModal.js       # Mindset assessment modal (NEW v3.1)
-│       ├── MindsetAdvisor.js          # Mindset advisor component (NEW v3.1)
+│       ├── MindsetCheckModal.js       # Mindset assessment modal
+│       ├── MindsetAdvisor.js          # Mindset advisor component
 │       ├── QuickMindsetWidget.js      # Quick mindset widget
 │       ├── AITradeGuard.js            # AI assessment
+│       ├── AIAssessmentSection.js     # AI assessment display
+│       ├── CoinSelectorModal.js       # Coin selector modal
+│       ├── CoinAccordion.js           # Coin accordion
+│       ├── CustomModeFields.js        # Custom mode inputs
+│       ├── PatternModeFields.js       # Pattern mode display
+│       ├── DeviationBadge.js          # Deviation indicator
+│       ├── EnhancementStatsCard.js    # Enhancement stats
+│       ├── MarginLeverageBar.js       # Margin/leverage bar
+│       ├── ModeBanner.js              # Mode indicator banner
+│       ├── ModeTabSelector.js         # Mode tab selector
+│       ├── MTFAlignmentPanel.js       # MTF alignment panel
+│       ├── OnboardingModal.js         # Onboarding modal
+│       ├── OrderCalculations.js       # Order calculations
+│       ├── OrderLinesSettings.js      # Order lines settings
+│       ├── OrderLinesToggle.js        # Order lines toggle
+│       ├── OrderTypeSelector.js       # Order type selector
+│       ├── PatternInfoCard.js         # Pattern info card
+│       ├── PriceInput.js              # Price input
+│       ├── PriceLines.js              # Price lines
+│       ├── QuantitySlider.js          # Quantity slider
+│       ├── ScanResultsAccordion.js    # Results accordion
+│       ├── ScoreGauge.js              # Score gauge
+│       ├── TPSLSection.js             # TP/SL section
+│       ├── ZoneTooltip.js             # Zone tooltip
 │       └── index.js
 ├── services/
 │   ├── patternDetection.js            # Pattern algorithm
 │   ├── binanceService.js              # Binance API
 │   ├── paperTradeService.js           # Paper trading
-│   ├── drawingService.js              # Chart drawings (NEW)
+│   ├── drawingService.js              # Chart drawings
 │   ├── multiTimeframeScanner.js       # Multi-TF scanning
-│   └── tierAccessService.js           # Feature gating
+│   ├── tierAccessService.js           # Feature gating
+│   ├── alertService.js                # Price alerts
+│   └── mindsetAdvisorService.js       # Mindset tracking
 ├── contexts/
 │   ├── ScannerContext.js              # Scanner state
 │   └── AuthContext.js                 # User & tier
@@ -2657,13 +2848,39 @@ gem-mobile/src/
 
 supabase/
 ├── migrations/
-│   ├── 20251219_chart_drawings.sql    # Drawings table (NEW)
+│   ├── 20251219_chart_drawings.sql    # Drawings table
+│   ├── 20260124_trading_mindset_logs.sql # Mindset logs table
 │   └── ...
 ```
 
 ---
 
 ## CHANGELOG
+
+### Version 3.2 (2026-01-29)
+- **Marketing Introduction:** Added comprehensive Vietnamese marketing section
+  - Feature overview and benefits
+  - Use cases and comparison table
+  - Tier comparison for sales reference
+  - SEO/ASO keywords
+- **Documentation Update:** Updated file manifest with all current components
+- **Components Added:**
+  - AIAssessmentSection.js
+  - CoinSelectorModal.js
+  - CoinAccordion.js
+  - DrawingListModal.js
+  - EnhancementStatsCard.js
+  - MarginLeverageBar.js
+  - MTFAlignmentPanel.js
+  - OrderLinesSettings.js
+  - OrderLinesToggle.js
+  - ScoreGauge.js
+  - ZoneTooltip.js
+- **Screens Added:**
+  - AlertsManagementScreen.js
+  - OddsAnalysisScreen.js
+  - ZoneDetailScreen.js
+  - MTFDashboardScreen.js
 
 ### Version 3.1 (2026-01-24)
 - **Zone Positioning Fix:** Zones now display at correct candle positions

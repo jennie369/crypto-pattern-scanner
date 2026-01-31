@@ -13,6 +13,9 @@ const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || '';
 // ✅ ENFORCEMENT: Use gemini-2.5-flash with thinking tokens
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
+// Timeout configuration (in milliseconds)
+const API_TIMEOUT_MS = 20000; // 20 seconds for API calls (gemini-2.5-flash needs more time for thinking)
+
 // Retry configuration
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
@@ -59,6 +62,37 @@ interface KnowledgeChunk {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Fetch with timeout to prevent hanging
+ */
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number = API_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeoutMs}ms`);
+    }
+    throw err;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // RAG FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -72,7 +106,8 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
   }
 
   try {
-    const response = await fetch('https://api.openai.com/v1/embeddings', {
+    console.log('[gem-master-chat] Generating embedding...');
+    const response = await fetchWithTimeout('https://api.openai.com/v1/embeddings', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
@@ -82,7 +117,7 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
         model: EMBEDDING_MODEL,
         input: text.trim(),
       }),
-    });
+    }, 10000); // 10s timeout for embedding
 
     if (!response.ok) {
       console.error('[gem-master-chat] Embedding error:', response.status);
@@ -90,9 +125,10 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
     }
 
     const data = await response.json();
+    console.log('[gem-master-chat] Embedding generated successfully');
     return data.data[0].embedding;
   } catch (err) {
-    console.error('[gem-master-chat] Embedding failed:', err);
+    console.error('[gem-master-chat] Embedding failed:', err.message);
     return null;
   }
 }
@@ -199,7 +235,9 @@ serve(async (req: Request) => {
       );
     }
 
-    console.log(`[gem-master-chat] Processing: "${message.substring(0, 50)}..."`);
+    const startTime = Date.now();
+    console.log(`[gem-master-chat] ═══ START Processing ═══`);
+    console.log(`[gem-master-chat] Message: "${message.substring(0, 50)}..."`);
     console.log(`[gem-master-chat] User: ${userId}, Tier: ${userTier}, RAG: ${useRAG}`);
 
     // Initialize Supabase client
@@ -214,6 +252,7 @@ serve(async (req: Request) => {
 
     try {
       if (useRAG && OPENAI_API_KEY) {
+        console.log(`[gem-master-chat] STEP 1: Starting RAG...`);
         const embedding = await generateEmbedding(message);
 
         if (embedding) {
@@ -235,9 +274,12 @@ serve(async (req: Request) => {
       console.warn('[gem-master-chat] RAG failed, continuing without:', ragError);
     }
 
+    console.log(`[gem-master-chat] STEP 1 complete: RAG sources=${knowledgeSources.length}, elapsed=${Date.now() - startTime}ms`);
+
     // ═══════════════════════════════════════════════════════════════════════
     // STEP 2: Build system prompt with RAG context
     // ═══════════════════════════════════════════════════════════════════════
+    console.log(`[gem-master-chat] STEP 2: Building system prompt...`);
 
     const systemPrompt = `Bạn là GEM Master - trợ lý trading crypto và tâm linh của Gemral.
 
@@ -338,18 +380,22 @@ KHÔNG được: Lan man, triết lý, không đưa câu trả lời cụ thể.
       try {
         console.log(`[gem-master-chat] Attempt ${attempt}/${MAX_RETRIES}`);
 
-        const geminiResponse = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents,
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 4096, // gemini-2.5-flash với thinking tokens
-              topP: 0.9,
-            },
-          }),
-        });
+        const geminiResponse = await fetchWithTimeout(
+          `${GEMINI_URL}?key=${GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents,
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 4096, // gemini-2.5-flash với thinking tokens
+                topP: 0.9,
+              },
+            }),
+          },
+          API_TIMEOUT_MS // 20s timeout for Gemini with thinking tokens
+        );
 
         if (!geminiResponse.ok) {
           const errorText = await geminiResponse.text();
@@ -430,6 +476,9 @@ KHÔNG được: Lan man, triết lý, không đưa câu trả lời cụ thể.
     // ═══════════════════════════════════════════════════════════════════════
     // STEP 6: Return response
     // ═══════════════════════════════════════════════════════════════════════
+
+    const totalElapsed = Date.now() - startTime;
+    console.log(`[gem-master-chat] ═══ SUCCESS ═══ Total time: ${totalElapsed}ms, RAG: ${ragContext.length > 0}, Response length: ${aiResponse.length}`);
 
     return new Response(
       JSON.stringify({

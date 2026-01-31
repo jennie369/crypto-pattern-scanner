@@ -8,9 +8,15 @@
 1. [Feature Overview](#1-feature-overview)
 2. [Navigation & Screens Structure](#2-navigation--screens-structure)
 3. [Screens Specification](#3-screens-specification)
+   - 3.1-3.6 Core Screens
+   - 3.7 Privacy Features Screens
 4. [Components Specification](#4-components-specification)
 5. [Call Feature (Audio/Video)](#5-call-feature-audiovideo)
 6. [Service Layer](#6-service-layer)
+   - 6.1 messagingService.js
+   - 6.2 privacySettingsService.js
+   - 6.3 restrictedUsersService.js
+   - 6.4 spamDetectionService.js
 7. [Database Schema](#7-database-schema)
 8. [Design Tokens & Styling](#8-design-tokens--styling)
 9. [User Flows](#9-user-flows)
@@ -76,7 +82,16 @@ MessagesStack
 ├── StarredMessagesScreen       # View all starred
 ├── ScheduledMessagesScreen     # View scheduled
 ├── MediaGalleryScreen          # Shared media gallery
-└── BlockedUsersScreen          # Manage blocked users
+├── ArchivedChatsScreen         # Archived conversations
+│
+├── # Privacy Features
+├── MessagePrivacySettings      # Privacy settings screen
+├── BlockedUsersScreen          # Manage blocked users
+├── RestrictedUsersScreen       # Silent block management
+├── MessageRequestsScreen       # Message requests (tin nhắn chờ)
+├── SpamMessagesScreen          # Spam messages folder
+│
+└── ProfileFull                 # View user profile from chat
 ```
 
 ### 2.2 CallStack Navigation
@@ -328,10 +343,223 @@ const OPTIMISTIC_ID_PATTERN = `temp-${Date.now()}`;
 | **MessageSearchScreen** | Search messages | Global/conversation search, filters (type, date, sender), highlight matches |
 | **ForwardMessageScreen** | Forward message | Select conversations, preview message, multi-select |
 | **PinnedMessagesScreen** | View pinned | Browse all pinned, unpin, jump to message |
-| **StarredMessagesScreen** | View starred | Important messages, unstar, jump to message |
+| **StarredMessagesScreen** | View starred | Important messages, unstar, jump to message, filter by conversation |
 | **ScheduledMessagesScreen** | Manage scheduled | Edit/cancel pending messages, reschedule |
-| **MediaGalleryScreen** | Shared media | Grid view of all media, filter by type |
-| **BlockedUsersScreen** | Manage blocked | List blocked, unblock functionality |
+| **MediaGalleryScreen** | Shared media | Grid view of all media, filter by type (images/files) |
+| **ArchivedChatsScreen** | Archived chats | List archived conversations, unarchive functionality |
+
+---
+
+### 3.7 Privacy Features Screens
+
+#### MessagePrivacySettings (PrivacySettingsScreen)
+**Purpose:** Configure privacy settings for messaging
+
+**Features:**
+- Cho phép tin nhắn chờ (Message Requests) - toggle
+- Xác nhận đã đọc (Read Receipts) - toggle
+- Đang nhập... (Typing Indicator) - toggle
+- Trạng thái online (Online Status) - toggle
+- Hoạt động lần cuối (Last Active) - toggle
+- Ai có thể gọi cho bạn (Call Permissions) - options
+
+**UI Layout:**
+```
+┌─────────────────────────────────────┐
+│  [<]      Quyền riêng tư            │
+├─────────────────────────────────────┤
+│  TIN NHẮN                           │
+│  ┌─────────────────────────────────┐│
+│  │ ✉️  Cho phép tin nhắn chờ  [⚙️]  ││
+│  │ ✓✓  Xác nhận đã đọc       [⚙️]  ││
+│  │ ...  Đang nhập...         [⚙️]  ││
+│  └─────────────────────────────────┘│
+├─────────────────────────────────────┤
+│  TRẠNG THÁI                         │
+│  ┌─────────────────────────────────┐│
+│  │ ●  Trạng thái online      [⚙️]  ││
+│  │ ⏱️  Hoạt động lần cuối    [⚙️]  ││
+│  └─────────────────────────────────┘│
+├─────────────────────────────────────┤
+│  CUỘC GỌI                           │
+│  ┌─────────────────────────────────┐│
+│  │ Ai có thể gọi cho bạn?          ││
+│  │ ○ Tất cả mọi người        [✓]   ││
+│  │ ○ Chỉ người đã nhắn tin         ││
+│  │ ○ Không ai                      ││
+│  └─────────────────────────────────┘│
+├─────────────────────────────────────┤
+│  ┌─────────────────────────────────┐│
+│  │ 🚫  Người đã chặn          [>]  ││
+│  │ 👁️  Người bị hạn chế       [>]  ││
+│  │ 📧  Tin nhắn spam          [>]  ││
+│  └─────────────────────────────────┘│
+└─────────────────────────────────────┘
+```
+
+#### BlockedUsersScreen
+**Purpose:** Manage blocked users
+
+**Features:**
+- List blocked users with profiles
+- Search blocked users
+- Unblock user functionality
+- Info banner explaining blocking
+- Empty state when no blocked users
+
+**UI Layout:**
+```
+┌─────────────────────────────────────┐
+│  [<]       Người đã chặn            │
+├─────────────────────────────────────┤
+│  ℹ️ Người bị chặn không thể gửi tin │
+│     nhắn hoặc xem trạng thái online │
+├─────────────────────────────────────┤
+│  ┌─────────────────────────────────┐│
+│  │ [Avatar] User Name              ││
+│  │          Đã chặn: 12/01/2025    ││
+│  │                      [Bỏ chặn]  ││
+│  └─────────────────────────────────┘│
+│                                     │
+│  Empty State:                       │
+│  ┌─────────────────────────────────┐│
+│  │         [✓ Shield Icon]         ││
+│  │      Không có người bị chặn     ││
+│  │  Người bị chặn không thể gửi    ││
+│  │  tin nhắn hoặc xem trạng thái   ││
+│  └─────────────────────────────────┘│
+└─────────────────────────────────────┘
+```
+
+#### RestrictedUsersScreen (Silent Block)
+**Purpose:** Manage silently blocked users
+
+**Features:**
+- List restricted users with profiles
+- Unrestrict user functionality
+- Info banner explaining silent blocking
+- Shows unread message count from restricted users
+- Empty state when no restricted users
+- User doesn't know they're restricted
+
+**UI Layout:**
+```
+┌─────────────────────────────────────┐
+│  [<]       Người bị hạn chế         │
+├─────────────────────────────────────┤
+│  ℹ️ Người bị hạn chế sẽ không biết  │
+│     họ bị hạn chế. Tin nhắn của họ  │
+│     vẫn đến nhưng sẽ được lọc riêng │
+├─────────────────────────────────────┤
+│  ┌─────────────────────────────────┐│
+│  │ [Avatar] User Name              ││
+│  │          Hạn chế từ: 12/01/2025 ││
+│  │          📬 3 tin nhắn chưa đọc ││
+│  │                    [Bỏ hạn chế] ││
+│  └─────────────────────────────────┘│
+│                                     │
+│  Empty State:                       │
+│  ┌─────────────────────────────────┐│
+│  │         [👁️‍🗨️ Eye Icon]          ││
+│  │    Không có người bị hạn chế    ││
+│  │  Khi bạn hạn chế ai đó, họ sẽ   ││
+│  │  không biết điều đó. Tin nhắn   ││
+│  │  của họ sẽ được chuyển vào      ││
+│  │  thư mục hạn chế.               ││
+│  └─────────────────────────────────┘│
+└─────────────────────────────────────┘
+```
+
+#### MessageRequestsScreen
+**Purpose:** Manage message requests from strangers
+
+**Features:**
+- List pending message requests
+- Preview requester profile
+- Accept/Decline buttons
+- View profile button
+- Info banner explaining message requests
+- Empty state when no requests
+
+**UI Layout:**
+```
+┌─────────────────────────────────────┐
+│  [<]        Tin nhắn chờ            │
+├─────────────────────────────────────┤
+│  ℹ️ Tin nhắn từ người lạ sẽ xuất    │
+│     hiện ở đây. Bạn có thể chấp     │
+│     nhận hoặc từ chối.              │
+├─────────────────────────────────────┤
+│  ┌─────────────────────────────────┐│
+│  │ [Avatar] Requester Name         ││
+│  │          "Preview message..."   ││
+│  │          2 giờ trước            ││
+│  │                                 ││
+│  │    [Từ chối]    [Chấp nhận]     ││
+│  └─────────────────────────────────┘│
+│                                     │
+│  Empty State:                       │
+│  ┌─────────────────────────────────┐│
+│  │         [📧 Mail Icon]          ││
+│  │    Không có tin nhắn chờ        ││
+│  │  Tin nhắn từ người lạ sẽ xuất   ││
+│  │  hiện ở đây để bạn duyệt        ││
+│  └─────────────────────────────────┘│
+└─────────────────────────────────────┘
+```
+
+#### SpamMessagesScreen
+**Purpose:** View and manage spam-detected messages
+
+**Features:**
+- List spam messages with confidence score
+- Filter by spam type (auto-detected, user reported, etc.)
+- Mark as "Not Spam" (restore to inbox)
+- Delete spam permanently
+- Delete all spam
+- Auto-delete after 30 days
+- Pull-to-refresh
+- Animated entrance
+
+**Spam Types:**
+```javascript
+SPAM_TYPE_LABELS = {
+  auto_detected: 'Tự động phát hiện',
+  user_reported: 'Người dùng báo cáo',
+  pattern_match: 'Khớp mẫu',
+  link_spam: 'Spam liên kết',
+  repeat_spam: 'Lặp lại nhiều lần',
+}
+```
+
+**UI Layout:**
+```
+┌─────────────────────────────────────┐
+│  [<]       Spam (5)          [🗑️]   │
+├─────────────────────────────────────┤
+│  [Tất cả] [Tự động] [Báo cáo] [...]│  Filter chips
+├─────────────────────────────────────┤
+│  ℹ️ Tin nhắn spam sẽ được tự động   │
+│     xóa sau 30 ngày.                │
+├─────────────────────────────────────┤
+│  ┌─────────────────────────────────┐│
+│  │ [Avatar ⚠️] Sender Name  2h ago ││
+│  │ [Tự động phát hiện] [85% ✓]     ││
+│  │ "Spam message content..."       ││
+│  │                                 ││
+│  │ [✓ Không phải spam]  [🗑️ Xóa]   ││
+│  └─────────────────────────────────┘│
+│                                     │
+│  Empty State:                       │
+│  ┌─────────────────────────────────┐│
+│  │         [🛡️ Shield Icon]        ││
+│  │        Không có spam            ││
+│  │  Hộp thư của bạn sạch sẽ!       ││
+│  │  Chúng tôi sẽ tự động lọc tin   ││
+│  │  nhắn rác cho bạn.              ││
+│  └─────────────────────────────────┘│
+└─────────────────────────────────────┘
+```
 
 ---
 
@@ -980,6 +1208,112 @@ searchMessages(query, conversationId = null)
 
 ---
 
+### 6.2 privacySettingsService.js
+
+#### Privacy Settings
+```javascript
+// Get all privacy settings
+getPrivacySettings()
+// Returns: { allow_message_requests, show_read_receipts, show_typing, show_online, show_last_active, call_permission }
+
+// Update privacy settings
+updatePrivacySetting(key, value)
+// Keys: 'allow_message_requests', 'show_read_receipts', 'show_typing', 'show_online', 'show_last_active'
+
+// Update call permission
+updateCallPermission(permission)
+// Values: 'everyone', 'contacts_only', 'nobody'
+```
+
+---
+
+### 6.3 restrictedUsersService.js
+
+#### Restricted Users (Silent Block)
+```javascript
+// Restrict/Unrestrict
+restrictUser(userId, reason = null)
+unrestrictUser(userId)
+
+// Get restricted users
+getRestrictedUsers(forceRefresh = false)  // With caching
+getRestrictedUsersCount()
+
+// Check restriction status
+isUserRestricted(userId)
+amIRestrictedBy(userId)  // Limited by RLS
+
+// Restricted messages
+getRestrictedMessages(limit = 50, offset = 0)
+getUnreadRestrictedMessagesCount()
+markRestrictedMessageRead(messageId)
+deleteRestrictedMessagesFrom(restrictedUserId)
+```
+
+**Key Features:**
+- Silent blocking - restricted user doesn't know
+- Messages from restricted users go to separate folder
+- Caching with 60s TTL for performance
+- RLS policies prevent users from knowing they're restricted
+
+---
+
+### 6.4 spamDetectionService.js
+
+#### Spam Detection
+```javascript
+// Detection
+detectSpam(content, senderId = null)
+// Returns: { isSpam: boolean, confidence: number, reasons: string[], score: number }
+
+// Auto-flagging
+autoFlagSpam(messageId, conversationId, confidence, reasons)
+
+// Report spam
+reportSpam(messageId, conversationId, reason = 'user_reported')
+```
+
+#### Spam Management
+```javascript
+// Get spam messages
+getSpamMessages(limit = 50, offset = 0)
+getSpamMessagesCount()
+
+// Actions
+markNotSpam(spamId)       // Alias for dismissSpam
+dismissSpam(messageId)    // Restore to inbox
+deleteSpamMessage(messageId)
+deleteAllSpam()
+
+// Block spam sender
+blockSpamSender(messageId)
+```
+
+**Spam Detection Patterns:**
+```javascript
+SPAM_PATTERNS = {
+  multipleLinks: /https?:\/\/[^\s]+/gi,           // Multiple URLs
+  shortenedUrls: /(bit\.ly|tinyurl|...)/i,        // URL shorteners
+  cryptoScam: /(free\s*bitcoin|airdrop|...)/i,    // Crypto scams
+  financialScam: /(make\s*\$?\d+.*day|...)/i,     // Financial scams
+  phishing: /(verify\s*your\s*account|...)/i,     // Phishing
+  adultSpam: /(click\s*here.*chat|...)/i,         // Adult content
+  genericSpam: /(congratulations.*won|...)/i,     // Generic spam
+  vietnameseSpam: /(kiếm\s*tiền\s*online|...)/i,  // Vietnamese spam
+}
+
+SPAM_KEYWORDS = {
+  high: ['bitcoin giveaway', 'double your money', ...],    // +25 score
+  medium: ['limited offer', 'act now', ...],               // +15 score
+  low: ['free', 'winner', ...],                            // +5 score
+}
+
+// Spam threshold: 50% confidence
+// Spam score calculation: sum of pattern matches + keyword scores
+```
+
+---
+
 ## 7. DATABASE SCHEMA
 
 ### 7.1 Tables
@@ -1106,6 +1440,57 @@ CREATE TABLE call_events (
   metadata JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Privacy Settings
+CREATE TABLE user_privacy_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE UNIQUE,
+  allow_message_requests BOOLEAN DEFAULT TRUE,
+  show_read_receipts BOOLEAN DEFAULT TRUE,
+  show_typing BOOLEAN DEFAULT TRUE,
+  show_online BOOLEAN DEFAULT TRUE,
+  show_last_active BOOLEAN DEFAULT TRUE,
+  call_permission TEXT DEFAULT 'everyone',  -- everyone, contacts_only, nobody
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Restricted Users (Silent Block)
+CREATE TABLE restricted_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  restricter_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  restricted_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  reason TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(restricter_id, restricted_id)
+);
+
+-- Message Requests
+CREATE TABLE message_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID REFERENCES conversations ON DELETE CASCADE,
+  requester_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  receiver_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  status TEXT DEFAULT 'pending',  -- pending, accepted, declined
+  message_preview TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(conversation_id, requester_id, receiver_id)
+);
+
+-- Message Spam
+CREATE TABLE message_spam (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  message_id UUID REFERENCES messages ON DELETE CASCADE,
+  conversation_id UUID REFERENCES conversations ON DELETE CASCADE,
+  reporter_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  spam_type TEXT DEFAULT 'user_reported',  -- auto_detected, user_reported, pattern_match, link_spam, repeat_spam
+  spam_reason TEXT,
+  confidence_score DECIMAL(3, 2) DEFAULT 0.00,  -- 0.00 to 1.00
+  status TEXT DEFAULT 'flagged',  -- flagged, dismissed, confirmed
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(message_id, reporter_id)
+);
 ```
 
 ### 7.2 RLS Policies
@@ -1129,6 +1514,47 @@ CREATE POLICY "Users can view messages in own conversations"
 CREATE POLICY "Users can delete own messages"
   ON messages FOR UPDATE
   USING (sender_id = auth.uid());
+
+-- Privacy settings: Users can only access their own
+CREATE POLICY "Users can view own privacy settings"
+  ON user_privacy_settings FOR SELECT
+  USING (user_id = auth.uid());
+
+CREATE POLICY "Users can update own privacy settings"
+  ON user_privacy_settings FOR UPDATE
+  USING (user_id = auth.uid());
+
+-- Restricted users: Users can only see users they restricted
+CREATE POLICY "Users can view own restrictions"
+  ON restricted_users FOR SELECT
+  USING (restricter_id = auth.uid());
+
+CREATE POLICY "Users can restrict others"
+  ON restricted_users FOR INSERT
+  WITH CHECK (restricter_id = auth.uid());
+
+CREATE POLICY "Users can unrestrict"
+  ON restricted_users FOR DELETE
+  USING (restricter_id = auth.uid());
+
+-- Blocked users: Same pattern as restricted
+CREATE POLICY "Users can view own blocks"
+  ON blocked_users FOR SELECT
+  USING (blocker_id = auth.uid());
+
+-- Message spam: Users can only see their own spam reports
+CREATE POLICY "Users can view own spam reports"
+  ON message_spam FOR SELECT
+  USING (reporter_id = auth.uid());
+
+CREATE POLICY "Users can report spam"
+  ON message_spam FOR INSERT
+  WITH CHECK (reporter_id = auth.uid());
+
+-- Message requests: Users can see requests sent to them
+CREATE POLICY "Users can view incoming requests"
+  ON message_requests FOR SELECT
+  USING (receiver_id = auth.uid() OR requester_id = auth.uid());
 ```
 
 ---
@@ -1993,7 +2419,32 @@ peerConnection.oniceconnectionstatechange = () => {
 - [ ] Call timeout (60s)
 - [ ] Reconnection handling
 
-### 14.4 Real-time Sync
+### 14.4 Privacy Features
+- [ ] Toggle message requests
+- [ ] Toggle read receipts
+- [ ] Toggle typing indicator
+- [ ] Toggle online status
+- [ ] Toggle last active
+- [ ] Set call permission (everyone/contacts/nobody)
+- [ ] Block user
+- [ ] Unblock user
+- [ ] View blocked users list
+- [ ] Restrict user (silent block)
+- [ ] Unrestrict user
+- [ ] View restricted users list
+- [ ] Restricted user doesn't know
+- [ ] View message requests
+- [ ] Accept message request
+- [ ] Decline message request
+- [ ] View spam messages
+- [ ] Mark as not spam (restore)
+- [ ] Delete spam message
+- [ ] Delete all spam
+- [ ] Spam auto-detection working
+- [ ] Report message as spam
+- [ ] Navigate to profile from chat details
+
+### 14.5 Real-time Sync
 - [ ] Messages sync with web
 - [ ] Typing indicators sync
 - [ ] Read receipts sync
@@ -2001,7 +2452,7 @@ peerConnection.oniceconnectionstatechange = () => {
 - [ ] Reactions sync
 - [ ] Pins/stars sync
 
-### 14.5 Edge Cases
+### 14.6 Edge Cases
 - [ ] Long message (1000+ chars)
 - [ ] Large file upload
 - [ ] Slow network handling
@@ -2010,7 +2461,7 @@ peerConnection.oniceconnectionstatechange = () => {
 - [ ] App kill during call
 - [ ] Multiple devices sync
 
-### 14.6 UI/UX
+### 14.7 UI/UX
 - [ ] Pull to refresh
 - [ ] Infinite scroll pagination
 - [ ] Empty states
@@ -2023,7 +2474,7 @@ peerConnection.oniceconnectionstatechange = () => {
 
 ---
 
-*Document Version: 2.0*
-*Last Updated: 2025-12-28*
+*Document Version: 3.0*
+*Last Updated: 2026-01-28*
 *Author: Claude Code*
-*Includes: Phase 1 Audio Call + Phase 2 Video Call*
+*Includes: Phase 1 Audio Call + Phase 2 Video Call + Privacy Features*

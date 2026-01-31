@@ -2,9 +2,10 @@
  * CommentItem Component
  * Single comment with reply support
  * Phase 3: Comment Threading (30/12/2024)
+ * Fixed: Vietnamese diacritics, like functionality
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -18,12 +19,13 @@ import Animated, {
   SlideInLeft,
   Layout,
 } from 'react-native-reanimated';
-import { User, MoreHorizontal } from 'lucide-react-native';
+import { User, MoreHorizontal, Heart } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import MentionText from './MentionText';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING } from '../../utils/tokens';
+import { commentService } from '../../services/commentService';
 
 const AVATAR_SIZE_ROOT = 40;
 const AVATAR_SIZE_REPLY = 32;
@@ -51,6 +53,8 @@ const CommentItem = ({
 }) => {
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(comment?.likes_count || 0);
+  const [isLiking, setIsLiking] = useState(false);
 
   // Determine avatar size based on depth
   const avatarSize = depth === 0 ? AVATAR_SIZE_ROOT : AVATAR_SIZE_REPLY;
@@ -60,6 +64,21 @@ const CommentItem = ({
 
   // Check if own comment
   const isOwn = user?.id === comment?.user_id;
+
+  // Check initial like status
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      if (user?.id && comment?.id) {
+        try {
+          const isLiked = await commentService.isCommentLiked(comment.id, user.id);
+          setLiked(isLiked);
+        } catch (err) {
+          // Ignore errors
+        }
+      }
+    };
+    checkLikeStatus();
+  }, [comment?.id, user?.id]);
 
   // Format timestamp
   const timeAgo = comment?.created_at
@@ -73,25 +92,47 @@ const CommentItem = ({
   const authorName = comment?.author_name
     || comment?.author?.display_name
     || comment?.author?.full_name
-    || 'Nguoi dung';
+    || 'Người dùng';
   const authorAvatar = comment?.author_avatar
     || comment?.author?.avatar_url;
 
-  // Handle like
-  const handleLike = useCallback(() => {
-    setLiked((prev) => !prev);
-    // TODO: Implement comment like API
-  }, []);
+  // Handle like with API
+  const handleLike = useCallback(async () => {
+    if (!user?.id) {
+      Alert.alert('Thông báo', 'Bạn cần đăng nhập để thích bình luận');
+      return;
+    }
+    if (isLiking) return;
+
+    // Optimistic update
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setLikesCount(prev => wasLiked ? Math.max(0, prev - 1) : prev + 1);
+
+    setIsLiking(true);
+    try {
+      const result = await commentService.toggleCommentLike(comment.id, user.id);
+      setLiked(result.isLiked);
+      setLikesCount(result.likesCount);
+    } catch (err) {
+      // Revert on error
+      setLiked(wasLiked);
+      setLikesCount(comment?.likes_count || 0);
+      console.error('[CommentItem] Like error:', err);
+    } finally {
+      setIsLiking(false);
+    }
+  }, [user?.id, liked, isLiking, comment?.id, comment?.likes_count]);
 
   // Handle delete
   const handleDelete = useCallback(() => {
     Alert.alert(
-      'Xoa binh luan',
-      'Ban co chac muon xoa binh luan nay?',
+      'Xóa bình luận',
+      'Bạn có chắc muốn xóa bình luận này?',
       [
-        { text: 'Huy', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Xoa',
+          text: 'Xóa',
           style: 'destructive',
           onPress: () => onDelete?.(comment?.id, comment?.parent_id),
         },
@@ -102,13 +143,13 @@ const CommentItem = ({
   // Handle more menu
   const handleMore = useCallback(() => {
     Alert.alert(
-      'Tuy chon',
+      'Tùy chọn',
       null,
       [
         ...(isOwn
-          ? [{ text: 'Xoa binh luan', onPress: handleDelete, style: 'destructive' }]
-          : [{ text: 'Bao cao', onPress: () => {} }]),
-        { text: 'Huy', style: 'cancel' },
+          ? [{ text: 'Xóa bình luận', onPress: handleDelete, style: 'destructive' }]
+          : [{ text: 'Báo cáo', onPress: () => {} }]),
+        { text: 'Hủy', style: 'cancel' },
       ]
     );
   }, [isOwn, handleDelete]);
@@ -169,14 +210,22 @@ const CommentItem = ({
           {/* Timestamp */}
           <Text style={styles.timestamp}>{timeAgo}</Text>
 
-          {/* Like */}
+          {/* Like with icon and count */}
           <Pressable
             style={styles.actionButton}
             onPress={handleLike}
+            disabled={isLiking}
           >
-            <Text style={[styles.actionText, liked && styles.actionTextActive]}>
-              Thich
-            </Text>
+            <View style={styles.likeContainer}>
+              <Heart
+                size={14}
+                color={liked ? '#FF6B6B' : COLORS.textMuted}
+                fill={liked ? '#FF6B6B' : 'transparent'}
+              />
+              <Text style={[styles.actionText, liked && styles.actionTextLiked]}>
+                {likesCount > 0 ? `${likesCount}` : 'Thích'}
+              </Text>
+            </View>
           </Pressable>
 
           {/* Reply */}
@@ -184,7 +233,7 @@ const CommentItem = ({
             style={styles.actionButton}
             onPress={() => onReply?.(comment)}
           >
-            <Text style={styles.actionText}>Tra loi</Text>
+            <Text style={styles.actionText}>Trả lời</Text>
           </Pressable>
 
           {/* More */}
@@ -252,10 +301,18 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
     paddingVertical: 2,
   },
+  likeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   actionText: {
     fontSize: 12,
     fontWeight: '600',
     color: COLORS.textMuted,
+  },
+  actionTextLiked: {
+    color: '#FF6B6B',
   },
   actionTextActive: {
     color: COLORS.gold,

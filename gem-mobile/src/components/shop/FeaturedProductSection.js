@@ -27,6 +27,7 @@ import {
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import shopBannerService from '../../services/shopBannerService';
+import InAppBrowser from '../Common/InAppBrowser';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SECTION_PADDING = SPACING.lg;
@@ -65,6 +66,11 @@ const FeaturedProductSection = ({ style }) => {
   const [featured, setFeatured] = useState(null);
   const [loading, setLoading] = useState(true);
   const hasFetched = useRef(false);
+
+  // InAppBrowser state for URL links
+  const [browserVisible, setBrowserVisible] = useState(false);
+  const [browserUrl, setBrowserUrl] = useState('');
+  const [browserTitle, setBrowserTitle] = useState('');
 
   // Fetch featured product - only once on mount
   useEffect(() => {
@@ -107,12 +113,11 @@ const FeaturedProductSection = ({ style }) => {
         });
         break;
       case 'url':
+        // Open URL in InAppBrowser (WebView) instead of external browser
         if (featured.link_value) {
-          try {
-            await Linking.openURL(featured.link_value);
-          } catch (err) {
-            console.error('[FeaturedProductSection] Open URL error:', err);
-          }
+          setBrowserUrl(featured.link_value);
+          setBrowserTitle(featured.title || 'Landing Page');
+          setBrowserVisible(true);
         }
         break;
       case 'screen':
@@ -153,8 +158,9 @@ const FeaturedProductSection = ({ style }) => {
   const BadgeIcon = getBadgeIcon(featured.badge_text);
 
   return (
-    <View style={[styles.container, style]}>
-      {/* Section Header */}
+    <>
+      <View style={[styles.container, style]}>
+        {/* Section Header */}
       <View style={styles.sectionHeader}>
         <View style={styles.headerLeft}>
           <Sparkles size={20} color={COLORS.gold} />
@@ -273,7 +279,16 @@ const FeaturedProductSection = ({ style }) => {
           </View>
         </LinearGradient>
       </TouchableOpacity>
-    </View>
+      </View>
+
+      {/* InAppBrowser for URL links */}
+      <InAppBrowser
+        visible={browserVisible}
+        url={browserUrl}
+        title={browserTitle}
+        onClose={() => setBrowserVisible(false)}
+      />
+    </>
   );
 };
 

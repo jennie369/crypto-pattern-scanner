@@ -36,7 +36,8 @@
         "NSCameraUsageDescription": "Cho phép sử dụng camera để thực hiện cuộc gọi video và chụp ảnh",
         "NSMicrophoneUsageDescription": "Cho phép sử dụng microphone để thực hiện cuộc gọi và nhập liệu bằng giọng nói",
         "NSSpeechRecognitionUsageDescription": "Cho phép nhận dạng giọng nói để chuyển đổi thành văn bản",
-        "UIBackgroundModes": ["audio", "voip"]
+        "NSContactsUsageDescription": "GEM sử dụng danh bạ để hiển thị tên người gọi",
+        "UIBackgroundModes": ["audio", "voip", "fetch", "remote-notification"]
       }
     },
     "android": {
@@ -52,7 +53,13 @@
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.BLUETOOTH",
-        "android.permission.BLUETOOTH_CONNECT"
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BIND_TELECOM_CONNECTION_SERVICE",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_PHONE_CALL",
+        "android.permission.READ_PHONE_STATE",
+        "android.permission.CALL_PHONE",
+        "android.permission.MANAGE_OWN_CALLS"
       ],
       "intentFilters": [
         {
@@ -120,6 +127,8 @@
       "expo-secure-store",
       "expo-web-browser",
       "./plugins/withAndroidGradleFix",
+      "./plugins/withCallKeep",
+      "./plugins/withVoIPPush",
       [
         "expo-build-properties",
         {

@@ -14,6 +14,8 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -35,6 +37,7 @@ import { Send, Sparkles, Star, Mail } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual, saveReflection } from '../../../services/ritualService';
+import ritualSoundService from '../../../services/ritualSoundService';
 
 // Cosmic Components
 import {
@@ -539,11 +542,33 @@ const LetterToUniverseRitual = ({ navigation }) => {
     { color: 'rgba(124, 58, 237, 0.15)', size: 200, x: SCREEN_WIDTH - 120, y: SCREEN_HEIGHT - 350, delay: 11000 },
   ], []);
 
+  // ===== SOUND MANAGEMENT =====
+  useEffect(() => {
+    ritualSoundService.init();
+    return () => {
+      ritualSoundService.stopAll();
+    };
+  }, []);
+
+  // Start/stop ambient based on phase and sound toggle
+  useEffect(() => {
+    if (isSoundOn && phase === 'write') {
+      ritualSoundService.startAmbient('letter-to-universe', 0.4);
+    } else if (isSoundOn && phase === 'sending') {
+      // Switch to starry night during sending animation
+      ritualSoundService.startAmbient('letter-to-universe', 0.5);
+    } else if (phase === 'received') {
+      ritualSoundService.stopAmbient();
+    }
+  }, [phase, isSoundOn]);
+
   // Handlers
   const handleSendWish = useCallback(async () => {
     if (!wish.trim()) return;
 
     HAPTIC_PATTERNS.cosmic.letterSend();
+    // Play whoosh sound when sending
+    if (isSoundOn) ritualSoundService.playWhoosh();
     setPhase('sending');
 
     // Start animation timeline
@@ -614,6 +639,11 @@ const LetterToUniverseRitual = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.keyboardAvoid}
     >
+      <ScrollView
+        contentContainerStyle={styles.writeScrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       <Animated.View style={[styles.writeContainer, contentAnimatedStyle]}>
         <View style={styles.iconContainer}>
           <View style={styles.mailIconWrapper}>
@@ -643,6 +673,9 @@ const LetterToUniverseRitual = ({ navigation }) => {
             onBlur={() => setInputFocused(false)}
             maxLength={CONFIG.maxChars}
             textAlignVertical="top"
+            returnKeyType="done"
+            blurOnSubmit={true}
+            onSubmitEditing={() => Keyboard.dismiss()}
           />
           <Text style={styles.charCount}>{wish.length}/{CONFIG.maxChars}</Text>
         </GlassInputCard>
@@ -654,10 +687,14 @@ const LetterToUniverseRitual = ({ navigation }) => {
           size="large"
           fullWidth
           disabled={!wish.trim()}
-          onPress={handleSendWish}
+          onPress={() => {
+            Keyboard.dismiss();
+            handleSendWish();
+          }}
           style={styles.sendButton}
         />
       </Animated.View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 
@@ -792,6 +829,9 @@ const styles = StyleSheet.create({
   },
   keyboardAvoid: {
     flex: 1,
+  },
+  writeScrollContent: {
+    flexGrow: 1,
   },
 
   // Write phase
