@@ -1165,11 +1165,31 @@ const ScannerScreen = ({ navigation }) => {
                     console.log('[ZONE] Fallback zone (2% around entry):', { zoneHigh, zoneLow, entry });
                   }
 
-                  // ✅ POSITION ZONES: Always show zones for open positions
-                  // R:R check is bypassed because user already opened the position
-                  // They need to see where their entry/SL/TP levels are
+                  // ⚠️ R:R CHECK: Only draw zone if Risk:Reward >= 1:2
+                  // Risk = distance from entry to SL
+                  // Reward = distance from entry to TP
+                  const risk = Math.abs(entry - sl);
+                  const reward = tp > 0 ? Math.abs(tp - entry) : 0;
+                  const rrRatio = risk > 0 ? reward / risk : 0;
+
+                  // Minimum R:R is 1:2 (reward must be at least 2x risk)
+                  const MIN_RR_RATIO = 2.0;
+
+                  if (rrRatio < MIN_RR_RATIO && tp > 0) {
+                    console.log('[ZONE] ❌ Zone NOT created - R:R < 1:2:', {
+                      risk: risk.toFixed(4),
+                      reward: reward.toFixed(4),
+                      rrRatio: rrRatio.toFixed(2),
+                      entry,
+                      sl,
+                      tp,
+                      required: MIN_RR_RATIO,
+                    });
+                    // Skip zone creation - R:R doesn't meet minimum requirements
+                  }
 
                   // Only create zone if we have valid boundaries
+                  // ✅ R:R check bypassed for position zones - user already opened the trade
                   if (zoneHigh > 0 && zoneLow > 0) {
                     // ✅ USE FORMATION_TIME from patternData (when pattern was detected)
                     // This is the CORRECT position where the pattern candles formed
@@ -1366,15 +1386,10 @@ const ScannerScreen = ({ navigation }) => {
                     entryPrice: position?.entryPrice,
                     stopLoss: position?.stopLoss,
                     direction: position?.direction,
-                    timeframe: position?.timeframe,
                     patternDataKeys: position?.patternData ? Object.keys(position.patternData) : [],
                   });
                   // Set all states together - React will batch them
                   setSelectedCoins([symbol]);
-                  // ✅ Set timeframe from position (important for zone display)
-                  if (position?.timeframe) {
-                    setSelectedTimeframe(position.timeframe);
-                  }
                   setSelectedPosition(position || null);
                   setShowPositionZone(true); // Auto-show zone when position selected
                 }}
@@ -1435,15 +1450,10 @@ const ScannerScreen = ({ navigation }) => {
                     entryPrice: position?.entryPrice,
                     stopLoss: position?.stopLoss,
                     direction: position?.direction,
-                    timeframe: position?.timeframe,
                     patternDataKeys: position?.patternData ? Object.keys(position.patternData) : [],
                   });
                   // Set all states together - React will batch them
                   setSelectedCoins([symbol]);
-                  // ✅ Set timeframe from position (important for zone display)
-                  if (position?.timeframe) {
-                    setSelectedTimeframe(position.timeframe);
-                  }
                   setSelectedPosition(position || null);
                   setShowPositionZone(true); // Auto-show zone when position selected
                 }}
