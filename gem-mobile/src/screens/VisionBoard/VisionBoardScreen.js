@@ -3247,10 +3247,36 @@ const VisionBoardScreen = () => {
   // During loading, we show the content (with skeleton if needed) instead of empty state
   const isVisionBoardEmpty = !loading && widgets.length === 0;
 
-  // Stats for overview
+  // Extract action items (steps) from goal widgets for accurate progress tracking
+  // This counts individual action items, not just goals marked as "completed"
+  const goalActionStats = useMemo(() => {
+    let actionsTotal = 0;
+    let actionsCompleted = 0;
+
+    // Extract steps/actionSteps from goal widgets
+    goalWidgets.forEach(widget => {
+      const content = parseWidgetContent(widget);
+      const steps = [...(content?.steps || []), ...(content?.actionSteps || [])];
+
+      // Debug logging
+      console.log('[VisionBoard] Goal widget', widget.id, 'content.steps:', content?.steps?.length || 0, 'content.actionSteps:', content?.actionSteps?.length || 0);
+      steps.forEach((s, i) => {
+        console.log(`  Step ${i}: is_completed=${s?.is_completed}, completed=${s?.completed}, title=${s?.title?.substring(0, 30)}`);
+      });
+
+      actionsTotal += steps.length;
+      actionsCompleted += steps.filter(s => s?.is_completed || s?.completed).length;
+    });
+
+    console.log('[VisionBoard] goalActionStats:', { actionsTotal, actionsCompleted });
+    return { actionsTotal, actionsCompleted };
+  }, [goalWidgets]);
+
+  // Stats for overview - now uses action items from goals, not just goal.completed
   const stats = {
-    goalsCompleted: allGoals.filter(g => g?.completed).length,
-    goalsTotal: allGoals.length,
+    // Use action items count instead of goals marked as completed
+    goalsCompleted: goalActionStats.actionsCompleted,
+    goalsTotal: goalActionStats.actionsTotal || allGoals.length, // Fallback to goals count if no actions
     affirmationsCompleted: affirmationsCompletedToday,
     habitsPercent: allHabits.length > 0
       ? Math.round((allHabits.filter(h => h?.completed).length / allHabits.length) * 100)
@@ -3576,35 +3602,26 @@ const VisionBoardScreen = () => {
 
   // Re-fetch widgets when screen gets focus - WITH GLOBAL CACHING for instant display
   // Key principle: NEVER show loading if we have ANY cached data
-  // Use InteractionManager to defer heavy operations until after animation completes
+  // ALWAYS fetch fresh data on focus to sync updates from GoalDetailScreen
   useFocusEffect(
     useCallback(() => {
-      // IMMEDIATELY sync from cache - no waiting
+      // IMMEDIATELY sync from cache - no waiting for instant display
       if (visionBoardCache.widgets) {
-        console.log('[VisionBoard] Screen focused - using cached data');
+        console.log('[VisionBoard] Screen focused - using cached data for instant display');
         setLoading(false);
         if (widgets !== visionBoardCache.widgets) {
           setWidgets(visionBoardCache.widgets);
         }
       }
 
-      // Defer API calls until AFTER navigation animation completes - makes screen transition instant
-      const task = InteractionManager.runAfterInteractions(() => {
-        const now = Date.now();
-        const cacheExpired = now - visionBoardCache.lastFetch > visionBoardCache.CACHE_DURATION;
-
-        // Only fetch if no cache or cache expired
-        if (!visionBoardCache.widgets || cacheExpired) {
-          console.log('[VisionBoard] Cache expired - refreshing data in background');
-          Promise.all([
-            fetchWidgets(),
-            fetchReadingHistory(),
-            fetchCalendarAndCharts(),
-          ]);
-        }
-      });
-
-      return () => task.cancel();
+      // ALWAYS fetch fresh data in background (ignore cache expiry)
+      // This ensures action progress updates from GoalDetailScreen are reflected immediately
+      console.log('[VisionBoard] Screen focused - ALWAYS fetching fresh data');
+      Promise.all([
+        fetchWidgets(),
+        fetchReadingHistory(),
+        fetchCalendarAndCharts(),
+      ]);
     }, [fetchWidgets, fetchReadingHistory, fetchCalendarAndCharts])
   );
 
