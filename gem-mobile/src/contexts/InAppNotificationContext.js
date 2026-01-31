@@ -214,13 +214,59 @@ export const InAppNotificationProvider = ({ children }) => {
       }
 
       // Handle call notifications
+      // Show toast with working accept/decline handlers as FALLBACK
+      // (in case realtime subscription doesn't detect the call)
       if (data?.type === 'incoming_call') {
+        console.log('[InAppNotification] Incoming call push received:', data.callId);
+
+        // Import call service for accept/decline
+        const { callService } = require('../services/callService');
+
+        // Create handlers that actually work
+        const handleAcceptFromToast = async () => {
+          console.log('[InAppNotification] Accept from toast, callId:', data.callId);
+          try {
+            // Fetch call info
+            const { call } = await callService.getCall(data.callId);
+            if (call) {
+              // Navigate to incoming call screen
+              const navReady = navigationRef.current &&
+                (typeof navigationRef.current.isReady === 'function'
+                  ? navigationRef.current.isReady()
+                  : true);
+
+              if (navReady) {
+                navigationRef.current.navigate('Call', {
+                  screen: 'IncomingCall',
+                  params: {
+                    call,
+                    caller: call.caller || { display_name: data.callerName, avatar_url: data.callerAvatar },
+                  },
+                });
+              }
+            }
+          } catch (error) {
+            console.error('[InAppNotification] Error accepting call from toast:', error);
+          }
+        };
+
+        const handleDeclineFromToast = async () => {
+          console.log('[InAppNotification] Decline from toast, callId:', data.callId);
+          try {
+            await callService.declineCall(data.callId);
+          } catch (error) {
+            console.error('[InAppNotification] Error declining call from toast:', error);
+          }
+        };
+
         showNotification({
           type: NOTIFICATION_TYPES.INCOMING_CALL,
           title: notification.request.content.title,
           body: notification.request.content.body,
           avatar: data.callerAvatar,
           data,
+          onAccept: handleAcceptFromToast,
+          onDecline: handleDeclineFromToast,
         });
       }
     });

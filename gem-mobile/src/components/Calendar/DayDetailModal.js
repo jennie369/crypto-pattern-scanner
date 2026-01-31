@@ -4,6 +4,7 @@
  *
  * Created: December 9, 2025
  * Part of Vision Board 2.0 Redesign
+ * Updated: January 2026 - Cosmic theme redesign
  */
 
 import React from 'react';
@@ -17,8 +18,10 @@ import {
   Dimensions,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Icons from 'lucide-react-native';
 import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
+import { COSMIC_COLORS, COSMIC_GRADIENTS, COSMIC_SHADOWS, COSMIC_SPACING } from '../../theme/cosmicTokens';
 import { CalendarEventItem } from './MonthCalendar';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -38,12 +41,24 @@ const RITUAL_NAMES = {
   'crystal-healing': 'Chữa Lành Pha Lê',
 };
 
-// Reading type mapping
+// Reading type mapping - Cosmic colors
 const READING_TYPES = {
-  tarot: { name: 'Tarot', icon: 'Sparkles', color: '#9C0612' },
-  iching: { name: 'I Ching', icon: 'BookOpen', color: '#6A5BFF' },
-  numerology: { name: 'Số Học', icon: 'Hash', color: '#FFBD59' },
-  angel: { name: 'Thiên Thần', icon: 'Feather', color: '#FF69B4' },
+  tarot: { name: 'Tarot', icon: 'Sparkles', color: COSMIC_COLORS.glow.purple },
+  iching: { name: 'I Ching', icon: 'BookOpen', color: COSMIC_COLORS.glow.cyan },
+  numerology: { name: 'Số Học', icon: 'Hash', color: COSMIC_COLORS.glow.gold },
+  angel: { name: 'Thiên Thần', icon: 'Feather', color: COSMIC_COLORS.glow.pink },
+};
+
+// Ritual icon colors - Cosmic vibrant
+const RITUAL_COLORS = {
+  'heart-expansion': COSMIC_COLORS.ritualThemes.heart.primary,
+  'gratitude-flow': COSMIC_COLORS.ritualThemes.gratitude.primary,
+  'cleansing-breath': COSMIC_COLORS.ritualThemes.breath.primary,
+  'water-manifest': COSMIC_COLORS.ritualThemes.water.primary,
+  'letter-to-universe': COSMIC_COLORS.ritualThemes.letter.primary,
+  'burn-release': COSMIC_COLORS.ritualThemes.burn.primary,
+  'star-wish': COSMIC_COLORS.ritualThemes.star.gold,
+  'crystal-healing': COSMIC_COLORS.ritualThemes.crystal.primary,
 };
 
 const DayDetailModal = ({
@@ -103,7 +118,7 @@ const DayDetailModal = ({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <BlurView intensity={20} style={styles.blurContainer}>
+        <BlurView intensity={40} tint="dark" style={styles.blurContainer}>
           <TouchableOpacity
             style={styles.dismissArea}
             activeOpacity={1}
@@ -111,6 +126,13 @@ const DayDetailModal = ({
           />
 
           <View style={styles.modalContainer}>
+            <LinearGradient
+              colors={[COSMIC_COLORS.bgMystic, COSMIC_COLORS.bgCosmic, COSMIC_COLORS.bgDeepSpace]}
+              style={StyleSheet.absoluteFill}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+            />
+
             {/* Handle bar */}
             <View style={styles.handleBar} />
 
@@ -132,11 +154,11 @@ const DayDetailModal = ({
                     onPress={() => onAddEvent(date)}
                     style={styles.addButton}
                   >
-                    <Icons.Plus size={20} color={COLORS.textPrimary} />
+                    <Icons.Plus size={20} color="#FFFFFF" />
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                  <Icons.X size={24} color={COLORS.textMuted} />
+                  <Icons.X size={24} color="rgba(255,255,255,0.6)" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -148,7 +170,7 @@ const DayDetailModal = ({
             >
               {events.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <Icons.CalendarX size={48} color={COLORS.textMuted} />
+                  <Icons.CalendarX size={48} color={COSMIC_COLORS.text.muted} />
                   <Text style={styles.emptyText}>Không có sự kiện nào</Text>
                   {onAddEvent && (
                     <TouchableOpacity
@@ -208,22 +230,23 @@ const DayDetailModal = ({
               {rituals.length > 0 && (
                 <View style={styles.journalSection}>
                   <View style={styles.journalHeader}>
-                    <Icons.Sparkles size={18} color={COLORS.purple} />
+                    <Icons.Sparkles size={18} color={COSMIC_COLORS.glow.purple} />
                     <Text style={styles.journalTitle}>Nghi thức đã hoàn thành</Text>
                   </View>
                   {rituals.map((ritual, index) => {
                     const time = ritual.completed_at
                       ? new Date(ritual.completed_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
                       : '';
+                    const ritualColor = RITUAL_COLORS[ritual.ritual_slug] || COSMIC_COLORS.glow.purple;
                     return (
                       <TouchableOpacity
                         key={ritual.id || index}
-                        style={styles.journalItem}
+                        style={[styles.journalItem, { borderColor: `${ritualColor}30` }]}
                         onPress={() => onRitualPress?.(ritual)}
                         activeOpacity={0.7}
                       >
-                        <View style={[styles.journalIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
-                          <Icons.Heart size={16} color={COLORS.purple} />
+                        <View style={[styles.journalIcon, { backgroundColor: `${ritualColor}25` }]}>
+                          <Icons.Heart size={16} color={ritualColor} />
                         </View>
                         <View style={styles.journalContent}>
                           <Text style={styles.journalItemTitle}>
@@ -236,7 +259,7 @@ const DayDetailModal = ({
                           )}
                           <Text style={styles.journalTime}>{time}</Text>
                         </View>
-                        <View style={styles.journalXP}>
+                        <View style={[styles.journalXP, { backgroundColor: `${COSMIC_COLORS.functional.success}20`, borderColor: `${COSMIC_COLORS.functional.success}40` }]}>
                           <Text style={styles.journalXPText}>+{ritual.xp_earned || 0} XP</Text>
                         </View>
                       </TouchableOpacity>
@@ -249,11 +272,11 @@ const DayDetailModal = ({
               {readings.length > 0 && (
                 <View style={styles.journalSection}>
                   <View style={styles.journalHeader}>
-                    <Icons.BookOpen size={18} color={COLORS.burgundy} />
+                    <Icons.BookOpen size={18} color={COSMIC_COLORS.glow.cyan} />
                     <Text style={styles.journalTitle}>Bói toán đã thực hiện</Text>
                   </View>
                   {readings.map((reading, index) => {
-                    const readingType = READING_TYPES[reading.reading_type] || { name: reading.reading_type, icon: 'Sparkles', color: COLORS.burgundy };
+                    const readingType = READING_TYPES[reading.reading_type] || { name: reading.reading_type, icon: 'Sparkles', color: COSMIC_COLORS.glow.purple };
                     const ReadingIcon = Icons[readingType.icon] || Icons.Sparkles;
                     const time = reading.created_at
                       ? new Date(reading.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
@@ -277,7 +300,7 @@ const DayDetailModal = ({
                           )}
                           <Text style={styles.journalTime}>{time}</Text>
                         </View>
-                        <Icons.ChevronRight size={16} color={COLORS.textMuted} />
+                        <Icons.ChevronRight size={16} color={COSMIC_COLORS.text.muted} />
                       </TouchableOpacity>
                     );
                   })}
@@ -449,150 +472,182 @@ export const AddEventFAB = ({ onPress, style }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center', // Changed from flex-end to center for higher position
+    paddingTop: SCREEN_HEIGHT * 0.08, // Move modal up
   },
   blurContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start', // Changed for higher position
+    paddingTop: SCREEN_HEIGHT * 0.05,
   },
   dismissArea: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   modalContainer: {
-    backgroundColor: COLORS.bgMid,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: SCREEN_HEIGHT * 0.75,
-    paddingBottom: 34, // Safe area
+    borderRadius: 24,
+    marginHorizontal: 16,
+    maxHeight: SCREEN_HEIGHT * 0.8,
+    paddingBottom: 24,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.borderGlow,
+    ...COSMIC_SHADOWS.glowMedium,
+    shadowColor: COSMIC_COLORS.glow.purple,
   },
   handleBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
+    width: 48,
+    height: 5,
+    backgroundColor: 'rgba(168, 85, 247, 0.5)',
+    borderRadius: 3,
     alignSelf: 'center',
-    marginTop: SPACING.md,
-    marginBottom: SPACING.sm,
+    marginTop: COSMIC_SPACING.lg,
+    marginBottom: COSMIC_SPACING.md,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: COSMIC_SPACING.xl,
+    paddingVertical: COSMIC_SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: COSMIC_COLORS.glass.borderGlow,
   },
   dateContainer: {
     flex: 1,
   },
   dayName: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COSMIC_COLORS.glow.cyan,
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   dateNumber: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.hero,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    lineHeight: 40,
+    color: '#FFFFFF',
+    fontSize: 48,
+    fontWeight: '700',
+    lineHeight: 56,
+    textShadowColor: COSMIC_COLORS.glow.purple,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
   },
   todayBadge: {
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: SPACING.xs,
+    backgroundColor: COSMIC_COLORS.glow.gold,
+    paddingHorizontal: COSMIC_SPACING.md,
+    paddingVertical: COSMIC_SPACING.xs,
+    borderRadius: COSMIC_SPACING.sm,
     alignSelf: 'flex-start',
-    marginTop: SPACING.xs,
+    marginTop: COSMIC_SPACING.sm,
+    shadowColor: COSMIC_COLORS.glow.gold,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
   },
   todayText: {
-    color: COLORS.bgDarkest,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#0D0D2B',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
+    gap: COSMIC_SPACING.md,
   },
   addButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COSMIC_COLORS.glow.purple,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: COSMIC_COLORS.glow.purple,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+  },
+  closeButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.purple,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeButton: {
-    padding: SPACING.xs,
-  },
   eventsList: {
-    padding: SPACING.lg,
+    padding: COSMIC_SPACING.xl,
   },
   eventGroup: {
-    marginBottom: SPACING.lg,
+    marginBottom: COSMIC_SPACING.xl,
   },
   groupTitle: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COSMIC_COLORS.glow.cyan,
+    fontSize: 11,
+    fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: SPACING.sm,
+    letterSpacing: 1.5,
+    marginBottom: COSMIC_SPACING.md,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: SPACING.huge,
+    paddingVertical: COSMIC_SPACING.huge,
   },
   emptyText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    marginTop: SPACING.md,
+    color: COSMIC_COLORS.text.muted,
+    fontSize: 16,
+    marginTop: COSMIC_SPACING.lg,
   },
   emptyAddButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.purple,
+    marginTop: COSMIC_SPACING.xl,
+    paddingVertical: COSMIC_SPACING.md,
+    paddingHorizontal: COSMIC_SPACING.xl,
+    borderRadius: COSMIC_SPACING.lg,
+    borderWidth: 1.5,
+    borderColor: COSMIC_COLORS.glow.purple,
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
   },
   emptyAddText: {
-    color: COLORS.purple,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    marginLeft: SPACING.xs,
+    color: COSMIC_COLORS.glow.purple,
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: COSMIC_SPACING.sm,
   },
   summaryContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.glassBg,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.lg,
-    marginTop: SPACING.md,
+    backgroundColor: COSMIC_COLORS.glass.bg,
+    borderRadius: 16,
+    padding: COSMIC_SPACING.xl,
+    marginTop: COSMIC_SPACING.lg,
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.border,
   },
   summaryItem: {
     alignItems: 'center',
-    paddingHorizontal: SPACING.xl,
+    paddingHorizontal: COSMIC_SPACING.xxl,
   },
   summaryValue: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '700',
   },
   summaryLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginTop: SPACING.xxs,
+    color: COSMIC_COLORS.text.muted,
+    fontSize: 12,
+    marginTop: COSMIC_SPACING.xs,
   },
   summaryDivider: {
     width: 1,
-    height: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    height: 36,
+    backgroundColor: COSMIC_COLORS.glass.borderGlow,
   },
 
   // FAB styles
@@ -603,47 +658,50 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: COLORS.gold,
+    backgroundColor: COSMIC_COLORS.glow.gold,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: COLORS.gold,
+    shadowColor: COSMIC_COLORS.glow.gold,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
     elevation: 8,
   },
 
-  // Journal styles
+  // Journal styles - Cosmic redesign
   journalSection: {
-    marginTop: SPACING.lg,
-    paddingTop: SPACING.md,
+    marginTop: COSMIC_SPACING.xl,
+    paddingTop: COSMIC_SPACING.lg,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: COSMIC_COLORS.glass.borderGlow,
   },
   journalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.md,
-    gap: SPACING.sm,
+    marginBottom: COSMIC_SPACING.lg,
+    gap: COSMIC_SPACING.sm,
   },
   journalTitle: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COSMIC_COLORS.text.secondary,
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   journalItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
-    gap: SPACING.md,
+    backgroundColor: COSMIC_COLORS.glass.bg,
+    borderRadius: 16,
+    padding: COSMIC_SPACING.lg,
+    marginBottom: COSMIC_SPACING.md,
+    gap: COSMIC_SPACING.lg,
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.border,
   },
   journalIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -651,60 +709,62 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   journalItemTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
   journalReflection: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COSMIC_COLORS.text.muted,
+    fontSize: 13,
     fontStyle: 'italic',
-    marginTop: 2,
-    lineHeight: 16,
+    marginTop: 4,
+    lineHeight: 18,
   },
   journalTime: {
-    color: COLORS.textHint,
-    fontSize: TYPOGRAPHY.fontSize.xxs,
-    marginTop: 4,
+    color: COSMIC_COLORS.text.hint,
+    fontSize: 11,
+    marginTop: 6,
   },
   journalXP: {
-    backgroundColor: 'rgba(58, 247, 166, 0.15)',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: SPACING.xs,
+    backgroundColor: 'rgba(58, 247, 166, 0.2)',
+    paddingHorizontal: COSMIC_SPACING.md,
+    paddingVertical: COSMIC_SPACING.xs,
+    borderRadius: COSMIC_SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(58, 247, 166, 0.3)',
   },
   journalXPText: {
-    color: COLORS.success,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COSMIC_COLORS.functional.success,
+    fontSize: 12,
+    fontWeight: '700',
   },
   journalSummary: {
     alignItems: 'center',
-    paddingVertical: SPACING.md,
+    paddingVertical: COSMIC_SPACING.lg,
   },
   journalSummaryText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COSMIC_COLORS.text.muted,
+    fontSize: 14,
   },
   // Trading styles
   tradePnL: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: SPACING.xs,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingHorizontal: COSMIC_SPACING.md,
+    paddingVertical: COSMIC_SPACING.xs,
+    borderRadius: COSMIC_SPACING.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   tradePnLText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    fontSize: 14,
+    fontWeight: '700',
   },
   resultBadge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: SPACING.xs,
+    paddingHorizontal: COSMIC_SPACING.md,
+    paddingVertical: COSMIC_SPACING.xs,
+    borderRadius: COSMIC_SPACING.sm,
   },
   resultText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    fontSize: 11,
+    fontWeight: '700',
   },
 });
 

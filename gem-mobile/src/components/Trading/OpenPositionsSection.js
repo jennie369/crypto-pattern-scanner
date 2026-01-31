@@ -228,6 +228,9 @@ const PositionCard = ({
 
 /**
  * Open Positions Section Component
+ *
+ * OPTIMIZATION: Uses cached positions from paperTradeService to show instantly
+ * without loading state when switching tabs. Only shows loading when no cached data.
  */
 const OpenPositionsSection = ({
   userId,
@@ -237,9 +240,29 @@ const OpenPositionsSection = ({
   onPositionClose,
   refreshTrigger = 0,
 }) => {
-  const [positions, setPositions] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // OPTIMIZATION: Get cached positions immediately (no async) to avoid loading flicker
+  const getCachedPositions = () => {
+    if (paperTradeService.initialized && paperTradeService.currentUserId === userId) {
+      return paperTradeService.getOpenPositions(userId) || [];
+    }
+    return [];
+  };
+
+  const getCachedStats = () => {
+    if (paperTradeService.initialized && paperTradeService.currentUserId === userId) {
+      return paperTradeService.getStats(userId) || null;
+    }
+    return null;
+  };
+
+  // Initialize with cached data if available - NO LOADING STATE if we have cached data
+  const cachedPositions = getCachedPositions();
+  const cachedStats = getCachedStats();
+
+  const [positions, setPositions] = useState(cachedPositions);
+  const [stats, setStats] = useState(cachedStats);
+  // CRITICAL: Only show loading if we have NO cached data
+  const [loading, setLoading] = useState(cachedPositions.length === 0 && !paperTradeService.initialized);
   const [collapsed, setCollapsed] = useState(false);
   const [closingId, setClosingId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -259,6 +282,16 @@ const OpenPositionsSection = ({
       }
 
       console.log('[OpenPositionsSection] Loading positions for userId:', userId, 'forceRefresh:', forceRefresh);
+
+      // OPTIMIZATION: Only show loading if we have no cached data AND service not initialized
+      // This prevents loading flicker when switching tabs
+      const hasCachedData = paperTradeService.initialized &&
+        paperTradeService.currentUserId === userId &&
+        (paperTradeService.openPositions?.length > 0 || paperTradeService.getOpenPositions(userId)?.length >= 0);
+
+      if (!hasCachedData && !paperTradeService.initialized) {
+        setLoading(true);
+      }
 
       // Use forceRefreshFromCloud only for manual refresh
       // For normal loads, use init() which has built-in data protection
@@ -511,7 +544,9 @@ const OpenPositionsSection = ({
   const totalPnL = positions.reduce((sum, p) => sum + (p.unrealizedPnL || 0), 0);
   const totalMargin = positions.reduce((sum, p) => sum + (p.margin || 0), 0);
 
-  if (loading) {
+  // OPTIMIZATION: Only show loading when we have NO cached positions AND still loading
+  // This prevents loading flicker when switching tabs
+  if (loading && positions.length === 0) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>

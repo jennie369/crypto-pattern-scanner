@@ -38,6 +38,8 @@ export default function TabNavigator() {
       tabBar={(props) => <GlassBottomTab {...props} />}
       screenOptions={{
         headerShown: false,
+        lazy: true, // Only mount screen when first accessed - improves performance
+        freezeOnBlur: true, // Freeze inactive screens to reduce re-renders
       }}
       backBehavior="history"
     >

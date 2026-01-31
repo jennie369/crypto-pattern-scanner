@@ -314,12 +314,26 @@ class CallService {
         })
         .eq('id', callId);
 
-      // Update participant status
+      // Update declining user's participant status
       await supabase
         .from('call_participants')
-        .update({ status: PARTICIPANT_STATUS.DECLINED })
+        .update({
+          status: PARTICIPANT_STATUS.DECLINED,
+          updated_at: new Date().toISOString(),
+        })
         .eq('call_id', callId)
         .eq('user_id', user.id);
+
+      // Also update caller's participant status to 'left' so they can call again
+      await supabase
+        .from('call_participants')
+        .update({
+          status: PARTICIPANT_STATUS.LEFT,
+          left_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('call_id', callId)
+        .eq('role', PARTICIPANT_ROLE.CALLER);
 
       // Send end signal
       await callSignalingService.sendEnd(END_REASON.DECLINED);
@@ -395,6 +409,7 @@ class CallService {
         callKeepService.endCall(callId);
       }
 
+      // Update call record
       await supabase
         .from('calls')
         .update({
@@ -403,6 +418,28 @@ class CallService {
           end_reason: END_REASON.CANCELLED,
         })
         .eq('id', callId);
+
+      // Update ALL participants to terminal status to prevent "busy" error
+      // Callee who was ringing -> cancelled
+      await supabase
+        .from('call_participants')
+        .update({
+          status: PARTICIPANT_STATUS.CANCELLED,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('call_id', callId)
+        .eq('role', PARTICIPANT_ROLE.CALLEE);
+
+      // Caller -> left
+      await supabase
+        .from('call_participants')
+        .update({
+          status: PARTICIPANT_STATUS.LEFT,
+          left_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('call_id', callId)
+        .eq('role', PARTICIPANT_ROLE.CALLER);
 
       // Send end signal
       await callSignalingService.sendEnd(END_REASON.CANCELLED);
@@ -915,6 +952,8 @@ class CallService {
         } catch (rpcErr) {
           // Fallback: update directly if RPC doesn't exist
           console.log('[CallService] mark_call_missed RPC failed, using direct update:', rpcErr.message);
+
+          // Update call record
           await supabase
             .from('calls')
             .update({
@@ -923,6 +962,30 @@ class CallService {
               end_reason: END_REASON.NO_ANSWER,
             })
             .eq('id', callId);
+
+          // IMPORTANT: Also update call_participants to prevent "busy" error on next call
+          // Update callee to 'missed'
+          await supabase
+            .from('call_participants')
+            .update({
+              status: PARTICIPANT_STATUS.MISSED,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('call_id', callId)
+            .eq('role', PARTICIPANT_ROLE.CALLEE);
+
+          // Update caller to 'left'
+          await supabase
+            .from('call_participants')
+            .update({
+              status: PARTICIPANT_STATUS.LEFT,
+              left_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('call_id', callId)
+            .eq('role', PARTICIPANT_ROLE.CALLER);
+
+          console.log('[CallService] Fallback: Updated call_participants status');
         }
 
         // Send end signal to peer so they know call is over

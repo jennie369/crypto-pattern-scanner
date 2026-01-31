@@ -14,6 +14,7 @@ import {
   Dimensions,
   Linking,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import shopBannerService from '../../services/shopBannerService';
@@ -166,15 +167,23 @@ const HeroBannerCarousel = ({ style }) => {
         resizeMode="cover"
         showPlaceholder={true}
       />
-      {/* Gradient overlay for text visibility */}
-      <View style={styles.overlay}>
-        {item.title && (
-          <Text style={styles.bannerTitle}>{item.title}</Text>
-        )}
-        {item.subtitle && (
-          <Text style={styles.bannerSubtitle}>{item.subtitle}</Text>
-        )}
-      </View>
+      {/* Gradient overlay for text visibility - stronger gradient at bottom */}
+      {(item.title || item.subtitle) && (
+        <LinearGradient
+          colors={['transparent', 'rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.85)']}
+          locations={[0, 0.5, 1]}
+          style={styles.overlay}
+        >
+          <View style={styles.textContainer}>
+            {item.title && (
+              <Text style={styles.bannerTitle}>{item.title}</Text>
+            )}
+            {item.subtitle && (
+              <Text style={styles.bannerSubtitle}>{item.subtitle}</Text>
+            )}
+          </View>
+        </LinearGradient>
+      )}
     </TouchableOpacity>
   );
 
@@ -270,25 +279,30 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
     justifyContent: 'flex-end',
+  },
+  textContainer: {
     padding: SPACING.lg,
+    paddingBottom: SPACING.xl,
   },
   bannerTitle: {
     color: COLORS.textPrimary,
     fontSize: TYPOGRAPHY.fontSize.xxxl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     marginBottom: SPACING.xs,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    // Stronger text shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
   bannerSubtitle: {
-    color: COLORS.textSecondary,
+    color: COLORS.textPrimary,
     fontSize: TYPOGRAPHY.fontSize.lg,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    // Stronger text shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
   paginationContainer: {
     flexDirection: 'row',

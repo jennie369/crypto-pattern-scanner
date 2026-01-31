@@ -43,12 +43,15 @@ import {
   CATEGORY_LABELS,
   TYPE_TO_CATEGORY,
 } from '../../services/notificationService';
+import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import useScrollToTop from '../../hooks/useScrollToTop';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const READ_NOTIFICATIONS_KEY = '@gem_read_notification_ids';
 
 // ============================================
 // GLOBAL CACHE - persists across tab switches
@@ -58,6 +61,28 @@ const notificationsCache = {
   lastFetch: 0,
   CACHE_DURATION: 60000, // 60 seconds
 };
+
+// Local read IDs cache - persists read state even if DB update fails
+let localReadIds = new Set();
+const loadLocalReadIds = async () => {
+  try {
+    const stored = await AsyncStorage.getItem(READ_NOTIFICATIONS_KEY);
+    if (stored) {
+      localReadIds = new Set(JSON.parse(stored));
+    }
+  } catch (e) {
+    console.warn('[Notifications] Failed to load local read IDs');
+  }
+};
+const saveLocalReadIds = async () => {
+  try {
+    await AsyncStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify([...localReadIds]));
+  } catch (e) {
+    console.warn('[Notifications] Failed to save local read IDs');
+  }
+};
+// Load on module init
+loadLocalReadIds();
 
 // Notification type configurations
 const NOTIFICATION_CONFIG = {
@@ -166,35 +191,81 @@ export default function NotificationsScreen() {
         return;
       }
 
+      // Ensure local read IDs are loaded
+      await loadLocalReadIds();
+
       // Fetch from BOTH tables in parallel and merge results
-      // - notifications table: system notifications, trading alerts, orders, etc.
-      // - forum_notifications table: social notifications (likes, comments, follows) with user data
       const [systemResult, forumData] = await Promise.all([
         notificationService.getUserNotificationsFromDB(user.id),
         forumService.getNotifications(),
       ]);
+
+      // Helper: check if notification is read (DB or local cache)
+      const isRead = (n) => {
+        if (n.read || n.is_read) return true;
+        if (n.id && localReadIds.has(n.id.toString())) return true;
+        return false;
+      };
 
       // Process system notifications (from notifications table)
       const systemNotifications = (systemResult.success && systemResult.data)
         ? systemResult.data.map(n => ({
             ...n,
             source: 'system',
-            read: n.read || n.is_read || false,
+            read: isRead(n),
           }))
         : [];
 
       // Process forum notifications (from forum_notifications table)
-      // These have from_user data with name and avatar
       const forumNotifications = (forumData || []).map(n => ({
         ...n,
         source: 'forum',
         category: TYPE_TO_CATEGORY[n.type] || 'social',
-        read: n.read || n.is_read || false,
+        read: isRead(n),
       }));
 
-      // Merge and sort by created_at descending
-      const allNotifications = [...systemNotifications, ...forumNotifications]
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      // Merge all notifications
+      let allNotifications = [...systemNotifications, ...forumNotifications];
+
+      // Collect user IDs that need profile fetching (no from_user data)
+      const userIdsToFetch = new Set();
+      allNotifications.forEach(n => {
+        if (!n.from_user?.full_name && !n.from_user?.avatar_url) {
+          // Try to get user ID from various fields
+          const userId = n.from_user_id || n.data?.fromUserId || n.data?.reactor_id;
+          if (userId) userIdsToFetch.add(userId);
+        }
+      });
+
+      // Batch fetch user profiles if needed
+      if (userIdsToFetch.size > 0) {
+        try {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, username, avatar_url')
+            .in('id', [...userIdsToFetch]);
+
+          if (profiles) {
+            const profileMap = new Map(profiles.map(p => [p.id, p]));
+
+            // Enrich notifications with user data
+            allNotifications = allNotifications.map(n => {
+              if (n.from_user?.full_name || n.from_user?.avatar_url) return n;
+              const userId = n.from_user_id || n.data?.fromUserId || n.data?.reactor_id;
+              const profile = userId ? profileMap.get(userId) : null;
+              if (profile) {
+                return { ...n, from_user: profile };
+              }
+              return n;
+            });
+          }
+        } catch (err) {
+          console.warn('[Notifications] Failed to fetch user profiles:', err);
+        }
+      }
+
+      // Sort by created_at descending
+      allNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
       updateNotifications(allNotifications);
     } catch (error) {
@@ -365,18 +436,25 @@ export default function NotificationsScreen() {
     }
   };
 
-  // Mark all as read - persist to BOTH notification tables
+  // Mark all as read - persist to DB AND local storage
   const handleMarkAllAsRead = async () => {
-    if (user?.id) {
-      // Update both tables in parallel for complete persistence
-      await Promise.all([
-        notificationService.markAllNotificationsAsRead(user.id),
-        forumService.markAllAsRead(),
-      ]);
-    }
-    // Update state AND global cache so it persists across tab switches/reloads
+    // 1. Update local state immediately for instant UI feedback
     const updatedNotifications = notifications.map(n => ({ ...n, read: true, is_read: true }));
     updateNotifications(updatedNotifications);
+
+    // 2. Save all IDs to local read cache (persists even if DB fails)
+    notifications.forEach(n => {
+      if (n.id) localReadIds.add(n.id.toString());
+    });
+    saveLocalReadIds();
+
+    // 3. Try to update database in background
+    if (user?.id) {
+      Promise.all([
+        notificationService.markAllNotificationsAsRead(user.id),
+        forumService.markAllAsRead(),
+      ]).catch(err => console.warn('[Notifications] DB update failed:', err));
+    }
   };
 
   // Format timestamp

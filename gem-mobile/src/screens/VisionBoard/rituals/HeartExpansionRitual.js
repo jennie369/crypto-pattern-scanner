@@ -489,7 +489,7 @@ const HeartExpansionRitual = ({ navigation }) => {
       </View>
 
       <InstructionText
-        text="Chạm giữ vào trái tim để lan tỏa yêu thương"
+        text="Chạm liên tục vào trái tim để tăng năng lượng. Chọn Bản thân, Người thân hoặc Vũ trụ để gửi yêu thương đến nơi bạn muốn."
         variant="default"
         color={COSMIC_COLORS.text.secondary}
         style={styles.expansionInstruction}

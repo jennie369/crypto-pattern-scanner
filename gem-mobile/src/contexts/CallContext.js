@@ -387,6 +387,23 @@ export function CallProvider({ children }) {
     };
   }, [stopRingtone]);
 
+  // ========== MANUALLY TRIGGER INCOMING CALL (for push notification fallback) ==========
+
+  const triggerIncomingCall = useCallback(async (callId) => {
+    console.log('[CallProvider] Manually triggering incoming call:', callId);
+    try {
+      // Fetch call info
+      const { call } = await callService.getCall(callId);
+      if (call && (call.status === 'ringing' || call.status === 'initiating')) {
+        handleIncomingCall(call);
+      } else {
+        console.log('[CallProvider] Call not in ringing state:', call?.status);
+      }
+    } catch (error) {
+      console.error('[CallProvider] Error triggering incoming call:', error);
+    }
+  }, [handleIncomingCall]);
+
   // ========== CONTEXT VALUE ==========
 
   const contextValue = {
@@ -398,6 +415,8 @@ export function CallProvider({ children }) {
     callKeepReady,
     // Debug info for troubleshooting call issues
     debugInfo,
+    // Manual trigger for push notification fallback
+    triggerIncomingCall,
   };
 
   return (

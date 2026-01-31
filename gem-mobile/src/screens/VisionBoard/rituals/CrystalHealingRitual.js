@@ -30,6 +30,7 @@ import { Gem, Sparkles, Heart, Shield, Sun, Moon, Zap } from 'lucide-react-nativ
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual, saveReflection } from '../../../services/ritualService';
+import ritualSoundService from '../../../services/ritualSoundService';
 import useVideoPause from '../../../hooks/useVideoPause';
 
 // Cosmic Components
@@ -287,6 +288,23 @@ const CrystalHealingRitual = ({ navigation }) => {
     };
   }, [phase]);
 
+  // ===== SOUND MANAGEMENT =====
+  useEffect(() => {
+    ritualSoundService.init();
+    return () => {
+      ritualSoundService.stopAll();
+    };
+  }, []);
+
+  // Start/stop ambient based on phase and sound toggle
+  useEffect(() => {
+    if (isSoundOn && (phase === 'selection' || phase === 'healing')) {
+      ritualSoundService.startAmbient('crystal-healing', 0.4);
+    } else if (phase === 'completion') {
+      ritualSoundService.stopAmbient();
+    }
+  }, [phase, isSoundOn]);
+
   // ===== HANDLERS =====
   const handleStart = useCallback(() => {
     HAPTIC_PATTERNS.tap();
@@ -299,8 +317,10 @@ const CrystalHealingRitual = ({ navigation }) => {
 
   const handleSelectCrystal = useCallback((crystal) => {
     HAPTIC_PATTERNS.tap();
+    // Play chime sound when selecting crystal
+    if (isSoundOn) ritualSoundService.playChime();
     setSelectedCrystal(crystal);
-  }, []);
+  }, [isSoundOn]);
 
   const handleStartHealing = useCallback(() => {
     if (!selectedCrystal) return;
@@ -314,12 +334,20 @@ const CrystalHealingRitual = ({ navigation }) => {
 
   const handleCrystalPress = useCallback(() => {
     HAPTIC_PATTERNS.tap();
+    // Play sparkle sound on crystal press
+    if (isSoundOn) ritualSoundService.playSparkle();
     setHealingProgress(prev => Math.min(100, prev + 5));
-  }, []);
+  }, [isSoundOn]);
 
   const handleComplete = async () => {
     HAPTIC_PATTERNS.celebration();
     setShowCelebration(true);
+
+    // Play completion sound and stop ambient
+    if (isSoundOn) {
+      ritualSoundService.stopAmbient();
+      ritualSoundService.playComplete('crystal-healing');
+    }
 
     try {
       if (user?.id) {

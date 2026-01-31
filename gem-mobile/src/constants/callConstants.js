@@ -28,6 +28,7 @@ export const PARTICIPANT_STATUS = {
   DECLINED: 'declined',
   MISSED: 'missed',
   BUSY: 'busy',
+  CANCELLED: 'cancelled', // Call was cancelled before being answered
 };
 
 export const PARTICIPANT_ROLE = {

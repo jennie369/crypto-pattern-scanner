@@ -38,6 +38,7 @@ import { Flame, Wind, Feather, Sparkles } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual, saveReflection } from '../../../services/ritualService';
+import ritualSoundService from '../../../services/ritualSoundService';
 
 // Cosmic Components
 import {
@@ -482,6 +483,23 @@ const BurnReleaseRitual = ({ navigation }) => {
     ],
   }));
 
+  // ===== SOUND MANAGEMENT =====
+  useEffect(() => {
+    ritualSoundService.init();
+    return () => {
+      ritualSoundService.stopAll();
+    };
+  }, []);
+
+  // Start/stop ambient based on phase and sound toggle
+  useEffect(() => {
+    if (isSoundOn && phase === 'burning') {
+      ritualSoundService.startAmbient('burn-release', 0.5);
+    } else if (phase === 'completed') {
+      ritualSoundService.stopAmbient();
+    }
+  }, [phase, isSoundOn]);
+
   // Handlers
   // Ref to prevent double-tap
   const isTransitioning = useRef(false);
@@ -520,6 +538,9 @@ const BurnReleaseRitual = ({ navigation }) => {
   const handleBurnComplete = useCallback(async () => {
     HAPTIC_PATTERNS.fire.burn();
 
+    // Play paper burn sound
+    if (isSoundOn) ritualSoundService.playRitualSound('burn-release', 'action', 0.9);
+
     // Show ash rising message
     setShowAshMessage(true);
     messageOpacity.value = withTiming(1, { duration: 800 });
@@ -527,6 +548,12 @@ const BurnReleaseRitual = ({ navigation }) => {
     // Complete after short delay (reduced from 3000 to 1500)
     setTimeout(async () => {
       setShowCelebration(true);
+
+      // Play completion sound and stop ambient
+      if (isSoundOn) {
+        ritualSoundService.stopAmbient();
+        ritualSoundService.playComplete('burn-release');
+      }
 
       try {
         if (user?.id) {

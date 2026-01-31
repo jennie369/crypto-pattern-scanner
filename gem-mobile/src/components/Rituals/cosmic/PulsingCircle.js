@@ -146,6 +146,7 @@ const PulsingCircle = ({
   const cycleRef = useRef(1);
   const phaseIndexRef = useRef(0);
   const isRunningRef = useRef(false);
+  const startPhaseRef = useRef(null); // Ref to avoid circular dependency
 
   // Get pattern
   const breathPattern = customPattern || BREATH_PATTERNS[pattern] || BREATH_PATTERNS['box'];
@@ -195,9 +196,11 @@ const PulsingCircle = ({
       }
     }
 
-    // Start next phase
+    // Start next phase - use ref to avoid stale closure
     phaseIndexRef.current = nextPhaseIndex;
-    startPhase(nextPhaseIndex);
+    if (startPhaseRef.current) {
+      startPhaseRef.current(nextPhaseIndex);
+    }
   }, [phases, cycles, onCycleComplete, onComplete]);
 
   // Start a single phase animation
@@ -246,6 +249,11 @@ const PulsingCircle = ({
       }
     });
   }, [phases, triggerHaptic, onPhaseChange, handlePhaseComplete]);
+
+  // Store startPhase in ref to break circular dependency
+  useEffect(() => {
+    startPhaseRef.current = startPhase;
+  }, [startPhase]);
 
   // Start breathing cycle
   const startBreathing = useCallback(() => {
@@ -387,29 +395,49 @@ const PulsingCircle = ({
 };
 
 // ============================================
-// ANIMATED TIMER - Uses shared value for smooth update
+// ANIMATED TIMER - Uses interval for reliable countdown
 // ============================================
 
 const AnimatedTimer = React.memo(({ duration, progress }) => {
   const [displayTime, setDisplayTime] = useState(Math.ceil(duration / 1000));
-  const durationRef = useRef(duration);
+  const intervalRef = useRef(null);
+  const startTimeRef = useRef(Date.now());
 
-  // Reset display time when duration changes (new phase)
+  // Reset and start countdown when duration changes (new phase)
   useEffect(() => {
-    durationRef.current = duration;
-    setDisplayTime(Math.ceil(duration / 1000));
-  }, [duration]);
+    // Clear previous interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
-  // Update timer based on progress
-  useAnimatedReaction(
-    () => progress.value,
-    (prog) => {
-      const currentDuration = durationRef.current;
-      const remaining = Math.max(0, Math.ceil((currentDuration * (1 - prog)) / 1000));
-      runOnJS(setDisplayTime)(remaining);
-    },
-    []
-  );
+    if (duration <= 0) {
+      setDisplayTime(0);
+      return;
+    }
+
+    // Set initial time
+    const totalSeconds = Math.ceil(duration / 1000);
+    setDisplayTime(totalSeconds);
+    startTimeRef.current = Date.now();
+
+    // Start countdown interval
+    intervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
+      setDisplayTime(remaining);
+
+      // Stop when done
+      if (remaining <= 0) {
+        clearInterval(intervalRef.current);
+      }
+    }, 100); // Update every 100ms for smooth countdown
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [duration]);
 
   return (
     <Text style={styles.timer}>

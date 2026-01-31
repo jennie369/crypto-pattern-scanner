@@ -17,7 +17,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Icons from 'lucide-react-native';
 
@@ -41,9 +41,11 @@ const CalendarScreen = () => {
   // Modal
   const [showDayModal, setShowDayModal] = useState(false);
 
-  // Journal data (rituals and readings)
+  // Journal data (rituals, readings, trades)
   const [journalRituals, setJournalRituals] = useState([]);
   const [journalReadings, setJournalReadings] = useState([]);
+  const [journalPaperTrades, setJournalPaperTrades] = useState([]);
+  const [journalTradingJournal, setJournalTradingJournal] = useState([]);
 
   // Get user
   useEffect(() => {
@@ -94,6 +96,16 @@ const CalendarScreen = () => {
     setRefreshing(false);
   };
 
+  // Refresh data when screen gains focus (e.g., after completing a ritual)
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        console.log('[Calendar] Screen focused - refreshing data');
+        loadEvents();
+      }
+    }, [userId, loadEvents])
+  );
+
   // Navigate months
   const goToPreviousMonth = () => {
     const newMonth = new Date(currentMonth);
@@ -119,10 +131,14 @@ const CalendarScreen = () => {
     // Fetch journal data for the selected date
     if (userId) {
       const dateStr = date.toISOString().split('T')[0];
+      console.log('[Calendar] Fetching journal data for:', dateStr);
       const journalResult = await calendarService.getDailyJournal(userId, dateStr);
+      console.log('[Calendar] Journal result:', journalResult.success, 'rituals:', journalResult.rituals?.length);
       if (journalResult.success) {
         setJournalRituals(journalResult.rituals);
         setJournalReadings(journalResult.readings);
+        setJournalPaperTrades(journalResult.paperTrades || []);
+        setJournalTradingJournal(journalResult.tradingJournal || []);
       }
     }
     setShowDayModal(true);
@@ -296,18 +312,55 @@ const CalendarScreen = () => {
           setShowDayModal(false);
           setJournalRituals([]);
           setJournalReadings([]);
+          setJournalPaperTrades([]);
+          setJournalTradingJournal([]);
         }}
         date={selectedDate instanceof Date ? selectedDate.toISOString().split('T')[0] : selectedDate}
         events={selectedDateEvents}
         rituals={journalRituals}
         readings={journalReadings}
+        paperTrades={journalPaperTrades}
+        tradingJournal={journalTradingJournal}
         onEventPress={handleEventPress}
         onEventComplete={handleEventComplete}
         onRitualPress={(ritual) => {
           console.log('[Calendar] Ritual pressed:', ritual.ritual_slug);
+          setShowDayModal(false);
+          // Navigate to the specific ritual screen
+          const ritualSlug = ritual.ritual_slug || ritual.ritual_id;
+          const ritualScreenMap = {
+            'heart-expansion': 'HeartExpansionRitual',
+            'gratitude-flow': 'GratitudeFlowRitual',
+            'cleansing-breath': 'CleansingBreathRitual',
+            'water-manifest': 'WaterManifestRitual',
+            'letter-to-universe': 'LetterToUniverseRitual',
+            'burn-release': 'BurnReleaseRitual',
+            'star-wish': 'StarWishRitual',
+            'crystal-healing': 'CrystalHealingRitual',
+          };
+          const screenName = ritualScreenMap[ritualSlug];
+          if (screenName) {
+            navigation.navigate(screenName);
+          } else {
+            // Navigate to general rituals screen
+            navigation.navigate('FeaturedRituals');
+          }
         }}
         onReadingPress={(reading) => {
           console.log('[Calendar] Reading pressed:', reading.reading_type);
+          setShowDayModal(false);
+          // Navigate to divination screen with the reading type
+          navigation.navigate('DivinationScreen', {
+            defaultType: reading.reading_type,
+            viewHistory: true,
+            readingId: reading.id,
+          });
+        }}
+        onTradePress={(trade) => {
+          console.log('[Calendar] Trade pressed:', trade.id);
+          setShowDayModal(false);
+          // Navigate to trading journal or paper trade detail
+          navigation.navigate('TradingJournal', { tradeId: trade.id });
         }}
       />
     </SafeAreaView>

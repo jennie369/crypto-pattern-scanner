@@ -90,6 +90,10 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   // Track last tap time for each tab for double-tap detection
   const lastTapTimeRef = useRef({});
 
+  // Prevent double navigation - track if navigation is in progress
+  const isNavigatingRef = useRef(false);
+  const NAVIGATION_COOLDOWN = 400; // ms to prevent double taps
+
   // Get auth state
   let isAuthenticated = false;
   try {
@@ -146,9 +150,15 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   const itemWidth = pillWidth / items.length;
 
   const onTabPress = (index, routeName) => {
+    const now = Date.now();
+
+    // Prevent double-tap navigation - ignore if navigation is in cooldown
+    if (isNavigatingRef.current) {
+      return;
+    }
+
     const route = state.routes[index];
     const isFocused = state.index === index;
-    const now = Date.now();
     const lastTapTime = lastTapTimeRef.current[routeName] || 0;
     const isDoubleTap = now - lastTapTime < DOUBLE_TAP_DELAY;
 
@@ -168,49 +178,44 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
         const hasNestedScreens = tabState && tabState.index > 0;
 
         if (hasNestedScreens) {
+          // Set navigation cooldown
+          isNavigatingRef.current = true;
+          setTimeout(() => { isNavigatingRef.current = false; }, NAVIGATION_COOLDOWN);
+
           // There are nested screens, pop to the root of this tab
-          console.log('[GlassBottomTab] Popping to top for tab:', routeName, 'nested index:', tabState?.index);
           try {
-            // Navigate to the first route in the tab's stack instead of popToTop
-            // This is more reliable across different navigator configurations
             const firstRoute = tabState.routeNames?.[0] || tabState.routes?.[0]?.name;
             if (firstRoute) {
               navigation.navigate(routeName, { screen: firstRoute });
             } else {
-              // Fallback: use goBack multiple times or just navigate to tab
-              // Avoid popToTop as it may not be handled
-              console.log('[GlassBottomTab] No first route found, navigating to tab root');
               navigation.navigate(routeName);
             }
           } catch (e) {
             console.warn('[GlassBottomTab] Navigation error:', e.message);
-            // Fallback: just navigate to the tab
             navigation.navigate(routeName);
           }
         } else if (isDoubleTap) {
-          // Double-tap on tab's home screen
-          console.log('[GlassBottomTab] Double-tap detected on tab:', routeName);
-          // Emit scroll to top and refresh event if handler exists
+          // Double-tap on tab's home screen - scroll to top and refresh
           if (emitScrollToTopAndRefresh) {
             emitScrollToTopAndRefresh(routeName);
           }
         }
         // Single tap on home screen - do nothing
       } else {
-        // Navigating to a different tab
+        // Navigating to a different tab - set cooldown to prevent double navigation
+        isNavigatingRef.current = true;
+        setTimeout(() => { isNavigatingRef.current = false; }, NAVIGATION_COOLDOWN);
+
         // Check if target tab has nested screens and reset it
         const targetRoute = state.routes[index];
         const targetState = targetRoute?.state;
         const targetHasNestedScreens = targetState && targetState.index > 0;
 
         if (targetHasNestedScreens) {
-          // Reset target tab to its root screen before navigating
-          console.log('[GlassBottomTab] Resetting tab with nested screens:', routeName);
           navigation.navigate(routeName, {
             screen: targetState.routeNames?.[0] || targetState.routes?.[0]?.name,
           });
         } else {
-          // Just navigate normally
           navigation.navigate(routeName);
         }
       }
@@ -267,7 +272,8 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
                   <TouchableOpacity
                     key={item.key}
                     onPress={() => onTabPress(index, item.key)}
-                    activeOpacity={0.85}
+                    activeOpacity={0.6}
+                    delayPressIn={0}
                     style={[styles.tabItem, { width: itemWidth }]}
                     accessibilityRole="button"
                     accessibilityState={{ selected: isFocused }}

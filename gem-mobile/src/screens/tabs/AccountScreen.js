@@ -21,6 +21,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Modal,
+  InteractionManager,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -111,7 +112,7 @@ const accountCache = {
   assetStats: null,
   adminStats: null,
   lastFetch: 0,
-  CACHE_DURATION: 60000, // 60 seconds
+  CACHE_DURATION: 300000, // 5 minutes - reduced API calls for better performance
 };
 
 export default function AccountScreen() {
@@ -170,37 +171,33 @@ export default function AccountScreen() {
 
   // Load data on focus - with global caching
   // Key principle: NEVER show loading if we have ANY cached data
+  // Use InteractionManager to defer heavy operations until after animation completes
   useFocusEffect(
     useCallback(() => {
       if (user?.id) {
-        const now = Date.now();
-        const cacheExpired = now - accountCache.lastFetch > accountCache.CACHE_DURATION;
-
-        // If we have cached data, set loading false IMMEDIATELY (even if stale)
+        // IMMEDIATELY sync from cache - no waiting
         if (accountCache.profile) {
           setLoading(false);
-          // Also sync state from cache in case component remounted
-          if (profile !== accountCache.profile) {
-            setProfile(accountCache.profile);
-          }
-          if (accountCache.stats && stats !== accountCache.stats) {
-            setStats(accountCache.stats);
-          }
-          if (accountCache.assetStats && assetStats !== accountCache.assetStats) {
-            setAssetStats(accountCache.assetStats);
-          }
-          if (isAdmin && accountCache.adminStats && adminStats !== accountCache.adminStats) {
-            setAdminStats(accountCache.adminStats);
-          }
+          if (profile !== accountCache.profile) setProfile(accountCache.profile);
+          if (accountCache.stats && stats !== accountCache.stats) setStats(accountCache.stats);
+          if (accountCache.assetStats && assetStats !== accountCache.assetStats) setAssetStats(accountCache.assetStats);
+          if (isAdmin && accountCache.adminStats && adminStats !== accountCache.adminStats) setAdminStats(accountCache.adminStats);
         }
 
-        // Fetch fresh data in background if cache expired
-        if (!accountCache.profile || cacheExpired) {
-          loadData();
-          if (isAdmin) {
-            loadAdminStats();
+        // Defer API calls until AFTER animation completes - makes tab switch instant
+        const task = InteractionManager.runAfterInteractions(() => {
+          const now = Date.now();
+          const cacheExpired = now - accountCache.lastFetch > accountCache.CACHE_DURATION;
+
+          if (!accountCache.profile || cacheExpired) {
+            loadData();
+            if (isAdmin) {
+              loadAdminStats();
+            }
           }
-        }
+        });
+
+        return () => task.cancel();
       } else {
         setLoading(false);
       }

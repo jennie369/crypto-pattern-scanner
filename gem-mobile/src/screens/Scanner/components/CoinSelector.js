@@ -22,6 +22,7 @@ import {
 import CustomAlert, { useCustomAlert } from '../../../components/CustomAlert';
 import {
   ChevronDown,
+  ChevronUp,
   Search,
   Star,
   X,
@@ -31,6 +32,8 @@ import {
   TrendingUp,
   Zap,
   Lock,
+  ArrowUpDown,
+  SlidersHorizontal,
 } from 'lucide-react-native';
 import { binanceService } from '../../../services/binanceService';
 import { favoritesService } from '../../../services/favoritesService';
@@ -161,6 +164,10 @@ const CoinSelector = ({
   const [tempSelected, setTempSelected] = useState([]);
   const [tickerData, setTickerData] = useState({}); // { symbol: { price, priceChangePercent, quoteVolume } }
 
+  // Sorting state - Binance style
+  const [sortBy, setSortBy] = useState('volume'); // 'name', 'volume', 'price', 'change'
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
+
   // Multi-Timeframe Selection
   const multiTFAccess = checkMultiTFAccess(userTier);
   const [selectedTimeframes, setSelectedTimeframes] = useState([selectedTimeframe]); // Default to current TF
@@ -183,6 +190,27 @@ const CoinSelector = ({
     loadData();
   }, []);
 
+  // Real-time price updates when modal is open (every 1 second like Binance)
+  useEffect(() => {
+    if (!modalVisible) return;
+
+    const updateTickers = async () => {
+      try {
+        // Pass silent=true to suppress console logs during real-time updates
+        const tickers = await binanceService.getAllFuturesTickers(true);
+        setTickerData(tickers);
+      } catch (error) {
+        // Silent fail for real-time updates
+      }
+    };
+
+    // Update immediately then every 1 second
+    updateTickers();
+    const interval = setInterval(updateTickers, 1000);
+
+    return () => clearInterval(interval);
+  }, [modalVisible]);
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -204,7 +232,7 @@ const CoinSelector = ({
     }
   };
 
-  // Filter coins
+  // Filter and sort coins - Binance style
   const filteredCoins = useMemo(() => {
     let coins = [...allCoins];
 
@@ -212,7 +240,17 @@ const CoinSelector = ({
       coins = coins.filter(c => favorites.includes(c.symbol));
     } else if (activeTab === 'recent') {
       coins = coins.filter(c => recentCoins.includes(c.symbol));
+      // Recent tab uses its own order
       coins.sort((a, b) => recentCoins.indexOf(a.symbol) - recentCoins.indexOf(b.symbol));
+      // Skip further sorting for recent
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        coins = coins.filter(c =>
+          c.symbol.toLowerCase().includes(query) ||
+          c.baseAsset.toLowerCase().includes(query)
+        );
+      }
+      return coins;
     }
 
     if (searchQuery.trim()) {
@@ -223,8 +261,44 @@ const CoinSelector = ({
       );
     }
 
+    // Apply sorting - Binance style
+    coins.sort((a, b) => {
+      const tickerA = tickerData[a.symbol] || {};
+      const tickerB = tickerData[b.symbol] || {};
+      let comparison = 0;
+
+      switch (sortBy) {
+        case 'name':
+          comparison = a.symbol.localeCompare(b.symbol);
+          break;
+        case 'volume':
+          comparison = (tickerB.quoteVolume || 0) - (tickerA.quoteVolume || 0);
+          break;
+        case 'price':
+          comparison = (tickerB.price || 0) - (tickerA.price || 0);
+          break;
+        case 'change':
+          comparison = (tickerB.priceChangePercent || 0) - (tickerA.priceChangePercent || 0);
+          break;
+        default:
+          comparison = (tickerB.quoteVolume || 0) - (tickerA.quoteVolume || 0);
+      }
+
+      return sortOrder === 'asc' ? -comparison : comparison;
+    });
+
     return coins;
-  }, [allCoins, favorites, recentCoins, searchQuery, activeTab]);
+  }, [allCoins, favorites, recentCoins, searchQuery, activeTab, sortBy, sortOrder, tickerData]);
+
+  // Toggle sort - Binance style (tap same column to toggle order)
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('desc'); // Default to descending
+    }
+  };
 
   const openModal = () => {
     // Debug log for tier
@@ -544,6 +618,67 @@ const CoinSelector = ({
               </View>
             </View>
 
+            {/* Sort Header - Binance style */}
+            <View style={styles.sortHeader}>
+              <TouchableOpacity
+                style={styles.sortColumn}
+                onPress={() => handleSort('name')}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.sortLabel, sortBy === 'name' && styles.sortLabelActive]}>
+                  Tên
+                </Text>
+                {sortBy === 'name' && (
+                  sortOrder === 'asc' ?
+                    <ChevronUp size={12} color={COLORS.gold} /> :
+                    <ChevronDown size={12} color={COLORS.gold} />
+                )}
+                <Text style={styles.sortDivider}>/</Text>
+                <TouchableOpacity onPress={() => handleSort('volume')}>
+                  <Text style={[styles.sortLabel, sortBy === 'volume' && styles.sortLabelActive]}>
+                    KL
+                  </Text>
+                </TouchableOpacity>
+                {sortBy === 'volume' && (
+                  sortOrder === 'asc' ?
+                    <ChevronUp size={12} color={COLORS.gold} /> :
+                    <ChevronDown size={12} color={COLORS.gold} />
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.sortColumnRight}>
+                <TouchableOpacity
+                  style={styles.sortItem}
+                  onPress={() => handleSort('price')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.sortLabel, sortBy === 'price' && styles.sortLabelActive]}>
+                    Giá
+                  </Text>
+                  {sortBy === 'price' && (
+                    sortOrder === 'asc' ?
+                      <ChevronUp size={12} color={COLORS.gold} /> :
+                      <ChevronDown size={12} color={COLORS.gold} />
+                  )}
+                </TouchableOpacity>
+                <Text style={styles.sortDivider}>/</Text>
+                <TouchableOpacity
+                  style={styles.sortItem}
+                  onPress={() => handleSort('change')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.sortLabel, sortBy === 'change' && styles.sortLabelActive]}>
+                    24h%
+                  </Text>
+                  {sortBy === 'change' && (
+                    sortOrder === 'asc' ?
+                      <ChevronUp size={12} color={COLORS.gold} /> :
+                      <ChevronDown size={12} color={COLORS.gold} />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {/* Coins List Container */}
             <View style={styles.coinsListContainer}>
               {loading ? (
@@ -828,6 +963,45 @@ const styles = StyleSheet.create({
     fontSize: 13, // Increased from 11
     fontWeight: '600',
     color: COLORS.error,
+  },
+
+  // Sort Header - Binance style
+  sortHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    backgroundColor: 'rgba(20, 18, 35, 0.8)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  sortColumn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  sortColumnRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sortItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sortLabel: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontWeight: '500',
+  },
+  sortLabelActive: {
+    color: COLORS.gold,
+    fontWeight: '700',
+  },
+  sortDivider: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginHorizontal: 4,
   },
 
   // Legacy styles (keep for compatibility)

@@ -423,10 +423,21 @@ const ScannerScreen = ({ navigation }) => {
 
     // =====================================================
     // CHECK SCAN QUOTA FIRST (Database-backed)
+    // ADMIN users have unlimited scans - skip quota check
+    // Add timeout to prevent hanging if Supabase is slow
     // =====================================================
-    if (user?.id) {
+    const isAdminUser = userTier === 'ADMIN' || userTier === 'admin';
+    console.log('[Scanner] User tier:', userTier, '| isAdmin:', isAdminUser);
+
+    if (user?.id && !isAdminUser) {
       try {
-        const quotaCheck = await tierAccessService.checkScanLimit();
+        // Wrap quota check with 3 second timeout
+        const quotaCheckPromise = tierAccessService.checkScanLimit();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Quota check timeout')), 3000)
+        );
+
+        const quotaCheck = await Promise.race([quotaCheckPromise, timeoutPromise]);
         console.log('[Scanner] Quota check:', quotaCheck);
 
         if (!quotaCheck.allowed && !quotaCheck.unlimited) {
@@ -444,8 +455,8 @@ const ScannerScreen = ({ navigation }) => {
           return;
         }
       } catch (quotaError) {
-        console.error('[Scanner] Quota check error:', quotaError);
-        // Continue scanning if quota check fails (graceful degradation)
+        console.warn('[Scanner] Quota check skipped (timeout or error):', quotaError?.message);
+        // Continue scanning if quota check fails or times out (graceful degradation)
       }
     }
 
@@ -1154,6 +1165,10 @@ const ScannerScreen = ({ navigation }) => {
                     console.log('[ZONE] Fallback zone (2% around entry):', { zoneHigh, zoneLow, entry });
                   }
 
+                  // ✅ POSITION ZONES: Always show zones for open positions
+                  // R:R check is bypassed because user already opened the position
+                  // They need to see where their entry/SL/TP levels are
+
                   // Only create zone if we have valid boundaries
                   if (zoneHigh > 0 && zoneLow > 0) {
                     // ✅ USE FORMATION_TIME from patternData (when pattern was detected)
@@ -1351,10 +1366,15 @@ const ScannerScreen = ({ navigation }) => {
                     entryPrice: position?.entryPrice,
                     stopLoss: position?.stopLoss,
                     direction: position?.direction,
+                    timeframe: position?.timeframe,
                     patternDataKeys: position?.patternData ? Object.keys(position.patternData) : [],
                   });
                   // Set all states together - React will batch them
                   setSelectedCoins([symbol]);
+                  // ✅ Set timeframe from position (important for zone display)
+                  if (position?.timeframe) {
+                    setSelectedTimeframe(position.timeframe);
+                  }
                   setSelectedPosition(position || null);
                   setShowPositionZone(true); // Auto-show zone when position selected
                 }}
@@ -1415,10 +1435,15 @@ const ScannerScreen = ({ navigation }) => {
                     entryPrice: position?.entryPrice,
                     stopLoss: position?.stopLoss,
                     direction: position?.direction,
+                    timeframe: position?.timeframe,
                     patternDataKeys: position?.patternData ? Object.keys(position.patternData) : [],
                   });
                   // Set all states together - React will batch them
                   setSelectedCoins([symbol]);
+                  // ✅ Set timeframe from position (important for zone display)
+                  if (position?.timeframe) {
+                    setSelectedTimeframe(position.timeframe);
+                  }
                   setSelectedPosition(position || null);
                   setShowPositionZone(true); // Auto-show zone when position selected
                 }}

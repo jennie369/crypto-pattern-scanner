@@ -1097,15 +1097,23 @@ class PatternDetectionService {
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.DPD;
-    const entry = lowBetween.price;
+
+    // ⚠️ FIX: Entry should be at high2 (reversal point), NOT lowBetween
+    // For SHORT pattern: Sell near the second high (the lower high = continuation)
+    const entry = high2.price;
 
     // TIMEFRAME-SCALED TP/SL
-    // Base: 1% SL above high2, 2:1 RR for target
-    const slPercent = this.scaleSL(0.01, timeframe); // Scale 1% base SL
-    const stopLoss = high2.price * (1 + slPercent);
+    // SL above high1 (the highest point), Target based on pattern height
+    const slPercent = this.scaleSL(0.01, timeframe); // 1% buffer above high1
+    const stopLoss = high1.price * (1 + slPercent);
     const riskAmount = stopLoss - entry;
     const rrMultiplier = 2.0; // Keep 2:1 R:R
     const target = entry - (riskAmount * rrMultiplier);
+
+    // ⚠️ FIX: Convert timestamps from ms to seconds for lightweight-charts
+    const high1Time = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
+    const high2Time = high2.timestamp > 9999999999 ? Math.floor(high2.timestamp / 1000) : high2.timestamp;
+    const lowTime = lowBetween.timestamp > 9999999999 ? Math.floor(lowBetween.timestamp / 1000) : lowBetween.timestamp;
 
     return {
       id: `DPD-${symbol}-${timeframe}-${Date.now()}`,
@@ -1125,6 +1133,15 @@ class PatternDetectionService {
       detectedAt: Date.now(),
       currentPrice,
       points: { high1, high2, lowBetween },
+      // ⚠️ FIX: Zone boundaries (SHORT: SL at top, entry at bottom)
+      zoneHigh: stopLoss,
+      zoneLow: entry,
+      // ⚠️ Time data for zone positioning (seconds for lightweight-charts)
+      startTime: high1Time,
+      endTime: lowTime,
+      formationTime: high1Time,
+      startCandleIndex: high1.index,
+      endCandleIndex: lowBetween.index,
     };
   }
 
@@ -1180,6 +1197,11 @@ class PatternDetectionService {
     const rrMultiplier = 2.0; // Keep 2:1 R:R
     const target = entry + (riskAmount * rrMultiplier);
 
+    // ⚠️ FIX: Convert timestamps from ms to seconds for lightweight-charts
+    const low1Time = low1.timestamp > 9999999999 ? Math.floor(low1.timestamp / 1000) : low1.timestamp;
+    const low2Time = low2.timestamp > 9999999999 ? Math.floor(low2.timestamp / 1000) : low2.timestamp;
+    const highTime = highBetween.timestamp > 9999999999 ? Math.floor(highBetween.timestamp / 1000) : highBetween.timestamp;
+
     return {
       id: `UPU-${symbol}-${timeframe}-${Date.now()}`,
       patternType: 'UPU',
@@ -1198,6 +1220,15 @@ class PatternDetectionService {
       detectedAt: Date.now(),
       currentPrice,
       points: { low1, low2, highBetween },
+      // ⚠️ FIX: Zone boundaries same as DPU (LONG: entry at top, SL at bottom)
+      zoneHigh: entry,
+      zoneLow: stopLoss,
+      // ⚠️ Time data for zone positioning (seconds for lightweight-charts)
+      startTime: low1Time,
+      endTime: highTime,
+      formationTime: low1Time,
+      startCandleIndex: low1.index,
+      endCandleIndex: highBetween.index,
     };
   }
 
@@ -1331,12 +1362,15 @@ class PatternDetectionService {
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPD;
-    const entry = trough.price;
+
+    // ⚠️ FIX: Entry should be at high2 (reversal point), NOT trough
+    // For SHORT pattern: Sell near the second high (the lower high = reversal confirmation)
+    const entry = high2.price;
 
     // TIMEFRAME-SCALED TP/SL
-    // Base: 2% SL above high2, 2:1 RR for target
-    const slPercent = this.scaleSL(0.02, timeframe); // Scale 2% base SL
-    const stopLoss = high2.price * (1 + slPercent);
+    // SL above high1 (the highest point), Target based on pattern height
+    const slPercent = this.scaleSL(0.01, timeframe); // 1% buffer above high1
+    const stopLoss = high1.price * (1 + slPercent);
     const riskAmount = stopLoss - entry;
     const rrMultiplier = 2.0; // 2:1 R:R
     const target = entry - (riskAmount * rrMultiplier);
@@ -1641,7 +1675,7 @@ class PatternDetectionService {
       candles,
       minRR: 2.0,
       maxATRMultiple: 3.5,
-      patternHeight, // Consider pattern height but cap it
+      patternHeight,
     });
 
     // Use smart TP if valid, otherwise fallback to capped pattern height
@@ -2037,7 +2071,6 @@ class PatternDetectionService {
         maxATRMultiple: 3.5,
       });
 
-      // Use smart TP if valid, otherwise fallback
       const targetPrice = smartTP.isValid
         ? smartTP.price
         : entry - (calculateATR(candles, 14) * 2.5);
@@ -2114,27 +2147,10 @@ class PatternDetectionService {
       // TIMEFRAME-SCALED TP/SL
       const entryBuffer = this.scaleSL(0.01, timeframe); // 1% above current
       const slPercent = this.scaleSL(0.01, timeframe); // 1% below avg low
+      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base target
       const entry = currentPrice * (1 + entryBuffer);
       const stopLoss = avgLow * (1 - slPercent);
-
-      // SMART TP: Use ATR capping + swing targets
-      const smartTP = calculateSmartTP({
-        entry,
-        stopLoss,
-        direction: 'LONG',
-        candles,
-        minRR: 2.0,
-        maxATRMultiple: 3.5,
-      });
-
-      // Use smart TP if valid, otherwise fallback
-      const targetPrice = smartTP.isValid
-        ? smartTP.price
-        : entry + (calculateATR(candles, 14) * 2.5);
-
-      const risk = entry - stopLoss;
-      const reward = targetPrice - entry;
-      const riskReward = risk > 0 ? parseFloat((reward / risk).toFixed(1)) : 2.0;
+      const targetPrice = currentPrice * (1 + tpPercent);
 
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const firstLowTime = firstLow.timestamp > 9999999999 ? Math.floor(firstLow.timestamp / 1000) : firstLow.timestamp;
@@ -2153,18 +2169,12 @@ class PatternDetectionService {
         entry,
         stopLoss,
         target: targetPrice,
-        riskReward,
+        riskReward: 2.3,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
         zone: { top: avgLow * 1.005, bottom: avgLow * 0.995, mid: avgLow },
         points: { firstLow, lastLow, cluster: recentLows },
-        // Smart TP metadata
-        smartTP: smartTP.isValid ? {
-          method: smartTP.method,
-          reasoning: smartTP.reasoning,
-          atr: smartTP.atr,
-        } : null,
         // FIX: Explicit zone data for zone rendering
         // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
         zoneHigh: entry,

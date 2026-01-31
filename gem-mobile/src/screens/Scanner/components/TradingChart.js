@@ -2588,49 +2588,24 @@ const TradingChart = ({
         let x1 = timeScale.timeToCoordinate(startTime);
         const x2 = endTime ? timeScale.timeToCoordinate(endTime) : null;
 
-        // ✅ FIX: If x1 is null, zone's formation_time is outside chart's visible/loaded range
-        // Try to scroll chart to show the zone's position
-        if (x1 === null && startTime && lastCandleData && lastCandleData.length > 0) {
-          const firstDataTime = lastCandleData[0]?.time;
-          const lastDataTime = lastCandleData[lastCandleData.length - 1]?.time;
-
-          console.log('[Zone] x1 is null, checking if we can scroll to zone:', {
-            startTime,
-            firstDataTime,
-            lastDataTime,
-            isInRange: startTime >= firstDataTime && startTime <= lastDataTime
-          });
-
-          // If startTime is within loaded data range, try scrolling to it
-          if (startTime >= firstDataTime && startTime <= lastDataTime) {
-            // Scroll chart to show the zone
-            try {
-              timeScale.scrollToPosition(-50, false); // Scroll left to show historical data
-              x1 = timeScale.timeToCoordinate(startTime);
-              console.log('[Zone] Scrolled chart, new x1:', x1);
-            } catch (e) {
-              console.warn('[Zone] Failed to scroll chart:', e);
+        // ⚠️ FALLBACK: If x1 is null, use fixed position (8 candles from right)
+        // This handles cases where formation_time is outside visible range or far in the past
+        // DO NOT scroll chart here - it will interfere with user scrolling
+        if (x1 === null && lastCandleData && lastCandleData.length > 0) {
+          // Get timestamp of candle ~8 positions from the end
+          const fallbackIndex = Math.max(0, lastCandleData.length - 8);
+          const fallbackCandle = lastCandleData[fallbackIndex];
+          if (fallbackCandle?.time) {
+            startTime = fallbackCandle.time;
+            x1 = timeScale.timeToCoordinate(startTime);
+            if (idx === 0) {
+              console.log('[Zone] FALLBACK - using position 8 candles from right, x1:', x1);
             }
           }
         }
 
-        // If still null after all attempts, skip with debug info
+        // If still null after fallback, skip silently
         if (x1 === null) {
-          console.log('[Zone] SKIP zone - formation_time outside chart data range:', {
-            id: zone.id,
-            startTime,
-            dataRange: lastCandleData?.length > 0 ? {
-              first: lastCandleData[0]?.time,
-              last: lastCandleData[lastCandleData.length - 1]?.time
-            } : 'no data'
-          });
-          window.ReactNativeWebView?.postMessage(JSON.stringify({
-            type: 'zone_skip',
-            reason: 'formation_time_outside_range',
-            zoneId: zone.id,
-            startTime,
-            dataRange: lastCandleData?.length > 0 ? [lastCandleData[0]?.time, lastCandleData[lastCandleData.length - 1]?.time] : null
-          }));
           return;
         }
 

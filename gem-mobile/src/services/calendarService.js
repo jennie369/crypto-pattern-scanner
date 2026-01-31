@@ -506,12 +506,13 @@ class CalendarService {
       // Fetch all data in parallel for better performance
       const [ritualsResult, readingsResult, paperTradesResult, tradingJournalResult, actionsResult] = await Promise.all([
         // 1. Ritual completions
+        // Note: In vision_rituals, 'id' IS the slug (VARCHAR primary key)
         supabase
           .from('vision_ritual_completions')
-          .select('*, ritual:vision_rituals(id, slug, name)')
+          .select('*, ritual:vision_rituals(id, name)')
           .eq('user_id', userId)
           .gte('completed_at', `${date}T00:00:00`)
-          .lt('completed_at', `${date}T23:59:59`)
+          .lte('completed_at', `${date}T23:59:59.999`)
           .order('completed_at', { ascending: true }),
 
         // 2. Divination readings
@@ -520,7 +521,7 @@ class CalendarService {
           .select('*')
           .eq('user_id', userId)
           .gte('created_at', `${date}T00:00:00`)
-          .lt('created_at', `${date}T23:59:59`)
+          .lte('created_at', `${date}T23:59:59.999`)
           .order('created_at', { ascending: true }),
 
         // 3. Paper trades
@@ -529,7 +530,7 @@ class CalendarService {
           .select('*')
           .eq('user_id', userId)
           .gte('created_at', `${date}T00:00:00`)
-          .lt('created_at', `${date}T23:59:59`)
+          .lte('created_at', `${date}T23:59:59.999`)
           .order('created_at', { ascending: true }),
 
         // 4. Trading journal entries
@@ -567,9 +568,10 @@ class CalendarService {
       }
 
       // Map ritual_slug from joined ritual data
+      // Note: In vision_rituals, the 'id' field IS the slug (VARCHAR)
       const mappedRituals = (ritualsResult.data || []).map(r => ({
         ...r,
-        ritual_slug: r.ritual?.slug || r.ritual_slug,
+        ritual_slug: r.ritual?.slug || r.ritual?.id || r.ritual_id,
         ritual_name: r.ritual?.name,
       }));
 

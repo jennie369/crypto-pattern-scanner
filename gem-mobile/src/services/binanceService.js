@@ -43,11 +43,12 @@ class BinanceService {
       const data = await response.json();
 
       // Filter USDT perpetual pairs only, trading status
+      // Include both PERPETUAL and TRADIFI_PERPETUAL (for gold, silver, stocks etc.)
       const usdtPairs = data.symbols
         .filter(symbol =>
           symbol.quoteAsset === 'USDT' &&
           symbol.status === 'TRADING' &&
-          symbol.contractType === 'PERPETUAL' && // Only perpetual futures
+          (symbol.contractType === 'PERPETUAL' || symbol.contractType === 'TRADIFI_PERPETUAL') &&
           !symbol.symbol.includes('_') // Exclude delivery contracts like BTCUSDT_230929
         )
         .map(symbol => ({
@@ -121,10 +122,16 @@ class BinanceService {
   /**
    * Get ALL 24h tickers from Binance Futures (for CoinSelector)
    * Returns map: { symbol: { price, priceChangePercent, volume, quoteVolume } }
+   * Optimized for real-time updates (no console logs, minimal caching)
    */
-  async getAllFuturesTickers() {
+  async getAllFuturesTickers(silent = false) {
     try {
-      console.log('[Binance] Fetching all Futures tickers...');
+      // Use cached data if recent (< 800ms) to prevent rate limiting
+      const now = Date.now();
+      if (this._tickerCache && (now - this._tickerCacheTime) < 800) {
+        return this._tickerCache;
+      }
+
       const response = await fetch(`${this.futuresBaseUrl}/ticker/24hr`);
       const data = await response.json();
 
@@ -140,12 +147,21 @@ class BinanceService {
         };
       });
 
-      console.log('[Binance] Loaded tickers for', Object.keys(tickerMap).length, 'symbols');
+      // Cache the result
+      this._tickerCache = tickerMap;
+      this._tickerCacheTime = now;
+
+      if (!silent) {
+        console.log('[Binance] Loaded tickers for', Object.keys(tickerMap).length, 'symbols');
+      }
       return tickerMap;
 
     } catch (error) {
-      console.error('[Binance] getAllFuturesTickers error:', error);
-      return {};
+      if (!silent) {
+        console.error('[Binance] getAllFuturesTickers error:', error);
+      }
+      // Return cached data if available on error
+      return this._tickerCache || {};
     }
   }
 

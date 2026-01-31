@@ -601,6 +601,12 @@ const LetterToUniverseRitual = ({ navigation }) => {
       setPhase('received');
       setShowCelebration(true);
 
+      // Play completion sound and stop ambient
+      if (isSoundOn) {
+        ritualSoundService.stopAmbient();
+        ritualSoundService.playLevelUp(); // Special level-up sound for letter ritual
+      }
+
       try {
         if (user?.id) {
           const result = await completeRitual(user.id, 'letter-to-universe', {

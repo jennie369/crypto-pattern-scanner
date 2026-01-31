@@ -38,6 +38,7 @@ import { Star, Sparkles, Wand2 } from 'lucide-react-native';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual, saveReflection } from '../../../services/ritualService';
+import ritualSoundService from '../../../services/ritualSoundService';
 
 // Cosmic Components
 import {
@@ -458,11 +459,30 @@ const StarWishRitual = ({ navigation }) => {
     return stars.find(s => s.id === selectedStarId);
   }, [stars, selectedStarId]);
 
+  // ===== SOUND MANAGEMENT =====
+  useEffect(() => {
+    ritualSoundService.init();
+    return () => {
+      ritualSoundService.stopAll();
+    };
+  }, []);
+
+  // Start/stop ambient based on phase and sound toggle
+  useEffect(() => {
+    if (isSoundOn && (phase === 'select' || phase === 'wish' || phase === 'granting')) {
+      ritualSoundService.startAmbient('star-wish', 0.4);
+    } else if (phase === 'granted') {
+      ritualSoundService.stopAmbient();
+    }
+  }, [phase, isSoundOn]);
+
   // Handlers
   const handleSelectStar = useCallback((starId) => {
     setSelectedStarId(starId);
     HAPTIC_PATTERNS.cosmic.starSelect();
-  }, []);
+    // Play sparkle sound when selecting star
+    if (isSoundOn) ritualSoundService.playSparkle();
+  }, [isSoundOn]);
 
   // OPTIMIZED: Instant phase transition
   const handleConfirmStar = useCallback(() => {
@@ -475,6 +495,8 @@ const StarWishRitual = ({ navigation }) => {
     if (!wish.trim()) return;
 
     HAPTIC_PATTERNS.press();
+    // Play whoosh sound when making wish
+    if (isSoundOn) ritualSoundService.playWhoosh();
     setPhase('granting');
 
     // Show shooting star animation
@@ -487,6 +509,12 @@ const StarWishRitual = ({ navigation }) => {
     HAPTIC_PATTERNS.cosmic.wishGranted();
     setPhase('granted');
     setShowCelebration(true);
+
+    // Play completion sound and stop ambient
+    if (isSoundOn) {
+      ritualSoundService.stopAmbient();
+      ritualSoundService.playComplete('star-wish');
+    }
 
     try {
       if (user?.id) {
