@@ -524,9 +524,9 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
     // Convert to objects with dimensions
     return urls.map((uri, index) => ({
       uri,
-      // Use post dimensions if available, fallback to reasonable defaults
+      // Use post dimensions if available, fallback to portrait ratio (9:16) for better full-screen display
       width: post.image_width || 1080,
-      height: post.image_height || 1080,
+      height: post.image_height || 1920,
     }));
   }, [post.media_urls, post.image_url, post.media_url, post.image_width, post.image_height]);
 
@@ -1486,6 +1486,9 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
           images={getAllImages()}
           initialIndex={imageViewerIndex}
           onClose={() => setImageViewerVisible(false)}
+          postContent={post?.content || ''}
+          authorName={post?.profiles?.display_name || post?.profiles?.username || ''}
+          showOverlay={true}
         />
       )}
 
