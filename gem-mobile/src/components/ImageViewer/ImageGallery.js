@@ -4,7 +4,7 @@
  * Phase 2: Image Viewer Enhancement (30/12/2024)
  */
 
-import React, { useState, useCallback, useRef, memo } from 'react';
+import React, { useState, useCallback, useRef, memo, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -16,12 +16,17 @@ import {
   Alert,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   ScrollView,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  interpolate,
   FadeIn,
   FadeOut,
 } from 'react-native-reanimated';
@@ -39,13 +44,25 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
-// Safe bottom padding for Android navigation bar
+// Overlay height constants
+const OVERLAY_COLLAPSED_HEIGHT = SCREEN_HEIGHT * 0.33; // 1/3 screen when collapsed
+const OVERLAY_EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.7;   // 70% screen when expanded
 const SAFE_BOTTOM_PADDING = 50;
 
 /**
  * Post Overlay Component - Facebook-style text overlay
+ * - Expanded: Shows full content (70% screen)
+ * - Collapsed: Shows 1/3 screen with author name
+ * - Faded: Overlay becomes very transparent to see image
  */
-const PostOverlay = memo(({ authorName, postContent, overlayExpanded, toggleOverlay }) => {
+const PostOverlay = memo(({
+  authorName,
+  postContent,
+  overlayExpanded,
+  overlayFaded,
+  toggleOverlay,
+  onTapOverlay,
+}) => {
   // Get safe area insets for bottom padding
   let bottomInset = SAFE_BOTTOM_PADDING;
   try {
@@ -55,41 +72,79 @@ const PostOverlay = memo(({ authorName, postContent, overlayExpanded, toggleOver
     // Hook not available, use default
   }
 
-  return (
-    <View style={[overlayStyles.postOverlay, { paddingBottom: overlayExpanded ? 0 : bottomInset }]}>
-      {/* Author header with tap to toggle */}
-      <TouchableOpacity
-        style={overlayStyles.postOverlayHeader}
-        activeOpacity={0.8}
-        onPress={toggleOverlay}
-      >
-        {authorName && (
-          <Text style={overlayStyles.postOverlayAuthor}>{authorName}</Text>
-        )}
-        <Text style={overlayStyles.postOverlayHint}>
-          {overlayExpanded ? '▼ Thu gọn' : '▲ Mở rộng'}
-        </Text>
-      </TouchableOpacity>
+  // Animated values
+  const heightAnim = useSharedValue(overlayExpanded ? OVERLAY_EXPANDED_HEIGHT : OVERLAY_COLLAPSED_HEIGHT);
+  const opacityAnim = useSharedValue(overlayFaded ? 0.15 : 1);
 
-      {/* Scrollable content area */}
-      {overlayExpanded && postContent && (
-        <ScrollView
-          style={overlayStyles.postOverlayScroll}
-          contentContainerStyle={[
-            overlayStyles.postOverlayScrollContent,
-            { paddingBottom: (SPACING?.xxl || 32) + bottomInset }
-          ]}
-          showsVerticalScrollIndicator={true}
-          nestedScrollEnabled={true}
-          scrollEnabled={true}
-          bounces={true}
-        >
-          <Text style={overlayStyles.postOverlayContent}>
-            {postContent.replace(/<[^>]*>/g, '')}
-          </Text>
-        </ScrollView>
-      )}
-    </View>
+  // Update animations when state changes
+  useEffect(() => {
+    heightAnim.value = withSpring(
+      overlayExpanded ? OVERLAY_EXPANDED_HEIGHT : OVERLAY_COLLAPSED_HEIGHT,
+      { damping: 20, stiffness: 150 }
+    );
+  }, [overlayExpanded]);
+
+  useEffect(() => {
+    opacityAnim.value = withTiming(overlayFaded ? 0.15 : 1, { duration: 200 });
+  }, [overlayFaded]);
+
+  // Animated style for container
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    height: heightAnim.value,
+    opacity: opacityAnim.value,
+  }));
+
+  return (
+    <Animated.View style={[overlayStyles.postOverlay, animatedContainerStyle]}>
+      {/* Tap area to unfade when faded */}
+      <TouchableWithoutFeedback onPress={onTapOverlay}>
+        <View style={overlayStyles.overlayInner}>
+          {/* Author header - ALWAYS visible */}
+          <TouchableOpacity
+            style={overlayStyles.postOverlayHeader}
+            activeOpacity={0.8}
+            onPress={toggleOverlay}
+          >
+            <View style={overlayStyles.authorSection}>
+              {authorName && (
+                <Text style={overlayStyles.postOverlayAuthor} numberOfLines={1}>
+                  {authorName}
+                </Text>
+              )}
+              {!overlayExpanded && postContent && (
+                <Text style={overlayStyles.previewText} numberOfLines={2}>
+                  {postContent.replace(/<[^>]*>/g, '').substring(0, 100)}
+                </Text>
+              )}
+            </View>
+            <View style={overlayStyles.toggleButton}>
+              <Text style={overlayStyles.postOverlayHint}>
+                {overlayExpanded ? '▼ Thu gọn' : '▲ Mở rộng'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Scrollable content area - only when expanded */}
+          {overlayExpanded && postContent && (
+            <ScrollView
+              style={overlayStyles.postOverlayScroll}
+              contentContainerStyle={[
+                overlayStyles.postOverlayScrollContent,
+                { paddingBottom: (SPACING?.xxl || 32) + bottomInset }
+              ]}
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+              scrollEnabled={true}
+              bounces={true}
+            >
+              <Text style={overlayStyles.postOverlayContent}>
+                {postContent.replace(/<[^>]*>/g, '')}
+              </Text>
+            </ScrollView>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+    </Animated.View>
   );
 });
 
@@ -99,22 +154,35 @@ const overlayStyles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: SCREEN_HEIGHT * 0.65,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)', // Reduced opacity
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+  },
+  overlayInner: {
+    flex: 1,
   },
   postOverlayHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: SPACING?.lg || 16,
-    paddingVertical: SPACING?.md || 12,
+    paddingVertical: SPACING?.md || 14,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    minHeight: 60,
+  },
+  authorSection: {
+    flex: 1,
+    marginRight: SPACING?.md || 12,
+  },
+  toggleButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
   },
   postOverlayScroll: {
-    maxHeight: SCREEN_HEIGHT * 0.50,
     flex: 1,
   },
   postOverlayScrollContent: {
@@ -124,19 +192,27 @@ const overlayStyles = StyleSheet.create({
     flexGrow: 1,
   },
   postOverlayAuthor: {
-    fontSize: TYPOGRAPHY?.fontSize?.lg || 18,
+    fontSize: TYPOGRAPHY?.fontSize?.xl || 20,
     fontWeight: TYPOGRAPHY?.fontWeight?.bold || '700',
     color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  previewText: {
+    fontSize: TYPOGRAPHY?.fontSize?.sm || 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+    lineHeight: 20,
+    marginTop: 4,
   },
   postOverlayContent: {
     fontSize: TYPOGRAPHY?.fontSize?.md || 16,
     color: '#FFFFFF',
-    lineHeight: 24,
+    lineHeight: 26,
     opacity: 0.95,
   },
   postOverlayHint: {
-    fontSize: TYPOGRAPHY?.fontSize?.sm || 14,
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: TYPOGRAPHY?.fontSize?.xs || 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '600',
   },
 });
 
@@ -166,7 +242,8 @@ const ImageGallery = ({
   const [controlsVisible, setControlsVisible] = useState(true);
   const [currentZoom, setCurrentZoom] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(true);
-  const [overlayExpanded, setOverlayExpanded] = useState(true); // Text overlay expanded state
+  const [overlayExpanded, setOverlayExpanded] = useState(true);  // Text overlay expanded/collapsed
+  const [overlayFaded, setOverlayFaded] = useState(false);       // Text overlay faded to see image
 
   // Refs
   const flatListRef = useRef(null);
@@ -193,17 +270,26 @@ const ImageGallery = ({
     itemVisiblePercentThreshold: 50,
   }).current;
 
-  // Toggle controls
+  // Single tap on image - toggle overlay fade (to see image better)
   const handleTap = useCallback(() => {
+    // When tapping image, fade overlay to see image clearly
+    // If already faded, unfade it
+    setOverlayFaded((prev) => !prev);
+    // Also toggle controls
     setControlsVisible((prev) => !prev);
   }, []);
 
   // Handle zoom change
   const handleZoomChange = useCallback((scale) => {
     setCurrentZoom(scale);
-    // Hide controls when zoomed
+    // Hide controls and fade overlay when zoomed (so user can see image clearly)
     if (scale > 1) {
       setControlsVisible(false);
+      setOverlayFaded(true);
+    } else if (scale === 1) {
+      // When zoom resets to 1, unfade overlay
+      setOverlayFaded(false);
+      setControlsVisible(true);
     }
   }, []);
 
@@ -299,10 +385,20 @@ const ImageGallery = ({
     setShowOnboarding(false);
   }, []);
 
-  // Toggle overlay visibility
+  // Toggle overlay expand/collapse
   const toggleOverlay = useCallback(() => {
     setOverlayExpanded(prev => !prev);
+    // When expanding/collapsing, make sure overlay is visible (not faded)
+    setOverlayFaded(false);
   }, []);
+
+  // Handle tap on overlay (when faded, unfade it)
+  const handleOverlayTap = useCallback(() => {
+    if (overlayFaded) {
+      setOverlayFaded(false);
+      setControlsVisible(true);
+    }
+  }, [overlayFaded]);
 
   // Render image item
   const renderItem = useCallback(({ item, index }) => (
@@ -403,12 +499,14 @@ const ImageGallery = ({
         )}
 
         {/* Facebook-style Post Content Overlay */}
-        {showOverlay && postContent && (
+        {showOverlay && (postContent || authorName) && (
           <PostOverlay
             authorName={authorName}
             postContent={postContent}
             overlayExpanded={overlayExpanded}
+            overlayFaded={overlayFaded}
             toggleOverlay={toggleOverlay}
+            onTapOverlay={handleOverlayTap}
           />
         )}
       </GestureHandlerRootView>
