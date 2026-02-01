@@ -26,6 +26,26 @@ import userContextService from './userContextService';
 import smartTriggerService from './smartTriggerService';
 import chatbotAnalyticsService from './chatbotAnalyticsService';
 
+// CRITICAL: Import enhanced chatbot modules for entity extraction, knowledge base, and fallback handling
+import {
+  enhancedMessageProcessor,
+  handleFormulaQuestion,
+  handleTarotReading,
+  handleHawkinsAssessment,
+  handleKinhDichReading,
+  quickSearch,
+  trichXuatThucThe,
+  determineDomain,
+  handleFallback,
+  shouldUseFallback,
+  calculateCompositeConfidence,
+  systemErrorFallback,
+  BASE_SYSTEM_PROMPT,
+  searchAllKnowledge,
+  getFormulaById,
+  checkTierAccess,
+} from './chatbot';
+
 // ========== API CONFIG ==========
 // API key from environment variable (set in .env file)
 const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
@@ -1656,6 +1676,29 @@ export const processMessage = async (userMessage, history = [], options = {}) =>
   const userBudget = nlpResult.entities.find(e => e.label === 'MONEY')?.value;
   const userQuantity = nlpResult.entities.find(e => e.label === 'QUANTITY')?.value;
 
+  // ========== ENHANCED ENTITY EXTRACTION (NEW CHATBOT UPGRADE) ==========
+  // Use enhanced entity extraction for trading coins, formulas, zones, tarot, crystals
+  let enhancedEntities = { byType: {}, entities: [] };
+  try {
+    enhancedEntities = trichXuatThucThe(userMessage);
+    console.log('[GEM] Enhanced entities:', {
+      coins: enhancedEntities.byType?.COIN || [],
+      formulas: enhancedEntities.byType?.FORMULA || [],
+      zones: enhancedEntities.byType?.ZONE || [],
+      tarot: enhancedEntities.byType?.TAROT || [],
+      crystals: enhancedEntities.byType?.CRYSTAL || [],
+      hawkins: enhancedEntities.byType?.HAWKINS || [],
+      totalEntities: enhancedEntities.entities?.length || 0,
+    });
+  } catch (entityError) {
+    console.warn('[GEM] Enhanced entity extraction failed:', entityError?.message);
+  }
+
+  // ========== DETERMINE DOMAIN (NEW CHATBOT UPGRADE) ==========
+  // Detect if message is about trading, spiritual, or general topics
+  const messageDomain = determineDomain(userMessage, intentResult.intent);
+  console.log('[GEM] Message domain:', messageDomain);
+
   try {
     // ========== MODE: QUESTIONNAIRE ==========
     if (conversationState.mode === 'questionnaire') {
@@ -2200,15 +2243,101 @@ export const processMessage = async (userMessage, history = [], options = {}) =>
       }
     }
 
-    // ========== STEP 4: FALLBACK TO DIRECT GEMINI API ==========
-    console.log('[GEM] Using direct Gemini API...');
+    // ========== STEP 4: ENHANCED CHATBOT PROCESSING + DIRECT GEMINI API ==========
+    console.log('[GEM] Using enhanced chatbot + direct Gemini API...');
 
     // Regular chat - Use Gemini API
     if (!API_KEY) {
       return { text: '⚠️ Thiếu API key trong .env', error: 'no-key' };
     }
 
-    // isContinuation already defined above (line 1213)
+    // ========== NEW: ENHANCED MESSAGE PROCESSOR ==========
+    // Use the new chatbot upgrade modules for better context and knowledge
+    let enhancedContext = null;
+    let knowledgeContextStr = '';
+    let entityContextStr = '';
+
+    try {
+      // Run enhanced message processor
+      enhancedContext = await enhancedMessageProcessor({
+        message: userMessage,
+        intent: intentResult.intent,
+        intentConfidence: intentResult.confidence,
+        userContext: {
+          tier: options.userTier || 'FREE',
+          ...(options.userContext || {}),
+        },
+        history: history.slice(-6),
+      });
+
+      console.log('[GEM] Enhanced processor result:', {
+        success: enhancedContext?.success,
+        useFallback: enhancedContext?.useFallback,
+        domain: enhancedContext?.domain,
+        confidence: enhancedContext?.confidence,
+        entitiesFound: Object.keys(enhancedContext?.entities || {}).length,
+        knowledgeFound: enhancedContext?.knowledgeContext?.length || 0,
+      });
+
+      // Check if fallback is needed (low confidence)
+      if (enhancedContext?.useFallback && enhancedContext?.fallback?.finalResponse) {
+        console.log('[GEM] Using fallback response from Sư Phụ persona');
+        return {
+          text: enhancedContext.fallback.finalResponse,
+          topics,
+          mode: 'chat',
+          source: 'enhanced_fallback',
+          confidence: enhancedContext.confidence,
+          domain: enhancedContext.domain,
+          widgetSuggestion: WIDGET_SUGGESTIONS[topics[0]] || null,
+          courseRecommendation: COURSE_RECOMMENDATIONS[topics[0]] || null,
+          showCrystals: false,
+          crystalTags: [],
+        };
+      }
+
+      // Build knowledge context string from search results
+      if (enhancedContext?.knowledgeContext && enhancedContext.knowledgeContext.length > 0) {
+        const relevantKnowledge = enhancedContext.knowledgeContext
+          .slice(0, 2)
+          .map(k => `- ${k.ten || k.title}: ${(k.moTaNgan || k.description || '').substring(0, 200)}`)
+          .join('\n');
+
+        if (relevantKnowledge) {
+          knowledgeContextStr = `\n**KIẾN THỨC LIÊN QUAN (từ kho kiến thức GEM):**\n${relevantKnowledge}\n`;
+          console.log('[GEM] Added knowledge context to prompt');
+        }
+      }
+
+      // Build entity context string
+      if (enhancedContext?.entities) {
+        const entityParts = [];
+        if (enhancedContext.entities.COIN?.length > 0) {
+          entityParts.push(`Coins: ${enhancedContext.entities.COIN.join(', ')}`);
+        }
+        if (enhancedContext.entities.FORMULA?.length > 0) {
+          entityParts.push(`Công thức: ${enhancedContext.entities.FORMULA.join(', ')}`);
+        }
+        if (enhancedContext.entities.ZONE?.length > 0) {
+          entityParts.push(`Zones: ${enhancedContext.entities.ZONE.join(', ')}`);
+        }
+        if (enhancedContext.entities.TAROT?.length > 0) {
+          entityParts.push(`Tarot: ${enhancedContext.entities.TAROT.join(', ')}`);
+        }
+        if (enhancedContext.entities.HAWKINS?.length > 0) {
+          entityParts.push(`Tần số Hawkins: ${enhancedContext.entities.HAWKINS.join(', ')}`);
+        }
+
+        if (entityParts.length > 0) {
+          entityContextStr = `\n**THỰC THỂ PHÁT HIỆN:** ${entityParts.join(' | ')}\n`;
+          console.log('[GEM] Added entity context to prompt');
+        }
+      }
+    } catch (enhancedError) {
+      console.warn('[GEM] Enhanced processor error (using standard flow):', enhancedError?.message);
+    }
+
+    // isContinuation already defined above
     const historyCount = Math.min(history.length, 8); // Send up to 8 recent messages for context
 
     // Build prompt - Different for first message vs continuation
@@ -2272,7 +2401,7 @@ Nếu user hỏi CHI TIẾT về:
       prompt += `---
 
 **CÂU HỎI MỚI TỪ USER:** ${userMessage}
-${options.userContext ? `\n**THÔNG TIN USER:**\n${options.userContext}\n` : ''}${options.intentInstruction ? `\n**HƯỚNG DẪN PHẢN HỒI THEO INTENT:**\n${options.intentInstruction}\n` : ''}
+${entityContextStr}${knowledgeContextStr}${options.userContext ? `\n**THÔNG TIN USER:**\n${options.userContext}\n` : ''}${options.intentInstruction ? `\n**HƯỚNG DẪN PHẢN HỒI THEO INTENT:**\n${options.intentInstruction}\n` : ''}
 **TRẢ LỜI (bắt đầu bằng 1 câu dẫn tự nhiên, sau đó vào nội dung):**`;
 
     } else {
@@ -2305,11 +2434,11 @@ Nếu user hỏi CHI TIẾT về công thức Frequency, khóa học TIER 1/2/3,
 - Hawkins: 20-100Hz (thấp), 200Hz+ (can đảm), 500Hz+ (tình yêu)
 
 **TIN NHẮN TỪ USER:** ${userMessage}
-${options.userContext ? `\n**THÔNG TIN USER:**\n${options.userContext}\n` : ''}${options.intentInstruction ? `\n**HƯỚNG DẪN PHẢN HỒI THEO INTENT:**\n${options.intentInstruction}\n` : ''}
+${entityContextStr}${knowledgeContextStr}${options.userContext ? `\n**THÔNG TIN USER:**\n${options.userContext}\n` : ''}${options.intentInstruction ? `\n**HƯỚNG DẪN PHẢN HỒI THEO INTENT:**\n${options.intentInstruction}\n` : ''}
 **TRẢ LỜI:**`;
     }
 
-    console.log('[GEM] Calling direct API...');
+    console.log('[GEM] Calling direct API with enhanced context...');
 
     const result = await callGeminiAPI(prompt, { temperature: 0.7 });
     const text = result.text;
@@ -2324,8 +2453,13 @@ ${options.userContext ? `\n**THÔNG TIN USER:**\n${options.userContext}\n` : ''}
       text,
       topics,
       mode: 'chat',
-      source: 'direct_api',
+      source: enhancedContext ? 'enhanced_api' : 'direct_api',
       ragUsed: false,
+      enhancedProcessing: !!enhancedContext,
+      domain: enhancedContext?.domain || messageDomain,
+      confidence: enhancedContext?.confidence,
+      entitiesDetected: enhancedContext?.entities || enhancedEntities?.byType || {},
+      knowledgeUsed: enhancedContext?.knowledgeContext?.length > 0,
       widgetSuggestion: WIDGET_SUGGESTIONS[topics[0]] || null,
       courseRecommendation: COURSE_RECOMMENDATIONS[topics[0]] || null,
       showCrystals,
