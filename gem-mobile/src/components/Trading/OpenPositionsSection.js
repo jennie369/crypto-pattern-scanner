@@ -255,14 +255,15 @@ const OpenPositionsSection = ({
     return null;
   };
 
-  // Initialize with cached data if available - NO LOADING STATE if we have cached data
+  // Initialize with cached data if available - NO LOADING STATE
   const cachedPositions = getCachedPositions();
   const cachedStats = getCachedStats();
 
   const [positions, setPositions] = useState(cachedPositions);
   const [stats, setStats] = useState(cachedStats);
-  // CRITICAL: Only show loading if we have NO cached data
-  const [loading, setLoading] = useState(cachedPositions.length === 0 && !paperTradeService.initialized);
+  // CRITICAL: Always start with loading=false to show section immediately
+  // Positions will appear as soon as data loads - no blocking loading screen
+  const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [closingId, setClosingId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -283,15 +284,8 @@ const OpenPositionsSection = ({
 
       console.log('[OpenPositionsSection] Loading positions for userId:', userId, 'forceRefresh:', forceRefresh);
 
-      // OPTIMIZATION: Only show loading if we have no cached data AND service not initialized
-      // This prevents loading flicker when switching tabs
-      const hasCachedData = paperTradeService.initialized &&
-        paperTradeService.currentUserId === userId &&
-        (paperTradeService.openPositions?.length > 0 || paperTradeService.getOpenPositions(userId)?.length >= 0);
-
-      if (!hasCachedData && !paperTradeService.initialized) {
-        setLoading(true);
-      }
+      // REMOVED: No more setLoading(true) - section displays immediately
+      // Positions appear as data loads without blocking UI
 
       // Use forceRefreshFromCloud only for manual refresh
       // For normal loads, use init() which has built-in data protection
@@ -544,18 +538,8 @@ const OpenPositionsSection = ({
   const totalPnL = positions.reduce((sum, p) => sum + (p.unrealizedPnL || 0), 0);
   const totalMargin = positions.reduce((sum, p) => sum + (p.margin || 0), 0);
 
-  // OPTIMIZATION: Only show loading when we have NO cached positions AND still loading
-  // This prevents loading flicker when switching tabs
-  if (loading && positions.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={COLORS.gold} />
-          <Text style={styles.loadingText}>Đang tải vị thế...</Text>
-        </View>
-      </View>
-    );
-  }
+  // REMOVED: Loading indicator - show section immediately, positions appear as they load
+  // This provides instant UI response when switching tabs or opening app
 
   // Always show section - display empty state if no positions
   // This helps debugging and shows the section is working
@@ -614,7 +598,7 @@ const OpenPositionsSection = ({
       {/* Positions List */}
       {!collapsed && (
         <View style={styles.positionsList}>
-          {/* Empty State */}
+          {/* Empty State - Show when no positions */}
           {positions.length === 0 && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>Chưa có lệnh đang mở</Text>

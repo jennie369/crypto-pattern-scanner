@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -60,6 +61,10 @@ import { hasAccess } from '../../constants/scannerAccess';
 import {
   checkMultiTFAccess,
   getAvailableTimeframesForTier,
+  analyzeMultiTFResults,
+  calculatePatternTimeframeStrength,
+  PATTERN_STRENGTH_RANKING,
+  TIMEFRAME_STRENGTH,
 } from '../../services/multiTimeframeScanner';
 import { binanceService } from '../../services/binanceService';
 import { favoritesService } from '../../services/favoritesService';
@@ -93,12 +98,14 @@ const ScannerScreen = ({ navigation }) => {
     selectedCoins,
     selectedTimeframe,
     multiTFResults,
+    zones,
     setScanResults,
     setPatterns,
     setLastScanTime,
     setSelectedCoins,
     setSelectedTimeframe,
     setMultiTFResults,
+    setZones,
   } = useScanner();
 
   // State for max coins - derived from tier
@@ -133,8 +140,7 @@ const ScannerScreen = ({ navigation }) => {
   // Positions refresh trigger
   const [positionsRefreshTrigger, setPositionsRefreshTrigger] = useState(0);
 
-  // Zone Visualization State
-  const [zones, setZones] = useState([]);
+  // Zone Visualization State (zones from ScannerContext)
   const [zonePreferences, setZonePreferences] = useState(null);
   // MTF state removed - integrated into main scan
   const [showZones, setShowZones] = useState(true);
@@ -320,6 +326,13 @@ const ScannerScreen = ({ navigation }) => {
         wsRef.current.close();
       }
     };
+  }, [displayCoin]);
+
+  // Reset zone display mode when coin changes to show all zones for new coin
+  useEffect(() => {
+    console.log('[Scanner] displayCoin changed to:', displayCoin, '- resetting zoneDisplayMode to all');
+    setZoneDisplayMode('all');
+    setSelectedZonePatternId(null);
   }, [displayCoin]);
 
   const subscribeToPrice = async (symbol) => {
@@ -631,6 +644,11 @@ const ScannerScreen = ({ navigation }) => {
       const enrichedPatterns = allPatterns.map((p) => {
         const v2Summary = getV2QuickSummary(p);
         const volRatio = p.enhancements?.volume?.ratio || 0;
+
+        // Calculate pattern-timeframe strength
+        const patternType = p.patternName || p.pattern || p.type || p.patternType;
+        const strengthAnalysis = calculatePatternTimeframeStrength(patternType, p.timeframe);
+
         return {
           ...p,
           pattern_id: generatePatternId(p),
@@ -641,6 +659,11 @@ const ScannerScreen = ({ navigation }) => {
           volumeRatio: volRatio, // Hoist to top level for easy access
           volumeValid: hasAccess(userTier, 'volumeValidation') ? volRatio >= 1.0 : undefined,
           volumeGrade: hasAccess(userTier, 'volumeValidation') ? v2Summary.validations.volume.grade : undefined,
+          // Pattern-Timeframe strength analysis
+          strengthAnalysis,
+          combinedScore: strengthAnalysis.combinedScore,
+          adjustedWinRate: strengthAnalysis.adjustedWinRate,
+          patternTier: strengthAnalysis.patternTier,
         };
       });
 
@@ -657,6 +680,11 @@ const ScannerScreen = ({ navigation }) => {
         patterns: result.patterns.map((p) => {
           const v2Summary = getV2QuickSummary(p);
           const volRatio = p.enhancements?.volume?.ratio || 0;
+
+          // Calculate pattern-timeframe strength
+          const patternType = p.patternName || p.pattern || p.type || p.patternType;
+          const strengthAnalysis = calculatePatternTimeframeStrength(patternType, p.timeframe);
+
           return {
             ...p,
             pattern_id: generatePatternId(p),
@@ -667,9 +695,24 @@ const ScannerScreen = ({ navigation }) => {
             volumeRatio: volRatio, // Hoist to top level for easy access
             volumeValid: hasAccess(userTier, 'volumeValidation') ? volRatio >= 1.0 : undefined,
             volumeGrade: hasAccess(userTier, 'volumeValidation') ? v2Summary.validations.volume.grade : undefined,
+            // Pattern-Timeframe strength analysis
+            strengthAnalysis,
+            combinedScore: strengthAnalysis.combinedScore,
+            adjustedWinRate: strengthAnalysis.adjustedWinRate,
+            patternTier: strengthAnalysis.patternTier,
           };
         }),
       }));
+
+      // Sort enrichedPatterns by combined score (pattern + timeframe strength)
+      enrichedPatterns.sort((a, b) => {
+        // Primary: combined score (pattern strength + timeframe reliability)
+        if (b.combinedScore !== a.combinedScore) {
+          return b.combinedScore - a.combinedScore;
+        }
+        // Secondary: confidence
+        return (b.confidence || 0) - (a.confidence || 0);
+      });
 
       // Debug V2 data
       if (enrichedPatterns.length > 0) {
@@ -679,6 +722,8 @@ const ScannerScreen = ({ navigation }) => {
           confidenceGrade: enrichedPatterns[0].confidenceGrade,
           volumeRatio: enrichedPatterns[0].volumeRatio,
           volumeGrade: enrichedPatterns[0].volumeGrade,
+          combinedScore: enrichedPatterns[0].combinedScore,
+          patternTier: enrichedPatterns[0].patternTier,
           v2: enrichedPatterns[0].v2,
         });
       }
@@ -916,6 +961,36 @@ const ScannerScreen = ({ navigation }) => {
     };
     checkExchangeAccount();
   }, [user?.id]);
+
+  // ✅ Restore zones from cache when tab is focused
+  useFocusEffect(
+    useCallback(() => {
+      // Reset zone display mode to show all zones when returning to tab
+      console.log('[Scanner] Tab focused - resetting zoneDisplayMode to all');
+      setZoneDisplayMode('all');
+      setSelectedZonePatternId(null);
+
+      const restoreZonesFromCache = async () => {
+        // Only restore if zones are empty and we have scan results
+        if (zones.length === 0 && scanResults.length > 0 && user?.id) {
+          try {
+            const cachedZones = await zoneManager.getZonesForChart(
+              displayCoin,
+              selectedTimeframe,
+              user.id
+            );
+            if (cachedZones && cachedZones.length > 0) {
+              console.log('[Scanner] Restored zones from cache:', cachedZones.length);
+              setZones(cachedZones);
+            }
+          } catch (error) {
+            console.log('[Scanner] No cached zones to restore:', error.message);
+          }
+        }
+      };
+      restoreZonesFromCache();
+    }, [zones.length, scanResults.length, displayCoin, selectedTimeframe, user?.id])
+  );
 
   // Handle selecting coin from scan results
   // NOTE: Only update state - useEffect will handle subscribeToPrice automatically
@@ -1744,10 +1819,10 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   priceUp: {
-    backgroundColor: COLORS.success,
+    backgroundColor: '#22C55E', // Match TradingView chart green
   },
   priceDown: {
-    backgroundColor: COLORS.error,
+    backgroundColor: '#EF4444', // Match TradingView chart red
   },
   priceChangeTextCompact: {
     fontSize: 12,

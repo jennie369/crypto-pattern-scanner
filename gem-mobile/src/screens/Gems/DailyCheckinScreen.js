@@ -33,7 +33,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../contexts/AuthContext';
 import gemEconomyService from '../../services/gemEconomyService';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 
 const DailyCheckinScreen = () => {
   const { user } = useAuth();
@@ -381,61 +381,82 @@ const DailyCheckinScreen = () => {
   // ========== LOADING STATE ==========
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={COLORS.gold} />
-          <Text style={styles.loadingText}>Đang tải...</Text>
-        </View>
-      </SafeAreaView>
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.gradient}
+      >
+        <SafeAreaView style={styles.container}>
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={COLORS.gold} />
+            <Text style={styles.loadingText}>Đang tải...</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
     );
   }
 
   // ========== ERROR STATE ==========
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContainer}>
-          <AlertCircle size={48} color={COLORS.danger} />
-          <Text style={styles.errorTitle}>Đã có lỗi xảy ra</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={loadCheckinStatus}
-          >
-            <RefreshCw size={18} color={COLORS.gold} />
-            <Text style={styles.retryText}>Thử lại</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.gradient}
+      >
+        <SafeAreaView style={styles.container}>
+          <View style={styles.centerContainer}>
+            <AlertCircle size={48} color={COLORS.danger} />
+            <Text style={styles.errorTitle}>Đã có lỗi xảy ra</Text>
+            <Text style={styles.errorMessage}>{error}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={loadCheckinStatus}
+            >
+              <RefreshCw size={18} color={COLORS.gold} />
+              <Text style={styles.retryText}>Thử lại</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
     );
   }
 
   // ========== MAIN RENDER ==========
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {renderStreakCard()}
-        {renderCheckinButton()}
-        {renderNextBonus()}
-        {renderRecentCheckins()}
-        {renderBonusInfo()}
-      </ScrollView>
+    <LinearGradient
+      colors={GRADIENTS.background}
+      locations={GRADIENTS.backgroundLocations}
+      style={styles.gradient}
+    >
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {renderStreakCard()}
+          {renderCheckinButton()}
+          {renderNextBonus()}
+          {renderRecentCheckins()}
+          {renderBonusInfo()}
+        </ScrollView>
 
-      {renderSuccessModal()}
-      {AlertComponent}
-    </SafeAreaView>
+        {renderSuccessModal()}
+        {AlertComponent}
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 // ========== STYLES ==========
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDarkest,
+    backgroundColor: 'transparent',
   },
   centerContainer: {
     flex: 1,
@@ -664,7 +685,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: COLORS.bgDarkest,
+    backgroundColor: 'rgba(15, 16, 48, 0.95)',
     borderRadius: 16,
     padding: SPACING.xl,
     alignItems: 'center',
