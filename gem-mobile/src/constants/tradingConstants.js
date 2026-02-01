@@ -431,6 +431,7 @@ export const NOTIFICATION_TYPES = {
   SL_HIT: 'sl_hit',
   POSITION_CLOSED: 'position_closed',
   LIQUIDATION_WARNING: 'liquidation_warning',
+  LIQUIDATION: 'liquidation',  // Position liquidated
   STOP_TRIGGERED: 'stop_triggered',
   DAILY_SUMMARY: 'daily_summary',
   WEEKLY_SUMMARY: 'weekly_summary',

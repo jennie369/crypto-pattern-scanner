@@ -967,7 +967,7 @@ const TradingChart = ({
 
       try {
         // Try Futures API first (use _cb for cache busting, not timestamp)
-        const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=500&_cb=' + cacheBuster;
+        const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=1500&_cb=' + cacheBuster;
         console.log('Fetching Futures:', futuresUrl);
         const futuresResponse = await fetch(futuresUrl, {
           cache: 'no-store',
@@ -993,7 +993,7 @@ const TradingChart = ({
 
         try {
           // Fallback to Spot API
-          const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=500&_cb=' + cacheBuster;
+          const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=1500&_cb=' + cacheBuster;
           console.log('Fetching Spot:', spotUrl);
           const spotResponse = await fetch(spotUrl, {
             cache: 'no-store',
@@ -1284,7 +1284,7 @@ const TradingChart = ({
 
       try {
         // Use _cb (cache buster) instead of timestamp to avoid Binance API confusion
-        const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + interval + '&limit=500&_cb=' + cacheBuster;
+        const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + interval + '&limit=1500&_cb=' + cacheBuster;
         debugLog('Fetching Futures', { url: futuresUrl });
         const futuresResponse = await fetch(futuresUrl, {
           cache: 'no-store',
@@ -1306,7 +1306,7 @@ const TradingChart = ({
 
         try {
           // Fallback to Spot API
-          const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + interval + '&limit=500&_cb=' + cacheBuster;
+          const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + interval + '&limit=1500&_cb=' + cacheBuster;
           debugLog('Trying Spot fallback', { url: spotUrl });
           const spotResponse = await fetch(spotUrl, {
             cache: 'no-store',

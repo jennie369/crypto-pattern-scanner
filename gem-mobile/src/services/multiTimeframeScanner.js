@@ -294,10 +294,231 @@ export const getRecommendedTimeframes = (patternType) => {
 
     // FREQUENCY ZONES need higher timeframes
     'HFZ': ['1d', '1w', '4h'],
-    'LFZ': ['1d', '1w', '4h']
+    'LFZ': ['1d', '1w', '4h'],
+
+    // Advanced GEM Frequency patterns
+    'Quasimodo Bearish': ['1d', '4h', '1h'],
+    'Quasimodo Bullish': ['1d', '4h', '1h'],
+    'QML-B': ['1d', '4h', '1h'],
+    'QML-L': ['1d', '4h', '1h'],
+    'FTR Bearish': ['4h', '1h', '15m'],
+    'FTR Bullish': ['4h', '1h', '15m'],
+    'FTR-B': ['4h', '1h', '15m'],
+    'FTR-L': ['4h', '1h', '15m'],
+    'Flag Limit Bearish': ['4h', '1h', '15m'],
+    'Flag Limit Bullish': ['4h', '1h', '15m'],
+    'FL-B': ['4h', '1h', '15m'],
+    'FL-L': ['4h', '1h', '15m'],
+    'Decision Point Bearish': ['1d', '4h', '1h'],
+    'Decision Point Bullish': ['1d', '4h', '1h'],
+    'DP-B': ['1d', '4h', '1h'],
+    'DP-L': ['1d', '4h', '1h'],
   };
 
   return recommendations[patternType] || ['1d', '4h', '1h'];
+};
+
+// 📊 PATTERN STRENGTH RANKING
+// Based on GEM Frequency Method win rates and reliability
+export const PATTERN_STRENGTH_RANKING = {
+  // TIER S - Highest reliability (75%+ expected win rate)
+  'Quasimodo Bearish': { tier: 'S', winRate: 75, strength: 95 },
+  'Quasimodo Bullish': { tier: 'S', winRate: 73, strength: 93 },
+  'QML-B': { tier: 'S', winRate: 75, strength: 95 },
+  'QML-L': { tier: 'S', winRate: 73, strength: 93 },
+
+  // TIER A - Strong reversal patterns (70-74% win rate)
+  'UPD': { tier: 'A', winRate: 72, strength: 88 },
+  'DPU': { tier: 'A', winRate: 71, strength: 87 },
+  'HEAD_SHOULDERS': { tier: 'A', winRate: 70, strength: 85 },
+  'DOUBLE_TOP': { tier: 'A', winRate: 68, strength: 82 },
+  'DOUBLE_BOTTOM': { tier: 'A', winRate: 68, strength: 82 },
+  'FTR Bearish': { tier: 'A', winRate: 66, strength: 80 },
+  'FTR Bullish': { tier: 'A', winRate: 68, strength: 82 },
+  'FTR-B': { tier: 'A', winRate: 66, strength: 80 },
+  'FTR-L': { tier: 'A', winRate: 68, strength: 82 },
+
+  // TIER B - Good patterns (65-69% win rate)
+  'Flag Limit Bearish': { tier: 'B', winRate: 65, strength: 75 },
+  'Flag Limit Bullish': { tier: 'B', winRate: 65, strength: 75 },
+  'FL-B': { tier: 'B', winRate: 65, strength: 75 },
+  'FL-L': { tier: 'B', winRate: 65, strength: 75 },
+  'ASCENDING_TRIANGLE': { tier: 'B', winRate: 67, strength: 78 },
+  'DESCENDING_TRIANGLE': { tier: 'B', winRate: 67, strength: 78 },
+  'DPD': { tier: 'B', winRate: 65, strength: 75 },
+  'UPU': { tier: 'B', winRate: 65, strength: 75 },
+  'Decision Point Bearish': { tier: 'B', winRate: 64, strength: 74 },
+  'Decision Point Bullish': { tier: 'B', winRate: 64, strength: 74 },
+  'DP-B': { tier: 'B', winRate: 64, strength: 74 },
+  'DP-L': { tier: 'B', winRate: 64, strength: 74 },
+
+  // TIER C - Standard patterns (60-64% win rate)
+  'SYMMETRICAL_TRIANGLE': { tier: 'C', winRate: 63, strength: 70 },
+  'BULL_FLAG': { tier: 'C', winRate: 64, strength: 72 },
+  'BEAR_FLAG': { tier: 'C', winRate: 64, strength: 72 },
+  'WEDGE': { tier: 'C', winRate: 62, strength: 68 },
+};
+
+// 📊 TIMEFRAME STRENGTH RANKING
+// Higher timeframes = stronger signals
+export const TIMEFRAME_STRENGTH = {
+  '1M': { weight: 100, label: 'Monthly', reliability: 95 },
+  '1w': { weight: 90, label: 'Weekly', reliability: 90 },
+  '1d': { weight: 80, label: 'Daily', reliability: 85 },
+  '4h': { weight: 65, label: '4 Hour', reliability: 75 },
+  '1h': { weight: 50, label: '1 Hour', reliability: 65 },
+  '30m': { weight: 35, label: '30 Min', reliability: 55 },
+  '15m': { weight: 25, label: '15 Min', reliability: 50 },
+  '5m': { weight: 15, label: '5 Min', reliability: 40 },
+  '1m': { weight: 5, label: '1 Min', reliability: 30 },
+};
+
+// 🎯 CALCULATE COMBINED PATTERN-TIMEFRAME STRENGTH
+export const calculatePatternTimeframeStrength = (patternType, timeframe) => {
+  const patternInfo = PATTERN_STRENGTH_RANKING[patternType] || { tier: 'C', winRate: 60, strength: 65 };
+  const tfInfo = TIMEFRAME_STRENGTH[timeframe] || { weight: 50, reliability: 60 };
+
+  // Combined score = pattern strength * 0.6 + timeframe weight * 0.4
+  const combinedScore = Math.round(patternInfo.strength * 0.6 + tfInfo.weight * 0.4);
+
+  // Adjusted win rate based on timeframe reliability
+  const adjustedWinRate = Math.round(patternInfo.winRate * (tfInfo.reliability / 100));
+
+  return {
+    patternType,
+    timeframe,
+    patternTier: patternInfo.tier,
+    baseWinRate: patternInfo.winRate,
+    patternStrength: patternInfo.strength,
+    timeframeWeight: tfInfo.weight,
+    timeframeReliability: tfInfo.reliability,
+    combinedScore,
+    adjustedWinRate,
+    grade: combinedScore >= 85 ? 'S' : combinedScore >= 75 ? 'A' : combinedScore >= 65 ? 'B' : 'C',
+  };
+};
+
+// 🔍 ANALYZE MULTI-TF PATTERN RESULTS
+export const analyzeMultiTFResults = (mtfResults) => {
+  if (!mtfResults?.results?.length) {
+    return null;
+  }
+
+  const analysis = {
+    strongestPattern: null,
+    strongestTimeframe: null,
+    bestCombination: null,
+    alignedPatterns: [],
+    recommendations: [],
+  };
+
+  let maxStrength = 0;
+  let maxTfWeight = 0;
+  let maxCombined = 0;
+
+  // Analyze each timeframe result
+  mtfResults.results.forEach(tfResult => {
+    const { timeframe, patterns } = tfResult;
+    const tfInfo = TIMEFRAME_STRENGTH[timeframe] || { weight: 50, reliability: 60 };
+
+    // Track strongest timeframe with patterns
+    if (patterns?.length > 0 && tfInfo.weight > maxTfWeight) {
+      maxTfWeight = tfInfo.weight;
+      analysis.strongestTimeframe = {
+        timeframe,
+        weight: tfInfo.weight,
+        reliability: tfInfo.reliability,
+        patternCount: patterns.length,
+      };
+    }
+
+    // Analyze each pattern
+    patterns?.forEach(pattern => {
+      const patternType = pattern.patternName || pattern.name || pattern.type;
+      const patternInfo = PATTERN_STRENGTH_RANKING[patternType] || { tier: 'C', winRate: 60, strength: 65 };
+
+      // Track strongest pattern
+      if (patternInfo.strength > maxStrength) {
+        maxStrength = patternInfo.strength;
+        analysis.strongestPattern = {
+          patternType,
+          timeframe,
+          tier: patternInfo.tier,
+          winRate: patternInfo.winRate,
+          strength: patternInfo.strength,
+          pattern,
+        };
+      }
+
+      // Calculate combined strength
+      const combined = calculatePatternTimeframeStrength(patternType, timeframe);
+      if (combined.combinedScore > maxCombined) {
+        maxCombined = combined.combinedScore;
+        analysis.bestCombination = {
+          ...combined,
+          pattern,
+        };
+      }
+    });
+  });
+
+  // Find aligned patterns (same direction across multiple timeframes)
+  const directionCount = { LONG: [], SHORT: [] };
+  mtfResults.results.forEach(tfResult => {
+    tfResult.patterns?.forEach(pattern => {
+      const direction = pattern.direction || pattern.signal;
+      if (direction === 'LONG' || direction === 'SHORT') {
+        directionCount[direction].push({
+          timeframe: tfResult.timeframe,
+          pattern: pattern.patternName || pattern.name || pattern.type,
+        });
+      }
+    });
+  });
+
+  // Check for alignment
+  if (directionCount.LONG.length >= 2) {
+    analysis.alignedPatterns.push({
+      direction: 'LONG',
+      timeframes: directionCount.LONG,
+      strength: 'STRONG',
+    });
+  }
+  if (directionCount.SHORT.length >= 2) {
+    analysis.alignedPatterns.push({
+      direction: 'SHORT',
+      timeframes: directionCount.SHORT,
+      strength: 'STRONG',
+    });
+  }
+
+  // Generate recommendations
+  if (analysis.bestCombination?.combinedScore >= 80) {
+    analysis.recommendations.push({
+      type: 'HIGH_PROBABILITY',
+      message: `${analysis.bestCombination.patternType} trên ${analysis.bestCombination.timeframe} có độ tin cậy cao (${analysis.bestCombination.combinedScore}/100)`,
+      action: 'TRADE',
+    });
+  }
+
+  if (analysis.alignedPatterns.length > 0) {
+    const aligned = analysis.alignedPatterns[0];
+    analysis.recommendations.push({
+      type: 'ALIGNMENT',
+      message: `${aligned.timeframes.length} timeframes cùng hướng ${aligned.direction}`,
+      action: 'CONFIRM',
+    });
+  }
+
+  if (analysis.strongestTimeframe?.weight >= 80) {
+    analysis.recommendations.push({
+      type: 'TIMEFRAME',
+      message: `Pattern trên ${analysis.strongestTimeframe.timeframe} đáng tin cậy hơn`,
+      action: 'PRIORITIZE',
+    });
+  }
+
+  return analysis;
 };
 
 // 🎨 GET TIER BADGE COLOR
@@ -359,5 +580,10 @@ export default {
   getTierFeatures,
   getAvailableTimeframesForTier,
   MULTI_TF_TIMEFRAMES,
-  TIER_CONFIG
+  TIER_CONFIG,
+  // Pattern & Timeframe strength analysis
+  PATTERN_STRENGTH_RANKING,
+  TIMEFRAME_STRENGTH,
+  calculatePatternTimeframeStrength,
+  analyzeMultiTFResults,
 };

@@ -88,6 +88,13 @@ const NOTIFICATION_TEMPLATES = {
     priority: 'high',
     categoryId: 'alert',
   },
+  [NOTIFICATION_TYPES.LIQUIDATION]: {
+    title: 'Vị thế đã bị thanh lý!',
+    titleEn: 'Position Liquidated!',
+    getBody: (data) => `${data.symbol}: Vị thế bị thanh lý @ ${formatUSDT(data.liquidationPrice)}\nLỗ: ${formatUSDT(data.pnl)}`,
+    priority: 'high',
+    categoryId: 'alert',
+  },
   [NOTIFICATION_TYPES.STOP_TRIGGERED]: {
     title: 'Stop đã kích hoạt',
     titleEn: 'Stop Triggered',
@@ -433,6 +440,19 @@ export const notifyLiquidationWarning = async (position, marginUsed, userId = nu
 };
 
 /**
+ * Notify position liquidated
+ */
+export const notifyLiquidation = async (position, liquidationPrice, pnl, userId = null) => {
+  return sendNotification(NOTIFICATION_TYPES.LIQUIDATION, {
+    symbol: position.symbol,
+    liquidationPrice,
+    pnl,
+    positionId: position.id,
+    direction: position.direction,
+  }, userId);
+};
+
+/**
  * Notify position closed
  */
 export const notifyPositionClosed = async (position, pnl, roe, userId = null) => {
@@ -479,6 +499,7 @@ const paperTradeNotificationService = {
   notifyTPHit,
   notifySLHit,
   notifyLiquidationWarning,
+  notifyLiquidation,
   notifyPositionClosed,
   addResponseListener,
   addReceivedListener,

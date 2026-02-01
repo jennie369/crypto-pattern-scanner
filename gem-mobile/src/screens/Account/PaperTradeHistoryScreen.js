@@ -1014,10 +1014,18 @@ export default function PaperTradeHistoryScreen({ navigation }) {
                               ]}>
                                 {trade.result === 'WIN' ? 'THẮNG' : 'THUA'}
                               </Text>
-                              <View style={styles.exitReasonBadge}>
-                                <Text style={styles.exitReasonText}>
-                                  {trade.exit_reason === 'STOP_LOSS' ? 'Chạm SL' :
-                                   trade.exit_reason === 'TAKE_PROFIT' ? 'Chạm TP' : 'Đóng tay'}
+                              <View style={[
+                                styles.exitReasonBadge,
+                                trade.exit_reason === 'LIQUIDATION' && { backgroundColor: 'rgba(220, 38, 38, 0.2)' }
+                              ]}>
+                                <Text style={[
+                                  styles.exitReasonText,
+                                  trade.exit_reason === 'LIQUIDATION' && { color: COLORS.error }
+                                ]}>
+                                  {trade.exit_reason === 'STOP_LOSS' ? 'Cắt lỗ (SL)' :
+                                   trade.exit_reason === 'TAKE_PROFIT' ? 'Chốt lời (TP)' :
+                                   trade.exit_reason === 'LIQUIDATION' ? 'Thanh lý' :
+                                   trade.exit_reason === 'MANUAL' ? 'Đóng tay' : 'Đóng tay'}
                                 </Text>
                               </View>
                             </View>

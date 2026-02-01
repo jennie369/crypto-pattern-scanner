@@ -298,6 +298,89 @@ const PATTERN_SIGNALS = {
     expectedWinRate: 70,
     avgRR: 1.8,
   },
+  // ========================================
+  // TIER 3 ADVANCED PATTERNS (GEM Frequency)
+  // ========================================
+  'Quasimodo Bearish': {
+    name: 'QML-B',
+    fullName: 'Quasimodo Bearish',
+    direction: 'SHORT',
+    type: 'reversal',
+    color: '#FF6B6B',
+    description: 'Strong bearish reversal - Lower low followed by lower high',
+    expectedWinRate: 75,
+    avgRR: 2.8,
+  },
+  'Quasimodo Bullish': {
+    name: 'QML-L',
+    fullName: 'Quasimodo Bullish',
+    direction: 'LONG',
+    type: 'reversal',
+    color: '#3AF7A6',
+    description: 'Strong bullish reversal - Higher high followed by higher low',
+    expectedWinRate: 73,
+    avgRR: 2.6,
+  },
+  'FTR Bearish': {
+    name: 'FTR-B',
+    fullName: 'Fail To Return Bearish',
+    direction: 'SHORT',
+    type: 'reversal',
+    color: '#FF6B6B',
+    description: 'Failed retest of resistance zone - bearish continuation',
+    expectedWinRate: 66,
+    avgRR: 2.2,
+  },
+  'FTR Bullish': {
+    name: 'FTR-L',
+    fullName: 'Fail To Return Bullish',
+    direction: 'LONG',
+    type: 'reversal',
+    color: '#3AF7A6',
+    description: 'Failed retest of support zone - bullish continuation',
+    expectedWinRate: 68,
+    avgRR: 2.3,
+  },
+  'Flag Limit Bearish': {
+    name: 'FL-B',
+    fullName: 'Flag Limit Bearish',
+    direction: 'SHORT',
+    type: 'reversal',
+    color: '#FF6B6B',
+    description: 'Price fails to break flag high - bearish continuation',
+    expectedWinRate: 65,
+    avgRR: 2.1,
+  },
+  'Flag Limit Bullish': {
+    name: 'FL-L',
+    fullName: 'Flag Limit Bullish',
+    direction: 'LONG',
+    type: 'reversal',
+    color: '#3AF7A6',
+    description: 'Price fails to break flag low - bullish continuation',
+    expectedWinRate: 65,
+    avgRR: 2.1,
+  },
+  'Decision Point Bearish': {
+    name: 'DP-B',
+    fullName: 'Decision Point Bearish',
+    direction: 'SHORT',
+    type: 'reversal',
+    color: '#FF6B6B',
+    description: 'Key decision area - price rejected at resistance',
+    expectedWinRate: 64,
+    avgRR: 2.0,
+  },
+  'Decision Point Bullish': {
+    name: 'DP-L',
+    fullName: 'Decision Point Bullish',
+    direction: 'LONG',
+    type: 'reversal',
+    color: '#3AF7A6',
+    description: 'Key decision area - price bounced at support',
+    expectedWinRate: 64,
+    avgRR: 2.0,
+  },
 };
 
 class PatternDetectionService {
@@ -329,22 +412,22 @@ class PatternDetectionService {
       '1w': 4.00,   // 400% of base
     };
 
-    // Candles per 7 days for each timeframe
-    this.CANDLES_PER_7_DAYS = {
-      '1m': 10080,  // 7 * 24 * 60
-      '3m': 3360,   // 7 * 24 * 20
-      '5m': 2016,   // 7 * 24 * 12
-      '15m': 672,   // 7 * 24 * 4
-      '30m': 336,   // 7 * 24 * 2
-      '1h': 168,    // 7 * 24
-      '2h': 84,     // 7 * 12
-      '4h': 42,     // 7 * 6
-      '6h': 28,     // 7 * 4
-      '8h': 21,     // 7 * 3
-      '12h': 14,    // 7 * 2
-      '1d': 7,      // 7
-      '3d': 3,      // ~2-3
-      '1w': 1,      // 1
+    // Candles per 21 days for each timeframe (3 weeks lookback)
+    this.CANDLES_PER_21_DAYS = {
+      '1m': 30240,  // 21 * 24 * 60
+      '3m': 10080,  // 21 * 24 * 20
+      '5m': 6048,   // 21 * 24 * 12
+      '15m': 2016,  // 21 * 24 * 4
+      '30m': 1008,  // 21 * 24 * 2
+      '1h': 504,    // 21 * 24
+      '2h': 252,    // 21 * 12
+      '4h': 126,    // 21 * 6
+      '6h': 84,     // 21 * 4
+      '8h': 63,     // 21 * 3
+      '12h': 42,    // 21 * 2
+      '1d': 21,     // 21
+      '3d': 7,      // ~7
+      '1w': 3,      // 3
     };
   }
 
@@ -358,12 +441,12 @@ class PatternDetectionService {
   }
 
   /**
-   * Get number of candles to scan (7 days worth)
+   * Get number of candles to scan (21 days worth)
    * @param {string} timeframe - Timeframe string
    * @returns {number} Number of candles
    */
-  getCandlesFor7Days(timeframe) {
-    return this.CANDLES_PER_7_DAYS[timeframe] || 168; // Default to 1h equivalent
+  getCandlesFor21Days(timeframe) {
+    return this.CANDLES_PER_21_DAYS[timeframe] || 504; // Default to 1h equivalent (21 * 24)
   }
 
   /**
@@ -581,24 +664,38 @@ class PatternDetectionService {
         // For UI display - use zone entry instead of old entry
         zoneEntry: zone.entryPrice,
         zoneStop: zone.stopPrice,
-        // ⚠️ FIX: Use pauseCandles timestamps instead of pattern.points
-        // This ensures zone time position matches where zone prices were calculated
-        // Without this fix, zones would float in areas with no candles
+        // ⚠️ FIX: Use pattern's ORIGINAL startTime/endTime if available
+        // Pattern detection sets specific times based on pattern formation points
+        // Only use pauseCandles as fallback to preserve unique zone positions
         startTime: (() => {
-          // FIRST: Use FIRST pause candle timestamp (where zone prices come from)
+          // PRIORITY 1: Use pattern's original startTime (from pattern detection)
+          if (pattern.startTime) {
+            let ts = pattern.startTime;
+            if (ts > 9999999999) ts = Math.floor(ts / 1000);
+            console.log(`[enrichWithZoneData] ${pattern.patternType} startTime from ORIGINAL pattern: ${ts} (${new Date(ts * 1000).toISOString()})`);
+            return ts;
+          }
+          // PRIORITY 2: Use pauseCandles timestamp
           if (pauseCandles[0]?.timestamp) {
             let ts = pauseCandles[0].timestamp;
             if (ts > 9999999999) ts = Math.floor(ts / 1000);
-            console.log(`[enrichWithZoneData] ${pattern.patternType} startTime from pauseCandles[0]: ${ts} (${new Date(ts * 1000).toISOString()})`);
+            console.log(`[enrichWithZoneData] ${pattern.patternType} startTime from pauseCandles[0]: ${ts}`);
             return ts;
           }
-          // FALLBACK: Use pattern points timestamp (may cause floating zones)
+          // PRIORITY 3: Extract from pattern points
           const st = this._extractPatternStartTime(pattern, candles);
           console.log(`[enrichWithZoneData] ${pattern.patternType} startTime FALLBACK from points: ${st}`);
           return st;
         })(),
         endTime: (() => {
-          // FIRST: Use LAST pause candle timestamp
+          // PRIORITY 1: Use pattern's original endTime (from pattern detection)
+          if (pattern.endTime) {
+            let ts = pattern.endTime;
+            if (ts > 9999999999) ts = Math.floor(ts / 1000);
+            console.log(`[enrichWithZoneData] ${pattern.patternType} endTime from ORIGINAL pattern: ${ts}`);
+            return ts;
+          }
+          // PRIORITY 2: Use pauseCandles timestamp
           const lastIdx = pauseCandles.length - 1;
           if (lastIdx >= 0 && pauseCandles[lastIdx]?.timestamp) {
             let ts = pauseCandles[lastIdx].timestamp;
@@ -606,7 +703,7 @@ class PatternDetectionService {
             console.log(`[enrichWithZoneData] ${pattern.patternType} endTime from pauseCandles[${lastIdx}]: ${ts}`);
             return ts;
           }
-          // FALLBACK: Use pattern points timestamp
+          // PRIORITY 3: Extract from pattern points
           const et = this._extractPatternEndTime(pattern, candles);
           console.log(`[enrichWithZoneData] ${pattern.patternType} endTime FALLBACK from points: ${et}`);
           return et;
@@ -858,6 +955,301 @@ class PatternDetectionService {
     return { swingHighs, swingLows };
   }
 
+  // ========================================
+  // GEM FREQUENCY METHOD HELPERS
+  // ========================================
+
+  /**
+   * Check if a candle is impulsive (strong move)
+   * @param {Object} candle - OHLCV candle
+   * @param {number} atr - Average True Range for comparison
+   * @param {string} direction - 'up' or 'down'
+   * @returns {boolean}
+   */
+  isImpulsiveCandle(candle, atr, direction) {
+    const bodySize = Math.abs(candle.close - candle.open);
+    const fullRange = candle.high - candle.low;
+    const bodyRatio = bodySize / fullRange;
+
+    // Impulsive candle: body > 60% of range and body > 0.5 ATR
+    const hasLargeBody = bodyRatio > 0.6 && bodySize > atr * 0.5;
+
+    if (direction === 'up') {
+      return hasLargeBody && candle.close > candle.open;
+    } else {
+      return hasLargeBody && candle.close < candle.open;
+    }
+  }
+
+  /**
+   * Detect impulsive move (2+ strong candles in same direction)
+   * @param {Array} candles - OHLCV candles
+   * @param {number} startIdx - Start index to check
+   * @param {string} direction - 'up' or 'down'
+   * @param {number} minCandles - Minimum candles for valid move
+   * @returns {Object|null} { startIdx, endIdx, strength, moveSize }
+   */
+  detectImpulsiveMove(candles, startIdx, direction, minCandles = 2) {
+    if (startIdx < 0 || startIdx >= candles.length) return null;
+
+    const atr = this.calculateATR(candles.slice(Math.max(0, startIdx - 14), startIdx + 1), 14);
+    let consecutiveCount = 0;
+    let moveStart = startIdx;
+    let moveEnd = startIdx;
+
+    for (let i = startIdx; i < candles.length && consecutiveCount < 6; i++) {
+      const candle = candles[i];
+      const isCorrectDirection = direction === 'up'
+        ? candle.close > candle.open
+        : candle.close < candle.open;
+
+      if (isCorrectDirection) {
+        consecutiveCount++;
+        moveEnd = i;
+      } else {
+        break;
+      }
+    }
+
+    if (consecutiveCount < minCandles) return null;
+
+    const startPrice = direction === 'up' ? candles[moveStart].low : candles[moveStart].high;
+    const endPrice = direction === 'up' ? candles[moveEnd].high : candles[moveEnd].low;
+    const moveSize = Math.abs(endPrice - startPrice);
+
+    return {
+      startIdx: moveStart,
+      endIdx: moveEnd,
+      startPrice,
+      endPrice,
+      strength: moveSize / atr,
+      moveSize,
+      direction,
+      candleCount: consecutiveCount,
+    };
+  }
+
+  /**
+   * Detect pause zone (consolidation of 2-6 candles)
+   * GEM Method: Small bodies, short wicks, little overlap
+   * @param {Array} candles - OHLCV candles
+   * @param {number} startIdx - Start index to check
+   * @param {number} atr - ATR for comparison
+   * @returns {Object|null} { startIdx, endIdx, high, low, candles }
+   */
+  detectPauseZone(candles, startIdx, atr) {
+    if (startIdx < 0 || startIdx >= candles.length - 2) return null;
+
+    let pauseCandles = [];
+    let pauseHigh = -Infinity;
+    let pauseLow = Infinity;
+
+    for (let i = startIdx; i < Math.min(startIdx + 8, candles.length); i++) {
+      const candle = candles[i];
+      const bodySize = Math.abs(candle.close - candle.open);
+      const fullRange = candle.high - candle.low;
+
+      // Pause candle criteria: small body relative to ATR
+      const isSmallBody = bodySize < atr * 0.7;
+
+      if (isSmallBody || pauseCandles.length === 0) {
+        pauseCandles.push({ ...candle, index: i });
+        pauseHigh = Math.max(pauseHigh, candle.high);
+        pauseLow = Math.min(pauseLow, candle.low);
+      } else {
+        break;
+      }
+
+      // Pause zone typically 2-6 candles
+      if (pauseCandles.length >= 6) break;
+    }
+
+    if (pauseCandles.length < 2) return null;
+
+    const zoneWidth = pauseHigh - pauseLow;
+    const avgBody = pauseCandles.reduce((sum, c) => sum + Math.abs(c.close - c.open), 0) / pauseCandles.length;
+
+    return {
+      startIdx: startIdx,
+      endIdx: startIdx + pauseCandles.length - 1,
+      high: pauseHigh,
+      low: pauseLow,
+      zoneWidth,
+      avgBodySize: avgBody,
+      candles: pauseCandles,
+      candleCount: pauseCandles.length,
+      isTight: zoneWidth < atr * 2,
+    };
+  }
+
+  /**
+   * Calculate simple ATR
+   */
+  calculateATR(candles, period = 14) {
+    if (!candles || candles.length < period) {
+      return candles && candles.length > 0
+        ? (candles[candles.length - 1].high - candles[candles.length - 1].low)
+        : 0;
+    }
+
+    let sum = 0;
+    for (let i = candles.length - period; i < candles.length; i++) {
+      const tr = candles[i].high - candles[i].low;
+      sum += tr;
+    }
+    return sum / period;
+  }
+
+  /**
+   * Find GEM Frequency Pattern (Move-Pause-Move structure)
+   * @param {Array} candles - OHLCV candles
+   * @param {string} patternType - 'UPD', 'DPU', 'DPD', 'UPU'
+   * @returns {Object|null} Pattern with zone data
+   */
+  findGEMPattern(candles, patternType) {
+    if (!candles || candles.length < 30) return null;
+
+    const atr = this.calculateATR(candles, 14);
+    const patterns = {
+      'UPD': { move1: 'up', move2: 'down', zoneType: 'HFZ' },
+      'DPU': { move1: 'down', move2: 'up', zoneType: 'LFZ' },
+      'DPD': { move1: 'down', move2: 'down', zoneType: 'HFZ' },
+      'UPU': { move1: 'up', move2: 'up', zoneType: 'LFZ' },
+    };
+
+    const config = patterns[patternType];
+    if (!config) return null;
+
+    // Scan from recent candles backwards to find pattern
+    for (let scanStart = candles.length - 10; scanStart >= 20; scanStart -= 3) {
+      // Look for Move 1
+      let move1Start = -1;
+      for (let i = scanStart; i >= Math.max(0, scanStart - 30); i--) {
+        const move = this.detectImpulsiveMove(candles, i, config.move1, 2);
+        if (move && move.strength > 1.5) {
+          move1Start = i;
+          break;
+        }
+      }
+
+      if (move1Start < 0) continue;
+
+      const move1 = this.detectImpulsiveMove(candles, move1Start, config.move1, 2);
+      if (!move1) continue;
+
+      // Look for Pause after Move 1
+      const pauseStartIdx = move1.endIdx + 1;
+      const pause = this.detectPauseZone(candles, pauseStartIdx, atr);
+      if (!pause || pause.candleCount < 2) continue;
+
+      // Look for Move 2 after Pause
+      const move2StartIdx = pause.endIdx + 1;
+      if (move2StartIdx >= candles.length - 2) continue;
+
+      const move2 = this.detectImpulsiveMove(candles, move2StartIdx, config.move2, 2);
+      if (!move2) continue;
+
+      // Valid pattern found!
+      // Zone = Pause area
+      const zoneHigh = pause.high;
+      const zoneLow = pause.low;
+
+      // Calculate departure strength (Odds Enhancer #1)
+      const departureStrength = move2.strength;
+
+      return {
+        patternType,
+        move1,
+        pause,
+        move2,
+        zoneHigh,
+        zoneLow,
+        zoneType: config.zoneType,
+        departureStrength,
+        pauseTightness: pause.isTight ? 2 : 1,
+        pauseCandleCount: pause.candleCount,
+        startTime: candles[move1.startIdx].timestamp,
+        endTime: candles[pause.endIdx].timestamp,
+        formationTime: candles[pause.startIdx].timestamp,
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Calculate 8 Odds Enhancers score
+   * @param {Object} pattern - Pattern with zone data
+   * @param {Array} candles - OHLCV candles
+   * @param {number} currentPrice - Current price
+   * @returns {Object} { totalScore, enhancers }
+   */
+  calculateOddsEnhancers(pattern, candles, currentPrice) {
+    const enhancers = {
+      departureStrength: 0,
+      timeAtLevel: 0,
+      freshness: 2, // Assume fresh for new detection
+      profitMargin: 0,
+      bigPicture: 0,
+      zoneOrigin: 0,
+      arrival: 1, // Default to good
+      riskReward: 0,
+    };
+
+    // 1. Departure Strength (0-2)
+    if (pattern.departureStrength >= 3) enhancers.departureStrength = 2;
+    else if (pattern.departureStrength >= 1.5) enhancers.departureStrength = 1;
+
+    // 2. Time at Level (0-2) - fewer candles = better
+    if (pattern.pauseCandleCount <= 2) enhancers.timeAtLevel = 2;
+    else if (pattern.pauseCandleCount <= 4) enhancers.timeAtLevel = 1;
+
+    // 3. Freshness (0-2) - new detection = fresh
+    enhancers.freshness = 2;
+
+    // 4. Profit Margin (0-2) - based on zone width vs distance to opposing zone
+    const zoneWidth = pattern.zoneHigh - pattern.zoneLow;
+    const distanceToZone = Math.abs(currentPrice - (pattern.zoneType === 'HFZ' ? pattern.zoneLow : pattern.zoneHigh));
+    if (distanceToZone > zoneWidth * 3) enhancers.profitMargin = 2;
+    else if (distanceToZone > zoneWidth * 1.5) enhancers.profitMargin = 1;
+
+    // 5. Big Picture (0-2) - trend alignment
+    const trend = this.calculateTrend(candles, 50);
+    const isReversal = pattern.patternType === 'UPD' || pattern.patternType === 'DPU';
+    if (isReversal) {
+      // Reversal at trend extremes = good
+      if ((pattern.patternType === 'UPD' && trend === 'uptrend') ||
+          (pattern.patternType === 'DPU' && trend === 'downtrend')) {
+        enhancers.bigPicture = 2;
+      }
+    } else {
+      // Continuation with trend = good
+      if ((pattern.patternType === 'DPD' && trend === 'downtrend') ||
+          (pattern.patternType === 'UPU' && trend === 'uptrend')) {
+        enhancers.bigPicture = 2;
+      }
+    }
+
+    // 6. Zone Origin (0-2) - reversal patterns stronger
+    if (pattern.patternType === 'UPD' || pattern.patternType === 'DPU') {
+      enhancers.zoneOrigin = 2;
+    } else {
+      enhancers.zoneOrigin = 1;
+    }
+
+    // 7. Arrival (0-2) - default to 1 (good)
+    enhancers.arrival = 1;
+
+    // 8. Risk/Reward (0-2)
+    const rr = distanceToZone / zoneWidth;
+    if (rr >= 3) enhancers.riskReward = 2;
+    else if (rr >= 2) enhancers.riskReward = 1;
+
+    const totalScore = Object.values(enhancers).reduce((a, b) => a + b, 0);
+
+    return { totalScore, maxScore: 16, enhancers };
+  }
+
   /**
    * Calculate confidence based on multiple factors
    */
@@ -1054,65 +1446,43 @@ class PatternDetectionService {
   }
 
   /**
-   * DPD Pattern (Down-Peak-Down) - Bearish Continuation
-   * Structure: Lower high formation in downtrend
+   * DPD Pattern (Down-Pause-Down) - Bearish Continuation
+   * GEM Frequency Method: DOWN move → PAUSE (zone) → DOWN move
+   * Creates HFZ (High Frequency Zone / Sell Zone)
    */
   detectDPD(candles, symbol, timeframe) {
     if (candles.length < this.MIN_CANDLES) return null;
 
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3); // Reduced lookback
-
-    if (swingHighs.length < 2) return null;
-
-    const recentHighs = swingHighs.slice(-4);
-    const recentLows = swingLows.slice(-4);
-
-    if (recentHighs.length < 2) return null;
-
-    const high1 = recentHighs[recentHighs.length - 2];
-    const high2 = recentHighs[recentHighs.length - 1];
-
-    // High2 must be lower than High1 (lower high) - with tolerance
-    const highDiff = (high1.price - high2.price) / high1.price;
-    if (highDiff < 0.005) return null; // At least 0.5% lower
-
-    // Find any low between highs or use the most recent low before high2
-    let lowBetween = recentLows.find(l => l.index > high1.index && l.index < high2.index);
-    if (!lowBetween && recentLows.length > 0) {
-      lowBetween = recentLows.find(l => l.index < high2.index) || recentLows[recentLows.length - 1];
+    // Use GEM Frequency Method detection
+    const gemPattern = this.findGEMPattern(candles, 'DPD');
+    if (!gemPattern) {
+      // Fallback to swing-based detection for compatibility
+      return this._detectDPDSwingBased(candles, symbol, timeframe);
     }
-    if (!lowBetween) return null;
-
-    // Calculate metrics
-    const lowerHighRatio = high2.price / high1.price;
-
-    const confidence = this.calculateConfidence({
-      symmetry: Math.min(highDiff * 10, 1),
-      trendAligned: this.calculateTrend(candles.slice(0, 20)) === 'downtrend',
-      swingClarity: 0.6,
-    });
-
-    if (confidence < 45) return null; // Lowered threshold
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.DPD;
+    const { pause, zoneHigh, zoneLow } = gemPattern;
 
-    // ⚠️ FIX: Entry should be at high2 (reversal point), NOT lowBetween
-    // For SHORT pattern: Sell near the second high (the lower high = continuation)
-    const entry = high2.price;
+    // Calculate odds enhancers score
+    const oddsScore = this.calculateOddsEnhancers(gemPattern, candles, currentPrice);
 
-    // TIMEFRAME-SCALED TP/SL
-    // SL above high1 (the highest point), Target based on pattern height
-    const slPercent = this.scaleSL(0.01, timeframe); // 1% buffer above high1
-    const stopLoss = high1.price * (1 + slPercent);
+    // GEM Zone Boundaries:
+    // HFZ (Sell Zone): Entry = LOW of pause, Stop = HIGH of pause
+    const entry = zoneLow; // Near price (entry point)
+    const slBuffer = this.scaleSL(0.005, timeframe); // Small buffer above zone
+    const stopLoss = zoneHigh * (1 + slBuffer);
     const riskAmount = stopLoss - entry;
-    const rrMultiplier = 2.0; // Keep 2:1 R:R
+    const rrMultiplier = 2.0;
     const target = entry - (riskAmount * rrMultiplier);
 
-    // ⚠️ FIX: Convert timestamps from ms to seconds for lightweight-charts
-    const high1Time = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
-    const high2Time = high2.timestamp > 9999999999 ? Math.floor(high2.timestamp / 1000) : high2.timestamp;
-    const lowTime = lowBetween.timestamp > 9999999999 ? Math.floor(lowBetween.timestamp / 1000) : lowBetween.timestamp;
+    // Convert timestamps to seconds
+    let startTime = gemPattern.startTime;
+    let endTime = gemPattern.endTime;
+    if (startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+    if (endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
+    const confidence = Math.min(50 + (oddsScore.totalScore * 3), 95);
 
     return {
       id: `DPD-${symbol}-${timeframe}-${Date.now()}`,
@@ -1131,282 +1501,397 @@ class PatternDetectionService {
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
-      points: { high1, high2, lowBetween },
-      // ⚠️ FIX: Zone boundaries (SHORT: SL at top, entry at bottom)
+      // GEM Pattern Data
+      gemPattern: {
+        move1: gemPattern.move1,
+        pause: gemPattern.pause,
+        move2: gemPattern.move2,
+      },
+      oddsEnhancers: oddsScore,
+      // Zone boundaries (SHORT/HFZ: stop at top, entry at bottom)
       zoneHigh: stopLoss,
       zoneLow: entry,
-      // ⚠️ Time data for zone positioning (seconds for lightweight-charts)
-      startTime: high1Time,
-      endTime: lowTime,
-      formationTime: high1Time,
-      startCandleIndex: high1.index,
-      endCandleIndex: lowBetween.index,
+      pauseHigh: zoneHigh,
+      pauseLow: zoneLow,
+      // Time data for zone positioning
+      startTime,
+      endTime,
+      formationTime: startTime,
+      startCandleIndex: gemPattern.move1.startIdx,
+      endCandleIndex: gemPattern.pause.endIdx,
+    };
+  }
+
+  // Fallback swing-based DPD detection
+  _detectDPDSwingBased(candles, symbol, timeframe) {
+    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
+    if (swingHighs.length < 2) return null;
+
+    const recentHighs = swingHighs.slice(-4);
+    const recentLows = swingLows.slice(-4);
+    if (recentHighs.length < 2) return null;
+
+    const high1 = recentHighs[recentHighs.length - 2];
+    const high2 = recentHighs[recentHighs.length - 1];
+    const highDiff = (high1.price - high2.price) / high1.price;
+    if (highDiff < 0.005) return null;
+
+    let lowBetween = recentLows.find(l => l.index > high1.index && l.index < high2.index);
+    if (!lowBetween && recentLows.length > 0) {
+      lowBetween = recentLows.find(l => l.index < high2.index) || recentLows[recentLows.length - 1];
+    }
+    if (!lowBetween) return null;
+
+    const confidence = this.calculateConfidence({
+      symmetry: Math.min(highDiff * 10, 1),
+      trendAligned: this.calculateTrend(candles.slice(0, 20)) === 'downtrend',
+      swingClarity: 0.6,
+    });
+    if (confidence < 45) return null;
+
+    const currentPrice = candles[candles.length - 1].close;
+    const signal = PATTERN_SIGNALS.DPD;
+    const entry = high2.price;
+    const slPercent = this.scaleSL(0.01, timeframe);
+    const stopLoss = high1.price * (1 + slPercent);
+    const riskAmount = stopLoss - entry;
+    const target = entry - (riskAmount * 2.0);
+
+    const high1Time = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
+    const lowTime = lowBetween.timestamp > 9999999999 ? Math.floor(lowBetween.timestamp / 1000) : lowBetween.timestamp;
+
+    return {
+      id: `DPD-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'DPD',
+      symbol, timeframe, confidence,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.0,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      points: { high1, high2, lowBetween },
+      zoneHigh: stopLoss, zoneLow: entry,
+      startTime: high1Time, endTime: lowTime, formationTime: high1Time,
+      startCandleIndex: high1.index, endCandleIndex: lowBetween.index,
     };
   }
 
   /**
-   * UPU Pattern (Up-Peak-Up) - Bullish Continuation
-   * Structure: Higher low formation in uptrend
+   * UPU Pattern (Up-Pause-Up) - Bullish Continuation
+   * GEM Frequency Method: UP move → PAUSE (zone) → UP move
+   * Creates LFZ (Low Frequency Zone / Buy Zone)
    */
   detectUPU(candles, symbol, timeframe) {
     if (candles.length < this.MIN_CANDLES) return null;
 
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3); // Reduced lookback
+    // Use GEM Frequency Method detection
+    const gemPattern = this.findGEMPattern(candles, 'UPU');
+    if (!gemPattern) {
+      // Fallback to swing-based detection
+      return this._detectUPUSwingBased(candles, symbol, timeframe);
+    }
 
+    const currentPrice = candles[candles.length - 1].close;
+    const signal = PATTERN_SIGNALS.UPU;
+    const { pause, zoneHigh, zoneLow } = gemPattern;
+
+    const oddsScore = this.calculateOddsEnhancers(gemPattern, candles, currentPrice);
+
+    // GEM Zone Boundaries:
+    // LFZ (Buy Zone): Entry = HIGH of pause, Stop = LOW of pause
+    const entry = zoneHigh; // Near price (entry point)
+    const slBuffer = this.scaleSL(0.005, timeframe);
+    const stopLoss = zoneLow * (1 - slBuffer);
+    const riskAmount = entry - stopLoss;
+    const rrMultiplier = 2.0;
+    const target = entry + (riskAmount * rrMultiplier);
+
+    let startTime = gemPattern.startTime;
+    let endTime = gemPattern.endTime;
+    if (startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+    if (endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
+    const confidence = Math.min(50 + (oddsScore.totalScore * 3), 95);
+
+    return {
+      id: `UPU-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'UPU',
+      symbol, timeframe, confidence,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: rrMultiplier,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      gemPattern: { move1: gemPattern.move1, pause: gemPattern.pause, move2: gemPattern.move2 },
+      oddsEnhancers: oddsScore,
+      // Zone boundaries (LONG/LFZ: entry at top, stop at bottom)
+      zoneHigh: entry, zoneLow: stopLoss,
+      pauseHigh: zoneHigh, pauseLow: zoneLow,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: gemPattern.move1.startIdx, endCandleIndex: gemPattern.pause.endIdx,
+    };
+  }
+
+  // Fallback swing-based UPU detection
+  _detectUPUSwingBased(candles, symbol, timeframe) {
+    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
     if (swingLows.length < 2) return null;
 
     const recentHighs = swingHighs.slice(-4);
     const recentLows = swingLows.slice(-4);
-
     if (recentLows.length < 2) return null;
 
     const low1 = recentLows[recentLows.length - 2];
     const low2 = recentLows[recentLows.length - 1];
-
-    // Low2 must be higher than Low1 (higher low) - with tolerance
     const lowDiff = (low2.price - low1.price) / low1.price;
-    if (lowDiff < 0.005) return null; // At least 0.5% higher
+    if (lowDiff < 0.005) return null;
 
-    // Find any high between lows or use the most recent high before low2
     let highBetween = recentHighs.find(h => h.index > low1.index && h.index < low2.index);
     if (!highBetween && recentHighs.length > 0) {
       highBetween = recentHighs.find(h => h.index < low2.index) || recentHighs[recentHighs.length - 1];
     }
     if (!highBetween) return null;
 
-    const higherLowRatio = low2.price / low1.price;
-
     const confidence = this.calculateConfidence({
       symmetry: Math.min(lowDiff * 10, 1),
       trendAligned: this.calculateTrend(candles.slice(0, 20)) === 'uptrend',
       swingClarity: 0.6,
     });
-
-    if (confidence < 45) return null; // Lowered threshold
+    if (confidence < 45) return null;
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPU;
     const entry = highBetween.price;
-
-    // TIMEFRAME-SCALED TP/SL
-    // Base: 1% SL below low2, 2:1 RR for target
-    const slPercent = this.scaleSL(0.01, timeframe); // Scale 1% base SL
+    const slPercent = this.scaleSL(0.01, timeframe);
     const stopLoss = low2.price * (1 - slPercent);
     const riskAmount = entry - stopLoss;
-    const rrMultiplier = 2.0; // Keep 2:1 R:R
-    const target = entry + (riskAmount * rrMultiplier);
+    const target = entry + (riskAmount * 2.0);
 
-    // ⚠️ FIX: Convert timestamps from ms to seconds for lightweight-charts
     const low1Time = low1.timestamp > 9999999999 ? Math.floor(low1.timestamp / 1000) : low1.timestamp;
-    const low2Time = low2.timestamp > 9999999999 ? Math.floor(low2.timestamp / 1000) : low2.timestamp;
     const highTime = highBetween.timestamp > 9999999999 ? Math.floor(highBetween.timestamp / 1000) : highBetween.timestamp;
 
     return {
       id: `UPU-${symbol}-${timeframe}-${Date.now()}`,
       patternType: 'UPU',
-      symbol,
-      timeframe,
-      confidence,
-      direction: signal.direction,
-      type: signal.type,
-      color: signal.color,
+      symbol, timeframe, confidence,
+      direction: signal.direction, type: signal.type, color: signal.color,
       description: signal.description,
-      entry,
-      stopLoss,
-      target,
-      riskReward: rrMultiplier,
-      winRate: signal.expectedWinRate,
-      detectedAt: Date.now(),
-      currentPrice,
+      entry, stopLoss, target, riskReward: 2.0,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
       points: { low1, low2, highBetween },
-      // ⚠️ FIX: Zone boundaries same as DPU (LONG: entry at top, SL at bottom)
-      zoneHigh: entry,
-      zoneLow: stopLoss,
-      // ⚠️ Time data for zone positioning (seconds for lightweight-charts)
-      startTime: low1Time,
-      endTime: highTime,
-      formationTime: low1Time,
-      startCandleIndex: low1.index,
-      endCandleIndex: highBetween.index,
+      zoneHigh: entry, zoneLow: stopLoss,
+      startTime: low1Time, endTime: highTime, formationTime: low1Time,
+      startCandleIndex: low1.index, endCandleIndex: highBetween.index,
     };
   }
 
   /**
-   * DPU Pattern (Down-Peak-Up) - Bullish Reversal
-   * Structure: Downtrend followed by higher low
+   * DPU Pattern (Down-Pause-Up) - Bullish Reversal (STRONG)
+   * GEM Frequency Method: DOWN move → PAUSE (zone) → UP move
+   * Creates LFZ (Low Frequency Zone / Buy Zone)
    */
   detectDPU(candles, symbol, timeframe) {
     if (candles.length < this.MIN_CANDLES) return null;
 
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
+    // Use GEM Frequency Method detection
+    const gemPattern = this.findGEMPattern(candles, 'DPU');
+    if (!gemPattern) {
+      return this._detectDPUSwingBased(candles, symbol, timeframe);
+    }
 
+    const currentPrice = candles[candles.length - 1].close;
+    const signal = PATTERN_SIGNALS.DPU;
+    const { pause, zoneHigh, zoneLow } = gemPattern;
+
+    const oddsScore = this.calculateOddsEnhancers(gemPattern, candles, currentPrice);
+
+    // GEM Zone Boundaries:
+    // LFZ (Buy Zone): Entry = HIGH of pause (gần giá nhất), Stop = LOW of pause (xa giá nhất)
+    const entry = zoneHigh;
+    const slBuffer = this.scaleSL(0.005, timeframe);
+    const stopLoss = zoneLow * (1 - slBuffer);
+    const riskAmount = entry - stopLoss;
+    const rrMultiplier = 2.0;
+    const target = entry + (riskAmount * rrMultiplier);
+
+    let startTime = gemPattern.startTime;
+    let endTime = gemPattern.endTime;
+    if (startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+    if (endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
+    // Reversal patterns get higher base confidence
+    const confidence = Math.min(55 + (oddsScore.totalScore * 3), 95);
+
+    return {
+      id: `DPU-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'DPU',
+      symbol, timeframe, confidence,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: rrMultiplier,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      gemPattern: { move1: gemPattern.move1, pause: gemPattern.pause, move2: gemPattern.move2 },
+      oddsEnhancers: oddsScore,
+      // Zone boundaries (LONG/LFZ: entry at top, stop at bottom)
+      zoneHigh: entry, zoneLow: stopLoss,
+      pauseHigh: zoneHigh, pauseLow: zoneLow,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: gemPattern.move1.startIdx, endCandleIndex: gemPattern.pause.endIdx,
+    };
+  }
+
+  // Fallback swing-based DPU detection
+  _detectDPUSwingBased(candles, symbol, timeframe) {
+    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
     if (swingLows.length < 2) return null;
 
     const recentLows = swingLows.slice(-4);
     const recentHighs = swingHighs.slice(-4);
-
     if (recentLows.length < 2) return null;
 
     const low1 = recentLows[recentLows.length - 2];
     const low2 = recentLows[recentLows.length - 1];
-
-    // Low2 must be higher (reversal) - with small tolerance
     const lowDiff = (low2.price - low1.price) / low1.price;
-    if (lowDiff < 0.003) return null; // At least 0.3% higher
+    if (lowDiff < 0.003) return null;
 
-    // Find peak between lows or any recent high
     let peak = recentHighs.find(h => h.index > low1.index && h.index < low2.index);
-    if (!peak && recentHighs.length > 0) {
-      peak = recentHighs[recentHighs.length - 1];
-    }
+    if (!peak && recentHighs.length > 0) peak = recentHighs[recentHighs.length - 1];
     if (!peak) return null;
 
-    const reversalStrength = lowDiff;
-
     const confidence = this.calculateConfidence({
-      symmetry: Math.min(reversalStrength * 15, 1),
-      trendAligned: false, // Reversal against trend
+      symmetry: Math.min(lowDiff * 15, 1),
+      trendAligned: false,
       swingClarity: 0.5,
     });
-
-    if (confidence < 40) return null; // Lowered threshold
+    if (confidence < 40) return null;
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.DPU;
     const entry = peak.price;
-
-    // TIMEFRAME-SCALED TP/SL
-    // Base: 2% SL below low2, 2:1 RR for target
-    const slPercent = this.scaleSL(0.02, timeframe); // Scale 2% base SL
+    const slPercent = this.scaleSL(0.02, timeframe);
     const stopLoss = low2.price * (1 - slPercent);
     const riskAmount = entry - stopLoss;
-    const rrMultiplier = 2.0; // 2:1 R:R
-    const target = entry + (riskAmount * rrMultiplier);
+    const target = entry + (riskAmount * 2.0);
 
-    // ⚠️ FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
     const low1Time = low1.timestamp > 9999999999 ? Math.floor(low1.timestamp / 1000) : low1.timestamp;
-    const low2Time = low2.timestamp > 9999999999 ? Math.floor(low2.timestamp / 1000) : low2.timestamp;
     const peakTime = peak.timestamp > 9999999999 ? Math.floor(peak.timestamp / 1000) : peak.timestamp;
 
     return {
       id: `DPU-${symbol}-${timeframe}-${Date.now()}`,
       patternType: 'DPU',
-      symbol,
-      timeframe,
-      confidence,
-      direction: signal.direction,
-      type: signal.type,
-      color: signal.color,
+      symbol, timeframe, confidence,
+      direction: signal.direction, type: signal.type, color: signal.color,
       description: signal.description,
-      entry,
-      stopLoss,
-      target,
-      riskReward: rrMultiplier,
-      winRate: signal.expectedWinRate,
-      detectedAt: Date.now(),
-      currentPrice,
+      entry, stopLoss, target, riskReward: 2.0,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
       points: { low1, low2, peak },
-      // ⚠️ FIX: Explicit zone data for zone rendering
-      // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
-      zoneHigh: entry,
-      zoneLow: stopLoss,
-      // ⚠️ FIX: Explicit time data for zone X-axis positioning
-      startTime: low1Time,
-      endTime: peakTime,
-      formationTime: low1Time,
-      startCandleIndex: low1.index,
-      endCandleIndex: peak.index,
+      zoneHigh: entry, zoneLow: stopLoss,
+      startTime: low1Time, endTime: peakTime, formationTime: low1Time,
+      startCandleIndex: low1.index, endCandleIndex: peak.index,
     };
   }
 
   /**
-   * UPD Pattern (Up-Peak-Down) - Bearish Reversal
-   * Structure: Uptrend followed by lower high
+   * UPD Pattern (Up-Pause-Down) - Bearish Reversal (STRONG)
+   * GEM Frequency Method: UP move → PAUSE (zone) → DOWN move
+   * Creates HFZ (High Frequency Zone / Sell Zone)
    */
   detectUPD(candles, symbol, timeframe) {
     if (candles.length < this.MIN_CANDLES) return null;
 
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
+    // Use GEM Frequency Method detection
+    const gemPattern = this.findGEMPattern(candles, 'UPD');
+    if (!gemPattern) {
+      return this._detectUPDSwingBased(candles, symbol, timeframe);
+    }
 
+    const currentPrice = candles[candles.length - 1].close;
+    const signal = PATTERN_SIGNALS.UPD;
+    const { pause, zoneHigh, zoneLow } = gemPattern;
+
+    const oddsScore = this.calculateOddsEnhancers(gemPattern, candles, currentPrice);
+
+    // GEM Zone Boundaries:
+    // HFZ (Sell Zone): Entry = LOW of pause (gần giá nhất), Stop = HIGH of pause (xa giá nhất)
+    const entry = zoneLow;
+    const slBuffer = this.scaleSL(0.005, timeframe);
+    const stopLoss = zoneHigh * (1 + slBuffer);
+    const riskAmount = stopLoss - entry;
+    const rrMultiplier = 2.0;
+    const target = entry - (riskAmount * rrMultiplier);
+
+    let startTime = gemPattern.startTime;
+    let endTime = gemPattern.endTime;
+    if (startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+    if (endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
+    // Reversal patterns get higher base confidence
+    const confidence = Math.min(55 + (oddsScore.totalScore * 3), 95);
+
+    return {
+      id: `UPD-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'UPD',
+      symbol, timeframe, confidence,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: rrMultiplier,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      gemPattern: { move1: gemPattern.move1, pause: gemPattern.pause, move2: gemPattern.move2 },
+      oddsEnhancers: oddsScore,
+      // Zone boundaries (SHORT/HFZ: stop at top, entry at bottom)
+      zoneHigh: stopLoss, zoneLow: entry,
+      pauseHigh: zoneHigh, pauseLow: zoneLow,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: gemPattern.move1.startIdx, endCandleIndex: gemPattern.pause.endIdx,
+    };
+  }
+
+  // Fallback swing-based UPD detection
+  _detectUPDSwingBased(candles, symbol, timeframe) {
+    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
     if (swingHighs.length < 2) return null;
 
     const recentHighs = swingHighs.slice(-4);
     const recentLows = swingLows.slice(-4);
-
     if (recentHighs.length < 2) return null;
 
     const high1 = recentHighs[recentHighs.length - 2];
     const high2 = recentHighs[recentHighs.length - 1];
-
-    // High2 must be lower (reversal) - with tolerance
     const highDiff = (high1.price - high2.price) / high1.price;
-    if (highDiff < 0.003) return null; // At least 0.3% lower
+    if (highDiff < 0.003) return null;
 
-    // Find trough between highs or any recent low
     let trough = recentLows.find(l => l.index > high1.index && l.index < high2.index);
-    if (!trough && recentLows.length > 0) {
-      trough = recentLows[recentLows.length - 1];
-    }
+    if (!trough && recentLows.length > 0) trough = recentLows[recentLows.length - 1];
     if (!trough) return null;
 
-    const reversalStrength = highDiff;
-
     const confidence = this.calculateConfidence({
-      symmetry: Math.min(reversalStrength * 15, 1),
+      symmetry: Math.min(highDiff * 15, 1),
       trendAligned: false,
       swingClarity: 0.5,
     });
-
-    if (confidence < 40) return null; // Lowered threshold
+    if (confidence < 40) return null;
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPD;
-
-    // ⚠️ FIX: Entry should be at high2 (reversal point), NOT trough
-    // For SHORT pattern: Sell near the second high (the lower high = reversal confirmation)
     const entry = high2.price;
-
-    // TIMEFRAME-SCALED TP/SL
-    // SL above high1 (the highest point), Target based on pattern height
-    const slPercent = this.scaleSL(0.01, timeframe); // 1% buffer above high1
+    const slPercent = this.scaleSL(0.01, timeframe);
     const stopLoss = high1.price * (1 + slPercent);
     const riskAmount = stopLoss - entry;
-    const rrMultiplier = 2.0; // 2:1 R:R
-    const target = entry - (riskAmount * rrMultiplier);
+    const target = entry - (riskAmount * 2.0);
 
-    // ⚠️ FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
     const high1Time = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
-    const high2Time = high2.timestamp > 9999999999 ? Math.floor(high2.timestamp / 1000) : high2.timestamp;
     const troughTime = trough.timestamp > 9999999999 ? Math.floor(trough.timestamp / 1000) : trough.timestamp;
 
     return {
       id: `UPD-${symbol}-${timeframe}-${Date.now()}`,
       patternType: 'UPD',
-      symbol,
-      timeframe,
-      confidence,
-      direction: signal.direction,
-      type: signal.type,
-      color: signal.color,
+      symbol, timeframe, confidence,
+      direction: signal.direction, type: signal.type, color: signal.color,
       description: signal.description,
-      entry,
-      stopLoss,
-      target,
-      riskReward: rrMultiplier,
-      winRate: signal.expectedWinRate,
-      detectedAt: Date.now(),
-      currentPrice,
+      entry, stopLoss, target, riskReward: 2.0,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
       points: { high1, high2, trough },
-      // ⚠️ FIX: Explicit zone data for zone rendering
-      // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
-      zoneHigh: stopLoss,
-      zoneLow: entry,
-      // ⚠️ FIX: Explicit time data for zone X-axis positioning
-      startTime: high1Time,
-      endTime: troughTime,
-      formationTime: high1Time,
-      startCandleIndex: high1.index,
-      endCandleIndex: trough.index,
+      zoneHigh: stopLoss, zoneLow: entry,
+      startTime: high1Time, endTime: troughTime, formationTime: high1Time,
+      startCandleIndex: high1.index, endCandleIndex: trough.index,
     };
   }
 
@@ -2784,6 +3269,478 @@ class PatternDetectionService {
     return null;
   }
 
+  // ========================================
+  // TIER 3 ADVANCED PATTERNS (GEM Frequency)
+  // Quasimodo, FTR, Flag Limit, Decision Point
+  // ========================================
+
+  /**
+   * Quasimodo Bearish - Strong Bearish Reversal
+   * Structure: Higher High followed by Lower Low and Lower High
+   * Win Rate: 75%
+   */
+  detectQuasimodoBearish(candles, symbol, timeframe) {
+    if (candles.length < 40) return null;
+
+    const { swingHighs, swingLows } = this.findSwingPoints(candles, 4);
+    if (swingHighs.length < 3 || swingLows.length < 2) return null;
+
+    const recentHighs = swingHighs.slice(-4);
+    const recentLows = swingLows.slice(-3);
+    if (recentHighs.length < 3 || recentLows.length < 2) return null;
+
+    // QML Structure: HH → LL → LH
+    const high1 = recentHighs[recentHighs.length - 3];
+    const high2 = recentHighs[recentHighs.length - 2]; // Should be Higher High
+    const high3 = recentHighs[recentHighs.length - 1]; // Should be Lower High
+
+    const low1 = recentLows[recentLows.length - 2];
+    const low2 = recentLows[recentLows.length - 1]; // Should be Lower Low
+
+    // Check QML criteria
+    const isHH = high2.price > high1.price && high2.price > high3.price;
+    const isLH = high3.price < high2.price;
+    const isLL = low2.price < low1.price;
+
+    if (!isHH || !isLH || !isLL) return null;
+
+    const signal = PATTERN_SIGNALS['Quasimodo Bearish'];
+    const currentPrice = candles[candles.length - 1].close;
+
+    // Zone at the Lower High area
+    const entry = high3.price;
+    const slBuffer = this.scaleSL(0.01, timeframe);
+    const stopLoss = high2.price * (1 + slBuffer);
+    const riskAmount = stopLoss - entry;
+    const target = entry - (riskAmount * 2.8);
+
+    const startTime = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
+    const endTime = high3.timestamp > 9999999999 ? Math.floor(high3.timestamp / 1000) : high3.timestamp;
+
+    return {
+      id: `QML-B-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'Quasimodo Bearish',
+      symbol, timeframe,
+      confidence: 75,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.8,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      points: { high1, high2, high3, low1, low2 },
+      zoneHigh: stopLoss, zoneLow: entry,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: high1.index, endCandleIndex: high3.index,
+    };
+  }
+
+  /**
+   * Quasimodo Bullish - Strong Bullish Reversal
+   * Structure: Lower Low followed by Higher High and Higher Low
+   * Win Rate: 73%
+   */
+  detectQuasimodoBullish(candles, symbol, timeframe) {
+    if (candles.length < 40) return null;
+
+    const { swingHighs, swingLows } = this.findSwingPoints(candles, 4);
+    if (swingHighs.length < 2 || swingLows.length < 3) return null;
+
+    const recentHighs = swingHighs.slice(-3);
+    const recentLows = swingLows.slice(-4);
+    if (recentHighs.length < 2 || recentLows.length < 3) return null;
+
+    // QML Structure: LL → HH → HL
+    const low1 = recentLows[recentLows.length - 3];
+    const low2 = recentLows[recentLows.length - 2]; // Should be Lower Low
+    const low3 = recentLows[recentLows.length - 1]; // Should be Higher Low
+
+    const high1 = recentHighs[recentHighs.length - 2];
+    const high2 = recentHighs[recentHighs.length - 1]; // Should be Higher High
+
+    // Check QML criteria
+    const isLL = low2.price < low1.price && low2.price < low3.price;
+    const isHL = low3.price > low2.price;
+    const isHH = high2.price > high1.price;
+
+    if (!isLL || !isHL || !isHH) return null;
+
+    const signal = PATTERN_SIGNALS['Quasimodo Bullish'];
+    const currentPrice = candles[candles.length - 1].close;
+
+    // Zone at the Higher Low area
+    const entry = low3.price;
+    const slBuffer = this.scaleSL(0.01, timeframe);
+    const stopLoss = low2.price * (1 - slBuffer);
+    const riskAmount = entry - stopLoss;
+    const target = entry + (riskAmount * 2.6);
+
+    const startTime = low1.timestamp > 9999999999 ? Math.floor(low1.timestamp / 1000) : low1.timestamp;
+    const endTime = low3.timestamp > 9999999999 ? Math.floor(low3.timestamp / 1000) : low3.timestamp;
+
+    return {
+      id: `QML-L-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'Quasimodo Bullish',
+      symbol, timeframe,
+      confidence: 73,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.6,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      points: { low1, low2, low3, high1, high2 },
+      zoneHigh: entry, zoneLow: stopLoss,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: low1.index, endCandleIndex: low3.index,
+    };
+  }
+
+  /**
+   * FTR Bearish (Fail to Return) - Bearish Continuation
+   * Price fails to return to previous high after breaking support
+   * Win Rate: 66%
+   */
+  detectFTRBearish(candles, symbol, timeframe) {
+    if (candles.length < 30) return null;
+
+    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
+    if (swingHighs.length < 2 || swingLows.length < 2) return null;
+
+    const recentHighs = swingHighs.slice(-3);
+    const recentLows = swingLows.slice(-3);
+
+    // FTR: Price breaks below support, rallies but fails to reach previous high
+    const prevHigh = recentHighs[recentHighs.length - 2];
+    const currHigh = recentHighs[recentHighs.length - 1];
+    const prevLow = recentLows[recentLows.length - 2];
+
+    // Current high should be significantly lower than previous high (failed to return)
+    const failRatio = currHigh.price / prevHigh.price;
+    if (failRatio > 0.97 || failRatio < 0.90) return null;
+
+    // Price should have broken below previous low
+    const currentPrice = candles[candles.length - 1].close;
+    if (currentPrice > prevLow.price) return null;
+
+    const signal = PATTERN_SIGNALS['FTR Bearish'];
+    const entry = currHigh.price;
+    const slBuffer = this.scaleSL(0.01, timeframe);
+    const stopLoss = prevHigh.price * (1 + slBuffer);
+    const riskAmount = stopLoss - entry;
+    const target = entry - (riskAmount * 2.2);
+
+    const startTime = prevHigh.timestamp > 9999999999 ? Math.floor(prevHigh.timestamp / 1000) : prevHigh.timestamp;
+    const endTime = currHigh.timestamp > 9999999999 ? Math.floor(currHigh.timestamp / 1000) : currHigh.timestamp;
+
+    return {
+      id: `FTR-B-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'FTR Bearish',
+      symbol, timeframe,
+      confidence: 66,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.2,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      points: { prevHigh, currHigh, prevLow },
+      zoneHigh: stopLoss, zoneLow: entry,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: prevHigh.index, endCandleIndex: currHigh.index,
+    };
+  }
+
+  /**
+   * FTR Bullish (Fail to Return) - Bullish Continuation
+   * Price fails to return to previous low after breaking resistance
+   * Win Rate: 68%
+   */
+  detectFTRBullish(candles, symbol, timeframe) {
+    if (candles.length < 30) return null;
+
+    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
+    if (swingHighs.length < 2 || swingLows.length < 2) return null;
+
+    const recentHighs = swingHighs.slice(-3);
+    const recentLows = swingLows.slice(-3);
+
+    // FTR: Price breaks above resistance, pulls back but fails to reach previous low
+    const prevLow = recentLows[recentLows.length - 2];
+    const currLow = recentLows[recentLows.length - 1];
+    const prevHigh = recentHighs[recentHighs.length - 2];
+
+    // Current low should be significantly higher than previous low (failed to return)
+    const failRatio = currLow.price / prevLow.price;
+    if (failRatio < 1.03 || failRatio > 1.10) return null;
+
+    // Price should have broken above previous high
+    const currentPrice = candles[candles.length - 1].close;
+    if (currentPrice < prevHigh.price) return null;
+
+    const signal = PATTERN_SIGNALS['FTR Bullish'];
+    const entry = currLow.price;
+    const slBuffer = this.scaleSL(0.01, timeframe);
+    const stopLoss = prevLow.price * (1 - slBuffer);
+    const riskAmount = entry - stopLoss;
+    const target = entry + (riskAmount * 2.3);
+
+    const startTime = prevLow.timestamp > 9999999999 ? Math.floor(prevLow.timestamp / 1000) : prevLow.timestamp;
+    const endTime = currLow.timestamp > 9999999999 ? Math.floor(currLow.timestamp / 1000) : currLow.timestamp;
+
+    return {
+      id: `FTR-L-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'FTR Bullish',
+      symbol, timeframe,
+      confidence: 68,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.3,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      points: { prevLow, currLow, prevHigh },
+      zoneHigh: entry, zoneLow: stopLoss,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: prevLow.index, endCandleIndex: currLow.index,
+    };
+  }
+
+  /**
+   * Flag Limit Bearish - Bearish Reversal
+   * Price fails to break flag high, forms rejection
+   * Win Rate: 65%
+   */
+  detectFlagLimitBearish(candles, symbol, timeframe) {
+    if (candles.length < 25) return null;
+
+    // Look for consolidation (flag) after a down move
+    const recentCandles = candles.slice(-25);
+    const atr = this.calculateATR(recentCandles, 14);
+
+    // Find flag boundaries (last 10 candles as potential flag)
+    const flagCandles = recentCandles.slice(-10);
+    const flagHigh = Math.max(...flagCandles.map(c => c.high));
+    const flagLow = Math.min(...flagCandles.map(c => c.low));
+    const flagHeight = flagHigh - flagLow;
+
+    // Flag should be tight (less than 2x ATR)
+    if (flagHeight > atr * 2.5) return null;
+
+    // Check if there was a down move before the flag
+    const preFlag = recentCandles.slice(0, 15);
+    const preFlagMove = preFlag[0].close - preFlag[preFlag.length - 1].close;
+    if (preFlagMove < atr * 1.5) return null; // Need significant down move
+
+    // Check for rejection at flag high (recent price action near high but failing)
+    const lastCandle = candles[candles.length - 1];
+    const distanceFromHigh = flagHigh - lastCandle.close;
+    if (distanceFromHigh < flagHeight * 0.3 || distanceFromHigh > flagHeight * 0.8) return null;
+
+    const signal = PATTERN_SIGNALS['Flag Limit Bearish'];
+    const currentPrice = lastCandle.close;
+    const entry = flagHigh;
+    const slBuffer = this.scaleSL(0.005, timeframe);
+    const stopLoss = flagHigh * (1 + slBuffer);
+    const riskAmount = stopLoss - entry;
+    const target = entry - (riskAmount * 2.1);
+
+    const startIdx = candles.length - 25;
+    const endIdx = candles.length - 1;
+    const startTime = candles[startIdx].timestamp > 9999999999 ? Math.floor(candles[startIdx].timestamp / 1000) : candles[startIdx].timestamp;
+    const endTime = candles[endIdx].timestamp > 9999999999 ? Math.floor(candles[endIdx].timestamp / 1000) : candles[endIdx].timestamp;
+
+    return {
+      id: `FL-B-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'Flag Limit Bearish',
+      symbol, timeframe,
+      confidence: 65,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.1,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      flagHigh, flagLow, flagHeight,
+      zoneHigh: stopLoss, zoneLow: entry,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: startIdx, endCandleIndex: endIdx,
+    };
+  }
+
+  /**
+   * Flag Limit Bullish - Bullish Reversal
+   * Price fails to break flag low, forms support
+   * Win Rate: 65%
+   */
+  detectFlagLimitBullish(candles, symbol, timeframe) {
+    if (candles.length < 25) return null;
+
+    const recentCandles = candles.slice(-25);
+    const atr = this.calculateATR(recentCandles, 14);
+
+    const flagCandles = recentCandles.slice(-10);
+    const flagHigh = Math.max(...flagCandles.map(c => c.high));
+    const flagLow = Math.min(...flagCandles.map(c => c.low));
+    const flagHeight = flagHigh - flagLow;
+
+    if (flagHeight > atr * 2.5) return null;
+
+    // Check if there was an up move before the flag
+    const preFlag = recentCandles.slice(0, 15);
+    const preFlagMove = preFlag[preFlag.length - 1].close - preFlag[0].close;
+    if (preFlagMove < atr * 1.5) return null;
+
+    // Check for support at flag low
+    const lastCandle = candles[candles.length - 1];
+    const distanceFromLow = lastCandle.close - flagLow;
+    if (distanceFromLow < flagHeight * 0.3 || distanceFromLow > flagHeight * 0.8) return null;
+
+    const signal = PATTERN_SIGNALS['Flag Limit Bullish'];
+    const currentPrice = lastCandle.close;
+    const entry = flagLow;
+    const slBuffer = this.scaleSL(0.005, timeframe);
+    const stopLoss = flagLow * (1 - slBuffer);
+    const riskAmount = entry - stopLoss;
+    const target = entry + (riskAmount * 2.1);
+
+    const startIdx = candles.length - 25;
+    const endIdx = candles.length - 1;
+    const startTime = candles[startIdx].timestamp > 9999999999 ? Math.floor(candles[startIdx].timestamp / 1000) : candles[startIdx].timestamp;
+    const endTime = candles[endIdx].timestamp > 9999999999 ? Math.floor(candles[endIdx].timestamp / 1000) : candles[endIdx].timestamp;
+
+    return {
+      id: `FL-L-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'Flag Limit Bullish',
+      symbol, timeframe,
+      confidence: 65,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.1,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      flagHigh, flagLow, flagHeight,
+      zoneHigh: entry, zoneLow: stopLoss,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: startIdx, endCandleIndex: endIdx,
+    };
+  }
+
+  /**
+   * Decision Point Bearish - Key resistance area
+   * Win Rate: 64%
+   */
+  detectDecisionPointBearish(candles, symbol, timeframe) {
+    if (candles.length < 30) return null;
+
+    const { swingHighs } = this.findSwingPoints(candles, 4);
+    if (swingHighs.length < 2) return null;
+
+    // Find a key resistance level (multiple touches)
+    const recentHighs = swingHighs.slice(-5);
+    const tolerance = 0.02; // 2% tolerance for same level
+
+    let resistanceLevel = null;
+    let touches = 0;
+
+    for (const high of recentHighs) {
+      const matchingHighs = recentHighs.filter(h =>
+        Math.abs(h.price - high.price) / high.price < tolerance
+      );
+      if (matchingHighs.length >= 2 && matchingHighs.length > touches) {
+        resistanceLevel = high.price;
+        touches = matchingHighs.length;
+      }
+    }
+
+    if (!resistanceLevel || touches < 2) return null;
+
+    const currentPrice = candles[candles.length - 1].close;
+    const distanceToLevel = (resistanceLevel - currentPrice) / currentPrice;
+
+    // Price should be approaching the decision point
+    if (distanceToLevel < 0 || distanceToLevel > 0.05) return null;
+
+    const signal = PATTERN_SIGNALS['Decision Point Bearish'];
+    const entry = resistanceLevel;
+    const slBuffer = this.scaleSL(0.01, timeframe);
+    const stopLoss = resistanceLevel * (1 + slBuffer);
+    const riskAmount = stopLoss - entry;
+    const target = entry - (riskAmount * 2.0);
+
+    const firstHigh = recentHighs[0];
+    const lastHigh = recentHighs[recentHighs.length - 1];
+    const startTime = firstHigh.timestamp > 9999999999 ? Math.floor(firstHigh.timestamp / 1000) : firstHigh.timestamp;
+    const endTime = lastHigh.timestamp > 9999999999 ? Math.floor(lastHigh.timestamp / 1000) : lastHigh.timestamp;
+
+    return {
+      id: `DP-B-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'Decision Point Bearish',
+      symbol, timeframe,
+      confidence: 64,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.0,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      resistanceLevel, touches,
+      zoneHigh: stopLoss, zoneLow: entry,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: firstHigh.index, endCandleIndex: lastHigh.index,
+    };
+  }
+
+  /**
+   * Decision Point Bullish - Key support area
+   * Win Rate: 64%
+   */
+  detectDecisionPointBullish(candles, symbol, timeframe) {
+    if (candles.length < 30) return null;
+
+    const { swingLows } = this.findSwingPoints(candles, 4);
+    if (swingLows.length < 2) return null;
+
+    // Find a key support level (multiple touches)
+    const recentLows = swingLows.slice(-5);
+    const tolerance = 0.02;
+
+    let supportLevel = null;
+    let touches = 0;
+
+    for (const low of recentLows) {
+      const matchingLows = recentLows.filter(l =>
+        Math.abs(l.price - low.price) / low.price < tolerance
+      );
+      if (matchingLows.length >= 2 && matchingLows.length > touches) {
+        supportLevel = low.price;
+        touches = matchingLows.length;
+      }
+    }
+
+    if (!supportLevel || touches < 2) return null;
+
+    const currentPrice = candles[candles.length - 1].close;
+    const distanceToLevel = (currentPrice - supportLevel) / currentPrice;
+
+    // Price should be approaching the decision point
+    if (distanceToLevel < 0 || distanceToLevel > 0.05) return null;
+
+    const signal = PATTERN_SIGNALS['Decision Point Bullish'];
+    const entry = supportLevel;
+    const slBuffer = this.scaleSL(0.01, timeframe);
+    const stopLoss = supportLevel * (1 - slBuffer);
+    const riskAmount = entry - stopLoss;
+    const target = entry + (riskAmount * 2.0);
+
+    const firstLow = recentLows[0];
+    const lastLow = recentLows[recentLows.length - 1];
+    const startTime = firstLow.timestamp > 9999999999 ? Math.floor(firstLow.timestamp / 1000) : firstLow.timestamp;
+    const endTime = lastLow.timestamp > 9999999999 ? Math.floor(lastLow.timestamp / 1000) : lastLow.timestamp;
+
+    return {
+      id: `DP-L-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'Decision Point Bullish',
+      symbol, timeframe,
+      confidence: 64,
+      direction: signal.direction, type: signal.type, color: signal.color,
+      description: signal.description,
+      entry, stopLoss, target, riskReward: 2.0,
+      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
+      supportLevel, touches,
+      zoneHigh: entry, zoneLow: stopLoss,
+      startTime, endTime, formationTime: startTime,
+      startCandleIndex: firstLow.index, endCandleIndex: lastLow.index,
+    };
+  }
+
   /**
    * Scan all patterns for a symbol
    * @param {String} symbol - Trading pair symbol
@@ -2799,7 +3756,7 @@ class PatternDetectionService {
         this.setUserTier(userTier);
       }
 
-      const rawCandles = await binanceService.getCandles(symbol, timeframe, 500);
+      const rawCandles = await binanceService.getCandles(symbol, timeframe, 1500);
 
       if (!rawCandles || rawCandles.length < this.MIN_CANDLES) {
         console.log('[PatternDetection] Not enough candle data:', rawCandles?.length);
@@ -2807,15 +3764,15 @@ class PatternDetectionService {
       }
 
       // =====================================================
-      // 7-DAY LOOKBACK LIMIT: Only scan recent patterns
+      // 21-DAY LOOKBACK LIMIT: Only scan recent patterns
       // Prevents scanning full history, focuses on actionable patterns
       // =====================================================
-      const candlesFor7Days = this.getCandlesFor7Days(timeframe);
-      const candles = rawCandles.length > candlesFor7Days
-        ? rawCandles.slice(-candlesFor7Days)
+      const candlesFor21Days = this.getCandlesFor21Days(timeframe);
+      const candles = rawCandles.length > candlesFor21Days
+        ? rawCandles.slice(-candlesFor21Days)
         : rawCandles;
 
-      console.log(`[PatternDetection] 7-day limit applied: ${rawCandles.length} -> ${candles.length} candles (limit: ${candlesFor7Days})`);
+      console.log(`[PatternDetection] 21-day limit applied: ${rawCandles.length} -> ${candles.length} candles (limit: ${candlesFor21Days})`);
 
       // 🔴 DEBUG: Verify candles have timestamp property
       const firstCandle = candles[0];
@@ -2916,6 +3873,31 @@ class PatternDetectionService {
 
         const hmr = this.detectHammer(candles, symbol, timeframe);
         if (hmr) patterns.push(hmr);
+
+        // Advanced GEM Frequency patterns
+        const qmlB = this.detectQuasimodoBearish(candles, symbol, timeframe);
+        if (qmlB) patterns.push(qmlB);
+
+        const qmlL = this.detectQuasimodoBullish(candles, symbol, timeframe);
+        if (qmlL) patterns.push(qmlL);
+
+        const ftrB = this.detectFTRBearish(candles, symbol, timeframe);
+        if (ftrB) patterns.push(ftrB);
+
+        const ftrL = this.detectFTRBullish(candles, symbol, timeframe);
+        if (ftrL) patterns.push(ftrL);
+
+        const flB = this.detectFlagLimitBearish(candles, symbol, timeframe);
+        if (flB) patterns.push(flB);
+
+        const flL = this.detectFlagLimitBullish(candles, symbol, timeframe);
+        if (flL) patterns.push(flL);
+
+        const dpB = this.detectDecisionPointBearish(candles, symbol, timeframe);
+        if (dpB) patterns.push(dpB);
+
+        const dpL = this.detectDecisionPointBullish(candles, symbol, timeframe);
+        if (dpL) patterns.push(dpL);
       }
 
       console.log(`[PatternDetection] Found ${patterns.length} patterns for ${symbol} (tier: ${tier})`);
@@ -3170,16 +4152,16 @@ export async function detectAllPatterns(candles, options = {}) {
   }
 
   // ========================================
-  // 7-DAY LOOKBACK LIMIT
+  // 21-DAY LOOKBACK LIMIT
   // ========================================
-  // Limit candles to 7 days worth based on timeframe
+  // Limit candles to 21 days worth based on timeframe
   // This prevents scanning full history and focuses on recent patterns
-  const candlesFor7Days = patternDetection.getCandlesFor7Days(timeframe);
-  const limitedCandles = candles.length > candlesFor7Days
-    ? candles.slice(-candlesFor7Days)
+  const candlesFor21Days = patternDetection.getCandlesFor21Days(timeframe);
+  const limitedCandles = candles.length > candlesFor21Days
+    ? candles.slice(-candlesFor21Days)
     : candles;
 
-  console.log(`[detectAllPatterns] Using ${limitedCandles.length} candles (7-day limit: ${candlesFor7Days}) for ${timeframe}`);
+  console.log(`[detectAllPatterns] Using ${limitedCandles.length} candles (21-day limit: ${candlesFor21Days}) for ${timeframe}`);
 
   // Set tier
   patternDetection.setUserTier(tier);
@@ -3270,6 +4252,31 @@ export async function detectAllPatterns(candles, options = {}) {
 
       const hm = patternDetection.detectHammer(limitedCandles, symbol, timeframe);
       if (hm) patterns.push(hm);
+
+      // Advanced GEM Frequency patterns
+      const qmlB = patternDetection.detectQuasimodoBearish(limitedCandles, symbol, timeframe);
+      if (qmlB) patterns.push(qmlB);
+
+      const qmlL = patternDetection.detectQuasimodoBullish(limitedCandles, symbol, timeframe);
+      if (qmlL) patterns.push(qmlL);
+
+      const ftrB = patternDetection.detectFTRBearish(limitedCandles, symbol, timeframe);
+      if (ftrB) patterns.push(ftrB);
+
+      const ftrL = patternDetection.detectFTRBullish(limitedCandles, symbol, timeframe);
+      if (ftrL) patterns.push(ftrL);
+
+      const flB = patternDetection.detectFlagLimitBearish(limitedCandles, symbol, timeframe);
+      if (flB) patterns.push(flB);
+
+      const flL = patternDetection.detectFlagLimitBullish(limitedCandles, symbol, timeframe);
+      if (flL) patterns.push(flL);
+
+      const dpB = patternDetection.detectDecisionPointBearish(limitedCandles, symbol, timeframe);
+      if (dpB) patterns.push(dpB);
+
+      const dpL = patternDetection.detectDecisionPointBullish(limitedCandles, symbol, timeframe);
+      if (dpL) patterns.push(dpL);
     }
 
     // ========================================

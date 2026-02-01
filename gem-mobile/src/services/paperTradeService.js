@@ -9,6 +9,12 @@ import { supabase } from './supabase';
 import 'react-native-get-random-values'; // Required for uuid
 import { v4 as uuidv4 } from 'uuid';
 import { calculateLiquidationPrice } from './tradingCalculations';
+import {
+  notifyOrderFilled,
+  notifyTPHit,
+  notifySLHit,
+  notifyLiquidation,
+} from './paperTradeNotificationService';
 
 // Helper to get user-specific storage keys
 const getStorageKeys = (userId) => ({
@@ -657,22 +663,34 @@ class PaperTradeService {
     // Get market price (required for proper order handling)
     const marketPrice = currentMarketPrice || pattern.entry;
 
-    // Determine order type for Custom Mode
+    // ═══════════════════════════════════════════════════════════
+    // LIMIT ORDER DETECTION - For BOTH Pattern Mode and Custom Mode
+    // ═══════════════════════════════════════════════════════════
     // Valid LIMIT: LONG entry < market (buy low) OR SHORT entry > market (sell high)
     // Invalid entry: LONG entry > market OR SHORT entry < market
+    // If entry == market price → MARKET order (instant fill)
+    // If entry != market price AND valid direction → LIMIT order (pending)
     // In case of invalid entry, execute as MARKET order at current market price
     const dir = (pattern.direction || '').toUpperCase();
-    const isValidLimit = tradeMode === 'custom' && this.isLimitOrder(dir, pattern.entry, marketPrice);
-    const isInvalidEntry = tradeMode === 'custom' && !isValidLimit && pattern.entry !== marketPrice && (
+
+    // Check if prices are essentially the same (within 0.1% tolerance)
+    const priceTolerance = marketPrice * 0.001;
+    const isSamePrice = Math.abs(pattern.entry - marketPrice) <= priceTolerance;
+
+    // Check valid limit order conditions (for BOTH pattern and custom mode)
+    const isValidLimit = !isSamePrice && this.isLimitOrder(dir, pattern.entry, marketPrice);
+
+    // Check invalid entry (wrong direction for limit)
+    const isInvalidEntry = !isSamePrice && !isValidLimit && (
       dir === 'LONG' ? pattern.entry > marketPrice : pattern.entry < marketPrice
     );
 
     // Determine final entry price and order type
-    // - If valid limit order: use pattern.entry, status = PENDING
-    // - If invalid entry: use marketPrice, status = OPEN (execute as market)
-    // - Otherwise (pattern mode or matching price): use pattern.entry, status = OPEN
-    const finalEntryPrice = isInvalidEntry ? marketPrice : pattern.entry;
-    const isLimitOrder = isValidLimit && !isInvalidEntry;
+    // - If same price: MARKET order at current price
+    // - If valid limit order: LIMIT order (pending), use pattern.entry
+    // - If invalid entry: MARKET order at current market price (safety)
+    const finalEntryPrice = isSamePrice ? marketPrice : (isInvalidEntry ? marketPrice : pattern.entry);
+    const isLimitOrder = isValidLimit && !isInvalidEntry && !isSamePrice;
 
     // Calculate quantity based on position value and FINAL entry price
     const quantity = actualPositionValue / finalEntryPrice;
@@ -937,6 +955,22 @@ class PaperTradeService {
 
         // Sync filled position to Supabase
         await this.syncPositionToSupabase(filledPosition, 'UPDATE');
+
+        // ═══════════════════════════════════════════════════════════
+        // PUSH NOTIFICATION - Limit Order Filled
+        // ═══════════════════════════════════════════════════════════
+        try {
+          await notifyOrderFilled({
+            symbol: filledPosition.symbol,
+            direction: filledPosition.direction,
+            entry_price: filledPosition.entryPrice,
+            filledPrice: filledPosition.entryPrice,
+            position_size: filledPosition.positionValue || filledPosition.positionSize,
+            id: filledPosition.id,
+          }, filledPosition.userId);
+        } catch (notifyError) {
+          console.log('[PaperTrade] Notification error (order filled):', notifyError.message);
+        }
       } else {
         remainingPending.push(order);
       }
@@ -1291,6 +1325,16 @@ class PaperTradeService {
           'STOP_LOSS'
         );
         closedPositions.push(closed);
+
+        // ═══════════════════════════════════════════════════════════
+        // PUSH NOTIFICATION - Stop Loss Hit
+        // ═══════════════════════════════════════════════════════════
+        try {
+          const roe = ((closed.realizedPnL || 0) / (position.positionSize || 1)) * 100;
+          await notifySLHit(position, closed.realizedPnL || 0, roe, position.userId);
+        } catch (notifyError) {
+          console.log('[PaperTrade] Notification error (SL hit):', notifyError.message);
+        }
         continue;
       }
 
@@ -1306,6 +1350,16 @@ class PaperTradeService {
           'TAKE_PROFIT'
         );
         closedPositions.push(closed);
+
+        // ═══════════════════════════════════════════════════════════
+        // PUSH NOTIFICATION - Take Profit Hit
+        // ═══════════════════════════════════════════════════════════
+        try {
+          const roe = ((closed.realizedPnL || 0) / (position.positionSize || 1)) * 100;
+          await notifyTPHit(position, closed.realizedPnL || 0, roe, position.userId);
+        } catch (notifyError) {
+          console.log('[PaperTrade] Notification error (TP hit):', notifyError.message);
+        }
         continue;
       }
 
@@ -1335,6 +1389,15 @@ class PaperTradeService {
           'LIQUIDATION'
         );
         closedPositions.push(closed);
+
+        // ═══════════════════════════════════════════════════════════
+        // PUSH NOTIFICATION - Liquidation
+        // ═══════════════════════════════════════════════════════════
+        try {
+          await notifyLiquidation(position, liquidationPrice, closed.realizedPnL || 0, position.userId);
+        } catch (notifyError) {
+          console.log('[PaperTrade] Notification error (liquidation):', notifyError.message);
+        }
         continue;
       }
 
