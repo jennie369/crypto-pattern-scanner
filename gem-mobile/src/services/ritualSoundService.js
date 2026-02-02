@@ -91,13 +91,38 @@ class RitualSoundService {
     this.isAmbientPlaying = false;
     this.currentRitual = null;
     this.isEnabled = true;
+    this.isInitialized = false;
+    this.initPromise = null;
   }
 
   /**
    * Initialize audio settings
+   * Safe to call multiple times - will only init once
    */
   async init() {
+    // If already initialized, return immediately
+    if (this.isInitialized) {
+      console.log('[RitualSound] Already initialized');
+      return;
+    }
+
+    // If init is in progress, wait for it
+    if (this.initPromise) {
+      console.log('[RitualSound] Init in progress, waiting...');
+      return this.initPromise;
+    }
+
+    // Start initialization
+    this.initPromise = this._doInit();
+    return this.initPromise;
+  }
+
+  /**
+   * Internal init implementation
+   */
+  async _doInit() {
     try {
+      console.log('[RitualSound] Initializing audio mode...');
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         staysActiveInBackground: false,
@@ -105,9 +130,21 @@ class RitualSoundService {
         shouldDuckAndroid: true,
         playThroughEarpieceAndroid: false,
       });
-      console.log('[RitualSound] Initialized');
+      this.isInitialized = true;
+      console.log('[RitualSound] Initialized successfully');
     } catch (error) {
       console.error('[RitualSound] Init error:', error);
+      // Reset promise so init can be retried
+      this.initPromise = null;
+    }
+  }
+
+  /**
+   * Ensure init is complete before proceeding
+   */
+  async ensureInitialized() {
+    if (!this.isInitialized) {
+      await this.init();
     }
   }
 
@@ -136,6 +173,9 @@ class RitualSoundService {
     }
 
     try {
+      // Ensure audio mode is set before loading sounds
+      await this.ensureInitialized();
+
       const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: false });
       this.sounds[soundKey] = sound;
       return sound;
@@ -152,6 +192,9 @@ class RitualSoundService {
     if (!this.isEnabled) return;
 
     try {
+      // Ensure audio mode is set before playing
+      await this.ensureInitialized();
+
       const sound = await this.loadSound(soundKey);
       if (!sound) return;
 
@@ -183,6 +226,9 @@ class RitualSoundService {
     }
 
     try {
+      // Ensure audio mode is set before playing
+      await this.ensureInitialized();
+
       const soundKey = ritualSounds.ambient;
       const sound = await this.loadSound(soundKey);
       if (!sound) return;
@@ -240,6 +286,8 @@ class RitualSoundService {
   async resumeAmbient() {
     if (this.ambientSound && !this.isAmbientPlaying && this.isEnabled) {
       try {
+        // Ensure audio mode is set before resuming
+        await this.ensureInitialized();
         await this.ambientSound.playAsync();
         this.isAmbientPlaying = true;
         console.log('[RitualSound] Resumed ambient');
@@ -324,6 +372,9 @@ class RitualSoundService {
 
     this.sounds = {};
     this.ambientSound = null;
+    // Reset initialization state so audio mode can be re-set if needed
+    this.isInitialized = false;
+    this.initPromise = null;
     console.log('[RitualSound] Cleaned up');
   }
 
