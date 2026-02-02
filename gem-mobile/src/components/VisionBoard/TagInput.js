@@ -31,7 +31,7 @@ const TagInput = ({
   onTagsChange,
   disabled = false,
   userId,
-  placeholder = 'Them tag...',
+  placeholder = 'Thêm tag...',
   maxTags = MAX_TAGS,
   suggestions: externalSuggestions,
   showIcon = true,

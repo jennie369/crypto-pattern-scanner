@@ -159,7 +159,8 @@ export const CalendarProvider = ({ children }) => {
 
     try {
       const result = await calendarJournalService.getEntriesForDate(userId, date);
-      const entries = result?.entries || [];
+      // Service returns { success, data } not { entries }
+      const entries = result?.data || [];
       setJournalEntries(entries);
       return entries;
     } catch (err) {
@@ -177,7 +178,8 @@ export const CalendarProvider = ({ children }) => {
 
     try {
       const result = await tradingJournalService.getTradingEntriesForDate(userId, date);
-      const entries = result?.entries || [];
+      // Service returns { success, data } not { entries }
+      const entries = result?.data || [];
       setTradingEntries(entries);
       return entries;
     } catch (err) {
@@ -195,8 +197,9 @@ export const CalendarProvider = ({ children }) => {
 
     try {
       const result = await moodTrackingService.getMoodForDate(userId, date);
-      setMoodData(result?.mood || null);
-      return result?.mood || null;
+      // Service returns { success, data } not { mood }
+      setMoodData(result?.data || null);
+      return result?.data || null;
     } catch (err) {
       console.error('[CalendarContext] Refresh mood data error:', err);
       return null;

@@ -239,18 +239,28 @@ const InAppNotificationToast = memo(({
                 <View style={styles.callActions}>
                   <TouchableOpacity
                     style={[styles.callButton, styles.declineButton]}
-                    onPress={() => {
-                      notification.onDecline?.();
+                    onPress={async () => {
+                      console.log('[InAppNotificationToast] Decline pressed');
                       handleDismiss();
+                      try {
+                        await notification.onDecline?.();
+                      } catch (e) {
+                        console.error('[InAppNotificationToast] Decline error:', e);
+                      }
                     }}
                   >
                     <Ionicons name="close" size={16} color={COLORS.textPrimary} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.callButton, styles.acceptButton]}
-                    onPress={() => {
-                      notification.onAccept?.();
+                    onPress={async () => {
+                      console.log('[InAppNotificationToast] Accept pressed');
                       handleDismiss();
+                      try {
+                        await notification.onAccept?.();
+                      } catch (e) {
+                        console.error('[InAppNotificationToast] Accept error:', e);
+                      }
                     }}
                   >
                     <Ionicons name="call" size={16} color={COLORS.textPrimary} />

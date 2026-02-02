@@ -458,6 +458,17 @@ class DigitalProductService {
   isCacheValid() {
     return this._cache && Date.now() - this._cacheTime < this._cacheDuration;
   }
+
+  /**
+   * Get cached products synchronously (for instant UI display)
+   * Returns null if no cache available
+   */
+  getCachedProducts() {
+    if (this.isCacheValid()) {
+      return this._cache;
+    }
+    return null;
+  }
 }
 
 export const digitalProductService = new DigitalProductService();

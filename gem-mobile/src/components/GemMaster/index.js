@@ -76,6 +76,9 @@ export { default as GoalSettingForm } from './GoalSettingForm';
 // NEW: Inline Chat Form (replaces modal with in-chat form for better UX)
 export { default as InlineChatForm } from './InlineChatForm';
 
+// NEW: Template Inline Form (centralized templates system)
+export { default as TemplateInlineForm } from './TemplateInlineForm';
+
 // Crystal Components
 export { default as CrystalLink, CrystalList, CrystalChip } from '../CrystalLink';
 

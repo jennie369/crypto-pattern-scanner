@@ -1,12 +1,13 @@
 /**
  * Add Event Modal Component
  * Modal for creating new calendar events
+ * OPTIMIZED: Removed BlurView for better performance
  *
  * Created: January 2026
- * Part of Vision Board Calendar Feature
+ * Updated: February 2026 - Performance optimization
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -16,17 +17,17 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
-  KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Switch,
+  Animated,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
 import * as Icons from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS, TYPOGRAPHY, SPACING, GLASS, INPUT } from '../../utils/tokens';
-import calendarService, { EVENT_SOURCE_TYPES, SOURCE_TYPE_COLORS } from '../../services/calendarService';
+import { COLORS, TYPOGRAPHY, SPACING, INPUT } from '../../utils/tokens';
+import calendarService, { EVENT_SOURCE_TYPES } from '../../services/calendarService';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Event color options
 const COLOR_OPTIONS = [
@@ -45,9 +46,51 @@ const LIFE_AREA_OPTIONS = [
   { key: 'relationships', label: 'Mối quan hệ', icon: 'Heart' },
   { key: 'career', label: 'Sự nghiệp', icon: 'Briefcase' },
   { key: 'health', label: 'Sức khỏe', icon: 'Activity' },
-  { key: 'personal', label: 'Phát triển cá nhân', icon: 'Star' },
-  { key: 'spiritual', label: 'Tâm thức', icon: 'Sparkles' },
+  { key: 'personal', label: 'Phát triển', icon: 'Star' },
 ];
+
+// Memoized color option to prevent re-renders
+const ColorOption = memo(({ color, isSelected, onSelect }) => (
+  <TouchableOpacity
+    style={[
+      styles.colorOption,
+      { backgroundColor: color },
+      isSelected && styles.colorOptionSelected,
+    ]}
+    onPress={() => onSelect(color)}
+    activeOpacity={0.7}
+  >
+    {isSelected && <Icons.Check size={16} color="#fff" />}
+  </TouchableOpacity>
+));
+
+// Memoized life area option
+const LifeAreaOption = memo(({ area, isSelected, onSelect }) => {
+  const AreaIcon = Icons[area.icon] || Icons.Tag;
+  return (
+    <TouchableOpacity
+      style={[
+        styles.lifeAreaOption,
+        isSelected && styles.lifeAreaOptionSelected,
+      ]}
+      onPress={() => onSelect(area.key)}
+      activeOpacity={0.7}
+    >
+      <AreaIcon
+        size={14}
+        color={isSelected ? '#FFFFFF' : COLORS.textMuted}
+      />
+      <Text
+        style={[
+          styles.lifeAreaLabel,
+          isSelected && styles.lifeAreaLabelSelected,
+        ]}
+      >
+        {area.label}
+      </Text>
+    </TouchableOpacity>
+  );
+});
 
 const AddEventModal = ({
   visible,
@@ -67,6 +110,9 @@ const AddEventModal = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Animation for modal
+  const slideAnim = useState(new Animated.Value(SCREEN_HEIGHT))[0];
+
   // Reset form when modal opens
   useEffect(() => {
     if (visible) {
@@ -78,11 +124,21 @@ const AddEventModal = ({
       setStartTime('');
       setEndTime('');
       setError(null);
+
+      // Animate in
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 65,
+        friction: 11,
+      }).start();
+    } else {
+      slideAnim.setValue(SCREEN_HEIGHT);
     }
   }, [visible]);
 
   // Format date for display
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     if (!dateString) return '';
     const d = new Date(dateString);
     return d.toLocaleDateString('vi-VN', {
@@ -91,10 +147,26 @@ const AddEventModal = ({
       month: 'long',
       year: 'numeric',
     });
-  };
+  }, []);
+
+  // Handlers
+  const handleColorSelect = useCallback((color) => {
+    setSelectedColor(color);
+    Haptics.selectionAsync();
+  }, []);
+
+  const handleLifeAreaSelect = useCallback((key) => {
+    setSelectedLifeArea(prev => prev === key ? null : key);
+    Haptics.selectionAsync();
+  }, []);
+
+  const handleToggleAllDay = useCallback((value) => {
+    setIsAllDay(value);
+    Haptics.selectionAsync();
+  }, []);
 
   // Handle create event
-  const handleCreateEvent = async () => {
+  const handleCreateEvent = useCallback(async () => {
     // Validate
     if (!title.trim()) {
       setError('Vui lòng nhập tiêu đề sự kiện');
@@ -145,242 +217,216 @@ const AddEventModal = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [title, description, date, userId, selectedColor, selectedLifeArea, isAllDay, startTime, endTime, onEventCreated, onClose]);
+
+  // Handle close with animation
+  const handleClose = useCallback(() => {
+    Animated.timing(slideAnim, {
+      toValue: SCREEN_HEIGHT,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      onClose();
+    });
+  }, [onClose, slideAnim]);
+
+  if (!visible) return null;
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={handleClose}
+      statusBarTranslucent
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.overlay}
-      >
-        <BlurView intensity={20} style={styles.blurContainer}>
-          <TouchableOpacity
-            style={styles.dismissArea}
-            activeOpacity={1}
-            onPress={onClose}
-          />
+      <View style={styles.overlay}>
+        {/* Backdrop */}
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={handleClose}
+        />
 
-          <View style={styles.modalContainer}>
-            {/* Handle bar */}
-            <View style={styles.handleBar} />
+        {/* Modal content */}
+        <Animated.View
+          style={[
+            styles.modalContainer,
+            {
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          {/* Handle bar */}
+          <View style={styles.handleBar} />
 
-            {/* Header */}
-            <View style={styles.header}>
-              <View>
-                <Text style={styles.headerTitle}>Thêm sự kiện</Text>
-                <Text style={styles.headerDate}>{formatDate(date)}</Text>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.headerTitle}>Thêm sự kiện</Text>
+              <Text style={styles.headerDate}>{formatDate(date)}</Text>
+            </View>
+            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+              <Icons.X size={22} color={COLORS.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Form */}
+          <ScrollView
+            style={styles.formContainer}
+            contentContainerStyle={styles.formContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+          >
+            {/* Error message */}
+            {error && (
+              <View style={styles.errorContainer}>
+                <Icons.AlertCircle size={16} color={COLORS.error} />
+                <Text style={styles.errorText}>{error}</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Icons.X size={24} color={COLORS.textMuted} />
-              </TouchableOpacity>
+            )}
+
+            {/* Title input */}
+            <View style={styles.inputGroup}>
+              <TextInput
+                style={styles.titleInput}
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Tiêu đề sự kiện..."
+                placeholderTextColor={COLORS.textMuted}
+                maxLength={100}
+                returnKeyType="next"
+              />
             </View>
 
-            {/* Form */}
-            <ScrollView
-              style={styles.formContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              {/* Error message */}
-              {error && (
-                <View style={styles.errorContainer}>
-                  <Icons.AlertCircle size={16} color={COLORS.error} />
-                  <Text style={styles.errorText}>{error}</Text>
-                </View>
-              )}
+            {/* Description input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Mô tả</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={description}
+                onChangeText={setDescription}
+                placeholder="Thêm mô tả chi tiết..."
+                placeholderTextColor={COLORS.textMuted}
+                multiline
+                numberOfLines={3}
+                maxLength={500}
+                textAlignVertical="top"
+              />
+            </View>
 
-              {/* Title input */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Tiêu đề *</Text>
-                <TextInput
-                  style={styles.input}
-                  value={title}
-                  onChangeText={setTitle}
-                  placeholder="Nhập tiêu đề sự kiện..."
-                  placeholderTextColor={COLORS.textMuted}
-                  maxLength={100}
-                  autoFocus
-                />
+            {/* Color picker */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Màu sắc</Text>
+              <View style={styles.colorPicker}>
+                {COLOR_OPTIONS.map((option) => (
+                  <ColorOption
+                    key={option.color}
+                    color={option.color}
+                    isSelected={selectedColor === option.color}
+                    onSelect={handleColorSelect}
+                  />
+                ))}
               </View>
+            </View>
 
-              {/* Description input */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Mô tả</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={description}
-                  onChangeText={setDescription}
-                  placeholder="Thêm mô tả chi tiết..."
-                  placeholderTextColor={COLORS.textMuted}
-                  multiline
-                  numberOfLines={3}
-                  maxLength={500}
-                />
+            {/* Life area picker */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Lĩnh vực (tùy chọn)</Text>
+              <View style={styles.lifeAreaPicker}>
+                {LIFE_AREA_OPTIONS.map((area) => (
+                  <LifeAreaOption
+                    key={area.key}
+                    area={area}
+                    isSelected={selectedLifeArea === area.key}
+                    onSelect={handleLifeAreaSelect}
+                  />
+                ))}
               </View>
+            </View>
 
-              {/* Color picker */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Màu sắc</Text>
-                <View style={styles.colorPicker}>
-                  {COLOR_OPTIONS.map((option) => (
-                    <TouchableOpacity
-                      key={option.color}
-                      style={[
-                        styles.colorOption,
-                        { backgroundColor: option.color },
-                        selectedColor === option.color && styles.colorOptionSelected,
-                      ]}
-                      onPress={() => {
-                        setSelectedColor(option.color);
-                        Haptics.selectionAsync();
-                      }}
-                    >
-                      {selectedColor === option.color && (
-                        <Icons.Check size={16} color="#fff" />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </View>
+            {/* All day toggle - Using native Switch for better performance */}
+            <View style={styles.toggleRow}>
+              <View style={styles.toggleInfo}>
+                <Icons.Clock size={18} color={COLORS.textMuted} />
+                <Text style={styles.toggleLabel}>Cả ngày</Text>
               </View>
+              <Switch
+                value={isAllDay}
+                onValueChange={handleToggleAllDay}
+                trackColor={{ false: COLORS.glassBg, true: COLORS.purple }}
+                thumbColor={isAllDay ? '#FFFFFF' : COLORS.textMuted}
+                ios_backgroundColor={COLORS.glassBg}
+              />
+            </View>
 
-              {/* Life area picker */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Lĩnh vực (tùy chọn)</Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.lifeAreaPicker}
-                >
-                  {LIFE_AREA_OPTIONS.map((area) => {
-                    const AreaIcon = Icons[area.icon] || Icons.Tag;
-                    const isSelected = selectedLifeArea === area.key;
-                    return (
-                      <TouchableOpacity
-                        key={area.key}
-                        style={[
-                          styles.lifeAreaOption,
-                          isSelected && styles.lifeAreaOptionSelected,
-                        ]}
-                        onPress={() => {
-                          setSelectedLifeArea(isSelected ? null : area.key);
-                          Haptics.selectionAsync();
-                        }}
-                      >
-                        <AreaIcon
-                          size={16}
-                          color={isSelected ? COLORS.textPrimary : COLORS.textMuted}
-                        />
-                        <Text
-                          style={[
-                            styles.lifeAreaLabel,
-                            isSelected && styles.lifeAreaLabelSelected,
-                          ]}
-                        >
-                          {area.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-
-              {/* All day toggle */}
-              <TouchableOpacity
-                style={styles.toggleRow}
-                onPress={() => {
-                  setIsAllDay(!isAllDay);
-                  Haptics.selectionAsync();
-                }}
-              >
-                <View style={styles.toggleInfo}>
-                  <Icons.Clock size={20} color={COLORS.textMuted} />
-                  <Text style={styles.toggleLabel}>Cả ngày</Text>
-                </View>
-                <View
-                  style={[
-                    styles.toggle,
-                    isAllDay && styles.toggleActive,
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.toggleThumb,
-                      isAllDay && styles.toggleThumbActive,
-                    ]}
+            {/* Time inputs (if not all day) */}
+            {!isAllDay && (
+              <View style={styles.timeRow}>
+                <View style={styles.timeInput}>
+                  <Text style={styles.timeLabel}>Bắt đầu</Text>
+                  <TextInput
+                    style={styles.timeField}
+                    value={startTime}
+                    onChangeText={setStartTime}
+                    placeholder="09:00"
+                    placeholderTextColor={COLORS.textMuted}
+                    keyboardType="numbers-and-punctuation"
+                    maxLength={5}
                   />
                 </View>
-              </TouchableOpacity>
-
-              {/* Time inputs (if not all day) */}
-              {!isAllDay && (
-                <View style={styles.timeRow}>
-                  <View style={[styles.inputGroup, { flex: 1 }]}>
-                    <Text style={styles.inputLabel}>Bắt đầu</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={startTime}
-                      onChangeText={setStartTime}
-                      placeholder="09:00"
-                      placeholderTextColor={COLORS.textMuted}
-                      keyboardType="numbers-and-punctuation"
-                    />
-                  </View>
-                  <View style={styles.timeSeparator}>
-                    <Icons.ArrowRight size={16} color={COLORS.textMuted} />
-                  </View>
-                  <View style={[styles.inputGroup, { flex: 1 }]}>
-                    <Text style={styles.inputLabel}>Kết thúc</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={endTime}
-                      onChangeText={setEndTime}
-                      placeholder="10:00"
-                      placeholderTextColor={COLORS.textMuted}
-                      keyboardType="numbers-and-punctuation"
-                    />
-                  </View>
+                <Icons.ArrowRight size={16} color={COLORS.textMuted} style={styles.timeArrow} />
+                <View style={styles.timeInput}>
+                  <Text style={styles.timeLabel}>Kết thúc</Text>
+                  <TextInput
+                    style={styles.timeField}
+                    value={endTime}
+                    onChangeText={setEndTime}
+                    placeholder="10:00"
+                    placeholderTextColor={COLORS.textMuted}
+                    keyboardType="numbers-and-punctuation"
+                    maxLength={5}
+                  />
                 </View>
+              </View>
+            )}
+
+            {/* Bottom spacer for keyboard */}
+            <View style={{ height: 100 }} />
+          </ScrollView>
+
+          {/* Footer buttons */}
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleClose}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.cancelButtonText}>Hủy</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.createButton,
+                loading && styles.createButtonDisabled,
+              ]}
+              onPress={handleCreateEvent}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color={COLORS.bgDarkest} />
+              ) : (
+                <>
+                  <Icons.Plus size={18} color={COLORS.bgDarkest} />
+                  <Text style={styles.createButtonText}>Tạo sự kiện</Text>
+                </>
               )}
-
-              {/* Spacer */}
-              <View style={{ height: 20 }} />
-            </ScrollView>
-
-            {/* Create button */}
-            <View style={styles.footer}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={onClose}
-                disabled={loading}
-              >
-                <Text style={styles.cancelButtonText}>Hủy</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.createButton,
-                  loading && styles.createButtonDisabled,
-                ]}
-                onPress={handleCreateEvent}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator size="small" color={COLORS.bgDarkest} />
-                ) : (
-                  <>
-                    <Icons.Plus size={18} color={COLORS.bgDarkest} />
-                    <Text style={styles.createButtonText}>Tạo sự kiện</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
-        </BlurView>
-      </KeyboardAvoidingView>
+        </Animated.View>
+      </View>
     </Modal>
   );
 };
@@ -388,19 +434,16 @@ const AddEventModal = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'flex-end',
   },
-  blurContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  dismissArea: {
-    flex: 1,
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
   },
   modalContainer: {
     backgroundColor: COLORS.bgMid,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     maxHeight: SCREEN_HEIGHT * 0.85,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
   },
@@ -410,74 +453,89 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 2,
     alignSelf: 'center',
-    marginTop: SPACING.md,
-    marginBottom: SPACING.sm,
+    marginTop: 12,
+    marginBottom: 8,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  headerLeft: {
+    flex: 1,
   },
   headerTitle: {
     color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    fontSize: 18,
+    fontWeight: '700',
   },
   headerDate: {
     color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    marginTop: 4,
+    fontSize: 13,
+    marginTop: 2,
   },
   closeButton: {
-    padding: SPACING.xs,
+    padding: 8,
+    marginRight: -8,
   },
   formContainer: {
-    padding: SPACING.lg,
-    maxHeight: SCREEN_HEIGHT * 0.5,
+    maxHeight: SCREEN_HEIGHT * 0.55,
+  },
+  formContent: {
+    padding: 20,
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(231, 76, 60, 0.15)',
-    padding: SPACING.md,
-    borderRadius: 12,
-    marginBottom: SPACING.md,
-    gap: SPACING.sm,
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 16,
+    gap: 8,
   },
   errorText: {
     color: COLORS.error,
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: 13,
     flex: 1,
   },
   inputGroup: {
-    marginBottom: SPACING.lg,
+    marginBottom: 16,
   },
   inputLabel: {
     color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    marginBottom: SPACING.sm,
+    fontSize: 13,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  titleInput: {
+    backgroundColor: INPUT.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: INPUT.borderColor,
+    padding: 14,
+    fontSize: 16,
+    color: COLORS.textPrimary,
   },
   input: {
     backgroundColor: INPUT.background,
-    borderRadius: INPUT.borderRadius,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: INPUT.borderColor,
-    padding: SPACING.md,
-    fontSize: TYPOGRAPHY.fontSize.md,
+    padding: 12,
+    fontSize: 14,
     color: COLORS.textPrimary,
   },
   textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
+    minHeight: 70,
+    maxHeight: 100,
   },
   colorPicker: {
     flexDirection: 'row',
-    gap: SPACING.md,
+    gap: 12,
   },
   colorOption: {
     width: 36,
@@ -488,117 +546,119 @@ const styles = StyleSheet.create({
   },
   colorOptionSelected: {
     borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderColor: 'rgba(255, 255, 255, 0.6)',
   },
   lifeAreaPicker: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   lifeAreaOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 20,
-    backgroundColor: COLORS.glassBg,
-    marginRight: SPACING.sm,
-    gap: SPACING.xs,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    gap: 6,
   },
   lifeAreaOptionSelected: {
     backgroundColor: COLORS.purple,
   },
   lifeAreaLabel: {
     color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: 12,
+    fontWeight: '500',
   },
   lifeAreaLabelSelected: {
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: '#FFFFFF',
   },
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: SPACING.md,
+    paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: SPACING.md,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    marginTop: 4,
   },
   toggleInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
+    gap: 10,
   },
   toggleLabel: {
     color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.md,
-  },
-  toggle: {
-    width: 48,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.glassBg,
-    padding: 2,
-  },
-  toggleActive: {
-    backgroundColor: COLORS.purple,
-  },
-  toggleThumb: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: COLORS.textMuted,
-  },
-  toggleThumbActive: {
-    backgroundColor: COLORS.textPrimary,
-    marginLeft: 'auto',
+    fontSize: 14,
+    fontWeight: '500',
   },
   timeRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: SPACING.sm,
+    alignItems: 'center',
+    marginTop: 8,
   },
-  timeSeparator: {
-    paddingBottom: SPACING.md + 14,
+  timeInput: {
+    flex: 1,
+  },
+  timeLabel: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    marginBottom: 6,
+  },
+  timeField: {
+    backgroundColor: INPUT.background,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: INPUT.borderColor,
+    padding: 12,
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+  },
+  timeArrow: {
+    marginHorizontal: 12,
+    marginTop: 16,
   },
   footer: {
     flexDirection: 'row',
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
+    paddingHorizontal: 20,
+    paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    gap: SPACING.md,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    gap: 12,
   },
   cancelButton: {
     flex: 1,
-    paddingVertical: SPACING.md,
+    paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.glassBorder,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   cancelButtonText: {
     color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    fontSize: 14,
+    fontWeight: '600',
   },
   createButton: {
     flex: 2,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: SPACING.md,
+    paddingVertical: 14,
     borderRadius: 12,
     backgroundColor: COLORS.gold,
-    gap: SPACING.xs,
+    gap: 6,
   },
   createButtonDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   createButtonText: {
     color: COLORS.bgDarkest,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    fontSize: 14,
+    fontWeight: '700',
   },
 });
 
-export default AddEventModal;
+export default memo(AddEventModal);

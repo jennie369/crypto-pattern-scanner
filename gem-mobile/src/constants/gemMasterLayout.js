@@ -39,6 +39,8 @@
  *    → Tăng giá trị tương ứng thêm 5-10
  */
 
+import { Platform } from 'react-native';
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // KEYBOARD POSITIONING - ĐÃ CALIBRATE, KHÔNG THAY ĐỔI!
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -55,10 +57,10 @@ export const KEYBOARD_CLOSED_BOTTOM = 110;
  * Offset thêm vào keyboard height khi keyboard MỞ
  * Formula: bottom = keyboardHeight + KEYBOARD_OPEN_OFFSET
  *
- * Giá trị đúng: 35
- * (Đã test: -10 bị che, +15 bị che nửa, +55 có gap, +35 vừa khít)
+ * Android: 35 (Samsung keyboard ~329px)
+ * iOS: 0 (iOS reports full keyboard height including safe area)
  */
-export const KEYBOARD_OPEN_OFFSET = 35;
+export const KEYBOARD_OPEN_OFFSET = Platform.OS === 'ios' ? 0 : 35;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // OTHER LAYOUT VALUES
@@ -91,8 +93,9 @@ export const SCROLL_BUTTON_KEYBOARD_OFFSET = 140;
 /**
  * Background color cho input area
  * PHẢI là solid color để chat content không xuyên qua
+ * Màu phải match với bottom của GRADIENTS.background ('#0F1030')
  */
-export const INPUT_AREA_BACKGROUND = '#0F1629';
+export const INPUT_AREA_BACKGROUND = '#0F1030';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // EXPORT DEFAULT

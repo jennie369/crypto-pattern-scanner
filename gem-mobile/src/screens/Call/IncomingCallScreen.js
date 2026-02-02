@@ -26,6 +26,14 @@ const IncomingCallScreen = ({ route, navigation }) => {
   const { call, caller } = route.params || {};
   const isVideoCall = call?.call_type === CALL_TYPE.VIDEO;
 
+  // Debug: Log params on mount
+  console.log('[IncomingCallScreen] ========================================');
+  console.log('[IncomingCallScreen] SCREEN MOUNTED');
+  console.log('[IncomingCallScreen] call.id:', call?.id);
+  console.log('[IncomingCallScreen] call.status:', call?.status);
+  console.log('[IncomingCallScreen] caller:', caller?.display_name);
+  console.log('[IncomingCallScreen] ========================================');
+
   // ========== HOOKS ==========
   const {
     answerCall,
@@ -63,8 +71,19 @@ const IncomingCallScreen = ({ route, navigation }) => {
   // ========== HANDLERS ==========
 
   const handleAccept = useCallback(async () => {
-    await answerCall();
-  }, [answerCall]);
+    console.log('[IncomingCallScreen] ========================================');
+    console.log('[IncomingCallScreen] ACCEPT BUTTON PRESSED');
+    console.log('[IncomingCallScreen] call:', call?.id);
+    console.log('[IncomingCallScreen] isConnecting:', isConnecting);
+    console.log('[IncomingCallScreen] ========================================');
+
+    try {
+      await answerCall();
+      console.log('[IncomingCallScreen] answerCall completed');
+    } catch (err) {
+      console.error('[IncomingCallScreen] answerCall error:', err);
+    }
+  }, [answerCall, call?.id, isConnecting]);
 
   const handleDecline = useCallback(async () => {
     await declineCall();
@@ -126,10 +145,12 @@ const IncomingCallScreen = ({ route, navigation }) => {
           {/* Accept Button */}
           <View style={styles.actionWrapper}>
             <TouchableOpacity
-              style={[styles.actionButton, styles.acceptButton]}
-              onPress={handleAccept}
+              style={[styles.actionButton, styles.acceptButton, isConnecting && { opacity: 0.5 }]}
+              onPress={() => {
+                console.log('[IncomingCallScreen] TouchableOpacity onPress triggered');
+                handleAccept();
+              }}
               activeOpacity={0.8}
-              disabled={isConnecting}
             >
               {isVideoCall ? (
                 <Video size={32} color={COLORS.textPrimary} />

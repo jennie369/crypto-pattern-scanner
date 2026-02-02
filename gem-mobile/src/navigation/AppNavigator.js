@@ -37,6 +37,9 @@ import { useAuth } from '../contexts/AuthContext';
 // In-App Notification Provider
 import { InAppNotificationProvider } from '../contexts/InAppNotificationContext';
 
+// Call Provider - Global call handling with incoming call overlay
+import { CallProvider } from '../contexts/CallContext';
+
 // Upgrade Success Modal (shows after purchase)
 import UpgradeSuccessModal from '../components/upgrade/UpgradeSuccessModal';
 
@@ -247,7 +250,9 @@ export default function AppNavigator() {
     <NavigationContainer ref={navigationRef} onReady={onNavigationReady}>
       <InAppNotificationProvider>
         {isAuthenticated ? (
-          <MainStack />
+          <CallProvider>
+            <MainStack />
+          </CallProvider>
         ) : (
           <AuthStack hasCompletedWelcome={hasCompletedWelcome} />
         )}

@@ -527,17 +527,69 @@ export const checkWelcomeBonusEligibility = async (userId) => {
 // =====================================================
 
 /**
- * Get gem transaction history
+ * Fix Vietnamese text without diacritics
+ * Maps common transaction descriptions to proper Vietnamese
+ */
+const VIETNAMESE_TEXT_FIXES = {
+  // Boost packages
+  'Boost bai viet - Goi Tieu chuan': 'Boost bài viết - Gói Tiêu chuẩn',
+  'Boost bai viet - Goi Nang cao': 'Boost bài viết - Gói Nâng cao',
+  'Boost bai viet - Goi VIP': 'Boost bài viết - Gói VIP',
+  'Boost bai viet': 'Boost bài viết',
+  // Gift transactions
+  'Gui qua cho': 'Gửi quà cho',
+  'Nhan qua tu': 'Nhận quà từ',
+  'Tang qua': 'Tặng quà',
+  'Nhan qua': 'Nhận quà',
+  // Purchase
+  'Mua gems': 'Mua Gems',
+  'Nap tien': 'Nạp tiền',
+  // Check-in
+  'Diem danh hang ngay': 'Điểm danh hàng ngày',
+  'Thuong streak': 'Thưởng streak',
+  // Courses
+  'Mua khoa hoc': 'Mua khóa học',
+  'Hoan tien khoa hoc': 'Hoàn tiền khóa học',
+  // Withdrawal
+  'Rut tien': 'Rút tiền',
+  'Yeu cau rut tien': 'Yêu cầu rút tiền',
+  // General
+  'Goi': 'Gói',
+  'Tieu chuan': 'Tiêu chuẩn',
+  'Nang cao': 'Nâng cao',
+};
+
+/**
+ * Fix Vietnamese text in transaction description
+ * @param {string} text - Original text (may have no diacritics)
+ * @returns {string} - Fixed text with proper Vietnamese diacritics
+ */
+export const fixVietnameseText = (text) => {
+  if (!text) return text;
+
+  let fixed = text;
+  // Apply all fixes
+  Object.entries(VIETNAMESE_TEXT_FIXES).forEach(([from, to]) => {
+    // Case-insensitive replace
+    const regex = new RegExp(from, 'gi');
+    fixed = fixed.replace(regex, to);
+  });
+
+  return fixed;
+};
+
+/**
+ * Get gem transaction history with related profiles
  * @param {string} userId - User ID
  * @param {number} limit - Max transactions to fetch
  * @param {number} offset - Offset for pagination
- * @returns {Promise<Array>} - Transaction list
+ * @returns {Promise<Array>} - Transaction list with profile info
  */
 export const getGemTransactions = async (userId, limit = 50, offset = 0) => {
   if (!userId) return [];
 
   try {
-    // Query from gems_transactions table (used by Shopify webhook)
+    // Query from gems_transactions table (simple query - no join)
     const { data, error } = await supabase
       .from('gems_transactions')
       .select('*')
@@ -565,13 +617,75 @@ export const getGemTransactions = async (userId, limit = 50, offset = 0) => {
           .range(offset, offset + limit - 1);
 
         if (!fallbackError) {
-          return fallbackData || [];
+          return (fallbackData || []).map(t => ({
+            ...t,
+            description: fixVietnameseText(t.description),
+          }));
         }
       }
       return [];
     }
 
-    return data || [];
+    // For gift transactions, fetch related user info from sent_gifts table
+    const giftTransactions = (data || []).filter(t =>
+      t.reference_type === 'gift' ||
+      t.reference_type === 'gift_received' ||
+      t.description?.includes('quà')
+    );
+
+    // Get reference IDs for gift transactions
+    const giftReferenceIds = giftTransactions
+      .map(t => t.reference_id)
+      .filter(Boolean);
+
+    // Fetch sent_gifts to get sender/recipient info
+    let giftInfoMap = {};
+    if (giftReferenceIds.length > 0) {
+      const { data: giftData } = await supabase
+        .from('sent_gifts')
+        .select(`
+          id,
+          sender_id,
+          recipient_id,
+          sender:sender_id(id, full_name, display_name, avatar_url),
+          recipient:recipient_id(id, full_name, display_name, avatar_url)
+        `)
+        .in('id', giftReferenceIds);
+
+      if (giftData) {
+        giftInfoMap = giftData.reduce((acc, g) => {
+          acc[g.id] = g;
+          return acc;
+        }, {});
+      }
+    }
+
+    // Process transactions: fix Vietnamese text and extract profile info
+    return (data || []).map(t => {
+      const giftInfo = giftInfoMap[t.reference_id];
+      let relatedUserName = null;
+      let relatedUserAvatar = null;
+
+      // If it's a gift transaction, determine if user is sender or receiver
+      if (giftInfo) {
+        if (giftInfo.sender_id === userId) {
+          // User is sender - show recipient info
+          relatedUserName = giftInfo.recipient?.display_name || giftInfo.recipient?.full_name;
+          relatedUserAvatar = giftInfo.recipient?.avatar_url;
+        } else {
+          // User is recipient - show sender info
+          relatedUserName = giftInfo.sender?.display_name || giftInfo.sender?.full_name;
+          relatedUserAvatar = giftInfo.sender?.avatar_url;
+        }
+      }
+
+      return {
+        ...t,
+        description: fixVietnameseText(t.description),
+        related_user_name: relatedUserName,
+        related_user_avatar: relatedUserAvatar,
+      };
+    });
   } catch (error) {
     console.error('[GemEconomy] getGemTransactions exception:', error);
     return [];
@@ -689,6 +803,7 @@ const gemEconomyService = {
   formatVND,
   calculateVndValue,
   getTransactionTypeLabel,
+  fixVietnameseText,
 };
 
 export default gemEconomyService;

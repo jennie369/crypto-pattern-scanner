@@ -26,9 +26,9 @@ function withVoIPPush(config) {
       config.modResults.path?.endsWith('.mm');
 
     if (isObjC) {
-      // Add PushKit import if not present
+      // Add PushKit and CallKit imports if not present
       if (!contents.includes('#import <PushKit/PushKit.h>')) {
-        // Find the imports section and add PushKit
+        // Find the imports section and add PushKit + CallKit
         const importRegex = /(#import\s+["<][^">\n]+[">]\s*\n)+/;
         const match = contents.match(importRegex);
 
@@ -37,7 +37,9 @@ function withVoIPPush(config) {
           contents =
             contents.slice(0, lastImportIndex) +
             '#import <PushKit/PushKit.h>\n' +
+            '#import <CallKit/CallKit.h>\n' +
             '#import <RNVoipPushNotification.h>\n' +
+            '#import <RNCallKeep.h>\n' +
             contents.slice(lastImportIndex);
         }
       }
@@ -77,13 +79,46 @@ function withVoIPPush(config) {
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void (^)(void))completion {
-  // Process VoIP push - must report call to CallKit within this method
-  NSString *uuid = payload.dictionaryPayload[@"callId"];
-  NSString *callerName = payload.dictionaryPayload[@"callerName"];
-  NSString *callType = payload.dictionaryPayload[@"callType"];
+  // CRITICAL: iOS 13+ requires reporting call to CallKit IMMEDIATELY
+  // Failure to do so will cause iOS to terminate the app
+
+  NSDictionary *payloadDict = payload.dictionaryPayload;
+  NSString *callId = payloadDict[@"callId"];
+  NSString *callerName = payloadDict[@"callerName"] ?: @"Cuộc gọi đến";
+  NSString *callerId = payloadDict[@"callerId"] ?: @"";
+  NSString *callType = payloadDict[@"callType"] ?: @"audio";
+  NSString *callerAvatar = payloadDict[@"callerAvatar"] ?: @"";
   BOOL hasVideo = [callType isEqualToString:@"video"];
 
-  // Notify RNVoipPushNotification
+  // Generate UUID for CallKit if not provided
+  NSUUID *callUUID;
+  if (callId && callId.length > 0) {
+    callUUID = [[NSUUID alloc] initWithUUIDString:callId] ?: [NSUUID UUID];
+  } else {
+    callUUID = [NSUUID UUID];
+    callId = [callUUID UUIDString];
+  }
+
+  NSLog(@"[VoIPPush] Received incoming call: %@, caller: %@, video: %d", callId, callerName, hasVideo);
+
+  // IMMEDIATELY report to CallKit to show native fullscreen incoming call UI
+  // This MUST happen before the completion handler is called
+  [RNCallKeep reportNewIncomingCall:callUUID.UUIDString
+                             handle:callerId
+                         handleType:@"generic"
+                           hasVideo:hasVideo
+                localizedCallerName:callerName
+                    supportsHolding:YES
+                       supportsDTMF:YES
+                   supportsGrouping:NO
+                 supportsUngrouping:NO
+                        fromPushKit:YES
+                            payload:payloadDict
+              withCompletionHandler:^{
+    NSLog(@"[VoIPPush] CallKit reported successfully");
+  }];
+
+  // Also notify RNVoipPushNotification for JS handling
   [RNVoipPushNotification didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];
 
   // Must call completion handler

@@ -22,16 +22,17 @@ import AccountStack from './AccountStack';
 import GlassBottomTab from '../components/GlassBottomTab';
 
 // Preload services for instant tab switching
-import { preloadShopData } from '../services/shopifyService';
+import { preloadAllShopData } from '../services/shopifyService';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
-  // Preload shop data in background when tabs are mounted
+  // Preload ALL shop data in background when tabs are mounted
   // This makes Shop tab instant when user navigates to it
   useEffect(() => {
     // Start preload immediately but non-blocking
-    preloadShopData();
+    // Uses enhanced preload that loads products, banners, and digital products
+    preloadAllShopData();
   }, []);
   return (
     <Tab.Navigator

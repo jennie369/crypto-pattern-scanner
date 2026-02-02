@@ -348,28 +348,161 @@ function pemToArrayBuffer(pem: string): ArrayBuffer {
   return bytes.buffer;
 }
 
-// ========== FCM High Priority ==========
+// ========== FCM High Priority (v1 API with Service Account) ==========
+
+/**
+ * Get FCM access token using service account
+ */
+async function getFCMAccessToken(serviceAccount: any): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const exp = now + 3600;
+
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: serviceAccount.client_email,
+    sub: serviceAccount.client_email,
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: exp,
+    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+  };
+
+  const encoder = new TextEncoder();
+  const headerB64 = base64UrlEncode(JSON.stringify(header));
+  const payloadB64 = base64UrlEncode(JSON.stringify(payload));
+  const unsignedToken = `${headerB64}.${payloadB64}`;
+
+  // Import private key
+  const pemContents = serviceAccount.private_key
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/\s/g, '');
+  const binaryDer = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
+
+  const privateKey = await crypto.subtle.importKey(
+    'pkcs8',
+    binaryDer,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const signature = await crypto.subtle.sign(
+    { name: 'RSASSA-PKCS1-v1_5' },
+    privateKey,
+    encoder.encode(unsignedToken)
+  );
+
+  const signatureB64 = base64UrlEncode(String.fromCharCode(...new Uint8Array(signature)));
+  const jwt = `${unsignedToken}.${signatureB64}`;
+
+  // Exchange JWT for access token
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }),
+  });
+
+  const data = await response.json();
+  if (!data.access_token) {
+    throw new Error(`FCM auth failed: ${JSON.stringify(data)}`);
+  }
+  return data.access_token;
+}
 
 async function sendFCMHighPriority(
   token: string,
   payload: APNsPayload
 ): Promise<{ success: boolean; response?: any; error?: string }> {
   try {
+    // Try FCM v1 API with service account first
+    const fcmServiceAccountB64 = Deno.env.get('FCM_SERVICE_ACCOUNT');
+
+    if (fcmServiceAccountB64) {
+      try {
+        const decoded = atob(fcmServiceAccountB64);
+        const serviceAccount = JSON.parse(decoded);
+        const accessToken = await getFCMAccessToken(serviceAccount);
+        const projectId = serviceAccount.project_id;
+
+        // FCM v1 API with fullscreen intent for calls
+        const fcmMessage = {
+          message: {
+            token: token,
+            // Data-only message for calls (no notification block)
+            // This ensures the app handles it and shows fullscreen call UI
+            data: {
+              type: 'incoming_call',
+              callId: payload.callId,
+              callerName: payload.callerName,
+              callerId: payload.callerId,
+              callType: payload.callType,
+              conversationId: payload.conversationId || '',
+              callerAvatar: payload.callerAvatar || '',
+              timestamp: Date.now().toString(),
+              // Flag to show fullscreen UI
+              fullscreen: 'true',
+            },
+            android: {
+              priority: 'HIGH',
+              ttl: '60s',
+              // Direct boot aware - delivered before first unlock
+              direct_boot_ok: true,
+              // IMPORTANT: For fullscreen call UI on Android
+              notification: {
+                channel_id: 'incoming_call',
+                sound: 'ringtone',
+                // Default visibility shows on lock screen
+                visibility: 'PUBLIC',
+                // Use call category for special handling
+                notification_priority: 'PRIORITY_MAX',
+              },
+            },
+          },
+        };
+
+        const response = await fetch(
+          `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(fcmMessage),
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('[FCM v1] High priority call push sent successfully');
+          return { success: true, response: result };
+        }
+
+        const error = await response.json();
+        console.error('[FCM v1] Error:', error);
+        // Fall through to legacy API or Expo
+      } catch (e) {
+        console.error('[FCM v1] Exception:', e);
+      }
+    }
+
+    // Fallback to legacy FCM API
     const fcmServerKey = Deno.env.get('FCM_SERVER_KEY');
 
     if (!fcmServerKey) {
-      console.log('[FCM] No server key configured, trying Expo push');
+      console.log('[FCM] No credentials configured, trying Expo push');
       return sendExpoPush(token, payload);
     }
 
-    // FCM data-only message with high priority for call
-    // Data-only messages can wake the app and trigger background processing
+    // Legacy FCM API
     const fcmPayload = {
       to: token,
       priority: 'high',
-      // Time to live: 60 seconds (call should be immediate)
       time_to_live: 60,
-      // Data message - will trigger onMessage even in background
       data: {
         type: 'incoming_call',
         callId: payload.callId,
@@ -378,13 +511,11 @@ async function sendFCMHighPriority(
         callType: payload.callType,
         conversationId: payload.conversationId || '',
         callerAvatar: payload.callerAvatar || '',
-        // Timestamp to help with deduplication
         timestamp: Date.now().toString(),
+        fullscreen: 'true',
       },
-      // Android-specific options
       android: {
         priority: 'high',
-        // Direct boot aware - can be delivered before first unlock
         direct_boot_ok: true,
       },
     };
@@ -401,13 +532,10 @@ async function sendFCMHighPriority(
     const result = await response.json();
 
     if (result.success === 1) {
-      console.log('[FCM] High priority push sent successfully');
-      return {
-        success: true,
-        response: result,
-      };
+      console.log('[FCM Legacy] High priority push sent successfully');
+      return { success: true, response: result };
     } else {
-      console.error('[FCM] Push failed:', result);
+      console.error('[FCM Legacy] Push failed:', result);
       return {
         success: false,
         error: `FCM error: ${JSON.stringify(result.results)}`,
@@ -415,10 +543,7 @@ async function sendFCMHighPriority(
     }
   } catch (error) {
     console.error('[FCM] Exception:', error);
-    return {
-      success: false,
-      error: error.message,
-    };
+    return { success: false, error: error.message };
   }
 }
 

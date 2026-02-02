@@ -5,6 +5,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, ToastAndroid, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import {
@@ -15,6 +16,7 @@ import {
   ChartLine, BarChart2, Activity, Wallet, Lock, Unlock, AlertTriangle,
   CheckCircle, XCircle, Info, HelpCircle, ArrowUp, ArrowDown,
   Clock, Calendar, Users, Gift, ShoppingBag, CreditCard,
+  ChevronRight,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import ExportPreview from '../../../components/GemMaster/ExportPreview';
@@ -156,6 +158,7 @@ const renderInlineMarkdown = (text, baseStyle) => {
 };
 
 const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, onOptionSelect, onQuickBuy, onFeedback, onRichAction }) => {
+  const navigation = useNavigation();
   const isUser = message.type === 'user';
   // Skip template selector - go directly to preview with reading_card template
   const [showPreview, setShowPreview] = useState(false);
@@ -165,6 +168,23 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
   const [selectedOption, setSelectedOption] = useState(null);
   // State for feedback (thumbs up/down)
   const [feedbackGiven, setFeedbackGiven] = useState(null);
+
+  // Check if message has action buttons
+  const hasActionButtons = !isUser && message.actionButtons && Array.isArray(message.actionButtons) && message.actionButtons.length > 0;
+
+  // Handle action button press
+  const handleActionButtonPress = useCallback((button) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (button.action === 'navigate_nested' && button.tabName && button.screen) {
+      // Navigate to nested screen in different tab
+      navigation.navigate(button.tabName, {
+        screen: button.screen,
+        params: button.params || {},
+      });
+    } else if (button.action === 'navigate' && button.screen) {
+      navigation.navigate(button.screen, button.params || {});
+    }
+  }, [navigation]);
 
   // Get products from message only (not from recommendations - those are handled by ProductRecommendations component)
   // Removed crystal fallback to avoid showing unrelated products for course/mindset messages
@@ -480,6 +500,26 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
                 )}
               </View>
             )}
+
+            {/* Action Buttons (for navigation after success) - compact chips */}
+            {hasActionButtons && (
+              <View style={styles.actionButtonsContainer}>
+                {message.actionButtons.map((button) => {
+                  const IconComponent = button.icon === 'target' ? Target : button.icon === 'calendar' ? Calendar : Target;
+                  return (
+                    <TouchableOpacity
+                      key={button.id}
+                      style={styles.actionButton}
+                      onPress={() => handleActionButtonPress(button)}
+                      activeOpacity={0.7}
+                    >
+                      <IconComponent size={12} color={COLORS.gold} />
+                      <Text style={styles.actionButtonText}>{button.label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
           </View>
         </Pressable>
 
@@ -693,6 +733,27 @@ const styles = StyleSheet.create({
   },
   optionCheck: {
     marginLeft: SPACING.xs,
+  },
+  // Action buttons (for navigation after success) - compact inline style
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: SPACING.xs,
+    gap: 6,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.12)',
+    borderRadius: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    gap: 4,
+  },
+  actionButtonText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: COLORS.gold,
   },
 });
 

@@ -31,3 +31,7 @@ export { default as QuotaLimitModal, QuotaWarningBanner } from './QuotaLimitModa
 
 // NEW: Activity Feed (Phase 2 Upgrade)
 export { default as ActivityFeed } from './ActivityFeed';
+
+// NEW: Goal Creation from Templates (Centralized Templates)
+export { default as GoalCreationOptions } from './GoalCreationOptions';
+export { default as GoalFromJournalCard, GoalFromJournalCardCompact, JournalLinkBadge } from './GoalFromJournalCard';

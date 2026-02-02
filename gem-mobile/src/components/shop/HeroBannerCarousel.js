@@ -26,26 +26,61 @@ const BANNER_WIDTH = SCREEN_WIDTH - (SPACING.lg * 2);
 const BANNER_HEIGHT = 175;
 const AUTO_SCROLL_INTERVAL = 4000; // 4 seconds
 
+// =========== GLOBAL CACHE for instant display ===========
+const bannerCache = {
+  data: null,
+  lastFetch: 0,
+  CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+};
+
+// Helper to get initial banners - checks both component cache and service cache
+const getInitialBanners = () => {
+  // First check component cache
+  if (bannerCache.data && bannerCache.data.length > 0) {
+    return bannerCache.data;
+  }
+  // Then check service cache (might be populated by preload)
+  const serviceCache = shopBannerService.getCachedShopBanners?.();
+  if (serviceCache && serviceCache.length > 0) {
+    // Sync to component cache
+    bannerCache.data = serviceCache;
+    bannerCache.lastFetch = Date.now();
+    return serviceCache;
+  }
+  return [];
+};
+
 const HeroBannerCarousel = ({ style }) => {
   const navigation = useNavigation();
   const flatListRef = useRef(null);
   const autoScrollTimer = useRef(null);
   const hasFetched = useRef(false);
 
-  const [banners, setBanners] = useState([]);
+  // Initialize from cache for instant display (checks both component and service cache)
+  const [banners, setBanners] = useState(() => getInitialBanners());
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
+  // Only show loading if no cached data available
+  const [loading, setLoading] = useState(() => getInitialBanners().length === 0);
 
   // InAppBrowser state for URL links
   const [browserVisible, setBrowserVisible] = useState(false);
   const [browserUrl, setBrowserUrl] = useState('');
   const [browserTitle, setBrowserTitle] = useState('');
 
-  // Fetch banners from service - only once on mount
+  // Fetch banners from service - use cache for instant display
   useEffect(() => {
-    // Skip if already fetched
+    // Skip if already fetched this session
     if (hasFetched.current) return;
     hasFetched.current = true;
+
+    const now = Date.now();
+    const cacheExpired = now - bannerCache.lastFetch > bannerCache.CACHE_DURATION;
+
+    // If cache is valid, just ensure loading is false
+    if (bannerCache.data && bannerCache.data.length > 0 && !cacheExpired) {
+      setLoading(false);
+      return;
+    }
 
     const fetchBanners = async () => {
       try {
@@ -53,6 +88,10 @@ const HeroBannerCarousel = ({ style }) => {
         if (result.success) {
           const bannersData = result.data || [];
           setBanners(bannersData);
+
+          // Update cache for instant display on next visit
+          bannerCache.data = bannersData;
+          bannerCache.lastFetch = Date.now();
 
           // Prefetch banner images for faster rendering
           const imageUrls = bannersData.map(b => b.image_url).filter(Boolean);

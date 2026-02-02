@@ -104,16 +104,10 @@ const ChatInput = ({
 
   const handleTranscription = (transcribedText) => {
     if (transcribedText) {
-      // Set text in input and auto-send
+      // Set text in input field for user to review
+      // User will manually press send button when ready
       setText(transcribedText);
-
-      // Auto-send after short delay
-      setTimeout(() => {
-        if (transcribedText.trim() && !disabled) {
-          onSend(transcribedText.trim());
-          setText('');
-        }
-      }, 500);
+      setInterimTranscript(''); // Clear interim display
     }
   };
 

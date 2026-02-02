@@ -19,11 +19,11 @@ import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 
 // Reaction types with icons and colors
 export const REACTION_TYPES = [
-  { id: 'like', icon: ThumbsUp, color: '#3B82F6', label: 'Thich', emoji: '👍' },
-  { id: 'love', icon: Heart, color: '#FF6B6B', label: 'Yeu thich', emoji: '❤️' },
+  { id: 'like', icon: ThumbsUp, color: '#3B82F6', label: 'Thích', emoji: '👍' },
+  { id: 'love', icon: Heart, color: '#FF6B6B', label: 'Yêu thích', emoji: '❤️' },
   { id: 'haha', icon: Laugh, color: '#FFBD59', label: 'Haha', emoji: '😂' },
   { id: 'wow', icon: AlertCircle, color: '#FFBD59', label: 'Wow', emoji: '😮' },
-  { id: 'sad', icon: Frown, color: '#FFBD59', label: 'Buon', emoji: '😢' },
+  { id: 'sad', icon: Frown, color: '#FFBD59', label: 'Buồn', emoji: '😢' },
 ];
 
 const ReactionPicker = ({

@@ -18,6 +18,8 @@ export { default as DailyRecapScreen } from './DailyRecapScreen';
 export { default as JournalEntryScreen } from './JournalEntryScreen';
 export { default as TradingJournalScreen } from './TradingJournalScreen';
 export { default as CalendarSettingsScreen } from './CalendarSettingsScreen';
+export { default as EditEventScreen } from './EditEventScreen';
+export { default as JournalDetailScreen } from '../Calendar/JournalDetailScreen';
 
 // Ritual Playground Screens
 export { default as RitualPlaygroundScreen } from './RitualPlaygroundScreen';

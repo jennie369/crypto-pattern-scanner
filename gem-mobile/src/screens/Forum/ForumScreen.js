@@ -41,6 +41,7 @@ import { injectBannersIntoFeed } from '../../utils/bannerDistribution';
 import { forumService } from '../../services/forumService';
 import { forumRecommendationService } from '../../services/forumRecommendationService';
 import { generateFeed, getNextFeedPage, resetAllImpressions, getImpressionStats, trackVisibleImpressions, invalidateFeedCache } from '../../services/feedService';
+import boostService from '../../services/boostService';
 import { trackView } from '../../services/engagementService';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -444,6 +445,13 @@ const ForumScreen = ({ navigation }) => {
 
     // Track load performance (dev only)
     performanceService.startMeasure(`loadPosts.${reset ? 'reset' : 'page'}`);
+
+    // Check and expire overdue boosts on feed refresh
+    if (reset) {
+      boostService.checkAndExpireBoosts().catch(err =>
+        console.warn('[ForumScreen] checkAndExpireBoosts error:', err)
+      );
+    }
 
     try {
       if (!reset) setLoadingMore(true);

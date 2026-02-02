@@ -13,31 +13,31 @@ const SERVICE_NAME = '[MoodTrackingService]';
 // ==================== CONSTANTS ====================
 
 export const MOODS = {
-  HAPPY: { id: 'happy', label: 'Vui ve', icon: 'Smile', score: 5, color: '#3AF7A6' },
-  EXCITED: { id: 'excited', label: 'Hung khoi', icon: 'Sparkles', score: 5, color: '#FFD700' },
-  PEACEFUL: { id: 'peaceful', label: 'Binh yen', icon: 'Heart', score: 4, color: '#00F0FF' },
-  CONTENT: { id: 'content', label: 'Hai long', icon: 'Check', score: 4, color: '#6A5BFF' },
-  NEUTRAL: { id: 'neutral', label: 'Binh thuong', icon: 'Meh', score: 3, color: '#9CA3AF' },
-  TIRED: { id: 'tired', label: 'Met moi', icon: 'Battery', score: 2, color: '#6B7280' },
-  ANXIOUS: { id: 'anxious', label: 'Lo lang', icon: 'AlertCircle', score: 2, color: '#FFB800' },
-  SAD: { id: 'sad', label: 'Buon', icon: 'Frown', score: 2, color: '#6B7280' },
-  STRESSED: { id: 'stressed', label: 'Cang thang', icon: 'Zap', score: 1, color: '#FF6B6B' },
-  ANGRY: { id: 'angry', label: 'Tuc gian', icon: 'Flame', score: 1, color: '#9C0612' },
+  HAPPY: { id: 'happy', label: 'Vui vẻ', icon: 'Smile', score: 5, color: '#3AF7A6' },
+  EXCITED: { id: 'excited', label: 'Hưng khởi', icon: 'Sparkles', score: 5, color: '#FFD700' },
+  PEACEFUL: { id: 'peaceful', label: 'Bình yên', icon: 'Heart', score: 4, color: '#00F0FF' },
+  CONTENT: { id: 'content', label: 'Hài lòng', icon: 'Check', score: 4, color: '#6A5BFF' },
+  NEUTRAL: { id: 'neutral', label: 'Bình thường', icon: 'Meh', score: 3, color: '#9CA3AF' },
+  TIRED: { id: 'tired', label: 'Mệt mỏi', icon: 'Battery', score: 2, color: '#6B7280' },
+  ANXIOUS: { id: 'anxious', label: 'Lo lắng', icon: 'AlertCircle', score: 2, color: '#FFB800' },
+  SAD: { id: 'sad', label: 'Buồn', icon: 'Frown', score: 2, color: '#6B7280' },
+  STRESSED: { id: 'stressed', label: 'Căng thẳng', icon: 'Zap', score: 1, color: '#FF6B6B' },
+  ANGRY: { id: 'angry', label: 'Tức giận', icon: 'Flame', score: 1, color: '#9C0612' },
 };
 
 export const MOOD_FACTORS = [
-  { id: 'good_sleep', label: 'Ngu ngon', category: 'positive' },
-  { id: 'exercise', label: 'Tap the duc', category: 'positive' },
-  { id: 'meditation', label: 'Thien dinh', category: 'positive' },
-  { id: 'social', label: 'Gap go ban be', category: 'positive' },
-  { id: 'achievement', label: 'Hoan thanh viec', category: 'positive' },
-  { id: 'nature', label: 'Ra ngoai thien nhien', category: 'positive' },
-  { id: 'poor_sleep', label: 'Ngu khong ngon', category: 'negative' },
-  { id: 'stress', label: 'Cong viec cang thang', category: 'negative' },
-  { id: 'health', label: 'Van de suc khoe', category: 'negative' },
-  { id: 'weather', label: 'Thoi tiet xau', category: 'negative' },
-  { id: 'conflict', label: 'Xung dot/Mau thuan', category: 'negative' },
-  { id: 'financial', label: 'Lo lang tai chinh', category: 'negative' },
+  { id: 'good_sleep', label: 'Ngủ ngon', category: 'positive' },
+  { id: 'exercise', label: 'Tập thể dục', category: 'positive' },
+  { id: 'meditation', label: 'Thiền định', category: 'positive' },
+  { id: 'social', label: 'Gặp gỡ bạn bè', category: 'positive' },
+  { id: 'achievement', label: 'Hoàn thành việc', category: 'positive' },
+  { id: 'nature', label: 'Ra ngoài thiên nhiên', category: 'positive' },
+  { id: 'poor_sleep', label: 'Ngủ không ngon', category: 'negative' },
+  { id: 'stress', label: 'Công việc căng thẳng', category: 'negative' },
+  { id: 'health', label: 'Vấn đề sức khỏe', category: 'negative' },
+  { id: 'weather', label: 'Thời tiết xấu', category: 'negative' },
+  { id: 'conflict', label: 'Xung đột/Mâu thuẫn', category: 'negative' },
+  { id: 'financial', label: 'Lo lắng tài chính', category: 'negative' },
 ];
 
 export const CHECK_IN_TYPES = {
@@ -75,10 +75,13 @@ export const getNegativeFactors = () => MOOD_FACTORS.filter(f => f.category === 
 // ==================== FUNCTIONS ====================
 
 /**
- * Get or create today's mood entry
+ * Get or create mood entry for a specific date
+ * @param {string} userId - User ID
+ * @param {string} date - Date (YYYY-MM-DD), defaults to today
  */
-export const getOrCreateTodayMood = async (userId) => {
-  const today = new Date().toISOString().split('T')[0];
+export const getOrCreateMoodForDate = async (userId, date = null) => {
+  const targetDate = date || new Date().toISOString().split('T')[0];
+  console.log(`${SERVICE_NAME} getOrCreateMoodForDate:`, { userId, targetDate });
 
   try {
     // Try to get existing
@@ -86,38 +89,55 @@ export const getOrCreateTodayMood = async (userId) => {
       .from('calendar_daily_mood')
       .select('*')
       .eq('user_id', userId)
-      .eq('mood_date', today)
+      .eq('mood_date', targetDate)
       .single();
 
     if (existing && !fetchError) {
+      console.log(`${SERVICE_NAME} Found existing mood record:`, existing.id);
       return { success: true, data: existing, isNew: false };
     }
 
+    console.log(`${SERVICE_NAME} Creating new mood record for date:`, targetDate);
     // Create new
     const { data: created, error: createError } = await supabase
       .from('calendar_daily_mood')
       .insert({
         user_id: userId,
-        mood_date: today,
+        mood_date: targetDate,
       })
       .select()
       .single();
 
     if (createError) throw createError;
 
+    console.log(`${SERVICE_NAME} Created new mood record:`, created.id);
     return { success: true, data: created, isNew: true };
 
   } catch (error) {
-    console.error(`${SERVICE_NAME} getOrCreateTodayMood error:`, error);
+    console.error(`${SERVICE_NAME} getOrCreateMoodForDate error:`, error);
     return { success: false, error: error.message };
   }
 };
 
 /**
- * Save mood check-in
+ * Get or create today's mood entry (backward compatible)
  */
-export const saveMoodCheckIn = async (userId, checkInType, data, userTier = 'free', userRole = null) => {
-  console.log(`${SERVICE_NAME} saveMoodCheckIn`, { userId, checkInType });
+export const getOrCreateTodayMood = async (userId) => {
+  return getOrCreateMoodForDate(userId, null);
+};
+
+/**
+ * Save mood check-in
+ * @param {string} userId - User ID
+ * @param {string} checkInType - Check-in type (morning, midday, evening)
+ * @param {Object} data - Mood data
+ * @param {string} userTier - User tier
+ * @param {string} userRole - User role
+ * @param {string} date - Target date (YYYY-MM-DD), defaults to today
+ */
+export const saveMoodCheckIn = async (userId, checkInType, data, userTier = 'free', userRole = null, date = null) => {
+  const targetDate = date || new Date().toISOString().split('T')[0];
+  console.log(`${SERVICE_NAME} saveMoodCheckIn`, { userId, checkInType, targetDate });
 
   try {
     // Check access
@@ -135,7 +155,6 @@ export const saveMoodCheckIn = async (userId, checkInType, data, userTier = 'fre
       };
     }
 
-    const today = new Date().toISOString().split('T')[0];
     const now = new Date().toISOString();
 
     // Build update object based on check-in type
@@ -184,8 +203,8 @@ export const saveMoodCheckIn = async (userId, checkInType, data, userTier = 'fre
       updateData.mood_factors = data.factors;
     }
 
-    // Get or create today's mood
-    const result = await getOrCreateTodayMood(userId);
+    // Get or create mood for target date
+    const result = await getOrCreateMoodForDate(userId, targetDate);
     if (!result.success) return result;
 
     const currentMood = result.data;
@@ -477,6 +496,7 @@ export default {
   getCheckInPrompt,
 
   // CRUD
+  getOrCreateMoodForDate,
   getOrCreateTodayMood,
   saveMoodCheckIn,
   getMoodForDate,

@@ -21,22 +21,22 @@ export const ENTRY_TYPES = {
 };
 
 export const MOODS = {
-  HAPPY: { id: 'happy', label: 'Vui ve', icon: 'Smile', score: 5, color: '#3AF7A6' },
-  EXCITED: { id: 'excited', label: 'Hung khoi', icon: 'Sparkles', score: 5, color: '#FFD700' },
-  PEACEFUL: { id: 'peaceful', label: 'Binh yen', icon: 'Heart', score: 4, color: '#00F0FF' },
-  NEUTRAL: { id: 'neutral', label: 'Binh thuong', icon: 'Meh', score: 3, color: '#9CA3AF' },
-  ANXIOUS: { id: 'anxious', label: 'Lo lang', icon: 'AlertCircle', score: 2, color: '#FFB800' },
-  SAD: { id: 'sad', label: 'Buon', icon: 'Frown', score: 2, color: '#6B7280' },
-  STRESSED: { id: 'stressed', label: 'Cang thang', icon: 'Zap', score: 1, color: '#FF6B6B' },
+  HAPPY: { id: 'happy', label: 'Vui vẻ', icon: 'Smile', score: 5, color: '#3AF7A6' },
+  EXCITED: { id: 'excited', label: 'Hưng khởi', icon: 'Sparkles', score: 5, color: '#FFD700' },
+  PEACEFUL: { id: 'peaceful', label: 'Bình yên', icon: 'Heart', score: 4, color: '#00F0FF' },
+  NEUTRAL: { id: 'neutral', label: 'Bình thường', icon: 'Meh', score: 3, color: '#9CA3AF' },
+  ANXIOUS: { id: 'anxious', label: 'Lo lắng', icon: 'AlertCircle', score: 2, color: '#FFB800' },
+  SAD: { id: 'sad', label: 'Buồn', icon: 'Frown', score: 2, color: '#6B7280' },
+  STRESSED: { id: 'stressed', label: 'Căng thẳng', icon: 'Zap', score: 1, color: '#FF6B6B' },
 };
 
 export const LIFE_AREAS = {
-  FINANCE: { id: 'finance', label: 'Tai chinh', icon: 'DollarSign', color: '#FFD700' },
-  HEALTH: { id: 'health', label: 'Suc khoe', icon: 'Heart', color: '#3AF7A6' },
-  CAREER: { id: 'career', label: 'Su nghiep', icon: 'Briefcase', color: '#6A5BFF' },
-  RELATIONSHIPS: { id: 'relationships', label: 'Moi quan he', icon: 'Users', color: '#FF6B6B' },
-  PERSONAL: { id: 'personal', label: 'Ca nhan', icon: 'User', color: '#00F0FF' },
-  SPIRITUAL: { id: 'spiritual', label: 'Tam linh', icon: 'Sparkles', color: '#9C0612' },
+  FINANCE: { id: 'finance', label: 'Tài chính', icon: 'DollarSign', color: '#FFD700' },
+  HEALTH: { id: 'health', label: 'Sức khỏe', icon: 'Heart', color: '#3AF7A6' },
+  CAREER: { id: 'career', label: 'Sự nghiệp', icon: 'Briefcase', color: '#6A5BFF' },
+  RELATIONSHIPS: { id: 'relationships', label: 'Mối quan hệ', icon: 'Users', color: '#FF6B6B' },
+  PERSONAL: { id: 'personal', label: 'Cá nhân', icon: 'User', color: '#00F0FF' },
+  SPIRITUAL: { id: 'spiritual', label: 'Tâm linh', icon: 'Sparkles', color: '#9C0612' },
 };
 
 // ==================== HELPERS ====================
@@ -76,47 +76,47 @@ const validateJournalEntry = (data, userTier, userRole) => {
 
   // Required fields
   if (!data.content || data.content.trim().length === 0) {
-    errors.push('Noi dung khong duoc de trong');
+    errors.push('Nội dung không được để trống');
   }
 
   if (!data.entry_date) {
-    errors.push('Ngay khong duoc de trong');
+    errors.push('Ngày không được để trống');
   }
 
   // Type validation
   if (data.entry_type && !Object.values(ENTRY_TYPES).includes(data.entry_type)) {
-    errors.push('Loai nhat ky khong hop le');
+    errors.push('Loại nhật ký không hợp lệ');
   }
 
   // Mood validation
   if (data.mood && !getMoodById(data.mood)) {
-    errors.push('Tam trang khong hop le');
+    errors.push('Tâm trạng không hợp lệ');
   }
 
   // Life area validation
   if (data.life_area && !getLifeAreaById(data.life_area)) {
-    errors.push('Linh vuc khong hop le');
+    errors.push('Lĩnh vực không hợp lệ');
   }
 
   // Tier-based character limit
   const charLimit = getJournalCharLimit(userTier, userRole);
   if (data.content && data.content.length > charLimit) {
-    errors.push(`Noi dung khong duoc vuot qua ${charLimit} ky tu`);
+    errors.push(`Nội dung không được vượt quá ${charLimit} ký tự`);
   }
 
   // Title length
   if (data.title && data.title.length > 200) {
-    errors.push('Tieu de khong duoc vuot qua 200 ky tu');
+    errors.push('Tiêu đề không được vượt quá 200 ký tự');
   }
 
   // Tags validation
   if (data.tags && Array.isArray(data.tags)) {
     if (data.tags.length > 10) {
-      errors.push('Khong duoc them qua 10 tags');
+      errors.push('Không được thêm quá 10 tags');
     }
     data.tags.forEach(tag => {
       if (tag.length > 30) {
-        errors.push('Moi tag khong duoc vuot qua 30 ky tu');
+        errors.push('Mỗi tag không được vượt quá 30 ký tự');
       }
     });
   }
@@ -157,7 +157,7 @@ export const createJournalEntry = async (userId, data, userTier = 'free', userRo
       if (count >= dailyLimit) {
         return {
           success: false,
-          error: `Ban da dat gioi han ${dailyLimit} nhat ky/ngay. Nang cap de viet khong gioi han.`,
+          error: `Bạn đã đạt giới hạn ${dailyLimit} nhật ký/ngày. Nâng cấp để viết không giới hạn.`,
           limitReached: true,
         };
       }
@@ -221,7 +221,7 @@ export const createJournalEntry = async (userId, data, userTier = 'free', userRo
 
   } catch (error) {
     console.error(`${SERVICE_NAME} createJournalEntry error:`, error);
-    return { success: false, error: error.message || 'Khong the tao nhat ky' };
+    return { success: false, error: error.message || 'Không thể tạo nhật ký' };
   }
 };
 
@@ -388,7 +388,7 @@ export const updateJournalEntry = async (userId, entryId, updates, userTier = 'f
     if (error) throw error;
 
     if (!data) {
-      return { success: false, error: 'Khong tim thay nhat ky' };
+      return { success: false, error: 'Không tìm thấy nhật ký' };
     }
 
     return { success: true, data };
@@ -436,7 +436,7 @@ export const togglePinEntry = async (userId, entryId) => {
       .single();
 
     if (!entry) {
-      return { success: false, error: 'Khong tim thay nhat ky' };
+      return { success: false, error: 'Không tìm thấy nhật ký' };
     }
 
     const { data, error } = await supabase
@@ -470,7 +470,7 @@ export const toggleFavoriteEntry = async (userId, entryId) => {
       .single();
 
     if (!entry) {
-      return { success: false, error: 'Khong tim thay nhat ky' };
+      return { success: false, error: 'Không tìm thấy nhật ký' };
     }
 
     const { data, error } = await supabase

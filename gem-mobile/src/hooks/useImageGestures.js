@@ -51,6 +51,7 @@ const SNAP_BACK_CONFIG = {
  * @param {number} options.imageHeight - Display height of image
  * @param {Function} options.onDismiss - Callback to close viewer
  * @param {Function} options.onTap - Callback for single tap
+ * @param {Function} options.onLongPress - Callback for long press
  * @param {Function} options.onZoomChange - Callback when zoom changes
  * @returns {Object} { gesture, animatedStyle, scale, resetZoom, backgroundOpacity }
  */
@@ -59,6 +60,7 @@ export const useImageGestures = ({
   imageHeight,
   onDismiss,
   onTap,
+  onLongPress,
   onZoomChange,
 }) => {
   // Shared values
@@ -143,6 +145,16 @@ export const useImageGestures = ({
         if (onTap) {
           runOnJS(onTap)();
         }
+      }
+    });
+
+  // Long press gesture - for saving image
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(500)
+    .onEnd(() => {
+      'worklet';
+      if (onLongPress) {
+        runOnJS(onLongPress)();
       }
     });
 
@@ -240,9 +252,12 @@ export const useImageGestures = ({
     });
 
   // Combine gestures
-  const gesture = Gesture.Simultaneous(
-    tapGesture,
-    Gesture.Simultaneous(pinchGesture, panGesture)
+  const gesture = Gesture.Race(
+    longPressGesture,
+    Gesture.Simultaneous(
+      tapGesture,
+      Gesture.Simultaneous(pinchGesture, panGesture)
+    )
   );
 
   // Animated style for image

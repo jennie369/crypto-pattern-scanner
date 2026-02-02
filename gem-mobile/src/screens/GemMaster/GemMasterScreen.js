@@ -133,6 +133,12 @@ import ConnectionStatus from './components/ConnectionStatus';
 // NEW: Smart Triggers Hook (Day 25)
 import { useSmartTriggers } from '../../hooks/useSmartTriggers';
 
+// NEW: Centralized Templates - Intent Detection
+import { detectTemplateIntent, extractContextForAutoFill } from '../../services/templates/intentDetectionService';
+import { checkTemplateAccess } from '../../config/templateAccessControl';
+import { getTemplate } from '../../services/templates/journalTemplates';
+import TemplateInlineForm from '../../components/GemMaster/TemplateInlineForm';
+
 // Simple UUID generator for session tracking
 const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -291,6 +297,16 @@ const GemMasterScreen = ({ navigation, route }) => {
     preSelectedArea: null,
     userInput: null,
   });
+
+  // NEW: Centralized Templates - Template inline form state
+  const [templateFormState, setTemplateFormState] = useState({
+    visible: false,
+    templateId: null,
+    autoFillData: {},
+  });
+
+  // NEW: Track when template form has focus (to hide chat input & quick actions)
+  const [templateFormFocused, setTemplateFormFocused] = useState(false);
 
   // NEW: Quick Buy & Upsell Modal state for crystal purchase flow
   const [quickBuyModal, setQuickBuyModal] = useState({
@@ -560,6 +576,26 @@ const GemMasterScreen = ({ navigation, route }) => {
       navigation.setParams({ initialPrompt: undefined });
     }
   }, [route?.params?.initialPrompt, navigation]);
+
+  // Handle autoShowTemplate from VisionBoard "Tạo từ Journal/Template" option
+  useEffect(() => {
+    const templateId = route?.params?.autoShowTemplate;
+    const entryPoint = route?.params?.entryPoint || 'gemmaster';
+
+    if (templateId) {
+      console.log('[GemMaster] Auto-showing template:', templateId, 'from:', entryPoint);
+
+      // Show the template form
+      setTemplateFormState({
+        visible: true,
+        templateId: templateId,
+        autoFillData: {},
+      });
+
+      // Clear the param to prevent re-triggering
+      navigation.setParams({ autoShowTemplate: undefined, entryPoint: undefined });
+    }
+  }, [route?.params?.autoShowTemplate, navigation]);
 
   // Reset on screen blur so next navigation can trigger
   useFocusEffect(
@@ -917,6 +953,85 @@ const GemMasterScreen = ({ navigation, route }) => {
           });
         } catch (ctxError) {
           console.warn('[GemMaster] Context building error:', ctxError);
+        }
+      }
+
+      // ========== CENTRALIZED TEMPLATES: Intent Detection ==========
+      // Check for template-specific intents FIRST (fear_setting, think_day, gratitude, etc.)
+      let templateIntent = null;
+      try {
+        console.log('[GemMaster] === TEMPLATE DETECTION START ===');
+        console.log('[GemMaster] Input text:', text);
+        console.log('[GemMaster] detectTemplateIntent function:', typeof detectTemplateIntent);
+        templateIntent = detectTemplateIntent(text);
+        console.log('[GemMaster] Template intent result:', JSON.stringify(templateIntent));
+      } catch (templateError) {
+        console.error('[GemMaster] Template detection error:', templateError);
+      }
+      if (templateIntent && templateIntent.confidence > 0.6) {
+        console.log('[GemMaster] Detected template intent:', templateIntent.templateId, 'confidence:', templateIntent.confidence);
+
+        // Check access control
+        const access = checkTemplateAccess(templateIntent.templateId, userTier);
+        console.log('[GemMaster] Template access check:', templateIntent.templateId, 'userTier:', userTier, 'result:', access);
+        if (access.allowed) {
+          // Add user message first
+          const userMessage = {
+            id: `user_${Date.now()}`,
+            type: 'user',
+            text,
+            timestamp: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, userMessage]);
+
+          // Template-specific intro messages
+          const templateIntroMessages = {
+            fear_setting: '😰 Tôi hiểu bạn đang lo lắng về điều gì đó. Hãy dùng Fear-Setting để phân tích nỗi sợ và tìm giải pháp.',
+            think_day: '🤔 Thời điểm tuyệt vời để review cuộc sống! Think Day giúp bạn nhìn lại và điều chỉnh hướng đi.',
+            gratitude: '🙏 Ghi nhận sự biết ơn là cách tuyệt vời để nâng cao tần số. Hãy viết nhật ký biết ơn.',
+            daily_wins: '🏆 Ghi nhận thành tựu trong ngày giúp bạn duy trì động lực và năng lượng tích cực.',
+            weekly_planning: '📅 Lên kế hoạch tuần giúp bạn có định hướng rõ ràng và đạt mục tiêu hiệu quả hơn.',
+            vision_3_5_years: '🔮 Tầm nhìn dài hạn giúp bạn định hình tương lai và có động lực mỗi ngày.',
+            trading_journal: '📈 Ghi chép giao dịch giúp bạn học hỏi từ kinh nghiệm và cải thiện hiệu suất trading.',
+            goal_basic: '🎯 Hãy đặt mục tiêu cụ thể để manifest điều bạn muốn.',
+            free_form: '✨ Viết tự do giúp bạn giải tỏa tâm trí và khám phá bản thân.',
+          };
+
+          const introText = templateIntroMessages[templateIntent.templateId] || '✨ Hãy điền form để tạo nhật ký và mục tiêu.';
+
+          // Add AI intro message
+          const introMsg = {
+            id: `template_intro_${Date.now()}`,
+            type: 'assistant',
+            text: introText,
+            timestamp: new Date().toISOString(),
+            source: 'template_intent',
+          };
+          setMessages((prev) => [...prev, introMsg]);
+
+          // Auto-scroll
+          setTimeout(() => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          }, 100);
+
+          // Extract auto-fill data from user message
+          const template = getTemplate(templateIntent.templateId);
+          const autoFillData = extractContextForAutoFill(text, template);
+
+          // Show template inline form
+          setTimeout(() => {
+            setTemplateFormState({
+              visible: true,
+              templateId: templateIntent.templateId,
+              autoFillData: autoFillData || {},
+            });
+          }, 500);
+
+          return; // Don't continue to AI chat
+        } else {
+          // User doesn't have access - show upgrade prompt
+          console.log('[GemMaster] Template access denied:', templateIntent.templateId, 'reason:', access.reason);
+          // Continue to normal AI flow which may suggest upgrade
         }
       }
 
@@ -2204,6 +2319,80 @@ const GemMasterScreen = ({ navigation, route }) => {
           />
         )}
 
+        {/* NEW: Centralized Templates - TemplateInlineForm */}
+        {templateFormState.visible && templateFormState.templateId && (
+          <TemplateInlineForm
+            visible={templateFormState.visible}
+            templateId={templateFormState.templateId}
+            autoFillData={templateFormState.autoFillData}
+            userTier={userTier}
+            userRole={user?.role}
+            userId={user?.id}
+            onFocusChange={setTemplateFormFocused}
+            onClose={() => {
+              setTemplateFormFocused(false);
+              setTemplateFormState({
+                visible: false,
+                templateId: null,
+                autoFillData: {},
+              });
+            }}
+            onResult={(result) => {
+              console.log('[GemMaster] TemplateInlineForm result:', result);
+              if (result?.success) {
+                const hasGoal = result.goal;
+                const hasJournal = result.journalEntry || result.journal;
+                let successText = '';
+                if (hasJournal && hasGoal) {
+                  successText = `✅ Đã tạo nhật ký và mục tiêu thành công!`;
+                } else if (hasJournal) {
+                  successText = `✅ Đã lưu nhật ký của bạn!`;
+                } else if (hasGoal) {
+                  successText = `✅ Đã tạo mục tiêu vào Vision Board!`;
+                } else {
+                  successText = result.message || '✅ Đã lưu thành công!';
+                }
+                const successMessage = {
+                  id: `template_result_${Date.now()}`,
+                  type: 'assistant',
+                  text: successText,
+                  timestamp: new Date().toISOString(),
+                  source: 'template_form',
+                  // Action buttons for navigation (nested navigator)
+                  actionButtons: hasGoal ? [
+                    {
+                      id: 'view_vision_board',
+                      label: 'Xem mục tiêu',
+                      icon: 'target',
+                      action: 'navigate_nested',
+                      tabName: 'Account',
+                      screen: 'VisionBoard',
+                      params: { scrollToSection: 'goals' },
+                    },
+                  ] : hasJournal ? [
+                    {
+                      id: 'view_calendar',
+                      label: 'Xem Calendar',
+                      icon: 'calendar',
+                      action: 'navigate_nested',
+                      tabName: 'Account',
+                      screen: 'VisionBoard',
+                      params: { scrollToSection: 'calendar' },
+                    },
+                  ] : [],
+                };
+                setMessages(prev => [...prev, successMessage]);
+              }
+              setTemplateFormFocused(false);
+              setTemplateFormState({
+                visible: false,
+                templateId: null,
+                autoFillData: {},
+              });
+            }}
+          />
+        )}
+
         {/* NEW V4: SmartFormCardNew - Widget suggestion from gemMasterService */}
         {widgetForm.visible && widgetForm.extractedData && (
           <SmartFormCardNew
@@ -2233,7 +2422,7 @@ const GemMasterScreen = ({ navigation, route }) => {
         <View style={{ height: 20 }} />
       </View>
     ),
-    [isTyping, wsIsTyping, inlineFormState, widgetForm, suggestedWidgets, user, handleWidgetsCreated, handleShowInlineForm]
+    [isTyping, wsIsTyping, inlineFormState, templateFormState, userTier, widgetForm, suggestedWidgets, user, handleWidgetsCreated, handleShowInlineForm]
   );
 
   return (
@@ -2483,53 +2672,56 @@ const GemMasterScreen = ({ navigation, route }) => {
       </SafeAreaView>
 
       {/* Bottom Input Area - OUTSIDE SafeAreaView for proper absolute positioning */}
-      <Animated.View style={[
-        styles.bottomInputAreaAbsolute,
-        { bottom: keyboardHeightAnim }
-      ]}>
-        {/* Quick Action Bar - Always visible (sticky above input) */}
-        <QuickActionBar
-          onAction={handleQuickAction}
-          onNavigate={handleQuickNavigate}
-          onTopicSelect={handleTopicSelect}
-          disabled={!canQuery()}
-        />
-
-        {/* Chat Input with Voice (Day 11-12) + Offline Indicator (PHASE 1C) */}
-        <ChatInput
-          onSend={handleSend}
-          disabled={isTyping || !canQuery()}
-          placeholder={
-            !canQuery()
-              ? 'Hết lượt hỏi hôm nay...'
-              : 'Nhập tin nhắn...'
-          }
-          // Voice props
-          voiceEnabled={true}
-          voiceQuota={voiceQuota}
-          onVoiceRecordingStart={handleVoiceRecordingStart}
-          onVoiceRecordingStop={handleVoiceRecordingStop}
-          onVoiceQuotaPress={handleVoiceQuotaPress}
-          onVoiceError={handleVoiceError}
-          // Offline props (PHASE 1C)
-          isOffline={!wsIsOnline}
-          queueSize={wsQueueSize}
-        />
-
-        {/* Quota Status Compact (Bottom) - Using new UpgradeBanner */}
-        {!canQuery() && (
-          <UpgradeBanner
-            triggerType="quota_reached"
-            tierType="chatbot"
-            variant="compact"
-            title="Hết lượt hỏi hôm nay"
-            subtitle="Nâng cấp để chat không giới hạn"
-            ctaText="Nâng cấp"
-            source="gem_master_chat"
-            onUpgrade={() => setShowUpgradeModal(true)}
+      {/* Hide when template form is focused to give more space */}
+      {!templateFormFocused && (
+        <Animated.View style={[
+          styles.bottomInputAreaAbsolute,
+          { bottom: keyboardHeightAnim }
+        ]}>
+          {/* Quick Action Bar - Always visible (sticky above input) */}
+          <QuickActionBar
+            onAction={handleQuickAction}
+            onNavigate={handleQuickNavigate}
+            onTopicSelect={handleTopicSelect}
+            disabled={!canQuery()}
           />
-        )}
-      </Animated.View>
+
+          {/* Chat Input with Voice (Day 11-12) + Offline Indicator (PHASE 1C) */}
+          <ChatInput
+            onSend={handleSend}
+            disabled={isTyping || !canQuery()}
+            placeholder={
+              !canQuery()
+                ? 'Hết lượt hỏi hôm nay...'
+                : 'Nhập tin nhắn...'
+            }
+            // Voice props
+            voiceEnabled={true}
+            voiceQuota={voiceQuota}
+            onVoiceRecordingStart={handleVoiceRecordingStart}
+            onVoiceRecordingStop={handleVoiceRecordingStop}
+            onVoiceQuotaPress={handleVoiceQuotaPress}
+            onVoiceError={handleVoiceError}
+            // Offline props (PHASE 1C)
+            isOffline={!wsIsOnline}
+            queueSize={wsQueueSize}
+          />
+
+          {/* Quota Status Compact (Bottom) - Using new UpgradeBanner */}
+          {!canQuery() && (
+            <UpgradeBanner
+              triggerType="quota_reached"
+              tierType="chatbot"
+              variant="compact"
+              title="Hết lượt hỏi hôm nay"
+              subtitle="Nâng cấp để chat không giới hạn"
+              ctaText="Nâng cấp"
+              source="gem_master_chat"
+              onUpgrade={() => setShowUpgradeModal(true)}
+            />
+          )}
+        </Animated.View>
+      )}
     </LinearGradient>
   );
 };

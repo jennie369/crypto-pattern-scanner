@@ -21,6 +21,8 @@ import { notificationService } from '../services/notificationService';
 import { useAuth } from './AuthContext';
 import { supabase } from '../services/supabase';
 import { navigationRef } from '../navigation/navigationRef';
+import { callService } from '../services/callService';
+import { triggerIncomingCallFromPush } from './CallContext';
 
 const InAppNotificationContext = createContext(null);
 
@@ -217,33 +219,74 @@ export const InAppNotificationProvider = ({ children }) => {
       // Show toast with working accept/decline handlers as FALLBACK
       // (in case realtime subscription doesn't detect the call)
       if (data?.type === 'incoming_call') {
-        console.log('[InAppNotification] Incoming call push received:', data.callId);
+        const callId = data.callId || data.call_id; // Support both formats
+        console.log('[InAppNotification] ========================================');
+        console.log('[InAppNotification] INCOMING CALL PUSH RECEIVED');
+        console.log('[InAppNotification] Current user (receiver):', user?.id);
+        console.log('[InAppNotification] callId:', callId);
+        console.log('[InAppNotification] callerId (người gọi):', data.callerId);
+        console.log('[InAppNotification] callerName:', data.callerName);
+        console.log('[InAppNotification] Full data:', JSON.stringify(data));
+        console.log('[InAppNotification] ========================================');
 
-        // Import call service for accept/decline
-        const { callService } = require('../services/callService');
+        if (!callId) {
+          console.error('[InAppNotification] No callId in push data:', data);
+          return;
+        }
+
+        // CRITICAL: Don't show incoming call UI if current user is the CALLER
+        // This prevents the caller from seeing their own call notification
+        if (data.callerId === user?.id) {
+          console.log('[InAppNotification] Ignoring - current user is the caller');
+          return;
+        }
+
+        // IMPORTANT: Trigger the full-screen overlay via CallContext
+        // This ensures the proper incoming call UI shows even if realtime subscription fails
+        console.log('[InAppNotification] Triggering full-screen overlay via CallContext');
+        triggerIncomingCallFromPush(callId).catch(err => {
+          console.error('[InAppNotification] Failed to trigger full-screen overlay:', err);
+        });
 
         // Create handlers that actually work
         const handleAcceptFromToast = async () => {
-          console.log('[InAppNotification] Accept from toast, callId:', data.callId);
+          console.log('[InAppNotification] Accept from toast, callId:', callId);
           try {
             // Fetch call info
-            const { call } = await callService.getCall(data.callId);
-            if (call) {
-              // Navigate to incoming call screen
-              const navReady = navigationRef.current &&
-                (typeof navigationRef.current.isReady === 'function'
-                  ? navigationRef.current.isReady()
-                  : true);
+            const result = await callService.getCall(callId);
+            console.log('[InAppNotification] getCall result:', result.success, result.call?.id);
 
-              if (navReady) {
-                navigationRef.current.navigate('Call', {
-                  screen: 'IncomingCall',
-                  params: {
-                    call,
-                    caller: call.caller || { display_name: data.callerName, avatar_url: data.callerAvatar },
+            if (!result.success || !result.call) {
+              console.error('[InAppNotification] Failed to get call:', result.error);
+              return;
+            }
+
+            const call = result.call;
+
+            // Navigate to incoming call screen
+            const navReady = navigationRef.current &&
+              (typeof navigationRef.current.isReady === 'function'
+                ? navigationRef.current.isReady()
+                : true);
+
+            console.log('[InAppNotification] Navigation ready:', navReady);
+
+            if (navReady) {
+              console.log('[InAppNotification] Navigating to IncomingCall screen...');
+              navigationRef.current.navigate('Call', {
+                screen: 'IncomingCall',
+                params: {
+                  call,
+                  caller: call.caller || {
+                    id: data.callerId,
+                    display_name: data.callerName || 'Người gọi',
+                    avatar_url: data.callerAvatar
                   },
-                });
-              }
+                },
+              });
+              console.log('[InAppNotification] Navigation triggered');
+            } else {
+              console.error('[InAppNotification] Navigation not ready');
             }
           } catch (error) {
             console.error('[InAppNotification] Error accepting call from toast:', error);
@@ -251,9 +294,10 @@ export const InAppNotificationProvider = ({ children }) => {
         };
 
         const handleDeclineFromToast = async () => {
-          console.log('[InAppNotification] Decline from toast, callId:', data.callId);
+          console.log('[InAppNotification] Decline from toast, callId:', callId);
           try {
-            await callService.declineCall(data.callId);
+            await callService.declineCall(callId);
+            console.log('[InAppNotification] Call declined successfully');
           } catch (error) {
             console.error('[InAppNotification] Error declining call from toast:', error);
           }
@@ -261,8 +305,8 @@ export const InAppNotificationProvider = ({ children }) => {
 
         showNotification({
           type: NOTIFICATION_TYPES.INCOMING_CALL,
-          title: notification.request.content.title,
-          body: notification.request.content.body,
+          title: notification.request.content.title || 'Cuộc gọi đến',
+          body: notification.request.content.body || `${data.callerName || 'Ai đó'} đang gọi cho bạn`,
           avatar: data.callerAvatar,
           data,
           onAccept: handleAcceptFromToast,

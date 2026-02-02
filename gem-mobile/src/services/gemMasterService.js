@@ -46,6 +46,9 @@ import {
   checkTierAccess,
 } from './chatbot';
 
+// Import for two-way linking (journal ↔ goal)
+import { createQuickGoalWithJournal } from './templates/journalRoutingService';
+
 // ========== API CONFIG ==========
 // API key from environment variable (set in .env file)
 const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
@@ -2490,8 +2493,12 @@ export const saveWidgetToVisionBoard = async (widget, userId, linkedGoalId = nul
     // Extract content based on widget type
     let content = [];
     if (widget.type === 'goal') {
-      // For goal widgets, store goal text AND affirmations AND action steps
+      // ========== NEW: Use createQuickGoalWithJournal for two-way linking ==========
+      // This creates: journal entry, vision_goal, goal_actions, and widgets
+      // With proper two-way linking: journal.linked_goal_ids ↔ goal.source_journal_id
       const goalTitle = widgetData.goalText || widgetData.goalTitle || widget.title || 'Mục tiêu mới';
+      const goalDescription = widgetData.description || widgetData.goalDescription || '';
+      const lifeArea = widgetData.lifeArea || widget.lifeArea || 'personal';
 
       // Extract affirmations
       const affirmations = Array.isArray(widgetData.affirmations)
@@ -2500,42 +2507,55 @@ export const saveWidgetToVisionBoard = async (widget, userId, linkedGoalId = nul
 
       // Extract action steps (from various sources)
       const rawSteps = widgetData.steps || widgetData.actionSteps || widgetData.habits || widget.steps || widget.actionSteps || [];
-      const steps = Array.isArray(rawSteps)
+      const actions = Array.isArray(rawSteps)
         ? rawSteps.map((step, idx) => ({
-            id: `step_${Date.now()}_${idx}`,
-            title: typeof step === 'string' ? step : (step.text || step.title || step.name || ''),
+            text: typeof step === 'string' ? step : (step.text || step.title || step.name || ''),
             action_type: step.action_type || (idx < 2 ? 'daily' : idx < 3 ? 'weekly' : 'monthly'),
-            completed: step.completed || false,
           }))
         : [];
 
       // Extract rituals (for Tarot/I Ching integration)
       const rawRituals = widgetData.rituals || widget.rituals || [];
       const rituals = Array.isArray(rawRituals)
-        ? rawRituals.map((ritual, idx) => ({
-            id: `ritual_${Date.now()}_${idx}`,
-            name: typeof ritual === 'string' ? ritual : (ritual.name || ritual.title || `Nghi thức ${idx + 1}`),
+        ? rawRituals.map((ritual) => ({
+            name: typeof ritual === 'string' ? ritual : (ritual.name || ritual.title || ''),
             description: typeof ritual === 'string' ? '' : (ritual.description || ''),
-            completed: false,
           }))
         : [];
 
-      content = {
-        lifeArea: widgetData.lifeArea || widget.lifeArea || 'personal',
-        title: goalTitle,
-        goals: [{
-          id: `goal_${Date.now()}`,
-          title: goalTitle,
-          completed: false,
-          timeline: widgetData.timeline || null,
-          lifeArea: widgetData.lifeArea || widget.lifeArea || 'personal',
-          targetAmount: widgetData.targetAmount || null,
-          currentAmount: widgetData.currentAmount || 0,
-        }],
-        affirmations: affirmations.length > 0 ? affirmations : undefined,
-        steps: steps.length > 0 ? steps : undefined,
-        rituals: rituals.length > 0 ? rituals : undefined,
-        crystals: widgetData.crystals || widget.crystals || undefined,
+      // Use journalRoutingService for unified goal creation with two-way linking
+      const result = await createQuickGoalWithJournal({
+        userId,
+        lifeArea,
+        goalTitle,
+        goalDescription,
+        actions,
+        affirmations,
+        rituals,
+        deadline: widgetData.timeline || widgetData.deadline || null,
+        crystals: widgetData.crystals || widget.crystals || [],
+        source: widget.source || 'gemmaster', // Track where goal came from (tarot, iching, gemmaster)
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Không thể tạo mục tiêu');
+      }
+
+      console.log('[GEM] Created goal with two-way linking:', result.goal?.id, 'journal:', result.journalEntry?.id);
+
+      // Collect all widgets created
+      const allWidgets = [
+        result.widget,
+        result.affirmationWidget,
+        result.actionPlanWidget,
+      ].filter(Boolean);
+
+      return {
+        success: true,
+        widget: result.widget, // The main goal widget
+        goal: result.goal,
+        journalEntry: result.journalEntry,
+        allWidgets,
       };
     } else if (widget.type === 'affirmation') {
       // For affirmation widgets, store affirmations array WITH lifeArea for grouping

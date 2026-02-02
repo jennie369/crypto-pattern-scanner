@@ -1082,6 +1082,17 @@ const clearSectionBannersCache = () => {
   allSectionBannersCache = { data: null, timestamp: 0 };
 };
 
+/**
+ * Get cached shop banners synchronously (for instant UI display)
+ * Returns null if no cache available
+ */
+const getCachedShopBanners = () => {
+  if (bannerCache.data && (Date.now() - bannerCache.lastFetch < bannerCache.CACHE_DURATION)) {
+    return bannerCache.data;
+  }
+  return null;
+};
+
 // ========================================
 // DEFAULT EXPORT
 // ========================================
@@ -1090,6 +1101,7 @@ export default {
   // Admin CRUD - Banners
   getAllShopBanners,
   getActiveShopBanners,
+  getCachedShopBanners,
   createShopBanner,
   updateShopBanner,
   deleteShopBanner,

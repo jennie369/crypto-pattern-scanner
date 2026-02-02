@@ -35,17 +35,17 @@ const ENTRY_TYPE_CONFIG = {
   [ENTRY_TYPES.REFLECTION]: {
     icon: BookOpen,
     color: COLORS.purple,
-    label: 'Suy ngam',
+    label: 'Suy ngẫm',
   },
   [ENTRY_TYPES.GRATITUDE]: {
     icon: Heart,
     color: COLORS.error,
-    label: 'Biet on',
+    label: 'Biết ơn',
   },
   [ENTRY_TYPES.GOAL_NOTE]: {
     icon: Target,
     color: COLORS.info,
-    label: 'Ghi chu muc tieu',
+    label: 'Ghi chú mục tiêu',
   },
   [ENTRY_TYPES.QUICK_NOTE]: {
     icon: FileText,

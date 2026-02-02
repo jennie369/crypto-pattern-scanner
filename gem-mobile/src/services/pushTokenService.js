@@ -80,13 +80,27 @@ const PUSH_TOKEN_SERVICE = {
 
       // Configure Android notification channels
       if (Platform.OS === 'android') {
-        // Incoming call channel - highest priority
+        // Incoming call channel - highest priority with fullscreen intent
         await Notifications.setNotificationChannelAsync('incoming_call', {
           name: 'Cuộc gọi đến',
           importance: Notifications.AndroidImportance.MAX,
           vibrationPattern: [0, 500, 200, 500, 200, 500],
           lightColor: '#4CAF50',
           description: 'Thông báo cuộc gọi đến',
+          sound: 'default',
+          enableVibrate: true,
+          showBadge: true,
+          lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+          bypassDnd: true,
+        });
+
+        // Paper trade channel - for order fills, TP/SL, liquidation
+        await Notifications.setNotificationChannelAsync('paper_trade', {
+          name: 'Paper Trading',
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FFD700',
+          description: 'Thông báo giao dịch Paper Trade',
           sound: 'default',
           enableVibrate: true,
           showBadge: true,
@@ -328,6 +342,8 @@ const PUSH_TOKEN_SERVICE = {
 
   /**
    * Save push token to database
+   * IMPORTANT: First removes this token from ALL other users to prevent
+   * notifications going to the wrong device when users switch accounts
    * @param {string} token - Expo push token
    */
   async savePushToken(token) {
@@ -338,12 +354,42 @@ const PUSH_TOKEN_SERVICE = {
         return;
       }
 
-      // Try to save to user_push_tokens table (column is 'token' not 'push_token')
+      console.log('[PushToken] Saving token for user:', user.id);
+
+      // CRITICAL: First, remove this token from ALL other users
+      // This prevents notifications being sent to wrong user when accounts switch on same device
+      const { data: existingTokens, error: checkError } = await supabase
+        .from('user_push_tokens')
+        .select('user_id')
+        .eq('token', token)
+        .neq('user_id', user.id);
+
+      if (!checkError && existingTokens && existingTokens.length > 0) {
+        console.log('[PushToken] Found token on other users, removing:', existingTokens.map(t => t.user_id));
+
+        // Delete token from other users
+        await supabase
+          .from('user_push_tokens')
+          .delete()
+          .eq('token', token)
+          .neq('user_id', user.id);
+
+        // Also clear from profiles table
+        const otherUserIds = existingTokens.map(t => t.user_id);
+        await supabase
+          .from('profiles')
+          .update({ expo_push_token: null })
+          .in('id', otherUserIds);
+
+        console.log('[PushToken] Cleaned up token from other users');
+      }
+
+      // Now save to user_push_tokens table for current user
       const { error: tokenError } = await supabase.from('user_push_tokens').upsert({
         user_id: user.id,
         token: token,
         platform: Platform.OS,
-        device_info: { model: Device.modelName || 'Unknown' },
+        device_info: { model: Device.modelName || 'Unknown', source: 'pushTokenService' },
         is_active: true,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' });
@@ -351,7 +397,7 @@ const PUSH_TOKEN_SERVICE = {
       if (tokenError) {
         console.log('[PushToken] user_push_tokens save failed, trying profiles:', tokenError.message);
       } else {
-        console.log('[PushToken] Saved to user_push_tokens');
+        console.log('[PushToken] Saved to user_push_tokens for user:', user.id);
       }
 
       // Also save to profiles.expo_push_token as fallback

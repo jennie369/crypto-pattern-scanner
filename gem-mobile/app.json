@@ -59,7 +59,12 @@
         "android.permission.FOREGROUND_SERVICE_PHONE_CALL",
         "android.permission.READ_PHONE_STATE",
         "android.permission.CALL_PHONE",
-        "android.permission.MANAGE_OWN_CALLS"
+        "android.permission.MANAGE_OWN_CALLS",
+        "android.permission.USE_FULL_SCREEN_INTENT",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.DISABLE_KEYGUARD"
       ],
       "intentFilters": [
         {
@@ -117,6 +122,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "jsEngine": "hermes",
     "assetBundlePatterns": [
       "**/*",
       "assets/**/*",
@@ -135,10 +141,12 @@
           "android": {
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
-            "buildToolsVersion": "35.0.0"
+            "buildToolsVersion": "35.0.0",
+            "jsEngine": "hermes"
           },
           "ios": {
-            "useFrameworks": "static"
+            "useFrameworks": "static",
+            "jsEngine": "hermes"
           }
         }
       ]

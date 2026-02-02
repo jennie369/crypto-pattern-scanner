@@ -269,6 +269,32 @@ const VoiceInputButton = ({
       // If we have partial results from real-time recognition, use those
       if (speechRecognition.partialResults && onTranscription) {
         onTranscription(speechRecognition.partialResults);
+      } else if (audioUri) {
+        // Fallback: Use OpenAI Whisper API if native speech recognition didn't produce results
+        console.log('[VoiceInputButton] No native transcription, using Whisper API fallback...');
+        try {
+          const result = await speechRecognition.transcribeAudio(audioUri, 'vi-VN');
+          if (result.success && result.text && onTranscription) {
+            console.log('[VoiceInputButton] Whisper transcription:', result.text);
+            onTranscription(result.text);
+          } else if (!result.success) {
+            console.log('[VoiceInputButton] Whisper API failed:', result.error);
+            if (onError) {
+              onError({
+                code: 'transcription_failed',
+                message: result.error || 'Không thể chuyển đổi giọng nói thành văn bản'
+              });
+            }
+          }
+        } catch (whisperError) {
+          console.error('[VoiceInputButton] Whisper API error:', whisperError);
+          if (onError) {
+            onError({
+              code: 'whisper_error',
+              message: whisperError.message || 'Lỗi khi xử lý giọng nói'
+            });
+          }
+        }
       }
 
     } catch (error) {

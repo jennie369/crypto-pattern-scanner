@@ -13,6 +13,7 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,6 +26,11 @@ import {
   Sparkles,
   Clock,
   Filter,
+  Gift,
+  Zap,
+  CreditCard,
+  TrendingUp,
+  User,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
 import walletService from '../../services/walletService';
@@ -204,6 +210,54 @@ const TransactionHistoryScreen = ({ navigation }) => {
     );
   };
 
+  // Get thumbnail info based on transaction type
+  const getTransactionThumbnail = (item) => {
+    const isGiftSend = isGiftSendTransaction(item);
+    const isGiftReceive = isGiftReceiveTransaction(item);
+
+    // For gift transactions with related user avatar
+    if ((isGiftSend || isGiftReceive) && item.related_user_avatar) {
+      return { type: 'avatar', uri: item.related_user_avatar };
+    }
+
+    // Default icon-based thumbnails
+    if (isGiftSend) return { type: 'icon', icon: Gift, color: COLORS.error };
+    if (isGiftReceive) return { type: 'icon', icon: Gift, color: COLORS.success };
+
+    switch (item.type) {
+      case 'purchase':
+        return { type: 'icon', icon: CreditCard, color: COLORS.success };
+      case 'bonus':
+      case 'daily_checkin':
+        return { type: 'icon', icon: Sparkles, color: COLORS.gold };
+      case 'boost':
+        return { type: 'icon', icon: Zap, color: COLORS.purple };
+      case 'withdrawal':
+        return { type: 'icon', icon: TrendingUp, color: COLORS.warning };
+      default:
+        return { type: 'icon', icon: Gem, color: COLORS.purple };
+    }
+  };
+
+  // Build display description with sender/receiver name
+  const getDisplayDescription = (item) => {
+    const isGiftSend = isGiftSendTransaction(item);
+    const isGiftReceive = isGiftReceiveTransaction(item);
+
+    // If has related user name, show it for gift transactions
+    if (item.related_user_name) {
+      if (isGiftSend) {
+        return `Gửi quà cho ${item.related_user_name}`;
+      }
+      if (isGiftReceive) {
+        return `Nhận quà từ ${item.related_user_name}`;
+      }
+    }
+
+    // Return the fixed description (Vietnamese text already fixed in service)
+    return item.description || 'Giao dịch';
+  };
+
   const renderItem = ({ item }) => {
     const { icon: Icon, color } = getTransactionIcon(item.type, item.reference_type, item.amount, item.description);
     // For gift sends, force display as negative even if amount is positive in DB
@@ -211,14 +265,26 @@ const TransactionHistoryScreen = ({ navigation }) => {
     const displayAmount = isGiftSend && item.amount > 0 ? -item.amount : item.amount;
     const isPositive = displayAmount > 0;
 
+    // Get thumbnail info
+    const thumbnail = getTransactionThumbnail(item);
+    const displayDescription = getDisplayDescription(item);
+
     return (
       <View style={styles.transactionItem}>
-        <View style={[styles.transactionIcon, { backgroundColor: `${color}20` }]}>
-          <Icon size={18} color={color} />
-        </View>
+        {/* Thumbnail - Avatar or Icon */}
+        {thumbnail.type === 'avatar' ? (
+          <Image
+            source={{ uri: thumbnail.uri }}
+            style={styles.transactionAvatar}
+          />
+        ) : (
+          <View style={[styles.transactionIcon, { backgroundColor: `${thumbnail.color}20` }]}>
+            <thumbnail.icon size={18} color={thumbnail.color} />
+          </View>
+        )}
         <View style={styles.transactionInfo}>
           <Text style={styles.transactionDescription} numberOfLines={2}>
-            {item.description}
+            {displayDescription}
           </Text>
           <Text style={styles.transactionDate}>{formatDate(item.created_at)}</Text>
         </View>
@@ -401,6 +467,12 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  transactionAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: GLASS.background,
   },
   transactionInfo: {
     flex: 1,

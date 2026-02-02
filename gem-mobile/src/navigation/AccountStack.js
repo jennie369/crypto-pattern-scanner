@@ -134,6 +134,8 @@ import {
   JournalEntryScreen,
   TradingJournalScreen,
   CalendarSettingsScreen,
+  EditEventScreen,
+  JournalDetailScreen,
   // New Ritual Screens (Vision Board 2.0 - Cosmic Glassmorphism)
   HeartExpansionRitual,
   GratitudeFlowRitual,
@@ -303,8 +305,10 @@ export default function AccountStack() {
 
       {/* Calendar & Journal Screens (Smart Journal) */}
       <Stack.Screen name="JournalEntry" component={JournalEntryScreen} />
+      <Stack.Screen name="JournalDetail" component={JournalDetailScreen} />
       <Stack.Screen name="TradingJournal" component={TradingJournalScreen} />
       <Stack.Screen name="CalendarSettings" component={CalendarSettingsScreen} />
+      <Stack.Screen name="EditEvent" component={EditEventScreen} />
 
       {/* Ritual Playground Screens */}
       <Stack.Screen

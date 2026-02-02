@@ -58,29 +58,29 @@ const MOOD_ICONS = {
 
 // Energy levels
 const ENERGY_LEVELS = [
-  { id: 1, label: 'Rat thap', emoji: '1' },
-  { id: 2, label: 'Thap', emoji: '2' },
-  { id: 3, label: 'Trung binh', emoji: '3' },
+  { id: 1, label: 'Rất thấp', emoji: '1' },
+  { id: 2, label: 'Thấp', emoji: '2' },
+  { id: 3, label: 'Trung bình', emoji: '3' },
   { id: 4, label: 'Cao', emoji: '4' },
-  { id: 5, label: 'Rat cao', emoji: '5' },
+  { id: 5, label: 'Rất cao', emoji: '5' },
 ];
 
 // Sleep quality
 const SLEEP_QUALITY = [
-  { id: 1, label: 'Rat te', emoji: '1' },
-  { id: 2, label: 'Te', emoji: '2' },
-  { id: 3, label: 'Binh thuong', emoji: '3' },
-  { id: 4, label: 'Tot', emoji: '4' },
-  { id: 5, label: 'Tuyet voi', emoji: '5' },
+  { id: 1, label: 'Rất tệ', emoji: '1' },
+  { id: 2, label: 'Tệ', emoji: '2' },
+  { id: 3, label: 'Bình thường', emoji: '3' },
+  { id: 4, label: 'Tốt', emoji: '4' },
+  { id: 5, label: 'Tuyệt vời', emoji: '5' },
 ];
 
 // Productivity levels (evening)
 const PRODUCTIVITY_LEVELS = [
-  { id: 1, label: 'Khong hieu qua', emoji: '1' },
-  { id: 2, label: 'It hieu qua', emoji: '2' },
-  { id: 3, label: 'Trung binh', emoji: '3' },
-  { id: 4, label: 'Hieu qua', emoji: '4' },
-  { id: 5, label: 'Rat hieu qua', emoji: '5' },
+  { id: 1, label: 'Không hiệu quả', emoji: '1' },
+  { id: 2, label: 'Ít hiệu quả', emoji: '2' },
+  { id: 3, label: 'Trung bình', emoji: '3' },
+  { id: 4, label: 'Hiệu quả', emoji: '4' },
+  { id: 5, label: 'Rất hiệu quả', emoji: '5' },
 ];
 
 /**
@@ -299,8 +299,8 @@ const MoodPicker = ({
   // Render energy selection
   const renderEnergySelection = () => (
     <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Muc nang luong cua ban?</Text>
-      <Text style={styles.stepSubtitle}>Chon muc nang luong tu 1-5</Text>
+      <Text style={styles.stepTitle}>Mức năng lượng của bạn?</Text>
+      <Text style={styles.stepSubtitle}>Chọn mức năng lượng từ 1-5</Text>
 
       <View style={styles.levelRow}>
         {ENERGY_LEVELS.map((level) => {
@@ -333,9 +333,9 @@ const MoodPicker = ({
     <View style={styles.stepContent}>
       <View style={styles.stepHeader}>
         <Moon size={24} color={COLORS.purple} />
-        <Text style={styles.stepTitle}>Chat luong giac ngu?</Text>
+        <Text style={styles.stepTitle}>Chất lượng giấc ngủ?</Text>
       </View>
-      <Text style={styles.stepSubtitle}>Dem qua ban ngu the nao?</Text>
+      <Text style={styles.stepSubtitle}>Đêm qua bạn ngủ thế nào?</Text>
 
       <View style={styles.levelRow}>
         {SLEEP_QUALITY.map((level) => {
@@ -368,9 +368,9 @@ const MoodPicker = ({
     <View style={styles.stepContent}>
       <View style={styles.stepHeader}>
         <Zap size={24} color={COLORS.gold} />
-        <Text style={styles.stepTitle}>Hieu qua lam viec hom nay?</Text>
+        <Text style={styles.stepTitle}>Hiệu quả làm việc hôm nay?</Text>
       </View>
-      <Text style={styles.stepSubtitle}>Danh gia muc do hoan thanh cong viec</Text>
+      <Text style={styles.stepSubtitle}>Đánh giá mức độ hoàn thành công việc</Text>
 
       <View style={styles.levelRow}>
         {PRODUCTIVITY_LEVELS.map((level) => {
@@ -401,10 +401,10 @@ const MoodPicker = ({
   // Render factors selection
   const renderFactors = () => (
     <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Dieu gi anh huong den ban?</Text>
-      <Text style={styles.stepSubtitle}>Chon cac yeu to (tuy chon)</Text>
+      <Text style={styles.stepTitle}>Điều gì ảnh hưởng đến bạn?</Text>
+      <Text style={styles.stepSubtitle}>Chọn các yếu tố (tùy chọn)</Text>
 
-      <Text style={styles.factorSectionTitle}>Tich cuc</Text>
+      <Text style={styles.factorSectionTitle}>Tích cực</Text>
       <View style={styles.factorGrid}>
         {MOOD_FACTORS.filter((f) => f.category === 'positive').map((factor) => {
           const isSelected = selectedFactors.includes(factor.id);
@@ -431,7 +431,7 @@ const MoodPicker = ({
         })}
       </View>
 
-      <Text style={[styles.factorSectionTitle, { marginTop: SPACING.md }]}>Tieu cuc</Text>
+      <Text style={[styles.factorSectionTitle, { marginTop: SPACING.md }]}>Tiêu cực</Text>
       <View style={styles.factorGrid}>
         {MOOD_FACTORS.filter((f) => f.category === 'negative').map((factor) => {
           const isSelected = selectedFactors.includes(factor.id);
@@ -463,12 +463,12 @@ const MoodPicker = ({
   // Render highlights (evening)
   const renderHighlights = () => (
     <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Diem noi bat trong ngay</Text>
+      <Text style={styles.stepTitle}>Điểm nổi bật trong ngày</Text>
 
-      <Text style={styles.inputLabel}>Dieu tot dep nhat hom nay</Text>
+      <Text style={styles.inputLabel}>Điều tốt đẹp nhất hôm nay</Text>
       <TextInput
         style={styles.textInput}
-        placeholder="Vd: Hoan thanh du an quan trong..."
+        placeholder="Vd: Hoàn thành dự án quan trọng..."
         placeholderTextColor={COLORS.textMuted}
         value={highlight}
         onChangeText={setHighlight}
@@ -476,10 +476,10 @@ const MoodPicker = ({
         maxLength={200}
       />
 
-      <Text style={[styles.inputLabel, { marginTop: SPACING.md }]}>Dieu chua tot</Text>
+      <Text style={[styles.inputLabel, { marginTop: SPACING.md }]}>Điều chưa tốt</Text>
       <TextInput
         style={styles.textInput}
-        placeholder="Vd: Mat tap trung vao buoi chieu..."
+        placeholder="Vd: Mất tập trung vào buổi chiều..."
         placeholderTextColor={COLORS.textMuted}
         value={lowlight}
         onChangeText={setLowlight}
@@ -487,10 +487,10 @@ const MoodPicker = ({
         maxLength={200}
       />
 
-      <Text style={[styles.inputLabel, { marginTop: SPACING.md }]}>Biet on dieu gi?</Text>
+      <Text style={[styles.inputLabel, { marginTop: SPACING.md }]}>Biết ơn điều gì?</Text>
       <TextInput
         style={styles.textInput}
-        placeholder="Vd: Cam on gia dinh, suc khoe..."
+        placeholder="Vd: Cảm ơn gia đình, sức khỏe..."
         placeholderTextColor={COLORS.textMuted}
         value={gratitude}
         onChangeText={setGratitude}
@@ -503,11 +503,11 @@ const MoodPicker = ({
   // Render note
   const renderNote = () => (
     <View style={styles.stepContent}>
-      <Text style={styles.stepTitle}>Ghi chu them (tuy chon)</Text>
+      <Text style={styles.stepTitle}>Ghi chú thêm (tùy chọn)</Text>
 
       <TextInput
         style={[styles.textInput, { minHeight: 100 }]}
-        placeholder="Viet them suy nghi cua ban..."
+        placeholder="Viết thêm suy nghĩ của bạn..."
         placeholderTextColor={COLORS.textMuted}
         value={note}
         onChangeText={setNote}
@@ -560,11 +560,11 @@ const MoodPicker = ({
   const getCheckInLabel = () => {
     switch (checkInType) {
       case CHECK_IN_TYPES.MORNING:
-        return 'Buoi sang';
+        return 'Buổi sáng';
       case CHECK_IN_TYPES.MIDDAY:
-        return 'Giua ngay';
+        return 'Giữa ngày';
       case CHECK_IN_TYPES.EVENING:
-        return 'Buoi toi';
+        return 'Buổi tối';
       default:
         return '';
     }
@@ -618,7 +618,6 @@ const MoodPicker = ({
                         { width: `${((step + 1) / totalSteps) * 100}%` },
                       ]}
                     />
-                  )}
                   </View>
                   <Text style={styles.progressText}>
                     {step + 1}/{totalSteps}
@@ -644,8 +643,7 @@ const MoodPicker = ({
                       onPress={handlePrev}
                       style={styles.backButton}
                     >
-                      <Text style={styles.backButtonText}>Quay lai</Text>
-                    )}
+                      <Text style={styles.backButtonText}>Quay lại</Text>
                     </TouchableOpacity>
                   ) : (
                     <View />
@@ -660,20 +658,15 @@ const MoodPicker = ({
                     disabled={!canProceed() || loading}
                   >
                     <Text style={styles.nextButtonText}>
-                      {step === totalSteps - 1 ? 'Luu' : 'Tiep'}
+                      {step === totalSteps - 1 ? 'Lưu' : 'Tiếp'}
                     </Text>
-                  )}
                     <ChevronRight size={18} color={COLORS.textPrimary} />
-                  )}
                   </TouchableOpacity>
-                )}
                 </View>
               )}
             </TouchableOpacity>
-          )}
           </Animated.View>
         </TouchableOpacity>
-      )}
       </KeyboardAvoidingView>
     </Modal>
   );

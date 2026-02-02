@@ -46,7 +46,13 @@ const OutgoingCallScreen = ({ route, navigation }) => {
       }
 
       try {
-        console.log('[OutgoingCallScreen] Initiating call...');
+        console.log('[OutgoingCallScreen] ========================================');
+        console.log('[OutgoingCallScreen] INITIATING CALL');
+        console.log('[OutgoingCallScreen] conversation_id:', initialCall.conversation_id);
+        console.log('[OutgoingCallScreen] callee object:', JSON.stringify(callee));
+        console.log('[OutgoingCallScreen] callee.id (người nhận):', callee.id);
+        console.log('[OutgoingCallScreen] call_type:', initialCall.call_type);
+        console.log('[OutgoingCallScreen] ========================================');
         const result = await callService.initiateCall(
           initialCall.conversation_id,
           callee.id,

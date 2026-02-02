@@ -118,6 +118,7 @@ const CommentItem = ({ comment, onLike, onReply, likedByUser }) => {
  * @param {boolean} loadingMore - Whether more comments are loading
  * @param {object} currentUser - Current user data (id, avatar_url, display_name)
  * @param {array} likedCommentIds - Array of comment IDs liked by current user
+ * @param {number} reactionCount - Total reactions on the post
  */
 export default function AdCommentsSheet({
   visible,
@@ -130,6 +131,7 @@ export default function AdCommentsSheet({
   loadingMore = false,
   currentUser,
   likedCommentIds = [],
+  reactionCount = 0,
 }) {
   const [inputText, setInputText] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
@@ -171,9 +173,11 @@ export default function AdCommentsSheet({
     if (loading) return null;
     return (
       <View style={styles.emptyContainer}>
-        <MessageCircle size={48} color={COLORS.textMuted} />
-        <Text style={styles.emptyText}>Chưa có bình luận nào</Text>
-        <Text style={styles.emptySubtext}>Hãy là người đầu tiên bình luận!</Text>
+        <View style={styles.emptyIconContainer}>
+          <MessageCircle size={56} color="#4A90D9" fill="#4A90D9" strokeWidth={0} />
+        </View>
+        <Text style={styles.emptyText}>Chưa có bình luận</Text>
+        <Text style={styles.emptySubtext}>Hãy là người đầu tiên bình luận.</Text>
       </View>
     );
   };
@@ -199,6 +203,16 @@ export default function AdCommentsSheet({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.container}>
+          {/* Reaction count bar - like Facebook */}
+          {reactionCount > 0 && (
+            <View style={styles.reactionBar}>
+              <View style={styles.reactionIcon}>
+                <Heart size={14} color="#FF6B6B" fill="#FF6B6B" />
+              </View>
+              <Text style={styles.reactionCount}>{reactionCount}</Text>
+            </View>
+          )}
+
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Bình luận</Text>
@@ -297,6 +311,27 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     height: '75%',
+  },
+  reactionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  reactionIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  reactionCount: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontWeight: '500',
   },
   header: {
     flexDirection: 'row',
@@ -402,16 +437,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 60,
   },
+  emptyIconContainer: {
+    marginBottom: 8,
+  },
   emptyText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#FFFFFF',
     marginTop: 16,
   },
   emptySubtext: {
-    fontSize: 14,
+    fontSize: 15,
     color: 'rgba(255, 255, 255, 0.5)',
-    marginTop: 4,
+    marginTop: 6,
   },
   loadingMore: {
     paddingVertical: 16,

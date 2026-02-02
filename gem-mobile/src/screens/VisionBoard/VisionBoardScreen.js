@@ -72,6 +72,7 @@ import {
   Play,
   Star,
   Eye,
+  Calendar,
 } from 'lucide-react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
@@ -239,10 +240,17 @@ import {
   GoalThumbnailCard,
   GoalsGridSection,
   CalendarHeatMap,
+  GoalCreationOptions,
 } from '../../components/VisionBoard';
 
 // NEW: Goal Setup Questionnaire for deeper personalization
 import GoalSetupQuestionnaire from '../../components/VisionBoard/GoalSetupQuestionnaire';
+
+// NEW: Centralized Templates - TemplateSelector for Journal/Template creation
+import TemplateSelector from '../../components/shared/templates/TemplateSelector';
+
+// NEW: Journal Routing Service for two-way linking
+import { createQuickGoalWithJournal } from '../../services/templates/journalRoutingService';
 
 // Gamification imports
 import {
@@ -3031,6 +3039,9 @@ const VisionBoardScreen = () => {
 
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showGoalCreationOptions, setShowGoalCreationOptions] = useState(false);
+  const [showTemplateSelectorModal, setShowTemplateSelectorModal] = useState(false);
+  const [showCalendarTemplateSelector, setShowCalendarTemplateSelector] = useState(false); // For calendar add event flow
   const [editingWidget, setEditingWidget] = useState(null);
   const [widgetForm, setWidgetForm] = useState({
     type: 'affirmation',
@@ -3070,6 +3081,10 @@ const VisionBoardScreen = () => {
   const [journalPaperTrades, setJournalPaperTrades] = useState([]);
   const [journalTradingJournal, setJournalTradingJournal] = useState([]);
   const [journalActions, setJournalActions] = useState([]);
+  // Calendar Smart Journal data
+  const [journalEntries, setJournalEntries] = useState([]);
+  const [tradingEntries, setTradingEntries] = useState([]);
+  const [journalMood, setJournalMood] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -3885,9 +3900,13 @@ const VisionBoardScreen = () => {
           if (!eventsMap[today]) eventsMap[today] = [];
           eventsMap[today].push({
             id: w.id,
-            title: 'Khẳng định hàng ngày',
+            title: content?.text || content?.title || 'Khẳng định hàng ngày',
+            description: content?.text || content?.affirmation || null,
             type: 'affirmation',
             color: '#FFD700',
+            source_type: 'affirmation',
+            source_id: w.id,
+            is_completed: content?.completed || w.is_completed || false,
           });
         }
 
@@ -5527,16 +5546,34 @@ const VisionBoardScreen = () => {
     });
   }, [user?.id]);
 
-  // Add new widget - now opens multi-step modal
+  // Add new widget - now opens GoalCreationOptions first
   const handleAddWidget = useCallback(() => {
-    console.log('[VisionBoard] handleAddWidget called - opening modal');
+    console.log('[VisionBoard] handleAddWidget called - opening GoalCreationOptions');
+    setShowGoalCreationOptions(true);
+  }, []);
+
+  // Handle GoalCreationOptions selection
+  const handleQuickCreate = useCallback(() => {
+    // "Tạo nhanh theo lĩnh vực" - Use existing life area selector flow
+    console.log('[VisionBoard] Quick create by life area selected');
     setEditingWidget(null);
     setWidgetForm({ type: 'goal', title: '', content: '' });
-    setModalStep(1); // Start at step 1: lifeArea selection
+    setModalStep(1); // Start at step 1: lifeArea selection (existing flow)
     setSelectedLifeArea(null);
     setScenarios([]);
     setSelectedScenario(null);
     setShowAddModal(true);
+  }, []);
+
+  const handleTemplateCreate = useCallback(() => {
+    // "Tạo từ Journal/Template" - Show TemplateSelector for Fear-Setting, Think Day, etc.
+    console.log('[VisionBoard] Template create selected - showing TemplateSelector');
+    setShowTemplateSelectorModal(true);
+  }, []);
+
+  const handleGemMasterCreate = useCallback(() => {
+    console.log('[VisionBoard] GEM Master create selected - navigating');
+    // Navigation handled by GoalCreationOptions component
   }, []);
 
   // Fetch scenarios from database when lifeArea is selected
@@ -5594,6 +5631,7 @@ const VisionBoardScreen = () => {
   }, []);
 
   // Handle questionnaire completion - save personalized goal + affirmations + actions
+  // NOW uses journalRoutingService for two-way linking with Calendar/Journal
   const handleQuestionnaireComplete = useCallback(async (personalizedData) => {
     console.log('[VisionBoard] Questionnaire completed:', personalizedData);
     console.log('[VisionBoard] Rituals from questionnaire:', personalizedData?.rituals);
@@ -5602,141 +5640,65 @@ const VisionBoardScreen = () => {
     if (!user?.id || !personalizedData) return;
 
     try {
-      const lifeAreaInfo = LIFE_AREAS.find(la => la.key === personalizedData.lifeArea);
-      const timestamp = Date.now();
-
       // Get rituals - use provided or fallback to default for life area
       const providedRituals = personalizedData?.rituals || [];
       const defaultRitual = DEFAULT_RITUALS[personalizedData.lifeArea] || DEFAULT_RITUALS.personal;
       const ritualsToSave = providedRituals.length > 0 ? providedRituals : [defaultRitual];
 
-      console.log('[VisionBoard] Saving goal with rituals:', {
-        provided: providedRituals?.length || 0,
-        autoSelected: providedRituals.length === 0,
-        ritualsToSave,
+      console.log('[VisionBoard] Saving goal with two-way linking via journalRoutingService:', {
+        goalTitle: personalizedData.goalTitle,
+        lifeArea: personalizedData.lifeArea,
+        rituals: ritualsToSave.length,
       });
 
-      // Create GOAL widget with personalized title
-      // NOTE: Use direct objects (not JSON.stringify) for JSONB columns - Supabase handles serialization
-      const goalData = {
-        user_id: user.id,
-        type: 'goal',
-        title: personalizedData.goalTitle,
-        icon: 'target',
-        content: {
-          lifeArea: personalizedData.lifeArea,
-          deadline: personalizedData.deadline,
-          questionnaire: personalizedData.questionnaire, // Save answers for reference
-          goals: [{
-            id: `goal_${timestamp}_0`,
-            title: personalizedData.goalTitle,
-            completed: false,
-            rituals: ritualsToSave, // Save selected or default rituals
-          }],
-          rituals: ritualsToSave, // Also save at content level for easy access
-        },
-        is_active: true,
-      };
-
-      // Create AFFIRMATION widget with personalized affirmations
-      const affirmationData = {
-        user_id: user.id,
-        type: 'affirmation',
-        title: `${lifeAreaInfo?.label || personalizedData.lifeArea} Affirmations`,
-        icon: 'sparkles',
-        content: {
-          lifeArea: personalizedData.lifeArea,
-          affirmations: personalizedData.affirmations || [],
-        },
-        is_active: true,
-      };
-
-      // Create ACTION PLAN widget with personalized action steps (including action_type)
-      const actionPlanData = {
-        user_id: user.id,
-        type: 'action_plan',
-        title: `Kế hoạch: ${personalizedData.goalTitle}`,
-        icon: 'list-checks',
-        content: {
-          lifeArea: personalizedData.lifeArea,
-          deadline: personalizedData.deadline,
-          steps: (personalizedData.actionSteps || []).map((step, i) => ({
-            id: step.id || `step_${timestamp}_${i}`,
-            title: step.title || step,
-            description: step.description || '',
-            action_type: step.action_type || 'daily', // NEW: Include action_type
-            completed: false,
-          })),
-        },
-        is_active: true,
-      };
-
-      console.log('[VisionBoard] Saving personalized widgets...');
-
-      // Insert GOAL widget FIRST to get its ID
-      const { data: goalResult, error: goalError } = await supabase
-        .from('vision_board_widgets')
-        .insert(goalData)
-        .select()
-        .single();
-
-      if (goalError) throw goalError;
-
-      const goalId = goalResult.id;
-
-      // Debug: Log what Supabase returned
-      console.log('[VisionBoard] Goal widget saved, content returned:', {
-        contentType: typeof goalResult.content,
-        content: goalResult.content,
-        parsedContent: typeof goalResult.content === 'string'
-          ? JSON.parse(goalResult.content)
-          : goalResult.content,
+      // Use journalRoutingService for two-way linking with Calendar/Journal
+      const result = await createQuickGoalWithJournal({
+        userId: user.id,
+        lifeArea: personalizedData.lifeArea,
+        goalTitle: personalizedData.goalTitle,
+        goalDescription: personalizedData.questionnaire
+          ? `Từ questionnaire: ${JSON.stringify(personalizedData.questionnaire)}`
+          : '',
+        actions: (personalizedData.actionSteps || []).map((step, i) => ({
+          id: step.id || `step_${Date.now()}_${i}`,
+          title: step.title || step,
+          text: step.title || step,
+          description: step.description || '',
+          action_type: step.action_type || 'daily',
+        })),
+        affirmations: personalizedData.affirmations || [],
+        questionnaire: personalizedData.questionnaire,
+        deadline: personalizedData.deadline,
+        rituals: ritualsToSave,
       });
 
-      // Update affirmationData with goalId in content
-      // NOTE: linked_goal_id column doesn't exist, store in content.linked_goal_id instead
-      affirmationData.content = {
-        ...affirmationData.content,
-        goalId: goalId,
-        linked_goal_id: goalId, // Store in content for GoalDetailScreen query
-      };
+      if (result.success) {
+        console.log('[VisionBoard] Goal created with two-way linking:', {
+          journalId: result.journalEntry?.id,
+          goalId: result.goal?.id,
+          widgetId: result.widget?.id,
+        });
 
-      // Update actionPlanData with goalId in content
-      actionPlanData.content = {
-        ...actionPlanData.content,
-        goalId: goalId,
-        linked_goal_id: goalId, // Store in content for GoalDetailScreen query
-      };
+        // Update local widget state with all created widgets
+        const newWidgets = [
+          result.widget,
+          result.affirmationWidget,
+          result.actionPlanWidget,
+        ].filter(Boolean);
 
-      const { data: affirmResult, error: affirmError } = await supabase
-        .from('vision_board_widgets')
-        .insert(affirmationData)
-        .select()
-        .single();
+        setWidgets(prev => [...prev, ...newWidgets]);
 
-      if (affirmError) throw affirmError;
-
-      const { data: actionResult, error: actionError } = await supabase
-        .from('vision_board_widgets')
-        .insert(actionPlanData)
-        .select()
-        .single();
-
-      if (actionError) throw actionError;
-
-      console.log('[VisionBoard] All personalized widgets saved with goalId:', goalId);
-
-      // Update local state
-      setWidgets(prev => [...prev, goalResult, affirmResult, actionResult]);
-
-      // Show success with personalization note
-      setAlertConfig({
-        visible: true,
-        type: 'success',
-        title: 'Mục tiêu đã được cá nhân hóa!',
-        message: `"${personalizedData.goalTitle}" với ${personalizedData.affirmations?.length || 0} khẳng định và ${personalizedData.actionSteps?.length || 0} bước hành động phù hợp với bạn.`,
-        buttons: [{ text: 'Tuyệt vời!', style: 'primary' }],
-      });
+        // Show success with personalization note
+        setAlertConfig({
+          visible: true,
+          type: 'success',
+          title: 'Mục tiêu đã được cá nhân hóa!',
+          message: `"${personalizedData.goalTitle}" với ${personalizedData.affirmations?.length || 0} khẳng định và ${personalizedData.actionSteps?.length || 0} bước hành động. Đã liên kết với Calendar & Journal.`,
+          buttons: [{ text: 'Tuyệt vời!', style: 'primary' }],
+        });
+      } else {
+        throw new Error(result.error || 'Không thể tạo mục tiêu');
+      }
 
       // Reset selection state
       setSelectedScenario(null);
@@ -5748,11 +5710,11 @@ const VisionBoardScreen = () => {
         visible: true,
         type: 'error',
         title: 'Lỗi',
-        message: 'Không thể lưu mục tiêu. Vui lòng thử lại.',
+        message: error.message || 'Không thể lưu mục tiêu. Vui lòng thử lại.',
         buttons: [{ text: 'OK', style: 'primary' }],
       });
     }
-  }, [user?.id, LIFE_AREAS]);
+  }, [user?.id]);
 
   // Handle "Manual entry" - go to step 3 (old form)
   const handleManualEntry = useCallback(() => {
@@ -6147,15 +6109,19 @@ const VisionBoardScreen = () => {
                 selectedDate={selectedDate}
                 onDateSelect={async (date) => {
                   setSelectedDate(date);
-                  // Fetch journal data for the selected date
+                  // Fetch journal data for the selected date (including mood)
                   if (user?.id) {
-                    const journalResult = await calendarService.getDailyJournal(user.id, date);
+                    const journalResult = await calendarService.getDayCalendarData(user.id, date);
                     if (journalResult.success) {
-                      setJournalRituals(journalResult.rituals);
-                      setJournalReadings(journalResult.readings);
+                      setJournalRituals(journalResult.rituals || []);
+                      setJournalReadings(journalResult.readings || []);
                       setJournalPaperTrades(journalResult.paperTrades || []);
                       setJournalTradingJournal(journalResult.tradingJournal || []);
                       setJournalActions(journalResult.actions || []);
+                      // Calendar Smart Journal data
+                      setJournalEntries(journalResult.journal || []);
+                      setTradingEntries(journalResult.trading || []);
+                      setJournalMood(journalResult.mood || null);
                     }
                   }
                   // Show day detail modal when date is selected
@@ -6176,6 +6142,9 @@ const VisionBoardScreen = () => {
                 setJournalPaperTrades([]);
                 setJournalTradingJournal([]);
                 setJournalActions([]);
+                setJournalEntries([]);
+                setTradingEntries([]);
+                setJournalMood(null);
               }}
               date={selectedDate}
               events={calendarEvents[selectedDate] || []}
@@ -6184,21 +6153,98 @@ const VisionBoardScreen = () => {
               paperTrades={journalPaperTrades}
               tradingJournal={journalTradingJournal}
               actions={journalActions}
-              onEventComplete={(eventId) => {
-                console.log('[VisionBoard] Event completed:', eventId);
-                // TODO: Mark event as complete
+              journalEntries={journalEntries}
+              tradingEntries={tradingEntries}
+              mood={journalMood}
+              onEventComplete={async (event) => {
+                console.log('[VisionBoard] Event completed:', event.id);
+                try {
+                  const result = await calendarService.completeEvent(event.id, user?.id);
+                  if (result.success) {
+                    // Update local state to reflect the change
+                    setCalendarEvents(prev => {
+                      const updated = { ...prev };
+                      const dateKey = event.event_date || selectedDate;
+                      if (updated[dateKey]) {
+                        updated[dateKey] = updated[dateKey].map(e =>
+                          e.id === event.id ? { ...e, is_completed: true } : e
+                        );
+                      }
+                      return updated;
+                    });
+                    console.log('[VisionBoard] Event marked as completed successfully');
+                  } else {
+                    console.error('[VisionBoard] Failed to complete event:', result.error);
+                  }
+                } catch (error) {
+                  console.error('[VisionBoard] Complete event error:', error);
+                }
               }}
               onAddEvent={() => {
                 console.log('[VisionBoard] Add event for date:', selectedDate);
-                setAddEventModalVisible(true);
+                // Close day modal and show template selector for calendar
+                setDayDetailModalVisible(false);
+                setTimeout(() => {
+                  setShowCalendarTemplateSelector(true);
+                }, 200);
               }}
               onRitualPress={(ritual) => {
                 console.log('[VisionBoard] Ritual pressed:', ritual.ritual_slug);
-                // Could navigate to ritual details in the future
+                setDayDetailModalVisible(false);
+                // Navigate to the specific ritual screen
+                const ritualSlug = ritual.ritual_slug || ritual.ritual_id;
+                const ritualScreenMap = {
+                  'heart-expansion': 'HeartExpansionRitual',
+                  'gratitude-flow': 'GratitudeFlowRitual',
+                  'cleansing-breath': 'CleansingBreathRitual',
+                  'water-manifest': 'WaterManifestRitual',
+                  'letter-to-universe': 'LetterToUniverseRitual',
+                  'burn-release': 'BurnReleaseRitual',
+                  'star-wish': 'StarWishRitual',
+                  'crystal-healing': 'CrystalHealingRitual',
+                };
+                const screenName = ritualScreenMap[ritualSlug];
+                if (screenName) {
+                  navigation.navigate(screenName);
+                } else {
+                  navigation.navigate('RitualHistory');
+                }
               }}
               onReadingPress={(reading) => {
                 console.log('[VisionBoard] Reading pressed:', reading.reading_type);
-                // Could navigate to reading details in the future
+                setDayDetailModalVisible(false);
+                // Navigate to divination screen with the reading
+                navigation.navigate('DivinationScreen', {
+                  defaultType: reading.reading_type,
+                  viewHistory: true,
+                  readingId: reading.id,
+                });
+              }}
+              onTradePress={(trade) => {
+                console.log('[VisionBoard] Trade pressed:', trade.id);
+                setDayDetailModalVisible(false);
+                // Navigate to paper trade history or trading journal
+                navigation.navigate('TradingJournal', {
+                  mode: 'edit',
+                  entryId: trade.id,
+                  date: selectedDate,
+                });
+              }}
+              onMoodUpdated={async () => {
+                // Refresh journal data after mood is saved
+                if (user?.id && selectedDate) {
+                  const journalResult = await calendarService.getDayCalendarData(user.id, selectedDate);
+                  if (journalResult.success) {
+                    setJournalRituals(journalResult.rituals || []);
+                    setJournalReadings(journalResult.readings || []);
+                    setJournalPaperTrades(journalResult.paperTrades || []);
+                    setJournalTradingJournal(journalResult.tradingJournal || []);
+                    setJournalActions(journalResult.actions || []);
+                    setJournalEntries(journalResult.journal || []);
+                    setTradingEntries(journalResult.trading || []);
+                    setJournalMood(journalResult.mood || null);
+                  }
+                }
               }}
             />
 
@@ -6222,17 +6268,76 @@ const VisionBoardScreen = () => {
                     setCalendarEvents(result.eventsByDate || {});
                   }
                   // Also refresh the day detail if open
-                  const journalResult = await calendarService.getDailyJournal(user.id, selectedDate);
+                  const journalResult = await calendarService.getDayCalendarData(user.id, selectedDate);
                   if (journalResult.success) {
-                    setJournalRituals(journalResult.rituals);
-                    setJournalReadings(journalResult.readings);
+                    setJournalRituals(journalResult.rituals || []);
+                    setJournalReadings(journalResult.readings || []);
                     setJournalPaperTrades(journalResult.paperTrades || []);
                     setJournalTradingJournal(journalResult.tradingJournal || []);
                     setJournalActions(journalResult.actions || []);
+                    setJournalEntries(journalResult.journal || []);
+                    setTradingEntries(journalResult.trading || []);
+                    setJournalMood(journalResult.mood || null);
                   }
                 }
               }}
             />
+
+            {/* Calendar Template Selector Modal */}
+            <Modal
+              visible={showCalendarTemplateSelector}
+              transparent
+              animationType="slide"
+              onRequestClose={() => setShowCalendarTemplateSelector(false)}
+            >
+              <Pressable
+                style={styles.calendarTemplateSelectorOverlay}
+                onPress={() => setShowCalendarTemplateSelector(false)}
+              >
+                <Pressable style={styles.calendarTemplateSelectorContainer} onPress={e => e.stopPropagation()}>
+                  <View style={styles.calendarTemplateSelectorHeader}>
+                    <Text style={styles.calendarTemplateSelectorTitle}>Chọn loại nhật ký</Text>
+                    <TouchableOpacity onPress={() => setShowCalendarTemplateSelector(false)}>
+                      <X size={24} color={COLORS.textPrimary} />
+                    </TouchableOpacity>
+                  </View>
+                  <ScrollView
+                    style={styles.calendarTemplateSelectorContent}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                    showsVerticalScrollIndicator={true}
+                    bounces={true}
+                  >
+                    <TemplateSelector
+                      onSelect={(template) => {
+                        const templateId = template?.id || template;
+                        console.log('[VisionBoard] Calendar template selected:', templateId);
+                        setShowCalendarTemplateSelector(false);
+                        // Navigate to JournalEntry screen with template
+                        navigation.navigate('JournalEntry', {
+                          mode: 'create',
+                          date: selectedDate,
+                          templateId: templateId,
+                        });
+                      }}
+                      userTier={userTier}
+                      userRole={user?.role}
+                      layout="grid"
+                      showDescription={true}
+                    />
+                  </ScrollView>
+                  <TouchableOpacity
+                    style={styles.calendarSkipTemplateButton}
+                    onPress={() => {
+                      setShowCalendarTemplateSelector(false);
+                      setAddEventModalVisible(true); // Show basic event modal
+                    }}
+                  >
+                    <Calendar size={18} color={COLORS.textSecondary} />
+                    <Text style={styles.calendarSkipTemplateText}>Tạo sự kiện đơn giản</Text>
+                  </TouchableOpacity>
+                </Pressable>
+              </Pressable>
+            </Modal>
 
             {/* Life Balance Radar Chart - New Full Card UI */}
             <LifeBalanceCard
@@ -6609,6 +6714,57 @@ const VisionBoardScreen = () => {
         showStreakHistory={showStreakHistory}
         onCloseStreakHistory={() => setShowStreakHistory(false)}
       />
+
+      {/* Goal Creation Options - 3 entry points modal */}
+      <GoalCreationOptions
+        visible={showGoalCreationOptions}
+        onClose={() => setShowGoalCreationOptions(false)}
+        onSelectQuick={handleQuickCreate}
+        onSelectTemplate={handleTemplateCreate}
+        onSelectGemMaster={handleGemMasterCreate}
+      />
+
+      {/* Template Selector Modal - For "Tạo từ Journal/Template" option */}
+      <Modal
+        visible={showTemplateSelectorModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowTemplateSelectorModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowTemplateSelectorModal(false)}
+        >
+          <View style={styles.templateSelectorContainer}>
+            <View style={styles.templateSelectorHeader}>
+              <Text style={styles.templateSelectorTitle}>Chọn Template</Text>
+              <TouchableOpacity onPress={() => setShowTemplateSelectorModal(false)}>
+                <X size={24} color={COLORS.textPrimary} />
+              </TouchableOpacity>
+            </View>
+            <TemplateSelector
+              userTier={userTier}
+              userRole={user?.role}
+              onSelect={(template) => {
+                console.log('[VisionBoard] Template selected:', template.id);
+                setShowTemplateSelectorModal(false);
+                // Navigate to GEM Master with the selected template
+                navigation.navigate('GemMaster', {
+                  autoShowTemplate: template.id,
+                  entryPoint: 'visionboard',
+                });
+              }}
+              onUpgradePress={() => {
+                setShowTemplateSelectorModal(false);
+                navigation.navigate('Subscription');
+              }}
+              layout="grid"
+              showDescription={true}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Goal Setup Questionnaire - Deeper personalization flow */}
       <GoalSetupQuestionnaire
@@ -8685,6 +8841,81 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(106, 91, 255, 0.3)',
     maxHeight: '90%',
     ...SHADOWS.glassHover,
+  },
+  // Template Selector Modal
+  templateSelectorContainer: {
+    width: '100%',
+    maxWidth: 420,
+    maxHeight: '85%',
+    backgroundColor: COLORS.bgDarkest,
+    borderRadius: 20,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+  },
+  templateSelectorHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  templateSelectorTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+  },
+  // Calendar Template Selector Modal
+  calendarTemplateSelectorOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  calendarTemplateSelectorContainer: {
+    backgroundColor: COLORS.bgDark,
+    borderTopLeftRadius: SPACING.xl,
+    borderTopRightRadius: SPACING.xl,
+    maxHeight: '90%',
+    minHeight: '75%',
+    paddingBottom: Platform.OS === 'ios' ? 40 : 70,
+  },
+  calendarTemplateSelectorHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  calendarTemplateSelectorTitle: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  calendarTemplateSelectorContent: {
+    flexGrow: 1,
+    flexShrink: 1,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.xxl,
+  },
+  calendarSkipTemplateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: SPACING.md,
+  },
+  calendarSkipTemplateText: {
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
   },
   modalHeader: {
     flexDirection: 'row',

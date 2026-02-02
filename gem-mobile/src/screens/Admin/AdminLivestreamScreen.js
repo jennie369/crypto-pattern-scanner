@@ -94,7 +94,7 @@ const SessionCard = ({ session, onPress, onAction }) => {
               onPress={() => onAction('stop', session)}
             >
               <Ionicons name="stop-circle" size={18} color="#fff" />
-              <Text style={styles.actionBtnText}>Ket thuc</Text>
+              <Text style={styles.actionBtnText}>Kết thúc</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -102,7 +102,7 @@ const SessionCard = ({ session, onPress, onAction }) => {
               onPress={() => onAction('start', session)}
             >
               <Ionicons name="play-circle" size={18} color="#fff" />
-              <Text style={styles.actionBtnText}>Bat dau</Text>
+              <Text style={styles.actionBtnText}>Bắt đầu</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -121,15 +121,15 @@ const StatsOverview = ({ stats }) => {
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
           <Text style={styles.statBoxValue}>{stats.totalSessions || 0}</Text>
-          <Text style={styles.statBoxLabel}>Tong Sessions</Text>
+          <Text style={styles.statBoxLabel}>Tổng Sessions</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statBoxValue}>{stats.liveSessions || 0}</Text>
-          <Text style={styles.statBoxLabel}>Dang Live</Text>
+          <Text style={styles.statBoxLabel}>Đang Live</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statBoxValue}>{stats.totalViewers || 0}</Text>
-          <Text style={styles.statBoxLabel}>Viewers Hom nay</Text>
+          <Text style={styles.statBoxLabel}>Viewers Hôm nay</Text>
         </View>
       </View>
       <View style={styles.statsRow}>

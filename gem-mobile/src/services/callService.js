@@ -58,7 +58,13 @@ class CallService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Chưa đăng nhập');
 
-      console.log('[CallService] Initiating call:', { conversationId, calleeId, callType });
+      console.log('[CallService] ========================================');
+      console.log('[CallService] INITIATING CALL');
+      console.log('[CallService] conversationId:', conversationId);
+      console.log('[CallService] calleeId (người nhận):', calleeId);
+      console.log('[CallService] callType:', callType);
+      console.log('[CallService] Current user (người gọi):', user.id);
+      console.log('[CallService] ========================================');
 
       // 1. Check if already in a call
       if (this.currentCallId) {
@@ -156,6 +162,11 @@ class CallService {
       }
 
       // 10. Send VoIP push notification (preferred) or regular push
+      console.log('[CallService] ========================================');
+      console.log('[CallService] SENDING PUSH NOTIFICATION');
+      console.log('[CallService] Sending TO (calleeId):', calleeId);
+      console.log('[CallService] Caller profile:', caller.id, caller.display_name);
+      console.log('[CallService] ========================================');
       await this._sendVoIPPushNotification(call, caller, calleeId);
 
       // 11. Start ring timeout

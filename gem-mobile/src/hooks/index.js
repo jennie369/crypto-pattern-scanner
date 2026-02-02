@@ -15,3 +15,7 @@ export { default as useAnimationOrchestrator } from './useAnimationOrchestrator'
 // Ritual Specific
 export { default as useRitualVideo, FALLBACK_GRADIENTS } from './useRitualVideo';
 export { default as useRitualHaptics } from './useRitualHaptics';
+
+// Template System (Centralized Templates)
+export { useTemplate, useTemplateIntent } from './useTemplate';
+export { useTemplateSettings, useTemplateUsageStats } from './useTemplateSettings';

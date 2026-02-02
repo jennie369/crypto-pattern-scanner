@@ -19,8 +19,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Modal,
-  Pressable,
 } from 'react-native';
 import alertService from '../../services/alertService';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,8 +27,6 @@ import {
   ArrowLeft,
   Search,
   X,
-  Trash2,
-  AlertTriangle,
 } from 'lucide-react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
@@ -60,10 +56,6 @@ const ChatHistoryScreen = ({ navigation, route }) => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  // Delete modal state
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [conversationToDelete, setConversationToDelete] = useState(null);
 
   const searchTimeoutRef = useRef(null);
 
@@ -172,26 +164,18 @@ const ChatHistoryScreen = ({ navigation, route }) => {
     navigation.goBack();
   }, [navigation, onLoadConversation]);
 
-  // Handle delete press - show confirmation
-  const handleDeletePress = useCallback((conversationId) => {
-    setConversationToDelete(conversationId);
-    setShowDeleteModal(true);
-  }, []);
-
-  // Confirm delete
-  const handleConfirmDelete = useCallback(async () => {
-    if (!conversationToDelete || !user) return;
+  // Handle delete press - delete directly without confirmation
+  const handleDeletePress = useCallback(async (conversationId) => {
+    if (!user) return;
 
     try {
-      await chatHistoryService.deleteConversation(conversationToDelete, user.id);
-      setConversations(prev => prev.filter(c => c.id !== conversationToDelete));
-      setShowDeleteModal(false);
-      setConversationToDelete(null);
+      await chatHistoryService.deleteConversation(conversationId, user.id);
+      setConversations(prev => prev.filter(c => c.id !== conversationId));
     } catch (error) {
       console.error('[ChatHistory] Delete error:', error);
       alertService.error('Lỗi', 'Không thể xóa cuộc trò chuyện. Vui lòng thử lại.');
     }
-  }, [conversationToDelete, user]);
+  }, [user]);
 
   // Handle archive/unarchive
   const handleArchive = useCallback(async (conversationId) => {
@@ -353,68 +337,6 @@ const ChatHistoryScreen = ({ navigation, route }) => {
             />
           )}
 
-          {/* Delete Confirmation Modal */}
-          <Modal
-            visible={showDeleteModal}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowDeleteModal(false)}
-          >
-            <Pressable
-              style={styles.modalOverlay}
-              onPress={() => setShowDeleteModal(false)}
-            >
-              <Pressable
-                style={styles.modalContent}
-                onPress={(e) => e.stopPropagation()}
-              >
-                {/* Header */}
-                <View style={styles.modalHeader}>
-                  <View style={styles.warningIcon}>
-                    <AlertTriangle size={24} color="#FFB800" />
-                  </View>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={() => setShowDeleteModal(false)}
-                  >
-                    <X size={20} color={COLORS.textMuted} />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Content */}
-                <Text style={styles.modalTitle}>Xóa cuộc trò chuyện?</Text>
-                <Text style={styles.modalDescription}>
-                  Cuộc trò chuyện này sẽ bị xóa vĩnh viễn và không thể khôi phục.
-                </Text>
-
-                {/* Actions */}
-                <View style={styles.modalActions}>
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={() => setShowDeleteModal(false)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.cancelButtonText}>Hủy</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={handleConfirmDelete}
-                    activeOpacity={0.7}
-                  >
-                    <LinearGradient
-                      colors={['#FF6B6B', '#FF4444']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.confirmButton}
-                    >
-                      <Trash2 size={16} color="#FFFFFF" />
-                      <Text style={styles.confirmButtonText}>Xóa</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </View>
-              </Pressable>
-            </Pressable>
-          </Modal>
         </SafeAreaView>
       </LinearGradient>
     </GestureHandlerRootView>
@@ -520,82 +442,6 @@ const styles = StyleSheet.create({
   loadingMore: {
     paddingVertical: SPACING.lg,
     alignItems: 'center',
-  },
-
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.lg,
-  },
-  modalContent: {
-    width: '100%',
-    maxWidth: 320,
-    backgroundColor: COLORS.bgMid,
-    borderRadius: 16,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  warningIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 184, 0, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  modalTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: SPACING.sm,
-  },
-  modalDescription: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: SPACING.lg,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: SPACING.sm,
-  },
-  cancelButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  cancelButtonText: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  confirmButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-  },
-  confirmButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
   },
 });
 

@@ -41,6 +41,7 @@ import RepostSheet from '../../../components/RepostSheet';
 import GiftCatalogSheet from '../../../components/GiftCatalogSheet';
 import ReceivedGiftsBar from '../../../components/ReceivedGiftsBar';
 import QuotedPost from '../../../components/QuotedPost';
+import AdCommentsSheet from '../../../components/AdCommentsSheet';
 
 // NEW: Forum Reaction System (Phase 1)
 import ForumReactionButton from '../../../components/Forum/ForumReactionButton';
@@ -121,6 +122,7 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
   const [repostSheetVisible, setRepostSheetVisible] = useState(false);
   const [giftSheetVisible, setGiftSheetVisible] = useState(false);
   const [reactionsVisible, setReactionsVisible] = useState(false);
+  const [commentsSheetVisible, setCommentsSheetVisible] = useState(false); // Facebook-style comments modal
 
   // Image viewer state for tap-to-view full screen
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
@@ -134,6 +136,13 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
   const commentInputRef = useRef(null);
+
+  // Comments sheet state (modal for ImageGallery)
+  const [sheetComments, setSheetComments] = useState([]);
+  const [sheetCommentsLoading, setSheetCommentsLoading] = useState(false);
+  const [sheetCommentsLoadingMore, setSheetCommentsLoadingMore] = useState(false);
+  const [sheetCommentsPage, setSheetCommentsPage] = useState(1);
+  const [likedCommentIds, setLikedCommentIds] = useState([]);
 
   // ========== LINK PREVIEW ==========
 
@@ -414,6 +423,96 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
     }
     setShowComments(!showComments);
   }, [showComments, inlineComments.length, loadInlineComments]);
+
+  // Load comments for the sheet modal
+  const loadSheetComments = useCallback(async (reset = true) => {
+    if (reset) {
+      setSheetCommentsLoading(true);
+      setSheetCommentsPage(1);
+    } else {
+      setSheetCommentsLoadingMore(true);
+    }
+    try {
+      const page = reset ? 1 : sheetCommentsPage;
+      const rawComments = await forumService.getCommentsWithReplies(post.id, page, 20);
+      // Map comments to AdCommentsSheet format
+      const mappedComments = (rawComments || []).map(comment => ({
+        ...comment,
+        display_name: comment.author?.full_name || 'Người dùng',
+        avatar_url: comment.author?.avatar_url,
+        likes_count: comment.likes_count || 0,
+        replies_count: comment.replies?.length || 0,
+      }));
+      if (reset) {
+        setSheetComments(mappedComments);
+      } else {
+        setSheetComments(prev => [...prev, ...mappedComments]);
+      }
+      if (!reset) setSheetCommentsPage(page + 1);
+    } catch (error) {
+      console.error('[PostCard] Load sheet comments error:', error);
+    } finally {
+      setSheetCommentsLoading(false);
+      setSheetCommentsLoadingMore(false);
+    }
+  }, [post.id, sheetCommentsPage]);
+
+  // Open comments sheet (from ImageGallery)
+  const openCommentsSheet = useCallback(() => {
+    setCommentsSheetVisible(true);
+    if (sheetComments.length === 0) {
+      loadSheetComments(true);
+    }
+  }, [sheetComments.length, loadSheetComments]);
+
+  // Submit comment in sheet
+  const handleSheetSubmitComment = useCallback(async (content, parentId) => {
+    if (!isAuthenticated) return;
+    try {
+      const { data } = await forumService.createComment(post.id, content, parentId || null);
+      if (data) {
+        const displayName = profile?.full_name || profile?.display_name || user?.user_metadata?.full_name || 'Bạn';
+        const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
+        const newComment = {
+          ...data,
+          display_name: displayName,
+          avatar_url: avatarUrl,
+          replies_count: 0,
+          likes_count: 0,
+        };
+        setSheetComments(prev => [newComment, ...prev]);
+        setCommentsCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('[PostCard] Submit sheet comment error:', error);
+    }
+  }, [post.id, isAuthenticated, profile, user]);
+
+  // Like comment in sheet
+  const handleSheetLikeComment = useCallback(async (commentId) => {
+    if (!isAuthenticated) return;
+    const isLiked = likedCommentIds.includes(commentId);
+    // Optimistic update
+    if (isLiked) {
+      setLikedCommentIds(prev => prev.filter(id => id !== commentId));
+    } else {
+      setLikedCommentIds(prev => [...prev, commentId]);
+    }
+    try {
+      if (isLiked) {
+        await forumService.unlikeComment(commentId);
+      } else {
+        await forumService.likeComment(commentId);
+      }
+    } catch (error) {
+      // Revert on error
+      if (isLiked) {
+        setLikedCommentIds(prev => [...prev, commentId]);
+      } else {
+        setLikedCommentIds(prev => prev.filter(id => id !== commentId));
+      }
+    }
+  }, [isAuthenticated, likedCommentIds]);
 
   // Handle comment button press - now toggles inline comments
   const handleComment = () => {
@@ -1468,6 +1567,25 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
         }}
       />
 
+      {/* Facebook-style Comments Sheet Modal */}
+      <AdCommentsSheet
+        visible={commentsSheetVisible}
+        onClose={() => setCommentsSheetVisible(false)}
+        comments={sheetComments}
+        onLoadMore={() => loadSheetComments(false)}
+        onSubmitComment={handleSheetSubmitComment}
+        onLikeComment={handleSheetLikeComment}
+        loading={sheetCommentsLoading}
+        loadingMore={sheetCommentsLoadingMore}
+        currentUser={{
+          id: user?.id,
+          avatar_url: profile?.avatar_url || user?.user_metadata?.avatar_url,
+          display_name: profile?.full_name || profile?.display_name || user?.user_metadata?.full_name || 'Bạn',
+        }}
+        likedCommentIds={likedCommentIds}
+        reactionCount={totalCount}
+      />
+
       {/* NEW: Forum Reaction Tooltip (Phase 1) - replaces ReactionsListSheet */}
       <ForumReactionTooltip
         visible={reactionsVisible}
@@ -1487,7 +1605,28 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
           initialIndex={imageViewerIndex}
           onClose={() => setImageViewerVisible(false)}
           postContent={post?.content || ''}
-          authorName={post?.profiles?.display_name || post?.profiles?.username || ''}
+          authorName={post?.profiles?.display_name || post?.profiles?.full_name || post?.profiles?.username || ''}
+          postDate={post?.created_at}
+          privacy={post?.privacy || 'public'}
+          reactionCount={totalCount || 0}
+          commentCount={commentsCount || 0}
+          shareCount={post?.share_count || 0}
+          isLiked={hasReacted}
+          onLike={handleLike}
+          onComment={() => {
+            // Close gallery first, then open comments sheet modal
+            setImageViewerVisible(false);
+            setTimeout(() => {
+              openCommentsSheet();
+            }, 300);
+          }}
+          onSharePost={() => {
+            // Close gallery first, then show share sheet
+            setImageViewerVisible(false);
+            setTimeout(() => {
+              handleShare();
+            }, 300);
+          }}
           showOverlay={true}
         />
       )}

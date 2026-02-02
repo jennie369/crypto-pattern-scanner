@@ -149,7 +149,8 @@ export const giftService = {
         gift.gem_cost,
         `Nhận quà "${gift.name}"${isAnonymous ? ' từ ẩn danh' : ''}`,
         sentGift.id,
-        'gift_received'
+        'gift_received',
+        isAnonymous ? null : user.id // Pass sender ID for related_user_id
       );
 
       if (!receiveResult.success) {
@@ -447,20 +448,21 @@ export const giftService = {
    * @param {string} description - Description
    * @param {string} referenceId - Reference ID (sent_gift ID)
    * @param {string} referenceType - Reference type
+   * @param {string} relatedUserId - Sender user ID (for transaction history)
    * @returns {Promise<object>}
    */
-  async _addGemsToRecipient(recipientId, amount, description, referenceId, referenceType) {
+  async _addGemsToRecipient(recipientId, amount, description, referenceId, referenceType, relatedUserId = null) {
     try {
-      console.log('[Gift] _addGemsToRecipient called:', { recipientId, amount, description, referenceId, referenceType });
+      console.log('[Gift] _addGemsToRecipient called:', { recipientId, amount, description, referenceId, referenceType, relatedUserId });
 
-      // Try RPC function first
+      // Try RPC function first (without related_user_id as it may not exist)
       // Note: RPC uses 'receive' type internally, which matches the CHECK constraint
       const { data: rpcResult, error: rpcError } = await supabase
         .rpc('receive_gems', {
           p_recipient_id: recipientId,
           p_amount: amount,
           p_description: description,
-          p_reference_id: referenceId || null, // Ensure null instead of undefined
+          p_reference_id: referenceId || null,
           p_reference_type: referenceType || 'gift',
         });
 

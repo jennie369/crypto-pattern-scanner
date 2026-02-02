@@ -15,6 +15,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -24,10 +26,19 @@ import * as Icons from 'lucide-react-native';
 import { COLORS, TYPOGRAPHY, SPACING, GLASS, GRADIENTS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
 import calendarService from '../../services/calendarService';
+import { useCalendar } from '../../contexts/CalendarContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { MonthCalendar, DayDetailModal, CalendarEventItem } from '../../components/Calendar';
+import AddEventModal from '../../components/Calendar/AddEventModal';
+
+// Centralized Templates
+import { TemplateSelector } from '../../components/shared/templates';
+import { TEMPLATES, getTemplate } from '../../services/templates/journalTemplates';
+import { processTemplateSubmission } from '../../services/templates/journalRoutingService';
 
 const CalendarScreen = () => {
   const navigation = useNavigation();
+  const { user, userTier, userRole } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -40,12 +51,22 @@ const CalendarScreen = () => {
 
   // Modal
   const [showDayModal, setShowDayModal] = useState(false);
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [addEventDate, setAddEventDate] = useState(null);
+
+  // Template selection state
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
 
   // Journal data (rituals, readings, trades)
   const [journalRituals, setJournalRituals] = useState([]);
   const [journalReadings, setJournalReadings] = useState([]);
   const [journalPaperTrades, setJournalPaperTrades] = useState([]);
   const [journalTradingJournal, setJournalTradingJournal] = useState([]);
+  // Calendar Smart Journal data
+  const [journalEntries, setJournalEntries] = useState([]);
+  const [tradingEntries, setTradingEntries] = useState([]);
+  const [moodData, setMoodData] = useState(null);
 
   // Get user
   useEffect(() => {
@@ -128,17 +149,25 @@ const CalendarScreen = () => {
   // Handle date selection
   const handleDateSelect = async (date) => {
     setSelectedDate(date);
-    // Fetch journal data for the selected date
+    // Fetch all calendar data for the selected date
     if (userId) {
       const dateStr = date.toISOString().split('T')[0];
-      console.log('[Calendar] Fetching journal data for:', dateStr);
-      const journalResult = await calendarService.getDailyJournal(userId, dateStr);
-      console.log('[Calendar] Journal result:', journalResult.success, 'rituals:', journalResult.rituals?.length);
-      if (journalResult.success) {
-        setJournalRituals(journalResult.rituals);
-        setJournalReadings(journalResult.readings);
-        setJournalPaperTrades(journalResult.paperTrades || []);
-        setJournalTradingJournal(journalResult.tradingJournal || []);
+      console.log('[Calendar] Fetching calendar data for:', dateStr);
+
+      // Use getDayCalendarData for comprehensive data including journal entries
+      const dayData = await calendarService.getDayCalendarData(userId, dateStr);
+      console.log('[Calendar] Day data result:', dayData.success);
+
+      if (dayData.success) {
+        // Legacy data from rituals/readings
+        setJournalRituals(dayData.rituals || []);
+        setJournalReadings(dayData.readings || []);
+        setJournalPaperTrades(dayData.paperTrades || []);
+        setJournalTradingJournal(dayData.tradingJournal || []);
+        // New Calendar Smart Journal data
+        setJournalEntries(dayData.journal || []);
+        setTradingEntries(dayData.trading || []);
+        setMoodData(dayData.mood);
       }
     }
     setShowDayModal(true);
@@ -166,12 +195,94 @@ const CalendarScreen = () => {
   // Handle event complete
   const handleEventComplete = async (event) => {
     try {
-      await calendarService.completeCalendarEvent(event.id);
-      await loadEvents();
+      const result = await calendarService.completeEvent(event.id, userId);
+      if (result.success) {
+        // Update local state immediately
+        setEvents(prev => prev.map(e =>
+          e.id === event.id ? { ...e, is_completed: true } : e
+        ));
+        // Also refresh from server
+        await loadEvents();
+      } else {
+        console.error('[Calendar] Failed to complete event:', result.error);
+      }
     } catch (error) {
       console.error('[Calendar] Complete event error:', error);
     }
   };
+
+  // Handle add event from DayDetailModal - now shows template selector first
+  const handleAddEvent = useCallback((date) => {
+    const dateStr = typeof date === 'string' ? date : date?.toISOString().split('T')[0];
+    setAddEventDate(dateStr);
+    setShowDayModal(false); // Close day modal first
+    setTimeout(() => {
+      setShowTemplateSelector(true); // Show template selector first
+    }, 200);
+  }, []);
+
+  // Handle template selection - TemplateSelector passes full template object
+  const handleSelectTemplate = useCallback((template) => {
+    const templateId = template?.id || template;
+    console.log('[Calendar] Template selected:', templateId);
+    setSelectedTemplateId(templateId);
+    setShowTemplateSelector(false);
+    // Navigate to JournalEntry screen with template
+    navigation.navigate('JournalEntry', {
+      mode: 'create',
+      date: addEventDate || selectedDate?.toISOString().split('T')[0],
+      templateId: templateId,
+    });
+  }, [addEventDate, selectedDate, navigation]);
+
+  // Handle skip template (create simple event)
+  const handleSkipTemplate = useCallback(() => {
+    setShowTemplateSelector(false);
+    setShowAddEventModal(true); // Show basic event modal
+  }, []);
+
+  // Handle event created
+  const handleEventCreated = useCallback(async (newEvent) => {
+    console.log('[Calendar] Event created:', newEvent?.id);
+    // Refresh events list
+    await loadEvents();
+    // Re-select the date to refresh the selected date events
+    if (selectedDate) {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const dayData = await calendarService.getDayCalendarData(userId, dateStr);
+      if (dayData.success) {
+        setJournalRituals(dayData.rituals || []);
+        setJournalReadings(dayData.readings || []);
+        setJournalPaperTrades(dayData.paperTrades || []);
+        setJournalTradingJournal(dayData.tradingJournal || []);
+        setJournalEntries(dayData.journal || []);
+        setTradingEntries(dayData.trading || []);
+        setMoodData(dayData.mood);
+      }
+    }
+  }, [loadEvents, selectedDate, userId]);
+
+  // Handle edit event
+  const handleEditEvent = useCallback((event) => {
+    console.log('[Calendar] Edit event:', event.id);
+    setShowDayModal(false);
+    // Navigate to edit screen based on event type
+    navigation.navigate('EditEvent', {
+      eventId: event.id,
+      date: selectedDate?.toISOString().split('T')[0],
+    });
+  }, [navigation, selectedDate]);
+
+  // Handle delete event
+  const handleDeleteEvent = useCallback(async (event) => {
+    console.log('[Calendar] Delete event:', event.id);
+    try {
+      await calendarService.deleteEvent(event.id, userId);
+      await loadEvents();
+    } catch (error) {
+      console.error('[Calendar] Delete event error:', error);
+    }
+  }, [loadEvents, userId]);
 
   // Format month name
   const monthName = currentMonth.toLocaleDateString('vi-VN', {
@@ -279,6 +390,33 @@ const CalendarScreen = () => {
           )}
         </View>
 
+        {/* Quick Actions */}
+        <View style={styles.quickActionsSection}>
+          <Text style={styles.quickActionsTitle}>Thao tác nhanh</Text>
+          <View style={styles.quickActionsRow}>
+            <TouchableOpacity
+              style={[styles.quickActionButton, { borderColor: COLORS.purple }]}
+              onPress={() => navigation.navigate('JournalEntry', {
+                mode: 'create',
+                date: selectedDate.toISOString().split('T')[0],
+              })}
+            >
+              <Icons.BookOpen size={18} color={COLORS.purple} />
+              <Text style={[styles.quickActionText, { color: COLORS.purple }]}>Viết nhật ký</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.quickActionButton, { borderColor: COLORS.success }]}
+              onPress={() => navigation.navigate('TradingJournal', {
+                mode: 'create',
+                date: selectedDate.toISOString().split('T')[0],
+              })}
+            >
+              <Icons.TrendingUp size={18} color={COLORS.success} />
+              <Text style={[styles.quickActionText, { color: COLORS.success }]}>Ghi trade</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Legend */}
         <View style={styles.legend}>
           <Text style={styles.legendTitle}>Chú thích</Text>
@@ -314,6 +452,9 @@ const CalendarScreen = () => {
           setJournalReadings([]);
           setJournalPaperTrades([]);
           setJournalTradingJournal([]);
+          setJournalEntries([]);
+          setTradingEntries([]);
+          setMoodData(null);
         }}
         date={selectedDate instanceof Date ? selectedDate.toISOString().split('T')[0] : selectedDate}
         events={selectedDateEvents}
@@ -321,8 +462,14 @@ const CalendarScreen = () => {
         readings={journalReadings}
         paperTrades={journalPaperTrades}
         tradingJournal={journalTradingJournal}
+        journalEntries={journalEntries}
+        tradingEntries={tradingEntries}
+        mood={moodData}
         onEventPress={handleEventPress}
         onEventComplete={handleEventComplete}
+        onAddEvent={handleAddEvent}
+        onEditEvent={handleEditEvent}
+        onDeleteEvent={handleDeleteEvent}
         onRitualPress={(ritual) => {
           console.log('[Calendar] Ritual pressed:', ritual.ritual_slug);
           setShowDayModal(false);
@@ -359,9 +506,94 @@ const CalendarScreen = () => {
         onTradePress={(trade) => {
           console.log('[Calendar] Trade pressed:', trade.id);
           setShowDayModal(false);
-          // Navigate to trading journal or paper trade detail
-          navigation.navigate('TradingJournal', { tradeId: trade.id });
+          // Navigate to trading journal detail
+          navigation.navigate('TradingJournal', {
+            mode: 'edit',
+            entryId: trade.id,
+            date: selectedDate.toISOString().split('T')[0],
+          });
         }}
+        onJournalPress={(entry) => {
+          console.log('[Calendar] Journal entry pressed:', entry.id);
+          setShowDayModal(false);
+          // Navigate to journal entry edit screen
+          navigation.navigate('JournalEntry', {
+            mode: 'edit',
+            entryId: entry.id,
+            date: selectedDate.toISOString().split('T')[0],
+          });
+        }}
+        onAddJournal={() => {
+          setShowDayModal(false);
+          navigation.navigate('JournalEntry', {
+            mode: 'create',
+            date: selectedDate.toISOString().split('T')[0],
+          });
+        }}
+        onAddTrade={() => {
+          setShowDayModal(false);
+          navigation.navigate('TradingJournal', {
+            mode: 'create',
+            date: selectedDate.toISOString().split('T')[0],
+          });
+        }}
+        onMoodUpdated={async () => {
+          console.log('[Calendar] Mood updated, refreshing data...');
+          // Refresh full day data to get the latest mood
+          const dateStr = selectedDate.toISOString().split('T')[0];
+          const dayData = await calendarService.getDayCalendarData(userId, dateStr);
+          if (dayData.success) {
+            console.log('[Calendar] Mood data refreshed:', dayData.mood);
+            setMoodData(dayData.mood);
+          }
+        }}
+      />
+
+      {/* Template Selector Modal */}
+      <Modal
+        visible={showTemplateSelector}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowTemplateSelector(false)}
+      >
+        <Pressable
+          style={styles.templateModalOverlay}
+          onPress={() => setShowTemplateSelector(false)}
+        >
+          <Pressable style={styles.templateModalContainer} onPress={e => e.stopPropagation()}>
+            <View style={styles.templateModalHeader}>
+              <Text style={styles.templateModalTitle}>Chọn loại nhật ký</Text>
+              <TouchableOpacity onPress={() => setShowTemplateSelector(false)}>
+                <Icons.X size={24} color={COLORS.textPrimary} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.templateModalContent}>
+              <TemplateSelector
+                onSelect={handleSelectTemplate}
+                userTier={userTier}
+                userRole={userRole}
+                layout="grid"
+                showDescription={true}
+              />
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.skipTemplateButton}
+              onPress={handleSkipTemplate}
+            >
+              <Icons.Calendar size={18} color={COLORS.textSecondary} />
+              <Text style={styles.skipTemplateText}>Tạo sự kiện đơn giản</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Add Event Modal */}
+      <AddEventModal
+        visible={showAddEventModal}
+        date={addEventDate}
+        userId={userId}
+        onClose={() => setShowAddEventModal(false)}
+        onEventCreated={handleEventCreated}
       />
     </SafeAreaView>
   );
@@ -506,6 +738,37 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
 
+  // Quick Actions
+  quickActionsSection: {
+    marginBottom: SPACING.lg,
+  },
+  quickActionsTitle: {
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    marginBottom: SPACING.sm,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  quickActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: SPACING.md,
+    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    gap: SPACING.xs,
+  },
+  quickActionText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+
   // Legend
   legend: {
     backgroundColor: COLORS.glassBg,
@@ -541,6 +804,53 @@ const styles = StyleSheet.create({
 
   bottomSpacing: {
     height: 100,
+  },
+
+  // Template Modal
+  templateModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  templateModalContainer: {
+    backgroundColor: COLORS.bgDark,
+    borderTopLeftRadius: SPACING.xl,
+    borderTopRightRadius: SPACING.xl,
+    maxHeight: '80%',
+    paddingBottom: SPACING.xl,
+  },
+  templateModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  templateModalTitle: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  templateModalContent: {
+    maxHeight: 400,
+    paddingHorizontal: SPACING.md,
+  },
+  skipTemplateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: SPACING.md,
+  },
+  skipTemplateText: {
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
   },
 });
 

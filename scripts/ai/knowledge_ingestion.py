@@ -1463,6 +1463,7 @@ def main():
     trading_count = ingest_gemral_trading_knowledge()
     product_count = ingest_gemral_product_knowledge()
     guidelines_count = ingest_gem_master_response_guidelines()
+    partnership_count = ingest_partnership_knowledge()
 
     print('\n' + '='*60)
     print('INGESTION COMPLETE')
@@ -1471,7 +1472,129 @@ def main():
     print(f'Trading documents: {trading_count}')
     print(f'Product documents: {product_count}')
     print(f'Response guidelines: {guidelines_count}')
-    print(f'Total: {spiritual_count + trading_count + product_count + guidelines_count}')
+    print(f'Partnership documents: {partnership_count}')
+    print(f'Total: {spiritual_count + trading_count + product_count + guidelines_count + partnership_count}')
+
+def ingest_partnership_knowledge():
+    """Ingest GEM Partnership/CTV program knowledge."""
+    print('\n' + '='*60)
+    print('INGESTING PARTNERSHIP KNOWLEDGE')
+    print('='*60)
+
+    documents = [
+        {
+            'title': 'GEM Partnership Program - Chuong Trinh Cong Tac Vien',
+            'content': '''
+# GEM Partnership Program - Chuong Trinh Cong Tac Vien
+
+## Gioi Thieu
+
+Chuong trinh Cong Tac Vien (CTV) GEM cho phep ban kiem thu nhap tu viec gioi thieu san pham va dich vu GEM den ban be, nguoi than.
+
+## Cac Cap Bac CTV
+
+### Bronze (Dong) - Cap Bac Khoi Diem
+- **Hoa hong san pham so (Digital)**: 10%
+- **Hoa hong san pham vat ly (Physical)**: 6%
+- **Doanh so yeu cau**: 0 VND (bat dau ngay)
+
+### Silver (Bac)
+- **Hoa hong san pham so (Digital)**: 15%
+- **Hoa hong san pham vat ly (Physical)**: 8%
+- **Doanh so tich luy yeu cau**: 50,000,000 VND
+
+### Gold (Vang)
+- **Hoa hong san pham so (Digital)**: 20%
+- **Hoa hong san pham vat ly (Physical)**: 10%
+- **Doanh so tich luy yeu cau**: 150,000,000 VND
+
+### Platinum (Bach Kim)
+- **Hoa hong san pham so (Digital)**: 25%
+- **Hoa hong san pham vat ly (Physical)**: 12%
+- **Doanh so tich luy yeu cau**: 400,000,000 VND
+
+### Diamond (Kim Cuong)
+- **Hoa hong san pham so (Digital)**: 30%
+- **Hoa hong san pham vat ly (Physical)**: 15%
+- **Doanh so tich luy yeu cau**: 800,000,000 VND
+
+## KOL Partner
+
+Danh cho nguoi co anh huong tren mang xa hoi:
+- **Hoa hong**: 20% cho ca san pham so va vat ly
+- **Dieu kien**: Toi thieu 20,000 followers tren bat ky nen tang nao
+- **Uu dai them**: Co hoi hop tac marketing, nhan san pham mau
+
+## San Pham Ap Dung
+
+### San Pham So (Digital) - Hoa Hong Cao
+- Goi subscription (TIER1, TIER2, TIER3)
+- Khoa hoc online
+- E-books va tai lieu so
+
+### San Pham Vat Ly (Physical)
+- Vong tay pha le
+- Da tu nhien
+- San pham phong thuy
+
+## Cach Tham Gia
+
+1. **Dang ky**: Truy cap Account > Partnership trong app
+2. **Nhan ma**: Sau khi duoc duyet, ban se nhan ma gioi thieu rieng
+3. **Chia se**: Gui ma cho ban be hoac chia se tren mang xa hoi
+4. **Nhan hoa hong**: Hoa hong duoc tinh tu moi don hang thanh cong
+
+## Cach Tinh Hoa Hong
+
+### Vi Du Cu The
+
+**Truong hop 1**: CTV Bronze ban goi TIER2 (199,000 VND/thang)
+- Hoa hong = 199,000 x 10% = 19,900 VND
+
+**Truong hop 2**: CTV Gold ban vong pha le (500,000 VND)
+- Hoa hong = 500,000 x 10% = 50,000 VND
+
+**Truong hop 3**: CTV Diamond ban khoa hoc (2,000,000 VND)
+- Hoa hong = 2,000,000 x 30% = 600,000 VND
+
+## Luu Y Quan Trong
+
+- Hoa hong chi tinh khi don hang THANH CONG va khong bi hoan
+- Doanh so tich luy tinh tren TONG gia tri don hang (khong phai hoa hong)
+- Cap bac duoc nang len tu dong khi dat du doanh so
+- Khong co gioi han hoa hong hang thang
+
+## FAQ
+
+### Q: Lam sao de tro thanh CTV?
+A: Dang ky trong app > Account > Partnership. Sau khi duyet, ban se nhan ma gioi thieu.
+
+### Q: Khi nao toi nhan duoc hoa hong?
+A: Hoa hong duoc thanh toan sau khi don hang hoan tat va het thoi gian hoan tra.
+
+### Q: Co mat phi tham gia khong?
+A: Hoan toan mien phi, khong mat bat ky chi phi nao.
+
+### Q: Toi co the tang cap nhu the nao?
+A: Tang doanh so tich luy de tu dong len cap. Vi du: Dat 50 trieu doanh so -> tu dong len Silver.
+
+### Q: KOL co gi khac biet?
+A: KOL duoc huong 20% cho moi loai san pham va co co hoi hop tac marketing cung GEM.
+            ''',
+            'source_url': 'internal://gemral/product/partnership_program',
+            'category': 'partnership',
+            'tags': ['ctv', 'cong_tac_vien', 'partnership', 'hoa_hong', 'affiliate'],
+        },
+    ]
+
+    success_count = 0
+    for doc in documents:
+        if ingest_document(doc, 'product'):
+            success_count += 1
+
+    print(f'\n[SUMMARY] Ingested {success_count}/{len(documents)} partnership documents')
+    return success_count
+
 
 def ingest_guidelines_only():
     """Only ingest response guidelines (for quick update)."""
@@ -1500,9 +1623,38 @@ def ingest_guidelines_only():
     print(f'Response guidelines: {guidelines_count}')
 
 
+def ingest_partnership_only():
+    """Only ingest partnership knowledge (for quick update)."""
+    print('='*60)
+    print('GEMRAL AI BRAIN - Partnership Ingestion Only')
+    print('='*60)
+
+    initialize()
+
+    # Check environment
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        print('[ERROR] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
+        return
+
+    from embedding_service import OPENAI_API_KEY
+    if not OPENAI_API_KEY:
+        print('[ERROR] Missing OPENAI_API_KEY')
+        return
+
+    print('\n[INFO] Environment OK, ingesting partnership knowledge...')
+    partnership_count = ingest_partnership_knowledge()
+
+    print('\n' + '='*60)
+    print('INGESTION COMPLETE')
+    print('='*60)
+    print(f'Partnership documents: {partnership_count}')
+
+
 if __name__ == '__main__':
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == '--guidelines-only':
         ingest_guidelines_only()
+    elif len(sys.argv) > 1 and sys.argv[1] == '--partnership-only':
+        ingest_partnership_only()
     else:
         main()

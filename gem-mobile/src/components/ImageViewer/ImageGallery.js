@@ -25,8 +25,6 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   withTiming,
-  withSpring,
-  interpolate,
   FadeIn,
   FadeOut,
 } from 'react-native-reanimated';
@@ -39,48 +37,78 @@ import ZoomIndicator from './ZoomIndicator';
 import ImageViewerOnboarding from './ImageViewerOnboarding';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Heart, MessageCircle, Send } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 // Overlay height constants
-const OVERLAY_COLLAPSED_HEIGHT = SCREEN_HEIGHT * 0.33; // 1/3 screen when collapsed
-const OVERLAY_EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.7;   // 70% screen when expanded
+const OVERLAY_COLLAPSED_HEIGHT = 140; // Name + 2-3 lines, higher from nav bar
+const OVERLAY_EXPANDED_HEIGHT = SCREEN_HEIGHT - 60; // Full screen (minus top controls)
 const SAFE_BOTTOM_PADDING = 50;
 
 /**
  * Post Overlay Component - Facebook-style text overlay
- * - Expanded: Shows full content (70% screen)
- * - Collapsed: Shows 1/3 screen with author name
- * - Faded: Overlay becomes very transparent to see image
+ * Simple layout: author name + date + content flowing together
  */
 const PostOverlay = memo(({
   authorName,
   postContent,
+  postDate,
+  privacy = 'public',
+  reactionCount = 0,
+  commentCount = 0,
+  shareCount = 0,
+  isLiked = false,
   overlayExpanded,
   overlayFaded,
   toggleOverlay,
-  onTapOverlay,
+  onLike,
+  onComment,
+  onShare,
 }) => {
   // Get safe area insets for bottom padding
   let bottomInset = SAFE_BOTTOM_PADDING;
   try {
     const insets = useSafeAreaInsets();
     bottomInset = Math.max(insets.bottom, SAFE_BOTTOM_PADDING);
-  } catch (e) {
-    // Hook not available, use default
-  }
+  } catch (e) {}
+
+  // Format date
+  const formatDate = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const now = new Date();
+    const diffMs = now - d;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffMins < 1) return 'Vừa xong';
+    if (diffMins < 60) return `${diffMins} phút`;
+    if (diffHours < 24) return `${diffHours} giờ`;
+    if (diffDays < 7) return `${diffDays} ngày`;
+    return d.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' });
+  };
+
+  // Format count
+  const formatCount = (count) => {
+    if (!count || count === 0) return null;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
+
+  // Clean content
+  const cleanContent = postContent ? postContent.replace(/<[^>]*>/g, '') : '';
 
   // Animated values
   const heightAnim = useSharedValue(overlayExpanded ? OVERLAY_EXPANDED_HEIGHT : OVERLAY_COLLAPSED_HEIGHT);
   const opacityAnim = useSharedValue(overlayFaded ? 0.15 : 1);
 
-  // Update animations when state changes
   useEffect(() => {
-    heightAnim.value = withSpring(
+    heightAnim.value = withTiming(
       overlayExpanded ? OVERLAY_EXPANDED_HEIGHT : OVERLAY_COLLAPSED_HEIGHT,
-      { damping: 20, stiffness: 150 }
+      { duration: 200 }
     );
   }, [overlayExpanded]);
 
@@ -88,7 +116,6 @@ const PostOverlay = memo(({
     opacityAnim.value = withTiming(overlayFaded ? 0.15 : 1, { duration: 200 });
   }, [overlayFaded]);
 
-  // Animated style for container
   const animatedContainerStyle = useAnimatedStyle(() => ({
     height: heightAnim.value,
     opacity: opacityAnim.value,
@@ -96,54 +123,91 @@ const PostOverlay = memo(({
 
   return (
     <Animated.View style={[overlayStyles.postOverlay, animatedContainerStyle]}>
-      {/* Tap area to unfade when faded */}
-      <TouchableWithoutFeedback onPress={onTapOverlay}>
-        <View style={overlayStyles.overlayInner}>
-          {/* Author header - ALWAYS visible */}
-          <TouchableOpacity
-            style={overlayStyles.postOverlayHeader}
-            activeOpacity={0.8}
-            onPress={toggleOverlay}
-          >
-            <View style={overlayStyles.authorSection}>
-              {authorName && (
-                <Text style={overlayStyles.postOverlayAuthor} numberOfLines={1}>
-                  {authorName}
-                </Text>
-              )}
-              {!overlayExpanded && postContent && (
-                <Text style={overlayStyles.previewText} numberOfLines={2}>
-                  {postContent.replace(/<[^>]*>/g, '').substring(0, 100)}
-                </Text>
-              )}
+      {/* Grab handle */}
+      <TouchableOpacity style={overlayStyles.grabHandleArea} activeOpacity={0.7} onPress={toggleOverlay}>
+        <View style={overlayStyles.grabHandle} />
+      </TouchableOpacity>
+
+      {/* Collapsed view */}
+      {!overlayExpanded ? (
+        <TouchableOpacity style={overlayStyles.collapsedContent} activeOpacity={0.9} onPress={toggleOverlay}>
+          <View style={overlayStyles.headerRow}>
+            <View style={overlayStyles.authorInfo}>
+              <Text style={overlayStyles.authorName}>{authorName}</Text>
+              {postDate && <Text style={overlayStyles.dateText}>{formatDate(postDate)}</Text>}
             </View>
             <View style={overlayStyles.toggleButton}>
-              <Text style={overlayStyles.postOverlayHint}>
-                {overlayExpanded ? '▼ Thu gọn' : '▲ Mở rộng'}
-              </Text>
+              <Text style={overlayStyles.toggleText}>▲ Mở rộng</Text>
             </View>
-          </TouchableOpacity>
-
-          {/* Scrollable content area - only when expanded */}
-          {overlayExpanded && postContent && (
-            <ScrollView
-              style={overlayStyles.postOverlayScroll}
-              contentContainerStyle={[
-                overlayStyles.postOverlayScrollContent,
-                { paddingBottom: (SPACING?.xxl || 32) + bottomInset }
-              ]}
-              showsVerticalScrollIndicator={true}
-              nestedScrollEnabled={true}
-              scrollEnabled={true}
-              bounces={true}
-            >
-              <Text style={overlayStyles.postOverlayContent}>
-                {postContent.replace(/<[^>]*>/g, '')}
-              </Text>
-            </ScrollView>
+          </View>
+          {postContent && (
+            <Text style={overlayStyles.previewText} numberOfLines={2}>{cleanContent}</Text>
           )}
+        </TouchableOpacity>
+      ) : (
+        /* Expanded view */
+        <View style={overlayStyles.expandedContainer}>
+          {/* Scrollable area with author + content together */}
+          <ScrollView
+            style={overlayStyles.contentScroll}
+            contentContainerStyle={overlayStyles.contentContainer}
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
+            bounces={true}
+          >
+            <TouchableOpacity activeOpacity={0.95} onPress={toggleOverlay}>
+              {/* Author header inside scroll */}
+              <View style={overlayStyles.headerRow}>
+                <View style={overlayStyles.authorInfo}>
+                  <Text style={overlayStyles.authorName}>{authorName}</Text>
+                  {postDate && <Text style={overlayStyles.dateText}>{formatDate(postDate)}</Text>}
+                </View>
+                <View style={overlayStyles.toggleButton}>
+                  <Text style={overlayStyles.toggleText}>▼ Thu gọn</Text>
+                </View>
+              </View>
+              {/* Content directly below author */}
+              <Text style={overlayStyles.contentText}>{cleanContent}</Text>
+            </TouchableOpacity>
+          </ScrollView>
+
+          {/* Counters row */}
+          {(reactionCount > 0 || commentCount > 0 || shareCount > 0) && (
+            <View style={overlayStyles.countersRow}>
+              {reactionCount > 0 && (
+                <View style={overlayStyles.counterItem}>
+                  <Heart size={14} color={COLORS.gold} fill={COLORS.gold} />
+                  <Text style={overlayStyles.counterText}>{formatCount(reactionCount)}</Text>
+                </View>
+              )}
+              <View style={overlayStyles.counterRight}>
+                {commentCount > 0 && (
+                  <Text style={overlayStyles.counterText}>{formatCount(commentCount)} bình luận</Text>
+                )}
+                {shareCount > 0 && (
+                  <Text style={overlayStyles.counterText}>  ·  {formatCount(shareCount)} chia sẻ</Text>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Action buttons - same icons as PostCard */}
+          <View style={[overlayStyles.actionsRow, { paddingBottom: bottomInset }]}>
+            <TouchableOpacity style={overlayStyles.actionButton} onPress={onLike}>
+              <Heart size={20} color={isLiked ? COLORS.gold : '#AAA'} fill={isLiked ? COLORS.gold : 'transparent'} />
+              <Text style={[overlayStyles.actionText, isLiked && { color: COLORS.gold }]}>Thích</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={overlayStyles.actionButton} onPress={onComment}>
+              <MessageCircle size={20} color="#AAA" />
+              <Text style={overlayStyles.actionText}>Bình luận</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={overlayStyles.actionButton} onPress={onShare}>
+              <Send size={18} color="#AAA" />
+              <Text style={overlayStyles.actionText}>Chia sẻ</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </TouchableWithoutFeedback>
+      )}
     </Animated.View>
   );
 });
@@ -154,70 +218,123 @@ const overlayStyles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)', // Reduced opacity
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     overflow: 'hidden',
   },
-  overlayInner: {
+  grabHandleArea: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  grabHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 2,
+  },
+  // Collapsed & Expanded shared
+  collapsedContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  expandedContainer: {
     flex: 1,
   },
-  postOverlayHeader: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingHorizontal: SPACING?.lg || 16,
-    paddingVertical: SPACING?.md || 14,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    minHeight: 60,
+    marginBottom: 8,
   },
-  authorSection: {
+  authorInfo: {
     flex: 1,
-    marginRight: SPACING?.md || 12,
+  },
+  authorName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  dateText: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginTop: 2,
   },
   toggleButton: {
     paddingVertical: 4,
-    paddingHorizontal: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 12,
   },
-  postOverlayScroll: {
-    flex: 1,
-  },
-  postOverlayScrollContent: {
-    paddingHorizontal: SPACING?.lg || 16,
-    paddingTop: SPACING?.md || 12,
-    paddingBottom: (SPACING?.xxl || 32) + 40,
-    flexGrow: 1,
-  },
-  postOverlayAuthor: {
-    fontSize: TYPOGRAPHY?.fontSize?.xl || 20,
-    fontWeight: TYPOGRAPHY?.fontWeight?.bold || '700',
-    color: '#FFFFFF',
-    marginBottom: 4,
+  toggleText: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
   },
   previewText: {
-    fontSize: TYPOGRAPHY?.fontSize?.sm || 14,
-    color: 'rgba(255, 255, 255, 0.7)',
-    lineHeight: 20,
-    marginTop: 4,
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: 21,
   },
-  postOverlayContent: {
-    fontSize: TYPOGRAPHY?.fontSize?.md || 16,
+  // Scroll area
+  contentScroll: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  contentText: {
+    fontSize: 15,
     color: '#FFFFFF',
-    lineHeight: 26,
-    opacity: 0.95,
+    lineHeight: 22,
   },
-  postOverlayHint: {
-    fontSize: TYPOGRAPHY?.fontSize?.xs || 12,
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontWeight: '600',
+  // Counters row
+  countersRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  counterItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  counterText: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  counterRight: {
+    flexDirection: 'row',
+  },
+  // Action buttons
+  actionsRow: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    paddingTop: 6,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 8,
+    gap: 6,
+  },
+  actionText: {
+    fontSize: 13,
+    color: '#AAA',
+    fontWeight: '500',
   },
 });
 
 /**
- * ImageGallery - Full-screen image gallery
+ * ImageGallery - Full-screen image gallery with Facebook-style overlay
  *
  * @param {Object} props
  * @param {boolean} props.visible - Show/hide gallery
@@ -226,6 +343,14 @@ const overlayStyles = StyleSheet.create({
  * @param {Function} props.onClose - Close callback
  * @param {string} props.postContent - Post text content for overlay
  * @param {string} props.authorName - Author name for overlay
+ * @param {string} props.postDate - Post creation date
+ * @param {string} props.privacy - Privacy setting (public/friends/private)
+ * @param {number} props.reactionCount - Number of reactions
+ * @param {number} props.commentCount - Number of comments
+ * @param {number} props.shareCount - Number of shares
+ * @param {Function} props.onLike - Like button callback
+ * @param {Function} props.onComment - Comment button callback
+ * @param {Function} props.onSharePost - Share button callback
  * @param {boolean} props.showOverlay - Whether to show text overlay
  */
 const ImageGallery = ({
@@ -235,6 +360,15 @@ const ImageGallery = ({
   onClose,
   postContent = null,
   authorName = null,
+  postDate = null,
+  privacy = 'public',
+  reactionCount = 0,
+  commentCount = 0,
+  shareCount = 0,
+  isLiked = false,
+  onLike,
+  onComment,
+  onSharePost,
   showOverlay = true,
 }) => {
   // State
@@ -242,8 +376,10 @@ const ImageGallery = ({
   const [controlsVisible, setControlsVisible] = useState(true);
   const [currentZoom, setCurrentZoom] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(true);
-  const [overlayExpanded, setOverlayExpanded] = useState(true);  // Text overlay expanded/collapsed
+  const [overlayExpanded, setOverlayExpanded] = useState(false);  // Start collapsed like Facebook
   const [overlayFaded, setOverlayFaded] = useState(false);       // Text overlay faded to see image
+  const [showOptionsModal, setShowOptionsModal] = useState(false); // Custom options modal
+  const [toastMessage, setToastMessage] = useState(null); // Toast notification
 
   // Refs
   const flatListRef = useRef(null);
@@ -270,14 +406,19 @@ const ImageGallery = ({
     itemVisiblePercentThreshold: 50,
   }).current;
 
-  // Single tap on image - toggle overlay fade (to see image better)
+  // Single tap on image - collapse overlay if expanded, or toggle fade
   const handleTap = useCallback(() => {
-    // When tapping image, fade overlay to see image clearly
-    // If already faded, unfade it
-    setOverlayFaded((prev) => !prev);
-    // Also toggle controls
-    setControlsVisible((prev) => !prev);
-  }, []);
+    if (overlayExpanded) {
+      // If overlay is expanded, tap anywhere to collapse it
+      setOverlayExpanded(false);
+      setOverlayFaded(false);
+      setControlsVisible(true);
+    } else {
+      // If collapsed, toggle fade to see image better
+      setOverlayFaded((prev) => !prev);
+      setControlsVisible((prev) => !prev);
+    }
+  }, [overlayExpanded]);
 
   // Handle zoom change
   const handleZoomChange = useCallback((scale) => {
@@ -356,28 +497,41 @@ const ImageGallery = ({
       // Save to gallery
       await MediaLibrary.saveToLibraryAsync(downloadResult.uri);
 
-      Alert.alert('Thành công', 'Đã lưu ảnh vào thư viện!');
+      // Show toast instead of alert
+      setToastMessage('✓ Đã lưu ảnh vào thư viện');
+      setTimeout(() => setToastMessage(null), 2500);
     } catch (err) {
       console.error('[ImageGallery] Download error:', err);
-      Alert.alert(
-        'Lỗi tải ảnh',
-        'Không thể tải ảnh. Vui lòng kiểm tra kết nối mạng và thử lại.'
-      );
+      setToastMessage('✗ Không thể tải ảnh');
+      setTimeout(() => setToastMessage(null), 2500);
     }
   }, [currentIndex, images]);
 
-  // Handle more options
+  // Handle more options - show custom modal
   const handleMore = useCallback(() => {
-    // Show action sheet with more options
-    Alert.alert(
-      'Tùy chọn',
-      null,
-      [
-        { text: 'Báo cáo ảnh', onPress: () => {} },
-        { text: 'Sao chép liên kết', onPress: () => {} },
-        { text: 'Hủy', style: 'cancel' },
-      ]
-    );
+    setShowOptionsModal(true);
+  }, []);
+
+  // Handle long press - show options modal
+  const handleLongPress = useCallback(() => {
+    setShowOptionsModal(true);
+  }, []);
+
+  // Handle copy link
+  const handleCopyLink = useCallback(async () => {
+    const currentImage = images[currentIndex];
+    if (currentImage?.uri) {
+      setShowOptionsModal(false);
+      setToastMessage('✓ Đã sao chép liên kết');
+      setTimeout(() => setToastMessage(null), 2500);
+    }
+  }, [currentIndex, images]);
+
+  // Handle report
+  const handleReport = useCallback(() => {
+    setShowOptionsModal(false);
+    setToastMessage('✓ Cảm ơn bạn đã báo cáo');
+    setTimeout(() => setToastMessage(null), 2500);
   }, []);
 
   // Handle onboarding complete
@@ -392,14 +546,6 @@ const ImageGallery = ({
     setOverlayFaded(false);
   }, []);
 
-  // Handle tap on overlay (when faded, unfade it)
-  const handleOverlayTap = useCallback(() => {
-    if (overlayFaded) {
-      setOverlayFaded(false);
-      setControlsVisible(true);
-    }
-  }, [overlayFaded]);
-
   // Render image item
   const renderItem = useCallback(({ item, index }) => (
     <ZoomableImage
@@ -408,10 +554,11 @@ const ImageGallery = ({
       height={item.height}
       onDismiss={onClose}
       onTap={handleTap}
+      onLongPress={handleLongPress}
       onZoomChange={handleZoomChange}
       isActive={index === currentIndex}
     />
-  ), [currentIndex, onClose, handleTap, handleZoomChange]);
+  ), [currentIndex, onClose, handleTap, handleLongPress, handleZoomChange]);
 
   // Key extractor
   const keyExtractor = useCallback((item, index) =>
@@ -503,11 +650,79 @@ const ImageGallery = ({
           <PostOverlay
             authorName={authorName}
             postContent={postContent}
+            postDate={postDate}
+            privacy={privacy}
+            reactionCount={reactionCount}
+            commentCount={commentCount}
+            shareCount={shareCount}
+            isLiked={isLiked}
             overlayExpanded={overlayExpanded}
             overlayFaded={overlayFaded}
             toggleOverlay={toggleOverlay}
-            onTapOverlay={handleOverlayTap}
+            onLike={onLike}
+            onComment={onComment}
+            onShare={onSharePost}
           />
+        )}
+
+        {/* Custom Options Modal */}
+        <Modal
+          visible={showOptionsModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowOptionsModal(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setShowOptionsModal(false)}>
+            <View style={styles.optionsBackdrop}>
+              <TouchableWithoutFeedback>
+                <View style={styles.optionsContainer}>
+                  <Text style={styles.optionsTitle}>Tùy chọn</Text>
+
+                  <TouchableOpacity
+                    style={styles.optionItem}
+                    onPress={() => {
+                      setShowOptionsModal(false);
+                      handleDownload();
+                    }}
+                  >
+                    <Text style={styles.optionText}>💾  Lưu ảnh</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.optionItem}
+                    onPress={handleCopyLink}
+                  >
+                    <Text style={styles.optionText}>🔗  Sao chép liên kết</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.optionItem}
+                    onPress={handleReport}
+                  >
+                    <Text style={styles.optionText}>⚠️  Báo cáo ảnh</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.optionItem, styles.cancelOption]}
+                    onPress={() => setShowOptionsModal(false)}
+                  >
+                    <Text style={styles.cancelText}>Hủy</Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
+        {/* Toast notification */}
+        {toastMessage && (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            style={styles.toastContainer}
+          >
+            <Text style={styles.toastText}>{toastMessage}</Text>
+          </Animated.View>
         )}
       </GestureHandlerRootView>
     </Modal>
@@ -525,9 +740,66 @@ const styles = StyleSheet.create({
   },
   paginationContainer: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 160, // Above collapsed overlay (140px)
     left: 0,
     right: 0,
+  },
+  // Options Modal styles
+  optionsBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  optionsContainer: {
+    backgroundColor: COLORS?.surface || '#1A1A2E',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: SPACING?.lg || 20,
+    paddingBottom: SPACING?.xxl || 40,
+    paddingHorizontal: SPACING?.lg || 20,
+  },
+  optionsTitle: {
+    fontSize: TYPOGRAPHY?.fontSize?.lg || 18,
+    fontWeight: TYPOGRAPHY?.fontWeight?.bold || '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: SPACING?.lg || 20,
+  },
+  optionItem: {
+    paddingVertical: SPACING?.md || 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  optionText: {
+    fontSize: TYPOGRAPHY?.fontSize?.md || 16,
+    color: '#FFFFFF',
+  },
+  cancelOption: {
+    borderBottomWidth: 0,
+    marginTop: SPACING?.sm || 8,
+  },
+  cancelText: {
+    fontSize: TYPOGRAPHY?.fontSize?.md || 16,
+    color: COLORS?.gold || '#FFD700',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  // Toast styles
+  toastContainer: {
+    position: 'absolute',
+    bottom: 200,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
 

@@ -11,6 +11,10 @@ if (__DEV__ && Platform.OS !== 'web') {
   require('./src/config/ReactotronConfig');
 }
 
+// Check if Hermes is enabled
+const isHermes = () => !!global.HermesInternal;
+console.log('🔥 Hermes enabled:', isHermes());
+
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, LogBox } from 'react-native';

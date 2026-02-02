@@ -28,6 +28,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // Services
 import messagingService from '../../services/messagingService';
 import presenceService from '../../services/presenceService';
+import { messageRequestService } from '../../services/messageRequestService';
 
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
@@ -53,6 +54,7 @@ export default function ConversationsListScreen({ navigation }) {
   const [archivedIds, setArchivedIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [messageRequestsCount, setMessageRequestsCount] = useState(0);
 
   // Animation refs
   const headerOpacity = useRef(new Animated.Value(1)).current;
@@ -66,15 +68,17 @@ export default function ConversationsListScreen({ navigation }) {
 
   const fetchConversations = useCallback(async () => {
     try {
-      // Fetch conversations, pinned IDs, and archived IDs in parallel
-      const [data, pinnedData, archivedData] = await Promise.all([
+      // Fetch conversations, pinned IDs, archived IDs, and message requests count in parallel
+      const [data, pinnedData, archivedData, requestsCount] = await Promise.all([
         messagingService.getConversations(),
         messagingService.getPinnedConversationIds(),
         messagingService.getArchivedConversationIds(),
+        messageRequestService.getMessageRequestsCount(),
       ]);
       setConversations(data);
       setPinnedIds(pinnedData?.data || pinnedData || []);
       setArchivedIds(archivedData || []);
+      setMessageRequestsCount(requestsCount || 0);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -231,6 +235,24 @@ export default function ConversationsListScreen({ navigation }) {
         </View>
       </TouchableOpacity>
 
+      {/* Message Requests Row */}
+      {messageRequestsCount > 0 && (
+        <TouchableOpacity
+          style={styles.archivedRow}
+          onPress={() => navigation.navigate('MessageRequests')}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.archivedIcon, { backgroundColor: 'rgba(255, 215, 0, 0.15)' }]}>
+            <Ionicons name="mail-unread" size={20} color={COLORS.gold} />
+          </View>
+          <Text style={styles.archivedText}>Message Requests</Text>
+          <View style={[styles.archivedBadge, { backgroundColor: COLORS.gold }]}>
+            <Text style={[styles.archivedBadgeText, { color: COLORS.background }]}>{messageRequestsCount}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+        </TouchableOpacity>
+      )}
+
       {/* Quick Actions Row - Archive badge only if has archived */}
       {archivedCount > 0 && (
         <TouchableOpacity
@@ -312,13 +334,22 @@ export default function ConversationsListScreen({ navigation }) {
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.title}>Chats</Text>
-          {/* Create Group in header */}
-          <TouchableOpacity
-            onPress={handleCreateGroup}
-            style={styles.headerAction}
-          >
-            <Ionicons name="people-outline" size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            {/* Privacy Settings */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate('PrivacySettings')}
+              style={styles.headerAction}
+            >
+              <Ionicons name="shield-outline" size={22} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            {/* Create Group */}
+            <TouchableOpacity
+              onPress={handleCreateGroup}
+              style={styles.headerAction}
+            >
+              <Ionicons name="people-outline" size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+          </View>
         </View>
         {renderHeader()}
       </View>
@@ -396,6 +427,10 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerAction: {
     width: 40,

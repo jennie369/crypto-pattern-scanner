@@ -40,6 +40,7 @@ const CARD_HEIGHT = 220;
 const HERO_BANNER_IMAGE_HEIGHT = 200; // Hero banner image height
 
 // Course tags - EXACT tags from Shopify (only course-specific tags)
+// IMPORTANT: Keep this before courseCache helper functions that reference it
 const COURSE_TAGS = [
   'Khóa học Trading',
   'Khóa học',
@@ -58,6 +59,42 @@ const COURSE_TAGS = [
   'course',
   '7-ngay',
 ];
+
+// =========== GLOBAL CACHE for instant display ===========
+const courseCache = {
+  products: null,
+  lastFetch: 0,
+  CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+};
+
+// Helper to get initial courses from cache (checks component cache first, then Shopify cache)
+const getInitialCourses = (limit) => {
+  // First check component cache
+  if (courseCache.products && courseCache.products.length > 0) {
+    return courseCache.products;
+  }
+  // Then check if Shopify has cached products (might be populated by preload)
+  const shopifyCache = shopifyService._productsCache;
+  if (shopifyCache && shopifyCache.length > 0) {
+    // Filter for courses using COURSE_TAGS
+    const tagSet = new Set(COURSE_TAGS.map(t => t.toLowerCase()));
+    const courses = shopifyCache.filter(product => {
+      if (!product.tags) return false;
+      const productTags = Array.isArray(product.tags)
+        ? product.tags
+        : product.tags.split(',').map(t => t.trim());
+      return productTags.some(tag => tagSet.has(tag.toLowerCase()));
+    }).slice(0, limit || 4);
+
+    if (courses.length > 0) {
+      // Sync to component cache
+      courseCache.products = courses;
+      courseCache.lastFetch = Date.now();
+      return courses;
+    }
+  }
+  return [];
+};
 
 // Price badge styling based on price
 const getPriceBadgeStyle = (price) => {
@@ -297,8 +334,10 @@ const CourseSection = ({
   heroBanner = null, // { image_url, title, subtitle, link_url }
 }) => {
   const navigation = useNavigation();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Initialize from cache for instant display (checks both component and Shopify cache)
+  const [products, setProducts] = useState(() => getInitialCourses(limit));
+  // Only show loading if no cached data
+  const [loading, setLoading] = useState(() => getInitialCourses(limit).length === 0);
 
   // InAppBrowser state for hero banner URL links
   const [browserVisible, setBrowserVisible] = useState(false);
@@ -315,6 +354,16 @@ const CourseSection = ({
   };
 
   useEffect(() => {
+    const now = Date.now();
+    const cacheExpired = now - courseCache.lastFetch > courseCache.CACHE_DURATION;
+
+    // If cache is valid, use it and skip loading
+    if (courseCache.products && courseCache.products.length > 0 && !cacheExpired) {
+      setLoading(false);
+      return;
+    }
+
+    // Fetch new data (in background if we have cached data)
     loadCourseProducts();
   }, []);
 
@@ -322,9 +371,12 @@ const CourseSection = ({
    * Load course products from Shopify filtered by tags
    */
   const loadCourseProducts = async () => {
-    try {
+    // Only show loading spinner if no cached data
+    if (!courseCache.products || courseCache.products.length === 0) {
       setLoading(true);
+    }
 
+    try {
       // Get products filtered by course tags
       // NOTE: Set fallbackToRandom = false to NOT show random products if no courses found
       const courseProducts = await shopifyService.getProductsByTags(
@@ -343,10 +395,17 @@ const CourseSection = ({
       } else {
         console.log('[CourseSection] No course products found with tags:', COURSE_TAGS.slice(0, 5).join(', '), '...');
       }
+
+      // Update state and cache
       setProducts(courseProducts || []);
+      courseCache.products = courseProducts || [];
+      courseCache.lastFetch = Date.now();
     } catch (error) {
       console.error('[CourseSection] Error loading course products:', error);
-      setProducts([]);
+      // Only clear if no cache exists
+      if (!courseCache.products) {
+        setProducts([]);
+      }
     } finally {
       setLoading(false);
     }

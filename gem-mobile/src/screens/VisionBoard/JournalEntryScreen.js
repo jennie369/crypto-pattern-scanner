@@ -53,9 +53,9 @@ import MoodPicker from '../../components/VisionBoard/MoodPicker';
 
 // Entry type options
 const ENTRY_TYPE_OPTIONS = [
-  { id: ENTRY_TYPES.REFLECTION, label: 'Suy ngam', icon: BookOpen, color: COLORS.purple },
-  { id: ENTRY_TYPES.GRATITUDE, label: 'Biet on', icon: Heart, color: COLORS.error },
-  { id: ENTRY_TYPES.GOAL_NOTE, label: 'Ghi chu muc tieu', icon: Target, color: COLORS.info },
+  { id: ENTRY_TYPES.REFLECTION, label: 'Suy ngẫm', icon: BookOpen, color: COLORS.purple },
+  { id: ENTRY_TYPES.GRATITUDE, label: 'Biết ơn', icon: Heart, color: COLORS.error },
+  { id: ENTRY_TYPES.GOAL_NOTE, label: 'Ghi chú mục tiêu', icon: Target, color: COLORS.info },
   { id: ENTRY_TYPES.QUICK_NOTE, label: 'Ghi nhanh', icon: FileText, color: COLORS.textSecondary },
 ];
 
@@ -161,7 +161,7 @@ const JournalEntryScreen = () => {
       }
     } catch (error) {
       console.error('[JournalEntry] Load error:', error);
-      Alert.alert('Loi', 'Khong the tai bai viet');
+      Alert.alert('Lỗi', 'Không thể tải bài viết');
     }
   };
 
@@ -187,12 +187,12 @@ const JournalEntryScreen = () => {
   // Handle save
   const handleSave = async () => {
     if (!content.trim()) {
-      Alert.alert('Loi', 'Vui long nhap noi dung');
+      Alert.alert('Lỗi', 'Vui lòng nhập nội dung');
       return;
     }
 
     if (!access.allowed) {
-      Alert.alert('Han che', access.reason);
+      Alert.alert('Hạn chế', access.reason);
       return;
     }
 
@@ -221,11 +221,11 @@ const JournalEntryScreen = () => {
       if (result.success) {
         navigation.goBack();
       } else {
-        Alert.alert('Loi', result.error || 'Khong the luu');
+        Alert.alert('Lỗi', result.error || 'Không thể lưu');
       }
     } catch (error) {
       console.error('[JournalEntry] Save error:', error);
-      Alert.alert('Loi', 'Khong the luu bai viet');
+      Alert.alert('Lỗi', 'Không thể lưu bài viết');
     }
 
     setSaving(false);
@@ -234,12 +234,12 @@ const JournalEntryScreen = () => {
   // Handle delete
   const handleDelete = () => {
     Alert.alert(
-      'Xoa bai viet',
-      'Ban co chac muon xoa bai viet nay?',
+      'Xóa bài viết',
+      'Bạn có chắc muốn xóa bài viết này?',
       [
-        { text: 'Huy', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Xoa',
+          text: 'Xóa',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -247,10 +247,10 @@ const JournalEntryScreen = () => {
               if (result.success) {
                 navigation.goBack();
               } else {
-                Alert.alert('Loi', result.error);
+                Alert.alert('Lỗi', result.error);
               }
             } catch (error) {
-              Alert.alert('Loi', 'Khong the xoa');
+              Alert.alert('Lỗi', 'Không thể xóa');
             }
           },
         },
@@ -262,12 +262,12 @@ const JournalEntryScreen = () => {
   const handleBack = () => {
     if (hasChanges) {
       Alert.alert(
-        'Chua luu',
-        'Ban co thay doi chua luu. Thoat khong luu?',
+        'Chưa lưu',
+        'Bạn có thay đổi chưa lưu. Thoát không lưu?',
         [
-          { text: 'Tiep tuc chinh sua', style: 'cancel' },
+          { text: 'Tiếp tục chỉnh sửa', style: 'cancel' },
           {
-            text: 'Thoat',
+            text: 'Thoát',
             style: 'destructive',
             onPress: () => navigation.goBack(),
           },
@@ -302,14 +302,13 @@ const JournalEntryScreen = () => {
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>
-          {mode === 'edit' ? 'Chinh sua' : 'Viet moi'}
+          {mode === 'edit' ? 'Chỉnh sửa' : 'Viết mới'}
         </Text>
 
         <View style={styles.headerActions}>
           {mode === 'edit' && (
             <TouchableOpacity onPress={handleDelete} style={styles.headerButton}>
               <Trash2 size={20} color={COLORS.error} />
-            )}
             </TouchableOpacity>
           )}
           <TouchableOpacity
@@ -322,8 +321,7 @@ const JournalEntryScreen = () => {
             ) : (
               <>
                 <Save size={18} color={COLORS.bgDarkest} />
-              )}
-                <Text style={styles.saveButtonText}>Luu</Text>
+                <Text style={styles.saveButtonText}>Lưu</Text>
               </>
             )}
           </TouchableOpacity>
@@ -370,7 +368,6 @@ const JournalEntryScreen = () => {
                     <Text style={[styles.typeOptionText, isSelected && { color: option.color }]}>
                       {option.label}
                     </Text>
-                  )}
                   </TouchableOpacity>
                 );
               })}
@@ -380,7 +377,7 @@ const JournalEntryScreen = () => {
           {/* Title (optional) */}
           <TextInput
             style={styles.titleInput}
-            placeholder="Tieu de (tuy chon)"
+            placeholder="Tiêu đề (tùy chọn)"
             placeholderTextColor={COLORS.textMuted}
             value={title}
             onChangeText={setTitle}
@@ -393,10 +390,10 @@ const JournalEntryScreen = () => {
               style={styles.contentInput}
               placeholder={
                 entryType === ENTRY_TYPES.GRATITUDE
-                  ? 'Hom nay toi biet on...'
+                  ? 'Hôm nay tôi biết ơn...'
                   : entryType === ENTRY_TYPES.GOAL_NOTE
-                  ? 'Ghi chu ve muc tieu...'
-                  : 'Viet suy nghi cua ban...'
+                  ? 'Ghi chú về mục tiêu...'
+                  : 'Viết suy nghĩ của bạn...'
               }
               placeholderTextColor={COLORS.textMuted}
               value={content}
@@ -415,7 +412,7 @@ const JournalEntryScreen = () => {
             style={styles.optionRow}
             onPress={() => setShowMoodPicker(true)}
           >
-            <Text style={styles.optionLabel}>Cam xuc</Text>
+            <Text style={styles.optionLabel}>Cảm xúc</Text>
             {mood ? (
               <View style={[styles.moodBadge, { backgroundColor: MOODS[mood.toUpperCase()]?.color + '20' }]}>
                 <Text style={[styles.moodBadgeText, { color: MOODS[mood.toUpperCase()]?.color }]}>
@@ -423,7 +420,7 @@ const JournalEntryScreen = () => {
                 </Text>
               </View>
             ) : (
-              <Text style={styles.optionValue}>Chon</Text>
+              <Text style={styles.optionValue}>Chọn</Text>
             )}
           </TouchableOpacity>
 
@@ -432,21 +429,21 @@ const JournalEntryScreen = () => {
             style={styles.optionRow}
             onPress={() => setShowLifeAreaSelector(!showLifeAreaSelector)}
           >
-            <Text style={styles.optionLabel}>Linh vuc</Text>
+            <Text style={styles.optionLabel}>Lĩnh vực</Text>
             {lifeArea ? (
-              <View style={[styles.areaBadge, { backgroundColor: LIFE_AREAS.find(la => la.id === lifeArea)?.color + '20' }]}>
-                <Text style={[styles.areaBadgeText, { color: LIFE_AREAS.find(la => la.id === lifeArea)?.color }]}>
-                  {LIFE_AREAS.find(la => la.id === lifeArea)?.label}
+              <View style={[styles.areaBadge, { backgroundColor: Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.color + '20' }]}>
+                <Text style={[styles.areaBadgeText, { color: Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.color }]}>
+                  {Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.label}
                 </Text>
               </View>
             ) : (
-              <Text style={styles.optionValue}>Chon</Text>
+              <Text style={styles.optionValue}>Chọn</Text>
             )}
           </TouchableOpacity>
 
           {showLifeAreaSelector && (
             <View style={styles.lifeAreaGrid}>
-              {LIFE_AREAS.map((area) => {
+              {Object.values(LIFE_AREAS).map((area) => {
                 const isSelected = lifeArea === area.id;
                 return (
                   <TouchableOpacity
@@ -463,7 +460,6 @@ const JournalEntryScreen = () => {
                     <Text style={[styles.lifeAreaText, isSelected && { color: area.color }]}>
                       {area.label}
                     </Text>
-                  )}
                   </TouchableOpacity>
                 );
               })}
@@ -477,7 +473,7 @@ const JournalEntryScreen = () => {
               tags={tags}
               onTagsChange={setTags}
               userId={userId}
-              placeholder="Them tag..."
+              placeholder="Thêm tag..."
             />
           </View>
 
@@ -496,7 +492,7 @@ const JournalEntryScreen = () => {
               onPress={() => setIsFavorite(!isFavorite)}
             >
               <Star size={18} color={isFavorite ? COLORS.gold : COLORS.textMuted} fill={isFavorite ? COLORS.gold : 'transparent'} />
-              <Text style={[styles.toggleText, isFavorite && styles.toggleTextActive]}>Yeu thich</Text>
+              <Text style={[styles.toggleText, isFavorite && styles.toggleTextActive]}>Yêu thích</Text>
             </TouchableOpacity>
           </View>
 

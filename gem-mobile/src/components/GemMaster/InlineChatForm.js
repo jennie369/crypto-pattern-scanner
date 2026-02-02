@@ -833,7 +833,7 @@ const InlineChatForm = ({
       const goalWidget = {
         user_id: user.id,
         type: 'goal',
-        title: `Mục tiêu: ${areaLabel}`,
+        title: goalText,
         icon: '🎯',
         content: {
           goals: [{

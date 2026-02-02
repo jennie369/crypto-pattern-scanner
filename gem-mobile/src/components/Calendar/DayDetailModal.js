@@ -7,7 +7,7 @@
  * Updated: January 2026 - Cosmic theme redesign
  */
 
-import React from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -16,13 +16,17 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Animated,
+  Alert,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Icons from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
 import { COSMIC_COLORS, COSMIC_GRADIENTS, COSMIC_SHADOWS, COSMIC_SPACING } from '../../theme/cosmicTokens';
 import { CalendarEventItem } from './MonthCalendar';
+import MoodPickerModal from './MoodPickerModal';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -70,6 +74,10 @@ const DayDetailModal = ({
   paperTrades = [],
   tradingJournal = [],
   actions = [],
+  // Calendar Smart Journal props
+  journalEntries = [],
+  tradingEntries = [],
+  mood = null,
   onClose,
   onEventPress,
   onEventComplete,
@@ -78,7 +86,93 @@ const DayDetailModal = ({
   onReadingPress,
   onTradePress,
   onActionPress,
+  onJournalPress,
+  onAddJournal,
+  onAddTrade,
+  onEditEvent,
+  onDeleteEvent,
+  onMoodUpdated,
 }) => {
+  // Mood Picker Modal state
+  const [showMoodPicker, setShowMoodPicker] = useState(false);
+  // Swipeable refs for closing
+  const swipeableRefs = useRef({});
+
+  // Close all swipeables
+  const closeAllSwipeables = useCallback((exceptKey) => {
+    Object.entries(swipeableRefs.current).forEach(([key, ref]) => {
+      if (key !== exceptKey && ref?.close) {
+        ref.close();
+      }
+    });
+  }, []);
+
+  // Render left actions (Edit)
+  const renderLeftActions = useCallback((progress, dragX, event) => {
+    const trans = dragX.interpolate({
+      inputRange: [0, 80],
+      outputRange: [-80, 0],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Animated.View style={[styles.swipeActionLeft, { transform: [{ translateX: trans }] }]}>
+        <TouchableOpacity
+          style={styles.editAction}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            swipeableRefs.current[event.id]?.close();
+            onEditEvent?.(event);
+          }}
+        >
+          <Icons.Pencil size={18} color="#FFFFFF" />
+          <Text style={styles.actionText}>Sửa</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }, [onEditEvent]);
+
+  // Render right actions (Delete)
+  const renderRightActions = useCallback((progress, dragX, event) => {
+    const trans = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [0, 80],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Animated.View style={[styles.swipeActionRight, { transform: [{ translateX: trans }] }]}>
+        <TouchableOpacity
+          style={styles.deleteAction}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            Alert.alert(
+              'Xóa sự kiện',
+              `Bạn có chắc muốn xóa "${event.title}"?`,
+              [
+                {
+                  text: 'Hủy',
+                  style: 'cancel',
+                  onPress: () => swipeableRefs.current[event.id]?.close(),
+                },
+                {
+                  text: 'Xóa',
+                  style: 'destructive',
+                  onPress: () => {
+                    swipeableRefs.current[event.id]?.close();
+                    onDeleteEvent?.(event);
+                  },
+                },
+              ]
+            );
+          }}
+        >
+          <Icons.Trash2 size={18} color="#FFFFFF" />
+          <Text style={styles.actionText}>Xóa</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }, [onDeleteEvent]);
   // Format date display
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -104,7 +198,7 @@ const DayDetailModal = ({
     goal_deadline: 'Deadline Mục Tiêu',
     action_due: 'Hành Động',
     habit_daily: 'Thói Quen',
-    divination: 'Bói Toán',
+    divination: 'Kết quả Tarot/Kinh Dịch',
     manual: 'Sự Kiện',
   };
 
@@ -116,16 +210,17 @@ const DayDetailModal = ({
       transparent
       animationType="slide"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
       <View style={styles.overlay}>
-        <BlurView intensity={40} tint="dark" style={styles.blurContainer}>
-          <TouchableOpacity
-            style={styles.dismissArea}
-            activeOpacity={1}
-            onPress={onClose}
-          />
+        {/* Backdrop without BlurView for performance */}
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={onClose}
+        />
 
-          <View style={styles.modalContainer}>
+        <View style={styles.modalContainer}>
             <LinearGradient
               colors={[COSMIC_COLORS.bgMystic, COSMIC_COLORS.bgCosmic, COSMIC_COLORS.bgDeepSpace]}
               style={StyleSheet.absoluteFill}
@@ -163,11 +258,13 @@ const DayDetailModal = ({
               </View>
             </View>
 
-            {/* Events list */}
-            <ScrollView
-              style={styles.eventsList}
-              showsVerticalScrollIndicator={false}
-            >
+            {/* Events list - Wrapped in GestureHandlerRootView for Swipeable to work in Modal */}
+            <GestureHandlerRootView style={styles.gestureContainer}>
+              <ScrollView
+                style={styles.eventsList}
+                contentContainerStyle={styles.eventsListContent}
+                showsVerticalScrollIndicator={false}
+              >
               {events.length === 0 ? (
                 <View style={styles.emptyState}>
                   <Icons.CalendarX size={48} color={COSMIC_COLORS.text.muted} />
@@ -189,12 +286,28 @@ const DayDetailModal = ({
                       {sourceTypeLabels[type] || type}
                     </Text>
                     {typeEvents.map((event) => (
-                      <CalendarEventItem
+                      <Swipeable
                         key={event.id}
-                        event={event}
-                        onPress={onEventPress}
-                        onComplete={onEventComplete}
-                      />
+                        ref={(ref) => {
+                          if (ref) swipeableRefs.current[event.id] = ref;
+                        }}
+                        renderLeftActions={(progress, dragX) =>
+                          onEditEvent ? renderLeftActions(progress, dragX, event) : null
+                        }
+                        renderRightActions={(progress, dragX) =>
+                          onDeleteEvent ? renderRightActions(progress, dragX, event) : null
+                        }
+                        onSwipeableWillOpen={() => closeAllSwipeables(event.id)}
+                        friction={2}
+                        overshootLeft={false}
+                        overshootRight={false}
+                      >
+                        <CalendarEventItem
+                          event={event}
+                          onPress={onEventPress}
+                          onComplete={onEventComplete}
+                        />
+                      </Swipeable>
                     ))}
                   </View>
                 ))
@@ -223,6 +336,192 @@ const DayDetailModal = ({
                     </Text>
                     <Text style={styles.summaryLabel}>Tổng</Text>
                   </View>
+                </View>
+              )}
+
+              {/* Mood Section */}
+              {mood && (mood.morning_mood || mood.evening_mood || mood.overall_mood) ? (
+                <View style={styles.moodSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.Smile size={18} color={COSMIC_COLORS.glow.gold} />
+                    <Text style={styles.journalTitle}>Tâm trạng hôm nay</Text>
+                    <TouchableOpacity
+                      style={styles.moodEditButton}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setShowMoodPicker(true);
+                      }}
+                    >
+                      <Icons.Pencil size={14} color={COSMIC_COLORS.glow.gold} />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.moodContainer}>
+                    {mood.morning_mood && (
+                      <View style={styles.moodItem}>
+                        <Text style={styles.moodLabel}>Sáng</Text>
+                        <Text style={styles.moodValue}>{mood.morning_mood}</Text>
+                      </View>
+                    )}
+                    {mood.evening_mood && (
+                      <View style={styles.moodItem}>
+                        <Text style={styles.moodLabel}>Tối</Text>
+                        <Text style={styles.moodValue}>{mood.evening_mood}</Text>
+                      </View>
+                    )}
+                    {mood.overall_mood && (
+                      <View style={styles.moodItem}>
+                        <Text style={styles.moodLabel}>Tổng</Text>
+                        <View style={[styles.moodBadge, { backgroundColor: `${COSMIC_COLORS.glow.gold}20` }]}>
+                          <Text style={[styles.moodBadgeText, { color: COSMIC_COLORS.glow.gold }]}>
+                            {mood.overall_mood}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                  {mood.day_highlight && (
+                    <Text style={styles.moodNote}>💡 {mood.day_highlight}</Text>
+                  )}
+                </View>
+              ) : (
+                <View style={styles.moodSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.Smile size={18} color={COSMIC_COLORS.glow.gold} />
+                    <Text style={styles.journalTitle}>Tâm trạng hôm nay</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.addMoodButton}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowMoodPicker(true);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.addMoodIconContainer}>
+                      <Icons.Plus size={20} color={COSMIC_COLORS.glow.gold} />
+                    </View>
+                    <View style={styles.addMoodContent}>
+                      <Text style={styles.addMoodTitle}>Ghi nhận tâm trạng</Text>
+                      <Text style={styles.addMoodSubtitle}>
+                        Theo dõi cảm xúc buổi sáng và tối
+                      </Text>
+                    </View>
+                    <Icons.ChevronRight size={18} color={COSMIC_COLORS.text.muted} />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Calendar Journal Entries Section */}
+              {journalEntries.length > 0 && (
+                <View style={styles.journalSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.BookOpen size={18} color={COSMIC_COLORS.glow.purple} />
+                    <Text style={styles.journalTitle}>Nhật ký ({journalEntries.length})</Text>
+                  </View>
+                  {journalEntries.map((entry, index) => {
+                    const time = entry.created_at
+                      ? new Date(entry.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+                      : '';
+                    const entryColor = entry.mood
+                      ? (entry.mood === 'happy' || entry.mood === 'excited' ? COSMIC_COLORS.glow.gold : COSMIC_COLORS.glow.purple)
+                      : COSMIC_COLORS.glow.purple;
+                    return (
+                      <TouchableOpacity
+                        key={entry.id || index}
+                        style={[styles.journalItem, { borderColor: `${entryColor}30` }]}
+                        onPress={() => onJournalPress?.(entry)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.journalIcon, { backgroundColor: `${entryColor}25` }]}>
+                          <Icons.FileText size={16} color={entryColor} />
+                        </View>
+                        <View style={styles.journalContent}>
+                          <Text style={styles.journalItemTitle}>
+                            {entry.title || entry.entry_type || 'Nhật ký'}
+                          </Text>
+                          {entry.content && (
+                            <Text style={styles.journalReflection} numberOfLines={2}>
+                              {entry.content}
+                            </Text>
+                          )}
+                          <View style={styles.journalMeta}>
+                            <Text style={styles.journalTime}>{time}</Text>
+                            {entry.mood && (
+                              <View style={[styles.moodChip, { backgroundColor: `${entryColor}20` }]}>
+                                <Text style={[styles.moodChipText, { color: entryColor }]}>{entry.mood}</Text>
+                              </View>
+                            )}
+                          </View>
+                        </View>
+                        {entry.is_pinned && <Icons.Pin size={14} color={COSMIC_COLORS.glow.gold} />}
+                        {entry.is_favorite && <Icons.Star size={14} color={COSMIC_COLORS.glow.gold} fill={COSMIC_COLORS.glow.gold} />}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Trading Journal Entries from Calendar Smart Journal */}
+              {tradingEntries.length > 0 && (
+                <View style={styles.journalSection}>
+                  <View style={styles.journalHeader}>
+                    <Icons.TrendingUp size={18} color={COSMIC_COLORS.functional.success} />
+                    <Text style={styles.journalTitle}>Giao dịch ({tradingEntries.length})</Text>
+                  </View>
+                  {tradingEntries.map((trade, index) => {
+                    const isWin = trade.result === 'win';
+                    const isLoss = trade.result === 'loss';
+                    const tradeColor = isWin ? '#3AF7A6' : isLoss ? '#FF6B6B' : '#FFBD59';
+                    const time = trade.entry_time
+                      ? new Date(trade.entry_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+                      : '';
+                    return (
+                      <TouchableOpacity
+                        key={trade.id || index}
+                        style={[styles.journalItem, { borderColor: `${tradeColor}30` }]}
+                        onPress={() => onTradePress?.(trade)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.journalIcon, { backgroundColor: `${tradeColor}20` }]}>
+                          {isWin ? (
+                            <Icons.TrendingUp size={16} color={tradeColor} />
+                          ) : isLoss ? (
+                            <Icons.TrendingDown size={16} color={tradeColor} />
+                          ) : (
+                            <Icons.Activity size={16} color={tradeColor} />
+                          )}
+                        </View>
+                        <View style={styles.journalContent}>
+                          <Text style={styles.journalItemTitle}>
+                            {trade.symbol} • {trade.direction?.toUpperCase()}
+                          </Text>
+                          <Text style={styles.journalReflection}>
+                            {trade.pattern_type || 'Manual'} {trade.pattern_grade ? `(${trade.pattern_grade})` : ''}
+                          </Text>
+                          {trade.lessons_learned && (
+                            <Text style={styles.journalReflection} numberOfLines={1}>
+                              💡 {trade.lessons_learned}
+                            </Text>
+                          )}
+                          <Text style={styles.journalTime}>{time}</Text>
+                        </View>
+                        <View style={styles.tradeResult}>
+                          {trade.pnl_amount !== null && (
+                            <Text style={[styles.tradePnLText, { color: tradeColor }]}>
+                              {trade.pnl_amount > 0 ? '+' : ''}{trade.pnl_amount?.toFixed(2)} USDT
+                            </Text>
+                          )}
+                          {trade.result && (
+                            <View style={[styles.resultBadge, { backgroundColor: `${tradeColor}20` }]}>
+                              <Text style={[styles.resultText, { color: tradeColor }]}>
+                                {trade.result.toUpperCase()}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               )}
 
@@ -273,7 +572,7 @@ const DayDetailModal = ({
                 <View style={styles.journalSection}>
                   <View style={styles.journalHeader}>
                     <Icons.BookOpen size={18} color={COSMIC_COLORS.glow.cyan} />
-                    <Text style={styles.journalTitle}>Bói toán đã thực hiện</Text>
+                    <Text style={styles.journalTitle}>Kết quả Tarot/Kinh Dịch</Text>
                   </View>
                   {readings.map((reading, index) => {
                     const readingType = READING_TYPES[reading.reading_type] || { name: reading.reading_type, icon: 'Sparkles', color: COSMIC_COLORS.glow.purple };
@@ -440,7 +739,7 @@ const DayDetailModal = ({
                   <Text style={styles.journalSummaryText}>
                     {rituals.length > 0 && `${rituals.length} nghi thức`}
                     {rituals.length > 0 && readings.length > 0 && ' • '}
-                    {readings.length > 0 && `${readings.length} bói toán`}
+                    {readings.length > 0 && `${readings.length} kết quả`}
                     {(rituals.length > 0 || readings.length > 0) && paperTrades.length > 0 && ' • '}
                     {paperTrades.length > 0 && `${paperTrades.length} trades`}
                     {(rituals.length > 0 || readings.length > 0 || paperTrades.length > 0) && actions.length > 0 && ' • '}
@@ -448,10 +747,22 @@ const DayDetailModal = ({
                   </Text>
                 </View>
               )}
-            </ScrollView>
+              </ScrollView>
+            </GestureHandlerRootView>
           </View>
-        </BlurView>
       </View>
+
+      {/* Mood Picker Modal */}
+      <MoodPickerModal
+        visible={showMoodPicker}
+        onClose={() => setShowMoodPicker(false)}
+        date={date}
+        existingMood={mood}
+        onMoodSaved={() => {
+          setShowMoodPicker(false);
+          onMoodUpdated?.();
+        }}
+      />
     </Modal>
   );
 };
@@ -472,28 +783,24 @@ export const AddEventFAB = ({ onPress, style }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: 'center', // Changed from flex-end to center for higher position
-    paddingTop: SCREEN_HEIGHT * 0.08, // Move modal up
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'flex-end',
   },
-  blurContainer: {
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  gestureContainer: {
     flex: 1,
-    justifyContent: 'flex-start', // Changed for higher position
-    paddingTop: SCREEN_HEIGHT * 0.05,
-  },
-  dismissArea: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
   },
   modalContainer: {
-    borderRadius: 24,
-    marginHorizontal: 16,
-    maxHeight: SCREEN_HEIGHT * 0.8,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: SCREEN_HEIGHT * 0.1,
+    height: SCREEN_HEIGHT * 0.85,
     paddingBottom: 24,
     overflow: 'hidden',
     borderWidth: 1,
+    borderBottomWidth: 0,
     borderColor: COSMIC_COLORS.glass.borderGlow,
     ...COSMIC_SHADOWS.glowMedium,
     shadowColor: COSMIC_COLORS.glow.purple,
@@ -579,7 +886,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   eventsList: {
+    flex: 1,
+  },
+  eventsListContent: {
     padding: COSMIC_SPACING.xl,
+    paddingBottom: 40,
   },
   eventGroup: {
     marginBottom: COSMIC_SPACING.xl,
@@ -765,6 +1076,154 @@ const styles = StyleSheet.create({
   resultText: {
     fontSize: 11,
     fontWeight: '700',
+  },
+  // Mood section styles
+  moodSection: {
+    marginTop: COSMIC_SPACING.xl,
+    paddingTop: COSMIC_SPACING.lg,
+    borderTopWidth: 1,
+    borderTopColor: COSMIC_COLORS.glass.borderGlow,
+  },
+  moodContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: COSMIC_COLORS.glass.bg,
+    borderRadius: 16,
+    padding: COSMIC_SPACING.lg,
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.border,
+  },
+  moodItem: {
+    alignItems: 'center',
+  },
+  moodLabel: {
+    color: COSMIC_COLORS.text.muted,
+    fontSize: 12,
+    marginBottom: COSMIC_SPACING.xs,
+  },
+  moodValue: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  moodBadge: {
+    paddingHorizontal: COSMIC_SPACING.md,
+    paddingVertical: COSMIC_SPACING.xs,
+    borderRadius: COSMIC_SPACING.sm,
+  },
+  moodBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  moodNote: {
+    color: COSMIC_COLORS.text.secondary,
+    fontSize: 13,
+    marginTop: COSMIC_SPACING.md,
+    paddingHorizontal: COSMIC_SPACING.sm,
+  },
+  // Add mood button styles
+  addMoodButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COSMIC_COLORS.glass.bg,
+    borderRadius: 16,
+    padding: COSMIC_SPACING.lg,
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.border,
+    borderStyle: 'dashed',
+    gap: COSMIC_SPACING.md,
+  },
+  addMoodIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: `${COSMIC_COLORS.glow.gold}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: `${COSMIC_COLORS.glow.gold}40`,
+  },
+  addMoodContent: {
+    flex: 1,
+  },
+  addMoodTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  addMoodSubtitle: {
+    color: COSMIC_COLORS.text.muted,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  moodEditButton: {
+    marginLeft: 'auto',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: `${COSMIC_COLORS.glow.gold}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Journal meta styles
+  journalMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: COSMIC_SPACING.sm,
+    marginTop: 6,
+  },
+  moodChip: {
+    paddingHorizontal: COSMIC_SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: COSMIC_SPACING.xs,
+  },
+  moodChipText: {
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  // Trade result styles
+  tradeResult: {
+    alignItems: 'flex-end',
+    gap: COSMIC_SPACING.xs,
+  },
+  // Swipe action styles
+  swipeActionLeft: {
+    width: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: COSMIC_SPACING.md,
+  },
+  swipeActionRight: {
+    width: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: COSMIC_SPACING.md,
+  },
+  editAction: {
+    flex: 1,
+    width: 70,
+    backgroundColor: COSMIC_COLORS.glow.cyan,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
+  deleteAction: {
+    flex: 1,
+    width: 70,
+    backgroundColor: '#FF6B6B',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
+  actionText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
   },
 });
 

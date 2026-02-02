@@ -121,8 +121,26 @@ export default function ChatScreen({ route, navigation }) {
   // Get other participant info
   const otherParticipant = useMemo(() => {
     if (conversation?.is_group) return null;
-    return conversation?.other_participant ||
+
+    // Debug logging
+    console.log('[ChatScreen] ========================================');
+    console.log('[ChatScreen] DETERMINING OTHER PARTICIPANT');
+    console.log('[ChatScreen] Current user.id:', user?.id);
+    console.log('[ChatScreen] conversation.other_participant:', conversation?.other_participant?.id);
+
+    if (conversation?.conversation_participants) {
+      conversation.conversation_participants.forEach((p, i) => {
+        console.log(`[ChatScreen] Participant ${i}: user_id=${p.user_id}, profiles.id=${p.profiles?.id}, profiles.display_name=${p.profiles?.display_name}`);
+      });
+    }
+
+    const found = conversation?.other_participant ||
       conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.profiles;
+
+    console.log('[ChatScreen] Selected otherParticipant.id:', found?.id);
+    console.log('[ChatScreen] ========================================');
+
+    return found;
   }, [conversation, user?.id]);
 
   const displayName = conversation?.is_group

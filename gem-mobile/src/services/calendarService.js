@@ -611,6 +611,292 @@ class CalendarService {
   }
 
   /**
+   * Get all calendar data for a specific date (unified view)
+   * Used by CalendarContext.getDayData()
+   * @param {string} userId - User ID
+   * @param {string} date - Date (YYYY-MM-DD)
+   * @returns {Promise<Object>}
+   */
+  async getDayCalendarData(userId, date) {
+    try {
+      console.log('[Calendar] getDayCalendarData:', { userId, date });
+
+      // Fetch all data in parallel
+      const [journalResult, dailyJournal, moodResult] = await Promise.all([
+        // Get daily journal (rituals, readings, paper trades, etc.)
+        this.getDailyJournal(userId, date),
+
+        // Get calendar events for this date
+        this.getDateEvents(userId, date),
+
+        // Get mood data
+        supabase
+          .from('calendar_daily_mood')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('mood_date', date)
+          .maybeSingle()
+          .then(result => {
+            console.log('[Calendar] Mood fetch result for date', date, ':', result.data ? 'found' : 'not found', result.data);
+            return result;
+          }),
+      ]);
+
+      // Get journal entries (from calendar_journal_entries table)
+      const { data: journalEntries, error: journalError } = await supabase
+        .from('calendar_journal_entries')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('entry_date', date)
+        .order('created_at', { ascending: true });
+
+      if (journalError && journalError.code !== '42P01') {
+        console.warn('[Calendar] Journal entries fetch error:', journalError);
+      }
+
+      // Get trading journal entries
+      const { data: tradingEntries, error: tradingError } = await supabase
+        .from('trading_journal_entries')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('trade_date', date)
+        .order('created_at', { ascending: true });
+
+      if (tradingError && tradingError.code !== '42P01') {
+        console.warn('[Calendar] Trading entries fetch error:', tradingError);
+      }
+
+      return {
+        success: true,
+        date,
+        // Events from calendar_events table
+        events: dailyJournal.events || [],
+        // Journal entries from calendar_journal_entries
+        journal: journalEntries || [],
+        // Trading entries from trading_journal_entries
+        trading: tradingEntries || [],
+        // Mood data
+        mood: moodResult.data || null,
+        // Legacy: rituals, readings, paper trades from getDailyJournal
+        rituals: journalResult.rituals || [],
+        readings: journalResult.readings || [],
+        paperTrades: journalResult.paperTrades || [],
+        tradingJournal: journalResult.tradingJournal || [],
+        // Summary
+        totalActivities: (journalEntries?.length || 0) +
+          (tradingEntries?.length || 0) +
+          (journalResult.totalActivities || 0),
+      };
+    } catch (error) {
+      console.error('[Calendar] getDayCalendarData error:', error);
+      return {
+        success: false,
+        error: error.message,
+        events: [],
+        journal: [],
+        trading: [],
+        mood: null,
+        rituals: [],
+        readings: [],
+        paperTrades: [],
+      };
+    }
+  }
+
+  /**
+   * Get calendar month markers for the heatmap
+   * @param {string} userId - User ID
+   * @param {number} year - Year
+   * @param {number} month - Month (1-12)
+   * @returns {Promise<Object>}
+   */
+  async getCalendarMonthMarkers(userId, year, month) {
+    try {
+      const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+      const lastDay = new Date(year, month, 0).getDate();
+      const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
+      // Fetch all relevant data for the month in parallel
+      const [journalResult, tradingResult, moodResult, eventsResult] = await Promise.all([
+        // Journal entries
+        supabase
+          .from('calendar_journal_entries')
+          .select('entry_date')
+          .eq('user_id', userId)
+          .gte('entry_date', startDate)
+          .lte('entry_date', endDate),
+
+        // Trading entries
+        supabase
+          .from('trading_journal_entries')
+          .select('trade_date, result')
+          .eq('user_id', userId)
+          .gte('trade_date', startDate)
+          .lte('trade_date', endDate),
+
+        // Mood data
+        supabase
+          .from('calendar_daily_mood')
+          .select('mood_date, overall_mood_score')
+          .eq('user_id', userId)
+          .gte('mood_date', startDate)
+          .lte('mood_date', endDate),
+
+        // Calendar events
+        this.getMonthEvents(userId, year, month),
+      ]);
+
+      // Build markers object: { 'YYYY-MM-DD': { hasJournal, hasTrade, hasMood, hasEvent, moodScore, tradeResult } }
+      const markers = {};
+
+      // Process journal entries
+      (journalResult.data || []).forEach(entry => {
+        const date = entry.entry_date;
+        if (!markers[date]) markers[date] = {};
+        markers[date].hasJournal = true;
+        markers[date].journalCount = (markers[date].journalCount || 0) + 1;
+      });
+
+      // Process trading entries
+      (tradingResult.data || []).forEach(entry => {
+        const date = entry.trade_date;
+        if (!markers[date]) markers[date] = {};
+        markers[date].hasTrade = true;
+        markers[date].tradeCount = (markers[date].tradeCount || 0) + 1;
+        if (entry.result === 'win') {
+          markers[date].tradeWins = (markers[date].tradeWins || 0) + 1;
+        } else if (entry.result === 'loss') {
+          markers[date].tradeLosses = (markers[date].tradeLosses || 0) + 1;
+        }
+      });
+
+      // Process mood data
+      (moodResult.data || []).forEach(entry => {
+        const date = entry.mood_date;
+        if (!markers[date]) markers[date] = {};
+        markers[date].hasMood = true;
+        markers[date].moodScore = entry.overall_mood_score;
+      });
+
+      // Process events
+      (eventsResult.events || []).forEach(event => {
+        const date = event.event_date;
+        if (!markers[date]) markers[date] = {};
+        markers[date].hasEvent = true;
+        markers[date].eventCount = (markers[date].eventCount || 0) + 1;
+      });
+
+      return {
+        success: true,
+        markers,
+        year,
+        month,
+      };
+    } catch (error) {
+      console.error('[Calendar] getCalendarMonthMarkers error:', error);
+      return { success: false, markers: {}, error: error.message };
+    }
+  }
+
+  /**
+   * Get events by date range (alias for getEvents for consistency)
+   * @param {string} userId - User ID
+   * @param {string} startDate - Start date
+   * @param {string} endDate - End date
+   * @returns {Promise<Array>}
+   */
+  async getEventsByDateRange(userId, startDate, endDate) {
+    const result = await this.getEvents(userId, startDate, endDate);
+    return result.events || [];
+  }
+
+  /**
+   * Get activities by date range for heatmap
+   * @param {string} userId - User ID
+   * @param {string} startDate - Start date (YYYY-MM-DD)
+   * @param {string} endDate - End date (YYYY-MM-DD)
+   * @returns {Promise<Array>}
+   */
+  async getActivitiesByDateRange(userId, startDate, endDate) {
+    try {
+      // Fetch all activities in parallel
+      const [journalResult, tradingResult, ritualsResult, readingsResult] = await Promise.all([
+        // Journal entries
+        supabase
+          .from('calendar_journal_entries')
+          .select('entry_date')
+          .eq('user_id', userId)
+          .gte('entry_date', startDate)
+          .lte('entry_date', endDate),
+
+        // Trading entries
+        supabase
+          .from('trading_journal_entries')
+          .select('trade_date')
+          .eq('user_id', userId)
+          .gte('trade_date', startDate)
+          .lte('trade_date', endDate),
+
+        // Ritual completions
+        supabase
+          .from('vision_ritual_completions')
+          .select('completed_at')
+          .eq('user_id', userId)
+          .gte('completed_at', `${startDate}T00:00:00`)
+          .lte('completed_at', `${endDate}T23:59:59`),
+
+        // Readings
+        supabase
+          .from('divination_readings')
+          .select('created_at')
+          .eq('user_id', userId)
+          .gte('created_at', `${startDate}T00:00:00`)
+          .lte('created_at', `${endDate}T23:59:59`),
+      ]);
+
+      // Aggregate by date
+      const activityByDate = {};
+
+      // Journal entries
+      (journalResult.data || []).forEach(entry => {
+        const date = entry.entry_date;
+        activityByDate[date] = (activityByDate[date] || 0) + 1;
+      });
+
+      // Trading entries
+      (tradingResult.data || []).forEach(entry => {
+        const date = entry.trade_date;
+        activityByDate[date] = (activityByDate[date] || 0) + 1;
+      });
+
+      // Ritual completions
+      (ritualsResult.data || []).forEach(entry => {
+        const date = entry.completed_at?.split('T')[0];
+        if (date) {
+          activityByDate[date] = (activityByDate[date] || 0) + 1;
+        }
+      });
+
+      // Readings
+      (readingsResult.data || []).forEach(entry => {
+        const date = entry.created_at?.split('T')[0];
+        if (date) {
+          activityByDate[date] = (activityByDate[date] || 0) + 1;
+        }
+      });
+
+      // Convert to array format
+      return Object.entries(activityByDate).map(([date, count]) => ({
+        activity_date: date,
+        activity_count: count,
+      }));
+    } catch (error) {
+      console.error('[Calendar] getActivitiesByDateRange error:', error);
+      return [];
+    }
+  }
+
+  /**
    * Get journal summary for a month (for calendar dots/indicators)
    * @param {string} userId - User ID
    * @param {number} year - Year

@@ -18,6 +18,23 @@ const CallContext = createContext({});
 
 export const useCallContext = () => useContext(CallContext);
 
+// Global callback for triggering incoming call from push notifications
+// This allows InAppNotificationContext to trigger the full-screen overlay
+let globalIncomingCallHandler = null;
+
+export const registerIncomingCallHandler = (handler) => {
+  globalIncomingCallHandler = handler;
+};
+
+export const triggerIncomingCallFromPush = async (callId) => {
+  console.log('[CallContext] triggerIncomingCallFromPush called:', callId);
+  if (globalIncomingCallHandler) {
+    await globalIncomingCallHandler(callId);
+  } else {
+    console.warn('[CallContext] No incoming call handler registered');
+  }
+};
+
 /**
  * CallProvider - Wraps app with global call handling
  */
@@ -90,10 +107,43 @@ export function CallProvider({ children }) {
     }
   }, []);
 
+  // ========== NAVIGATION HELPER ==========
+
+  // Helper function to navigate to call screen
+  // IMPORTANT: Must be defined BEFORE handleIncomingCall which depends on it
+  const navigateToCallScreen = useCallback((call, caller) => {
+    console.log('[CallProvider] Navigating to call screen:', call?.id);
+    const navReady = navigationRef.current &&
+      (typeof navigationRef.current.isReady === 'function'
+        ? navigationRef.current.isReady()
+        : true);
+
+    console.log('[CallProvider] Navigation ready:', navReady);
+
+    if (navReady) {
+      navigationRef.current.navigate('Call', {
+        screen: 'IncomingCall',
+        params: {
+          call,
+          caller,
+        },
+      });
+      console.log('[CallProvider] Navigation triggered');
+    } else {
+      console.error('[CallProvider] Navigation not ready');
+    }
+  }, []);
+
   // ========== INCOMING CALL HANDLERS ==========
 
   const handleIncomingCall = useCallback((call) => {
-    console.log('[CallProvider] Incoming call:', call);
+    console.log('[CallProvider] *** handleIncomingCall called ***');
+    console.log('[CallProvider] Call data:', JSON.stringify({
+      id: call?.id,
+      status: call?.status,
+      call_type: call?.call_type,
+      caller_id: call?.caller_id,
+    }));
 
     // Don't show if already handling a call
     if (incomingCall) {
@@ -112,14 +162,24 @@ export function CallProvider({ children }) {
       return;
     }
 
-    // Set incoming call and show overlay
+    // Set incoming call state (for tracking)
+    console.log('[CallProvider] *** INCOMING CALL DETECTED ***');
     setIncomingCall(call);
-    setShowOverlay(true);
 
     // Play ringtone and vibrate
-    // Note: If CallKeep is available, native UI handles ringtone
-    // but we still vibrate as backup
     playRingtone();
+
+    // Navigate directly to IncomingCall screen
+    // This is more reliable than showing a Modal overlay
+    const caller = call.caller || {
+      id: call.caller_id,
+      display_name: 'Người gọi',
+    };
+
+    console.log('[CallProvider] Navigating to IncomingCall screen...');
+    console.log('[CallProvider] Caller:', caller?.display_name);
+    navigateToCallScreen(call, caller);
+    console.log('[CallProvider] Navigation triggered');
   }, [incomingCall, playRingtone, navigateToCallScreen]);
 
   const handleCallEnded = useCallback((call) => {
@@ -269,25 +329,7 @@ export function CallProvider({ children }) {
       console.log('[CallProvider] Cleaning up CallKeep');
       callKeepService.cleanup();
     };
-  }, [isAuthenticated, user?.id, incomingCall, stopRingtone]);
-
-  // Helper function to navigate to call screen
-  const navigateToCallScreen = useCallback((call, caller) => {
-    const navReady = navigationRef.current &&
-      (typeof navigationRef.current.isReady === 'function'
-        ? navigationRef.current.isReady()
-        : true);
-
-    if (navReady) {
-      navigationRef.current.navigate('Call', {
-        screen: 'IncomingCall',
-        params: {
-          call,
-          caller,
-        },
-      });
-    }
-  }, []);
+  }, [isAuthenticated, user?.id, incomingCall, stopRingtone, navigateToCallScreen]);
 
   // ========== SUBSCRIBE TO INCOMING CALLS ==========
 
@@ -393,16 +435,44 @@ export function CallProvider({ children }) {
     console.log('[CallProvider] Manually triggering incoming call:', callId);
     try {
       // Fetch call info
-      const { call } = await callService.getCall(callId);
-      if (call && (call.status === 'ringing' || call.status === 'initiating')) {
+      const result = await callService.getCall(callId);
+      console.log('[CallProvider] getCall result:', result.success, result.call?.id, result.call?.status);
+
+      if (!result.success || !result.call) {
+        console.error('[CallProvider] Failed to get call:', result.error);
+        return;
+      }
+
+      const call = result.call;
+      if (call.status === 'ringing' || call.status === 'initiating' || call.status === 'connecting') {
+        console.log('[CallProvider] Call is valid, showing overlay');
         handleIncomingCall(call);
       } else {
-        console.log('[CallProvider] Call not in ringing state:', call?.status);
+        console.log('[CallProvider] Call not in ringing state:', call.status);
       }
     } catch (error) {
       console.error('[CallProvider] Error triggering incoming call:', error);
     }
   }, [handleIncomingCall]);
+
+  // Register global callback so InAppNotificationContext can trigger incoming call overlay
+  useEffect(() => {
+    console.log('[CallProvider] Registering global incoming call handler');
+    registerIncomingCallHandler(triggerIncomingCall);
+
+    return () => {
+      console.log('[CallProvider] Unregistering global incoming call handler');
+      registerIncomingCallHandler(null);
+    };
+  }, [triggerIncomingCall]);
+
+  // Log overlay state changes for debugging
+  useEffect(() => {
+    console.log('[CallProvider] === OVERLAY STATE CHANGED ===');
+    console.log('[CallProvider] showOverlay:', showOverlay);
+    console.log('[CallProvider] incomingCall:', incomingCall?.id, incomingCall?.status);
+    console.log('[CallProvider] caller:', incomingCall?.caller?.display_name);
+  }, [showOverlay, incomingCall]);
 
   // ========== CONTEXT VALUE ==========
 

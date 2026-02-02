@@ -335,7 +335,7 @@ const GoalSettingForm = ({
         widgets: [
           {
             type: 'goal',
-            title: `Mục tiêu: ${areaLabel}`,
+            title: goalText,
             icon: '🎯',
             data: {
               goalText: goalText,

@@ -15,6 +15,8 @@ export const ScannerProvider = ({ children }) => {
   const [selectedCoins, setSelectedCoins] = useState(['BTCUSDT']);
   const [selectedTimeframe, setSelectedTimeframe] = useState('4h');
   const [multiTFResults, setMultiTFResults] = useState(null);
+  // Zone state - persisted across tab navigation
+  const [zones, setZones] = useState([]);
 
   // Update scan results
   const updateScanResults = useCallback((results, allPatterns, time) => {
@@ -29,6 +31,7 @@ export const ScannerProvider = ({ children }) => {
     setPatterns([]);
     setLastScanTime(null);
     setMultiTFResults(null);
+    setZones([]);
   }, []);
 
   const value = {
@@ -39,6 +42,7 @@ export const ScannerProvider = ({ children }) => {
     selectedCoins,
     selectedTimeframe,
     multiTFResults,
+    zones,
     // Actions
     setScanResults,
     setPatterns,
@@ -46,6 +50,7 @@ export const ScannerProvider = ({ children }) => {
     setSelectedCoins,
     setSelectedTimeframe,
     setMultiTFResults,
+    setZones,
     updateScanResults,
     clearScanResults,
   };

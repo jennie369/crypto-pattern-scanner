@@ -22,13 +22,22 @@ import CountdownTimer from './CountdownTimer';
 import FlashSaleCard from './FlashSaleCard';
 import { prefetchImages } from '../Common/OptimizedImage';
 
+// =========== GLOBAL CACHE for instant display ===========
+const flashSaleCache = {
+  sale: null,
+  products: null,
+  lastFetch: 0,
+  CACHE_DURATION: 2 * 60 * 1000, // 2 minutes (shorter for flash sales)
+};
+
 const FlashSaleSection = ({ style }) => {
   const navigation = useNavigation();
   const { addToCart } = useCart();
 
-  const [flashSale, setFlashSale] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Initialize from cache for instant display
+  const [flashSale, setFlashSale] = useState(() => flashSaleCache.sale);
+  const [products, setProducts] = useState(() => flashSaleCache.products || []);
+  const [loading, setLoading] = useState(() => !flashSaleCache.products || flashSaleCache.products.length === 0);
   const [isExpired, setIsExpired] = useState(false);
 
   // Use ref to track if already fetched - prevents re-fetch on every render
@@ -40,32 +49,52 @@ const FlashSaleSection = ({ style }) => {
     if (hasFetched.current) return;
     hasFetched.current = true;
 
+    const now = Date.now();
+    const cacheExpired = now - flashSaleCache.lastFetch > flashSaleCache.CACHE_DURATION;
+
+    // Use cache if valid
+    if (flashSaleCache.sale && flashSaleCache.products && flashSaleCache.products.length > 0 && !cacheExpired) {
+      // Check if the flash sale is still active
+      const endTime = new Date(flashSaleCache.sale.end_time).getTime();
+      if (endTime > now) {
+        setLoading(false);
+        return;
+      }
+    }
+
     const fetchFlashSale = async () => {
       try {
-        const now = new Date().toISOString();
+        const nowISO = new Date().toISOString();
 
         const { data, error } = await supabase
           .from('flash_sale_config')
           .select('*')
           .eq('is_active', true)
-          .lte('start_time', now)
-          .gte('end_time', now)
+          .lte('start_time', nowISO)
+          .gte('end_time', nowISO)
           .order('start_time', { ascending: true })
           .limit(1)
           .single();
 
         if (error || !data) {
           setFlashSale(null);
+          flashSaleCache.sale = null;
+          flashSaleCache.products = null;
           setLoading(false);
           return;
         }
 
         setFlashSale(data);
+        flashSaleCache.sale = data;
 
         // Fetch products for flash sale
         if (data.product_ids && data.product_ids.length > 0) {
           const fetchedProducts = await fetchProductsByIds(data.product_ids);
           setProducts(fetchedProducts || []);
+
+          // Update cache
+          flashSaleCache.products = fetchedProducts || [];
+          flashSaleCache.lastFetch = Date.now();
 
           // Prefetch product images for faster rendering
           const imageUrls = (fetchedProducts || [])

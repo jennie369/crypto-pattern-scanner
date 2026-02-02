@@ -792,6 +792,7 @@ export const shopifyService = new ShopifyService();
 // Call this early in app lifecycle to warm up the cache
 // This makes Shop tab instant when user navigates to it
 let preloadPromise = null;
+let preloadAllPromise = null;
 
 export const preloadShopData = async () => {
   // Avoid duplicate preloads
@@ -819,6 +820,47 @@ export const preloadShopData = async () => {
     });
 
   return preloadPromise;
+};
+
+/**
+ * Enhanced preload - preloads ALL shop data including banners and digital products
+ * This ensures instant display when switching to Shop tab
+ */
+export const preloadAllShopData = async () => {
+  if (preloadAllPromise) {
+    return preloadAllPromise;
+  }
+
+  console.log('[Shopify] Preloading ALL shop data (products, banners, digital)...');
+
+  preloadAllPromise = Promise.all([
+    // Preload main products
+    preloadShopData(),
+    // Preload banners - dynamic import to avoid circular deps
+    import('./shopBannerService').then(module =>
+      module.default.getActiveShopBanners().catch(() => null)
+    ),
+    // Preload digital products - dynamic import
+    import('./digitalProductService').then(module =>
+      module.digitalProductService?.getProductsByCategory?.('all').catch(() => null)
+    ),
+    // Preload hero products
+    import('./digitalProductService').then(module =>
+      module.digitalProductService?.getHeroProducts?.(5).catch(() => null)
+    ),
+  ])
+    .then(([products]) => {
+      console.log('[Shopify] ALL shop data preloaded');
+      preloadAllPromise = null;
+      return products;
+    })
+    .catch(err => {
+      console.warn('[Shopify] Preload all error:', err);
+      preloadAllPromise = null;
+      return [];
+    });
+
+  return preloadAllPromise;
 };
 
 export default shopifyService;

@@ -38,17 +38,17 @@ const TYPE_CONFIG = {
   journal: {
     icon: BookOpen,
     color: COLORS.purple,
-    label: 'Nhat ky',
+    label: 'Nhật ký',
   },
   journal_gratitude: {
     icon: Heart,
     color: COLORS.error,
-    label: 'Biet on',
+    label: 'Biết ơn',
   },
   journal_goal_note: {
     icon: Target,
     color: COLORS.info,
-    label: 'Ghi chu muc tieu',
+    label: 'Ghi chú mục tiêu',
   },
   journal_quick_note: {
     icon: BookOpen,
@@ -58,7 +58,7 @@ const TYPE_CONFIG = {
   trade: {
     icon: TrendingUp,
     color: COLORS.success,
-    label: 'Giao dich',
+    label: 'Giao dịch',
   },
   ritual: {
     icon: Sparkles,
@@ -78,22 +78,22 @@ const TYPE_CONFIG = {
   goal_progress: {
     icon: Target,
     color: COLORS.info,
-    label: 'Tien do',
+    label: 'Tiến độ',
   },
   mood_morning: {
     icon: Sun,
     color: COLORS.gold,
-    label: 'Sang',
+    label: 'Sáng',
   },
   mood_midday: {
     icon: Coffee,
     color: COLORS.cyan,
-    label: 'Trua',
+    label: 'Trưa',
   },
   mood_evening: {
     icon: Moon,
     color: COLORS.purple,
-    label: 'Toi',
+    label: 'Tối',
   },
 };
 
@@ -285,7 +285,7 @@ const TimelineItem = ({
   const renderDivinationContent = () => (
     <View style={styles.textContent}>
       <Text style={styles.title} numberOfLines={1}>
-        {item.result_summary || (item.divination_type === 'tarot' ? 'Trai bai Tarot' : 'Gieo que I Ching')}
+        {item.result_summary || (item.divination_type === 'tarot' ? 'Trải bài Tarot' : 'Gieo quẻ I Ching')}
       </Text>
       {item.question && (
         <Text style={styles.preview} numberOfLines={1}>
@@ -335,7 +335,7 @@ const TimelineItem = ({
             </View>
           )}
           {item.energy && (
-            <Text style={styles.moodDetail}>Nang luong: {item.energy}/5</Text>
+            <Text style={styles.moodDetail}>Năng lượng: {item.energy}/5</Text>
           )}
         </View>
         {item.note && (
@@ -413,7 +413,7 @@ export const TimelineHeader = ({ title, count, icon: IconComponent, color }) => 
 /**
  * EmptyTimeline - Empty state for timeline
  */
-export const EmptyTimeline = ({ message = 'Chua co hoat dong nao' }) => (
+export const EmptyTimeline = ({ message = 'Chưa có hoạt động nào' }) => (
   <View style={styles.emptyContainer}>
     <BookOpen size={32} color={COLORS.textMuted} />
     <Text style={styles.emptyText}>{message}</Text>

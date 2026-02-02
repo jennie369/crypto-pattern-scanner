@@ -333,11 +333,13 @@ export const sendNotification = async (type, data, userId = null) => {
     }
 
     const settings = await getSettings(userId);
+    const title = template.title;
+    const body = template.getBody(data);
 
     // Build notification content
     const content = {
-      title: template.title,
-      body: template.getBody(data),
+      title,
+      body,
       data: { type, ...data },
       categoryIdentifier: template.categoryId,
       sound: settings.sound_enabled ? 'default' : null,
@@ -345,15 +347,18 @@ export const sendNotification = async (type, data, userId = null) => {
       badge: 1,
     };
 
-    // Schedule notification (immediately)
+    // Send local notification (for foreground)
     const notificationId = await Notifications.scheduleNotificationAsync({
       content,
       trigger: null, // Immediate
     });
 
-    // Log to history in Supabase
+    // Also send remote push (for background/closed app)
+    // This runs in parallel, don't await to avoid blocking
     if (userId) {
-      await logNotificationHistory(userId, type, content, data);
+      sendRemotePush(userId, type, title, body, data).catch((err) => {
+        console.warn('[notificationService] Remote push failed:', err);
+      });
     }
 
     console.log('[notificationService] Sent notification:', type, notificationId);
@@ -384,6 +389,48 @@ const logNotificationHistory = async (userId, type, content, data) => {
       });
   } catch (error) {
     console.error('[notificationService] logHistory error:', error);
+  }
+};
+
+/**
+ * Send remote push notification via Edge Function
+ * This ensures notification is delivered even when app is closed
+ * @param {string} userId - User ID
+ * @param {string} type - Notification type
+ * @param {string} title - Notification title
+ * @param {string} body - Notification body
+ * @param {Object} data - Additional data
+ */
+export const sendRemotePush = async (userId, type, title, body, data = {}) => {
+  if (!userId) {
+    console.warn('[notificationService] No userId for remote push');
+    return { sent: false, reason: 'no_user_id' };
+  }
+
+  try {
+    const { data: result, error } = await supabase.functions.invoke(
+      'send-paper-trade-push',
+      {
+        body: {
+          userId,
+          type,
+          title,
+          body,
+          data,
+        },
+      }
+    );
+
+    if (error) {
+      console.error('[notificationService] Remote push error:', error);
+      return { sent: false, error: error.message };
+    }
+
+    console.log('[notificationService] Remote push sent:', result);
+    return { sent: true, ...result };
+  } catch (error) {
+    console.error('[notificationService] Remote push exception:', error);
+    return { sent: false, error: error.message };
   }
 };
 
@@ -495,6 +542,7 @@ const paperTradeNotificationService = {
   getSettings,
   updateSettings,
   sendNotification,
+  sendRemotePush,
   notifyOrderFilled,
   notifyTPHit,
   notifySLHit,

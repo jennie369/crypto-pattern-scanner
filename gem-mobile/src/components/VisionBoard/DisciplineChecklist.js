@@ -205,7 +205,6 @@ const DisciplineChecklist = ({
           <Text style={styles.warningText}>
             Diem ky luat thap co the dan den quyet dinh sai lam
           </Text>
-        )}
         </View>
       )}
 
@@ -216,7 +215,6 @@ const DisciplineChecklist = ({
           <Text style={styles.achievementText}>
             Tuyet voi! Ban da tuan thu day du ky luat giao dich
           </Text>
-        )}
         </View>
       )}
     </View>

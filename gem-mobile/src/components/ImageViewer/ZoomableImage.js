@@ -30,6 +30,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
  * @param {number} props.height - Original image height
  * @param {Function} props.onDismiss - Callback to close viewer
  * @param {Function} props.onTap - Callback for single tap
+ * @param {Function} props.onLongPress - Callback for long press (save image)
  * @param {Function} props.onZoomChange - Callback when zoom changes
  * @param {boolean} props.isActive - Whether this image is currently visible
  */
@@ -39,6 +40,7 @@ const ZoomableImage = ({
   height: originalHeight,
   onDismiss,
   onTap,
+  onLongPress,
   onZoomChange,
   isActive = true,
 }) => {
@@ -63,6 +65,7 @@ const ZoomableImage = ({
     imageHeight: displayHeight,
     onDismiss,
     onTap,
+    onLongPress,
     onZoomChange,
   });
 

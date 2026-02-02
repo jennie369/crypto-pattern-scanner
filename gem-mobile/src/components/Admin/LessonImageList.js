@@ -60,15 +60,15 @@ const LessonImageList = ({
         await Clipboard.setStringAsync(url);
         alert({
           type: 'success',
-          title: 'Da sao chep',
-          message: 'URL hinh anh da duoc sao chep vao clipboard',
+          title: 'Đã sao chép',
+          message: 'URL hình ảnh đã được sao chép vào clipboard',
           buttons: [{ text: 'OK' }],
         });
       } catch (error) {
         alert({
           type: 'error',
-          title: 'Loi',
-          message: 'Khong the sao chep URL',
+          title: 'Lỗi',
+          message: 'Không thể sao chép URL',
           buttons: [{ text: 'OK' }],
         });
       }
@@ -84,15 +84,15 @@ const LessonImageList = ({
         await Clipboard.setStringAsync(htmlTag);
         alert({
           type: 'success',
-          title: 'Da sao chep',
-          message: 'The HTML da duoc sao chep. Paste vao noi dung bai hoc.',
+          title: 'Đã sao chép',
+          message: 'Thẻ HTML đã được sao chép. Paste vào nội dung bài học.',
           buttons: [{ text: 'OK' }],
         });
       } catch (error) {
         alert({
           type: 'error',
-          title: 'Loi',
-          message: 'Khong the sao chep',
+          title: 'Lỗi',
+          message: 'Không thể sao chép',
           buttons: [{ text: 'OK' }],
         });
       }
@@ -105,12 +105,12 @@ const LessonImageList = ({
     (image) => {
       alert({
         type: 'warning',
-        title: 'Xac nhan xoa',
-        message: `Ban co chac muon xoa hinh "${image.position_id || image.file_name}"?\n\nLuu y: Neu hinh dang duoc su dung trong noi dung, can xoa thu cong trong HTML.`,
+        title: 'Xác nhận xóa',
+        message: `Bạn có chắc muốn xóa hình "${image.position_id || image.file_name}"?\n\nLưu ý: Nếu hình đang được sử dụng trong nội dung, cần xóa thủ công trong HTML.`,
         buttons: [
-          { text: 'Huy', style: 'cancel' },
+          { text: 'Hủy', style: 'cancel' },
           {
-            text: 'Xoa',
+            text: 'Xóa',
             style: 'destructive',
             onPress: async () => {
               setDeletingId(image.id);
@@ -151,12 +151,12 @@ const LessonImageList = ({
       if (hasChanges) {
         alert({
           type: 'warning',
-          title: 'Huy thay doi?',
-          message: 'Ban co thay doi chua luu. Ban co chac muon huy?',
+          title: 'Hủy thay đổi?',
+          message: 'Bạn có thay đổi chưa lưu. Bạn có chắc muốn hủy?',
           buttons: [
-            { text: 'Tiep tuc sua', style: 'cancel' },
+            { text: 'Tiếp tục sửa', style: 'cancel' },
             {
-              text: 'Huy',
+              text: 'Hủy',
               style: 'destructive',
               onPress: () => setEditingImage(null),
             },
@@ -184,12 +184,12 @@ const LessonImageList = ({
 
     // Validate title length
     if (editForm.title && editForm.title.length > 200) {
-      errors.title = 'Tieu de toi da 200 ky tu';
+      errors.title = 'Tiêu đề tối đa 200 ký tự';
     }
 
     // Validate caption length
     if (editForm.caption && editForm.caption.length > 1000) {
-      errors.caption = 'Mo ta toi da 1000 ky tu';
+      errors.caption = 'Mô tả tối đa 1000 ký tự';
     }
 
     setFormErrors(errors);
@@ -207,15 +207,15 @@ const LessonImageList = ({
       setEditingImage(null);
       alert({
         type: 'success',
-        title: 'Thanh cong',
-        message: 'Da cap nhat thong tin hinh anh',
+        title: 'Thành công',
+        message: 'Đã cập nhật thông tin hình ảnh',
         buttons: [{ text: 'OK' }],
       });
     } catch (error) {
       alert({
         type: 'error',
-        title: 'Loi',
-        message: error.message || 'Khong the luu thay doi',
+        title: 'Lỗi',
+        message: error.message || 'Không thể lưu thay đổi',
         buttons: [{ text: 'OK' }],
       });
     } finally {
@@ -293,7 +293,7 @@ const LessonImageList = ({
               {item.position_id || `image-${index + 1}`}
             </Text>
             <Text style={styles.title} numberOfLines={1}>
-              {item.title || item.file_name || 'Chua dat ten'}
+              {item.title || item.file_name || 'Chưa đặt tên'}
             </Text>
             {item.width && item.height && (
               <Text style={styles.dimensions}>
@@ -352,8 +352,8 @@ const LessonImageList = ({
     () => (
       <View style={styles.emptyContainer}>
         <Inbox size={48} color={COLORS.textMuted} />
-        <Text style={styles.emptyText}>Chua co hinh anh nao</Text>
-        <Text style={styles.emptyHint}>Upload hinh anh o tren de bat dau</Text>
+        <Text style={styles.emptyText}>Chưa có hình ảnh nào</Text>
+        <Text style={styles.emptyHint}>Upload hình ảnh ở trên để bắt đầu</Text>
       </View>
     ),
     []
@@ -364,7 +364,7 @@ const LessonImageList = ({
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.gold} />
-        <Text style={styles.loadingText}>Dang tai hinh anh...</Text>
+        <Text style={styles.loadingText}>Đang tải hình ảnh...</Text>
       </View>
     );
   }
@@ -374,10 +374,10 @@ const LessonImageList = ({
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.sectionTitle}>
-          Hinh anh da tai len ({images.length})
+          Hình ảnh đã tải lên ({images.length})
         </Text>
         {images.length > 1 && (
-          <Text style={styles.headerHint}>Dung arrows de sap xep</Text>
+          <Text style={styles.headerHint}>Dùng arrows để sắp xếp</Text>
         )}
       </View>
 
@@ -402,7 +402,7 @@ const LessonImageList = ({
           <View style={styles.modalContent}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Chinh sua hinh anh</Text>
+              <Text style={styles.modalTitle}>Chỉnh sửa hình ảnh</Text>
               <TouchableOpacity style={styles.modalCloseBtn} onPress={closeEditModal}>
                 <X size={24} color={COLORS.textPrimary} />
               </TouchableOpacity>
@@ -440,18 +440,18 @@ const LessonImageList = ({
                 <Text style={styles.errorText}>{formErrors.position_id}</Text>
               ) : (
                 <Text style={styles.inputHint}>
-                  ID duy nhat de tham chieu trong HTML. Chi dung chu, so, dau - va _
+                  ID duy nhất để tham chiếu trong HTML. Chỉ dùng chữ, số, dấu - và _
                 </Text>
               )}
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Tieu de</Text>
+              <Text style={styles.label}>Tiêu đề</Text>
               <TextInput
                 style={[styles.input, formErrors.title && styles.inputError]}
                 value={editForm.title}
                 onChangeText={(t) => setEditForm((prev) => ({ ...prev, title: t }))}
-                placeholder="Tieu de hien thi khi hover"
+                placeholder="Tiêu đề hiển thị khi hover"
                 placeholderTextColor={COLORS.textMuted}
                 maxLength={200}
               />
@@ -461,7 +461,7 @@ const LessonImageList = ({
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Mo ta (Caption)</Text>
+              <Text style={styles.label}>Mô tả (Caption)</Text>
               <TextInput
                 style={[
                   styles.input,
@@ -470,7 +470,7 @@ const LessonImageList = ({
                 ]}
                 value={editForm.caption}
                 onChangeText={(t) => setEditForm((prev) => ({ ...prev, caption: t }))}
-                placeholder="Mo ta hien thi duoi hinh anh"
+                placeholder="Mô tả hiển thị dưới hình ảnh"
                 placeholderTextColor={COLORS.textMuted}
                 multiline
                 numberOfLines={3}
@@ -488,12 +488,12 @@ const LessonImageList = ({
                 style={styles.input}
                 value={editForm.alt_text}
                 onChangeText={(t) => setEditForm((prev) => ({ ...prev, alt_text: t }))}
-                placeholder="Mo ta cho nguoi khiem thi va SEO"
+                placeholder="Mô tả cho người khiếm thị và SEO"
                 placeholderTextColor={COLORS.textMuted}
                 maxLength={300}
               />
               <Text style={styles.inputHint}>
-                Mo ta noi dung hinh cho nguoi su dung screen reader
+                Mô tả nội dung hình cho người sử dụng screen reader
               </Text>
             </View>
 
@@ -509,7 +509,7 @@ const LessonImageList = ({
                 <Check size={18} color="#000" />
               )}
               <Text style={styles.saveBtnText}>
-                {saving ? 'Dang luu...' : 'Luu thay doi'}
+                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
               </Text>
             </TouchableOpacity>
           </View>

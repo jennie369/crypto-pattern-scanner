@@ -52,17 +52,17 @@ const QuickActionBar = ({
 
   // Get pending mood label
   const getMoodCheckInLabel = () => {
-    if (!pendingMoodCheckIn) return 'Cam xuc';
+    if (!pendingMoodCheckIn) return 'Cảm xúc';
 
     switch (pendingMoodCheckIn.type) {
       case CHECK_IN_TYPES.MORNING:
-        return 'Sang';
+        return 'Sáng';
       case CHECK_IN_TYPES.MIDDAY:
-        return 'Trua';
+        return 'Trưa';
       case CHECK_IN_TYPES.EVENING:
-        return 'Toi';
+        return 'Tối';
       default:
-        return 'Cam xuc';
+        return 'Cảm xúc';
     }
   };
 
@@ -82,7 +82,7 @@ const QuickActionBar = ({
     // Write journal
     {
       id: 'journal',
-      label: 'Nhat ky',
+      label: 'Nhật ký',
       icon: BookOpen,
       color: COLORS.purple,
       onPress: onWriteJournal,
@@ -100,7 +100,7 @@ const QuickActionBar = ({
     // Gratitude
     {
       id: 'gratitude',
-      label: 'Biet on',
+      label: 'Biết ơn',
       icon: Heart,
       color: COLORS.error,
       onPress: onGratitude,
@@ -118,7 +118,7 @@ const QuickActionBar = ({
     // Goal progress
     {
       id: 'goal',
-      label: 'Muc tieu',
+      label: 'Mục tiêu',
       icon: Target,
       color: COLORS.info,
       onPress: onGoalProgress,

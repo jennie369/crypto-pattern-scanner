@@ -16,6 +16,8 @@ import CreateGroupScreen from '../screens/Messages/CreateGroupScreen';
 import MessageSearchScreen from '../screens/Messages/MessageSearchScreen';
 import ForwardMessageScreen from '../screens/Messages/ForwardMessageScreen';
 import BlockedUsersScreen from '../screens/Messages/BlockedUsersScreen';
+import MessageRequestsScreen from '../screens/Messages/MessageRequestsScreen';
+import PrivacySettingsScreen from '../screens/Messages/PrivacySettingsScreen';
 import PinnedMessagesScreen from '../screens/Messages/PinnedMessagesScreen';
 import ScheduledMessagesScreen from '../screens/Messages/ScheduledMessagesScreen';
 import StarredMessagesScreen from '../screens/Messages/StarredMessagesScreen';
@@ -104,6 +106,24 @@ export default function MessagesStack() {
       <Stack.Screen
         name="BlockedUsers"
         component={BlockedUsersScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Message Requests */}
+      <Stack.Screen
+        name="MessageRequests"
+        component={MessageRequestsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Privacy Settings */}
+      <Stack.Screen
+        name="PrivacySettings"
+        component={PrivacySettingsScreen}
         options={{
           animation: 'slide_from_right',
         }}
