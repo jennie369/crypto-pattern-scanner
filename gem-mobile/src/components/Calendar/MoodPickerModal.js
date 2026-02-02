@@ -251,13 +251,43 @@ const MoodPickerModal = ({
         if (result.success) saveSuccess = true;
       }
 
+      // Save notes even if no mood was selected (user might just want to log highlight/gratitude)
+      if (!saveSuccess && (dayHighlight.trim() || gratitudeNotes.trim())) {
+        console.log('[MoodPickerModal] Saving notes without mood for date:', targetDate);
+        const result = await saveMoodCheckIn(
+          user.id,
+          CHECK_IN_TYPES.EVENING, // Use evening for notes since it has highlight/gratitude fields
+          {
+            mood: null,
+            note: '',
+            gratitude: gratitudeNotes,
+            highlight: dayHighlight,
+          },
+          userTier,
+          userRole,
+          targetDate
+        );
+        console.log('[MoodPickerModal] Notes save result:', result);
+        if (result.success) saveSuccess = true;
+      }
+
       if (saveSuccess) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         onMoodSaved?.();
         handleClose();
       } else {
-        console.error('[MoodPickerModal] No mood data was saved - no mood selected');
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        // No mood selected and no notes entered - nothing to save
+        console.warn('[MoodPickerModal] Nothing to save - please select a mood or enter notes');
+        console.log('[MoodPickerModal] Current state:', {
+          activeTab,
+          morningMood,
+          eveningMood,
+          overallMood,
+          dayHighlight: dayHighlight?.trim() || '',
+          gratitudeNotes: gratitudeNotes?.trim() || '',
+        });
+        // Don't show error - just close the modal (user might have just wanted to cancel)
+        handleClose();
       }
     } catch (error) {
       console.error('[MoodPickerModal] Error saving mood:', error);

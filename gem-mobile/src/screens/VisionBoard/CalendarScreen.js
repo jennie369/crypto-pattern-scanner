@@ -26,6 +26,8 @@ import * as Icons from 'lucide-react-native';
 import { COLORS, TYPOGRAPHY, SPACING, GLASS, GRADIENTS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
 import calendarService from '../../services/calendarService';
+import calendarJournalService from '../../services/calendarJournalService';
+import tradingJournalService from '../../services/tradingJournalService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { MonthCalendar, DayDetailModal, CalendarEventItem } from '../../components/Calendar';
@@ -496,11 +498,13 @@ const CalendarScreen = () => {
         onReadingPress={(reading) => {
           console.log('[Calendar] Reading pressed:', reading.reading_type);
           setShowDayModal(false);
-          // Navigate to divination screen with the reading type
-          navigation.navigate('DivinationScreen', {
-            defaultType: reading.reading_type,
-            viewHistory: true,
-            readingId: reading.id,
+          // Navigate to GemMaster stack -> ReadingDetail
+          navigation.navigate('GemMaster', {
+            screen: 'ReadingDetail',
+            params: {
+              readingId: reading.id,
+              readingType: reading.reading_type,
+            },
           });
         }}
         onTradePress={(trade) => {
@@ -536,6 +540,56 @@ const CalendarScreen = () => {
             mode: 'create',
             date: selectedDate.toISOString().split('T')[0],
           });
+        }}
+        onEditJournal={(entry) => {
+          console.log('[Calendar] Edit journal entry:', entry.id);
+          setShowDayModal(false);
+          navigation.navigate('JournalEntry', {
+            mode: 'edit',
+            entryId: entry.id,
+            date: selectedDate.toISOString().split('T')[0],
+          });
+        }}
+        onDeleteJournal={async (entry) => {
+          console.log('[Calendar] Delete journal entry:', entry.id);
+          try {
+            const result = await calendarJournalService.deleteJournalEntry(entry.id);
+            if (result.success) {
+              // Refresh day data
+              const dateStr = selectedDate.toISOString().split('T')[0];
+              const dayData = await calendarService.getDayCalendarData(userId, dateStr);
+              if (dayData.success) {
+                setJournalData(dayData.journal || []);
+              }
+            }
+          } catch (error) {
+            console.error('[Calendar] Delete journal error:', error);
+          }
+        }}
+        onEditTradingEntry={(trade) => {
+          console.log('[Calendar] Edit trading entry:', trade.id);
+          setShowDayModal(false);
+          navigation.navigate('TradingJournal', {
+            mode: 'edit',
+            entryId: trade.id,
+            date: selectedDate.toISOString().split('T')[0],
+          });
+        }}
+        onDeleteTradingEntry={async (trade) => {
+          console.log('[Calendar] Delete trading entry:', trade.id);
+          try {
+            const result = await tradingJournalService.deleteEntry(trade.id);
+            if (result.success) {
+              // Refresh day data
+              const dateStr = selectedDate.toISOString().split('T')[0];
+              const dayData = await calendarService.getDayCalendarData(userId, dateStr);
+              if (dayData.success) {
+                setTradingData(dayData.trading || []);
+              }
+            }
+          } catch (error) {
+            console.error('[Calendar] Delete trading entry error:', error);
+          }
         }}
         onMoodUpdated={async () => {
           console.log('[Calendar] Mood updated, refreshing data...');

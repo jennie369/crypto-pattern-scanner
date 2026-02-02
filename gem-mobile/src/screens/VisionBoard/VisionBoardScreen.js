@@ -224,6 +224,8 @@ import { preloadVideo } from '../../components/Rituals/cosmic';
 
 // NEW: Services for Calendar/Charts
 import calendarService from '../../services/calendarService';
+import calendarJournalService from '../../services/calendarJournalService';
+import tradingJournalService from '../../services/tradingJournalService';
 import statsService from '../../services/statsService';
 import readingHistoryService from '../../services/readingHistoryService';
 import notificationService from '../../services/notificationService';
@@ -6223,11 +6225,13 @@ const VisionBoardScreen = () => {
               onReadingPress={(reading) => {
                 console.log('[VisionBoard] Reading pressed:', reading.reading_type);
                 setDayDetailModalVisible(false);
-                // Navigate to divination screen with the reading
-                navigation.navigate('DivinationScreen', {
-                  defaultType: reading.reading_type,
-                  viewHistory: true,
-                  readingId: reading.id,
+                // Navigate to GemMaster stack -> ReadingDetail
+                navigation.navigate('GemMaster', {
+                  screen: 'ReadingDetail',
+                  params: {
+                    readingId: reading.id,
+                    readingType: reading.reading_type,
+                  },
                 });
               }}
               onTradePress={(trade) => {
@@ -6239,6 +6243,58 @@ const VisionBoardScreen = () => {
                   entryId: trade.id,
                   date: selectedDate,
                 });
+              }}
+              onJournalPress={(entry) => {
+                console.log('[VisionBoard] Journal entry pressed:', entry.id);
+                setDayDetailModalVisible(false);
+                // Navigate to journal entry detail/edit screen
+                navigation.navigate('JournalEntry', {
+                  mode: 'edit',
+                  entryId: entry.id,
+                  date: selectedDate,
+                });
+              }}
+              onEditJournal={(entry) => {
+                console.log('[VisionBoard] Edit journal entry:', entry.id);
+                setDayDetailModalVisible(false);
+                navigation.navigate('JournalEntry', {
+                  mode: 'edit',
+                  entryId: entry.id,
+                  date: selectedDate,
+                });
+              }}
+              onDeleteJournal={async (entry) => {
+                console.log('[VisionBoard] Delete journal entry:', entry.id);
+                try {
+                  const result = await calendarJournalService.deleteJournalEntry(entry.id);
+                  if (result.success) {
+                    // Remove from local state
+                    setJournalEntries(prev => prev.filter(e => e.id !== entry.id));
+                  }
+                } catch (error) {
+                  console.error('[VisionBoard] Delete journal error:', error);
+                }
+              }}
+              onEditTradingEntry={(trade) => {
+                console.log('[VisionBoard] Edit trading entry:', trade.id);
+                setDayDetailModalVisible(false);
+                navigation.navigate('TradingJournal', {
+                  mode: 'edit',
+                  entryId: trade.id,
+                  date: selectedDate,
+                });
+              }}
+              onDeleteTradingEntry={async (trade) => {
+                console.log('[VisionBoard] Delete trading entry:', trade.id);
+                try {
+                  const result = await tradingJournalService.deleteEntry(trade.id);
+                  if (result.success) {
+                    // Remove from local state
+                    setTradingEntries(prev => prev.filter(e => e.id !== trade.id));
+                  }
+                } catch (error) {
+                  console.error('[VisionBoard] Delete trading entry error:', error);
+                }
               }}
               onMoodUpdated={async () => {
                 // Refresh journal data after mood is saved
