@@ -2292,10 +2292,13 @@ const GemMasterScreen = ({ navigation, route }) => {
                 case 'SUGGEST_UPGRADE':
                   navigation.navigate('Subscription');
                   break;
-                case 'SUGGEST_HEALING':
                 case 'WELCOME_BACK':
-                  // Send a friendly message to start conversation
-                  handleSend('Xin chào! Tôi muốn khám phá hôm nay.');
+                  // Navigate to VisionBoard for returning users
+                  navigation.navigate('VisionBoard');
+                  break;
+                case 'SUGGEST_HEALING':
+                  // Send a message to start healing meditation
+                  handleSend('Tôi muốn thực hành thiền phục hồi năng lượng.');
                   break;
                 case 'SUGGEST_DEEP_DIVE':
                   // Focus on the topic they're interested in
