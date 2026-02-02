@@ -250,47 +250,191 @@ const RichTextEditor = ({
 };
 
 /**
- * Rich Text Renderer - Renders formatted text
+ * Rich Text Renderer - Renders formatted text with markdown support
  */
 export const RichTextRenderer = ({ content, style }) => {
   if (!content) return null;
 
-  // Parse markdown-like syntax
-  const parseContent = (text) => {
-    const parts = [];
-    let currentIndex = 0;
+  // Parse inline markdown (bold, italic, code, etc.)
+  const parseInlineMarkdown = (text, baseStyle = {}) => {
+    if (!text) return null;
 
-    // Bold: **text**
-    const boldRegex = /\*\*([^*]+)\*\*/g;
-    // Italic: _text_
-    const italicRegex = /_([^_]+)_/g;
-    // Strikethrough: ~~text~~
-    const strikeRegex = /~~([^~]+)~~/g;
-    // Code: `text`
-    const codeRegex = /`([^`]+)`/g;
-    // Heading: # text
-    const heading1Regex = /^# (.+)$/gm;
-    const heading2Regex = /^## (.+)$/gm;
-    // Quote: > text
-    const quoteRegex = /^> (.+)$/gm;
-    // Links: [text](url)
-    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    // Mentions: @username
-    const mentionRegex = /@(\w+)/g;
-    // Hashtags: #tag
-    const hashtagRegex = /#(\w+)/g;
+    const elements = [];
+    let remaining = text;
+    let keyIndex = 0;
 
-    // For simplicity, just return styled Text components
-    // A full implementation would parse and render each format
+    // Process inline patterns
+    while (remaining.length > 0) {
+      // Bold: **text** or ***text***
+      const boldMatch = remaining.match(/^\*\*\*?([^*]+)\*\*\*?/);
+      if (boldMatch) {
+        elements.push(
+          <Text key={keyIndex++} style={[baseStyle, rendererStyles.bold]}>
+            {parseInlineMarkdown(boldMatch[1], { ...baseStyle, fontWeight: 'bold' })}
+          </Text>
+        );
+        remaining = remaining.slice(boldMatch[0].length);
+        continue;
+      }
 
-    return (
-      <Text style={[rendererStyles.text, style]}>
-        {text}
-      </Text>
-    );
+      // Italic: _text_
+      const italicMatch = remaining.match(/^_([^_]+)_/);
+      if (italicMatch) {
+        elements.push(
+          <Text key={keyIndex++} style={[baseStyle, rendererStyles.italic]}>
+            {italicMatch[1]}
+          </Text>
+        );
+        remaining = remaining.slice(italicMatch[0].length);
+        continue;
+      }
+
+      // Strikethrough: ~~text~~
+      const strikeMatch = remaining.match(/^~~([^~]+)~~/);
+      if (strikeMatch) {
+        elements.push(
+          <Text key={keyIndex++} style={[baseStyle, rendererStyles.strikethrough]}>
+            {strikeMatch[1]}
+          </Text>
+        );
+        remaining = remaining.slice(strikeMatch[0].length);
+        continue;
+      }
+
+      // Code: `text`
+      const codeMatch = remaining.match(/^`([^`]+)`/);
+      if (codeMatch) {
+        elements.push(
+          <Text key={keyIndex++} style={[baseStyle, rendererStyles.code]}>
+            {codeMatch[1]}
+          </Text>
+        );
+        remaining = remaining.slice(codeMatch[0].length);
+        continue;
+      }
+
+      // Regular character
+      const nextSpecial = remaining.search(/(\*\*|_[^_]|~~|`)/);
+      if (nextSpecial === -1) {
+        elements.push(<Text key={keyIndex++} style={baseStyle}>{remaining}</Text>);
+        break;
+      } else if (nextSpecial === 0) {
+        // If we reach here, the pattern didn't match (e.g., single * or unmatched)
+        elements.push(<Text key={keyIndex++} style={baseStyle}>{remaining[0]}</Text>);
+        remaining = remaining.slice(1);
+      } else {
+        elements.push(<Text key={keyIndex++} style={baseStyle}>{remaining.slice(0, nextSpecial)}</Text>);
+        remaining = remaining.slice(nextSpecial);
+      }
+    }
+
+    return elements.length === 1 ? elements[0] : elements;
   };
 
-  return parseContent(content);
+  // Parse block-level markdown (lines)
+  const parseBlockMarkdown = (text) => {
+    const lines = text.split('\n');
+    const elements = [];
+
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+
+      // Checkbox checked: - [x] text
+      if (trimmedLine.match(/^-\s*\[x\]\s*/i)) {
+        const content = trimmedLine.replace(/^-\s*\[x\]\s*/i, '');
+        elements.push(
+          <View key={index} style={rendererStyles.checkboxRow}>
+            <View style={[rendererStyles.checkbox, rendererStyles.checkboxChecked]}>
+              <Text style={rendererStyles.checkmark}>✓</Text>
+            </View>
+            <Text style={[rendererStyles.text, rendererStyles.checkboxTextChecked, style]}>
+              {parseInlineMarkdown(content)}
+            </Text>
+          </View>
+        );
+        return;
+      }
+
+      // Checkbox unchecked: - [ ] text
+      if (trimmedLine.match(/^-\s*\[\s*\]\s*/)) {
+        const content = trimmedLine.replace(/^-\s*\[\s*\]\s*/, '');
+        elements.push(
+          <View key={index} style={rendererStyles.checkboxRow}>
+            <View style={rendererStyles.checkbox} />
+            <Text style={[rendererStyles.text, style]}>
+              {parseInlineMarkdown(content)}
+            </Text>
+          </View>
+        );
+        return;
+      }
+
+      // Bullet point: - text
+      if (trimmedLine.match(/^-\s+/)) {
+        const content = trimmedLine.replace(/^-\s+/, '');
+        elements.push(
+          <View key={index} style={rendererStyles.bulletRow}>
+            <Text style={[rendererStyles.bullet, style]}>•</Text>
+            <Text style={[rendererStyles.text, rendererStyles.bulletText, style]}>
+              {parseInlineMarkdown(content)}
+            </Text>
+          </View>
+        );
+        return;
+      }
+
+      // Heading 1: # text
+      if (trimmedLine.match(/^#\s+/)) {
+        const content = trimmedLine.replace(/^#\s+/, '');
+        elements.push(
+          <Text key={index} style={[rendererStyles.heading1, style]}>
+            {parseInlineMarkdown(content)}
+          </Text>
+        );
+        return;
+      }
+
+      // Heading 2: ## text
+      if (trimmedLine.match(/^##\s+/)) {
+        const content = trimmedLine.replace(/^##\s+/, '');
+        elements.push(
+          <Text key={index} style={[rendererStyles.heading2, style]}>
+            {parseInlineMarkdown(content)}
+          </Text>
+        );
+        return;
+      }
+
+      // Quote: > text
+      if (trimmedLine.match(/^>\s*/)) {
+        const content = trimmedLine.replace(/^>\s*/, '');
+        elements.push(
+          <View key={index} style={rendererStyles.quoteContainer}>
+            <Text style={[rendererStyles.quote, style]}>
+              {parseInlineMarkdown(content)}
+            </Text>
+          </View>
+        );
+        return;
+      }
+
+      // Regular line (or empty line for spacing)
+      if (trimmedLine) {
+        elements.push(
+          <Text key={index} style={[rendererStyles.text, style]}>
+            {parseInlineMarkdown(trimmedLine)}
+          </Text>
+        );
+      } else if (index > 0 && index < lines.length - 1) {
+        // Empty line - add spacing
+        elements.push(<View key={index} style={rendererStyles.emptyLine} />);
+      }
+    });
+
+    return elements;
+  };
+
+  return <View style={rendererStyles.container}>{parseBlockMarkdown(content)}</View>;
 };
 
 /**
@@ -373,13 +517,16 @@ const styles = StyleSheet.create({
 });
 
 const rendererStyles = StyleSheet.create({
+  container: {
+    gap: 6,
+  },
   text: {
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textPrimary,
     lineHeight: 22,
   },
   bold: {
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    fontWeight: 'bold',
   },
   italic: {
     fontStyle: 'italic',
@@ -394,19 +541,30 @@ const rendererStyles = StyleSheet.create({
     borderRadius: 4,
   },
   heading1: {
-    fontSize: TYPOGRAPHY.fontSize['2xl'],
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    fontSize: TYPOGRAPHY.fontSize['2xl'] || 24,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   heading2: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    fontSize: TYPOGRAPHY.fontSize.xl || 20,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
-  quote: {
+  quoteContainer: {
     borderLeftWidth: 3,
     borderLeftColor: COLORS.purple,
     paddingLeft: SPACING.md,
+    marginVertical: SPACING.xs,
+  },
+  quote: {
     fontStyle: 'italic',
     color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    lineHeight: 22,
   },
   link: {
     color: COLORS.cyan,
@@ -414,10 +572,59 @@ const rendererStyles = StyleSheet.create({
   },
   mention: {
     color: COLORS.cyan,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    fontWeight: '500',
   },
   hashtag: {
     color: COLORS.purple,
+  },
+  // Checkbox styles
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginVertical: 2,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+    marginRight: SPACING.sm,
+    marginTop: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.success || '#22c55e',
+    borderColor: COLORS.success || '#22c55e',
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  checkboxTextChecked: {
+    textDecorationLine: 'line-through',
+    color: COLORS.textMuted,
+  },
+  // Bullet styles
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginVertical: 2,
+  },
+  bullet: {
+    color: COLORS.purple,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    marginRight: SPACING.sm,
+    marginTop: 0,
+  },
+  bulletText: {
+    flex: 1,
+  },
+  // Empty line
+  emptyLine: {
+    height: 8,
   },
 });
 

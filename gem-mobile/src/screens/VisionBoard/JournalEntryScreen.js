@@ -32,6 +32,8 @@ import {
   Target,
   FileText,
   ChevronDown,
+  Eye,
+  Edit3,
 } from 'lucide-react-native';
 
 import { COLORS, TYPOGRAPHY, SPACING, GRADIENTS, BORDER_RADIUS } from '../../utils/tokens';
@@ -50,6 +52,7 @@ import {
 import { checkCalendarAccess, getJournalCharLimit } from '../../config/calendarAccessControl';
 import TagInput from '../../components/VisionBoard/TagInput';
 import MoodPicker from '../../components/VisionBoard/MoodPicker';
+import { RichTextRenderer } from '../../components/RichTextEditor';
 
 // Entry type options
 const ENTRY_TYPE_OPTIONS = [
@@ -88,6 +91,7 @@ const JournalEntryScreen = () => {
   const [showMoodPicker, setShowMoodPicker] = useState(false);
   const [showLifeAreaSelector, setShowLifeAreaSelector] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Original data for change detection
   const originalData = useRef(null);
@@ -134,9 +138,16 @@ const JournalEntryScreen = () => {
         .select('*')
         .eq('id', eid)
         .eq('user_id', uid)
-        .single();
+        .maybeSingle(); // Handle 0 rows gracefully
 
       if (error) throw error;
+
+      if (!data) {
+        console.warn('[JournalEntry] Entry not found:', eid);
+        Alert.alert('Lỗi', 'Không tìm thấy bài viết');
+        navigation.goBack();
+        return;
+      }
 
       if (data) {
         setEntryType(data.entry_type);
@@ -384,24 +395,58 @@ const JournalEntryScreen = () => {
             maxLength={100}
           />
 
-          {/* Content */}
+          {/* Content with Preview Toggle */}
           <View style={styles.contentContainer}>
-            <TextInput
-              style={styles.contentInput}
-              placeholder={
-                entryType === ENTRY_TYPES.GRATITUDE
-                  ? 'Hôm nay tôi biết ơn...'
-                  : entryType === ENTRY_TYPES.GOAL_NOTE
-                  ? 'Ghi chú về mục tiêu...'
-                  : 'Viết suy nghĩ của bạn...'
-              }
-              placeholderTextColor={COLORS.textMuted}
-              value={content}
-              onChangeText={setContent}
-              multiline
-              textAlignVertical="top"
-              maxLength={charLimit}
-            />
+            {/* Preview/Edit Toggle */}
+            <View style={styles.previewToggleRow}>
+              <TouchableOpacity
+                style={[styles.previewToggle, !showPreview && styles.previewToggleActive]}
+                onPress={() => setShowPreview(false)}
+              >
+                <Edit3 size={16} color={!showPreview ? COLORS.purple : COLORS.textMuted} />
+                <Text style={[styles.previewToggleText, !showPreview && styles.previewToggleTextActive]}>
+                  Sửa
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.previewToggle, showPreview && styles.previewToggleActive]}
+                onPress={() => setShowPreview(true)}
+              >
+                <Eye size={16} color={showPreview ? COLORS.purple : COLORS.textMuted} />
+                <Text style={[styles.previewToggleText, showPreview && styles.previewToggleTextActive]}>
+                  Xem trước
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {showPreview ? (
+              /* Preview Mode - Render Markdown */
+              <View style={styles.previewContainer}>
+                {content ? (
+                  <RichTextRenderer content={content} style={styles.previewText} />
+                ) : (
+                  <Text style={styles.previewPlaceholder}>Chưa có nội dung</Text>
+                )}
+              </View>
+            ) : (
+              /* Edit Mode - TextInput */
+              <TextInput
+                style={styles.contentInput}
+                placeholder={
+                  entryType === ENTRY_TYPES.GRATITUDE
+                    ? 'Hôm nay tôi biết ơn...'
+                    : entryType === ENTRY_TYPES.GOAL_NOTE
+                    ? 'Ghi chú về mục tiêu...'
+                    : 'Viết suy nghĩ của bạn...'
+                }
+                placeholderTextColor={COLORS.textMuted}
+                value={content}
+                onChangeText={setContent}
+                multiline
+                textAlignVertical="top"
+                maxLength={charLimit}
+              />
+            )}
             <Text style={styles.charCount}>
               {content.length}/{charLimit}
             </Text>
@@ -638,6 +683,51 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textPrimary,
     minHeight: 200,
+  },
+  previewToggleRow: {
+    flexDirection: 'row',
+    marginBottom: SPACING.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: BORDER_RADIUS.md,
+    padding: 4,
+  },
+  previewToggle: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
+    gap: SPACING.xs,
+  },
+  previewToggleActive: {
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  previewToggleText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  previewToggleTextActive: {
+    color: COLORS.purple,
+    fontWeight: '600',
+  },
+  previewContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+    padding: SPACING.md,
+    minHeight: 200,
+  },
+  previewText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    lineHeight: 22,
+  },
+  previewPlaceholder: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
   },
   charCount: {
     fontSize: TYPOGRAPHY.fontSize.xs,
