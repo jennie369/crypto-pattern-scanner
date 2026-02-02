@@ -2278,11 +2278,41 @@ const GemMasterScreen = ({ navigation, route }) => {
             trigger={smartTrigger}
             onDismiss={dismissSmartTrigger}
             onAction={(action, trigger) => {
-              // Handle the action (e.g., navigate to a feature, send a message)
+              // Handle the action
               handleSmartTriggerAction(action, trigger);
-              // If action is a message prompt, send it to chat
-              if (action?.type === 'send_message' && action?.message) {
-                handleSend(action.message);
+
+              // Navigate based on action type
+              const actionType = typeof action === 'string' ? action : action?.type;
+              console.log('[GemMaster] Smart trigger action:', actionType);
+
+              switch (actionType) {
+                case 'SUGGEST_PAPER_TRADE':
+                  navigation.navigate('Scanner');
+                  break;
+                case 'SUGGEST_UPGRADE':
+                  navigation.navigate('Subscription');
+                  break;
+                case 'SUGGEST_HEALING':
+                case 'WELCOME_BACK':
+                  // Send a friendly message to start conversation
+                  handleSend('Xin chào! Tôi muốn khám phá hôm nay.');
+                  break;
+                case 'SUGGEST_DEEP_DIVE':
+                  // Focus on the topic they're interested in
+                  if (trigger?.stats?.mostAskedTopic) {
+                    handleSend(`Tôi muốn tìm hiểu sâu hơn về ${trigger.stats.mostAskedTopic}`);
+                  }
+                  break;
+                case 'CELEBRATE':
+                case 'CELEBRATE_FIRST_WIN':
+                  // Just acknowledge, no navigation needed
+                  break;
+                default:
+                  // For any other action type with message
+                  if (action?.message) {
+                    handleSend(action.message);
+                  }
+                  break;
               }
             }}
           />

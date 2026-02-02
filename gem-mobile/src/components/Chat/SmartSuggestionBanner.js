@@ -5,15 +5,28 @@
 // ============================================================
 
 import React, { memo, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Platform, StatusBar } from 'react-native';
 import { X, Sparkles, ArrowRight } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+
+// Get status bar height for Android
+const ANDROID_STATUS_BAR_HEIGHT = StatusBar.currentHeight || 24;
 
 const SmartSuggestionBanner = memo(({
   trigger,
   onDismiss,
   onAction,
 }) => {
+  // Get safe area insets for proper top padding
+  let topInset = Platform.OS === 'android' ? ANDROID_STATUS_BAR_HEIGHT : 0;
+  try {
+    const insets = useSafeAreaInsets();
+    topInset = Math.max(insets.top, topInset);
+  } catch (e) {
+    // Hook not available in test environment
+  }
+
   const slideAnim = useRef(new Animated.Value(-100)).current;
 
   useEffect(() => {
@@ -45,7 +58,10 @@ const SmartSuggestionBanner = memo(({
     <Animated.View
       style={[
         styles.container,
-        { transform: [{ translateY: slideAnim }] }
+        {
+          paddingTop: topInset + SPACING.xs,
+          transform: [{ translateY: slideAnim }]
+        }
       ]}
     >
       <View style={styles.content}>
