@@ -311,10 +311,21 @@ const GoalDetailScreen = () => {
       extracted = [...extracted, ...affs];
     }
 
-    return extracted.map((a, i) => ({
+    let normalized = extracted.map((a, i) => ({
       id: a?.id || `aff_${i}`,
       text: typeof a === 'string' ? a : (a?.text || a?.content || a?.affirmation || ''),
     })).filter(a => a.text);
+
+    // Deduplicate by text
+    const seenTexts = new Set();
+    normalized = normalized.filter(aff => {
+      const textLower = aff.text.toLowerCase().trim();
+      if (seenTexts.has(textLower)) return false;
+      seenTexts.add(textLower);
+      return true;
+    });
+
+    return normalized;
   }, [parsedInitialGoal]);
 
   // Extract actions immediately from content for instant display
@@ -336,16 +347,29 @@ const GoalDetailScreen = () => {
     if (content?.goals?.[0]?.steps) {
       legacyActions = [...legacyActions, ...(Array.isArray(content.goals[0].steps) ? content.goals[0].steps : [content.goals[0].steps])];
     }
+    // From goals[0].actionSteps (from template system)
+    if (content?.goals?.[0]?.actionSteps) {
+      legacyActions = [...legacyActions, ...(Array.isArray(content.goals[0].actionSteps) ? content.goals[0].actionSteps : [content.goals[0].actionSteps])];
+    }
 
     if (legacyActions.length === 0) return empty;
 
-    const normalized = legacyActions.map((s, i) => ({
+    let normalized = legacyActions.map((s, i) => ({
       id: `legacy_${i}_${s.id || s.title || i}`,
       title: typeof s === 'string' ? s : (s?.title || s?.text || s?.step || ''),
       action_type: s?.action_type || s?.frequency || 'daily',
       is_completed: s?.is_completed || s?.completed || false,
       _isLegacy: true,
     })).filter(a => a.title);
+
+    // Deduplicate by title (content may have same actions in multiple places)
+    const seenTitles = new Set();
+    normalized = normalized.filter(action => {
+      const titleLower = action.title.toLowerCase().trim();
+      if (seenTitles.has(titleLower)) return false;
+      seenTitles.add(titleLower);
+      return true;
+    });
 
     return {
       daily: normalized.filter(a => a.action_type === 'daily'),
@@ -534,10 +558,19 @@ const GoalDetailScreen = () => {
           }
 
           // Normalize affirmations
-          const normalizedAffirmations = extractedAffirmations.map((a, i) => ({
+          let normalizedAffirmations = extractedAffirmations.map((a, i) => ({
             id: a?.id || `aff_${i}`,
             text: typeof a === 'string' ? a : (a?.text || a?.content || a?.affirmation || ''),
           })).filter(a => a.text);
+
+          // Deduplicate affirmations by text
+          const seenAffTexts = new Set();
+          normalizedAffirmations = normalizedAffirmations.filter(aff => {
+            const textLower = aff.text.toLowerCase().trim();
+            if (seenAffTexts.has(textLower)) return false;
+            seenAffTexts.add(textLower);
+            return true;
+          });
 
           setAffirmations(normalizedAffirmations);
 
@@ -648,8 +681,20 @@ const GoalDetailScreen = () => {
 
         legacyActions = legacyActions.filter(a => a.title);
 
+        // DEDUPLICATE by title (case-insensitive) to avoid showing same action multiple times
+        // Widget content may have actions in steps, actionSteps, AND goals[0].actionSteps
+        const seenTitles = new Set();
+        legacyActions = legacyActions.filter(action => {
+          const titleLower = action.title.toLowerCase().trim();
+          if (seenTitles.has(titleLower)) {
+            return false;
+          }
+          seenTitles.add(titleLower);
+          return true;
+        });
+
         // DEBUG: Log extracted legacy actions
-        console.log('[GoalDetail] Legacy actions extracted:', {
+        console.log('[GoalDetail] Legacy actions extracted (after dedup):', {
           totalCount: legacyActions.length,
           fromSteps: goalData._content?.steps?.length || 0,
           fromActionSteps: goalData._content?.actionSteps?.length || 0,
@@ -1006,12 +1051,17 @@ const GoalDetailScreen = () => {
         const fileName = `${goalId}-${Date.now()}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
+        // Read file as base64
         const base64 = await FileSystem.readAsStringAsync(imageUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        const bytes = new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
 
-        await supabase.storage.from('vision-board').upload(filePath, bytes.buffer, {
+        // Convert base64 to ArrayBuffer using fetch (works on both iOS and Android)
+        const response = await fetch(`data:image/${fileExt};base64,${base64}`);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+
+        await supabase.storage.from('vision-board').upload(filePath, arrayBuffer, {
           contentType: `image/${fileExt}`,
           upsert: true,
         });
