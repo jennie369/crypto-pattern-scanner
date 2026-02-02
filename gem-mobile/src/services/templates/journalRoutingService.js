@@ -364,10 +364,16 @@ export const processTemplateSubmission = async ({
     const journalContent = buildJournalContent(template, sanitizedData);
 
     // 7. ALWAYS create journal entry
+    // Use local date format for entry_date to match calendar display
+    const now = new Date();
+    const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    console.log(`${SERVICE_NAME} Creating journal with local date:`, localDate, 'vs UTC:', now.toISOString().split('T')[0]);
+
     // Build base journal data (fields that always exist)
     const baseJournalData = {
       user_id: userId,
-      entry_date: new Date().toISOString().split('T')[0],
+      entry_date: localDate,
       entry_type: template.category === 'trading_journal' ? 'trading' : 'reflection',
       title: sanitizedData.title || template.name,
       content: journalContent,
@@ -539,6 +545,11 @@ export const processTemplateSubmission = async ({
           actions: allActions.length,
           affirmations: allAffirmations.length,
           rituals: allRituals.length,
+          actionsSample: allActions.slice(0, 2),
+          affirmationsSample: allAffirmations.slice(0, 2),
+          ritualsSample: allRituals.slice(0, 2),
+          templateFields: template.fields?.map(f => ({ id: f.id, type: f.type })),
+          formDataKeys: Object.keys(sanitizedData),
         });
 
         // 13. Create widget in vision_board_widgets for UI display

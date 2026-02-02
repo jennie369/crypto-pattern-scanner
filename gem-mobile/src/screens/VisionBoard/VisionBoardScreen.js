@@ -3886,9 +3886,19 @@ const VisionBoardScreen = () => {
 
           if (deadlineDate && !eventsMap[deadlineDate]) eventsMap[deadlineDate] = [];
           if (deadlineDate) {
+            // Priority: actual goal text from content > widget title (with prefix stripped)
+            const rawTitle = content?.goals?.[0]?.title
+              || content?.goals?.[0]?.text
+              || content?.goalText
+              || content?.title
+              || w.title
+              || 'Mục tiêu';
+            const eventTitle = rawTitle.startsWith('Mục tiêu: ')
+              ? rawTitle.replace('Mục tiêu: ', '')
+              : rawTitle;
             eventsMap[deadlineDate].push({
               id: w.id,
-              title: content?.title || 'Mục tiêu',
+              title: eventTitle,
               type: 'goal_deadline',
               color: '#6A5BFF',
             });

@@ -115,9 +115,21 @@ const AllGoalsScreen = ({ navigation, route }) => {
       // Transform to normalized format
       const normalizedGoals = (data || []).map((widget) => {
         const content = parseWidgetContent(widget);
+        // Priority: actual goal text from content > widget title (with prefix stripped)
+        const rawTitle = content?.goals?.[0]?.title
+          || content?.goals?.[0]?.text
+          || content?.goalText
+          || content?.text
+          || widget.title
+          || content?.title
+          || 'Mục tiêu';
+        // Strip "Mục tiêu: " prefix from legacy titles
+        const title = rawTitle.startsWith('Mục tiêu: ')
+          ? rawTitle.replace('Mục tiêu: ', '')
+          : rawTitle;
         return {
           id: widget.id,
-          title: widget.title || content?.title || content?.goalText || 'Mục tiêu',
+          title,
           cover_image: widget.cover_image || content?.cover_image || content?.coverImage || null,
           life_area: (widget.life_area || content?.lifeArea || content?.life_area || 'personal').toLowerCase(),
           progress_percent: widget.progress_percent || content?.progress || 0,

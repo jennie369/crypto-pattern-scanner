@@ -72,13 +72,20 @@ const GoalThumbnailCard = ({ goal, onPress, onLongPress, index = 0, style }) => 
       }
     }
 
-    const title = goal.title
-      || content.title
+    // Priority: actual goal text from content > widget title (with prefix stripped)
+    // This handles legacy goals that had "Mục tiêu: <area>" as title
+    let rawTitle = content.goals?.[0]?.title
+      || content.goals?.[0]?.text
       || content.goalText
       || content.text
-      || content.goals?.[0]?.title
-      || content.goals?.[0]?.text
+      || goal.title
+      || content.title
       || 'Mục tiêu';
+
+    // Strip "Mục tiêu: " prefix from legacy titles that used life area as title
+    const title = rawTitle.startsWith('Mục tiêu: ')
+      ? rawTitle.replace('Mục tiêu: ', '')
+      : rawTitle;
 
     const coverImage = goal.cover_image
       || content.cover_image

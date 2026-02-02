@@ -272,9 +272,21 @@ const GoalDetailScreen = () => {
     const content = typeof initialGoalData.content === 'string'
       ? JSON.parse(initialGoalData.content || '{}')
       : (initialGoalData.content || initialGoalData._content || {});
+    // Priority: actual goal text from content > widget title (with prefix stripped)
+    const rawTitle = content?.goals?.[0]?.title
+      || content?.goals?.[0]?.text
+      || content?.goalText
+      || content?.text
+      || initialGoalData.title
+      || content?.title
+      || 'Mục tiêu';
+    // Strip "Mục tiêu: " prefix from legacy titles
+    const title = rawTitle.startsWith('Mục tiêu: ')
+      ? rawTitle.replace('Mục tiêu: ', '')
+      : rawTitle;
     return {
       id: initialGoalData.id || goalId,
-      title: initialGoalData.title || content?.title || content?.goalText || 'Mục tiêu',
+      title,
       cover_image: initialGoalData.cover_image || content?.cover_image || content?.coverImage || null,
       life_area: (initialGoalData.life_area || content?.lifeArea || content?.life_area || 'personal').toLowerCase(),
       progress_percent: initialGoalData.progress_percent || content?.progress || 0,
@@ -437,11 +449,34 @@ const GoalDetailScreen = () => {
             ? JSON.parse(widgetData.content)
             : widgetData.content;
 
-          const actualGoalTitle = content?.goals?.[0]?.title
+          // DEBUG: Log widget content structure
+          console.log('[GoalDetail] Widget content loaded:', {
+            widgetId: widgetData.id,
+            contentKeys: Object.keys(content || {}),
+            hasSteps: !!content?.steps,
+            stepsCount: content?.steps?.length,
+            hasActionSteps: !!content?.actionSteps,
+            actionStepsCount: content?.actionSteps?.length,
+            hasGoals: !!content?.goals,
+            goalsActionSteps: content?.goals?.[0]?.actionSteps?.length,
+            hasAffirmations: !!content?.affirmations,
+            affirmationsCount: content?.affirmations?.length,
+            hasRituals: !!content?.rituals,
+            ritualsCount: content?.rituals?.length,
+            goalsAffirmations: content?.goals?.[0]?.affirmations?.length,
+            goalsRituals: content?.goals?.[0]?.rituals?.length,
+            templateId: content?.template_id,
+          });
+
+          const rawGoalTitle = content?.goals?.[0]?.title
             || content?.goalText
             || content?.title
             || widgetData.title
             || 'Mục tiêu';
+          // Strip "Mục tiêu: " prefix from legacy titles
+          const actualGoalTitle = rawGoalTitle.startsWith('Mục tiêu: ')
+            ? rawGoalTitle.replace('Mục tiêu: ', '')
+            : rawGoalTitle;
 
           goalData = {
             id: widgetData.id,
@@ -612,6 +647,17 @@ const GoalDetailScreen = () => {
         }
 
         legacyActions = legacyActions.filter(a => a.title);
+
+        // DEBUG: Log extracted legacy actions
+        console.log('[GoalDetail] Legacy actions extracted:', {
+          totalCount: legacyActions.length,
+          fromSteps: goalData._content?.steps?.length || 0,
+          fromActionSteps: goalData._content?.actionSteps?.length || 0,
+          fromLinkedSteps: goalData._linkedSteps?.length || 0,
+          fromGoals0ActionSteps: goalData._content?.goals?.[0]?.actionSteps?.length || 0,
+          sampleAction: legacyActions[0],
+        });
+
         if (legacyActions.length > 0) {
           setGroupedActions({
             daily: legacyActions.filter(a => a.action_type === 'daily'),
@@ -619,6 +665,12 @@ const GoalDetailScreen = () => {
             monthly: legacyActions.filter(a => a.action_type === 'monthly'),
             one_time_pending: legacyActions.filter(a => a.action_type === 'one_time' && !a.is_completed),
             one_time_completed: legacyActions.filter(a => a.action_type === 'one_time' && a.is_completed),
+          });
+        } else {
+          console.log('[GoalDetail] No legacy actions found, checking content structure:', {
+            contentKeys: Object.keys(goalData._content || {}),
+            stepsValue: goalData._content?.steps,
+            actionStepsValue: goalData._content?.actionSteps,
           });
         }
       }

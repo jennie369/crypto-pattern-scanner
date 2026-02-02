@@ -650,6 +650,19 @@ class CalendarService {
         .eq('entry_date', date)
         .order('created_at', { ascending: true });
 
+      // DEBUG: Log journal entries query result
+      console.log('[Calendar] Journal entries query:', {
+        date,
+        userId: userId?.substring(0, 8) + '...',
+        entriesFound: journalEntries?.length || 0,
+        error: journalError?.message || null,
+        sampleEntry: journalEntries?.[0] ? {
+          id: journalEntries[0].id,
+          title: journalEntries[0].title,
+          entry_date: journalEntries[0].entry_date,
+        } : null,
+      });
+
       if (journalError && journalError.code !== '42P01') {
         console.warn('[Calendar] Journal entries fetch error:', journalError);
       }

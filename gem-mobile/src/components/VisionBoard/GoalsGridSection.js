@@ -81,18 +81,25 @@ const extractLifeArea = (widget) => {
 
 /**
  * Helper to extract title from widget
+ * Priority: actual goal text from content > widget title (with prefix stripped)
  */
 const extractTitle = (widget) => {
   const content = parseWidgetContent(widget);
-  return (
-    widget?.title ||
-    content?.title ||
-    content?.goalText ||
-    content?.text ||
+  // Priority: actual goal text from content > widget title
+  const rawTitle = (
     content?.goals?.[0]?.title ||
     content?.goals?.[0]?.text ||
+    content?.goalText ||
+    content?.text ||
+    widget?.title ||
+    content?.title ||
     'Mục tiêu'
   );
+
+  // Strip "Mục tiêu: " prefix from legacy titles that used life area as title
+  return rawTitle.startsWith('Mục tiêu: ')
+    ? rawTitle.replace('Mục tiêu: ', '')
+    : rawTitle;
 };
 
 /**

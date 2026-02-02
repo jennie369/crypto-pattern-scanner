@@ -92,6 +92,11 @@ const DayDetailModal = ({
   onEditEvent,
   onDeleteEvent,
   onMoodUpdated,
+  // New: Journal swipe actions
+  onEditJournal,
+  onDeleteJournal,
+  onEditTradingEntry,
+  onDeleteTradingEntry,
 }) => {
   // Mood Picker Modal state
   const [showMoodPicker, setShowMoodPicker] = useState(false);
@@ -173,6 +178,82 @@ const DayDetailModal = ({
       </Animated.View>
     );
   }, [onDeleteEvent]);
+
+  // Render journal swipe actions (Edit)
+  const renderJournalLeftActions = useCallback((progress, dragX, entry, type) => {
+    const trans = dragX.interpolate({
+      inputRange: [0, 80],
+      outputRange: [-80, 0],
+      extrapolate: 'clamp',
+    });
+
+    const onEdit = type === 'trading' ? onEditTradingEntry : onEditJournal;
+    const refKey = `${type}_${entry.id}`;
+
+    return (
+      <Animated.View style={[styles.swipeActionLeft, { transform: [{ translateX: trans }] }]}>
+        <TouchableOpacity
+          style={styles.editAction}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            swipeableRefs.current[refKey]?.close();
+            onEdit?.(entry);
+          }}
+        >
+          <Icons.Pencil size={18} color="#FFFFFF" />
+          <Text style={styles.actionText}>Sửa</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }, [onEditJournal, onEditTradingEntry]);
+
+  // Render journal swipe actions (Delete)
+  const renderJournalRightActions = useCallback((progress, dragX, entry, type) => {
+    const trans = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [0, 80],
+      extrapolate: 'clamp',
+    });
+
+    const onDelete = type === 'trading' ? onDeleteTradingEntry : onDeleteJournal;
+    const refKey = `${type}_${entry.id}`;
+    const title = type === 'trading'
+      ? `${entry.symbol} - ${entry.direction?.toUpperCase()}`
+      : (entry.title || 'Nhật ký');
+
+    return (
+      <Animated.View style={[styles.swipeActionRight, { transform: [{ translateX: trans }] }]}>
+        <TouchableOpacity
+          style={styles.deleteAction}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            Alert.alert(
+              type === 'trading' ? 'Xóa giao dịch' : 'Xóa nhật ký',
+              `Bạn có chắc muốn xóa "${title}"?`,
+              [
+                {
+                  text: 'Hủy',
+                  style: 'cancel',
+                  onPress: () => swipeableRefs.current[refKey]?.close(),
+                },
+                {
+                  text: 'Xóa',
+                  style: 'destructive',
+                  onPress: () => {
+                    swipeableRefs.current[refKey]?.close();
+                    onDelete?.(entry);
+                  },
+                },
+              ]
+            );
+          }}
+        >
+          <Icons.Trash2 size={18} color="#FFFFFF" />
+          <Text style={styles.actionText}>Xóa</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }, [onDeleteJournal, onDeleteTradingEntry]);
   // Format date display
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -231,11 +312,11 @@ const DayDetailModal = ({
             {/* Handle bar */}
             <View style={styles.handleBar} />
 
-            {/* Header */}
+            {/* Header - Compact */}
             <View style={styles.header}>
               <View style={styles.dateContainer}>
-                <Text style={styles.dayName}>{dateInfo.dayName}</Text>
                 <Text style={styles.dateNumber}>{dateInfo.day}</Text>
+                <Text style={styles.dayName}>{dateInfo.dayName}</Text>
                 {isToday && (
                   <View style={styles.todayBadge}>
                     <Text style={styles.todayText}>Hôm nay</Text>
@@ -249,11 +330,11 @@ const DayDetailModal = ({
                     onPress={() => onAddEvent(date)}
                     style={styles.addButton}
                   >
-                    <Icons.Plus size={20} color="#FFFFFF" />
+                    <Icons.Plus size={18} color="#FFFFFF" />
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                  <Icons.X size={24} color="rgba(255,255,255,0.6)" />
+                  <Icons.X size={20} color="rgba(255,255,255,0.6)" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -425,37 +506,55 @@ const DayDetailModal = ({
                     const entryColor = entry.mood
                       ? (entry.mood === 'happy' || entry.mood === 'excited' ? COSMIC_COLORS.glow.gold : COSMIC_COLORS.glow.purple)
                       : COSMIC_COLORS.glow.purple;
+                    const refKey = `journal_${entry.id}`;
                     return (
-                      <TouchableOpacity
+                      <Swipeable
                         key={entry.id || index}
-                        style={[styles.journalItem, { borderColor: `${entryColor}30` }]}
-                        onPress={() => onJournalPress?.(entry)}
-                        activeOpacity={0.7}
+                        ref={(ref) => {
+                          if (ref) swipeableRefs.current[refKey] = ref;
+                        }}
+                        renderLeftActions={(progress, dragX) =>
+                          onEditJournal ? renderJournalLeftActions(progress, dragX, entry, 'journal') : null
+                        }
+                        renderRightActions={(progress, dragX) =>
+                          onDeleteJournal ? renderJournalRightActions(progress, dragX, entry, 'journal') : null
+                        }
+                        onSwipeableWillOpen={() => closeAllSwipeables(refKey)}
+                        friction={2}
+                        overshootLeft={false}
+                        overshootRight={false}
                       >
-                        <View style={[styles.journalIcon, { backgroundColor: `${entryColor}25` }]}>
-                          <Icons.FileText size={16} color={entryColor} />
-                        </View>
-                        <View style={styles.journalContent}>
-                          <Text style={styles.journalItemTitle}>
-                            {entry.title || entry.entry_type || 'Nhật ký'}
-                          </Text>
-                          {entry.content && (
-                            <Text style={styles.journalReflection} numberOfLines={2}>
-                              {entry.content}
-                            </Text>
-                          )}
-                          <View style={styles.journalMeta}>
-                            <Text style={styles.journalTime}>{time}</Text>
-                            {entry.mood && (
-                              <View style={[styles.moodChip, { backgroundColor: `${entryColor}20` }]}>
-                                <Text style={[styles.moodChipText, { color: entryColor }]}>{entry.mood}</Text>
-                              </View>
-                            )}
+                        <TouchableOpacity
+                          style={[styles.journalItem, { borderColor: `${entryColor}30` }]}
+                          onPress={() => onJournalPress?.(entry)}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.journalIcon, { backgroundColor: `${entryColor}25` }]}>
+                            <Icons.FileText size={16} color={entryColor} />
                           </View>
-                        </View>
-                        {entry.is_pinned && <Icons.Pin size={14} color={COSMIC_COLORS.glow.gold} />}
-                        {entry.is_favorite && <Icons.Star size={14} color={COSMIC_COLORS.glow.gold} fill={COSMIC_COLORS.glow.gold} />}
-                      </TouchableOpacity>
+                          <View style={styles.journalContent}>
+                            <Text style={styles.journalItemTitle}>
+                              {entry.title || entry.entry_type || 'Nhật ký'}
+                            </Text>
+                            {entry.content && (
+                              <Text style={styles.journalReflection} numberOfLines={2}>
+                                {entry.content}
+                              </Text>
+                            )}
+                            <View style={styles.journalMeta}>
+                              <Text style={styles.journalTime}>{time}</Text>
+                              {entry.mood && (
+                                <View style={[styles.moodChip, { backgroundColor: `${entryColor}20` }]}>
+                                  <Text style={[styles.moodChipText, { color: entryColor }]}>{entry.mood}</Text>
+                                </View>
+                              )}
+                            </View>
+                          </View>
+                          {entry.is_pinned && <Icons.Pin size={14} color={COSMIC_COLORS.glow.gold} />}
+                          {entry.is_favorite && <Icons.Star size={14} color={COSMIC_COLORS.glow.gold} fill={COSMIC_COLORS.glow.gold} />}
+                          <Icons.ChevronRight size={16} color={COSMIC_COLORS.text.muted} />
+                        </TouchableOpacity>
+                      </Swipeable>
                     );
                   })}
                 </View>
@@ -475,51 +574,69 @@ const DayDetailModal = ({
                     const time = trade.entry_time
                       ? new Date(trade.entry_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
                       : '';
+                    const refKey = `trading_${trade.id}`;
                     return (
-                      <TouchableOpacity
+                      <Swipeable
                         key={trade.id || index}
-                        style={[styles.journalItem, { borderColor: `${tradeColor}30` }]}
-                        onPress={() => onTradePress?.(trade)}
-                        activeOpacity={0.7}
+                        ref={(ref) => {
+                          if (ref) swipeableRefs.current[refKey] = ref;
+                        }}
+                        renderLeftActions={(progress, dragX) =>
+                          onEditTradingEntry ? renderJournalLeftActions(progress, dragX, trade, 'trading') : null
+                        }
+                        renderRightActions={(progress, dragX) =>
+                          onDeleteTradingEntry ? renderJournalRightActions(progress, dragX, trade, 'trading') : null
+                        }
+                        onSwipeableWillOpen={() => closeAllSwipeables(refKey)}
+                        friction={2}
+                        overshootLeft={false}
+                        overshootRight={false}
                       >
-                        <View style={[styles.journalIcon, { backgroundColor: `${tradeColor}20` }]}>
-                          {isWin ? (
-                            <Icons.TrendingUp size={16} color={tradeColor} />
-                          ) : isLoss ? (
-                            <Icons.TrendingDown size={16} color={tradeColor} />
-                          ) : (
-                            <Icons.Activity size={16} color={tradeColor} />
-                          )}
-                        </View>
-                        <View style={styles.journalContent}>
-                          <Text style={styles.journalItemTitle}>
-                            {trade.symbol} • {trade.direction?.toUpperCase()}
-                          </Text>
-                          <Text style={styles.journalReflection}>
-                            {trade.pattern_type || 'Manual'} {trade.pattern_grade ? `(${trade.pattern_grade})` : ''}
-                          </Text>
-                          {trade.lessons_learned && (
-                            <Text style={styles.journalReflection} numberOfLines={1}>
-                              💡 {trade.lessons_learned}
+                        <TouchableOpacity
+                          style={[styles.journalItem, { borderColor: `${tradeColor}30` }]}
+                          onPress={() => onTradePress?.(trade)}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.journalIcon, { backgroundColor: `${tradeColor}20` }]}>
+                            {isWin ? (
+                              <Icons.TrendingUp size={16} color={tradeColor} />
+                            ) : isLoss ? (
+                              <Icons.TrendingDown size={16} color={tradeColor} />
+                            ) : (
+                              <Icons.Activity size={16} color={tradeColor} />
+                            )}
+                          </View>
+                          <View style={styles.journalContent}>
+                            <Text style={styles.journalItemTitle}>
+                              {trade.symbol} • {trade.direction?.toUpperCase()}
                             </Text>
-                          )}
-                          <Text style={styles.journalTime}>{time}</Text>
-                        </View>
-                        <View style={styles.tradeResult}>
-                          {trade.pnl_amount !== null && (
-                            <Text style={[styles.tradePnLText, { color: tradeColor }]}>
-                              {trade.pnl_amount > 0 ? '+' : ''}{trade.pnl_amount?.toFixed(2)} USDT
+                            <Text style={styles.journalReflection}>
+                              {trade.pattern_type || 'Manual'} {trade.pattern_grade ? `(${trade.pattern_grade})` : ''}
                             </Text>
-                          )}
-                          {trade.result && (
-                            <View style={[styles.resultBadge, { backgroundColor: `${tradeColor}20` }]}>
-                              <Text style={[styles.resultText, { color: tradeColor }]}>
-                                {trade.result.toUpperCase()}
+                            {trade.lessons_learned && (
+                              <Text style={styles.journalReflection} numberOfLines={1}>
+                                💡 {trade.lessons_learned}
                               </Text>
-                            </View>
-                          )}
-                        </View>
-                      </TouchableOpacity>
+                            )}
+                            <Text style={styles.journalTime}>{time}</Text>
+                          </View>
+                          <View style={styles.tradeResult}>
+                            {trade.pnl_amount !== null && (
+                              <Text style={[styles.tradePnLText, { color: tradeColor }]}>
+                                {trade.pnl_amount > 0 ? '+' : ''}{trade.pnl_amount?.toFixed(2)} USDT
+                              </Text>
+                            )}
+                            {trade.result && (
+                              <View style={[styles.resultBadge, { backgroundColor: `${tradeColor}20` }]}>
+                                <Text style={[styles.resultText, { color: tradeColor }]}>
+                                  {trade.result.toUpperCase()}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                          <Icons.ChevronRight size={16} color={COSMIC_COLORS.text.muted} />
+                        </TouchableOpacity>
+                      </Swipeable>
                     );
                   })}
                 </View>
@@ -806,81 +923,81 @@ const styles = StyleSheet.create({
     shadowColor: COSMIC_COLORS.glow.purple,
   },
   handleBar: {
-    width: 48,
-    height: 5,
+    width: 40,
+    height: 4,
     backgroundColor: 'rgba(168, 85, 247, 0.5)',
-    borderRadius: 3,
+    borderRadius: 2,
     alignSelf: 'center',
-    marginTop: COSMIC_SPACING.lg,
-    marginBottom: COSMIC_SPACING.md,
+    marginTop: COSMIC_SPACING.sm,
+    marginBottom: COSMIC_SPACING.xs,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: COSMIC_SPACING.xl,
-    paddingVertical: COSMIC_SPACING.lg,
+    alignItems: 'center',
+    paddingHorizontal: COSMIC_SPACING.lg,
+    paddingVertical: COSMIC_SPACING.md,
     borderBottomWidth: 1,
     borderBottomColor: COSMIC_COLORS.glass.borderGlow,
   },
   dateContainer: {
-    flex: 1,
-  },
-  dayName: {
-    color: COSMIC_COLORS.glow.cyan,
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  dateNumber: {
-    color: '#FFFFFF',
-    fontSize: 48,
-    fontWeight: '700',
-    lineHeight: 56,
-    textShadowColor: COSMIC_COLORS.glow.purple,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
-  },
-  todayBadge: {
-    backgroundColor: COSMIC_COLORS.glow.gold,
-    paddingHorizontal: COSMIC_SPACING.md,
-    paddingVertical: COSMIC_SPACING.xs,
-    borderRadius: COSMIC_SPACING.sm,
-    alignSelf: 'flex-start',
-    marginTop: COSMIC_SPACING.sm,
-    shadowColor: COSMIC_COLORS.glow.gold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-  },
-  todayText: {
-    color: '#0D0D2B',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: COSMIC_SPACING.md,
   },
+  dayName: {
+    color: COSMIC_COLORS.glow.cyan,
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  dateNumber: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '700',
+    lineHeight: 32,
+    textShadowColor: COSMIC_COLORS.glow.purple,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  todayBadge: {
+    backgroundColor: COSMIC_COLORS.glow.gold,
+    paddingHorizontal: COSMIC_SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: COSMIC_SPACING.xs,
+    shadowColor: COSMIC_COLORS.glow.gold,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 6,
+  },
+  todayText: {
+    color: '#0D0D2B',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: COSMIC_SPACING.sm,
+  },
   addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: COSMIC_COLORS.glow.purple,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: COSMIC_COLORS.glow.purple,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 10,
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
   },
   closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',

@@ -214,8 +214,9 @@ const MoodPickerModal = ({
         if (result.success) saveSuccess = true;
       }
 
-      // Save overall mood if set (and morning/evening not set)
-      if (overallMood && !morningMood && !eveningMood) {
+      // Save overall mood if user is on overall tab and selected a mood
+      // This works even if existing morningMood/eveningMood data was loaded
+      if (activeTab === 'overall' && overallMood) {
         console.log('[MoodPickerModal] Saving overall mood for date:', targetDate);
         // Save as morning mood since overall is just a single selection
         const result = await saveMoodCheckIn(
@@ -230,6 +231,23 @@ const MoodPickerModal = ({
           targetDate
         );
         console.log('[MoodPickerModal] Overall mood save result:', result);
+        if (result.success) saveSuccess = true;
+      }
+      // Also save overall mood if no tab-specific moods were set/changed
+      else if (overallMood && !morningMood && !eveningMood) {
+        console.log('[MoodPickerModal] Saving overall mood (fallback) for date:', targetDate);
+        const result = await saveMoodCheckIn(
+          user.id,
+          CHECK_IN_TYPES.MORNING,
+          {
+            mood: overallMood,
+            note: dayHighlight || '',
+          },
+          userTier,
+          userRole,
+          targetDate
+        );
+        console.log('[MoodPickerModal] Overall mood (fallback) save result:', result);
         if (result.success) saveSuccess = true;
       }
 
@@ -259,7 +277,7 @@ const MoodPickerModal = ({
   };
 
   // Check if we have any mood data to save
-  const hasData = morningMood || eveningMood || dayHighlight.trim() || gratitudeNotes.trim();
+  const hasData = morningMood || eveningMood || overallMood || dayHighlight.trim() || gratitudeNotes.trim();
 
   return (
     <Modal
