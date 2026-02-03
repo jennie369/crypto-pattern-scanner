@@ -32,7 +32,6 @@ import {
   Target,
   FileText,
   ChevronDown,
-  Eye,
   Edit3,
 } from 'lucide-react-native';
 
@@ -91,7 +90,7 @@ const JournalEntryScreen = () => {
   const [showMoodPicker, setShowMoodPicker] = useState(false);
   const [showLifeAreaSelector, setShowLifeAreaSelector] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [isEditing, setIsEditing] = useState(mode === 'create'); // Start in edit mode only for new entries
 
   // Original data for change detection
   const originalData = useRef(null);
@@ -395,40 +394,9 @@ const JournalEntryScreen = () => {
             maxLength={100}
           />
 
-          {/* Content with Preview Toggle */}
+          {/* Content - Tap to Edit */}
           <View style={styles.contentContainer}>
-            {/* Preview/Edit Toggle */}
-            <View style={styles.previewToggleRow}>
-              <TouchableOpacity
-                style={[styles.previewToggle, !showPreview && styles.previewToggleActive]}
-                onPress={() => setShowPreview(false)}
-              >
-                <Edit3 size={16} color={!showPreview ? COLORS.purple : COLORS.textMuted} />
-                <Text style={[styles.previewToggleText, !showPreview && styles.previewToggleTextActive]}>
-                  Sửa
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.previewToggle, showPreview && styles.previewToggleActive]}
-                onPress={() => setShowPreview(true)}
-              >
-                <Eye size={16} color={showPreview ? COLORS.purple : COLORS.textMuted} />
-                <Text style={[styles.previewToggleText, showPreview && styles.previewToggleTextActive]}>
-                  Xem trước
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {showPreview ? (
-              /* Preview Mode - Render Markdown */
-              <View style={styles.previewContainer}>
-                {content ? (
-                  <RichTextRenderer content={content} style={styles.previewText} />
-                ) : (
-                  <Text style={styles.previewPlaceholder}>Chưa có nội dung</Text>
-                )}
-              </View>
-            ) : (
+            {isEditing ? (
               /* Edit Mode - TextInput */
               <TextInput
                 style={styles.contentInput}
@@ -445,7 +413,26 @@ const JournalEntryScreen = () => {
                 multiline
                 textAlignVertical="top"
                 maxLength={charLimit}
+                autoFocus={mode === 'create'}
+                onBlur={() => content.trim() && setIsEditing(false)}
               />
+            ) : (
+              /* View Mode - Rendered Content (tap to edit) */
+              <TouchableOpacity
+                style={styles.previewContainer}
+                onPress={() => setIsEditing(true)}
+                activeOpacity={0.8}
+              >
+                {content ? (
+                  <RichTextRenderer content={content} style={styles.previewText} />
+                ) : (
+                  <Text style={styles.previewPlaceholder}>Nhấn để viết...</Text>
+                )}
+                <View style={styles.editHint}>
+                  <Edit3 size={14} color={COLORS.textMuted} />
+                  <Text style={styles.editHintText}>Nhấn để chỉnh sửa</Text>
+                </View>
+              </TouchableOpacity>
             )}
             <Text style={styles.charCount}>
               {content.length}/{charLimit}
@@ -684,33 +671,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     minHeight: 200,
   },
-  previewToggleRow: {
-    flexDirection: 'row',
-    marginBottom: SPACING.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: BORDER_RADIUS.md,
-    padding: 4,
-  },
-  previewToggle: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.sm,
-    gap: SPACING.xs,
-  },
-  previewToggleActive: {
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  previewToggleText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  previewToggleTextActive: {
-    color: COLORS.purple,
-    fontWeight: '600',
-  },
   previewContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: BORDER_RADIUS.md,
@@ -728,6 +688,20 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textMuted,
     fontStyle: 'italic',
+  },
+  editHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    gap: SPACING.xs,
+  },
+  editHintText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
   },
   charCount: {
     fontSize: TYPOGRAPHY.fontSize.xs,
