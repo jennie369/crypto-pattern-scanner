@@ -444,13 +444,13 @@ export const getCheckInLabel = (checkInType) => {
 export const getCheckInPrompt = (checkInType) => {
   switch (checkInType) {
     case CHECK_IN_TYPES.MORNING:
-      return 'Ban cam thay the nao sau khi ngu day?';
+      return 'Bạn cảm thấy thế nào sau khi ngủ dậy?';
     case CHECK_IN_TYPES.MIDDAY:
-      return 'Ngay cua ban dang dien ra the nao?';
+      return 'Ngày của bạn đang diễn ra thế nào?';
     case CHECK_IN_TYPES.EVENING:
-      return 'Ban cam thay the nao khi nhin lai ngay hom nay?';
+      return 'Bạn cảm thấy thế nào khi nhìn lại ngày hôm nay?';
     default:
-      return 'Ban dang cam thay the nao?';
+      return 'Bạn đang cảm thấy thế nào?';
   }
 };
 

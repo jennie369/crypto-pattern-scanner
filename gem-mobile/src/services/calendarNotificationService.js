@@ -216,8 +216,8 @@ export const scheduleMorningMoodReminder = async (userId, time = DEFAULT_TIMES.M
 
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Chao buoi sang!',
-        body: 'Ban cam thay the nao sau khi ngu day?',
+        title: 'Chào buổi sáng!',
+        body: 'Bạn cảm thấy thế nào sau khi ngủ dậy?',
         data: {
           type: NOTIFICATION_TYPES.MORNING_MOOD,
           userId,
@@ -256,8 +256,8 @@ export const scheduleEveningMoodReminder = async (userId, time = DEFAULT_TIMES.E
 
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Ket thuc ngay!',
-        body: 'Danh vai phut de nhin lai ngay hom nay',
+        title: 'Kết thúc ngày!',
+        body: 'Dành vài phút để nhìn lại ngày hôm nay',
         data: {
           type: NOTIFICATION_TYPES.EVENING_MOOD,
           userId,
