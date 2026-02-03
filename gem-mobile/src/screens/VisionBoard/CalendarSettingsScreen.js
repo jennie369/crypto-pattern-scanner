@@ -131,11 +131,11 @@ const CalendarSettingsScreen = () => {
     try {
       const result = await updateNotificationSettings(userId, updates);
       if (!result.success) {
-        Alert.alert('Loi', result.error || 'Khong the luu cai dat');
+        Alert.alert('Lỗi', result.error || 'Không thể lưu cài đặt');
       }
     } catch (error) {
       console.error('[CalendarSettings] Save error:', error);
-      Alert.alert('Loi', 'Khong the luu cai dat');
+      Alert.alert('Lỗi', 'Không thể lưu cài đặt');
     }
     setSaving(false);
   };
@@ -149,13 +149,13 @@ const CalendarSettingsScreen = () => {
   // Handle export
   const handleExport = () => {
     if (!exportAccess.allowed) {
-      Alert.alert('Han che', exportAccess.reason);
+      Alert.alert('Hạn chế', exportAccess.reason);
       return;
     }
 
     Alert.alert(
-      'Xuat du lieu',
-      'Tinh nang xuat du lieu dang duoc phat trien. Vui long quay lai sau.',
+      'Xuất dữ liệu',
+      'Tính năng xuất dữ liệu đang được phát triển. Vui lòng quay lại sau.',
       [{ text: 'OK' }]
     );
   };
@@ -350,7 +350,7 @@ const CalendarSettingsScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Download size={20} color={COLORS.info} />
-            <Text style={styles.sectionTitle}>Xuat du lieu</Text>
+            <Text style={styles.sectionTitle}>Xuất dữ liệu</Text>
           </View>
 
           <TouchableOpacity

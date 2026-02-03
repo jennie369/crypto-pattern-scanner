@@ -106,7 +106,7 @@ const EXTENDED_PATTERN_TYPES = [
   { id: 'TripleTop', name: 'Triple Top', category: 'reversal' },
   { id: 'TripleBottom', name: 'Triple Bottom', category: 'reversal' },
   { id: 'Channel', name: 'Channel Breakout', category: 'momentum' },
-  { id: 'Other', name: 'Khac', category: 'other' },
+  { id: 'Other', name: 'Khác', category: 'other' },
 ];
 
 // Extended timeframes
@@ -320,10 +320,16 @@ const TradingJournalScreen = () => {
         }
         // Check if paper trade from source field
         setIsPaperTradeEntry(data.source === 'paper_trade' || data.source === 'manual');
+      } else {
+        // Entry not found - show error and go back
+        console.warn('[TradingJournal] Entry not found:', eid);
+        Alert.alert('Lỗi', 'Không tìm thấy giao dịch');
+        navigation.goBack();
       }
     } catch (error) {
       console.error('[TradingJournal] Load error:', error);
-      Alert.alert('Loi', 'Khong the tai giao dich');
+      Alert.alert('Lỗi', 'Không thể tải giao dịch');
+      navigation.goBack();
     }
   };
 
@@ -338,7 +344,7 @@ const TradingJournalScreen = () => {
     try {
       const { status } = await ExpoImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Can quyen truy cap', 'Vui long cho phep truy cap thu vien anh');
+        Alert.alert('Cần quyền truy cập', 'Vui lòng cho phép truy cập thư viện ảnh');
         return;
       }
 
@@ -355,7 +361,7 @@ const TradingJournalScreen = () => {
       }
     } catch (error) {
       console.error('[TradingJournal] Image picker error:', error);
-      Alert.alert('Loi', 'Khong the chon anh');
+      Alert.alert('Lỗi', 'Không thể chọn ảnh');
     }
   };
 
@@ -364,7 +370,7 @@ const TradingJournalScreen = () => {
     try {
       const { status } = await ExpoImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Can quyen truy cap', 'Vui long cho phep su dung camera');
+        Alert.alert('Cần quyền truy cập', 'Vui lòng cho phép sử dụng camera');
         return;
       }
 
@@ -380,7 +386,7 @@ const TradingJournalScreen = () => {
       }
     } catch (error) {
       console.error('[TradingJournal] Camera error:', error);
-      Alert.alert('Loi', 'Khong the mo camera');
+      Alert.alert('Lỗi', 'Không thể mở camera');
     }
   };
 
@@ -429,17 +435,17 @@ const TradingJournalScreen = () => {
   // Handle save
   const handleSave = async () => {
     if (!symbol.trim()) {
-      Alert.alert('Loi', 'Vui long nhap ma coin/symbol');
+      Alert.alert('Lỗi', 'Vui lòng nhập mã coin/symbol');
       return;
     }
 
     if (!entryPrice || parseFloat(entryPrice) <= 0) {
-      Alert.alert('Loi', 'Vui long nhap gia entry');
+      Alert.alert('Lỗi', 'Vui lòng nhập giá entry');
       return;
     }
 
     if (!access.allowed) {
-      Alert.alert('Han che', access.reason);
+      Alert.alert('Hạn chế', access.reason);
       return;
     }
 
@@ -506,11 +512,11 @@ const TradingJournalScreen = () => {
       if (result.success) {
         navigation.goBack();
       } else {
-        Alert.alert('Loi', result.error || 'Khong the luu');
+        Alert.alert('Lỗi', result.error || 'Không thể lưu');
       }
     } catch (error) {
       console.error('[TradingJournal] Save error:', error);
-      Alert.alert('Loi', 'Khong the luu giao dich');
+      Alert.alert('Lỗi', 'Không thể lưu giao dich');
     }
 
     setSaving(false);
@@ -613,7 +619,7 @@ const TradingJournalScreen = () => {
       <SafeAreaView style={styles.loadingContainer}>
         <LinearGradient colors={GRADIENTS.darkPurple} style={StyleSheet.absoluteFill} />
         <ActivityIndicator size="large" color={COLORS.purple} />
-        <Text style={styles.loadingText}>Dang tai...</Text>
+        <Text style={styles.loadingText}>Đang tải...</Text>
       </SafeAreaView>
     );
   }
@@ -627,18 +633,18 @@ const TradingJournalScreen = () => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Nhat ky giao dich</Text>
+          <Text style={styles.headerTitle}>Nhật ký giao dịch</Text>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.lockedContainer}>
           <AlertTriangle size={48} color={COLORS.warning} />
-          <Text style={styles.lockedTitle}>Tinh nang cao cap</Text>
+          <Text style={styles.lockedTitle}>Tính năng cao cấp</Text>
           <Text style={styles.lockedText}>{access.reason}</Text>
           <TouchableOpacity
             style={styles.upgradeButton}
             onPress={() => navigation.navigate('TierUpgrade')}
           >
-            <Text style={styles.upgradeButtonText}>Nang cap</Text>
+            <Text style={styles.upgradeButtonText}>Nâng cấp</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -656,7 +662,7 @@ const TradingJournalScreen = () => {
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>
-          {mode === 'edit' ? 'Chinh sua giao dich' : 'Ghi nhat ky'}
+          {mode === 'edit' ? 'Chỉnh sửa giao dịch' : 'Ghi nhật ký'}
         </Text>
 
         <View style={styles.headerActions}>
@@ -774,7 +780,7 @@ const TradingJournalScreen = () => {
 
           {/* Direction Toggle */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Huong giao dich *</Text>
+            <Text style={styles.sectionTitle}>Hướng giao dịch *</Text>
             <View style={styles.directionRow}>
               <TouchableOpacity
                 style={[
@@ -898,7 +904,7 @@ const TradingJournalScreen = () => {
 
               {/* Timeframe Selector */}
               <View style={styles.timeframeContainer}>
-                <Text style={styles.subLabel}>Khung gio</Text>
+                <Text style={styles.subLabel}>Khung giờ</Text>
                 <TouchableOpacity
                   style={styles.smallSelector}
                   onPress={() => setShowTimeframeSelector(!showTimeframeSelector)}
@@ -939,7 +945,7 @@ const TradingJournalScreen = () => {
 
           {/* Prices Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Gia & Vi the</Text>
+            <Text style={styles.sectionTitle}>Giá & Vị thế</Text>
 
             <View style={styles.priceGrid}>
               <View style={styles.priceInput}>
@@ -991,7 +997,7 @@ const TradingJournalScreen = () => {
               </View>
 
               <View style={styles.priceInput}>
-                <Text style={styles.priceLabel}>Position Size</Text>
+                <Text style={styles.priceLabel}>Khối lượng</Text>
                 <TextInput
                   style={styles.priceField}
                   placeholder="0.00"
@@ -1034,13 +1040,13 @@ const TradingJournalScreen = () => {
 
           {/* Manual P/L Override */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>P/L (Thu cong)</Text>
+            <Text style={styles.sectionTitle}>P/L (Thủ công)</Text>
             <View style={styles.pnlInputRow}>
               <View style={styles.pnlInputContainer}>
-                <Text style={styles.pnlInputLabel}>So tien (USDT)</Text>
+                <Text style={styles.pnlInputLabel}>Số tiền (USDT)</Text>
                 <TextInput
                   style={styles.pnlInput}
-                  placeholder="+100 hoac -50"
+                  placeholder="+100 hoặc -50"
                   placeholderTextColor={COLORS.textMuted}
                   value={pnlAmount}
                   onChangeText={setPnlAmount}
@@ -1048,10 +1054,10 @@ const TradingJournalScreen = () => {
                 />
               </View>
               <View style={styles.pnlInputContainer}>
-                <Text style={styles.pnlInputLabel}>Phan tram (%)</Text>
+                <Text style={styles.pnlInputLabel}>Phần trăm (%)</Text>
                 <TextInput
                   style={styles.pnlInput}
-                  placeholder="+5.2 hoac -2.1"
+                  placeholder="+5.2 hoặc -2.1"
                   placeholderTextColor={COLORS.textMuted}
                   value={pnlPercent}
                   onChangeText={setPnlPercent}
@@ -1063,7 +1069,7 @@ const TradingJournalScreen = () => {
 
           {/* Result Selector */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ket qua</Text>
+            <Text style={styles.sectionTitle}>Kết quả</Text>
             <View style={styles.resultRow}>
               {[
                 { id: TRADE_RESULTS.WIN, label: 'WIN', color: COLORS.success },
@@ -1094,12 +1100,12 @@ const TradingJournalScreen = () => {
 
           {/* Emotions Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tam ly giao dich</Text>
+            <Text style={styles.sectionTitle}>Tâm lý giao dịch</Text>
 
             <View style={styles.emotionsRow}>
               {/* Emotion Before */}
               <View style={styles.emotionContainer}>
-                <Text style={styles.emotionTitle}>Truoc khi vao lenh</Text>
+                <Text style={styles.emotionTitle}>Trước khi vào lệnh</Text>
                 <TouchableOpacity
                   style={styles.emotionSelector}
                   onPress={() => setShowEmotionPicker('before')}
@@ -1127,7 +1133,7 @@ const TradingJournalScreen = () => {
 
               {/* Emotion After */}
               <View style={styles.emotionContainer}>
-                <Text style={styles.emotionTitle}>Sau khi dong lenh</Text>
+                <Text style={styles.emotionTitle}>Sau khi đóng lệnh</Text>
                 <TouchableOpacity
                   style={styles.emotionSelector}
                   onPress={() => setShowEmotionPicker('after')}
@@ -1166,10 +1172,10 @@ const TradingJournalScreen = () => {
 
           {/* Lessons Learned */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Bai hoc rut ra</Text>
+            <Text style={styles.sectionTitle}>Bài học rút ra</Text>
             <TextInput
               style={styles.notesInput}
-              placeholder="Ban hoc duoc gi tu lenh nay? Dieu gi lam tot, dieu gi can cai thien?"
+              placeholder="Bạn học được gì từ lệnh này? Điều gì làm tốt, điều gì cần cải thiện?"
               placeholderTextColor={COLORS.textMuted}
               value={lessonsLearned}
               onChangeText={setLessonsLearned}
@@ -1182,7 +1188,7 @@ const TradingJournalScreen = () => {
 
           {/* Screenshot Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Screenshot (tuy chon)</Text>
+            <Text style={styles.sectionTitle}>Screenshot (tùy chọn)</Text>
 
             {screenshotUrl ? (
               <View style={styles.screenshotPreview}>
@@ -1205,7 +1211,7 @@ const TradingJournalScreen = () => {
                   onPress={handlePickImage}
                 >
                   <ImageIcon size={24} color={COLORS.purple} />
-                  <Text style={styles.screenshotButtonText}>Thu vien</Text>
+                  <Text style={styles.screenshotButtonText}>Thư viện</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity

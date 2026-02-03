@@ -244,7 +244,7 @@ export const checkCalendarAccess = (feature, userTier, userRole = null) => {
   return {
     allowed: isAllowed,
     limit,
-    reason: isAllowed ? null : `Tinh nang nay yeu cau ${getRequiredTier(access)}`,
+    reason: isAllowed ? null : `Tính năng này yêu cầu ${getRequiredTier(access)}`,
   };
 };
 
