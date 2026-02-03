@@ -828,6 +828,105 @@ export const saveReflection = async (userId, ritualSlug, reflection) => {
   }
 };
 
+// ============ DELETE RITUAL COMPLETION ============
+/**
+ * Delete a ritual completion record
+ * Also deletes the associated calendar event
+ * @param {string} userId - User ID
+ * @param {string} completionId - Completion record ID
+ * @returns {Promise<Object>}
+ */
+export const deleteRitualCompletion = async (userId, completionId) => {
+  console.log('[ritualService] deleteRitualCompletion:', { userId: !!userId, completionId });
+
+  if (!userId || !completionId) {
+    return { success: false, error: 'Missing required parameters' };
+  }
+
+  try {
+    // 1. Delete the completion record
+    const { error: deleteError } = await supabase
+      .from('vision_ritual_completions')
+      .delete()
+      .eq('id', completionId)
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      console.error('[ritualService] Delete completion error:', deleteError);
+      throw deleteError;
+    }
+
+    // 2. Also delete the associated calendar event (if exists)
+    // Calendar events have source_id = completionId and source_type = 'divination'
+    try {
+      await calendarService.deleteEventsBySource(userId, 'divination', completionId);
+    } catch (calErr) {
+      console.warn('[ritualService] Calendar event delete failed (non-critical):', calErr?.message);
+    }
+
+    console.log('[ritualService] Ritual completion deleted successfully');
+    return { success: true };
+  } catch (err) {
+    console.error('[ritualService] deleteRitualCompletion error:', err?.message || err);
+    return { success: false, error: err?.message || 'Unknown error' };
+  }
+};
+
+// ============ UPDATE RITUAL REFLECTION ============
+/**
+ * Update the reflection text of a ritual completion
+ * @param {string} userId - User ID
+ * @param {string} completionId - Completion record ID
+ * @param {string} reflection - New reflection text
+ * @returns {Promise<Object>}
+ */
+export const updateRitualReflection = async (userId, completionId, reflection) => {
+  console.log('[ritualService] updateRitualReflection:', { userId: !!userId, completionId, reflectionLength: reflection?.length });
+
+  if (!userId || !completionId) {
+    return { success: false, error: 'Missing required parameters' };
+  }
+
+  try {
+    // Get current content
+    const { data: current, error: fetchError } = await supabase
+      .from('vision_ritual_completions')
+      .select('content')
+      .eq('id', completionId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError) {
+      console.error('[ritualService] Fetch current content error:', fetchError);
+      throw fetchError;
+    }
+
+    // Merge with existing content
+    const updatedContent = {
+      ...(current?.content || {}),
+      reflection: reflection?.trim() || '',
+    };
+
+    // Update the completion record
+    const { error: updateError } = await supabase
+      .from('vision_ritual_completions')
+      .update({ content: updatedContent })
+      .eq('id', completionId)
+      .eq('user_id', userId);
+
+    if (updateError) {
+      console.error('[ritualService] Update reflection error:', updateError);
+      throw updateError;
+    }
+
+    console.log('[ritualService] Reflection updated successfully');
+    return { success: true };
+  } catch (err) {
+    console.error('[ritualService] updateRitualReflection error:', err?.message || err);
+    return { success: false, error: err?.message || 'Unknown error' };
+  }
+};
+
 export default {
   RITUAL_TYPES,
   getAllRituals,
@@ -839,4 +938,6 @@ export default {
   getRitualStats,
   getRecommendedRituals,
   saveReflection,
+  deleteRitualCompletion,
+  updateRitualReflection,
 };

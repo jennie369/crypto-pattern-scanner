@@ -52,11 +52,35 @@ export const getMoodById = (moodId) => {
 
 /**
  * Get life area object by id
+ * Supports lookup by key (FINANCE) or by id field (finance, personal_growth)
  */
 export const getLifeAreaById = (areaId) => {
   if (!areaId) return null;
+
+  // First try direct key lookup (uppercase)
   const key = areaId.toUpperCase();
-  return LIFE_AREAS[key] || null;
+  if (LIFE_AREAS[key]) {
+    return LIFE_AREAS[key];
+  }
+
+  // Then try finding by id field (for templates that use lowercase ids)
+  const normalizedId = areaId.toLowerCase();
+  const entry = Object.values(LIFE_AREAS).find(area => area.id === normalizedId);
+  if (entry) {
+    return entry;
+  }
+
+  // Handle special mappings (template ids to calendarJournal ids)
+  const mappings = {
+    'personal_growth': 'personal',
+    'love': 'relationships',
+    'crypto': 'finance',
+  };
+  if (mappings[normalizedId]) {
+    return Object.values(LIFE_AREAS).find(area => area.id === mappings[normalizedId]) || null;
+  }
+
+  return null;
 };
 
 /**
@@ -237,9 +261,13 @@ export const getEntryById = async (userId, entryId) => {
       .select('*')
       .eq('id', entryId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle to handle 0 rows gracefully
 
     if (error) throw error;
+
+    if (!data) {
+      return { success: false, error: 'Entry not found', data: null };
+    }
 
     return { success: true, data };
 

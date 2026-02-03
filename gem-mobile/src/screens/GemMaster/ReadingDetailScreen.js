@@ -35,7 +35,8 @@ import * as Haptics from 'expo-haptics';
 
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
 import readingHistoryService from '../../services/readingHistoryService';
-import { getCardImage } from '../../assets/tarot';
+import { getCardImage, getCardImageByName } from '../../assets/tarot';
+import { getHexagramImage } from '../../assets/iching';
 
 const ReadingDetailScreen = () => {
   const navigation = useNavigation();
@@ -91,11 +92,15 @@ const ReadingDetailScreen = () => {
         ? readingHistoryService.updateTarotNotes
         : readingHistoryService.updateIChingNotes;
 
-      const { error } = await updateFunc(reading?.id, notes);
+      // Include userId in the update call (required by service)
+      const { error } = await updateFunc(reading?.id, reading?.user_id, notes);
       if (!error) {
         setReading((prev) => ({ ...prev, notes }));
         setIsEditingNotes(false);
         Alert.alert('Đã lưu', 'Ghi chú đã được cập nhật.');
+      } else {
+        console.error('[ReadingDetailScreen] Save notes error:', error);
+        Alert.alert('Lỗi', 'Không thể lưu ghi chú.');
       }
     } catch (err) {
       console.error('[ReadingDetailScreen] Save notes error:', err);
@@ -184,10 +189,15 @@ const ReadingDetailScreen = () => {
           <Text style={styles.sectionTitle}>Các lá bài</Text>
           <View style={styles.cardsGrid}>
             {cards.map((card, index) => {
-              const cardName = card?.name_vi || card?.nameVi || card?.name || 'Unknown';
+              const cardName = card?.name_vi || card?.nameVi || card?.vietnamese || card?.name || 'Unknown';
               const isReversed = card?.is_reversed || card?.isReversed;
               const cardId = card?.card_id || card?.id;
-              const cardImage = cardId ? getCardImage(cardId) : null;
+
+              // Try multiple methods to get card image (like DivinationSection)
+              let cardImage = cardId ? getCardImage(cardId) : null;
+              if (!cardImage && cardName && cardName !== 'Unknown') {
+                cardImage = getCardImageByName(cardName);
+              }
 
               return (
                 <View key={index} style={styles.cardItem}>
@@ -270,15 +280,30 @@ const ReadingDetailScreen = () => {
     const changingLines = reading?.changing_lines || [];
     const interpretations = reading?.interpretations || {};
 
+    // Get hexagram number for image
+    const hexagramNumber = hexagram?.number || reading?.hexagram_number || reading?.hexagramNumber;
+    const hexagramImage = hexagramNumber ? getHexagramImage(hexagramNumber) : null;
+
     return (
       <>
         {/* Hexagram Display */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quẻ hiện tại</Text>
           <View style={styles.hexagramCard}>
-            <View style={styles.hexagramSymbol}>
-              <BookOpen size={48} color={COLORS.cyan} />
-            </View>
+            {hexagramImage ? (
+              <Image
+                source={hexagramImage}
+                style={styles.hexagramImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.hexagramSymbol}>
+                <BookOpen size={48} color={COLORS.cyan} />
+              </View>
+            )}
+            {hexagramNumber && (
+              <Text style={styles.hexagramNumber}>Quẻ #{hexagramNumber}</Text>
+            )}
             <Text style={styles.hexagramName}>
               {hexagram?.name_vi || hexagram?.name_en || 'Unknown'}
             </Text>
@@ -580,18 +605,21 @@ const styles = StyleSheet.create({
   cardsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.sm,
+    justifyContent: 'center',
+    gap: SPACING.md,
   },
   cardItem: {
-    width: '30%',
+    width: 100,
     alignItems: 'center',
     backgroundColor: COLORS.glassBg,
     borderRadius: 12,
     padding: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
   },
   cardImage: {
-    width: 60,
-    height: 90,
+    width: 80,
+    height: 120,
     borderRadius: 8,
     marginBottom: SPACING.xs,
   },
@@ -599,8 +627,8 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '180deg' }],
   },
   cardPlaceholder: {
-    width: 60,
-    height: 90,
+    width: 80,
+    height: 120,
     borderRadius: 8,
     backgroundColor: 'rgba(106, 91, 255, 0.2)',
     justifyContent: 'center',
@@ -684,6 +712,18 @@ const styles = StyleSheet.create({
   },
   hexagramSymbol: {
     marginBottom: SPACING.md,
+  },
+  hexagramImage: {
+    width: 140,
+    height: 180,
+    borderRadius: 12,
+    marginBottom: SPACING.md,
+  },
+  hexagramNumber: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    marginBottom: SPACING.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
   },
   hexagramName: {
     fontSize: TYPOGRAPHY.fontSize.xl,

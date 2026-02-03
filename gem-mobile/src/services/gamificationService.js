@@ -577,36 +577,61 @@ class GamificationService {
    */
   async getAllStreaks(userId) {
     try {
-      // Select only columns we know exist, freeze_count is optional
-      const { data, error } = await supabase
-        .from('user_streaks')
-        .select('streak_type, current_streak, longest_streak, total_completions, last_completion_date')
-        .eq('user_id', userId);
-
-      // Graceful degradation if table/column doesn't exist
-      if (error) {
-        if (error.code === '42P01' || error.code === '42703' || error.message?.includes('does not exist')) {
-          console.log('[Gamification] user_streaks table/columns not ready yet');
-          return { success: true, streaks: {} };
-        }
-        throw error;
-      }
-
-      const streaks = {};
-      (data || []).forEach(streak => {
-        streaks[streak.streak_type] = {
-          currentStreak: streak.current_streak || 0,
-          longestStreak: streak.longest_streak || 0,
-          totalCompletions: streak.total_completions || 0,
-          lastCompletionDate: streak.last_completion_date,
-          freezeCount: streak.freeze_count || 0,
-        };
+      // Try using RPC function first (more reliable with SECURITY DEFINER)
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_all_user_streaks', {
+        p_user_id: userId,
       });
 
-      return { success: true, streaks };
+      // If RPC works, use that data
+      if (!rpcError && rpcData) {
+        const streaks = {};
+        rpcData.forEach(streak => {
+          streaks[streak.streak_type] = {
+            currentStreak: streak.current_streak || 0,
+            longestStreak: streak.longest_streak || 0,
+            totalCompletions: streak.total_completions || 0,
+            lastCompletionDate: streak.last_completion_date,
+            freezeCount: streak.freeze_count || 0,
+          };
+        });
+        return { success: true, streaks };
+      }
+
+      // Fallback to direct table query if RPC doesn't exist (42883)
+      if (rpcError?.code === '42883') {
+        console.log('[Gamification] get_all_user_streaks function not found, using direct query');
+        const { data, error } = await supabase
+          .from('user_streaks')
+          .select('streak_type, current_streak, longest_streak, total_completions, last_completion_date, freeze_count')
+          .eq('user_id', userId);
+
+        if (error) {
+          // Table or RLS issue
+          console.log('[Gamification] user_streaks query error:', error.code || error.message);
+          return { success: true, streaks: {} };
+        }
+
+        const streaks = {};
+        (data || []).forEach(streak => {
+          streaks[streak.streak_type] = {
+            currentStreak: streak.current_streak || 0,
+            longestStreak: streak.longest_streak || 0,
+            totalCompletions: streak.total_completions || 0,
+            lastCompletionDate: streak.last_completion_date,
+            freezeCount: streak.freeze_count || 0,
+          };
+        });
+
+        return { success: true, streaks };
+      }
+
+      // Other RPC error - log and return empty
+      console.log('[Gamification] getAllStreaks RPC error:', rpcError?.code || rpcError?.message);
+      return { success: true, streaks: {} };
     } catch (error) {
-      console.error('[Gamification] Get all streaks error:', error);
-      return { success: false, streaks: {} };
+      // Always return gracefully - streaks are optional feature
+      console.warn('[Gamification] Get all streaks exception:', error?.message || error);
+      return { success: true, streaks: {} };
     }
   }
 

@@ -410,9 +410,13 @@ export const getEntryById = async (userId, entryId) => {
       .select('*')
       .eq('id', entryId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle to handle 0 rows gracefully
 
     if (error) throw error;
+
+    if (!data) {
+      return { success: false, error: 'Entry not found', data: null };
+    }
 
     return { success: true, data };
 

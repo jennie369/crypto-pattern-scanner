@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Modal, ScrollView, Pressable } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
 
@@ -29,6 +29,12 @@ const MONTH_NAMES = [
 
 // Calendar event source types and their display config
 const EVENT_SOURCE_CONFIG = {
+  mood: {
+    color: '#FFD700',
+    icon: 'Smile',
+    label: 'Tâm trạng',
+    priority: 0,
+  },
   goal_deadline: {
     color: COLORS.burgundy || '#8B1C3A',
     icon: 'Target',
@@ -43,6 +49,12 @@ const EVENT_SOURCE_CONFIG = {
   },
   habit_schedule: {
     color: COLORS.success,
+    icon: 'Repeat',
+    label: 'Thói quen',
+    priority: 3,
+  },
+  habit: {
+    color: '#00F0FF',
     icon: 'Repeat',
     label: 'Thói quen',
     priority: 3,
@@ -64,6 +76,30 @@ const EVENT_SOURCE_CONFIG = {
     icon: 'BookOpen',
     label: 'Bài học',
     priority: 6,
+  },
+  ritual: {
+    color: '#EC4899',
+    icon: 'Sparkles',
+    label: 'Nghi thức',
+    priority: 7,
+  },
+  paper_trade: {
+    color: '#3AF7A6',
+    icon: 'TrendingUp',
+    label: 'Paper Trade',
+    priority: 8,
+  },
+  affirmation: {
+    color: '#FFD700',
+    icon: 'Heart',
+    label: 'Khẳng định',
+    priority: 9,
+  },
+  journal: {
+    color: '#A855F7',
+    icon: 'BookOpen',
+    label: 'Nhật ký',
+    priority: 10,
   },
 };
 
@@ -347,12 +383,15 @@ const DayDetailModal = ({
   // Get icon component
   const getIconComponent = (iconName) => {
     const iconMap = {
+      Smile: Icons.Smile,
       Target: Icons.Target,
       CheckSquare: Icons.CheckSquare,
       Repeat: Icons.Repeat,
       Sparkles: Icons.Sparkles,
       CalendarCheck: Icons.CalendarCheck,
       BookOpen: Icons.BookOpen,
+      TrendingUp: Icons.TrendingUp,
+      Heart: Icons.Heart,
     };
     return iconMap[iconName] || Icons.Calendar;
   };
@@ -608,7 +647,7 @@ export const MonthCalendarCompact = ({
   );
 };
 
-// Calendar event item for lists
+// Calendar event item for lists - uses Pressable for Swipeable compatibility
 export const CalendarEventItem = ({
   event,
   onPress,
@@ -629,13 +668,27 @@ export const CalendarEventItem = ({
 
   const EventIcon = getIcon();
 
+  // Handle checkbox press separately to avoid conflicts with row press
+  const handleCheckboxPress = useCallback((e) => {
+    // Stop propagation to prevent row press
+    e?.stopPropagation?.();
+    console.log('[CalendarEventItem] Checkbox pressed for:', event.id, event.title);
+    onComplete?.(event);
+  }, [event, onComplete]);
+
+  const handleRowPress = useCallback(() => {
+    console.log('[CalendarEventItem] Row pressed for:', event.id, event.title);
+    onPress?.(event);
+  }, [event, onPress]);
+
   return (
-    <TouchableOpacity
+    <Pressable
       style={[
         styles.eventItem,
         event.is_completed && styles.eventItemCompleted,
       ]}
-      onPress={() => onPress?.(event)}
+      onPress={handleRowPress}
+      android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
     >
       <View style={[styles.eventIconContainer, { backgroundColor: `${event.color || COLORS.gold}20` }]}>
         <EventIcon size={16} color={event.color || COLORS.gold} />
@@ -658,19 +711,29 @@ export const CalendarEventItem = ({
         )}
       </View>
 
-      {onComplete && !event.is_completed && (
-        <TouchableOpacity
-          onPress={() => onComplete(event)}
+      {onComplete && (
+        <Pressable
+          onPress={handleCheckboxPress}
           style={styles.completeButton}
+          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: true }}
         >
-          <Icons.Circle size={20} color={COLORS.textMuted} />
-        </TouchableOpacity>
+          <View style={styles.checkboxContainer}>
+            {event.is_completed ? (
+              <Icons.CheckCircle size={24} color={COLORS.success} />
+            ) : (
+              <Icons.Circle size={24} color={COLORS.textMuted} />
+            )}
+          </View>
+        </Pressable>
       )}
 
-      {event.is_completed && (
-        <Icons.CheckCircle size={20} color={COLORS.success} />
+      {!onComplete && event.is_completed && (
+        <View style={styles.completedIcon}>
+          <Icons.CheckCircle size={24} color={COLORS.success} />
+        </View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -1044,7 +1107,24 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xxs,
   },
   completeButton: {
-    padding: SPACING.xs,
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  completedIcon: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

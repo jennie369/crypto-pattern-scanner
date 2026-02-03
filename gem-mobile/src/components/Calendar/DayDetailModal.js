@@ -18,6 +18,9 @@ import {
   Dimensions,
   Animated,
   Alert,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -118,6 +121,12 @@ const DayDetailModal = ({
   const { user, profile, userTier } = useAuth();
   const [savingMood, setSavingMood] = useState(false);
   const [selectedMood, setSelectedMood] = useState(null);
+  const [showTemplates, setShowTemplates] = useState(false); // Inline template selector
+
+  // Edit ritual reflection modal state
+  const [editingRitual, setEditingRitual] = useState(null);
+  const [editReflectionText, setEditReflectionText] = useState('');
+  const [savingReflection, setSavingReflection] = useState(false);
 
   // Swipeable refs for closing
   const swipeableRefs = useRef({});
@@ -182,16 +191,39 @@ const DayDetailModal = ({
     });
   }, []);
 
-  // Render left actions (Edit)
-  const renderLeftActions = useCallback((progress, dragX, event) => {
-    const trans = dragX.interpolate({
-      inputRange: [0, 80],
-      outputRange: [-80, 0],
-      extrapolate: 'clamp',
-    });
+  // Open edit reflection modal
+  const handleOpenEditReflection = useCallback((ritual) => {
+    console.log('[DayDetailModal] Opening edit reflection modal for:', ritual.id);
+    setEditingRitual(ritual);
+    setEditReflectionText(ritual.content?.reflection || '');
+  }, []);
 
+  // Save reflection
+  const handleSaveReflection = useCallback(async () => {
+    if (!editingRitual || savingReflection) return;
+
+    setSavingReflection(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    try {
+      // Call the parent handler to save
+      await onEditRitual?.({
+        ...editingRitual,
+        newReflection: editReflectionText,
+      });
+      setEditingRitual(null);
+      setEditReflectionText('');
+    } catch (error) {
+      console.error('[DayDetailModal] Save reflection error:', error);
+    } finally {
+      setSavingReflection(false);
+    }
+  }, [editingRitual, editReflectionText, savingReflection, onEditRitual]);
+
+  // Render left actions (Edit) - simplified without animation for reliability
+  const renderLeftActions = useCallback((progress, dragX, event) => {
     return (
-      <Animated.View style={[styles.swipeActionLeft, { transform: [{ translateX: trans }] }]}>
+      <View style={styles.swipeActionLeft}>
         <TouchableOpacity
           style={styles.editAction}
           onPress={() => {
@@ -199,69 +231,42 @@ const DayDetailModal = ({
             swipeableRefs.current[event.id]?.close();
             onEditEvent?.(event);
           }}
+          activeOpacity={0.7}
         >
-          <Icons.Pencil size={18} color="#FFFFFF" />
+          <Icons.Pencil size={20} color="#FFFFFF" />
           <Text style={styles.actionText}>Sửa</Text>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
     );
   }, [onEditEvent]);
 
-  // Render right actions (Delete)
+  // Render right actions (Delete) - simplified without animation for reliability
   const renderRightActions = useCallback((progress, dragX, event) => {
-    const trans = dragX.interpolate({
-      inputRange: [-80, 0],
-      outputRange: [0, 80],
-      extrapolate: 'clamp',
-    });
-
     return (
-      <Animated.View style={[styles.swipeActionRight, { transform: [{ translateX: trans }] }]}>
+      <View style={styles.swipeActionRight}>
         <TouchableOpacity
           style={styles.deleteAction}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            Alert.alert(
-              'Xóa sự kiện',
-              `Bạn có chắc muốn xóa "${event.title}"?`,
-              [
-                {
-                  text: 'Hủy',
-                  style: 'cancel',
-                  onPress: () => swipeableRefs.current[event.id]?.close(),
-                },
-                {
-                  text: 'Xóa',
-                  style: 'destructive',
-                  onPress: () => {
-                    swipeableRefs.current[event.id]?.close();
-                    onDeleteEvent?.(event);
-                  },
-                },
-              ]
-            );
+            swipeableRefs.current[event.id]?.close();
+            onDeleteEvent?.(event);
           }}
+          activeOpacity={0.7}
         >
-          <Icons.Trash2 size={18} color="#FFFFFF" />
+          <Icons.Trash2 size={20} color="#FFFFFF" />
           <Text style={styles.actionText}>Xóa</Text>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
     );
   }, [onDeleteEvent]);
 
-  // Render journal swipe actions (Edit)
+  // Render journal swipe actions (Edit) - simplified
   const renderJournalLeftActions = useCallback((progress, dragX, entry, type) => {
-    const trans = dragX.interpolate({
-      inputRange: [0, 80],
-      outputRange: [-80, 0],
-      extrapolate: 'clamp',
-    });
-
     const onEdit = type === 'trading' ? onEditTradingEntry : onEditJournal;
     const refKey = `${type}_${entry.id}`;
 
     return (
-      <Animated.View style={[styles.swipeActionLeft, { transform: [{ translateX: trans }] }]}>
+      <View style={styles.swipeActionLeft}>
         <TouchableOpacity
           style={styles.editAction}
           onPress={() => {
@@ -269,101 +274,66 @@ const DayDetailModal = ({
             swipeableRefs.current[refKey]?.close();
             onEdit?.(entry);
           }}
+          activeOpacity={0.7}
         >
-          <Icons.Pencil size={18} color="#FFFFFF" />
+          <Icons.Pencil size={20} color="#FFFFFF" />
           <Text style={styles.actionText}>Sửa</Text>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
     );
   }, [onEditJournal, onEditTradingEntry]);
 
-  // Render journal swipe actions (Delete)
+  // Render journal swipe actions (Delete) - simplified, no confirmation
   const renderJournalRightActions = useCallback((progress, dragX, entry, type) => {
-    const trans = dragX.interpolate({
-      inputRange: [-80, 0],
-      outputRange: [0, 80],
-      extrapolate: 'clamp',
-    });
-
     const onDelete = type === 'trading' ? onDeleteTradingEntry : onDeleteJournal;
     const refKey = `${type}_${entry.id}`;
-    const title = type === 'trading'
-      ? `${entry.symbol} - ${entry.direction?.toUpperCase()}`
-      : (entry.title || 'Nhật ký');
 
     return (
-      <Animated.View style={[styles.swipeActionRight, { transform: [{ translateX: trans }] }]}>
+      <View style={styles.swipeActionRight}>
         <TouchableOpacity
           style={styles.deleteAction}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            Alert.alert(
-              type === 'trading' ? 'Xóa giao dịch' : 'Xóa nhật ký',
-              `Bạn có chắc muốn xóa "${title}"?`,
-              [
-                {
-                  text: 'Hủy',
-                  style: 'cancel',
-                  onPress: () => swipeableRefs.current[refKey]?.close(),
-                },
-                {
-                  text: 'Xóa',
-                  style: 'destructive',
-                  onPress: () => {
-                    swipeableRefs.current[refKey]?.close();
-                    onDelete?.(entry);
-                  },
-                },
-              ]
-            );
+            swipeableRefs.current[refKey]?.close();
+            onDelete?.(entry);
           }}
+          activeOpacity={0.7}
         >
-          <Icons.Trash2 size={18} color="#FFFFFF" />
+          <Icons.Trash2 size={20} color="#FFFFFF" />
           <Text style={styles.actionText}>Xóa</Text>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
     );
   }, [onDeleteJournal, onDeleteTradingEntry]);
 
-  // Render ritual swipe actions - Left (Edit reflection)
+  // Render ritual swipe actions - Left (Edit reflection) - opens inline modal
   const renderRitualLeftActions = useCallback((progress, dragX, ritual) => {
-    const trans = dragX.interpolate({
-      inputRange: [0, 80],
-      outputRange: [-80, 0],
-      extrapolate: 'clamp',
-    });
-
     const refKey = `ritual_${ritual.id}`;
 
     return (
-      <Animated.View style={[styles.swipeActionLeft, { transform: [{ translateX: trans }] }]}>
+      <View style={styles.swipeActionLeft}>
         <TouchableOpacity
           style={styles.editAction}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             swipeableRefs.current[refKey]?.close();
-            onEditRitual?.(ritual);
+            handleOpenEditReflection(ritual);
           }}
+          activeOpacity={0.7}
         >
-          <Icons.Pencil size={18} color="#FFFFFF" />
+          <Icons.Pencil size={20} color="#FFFFFF" />
           <Text style={styles.actionText}>Sửa</Text>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
     );
-  }, [onEditRitual]);
+  }, [handleOpenEditReflection]);
 
-  // Render ritual swipe actions - Right (Delete)
+  // Render ritual swipe actions - Right (Delete) - simplified
   const renderRitualRightActions = useCallback((progress, dragX, ritual) => {
-    const trans = dragX.interpolate({
-      inputRange: [-80, 0],
-      outputRange: [0, 80],
-      extrapolate: 'clamp',
-    });
-
     const refKey = `ritual_${ritual.id}`;
 
     return (
-      <Animated.View style={[styles.swipeActionRight, { transform: [{ translateX: trans }] }]}>
+      <View style={styles.swipeActionRight}>
         <TouchableOpacity
           style={styles.deleteAction}
           onPress={() => {
@@ -371,11 +341,12 @@ const DayDetailModal = ({
             swipeableRefs.current[refKey]?.close();
             onDeleteRitual?.(ritual);
           }}
+          activeOpacity={0.7}
         >
-          <Icons.Trash2 size={18} color="#FFFFFF" />
+          <Icons.Trash2 size={20} color="#FFFFFF" />
           <Text style={styles.actionText}>Xóa</Text>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
     );
   }, [onDeleteRitual]);
 
@@ -394,9 +365,10 @@ const DayDetailModal = ({
   // Filter out divination/ritual/affirmation events since they're shown in dedicated sections
   // Be aggressive about filtering to prevent any duplicates
   const filteredEvents = events.filter(event => {
-    // Check source_type - filter out ritual, affirmation, divination types
+    // Check source_type - filter out types that have dedicated sections below
+    // journal = shown in "Nhật ký" section, mood = quick mood picker, etc.
     const sourceType = (event.source_type || '').toLowerCase();
-    const excludedTypes = ['divination', 'ritual', 'affirmation', 'habit', 'habit_daily'];
+    const excludedTypes = ['divination', 'ritual', 'affirmation', 'habit', 'habit_daily', 'mood', 'journal'];
     if (excludedTypes.includes(sourceType)) {
       console.log('[DayDetailModal] Filtered out event by source_type:', sourceType, event.title);
       return false;
@@ -492,10 +464,17 @@ const DayDetailModal = ({
               <View style={styles.headerActions}>
                 {onAddEvent && (
                   <TouchableOpacity
-                    onPress={() => onAddEvent(date)}
-                    style={styles.addButton}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowTemplates(!showTemplates);
+                    }}
+                    style={[styles.addButton, showTemplates && styles.addButtonActive]}
                   >
-                    <Icons.Plus size={18} color="#FFFFFF" />
+                    {showTemplates ? (
+                      <Icons.ChevronLeft size={18} color="#FFFFFF" />
+                    ) : (
+                      <Icons.Plus size={18} color="#FFFFFF" />
+                    )}
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -504,15 +483,206 @@ const DayDetailModal = ({
               </View>
             </View>
 
-            {/* Events list - Wrapped in GestureHandlerRootView for Swipeable to work in Modal */}
-            <GestureHandlerRootView style={styles.gestureContainer}>
+            {/* Show Templates or Events list */}
+            {showTemplates ? (
+              /* Inline Template Selector */
               <ScrollView
-                style={styles.eventsList}
-                contentContainerStyle={styles.eventsListContent}
+                style={styles.templateList}
+                contentContainerStyle={styles.templateListContent}
                 showsVerticalScrollIndicator={false}
               >
-              {/* Events Section - Only show if there are filtered events */}
-              {Object.keys(groupedEvents).length > 0 && (
+                <Text style={styles.templateSectionTitle}>Chọn loại nhật ký</Text>
+
+                {/* Trading Journal */}
+                <TouchableOpacity
+                  style={styles.templateOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'trading_journal');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(58, 247, 166, 0.2)' }]}>
+                    <Icons.TrendingUp size={22} color="#3AF7A6" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Nhật ký giao dịch</Text>
+                    <Text style={styles.templateDesc}>Ghi chép trades, phân tích P&L</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+
+                {/* Daily Journal - Free Form */}
+                <TouchableOpacity
+                  style={styles.templateOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'free_form');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(168, 85, 247, 0.2)' }]}>
+                    <Icons.BookOpen size={22} color="#A855F7" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Nhật ký tự do</Text>
+                    <Text style={styles.templateDesc}>Ghi chép suy nghĩ, trải nghiệm</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+
+                {/* Gratitude */}
+                <TouchableOpacity
+                  style={styles.templateOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'gratitude');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(255, 215, 0, 0.2)' }]}>
+                    <Icons.Heart size={22} color="#FFD700" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Biết ơn</Text>
+                    <Text style={styles.templateDesc}>Những điều bạn biết ơn hôm nay</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+
+                {/* Fear Setting */}
+                <TouchableOpacity
+                  style={styles.templateOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'fear_setting');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(255, 152, 0, 0.2)' }]}>
+                    <Icons.AlertTriangle size={22} color="#FF9800" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Đối diện nỗi sợ</Text>
+                    <Text style={styles.templateDesc}>Phân tích và vượt qua nỗi sợ</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+
+                {/* Think Day */}
+                <TouchableOpacity
+                  style={styles.templateOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'think_day');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(156, 39, 176, 0.2)' }]}>
+                    <Icons.Brain size={22} color="#9C27B0" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Think Day</Text>
+                    <Text style={styles.templateDesc}>Review và suy nghĩ về cuộc sống</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+
+                {/* Weekly Planning */}
+                <TouchableOpacity
+                  style={styles.templateOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'weekly_planning');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(0, 188, 212, 0.2)' }]}>
+                    <Icons.CalendarDays size={22} color="#00BCD4" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Tuần mới</Text>
+                    <Text style={styles.templateDesc}>Lên kế hoạch cho tuần mới</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+
+                {/* Vision 3-5 Years */}
+                <TouchableOpacity
+                  style={styles.templateOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'vision_3_5_years');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(33, 150, 243, 0.2)' }]}>
+                    <Icons.Telescope size={22} color="#2196F3" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Tầm nhìn 3-5 năm</Text>
+                    <Text style={styles.templateDesc}>Thiết kế cuộc sống lý tưởng</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+
+                {/* Daily Wins */}
+                <TouchableOpacity
+                  style={styles.templateOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'daily_wins');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(0, 240, 255, 0.2)' }]}>
+                    <Icons.Trophy size={22} color="#00F0FF" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Chiến thắng hôm nay</Text>
+                    <Text style={styles.templateDesc}>Ghi nhận thành tựu trong ngày</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+
+                {/* Simple Event */}
+                <TouchableOpacity
+                  style={[styles.templateOption, styles.templateOptionSimple]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setShowTemplates(false);
+                    onAddEvent?.(date, 'simple_event');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(156, 163, 175, 0.2)' }]}>
+                    <Icons.Calendar size={22} color="#9CA3AF" />
+                  </View>
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>Sự kiện đơn giản</Text>
+                    <Text style={styles.templateDesc}>Tạo sự kiện nhanh</Text>
+                  </View>
+                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                </TouchableOpacity>
+              </ScrollView>
+            ) : (
+              /* Events list - Wrapped in GestureHandlerRootView for Swipeable to work in Modal */
+              <GestureHandlerRootView style={styles.gestureContainer}>
+                <ScrollView
+                  style={styles.eventsList}
+                  contentContainerStyle={styles.eventsListContent}
+                  showsVerticalScrollIndicator={false}
+                >
+                {/* Events Section - Only show if there are filtered events */}
+                {Object.keys(groupedEvents).length > 0 && (
                 <>
                   {Object.entries(groupedEvents).map(([type, typeEvents]) => (
                     <View key={type} style={styles.eventGroup}>
@@ -532,9 +702,10 @@ const DayDetailModal = ({
                             onDeleteEvent ? renderRightActions(progress, dragX, event) : null
                           }
                           onSwipeableWillOpen={() => closeAllSwipeables(event.id)}
-                          friction={2}
-                          overshootLeft={false}
-                          overshootRight={false}
+                          friction={1.5}
+                          leftThreshold={30}
+                          rightThreshold={30}
+                          overshootFriction={8}
                         >
                           <CalendarEventItem
                             event={event}
@@ -632,9 +803,10 @@ const DayDetailModal = ({
                           onDeleteJournal ? renderJournalRightActions(progress, dragX, entry, 'journal') : null
                         }
                         onSwipeableWillOpen={() => closeAllSwipeables(refKey)}
-                        friction={2}
-                        overshootLeft={false}
-                        overshootRight={false}
+                        friction={1.5}
+                        leftThreshold={30}
+                        rightThreshold={30}
+                        overshootFriction={8}
                       >
                         <TouchableOpacity
                           style={[styles.journalItem, { borderColor: `${entryColor}30` }]}
@@ -700,9 +872,10 @@ const DayDetailModal = ({
                           onDeleteTradingEntry ? renderJournalRightActions(progress, dragX, trade, 'trading') : null
                         }
                         onSwipeableWillOpen={() => closeAllSwipeables(refKey)}
-                        friction={2}
-                        overshootLeft={false}
-                        overshootRight={false}
+                        friction={1.5}
+                        leftThreshold={30}
+                        rightThreshold={30}
+                        overshootFriction={8}
                       >
                         <TouchableOpacity
                           style={[styles.journalItem, { borderColor: `${tradeColor}30` }]}
@@ -784,9 +957,10 @@ const DayDetailModal = ({
                             : null
                         }
                         onSwipeableWillOpen={() => closeAllSwipeables(refKey)}
-                        friction={2}
-                        overshootLeft={false}
-                        overshootRight={false}
+                        friction={1.5}
+                        leftThreshold={30}
+                        rightThreshold={30}
+                        overshootFriction={8}
                       >
                         <TouchableOpacity
                           style={[styles.journalItem, { borderColor: `${ritualColor}30` }]}
@@ -1003,10 +1177,82 @@ const DayDetailModal = ({
                 </View>
               )}
               </ScrollView>
-            </GestureHandlerRootView>
+              </GestureHandlerRootView>
+            )}
           </View>
       </View>
 
+      {/* Edit Reflection Modal */}
+      <Modal
+        visible={!!editingRitual}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setEditingRitual(null);
+          setEditReflectionText('');
+        }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.editModalOverlay}
+        >
+          <TouchableOpacity
+            style={styles.editModalBackdrop}
+            activeOpacity={1}
+            onPress={() => {
+              setEditingRitual(null);
+              setEditReflectionText('');
+            }}
+          />
+          <View style={styles.editModalContainer}>
+            <View style={styles.editModalHeader}>
+              <Text style={styles.editModalTitle}>Sửa suy ngẫm</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setEditingRitual(null);
+                  setEditReflectionText('');
+                }}
+                style={styles.editModalCloseBtn}
+              >
+                <Icons.X size={20} color={COSMIC_COLORS.text.muted} />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.editModalInput}
+              value={editReflectionText}
+              onChangeText={setEditReflectionText}
+              placeholder="Nhập suy ngẫm của bạn..."
+              placeholderTextColor={COSMIC_COLORS.text.hint}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              autoFocus
+            />
+            <View style={styles.editModalActions}>
+              <TouchableOpacity
+                style={styles.editModalCancelBtn}
+                onPress={() => {
+                  setEditingRitual(null);
+                  setEditReflectionText('');
+                }}
+              >
+                <Text style={styles.editModalCancelText}>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.editModalSaveBtn, savingReflection && styles.editModalSaveBtnDisabled]}
+                onPress={handleSaveReflection}
+                disabled={savingReflection}
+              >
+                {savingReflection ? (
+                  <Text style={styles.editModalSaveText}>Đang lưu...</Text>
+                ) : (
+                  <Text style={styles.editModalSaveText}>Lưu</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </Modal>
   );
 };
@@ -1128,6 +1374,59 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  addButtonActive: {
+    backgroundColor: COSMIC_COLORS.glow.cyan,
+  },
+  // Template Selector styles
+  templateList: {
+    flex: 1,
+  },
+  templateListContent: {
+    padding: COSMIC_SPACING.lg,
+    paddingBottom: 40,
+  },
+  templateSectionTitle: {
+    color: COSMIC_COLORS.text.secondary,
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: COSMIC_SPACING.md,
+    textAlign: 'center',
+  },
+  templateOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COSMIC_COLORS.glass.bg,
+    borderRadius: 16,
+    padding: COSMIC_SPACING.md,
+    marginBottom: COSMIC_SPACING.sm,
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.border,
+  },
+  templateOptionSimple: {
+    marginTop: COSMIC_SPACING.md,
+    borderStyle: 'dashed',
+  },
+  templateIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: COSMIC_SPACING.md,
+  },
+  templateInfo: {
+    flex: 1,
+  },
+  templateTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  templateDesc: {
+    color: COSMIC_COLORS.text.muted,
+    fontSize: 12,
   },
   eventsList: {
     flex: 1,
@@ -1484,19 +1783,21 @@ const styles = StyleSheet.create({
   // Swipe action styles
   swipeActionLeft: {
     width: 80,
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: COSMIC_SPACING.md,
+    paddingRight: 8,
   },
   swipeActionRight: {
     width: 80,
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: COSMIC_SPACING.md,
+    paddingLeft: 8,
   },
   editAction: {
-    flex: 1,
     width: 70,
+    height: 60,
     backgroundColor: COSMIC_COLORS.glow.cyan,
     borderRadius: 12,
     justifyContent: 'center',
@@ -1504,8 +1805,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deleteAction: {
-    flex: 1,
     width: 70,
+    height: 60,
     backgroundColor: '#FF6B6B',
     borderRadius: 12,
     justifyContent: 'center',
@@ -1516,6 +1817,87 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '600',
+  },
+  // Edit Reflection Modal styles
+  editModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editModalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  editModalContainer: {
+    width: '90%',
+    maxWidth: 400,
+    backgroundColor: COSMIC_COLORS.bgMystic,
+    borderRadius: 20,
+    padding: COSMIC_SPACING.xl,
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.borderGlow,
+    ...COSMIC_SHADOWS.glowMedium,
+    shadowColor: COSMIC_COLORS.glow.purple,
+  },
+  editModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: COSMIC_SPACING.lg,
+  },
+  editModalTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  editModalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editModalInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    padding: COSMIC_SPACING.lg,
+    color: '#FFFFFF',
+    fontSize: 15,
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.border,
+  },
+  editModalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: COSMIC_SPACING.md,
+    marginTop: COSMIC_SPACING.xl,
+  },
+  editModalCancelBtn: {
+    paddingVertical: COSMIC_SPACING.md,
+    paddingHorizontal: COSMIC_SPACING.xl,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  editModalCancelText: {
+    color: COSMIC_COLORS.text.muted,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  editModalSaveBtn: {
+    paddingVertical: COSMIC_SPACING.md,
+    paddingHorizontal: COSMIC_SPACING.xl,
+    borderRadius: 12,
+    backgroundColor: COSMIC_COLORS.glow.cyan,
+  },
+  editModalSaveBtnDisabled: {
+    opacity: 0.5,
+  },
+  editModalSaveText: {
+    color: '#000000',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });
 

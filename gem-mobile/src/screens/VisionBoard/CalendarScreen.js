@@ -17,9 +17,11 @@ import {
   RefreshControl,
   Modal,
   Pressable,
+  Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Icons from 'lucide-react-native';
 
@@ -28,6 +30,7 @@ import { supabase } from '../../services/supabase';
 import calendarService from '../../services/calendarService';
 import calendarJournalService from '../../services/calendarJournalService';
 import tradingJournalService from '../../services/tradingJournalService';
+import { deleteRitualCompletion, updateRitualReflection } from '../../services/ritualService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { MonthCalendar, DayDetailModal, CalendarEventItem } from '../../components/Calendar';
@@ -40,6 +43,7 @@ import { processTemplateSubmission } from '../../services/templates/journalRouti
 
 const CalendarScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const { user, userTier, userRole } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -127,6 +131,48 @@ const CalendarScreen = () => {
         loadEvents();
       }
     }, [userId, loadEvents])
+  );
+
+  // Handle return from JournalEntry - open day detail modal with fresh data
+  useFocusEffect(
+    useCallback(() => {
+      const { selectedDate: returnDate, refreshData } = route.params || {};
+      if (returnDate && refreshData) {
+        // Clear the params immediately to prevent re-triggering
+        navigation.setParams({ selectedDate: undefined, refreshData: undefined });
+
+        // Parse date if it's a string
+        const dateObj = typeof returnDate === 'string' ? new Date(returnDate) : returnDate;
+        setSelectedDate(dateObj);
+
+        // Fetch fresh data for that date, then open modal
+        const loadAndOpenModal = async () => {
+          try {
+            if (userId) {
+              const dateStr = dateObj.toISOString().split('T')[0];
+              console.log('[Calendar] Loading data for return date:', dateStr);
+              const dayData = await calendarService.getDayCalendarData(userId, dateStr);
+              if (dayData.success) {
+                setJournalRituals(dayData.rituals || []);
+                setJournalReadings(dayData.readings || []);
+                setJournalPaperTrades(dayData.paperTrades || []);
+                setJournalTradingJournal(dayData.tradingJournal || []);
+                setJournalEntries(dayData.journal || []);
+                setTradingEntries(dayData.trading || []);
+                setMoodData(dayData.mood);
+                console.log('[Calendar] Loaded journal entries:', dayData.journal?.length || 0);
+              }
+            }
+          } catch (error) {
+            console.error('[Calendar] Error loading return date data:', error);
+          }
+          // Open modal after data is loaded
+          setShowDayModal(true);
+        };
+
+        loadAndOpenModal();
+      }
+    }, [route.params?.selectedDate, route.params?.refreshData, navigation, userId])
   );
 
   // Navigate months
@@ -229,11 +275,14 @@ const CalendarScreen = () => {
     console.log('[Calendar] Template selected:', templateId);
     setSelectedTemplateId(templateId);
     setShowTemplateSelector(false);
+    const eventDate = addEventDate || selectedDate?.toISOString().split('T')[0];
     // Navigate to JournalEntry screen with template
     navigation.navigate('JournalEntry', {
       mode: 'create',
-      date: addEventDate || selectedDate?.toISOString().split('T')[0],
+      date: eventDate,
       templateId: templateId,
+      sourceScreen: 'Calendar',
+      returnDate: eventDate,
     });
   }, [addEventDate, selectedDate, navigation]);
 
@@ -508,13 +557,22 @@ const CalendarScreen = () => {
           });
         }}
         onTradePress={(trade) => {
-          console.log('[Calendar] Trade pressed:', trade.id);
+          console.log('[Calendar] Trading journal entry pressed:', trade.id);
           setShowDayModal(false);
-          // Navigate to trading journal detail
+          // Navigate to trading journal detail (from trading_journal_entries table)
           navigation.navigate('TradingJournal', {
             mode: 'edit',
             entryId: trade.id,
             date: selectedDate.toISOString().split('T')[0],
+          });
+        }}
+        onPaperTradePress={(trade) => {
+          console.log('[Calendar] Paper trade pressed:', trade.id, trade.symbol);
+          setShowDayModal(false);
+          // Navigate to paper trade history (from paper_trades table)
+          navigation.navigate('PaperTradeHistory', {
+            highlightTradeId: trade.id,
+            symbol: trade.symbol,
           });
         }}
         onJournalPress={(entry) => {
@@ -553,7 +611,7 @@ const CalendarScreen = () => {
         onDeleteJournal={async (entry) => {
           console.log('[Calendar] Delete journal entry:', entry.id);
           try {
-            const result = await calendarJournalService.deleteJournalEntry(entry.id);
+            const result = await calendarJournalService.deleteJournalEntry(userId, entry.id);
             if (result.success) {
               // Refresh day data
               const dateStr = selectedDate.toISOString().split('T')[0];
@@ -578,7 +636,7 @@ const CalendarScreen = () => {
         onDeleteTradingEntry={async (trade) => {
           console.log('[Calendar] Delete trading entry:', trade.id);
           try {
-            const result = await tradingJournalService.deleteEntry(trade.id);
+            const result = await tradingJournalService.deleteTradingEntry(userId, trade.id);
             if (result.success) {
               // Refresh day data
               const dateStr = selectedDate.toISOString().split('T')[0];
@@ -589,6 +647,41 @@ const CalendarScreen = () => {
             }
           } catch (error) {
             console.error('[Calendar] Delete trading entry error:', error);
+          }
+        }}
+        onEditRitual={async (ritual) => {
+          console.log('[Calendar] Edit ritual reflection:', ritual.id, ritual.newReflection);
+          const newReflection = ritual.newReflection;
+
+          if (newReflection !== undefined) {
+            try {
+              const result = await updateRitualReflection(userId, ritual.id, newReflection);
+              if (result.success) {
+                setJournalRituals(prev => prev.map(r =>
+                  r.id === ritual.id
+                    ? { ...r, content: { ...r.content, reflection: newReflection } }
+                    : r
+                ));
+              } else {
+                console.error('[Calendar] Update ritual reflection failed:', result.error);
+              }
+            } catch (error) {
+              console.error('[Calendar] Update ritual reflection error:', error);
+            }
+          }
+        }}
+        onDeleteRitual={async (ritual) => {
+          console.log('[Calendar] Delete ritual completion:', ritual.id);
+          try {
+            const result = await deleteRitualCompletion(userId, ritual.id);
+            if (result.success) {
+              // Remove from local state
+              setJournalRituals(prev => prev.filter(r => r.id !== ritual.id));
+            } else {
+              console.error('[Calendar] Delete ritual failed:', result.error);
+            }
+          } catch (error) {
+            console.error('[Calendar] Delete ritual error:', error);
           }
         }}
         onMoodUpdated={async () => {
