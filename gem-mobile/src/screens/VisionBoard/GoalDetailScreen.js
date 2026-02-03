@@ -1075,7 +1075,9 @@ const GoalDetailScreen = () => {
         const { data: { publicUrl } } = supabase.storage.from('vision-board').getPublicUrl(filePath);
 
         if (goal?._isLegacy) {
+          // Update both cover_image column AND content.cover_image for legacy widgets
           await supabase.from('vision_board_widgets').update({
+            cover_image: publicUrl,
             content: { ...goal._content, cover_image: publicUrl },
           }).eq('id', goalId);
         } else {

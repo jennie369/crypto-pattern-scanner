@@ -102,20 +102,27 @@ const AllGoalsScreen = ({ navigation, route }) => {
     if (!user?.id) return;
 
     try {
-      const { data, error } = await supabase
-        .from('vision_board_widgets')
-        .select('*')
-        .eq('user_id', user.id)
-        .in('type', ['GOAL_CARD', 'goal'])
-        .eq('is_active', true)
-        .order('updated_at', { ascending: false });
+      // Load from both vision_board_widgets (legacy) and vision_goals (new)
+      const [widgetsResult, goalsResult] = await Promise.all([
+        supabase
+          .from('vision_board_widgets')
+          .select('*')
+          .eq('user_id', user.id)
+          .in('type', ['GOAL_CARD', 'goal'])
+          .eq('is_active', true)
+          .order('updated_at', { ascending: false }),
+        supabase
+          .from('vision_goals')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('updated_at', { ascending: false }),
+      ]);
 
-      if (error) throw error;
+      if (widgetsResult.error) throw widgetsResult.error;
 
-      // Transform to normalized format
-      const normalizedGoals = (data || []).map((widget) => {
+      // Transform legacy widgets
+      const legacyGoals = (widgetsResult.data || []).map((widget) => {
         const content = parseWidgetContent(widget);
-        // Priority: actual goal text from content > widget title (with prefix stripped)
         const rawTitle = content?.goals?.[0]?.title
           || content?.goals?.[0]?.text
           || content?.goalText
@@ -123,7 +130,6 @@ const AllGoalsScreen = ({ navigation, route }) => {
           || widget.title
           || content?.title
           || 'Mục tiêu';
-        // Strip "Mục tiêu: " prefix from legacy titles
         const title = rawTitle.startsWith('Mục tiêu: ')
           ? rawTitle.replace('Mục tiêu: ', '')
           : rawTitle;
@@ -135,11 +141,37 @@ const AllGoalsScreen = ({ navigation, route }) => {
           progress_percent: widget.progress_percent || content?.progress || 0,
           updated_at: widget.updated_at,
           created_at: widget.created_at,
+          _isLegacy: true,
           _originalWidget: widget,
         };
       });
 
-      setGoals(normalizedGoals);
+      // Transform new vision_goals
+      const newGoals = (goalsResult.data || []).map((goal) => ({
+        id: goal.id,
+        title: goal.title || 'Mục tiêu',
+        cover_image: goal.cover_image,
+        life_area: (goal.life_area || 'personal').toLowerCase(),
+        progress_percent: goal.progress_percent || 0,
+        updated_at: goal.updated_at,
+        created_at: goal.created_at,
+        _isLegacy: false,
+        _originalGoal: goal,
+      }));
+
+      // Merge and deduplicate (prefer new goals if same id)
+      const allGoals = [...newGoals, ...legacyGoals];
+      const seenIds = new Set();
+      const uniqueGoals = allGoals.filter((g) => {
+        if (seenIds.has(g.id)) return false;
+        seenIds.add(g.id);
+        return true;
+      });
+
+      // Sort by updated_at
+      uniqueGoals.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+      setGoals(uniqueGoals);
     } catch (err) {
       console.error('[AllGoalsScreen] Error loading goals:', err);
     } finally {
