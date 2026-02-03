@@ -226,8 +226,9 @@ import { preloadVideo } from '../../components/Rituals/cosmic';
 import calendarService from '../../services/calendarService';
 import calendarJournalService from '../../services/calendarJournalService';
 import tradingJournalService from '../../services/tradingJournalService';
-import { deleteRitualCompletion } from '../../services/ritualService';
+import { deleteRitualCompletion, updateRitualReflection } from '../../services/ritualService';
 import statsService from '../../services/statsService';
+import { completeAffirmation } from '../../services/affirmationService';
 import readingHistoryService from '../../services/readingHistoryService';
 import notificationService from '../../services/notificationService';
 import progressCalculator, {
@@ -3689,6 +3690,46 @@ const VisionBoardScreen = () => {
     }, [route.params?.scrollToSection, navigation, scrollToGoalsSection])
   );
 
+  // Handle return from JournalEntry - open day detail modal with fresh data
+  useFocusEffect(
+    useCallback(() => {
+      const { openCalendarDate, showDayDetail, refreshData } = route.params || {};
+      if (openCalendarDate && showDayDetail) {
+        // Clear the params immediately to prevent re-triggering
+        navigation.setParams({ openCalendarDate: undefined, showDayDetail: undefined, refreshData: undefined });
+
+        // Set the selected date
+        setSelectedDate(openCalendarDate);
+
+        // Fetch fresh data for that date, then open modal
+        const loadAndOpenModal = async () => {
+          try {
+            if (user?.id) {
+              console.log('[VisionBoard] Loading data for return date:', openCalendarDate);
+              const journalResult = await calendarService.getDayCalendarData(user.id, openCalendarDate);
+              if (journalResult.success) {
+                setJournalRituals(journalResult.rituals || []);
+                setJournalReadings(journalResult.readings || []);
+                setJournalPaperTrades(journalResult.paperTrades || []);
+                setJournalTradingJournal(journalResult.tradingJournal || []);
+                setJournalEntries(journalResult.journal || []);
+                setTradingEntries(journalResult.trading || []);
+                setJournalMood(journalResult.mood || null);
+                console.log('[VisionBoard] Loaded journal entries:', journalResult.journal?.length || 0);
+              }
+            }
+          } catch (error) {
+            console.error('[VisionBoard] Error loading return date data:', error);
+          }
+          // Open modal after data is loaded
+          setDayDetailModalVisible(true);
+        };
+
+        loadAndOpenModal();
+      }
+    }, [route.params?.openCalendarDate, route.params?.showDayDetail, navigation, user?.id])
+  );
+
   // =========== FETCH READING HISTORY FROM DATABASE ===========
   const fetchReadingHistory = useCallback(async () => {
     if (!user?.id) return;
@@ -3794,8 +3835,8 @@ const VisionBoardScreen = () => {
       const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
 
       // ========== 1a. Load history from database ==========
-      // Fetch ritual completions, paper trades, mood data for 3 months range
-      const [ritualsResult, paperTradesResult, calendarEventsResult, moodResult] = await Promise.all([
+      // Fetch ritual completions, paper trades, mood data, journal entries for 3 months range
+      const [ritualsResult, paperTradesResult, calendarEventsResult, moodResult, journalEntriesResult] = await Promise.all([
         supabase
           .from('vision_ritual_completions')
           .select('id, ritual_id, completed_at, xp_earned')
@@ -3815,6 +3856,13 @@ const VisionBoardScreen = () => {
           .eq('user_id', user.id)
           .gte('mood_date', startDate)
           .lte('mood_date', endDate),
+        // Also fetch journal entries for calendar dots
+        supabase
+          .from('calendar_journal_entries')
+          .select('id, entry_date, title, entry_type')
+          .eq('user_id', user.id)
+          .gte('entry_date', startDate)
+          .lte('entry_date', endDate),
       ]);
 
       // DEBUG: Log fetched data
@@ -3823,6 +3871,7 @@ const VisionBoardScreen = () => {
       console.log('[VisionBoard] Paper trades fetched:', paperTradesResult.data?.length || 0, paperTradesResult.error ? `Error: ${paperTradesResult.error.message}` : 'OK');
       console.log('[VisionBoard] Calendar events:', calendarEventsResult.success ? 'OK' : 'FAIL', Object.keys(calendarEventsResult.eventsByDate || {}).length, 'dates');
       console.log('[VisionBoard] Mood entries fetched:', moodResult.data?.length || 0, moodResult.error ? `Error: ${moodResult.error.message}` : 'OK');
+      console.log('[VisionBoard] Journal entries fetched:', journalEntriesResult.data?.length || 0, journalEntriesResult.error ? `Error: ${journalEntriesResult.error.message}` : 'OK');
 
       // Add ritual completions to eventsMap
       if (ritualsResult.data) {
@@ -3869,6 +3918,22 @@ const VisionBoardScreen = () => {
               title: moodText,
               source_type: 'mood',
               color: '#FFD700', // Gold for mood
+            });
+          }
+        });
+      }
+
+      // Add journal entries to eventsMap (for calendar dots)
+      if (journalEntriesResult.data) {
+        journalEntriesResult.data.forEach(entry => {
+          const date = entry.entry_date;
+          if (date) {
+            if (!eventsMap[date]) eventsMap[date] = [];
+            eventsMap[date].push({
+              id: entry.id,
+              title: entry.title || entry.entry_type || 'Nhật ký',
+              source_type: 'journal',
+              color: '#A855F7', // Purple for journal entries
             });
           }
         });
@@ -6133,13 +6198,6 @@ const VisionBoardScreen = () => {
                 >
                   <HelpCircle size={16} color={COLORS.textMuted} />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('VisionCalendar')}
-                  style={styles.seeAllButton}
-                >
-                  <Text style={styles.seeAllText}>Xem tất cả</Text>
-                  <ChevronRight size={14} color={COLORS.textMuted} />
-                </TouchableOpacity>
               </View>
               <MonthCalendarCompact
                 eventsByDate={calendarEvents}
@@ -6147,12 +6205,18 @@ const VisionBoardScreen = () => {
                 onDateSelect={async (date) => {
                   console.log('[VisionBoard] Date selected:', date);
                   setSelectedDate(date);
-                  // Show modal first for better UX
-                  setDayDetailModalVisible(true);
-                  // Fetch journal data for the selected date (including mood)
+                  // Fetch journal data FIRST, then open modal with data
                   try {
                     if (user?.id) {
                       const journalResult = await calendarService.getDayCalendarData(user.id, date);
+                      console.log('[VisionBoard] Day data loaded:', {
+                        date,
+                        journal: journalResult.journal?.length || 0,
+                        trading: journalResult.trading?.length || 0,
+                        rituals: journalResult.rituals?.length || 0,
+                        readings: journalResult.readings?.length || 0,
+                        actions: journalResult.actions?.length || 0,
+                      });
                       if (journalResult.success) {
                         setJournalRituals(journalResult.rituals || []);
                         setJournalReadings(journalResult.readings || []);
@@ -6168,8 +6232,9 @@ const VisionBoardScreen = () => {
                   } catch (error) {
                     console.error('[VisionBoard] Error loading day data:', error);
                   }
+                  // Open modal AFTER data is loaded
+                  setDayDetailModalVisible(true);
                 }}
-                onViewFullCalendar={() => navigation.navigate('VisionCalendar')}
                 showLegend={true}
               />
             </View>
@@ -6222,20 +6287,41 @@ const VisionBoardScreen = () => {
                   console.error('[VisionBoard] Complete event error:', error);
                 }
               }}
-              onAddEvent={() => {
-                console.log('[VisionBoard] Add event for date:', selectedDate);
-                // Close day modal and show template selector for calendar
-                setDayDetailModalVisible(false);
-                setTimeout(() => {
-                  setShowCalendarTemplateSelector(true);
-                }, 200);
+              onAddEvent={(date, templateType) => {
+                console.log('[VisionBoard] Add event for date:', date, 'template:', templateType);
+
+                if (templateType === 'simple_event') {
+                  // Open simple event modal
+                  setDayDetailModalVisible(false);
+                  setTimeout(() => setAddEventModalVisible(true), 100);
+                } else if (templateType) {
+                  // Navigate directly to JournalEntry with template
+                  // Keep modal visible state so it opens when returning
+                  const eventDate = date || selectedDate;
+                  setDayDetailModalVisible(false);
+                  setTimeout(() => {
+                    navigation.navigate('JournalEntry', {
+                      mode: 'create',
+                      date: eventDate,
+                      templateId: templateType,
+                      sourceScreen: 'VisionBoard',
+                      returnDate: eventDate,
+                    });
+                  }, 100);
+                } else {
+                  // Fallback: show template selector (shouldn't happen with new inline UI)
+                  setDayDetailModalVisible(false);
+                  setTimeout(() => setShowCalendarTemplateSelector(true), 200);
+                }
               }}
               onEditEvent={(event) => {
                 console.log('[VisionBoard] Edit event:', event.id);
                 setDayDetailModalVisible(false);
-                // Navigate to edit event modal with event data
-                setAddEventModalVisible(true);
-                // TODO: Set event data for editing - for now we open add modal
+                // Navigate to EditEvent screen with event data
+                navigation.navigate('EditEvent', {
+                  eventId: event.id,
+                  date: selectedDate || event.event_date,
+                });
               }}
               onDeleteEvent={async (event) => {
                 console.log('[VisionBoard] Delete event:', event.id);
@@ -6366,6 +6452,25 @@ const VisionBoardScreen = () => {
                   }
                 } catch (error) {
                   console.error('[VisionBoard] Delete trading entry error:', error);
+                }
+              }}
+              onEditRitual={async (ritual) => {
+                console.log('[VisionBoard] Edit ritual reflection:', ritual.id, ritual.newReflection);
+                const newReflection = ritual.newReflection;
+
+                if (newReflection !== undefined) {
+                  try {
+                    const result = await updateRitualReflection(user?.id, ritual.id, newReflection);
+                    if (result.success) {
+                      setJournalRituals(prev => prev.map(r =>
+                        r.id === ritual.id
+                          ? { ...r, content: { ...r.content, reflection: newReflection } }
+                          : r
+                      ));
+                    }
+                  } catch (error) {
+                    console.error('[VisionBoard] Edit ritual error:', error);
+                  }
                 }
               }}
               onDeleteRitual={async (ritual) => {
@@ -9069,16 +9174,18 @@ const styles = StyleSheet.create({
   // Calendar Template Selector Modal
   calendarTemplateSelectorOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(13, 13, 43, 0.85)',
     justifyContent: 'flex-end',
   },
   calendarTemplateSelectorContainer: {
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgMid,
     borderTopLeftRadius: SPACING.xl,
     borderTopRightRadius: SPACING.xl,
     maxHeight: '90%',
     minHeight: '75%',
     paddingBottom: Platform.OS === 'ios' ? 40 : 70,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(106, 91, 255, 0.3)',
   },
   calendarTemplateSelectorHeader: {
     flexDirection: 'row',
@@ -9086,7 +9193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
   },
   calendarTemplateSelectorTitle: {
     color: COLORS.textPrimary,
@@ -9109,8 +9216,9 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(106, 91, 255, 0.3)',
     borderRadius: SPACING.md,
+    backgroundColor: 'rgba(13, 13, 43, 0.4)',
   },
   calendarSkipTemplateText: {
     color: COLORS.textSecondary,

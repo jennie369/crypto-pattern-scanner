@@ -241,9 +241,14 @@ class CalendarService {
         .eq('id', eventId)
         .eq('user_id', userId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+
+      if (!data) {
+        console.warn('[Calendar] Event not found or no permission:', eventId);
+        return { success: false, error: 'Sự kiện không tồn tại hoặc không có quyền' };
+      }
 
       return { success: true, event: data };
     } catch (error) {
@@ -507,9 +512,10 @@ class CalendarService {
       const [ritualsResult, readingsResult, paperTradesResult, tradingJournalResult, actionsResult] = await Promise.all([
         // 1. Ritual completions
         // Note: In vision_rituals, 'id' IS the slug (VARCHAR primary key)
+        // Include xp_per_completion for XP display
         supabase
           .from('vision_ritual_completions')
-          .select('*, ritual:vision_rituals(id, name)')
+          .select('*, ritual:vision_rituals(id, name, xp_per_completion)')
           .eq('user_id', userId)
           .gte('completed_at', `${date}T00:00:00`)
           .lte('completed_at', `${date}T23:59:59.999`)
@@ -573,6 +579,8 @@ class CalendarService {
         ...r,
         ritual_slug: r.ritual?.slug || r.ritual?.id || r.ritual_id,
         ritual_name: r.ritual?.name,
+        // XP earned from ritual config, default 25 if not found
+        xp_earned: r.ritual?.xp_per_completion || 25,
       }));
 
       // Map actions with goal title
@@ -690,11 +698,12 @@ class CalendarService {
         trading: tradingEntries || [],
         // Mood data
         mood: moodResult.data || null,
-        // Legacy: rituals, readings, paper trades from getDailyJournal
+        // Legacy: rituals, readings, paper trades, actions from getDailyJournal
         rituals: journalResult.rituals || [],
         readings: journalResult.readings || [],
         paperTrades: journalResult.paperTrades || [],
         tradingJournal: journalResult.tradingJournal || [],
+        actions: journalResult.actions || [],
         // Summary
         totalActivities: (journalEntries?.length || 0) +
           (tradingEntries?.length || 0) +
@@ -712,6 +721,8 @@ class CalendarService {
         rituals: [],
         readings: [],
         paperTrades: [],
+        tradingJournal: [],
+        actions: [],
       };
     }
   }

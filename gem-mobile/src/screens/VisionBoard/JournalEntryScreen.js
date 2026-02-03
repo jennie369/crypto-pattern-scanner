@@ -1,11 +1,13 @@
 /**
  * JournalEntryScreen.js
  * Screen for creating/editing journal entries in Calendar Smart Journal
+ * Supports both generic forms and template-based forms
  *
  * Created: January 28, 2026
+ * Updated: February 3, 2026 - Added template support
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -32,7 +34,9 @@ import {
   Target,
   FileText,
   ChevronDown,
+  Info,
 } from 'lucide-react-native';
+import * as LucideIcons from 'lucide-react-native';
 
 import { COLORS, TYPOGRAPHY, SPACING, GRADIENTS, BORDER_RADIUS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
@@ -52,6 +56,11 @@ import TagInput from '../../components/VisionBoard/TagInput';
 import MoodPicker from '../../components/VisionBoard/MoodPicker';
 import { RichTextRenderer } from '../../components/RichTextEditor';
 
+// Template system imports
+import { getTemplate, canAccessTemplate } from '../../services/templates/journalTemplates';
+import FormFieldRenderer, { renderTemplateFields } from '../../components/shared/templates/FormFieldRenderer';
+import PaperTradeSelector from '../../components/shared/templates/PaperTradeSelector';
+
 // Entry type options
 const ENTRY_TYPE_OPTIONS = [
   { id: ENTRY_TYPES.REFLECTION, label: 'Suy ngẫm', icon: BookOpen, color: COLORS.purple },
@@ -65,7 +74,7 @@ const JournalEntryScreen = () => {
   const route = useRoute();
 
   // Route params
-  const { entryId, mode = 'create', date, entryType: initialType } = route.params || {};
+  const { entryId, mode = 'create', date, entryType: initialType, templateId, sourceScreen, returnDate } = route.params || {};
 
   // State
   const [loading, setLoading] = useState(mode === 'edit');
@@ -74,7 +83,7 @@ const JournalEntryScreen = () => {
   const [userTier, setUserTier] = useState('FREE');
   const [userRole, setUserRole] = useState(null);
 
-  // Entry data
+  // Entry data (generic form)
   const [entryType, setEntryType] = useState(initialType || ENTRY_TYPES.REFLECTION);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -83,6 +92,10 @@ const JournalEntryScreen = () => {
   const [tags, setTags] = useState([]);
   const [isPinned, setIsPinned] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // Template form data
+  const [templateFormData, setTemplateFormData] = useState({});
+  const [templateErrors, setTemplateErrors] = useState({});
 
   // UI state
   const [showTypeSelector, setShowTypeSelector] = useState(false);
@@ -93,6 +106,36 @@ const JournalEntryScreen = () => {
 
   // Original data for change detection
   const originalData = useRef(null);
+
+  // Get template if templateId is provided
+  const template = useMemo(() => {
+    if (!templateId) return null;
+    return getTemplate(templateId);
+  }, [templateId]);
+
+  // Check template access
+  const templateAccess = useMemo(() => {
+    if (!templateId) return { allowed: true };
+    return canAccessTemplate(templateId, userTier, userRole);
+  }, [templateId, userTier, userRole]);
+
+  // Get template icon component
+  const TemplateIcon = useMemo(() => {
+    if (!template?.icon) return null;
+    return LucideIcons[template.icon] || Info;
+  }, [template]);
+
+  // Check if this is a trading journal template
+  const isTradingJournal = templateId === 'trading_journal';
+
+  // Handle Paper Trade selection (auto-fill form data)
+  const handlePaperTradeSelect = useCallback((tradeData) => {
+    console.log('[JournalEntry] Paper trade selected:', tradeData);
+    setTemplateFormData(prev => ({
+      ...prev,
+      ...tradeData,
+    }));
+  }, []);
 
   // Get access config
   const access = checkCalendarAccess('basic_journal', userTier, userRole);
@@ -174,6 +217,22 @@ const JournalEntryScreen = () => {
     }
   };
 
+  // Handle template field changes
+  const handleTemplateFieldChange = useCallback((fieldId, value) => {
+    setTemplateFormData(prev => ({
+      ...prev,
+      [fieldId]: value,
+    }));
+    // Clear error for this field when user types
+    if (templateErrors[fieldId]) {
+      setTemplateErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldId];
+        return newErrors;
+      });
+    }
+  }, [templateErrors]);
+
   // Track changes
   useEffect(() => {
     if (mode === 'edit' && originalData.current) {
@@ -189,15 +248,116 @@ const JournalEntryScreen = () => {
 
       setHasChanges(changed);
     } else if (mode === 'create') {
-      setHasChanges(content.trim().length > 0);
+      // For template forms, check if any field has data
+      if (template) {
+        const hasData = Object.values(templateFormData).some(v => {
+          if (Array.isArray(v)) return v.length > 0;
+          if (typeof v === 'string') return v.trim().length > 0;
+          return v !== null && v !== undefined;
+        });
+        setHasChanges(hasData);
+      } else {
+        setHasChanges(content.trim().length > 0);
+      }
     }
-  }, [entryType, title, content, mood, lifeArea, tags, isPinned, isFavorite, mode]);
+  }, [entryType, title, content, mood, lifeArea, tags, isPinned, isFavorite, mode, template, templateFormData]);
+
+  // Validate template form
+  const validateTemplateForm = useCallback(() => {
+    if (!template) return { isValid: true, errors: {} };
+
+    const errors = {};
+    let isValid = true;
+
+    for (const field of template.fields) {
+      const value = templateFormData[field.id];
+
+      // Check required fields
+      if (field.required) {
+        if (value === undefined || value === null || value === '') {
+          errors[field.id] = 'Trường này là bắt buộc';
+          isValid = false;
+        } else if (Array.isArray(value) && value.length === 0) {
+          errors[field.id] = 'Vui lòng thêm ít nhất một mục';
+          isValid = false;
+        }
+      }
+
+      // Check minItems for lists
+      if (field.minItems && Array.isArray(value) && value.length < field.minItems) {
+        errors[field.id] = `Cần ít nhất ${field.minItems} mục`;
+        isValid = false;
+      }
+    }
+
+    return { isValid, errors };
+  }, [template, templateFormData]);
+
+  // Build content from template data for storage
+  const buildTemplateContent = useCallback(() => {
+    if (!template) return '';
+
+    const lines = [];
+    lines.push(`# ${template.name}\n`);
+
+    for (const field of template.fields) {
+      const value = templateFormData[field.id];
+      if (value === undefined || value === null || value === '') continue;
+
+      // Add field label
+      lines.push(`## ${field.label.replace(' *', '')}`);
+
+      // Format value based on type
+      if (Array.isArray(value)) {
+        // Action list or checklist
+        for (const item of value) {
+          if (typeof item === 'object') {
+            // Action item with checked state
+            const checkbox = item.checked ? '[x]' : '[ ]';
+            const lifeAreaText = item.lifeArea ? ` (${item.lifeArea})` : '';
+            lines.push(`- ${checkbox} ${item.text}${lifeAreaText}`);
+          } else {
+            lines.push(`- ${item}`);
+          }
+        }
+      } else if (typeof value === 'number') {
+        // Slider value
+        lines.push(`${value}`);
+      } else {
+        // Text value
+        lines.push(value);
+      }
+
+      lines.push(''); // Empty line between sections
+    }
+
+    return lines.join('\n');
+  }, [template, templateFormData]);
 
   // Handle save
   const handleSave = async () => {
-    if (!content.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập nội dung');
-      return;
+    // Template form validation
+    if (template) {
+      // Check template access
+      if (!templateAccess.allowed) {
+        Alert.alert('Hạn chế', templateAccess.reason);
+        return;
+      }
+
+      const { isValid, errors } = validateTemplateForm();
+      if (!isValid) {
+        setTemplateErrors(errors);
+        // Find first error field to scroll to
+        const firstErrorField = template.fields.find(f => errors[f.id]);
+        Alert.alert('Lỗi', `Vui lòng điền ${firstErrorField?.label?.replace(' *', '') || 'các trường bắt buộc'}`);
+        return;
+      }
+    } else {
+      // Generic form validation
+      if (!content.trim()) {
+        Alert.alert('Lỗi', 'Vui lòng nhập nội dung');
+        return;
+      }
     }
 
     if (!access.allowed) {
@@ -208,17 +368,40 @@ const JournalEntryScreen = () => {
     setSaving(true);
 
     try {
-      const entryData = {
-        entry_type: entryType,
-        title: title.trim() || null,
-        content: content.trim(),
-        mood,
-        life_area: lifeArea,
-        tags,
-        is_pinned: isPinned,
-        is_favorite: isFavorite,
-        entry_date: date || new Date().toISOString().split('T')[0],
-      };
+      // Build entry data
+      let entryData;
+
+      if (template) {
+        // Template form - store structured data
+        const builtContent = buildTemplateContent();
+        entryData = {
+          entry_type: template.category === 'goal_focused' ? ENTRY_TYPES.GOAL_NOTE : ENTRY_TYPES.REFLECTION,
+          title: templateFormData.title || templateFormData.fear_target || template.name,
+          content: builtContent,
+          mood: templateFormData.mood || null,
+          life_area: templateFormData.life_area || template.defaultLifeArea,
+          tags,
+          is_pinned: isPinned,
+          is_favorite: isFavorite,
+          entry_date: date || new Date().toISOString().split('T')[0],
+          // Store template metadata
+          template_id: templateId,
+          template_data: templateFormData,
+        };
+      } else {
+        // Generic form
+        entryData = {
+          entry_type: entryType,
+          title: title.trim() || null,
+          content: content.trim(),
+          mood,
+          life_area: lifeArea,
+          tags,
+          is_pinned: isPinned,
+          is_favorite: isFavorite,
+          entry_date: date || new Date().toISOString().split('T')[0],
+        };
+      }
 
       let result;
       if (mode === 'edit' && entryId) {
@@ -228,7 +411,7 @@ const JournalEntryScreen = () => {
       }
 
       if (result.success) {
-        navigation.goBack();
+        navigateBack();
       } else {
         Alert.alert('Lỗi', result.error || 'Không thể lưu');
       }
@@ -254,7 +437,7 @@ const JournalEntryScreen = () => {
             try {
               const result = await deleteJournalEntry(userId, entryId);
               if (result.success) {
-                navigation.goBack();
+                navigateBack();
               } else {
                 Alert.alert('Lỗi', result.error);
               }
@@ -265,6 +448,22 @@ const JournalEntryScreen = () => {
         },
       ]
     );
+  };
+
+  // Navigate back to the source screen
+  const navigateBack = () => {
+    // If we came from Calendar or VisionBoard, navigate back properly
+    if (sourceScreen === 'Calendar') {
+      navigation.navigate('Calendar', { selectedDate: returnDate, refreshData: true });
+    } else if (sourceScreen === 'VisionBoard') {
+      navigation.navigate('VisionBoard', {
+        openCalendarDate: returnDate,
+        showDayDetail: true,
+        refreshData: true,
+      });
+    } else {
+      navigation.goBack();
+    }
   };
 
   // Handle back with unsaved changes
@@ -278,12 +477,12 @@ const JournalEntryScreen = () => {
           {
             text: 'Thoát',
             style: 'destructive',
-            onPress: () => navigation.goBack(),
+            onPress: navigateBack,
           },
         ]
       );
     } else {
-      navigation.goBack();
+      navigateBack();
     }
   };
 
@@ -310,9 +509,14 @@ const JournalEntryScreen = () => {
           <ArrowLeft size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>
-          {mode === 'edit' ? 'Chỉnh sửa' : 'Viết mới'}
-        </Text>
+        <View style={styles.headerTitleContainer}>
+          {template && TemplateIcon && (
+            <TemplateIcon size={20} color={COLORS.gold} style={styles.headerTitleIcon} />
+          )}
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {template ? template.name : (mode === 'edit' ? 'Chỉnh sửa' : 'Viết mới')}
+          </Text>
+        </View>
 
         <View style={styles.headerActions}>
           {mode === 'edit' && (
@@ -323,7 +527,7 @@ const JournalEntryScreen = () => {
           <TouchableOpacity
             onPress={handleSave}
             style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-            disabled={saving || !content.trim()}
+            disabled={saving || (!template && !content.trim())}
           >
             {saving ? (
               <ActivityIndicator size="small" color={COLORS.bgDarkest} />
@@ -347,185 +551,265 @@ const JournalEntryScreen = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Entry Type Selector */}
-          <TouchableOpacity
-            style={styles.typeSelector}
-            onPress={() => setShowTypeSelector(!showTypeSelector)}
-          >
-            <View style={[styles.typeIcon, { backgroundColor: currentTypeConfig.color + '20' }]}>
-              <TypeIcon size={18} color={currentTypeConfig.color} />
+          {/* TEMPLATE FORM - Render when templateId is provided */}
+          {template ? (
+            <View style={styles.templateFormContainer}>
+              {/* Template description */}
+              {template.description && (
+                <View style={styles.templateDescription}>
+                  <Info size={14} color={COLORS.textMuted} />
+                  <Text style={styles.templateDescriptionText}>{template.description}</Text>
+                </View>
+              )}
+
+              {/* Template tooltip */}
+              {template.tooltips?.form && (
+                <View style={styles.templateTooltip}>
+                  <Text style={styles.templateTooltipText}>{template.tooltips.form}</Text>
+                </View>
+              )}
+
+              {/* Paper Trade Selector for Trading Journal */}
+              {isTradingJournal && (
+                <PaperTradeSelector
+                  userId={userId}
+                  onSelect={handlePaperTradeSelect}
+                  disabled={saving}
+                />
+              )}
+
+              {/* Render template fields */}
+              {template.fields.map((field) => (
+                <FormFieldRenderer
+                  key={field.id}
+                  field={field}
+                  value={templateFormData[field.id]}
+                  onChange={(value) => handleTemplateFieldChange(field.id, value)}
+                  error={templateErrors[field.id]}
+                  disabled={saving}
+                  tooltips={template.tooltips || {}}
+                />
+              ))}
+
+              {/* Tags section for templates */}
+              <View style={styles.tagsSection}>
+                <Text style={styles.optionLabel}>Tags</Text>
+                <TagInput
+                  tags={tags}
+                  onTagsChange={setTags}
+                  userId={userId}
+                  placeholder="Thêm tag..."
+                />
+              </View>
+
+              {/* Pin & Favorite */}
+              <View style={styles.togglesRow}>
+                <TouchableOpacity
+                  style={[styles.toggleButton, isPinned && styles.toggleButtonActive]}
+                  onPress={() => setIsPinned(!isPinned)}
+                >
+                  <Pin size={18} color={isPinned ? COLORS.gold : COLORS.textMuted} fill={isPinned ? COLORS.gold : 'transparent'} />
+                  <Text style={[styles.toggleText, isPinned && styles.toggleTextActive]}>Ghim</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.toggleButton, isFavorite && styles.toggleButtonActive]}
+                  onPress={() => setIsFavorite(!isFavorite)}
+                >
+                  <Star size={18} color={isFavorite ? COLORS.gold : COLORS.textMuted} fill={isFavorite ? COLORS.gold : 'transparent'} />
+                  <Text style={[styles.toggleText, isFavorite && styles.toggleTextActive]}>Yêu thích</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <Text style={styles.typeLabel}>{currentTypeConfig.label}</Text>
-            <ChevronDown size={18} color={COLORS.textMuted} />
-          </TouchableOpacity>
-
-          {showTypeSelector && (
-            <View style={styles.typeOptions}>
-              {ENTRY_TYPE_OPTIONS.map((option) => {
-                const OptionIcon = option.icon;
-                const isSelected = entryType === option.id;
-                return (
-                  <TouchableOpacity
-                    key={option.id}
-                    style={[styles.typeOption, isSelected && styles.typeOptionSelected]}
-                    onPress={() => {
-                      setEntryType(option.id);
-                      setShowTypeSelector(false);
-                    }}
-                  >
-                    <OptionIcon size={16} color={isSelected ? option.color : COLORS.textMuted} />
-                    <Text style={[styles.typeOptionText, isSelected && { color: option.color }]}>
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          )}
-
-          {/* Title (optional) */}
-          <TextInput
-            style={styles.titleInput}
-            placeholder="Tiêu đề (tùy chọn)"
-            placeholderTextColor={COLORS.textMuted}
-            value={title}
-            onChangeText={setTitle}
-            maxLength={100}
-          />
-
-          {/* Content - Seamless Edit */}
-          <View style={styles.contentContainer}>
-            {isEditing ? (
-              <TextInput
-                style={styles.contentInput}
-                placeholder={
-                  entryType === ENTRY_TYPES.GRATITUDE
-                    ? 'Hôm nay tôi biết ơn...'
-                    : entryType === ENTRY_TYPES.GOAL_NOTE
-                    ? 'Ghi chú về mục tiêu...'
-                    : 'Viết suy nghĩ của bạn...'
-                }
-                placeholderTextColor={COLORS.textMuted}
-                value={content}
-                onChangeText={setContent}
-                multiline
-                textAlignVertical="top"
-                maxLength={charLimit}
-                autoFocus
-                onBlur={() => setIsEditing(false)}
-              />
-            ) : (
+          ) : (
+            /* GENERIC FORM - Original form when no templateId */
+            <>
+              {/* Entry Type Selector */}
               <TouchableOpacity
-                style={styles.previewContainer}
-                onPress={() => setIsEditing(true)}
-                activeOpacity={1}
+                style={styles.typeSelector}
+                onPress={() => setShowTypeSelector(!showTypeSelector)}
               >
-                {content ? (
-                  <RichTextRenderer content={content} style={styles.previewText} />
+                <View style={[styles.typeIcon, { backgroundColor: currentTypeConfig.color + '20' }]}>
+                  <TypeIcon size={18} color={currentTypeConfig.color} />
+                </View>
+                <Text style={styles.typeLabel}>{currentTypeConfig.label}</Text>
+                <ChevronDown size={18} color={COLORS.textMuted} />
+              </TouchableOpacity>
+
+              {showTypeSelector && (
+                <View style={styles.typeOptions}>
+                  {ENTRY_TYPE_OPTIONS.map((option) => {
+                    const OptionIcon = option.icon;
+                    const isSelected = entryType === option.id;
+                    return (
+                      <TouchableOpacity
+                        key={option.id}
+                        style={[styles.typeOption, isSelected && styles.typeOptionSelected]}
+                        onPress={() => {
+                          setEntryType(option.id);
+                          setShowTypeSelector(false);
+                        }}
+                      >
+                        <OptionIcon size={16} color={isSelected ? option.color : COLORS.textMuted} />
+                        <Text style={[styles.typeOptionText, isSelected && { color: option.color }]}>
+                          {option.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Title (optional) */}
+              <TextInput
+                style={styles.titleInput}
+                placeholder="Tiêu đề (tùy chọn)"
+                placeholderTextColor={COLORS.textMuted}
+                value={title}
+                onChangeText={setTitle}
+                maxLength={100}
+              />
+
+              {/* Content - Seamless Edit */}
+              <View style={styles.contentContainer}>
+                {isEditing ? (
+                  <TextInput
+                    style={styles.contentInput}
+                    placeholder={
+                      entryType === ENTRY_TYPES.GRATITUDE
+                        ? 'Hôm nay tôi biết ơn...'
+                        : entryType === ENTRY_TYPES.GOAL_NOTE
+                        ? 'Ghi chú về mục tiêu...'
+                        : 'Viết suy nghĩ của bạn...'
+                    }
+                    placeholderTextColor={COLORS.textMuted}
+                    value={content}
+                    onChangeText={setContent}
+                    multiline
+                    textAlignVertical="top"
+                    maxLength={charLimit}
+                    autoFocus
+                    onBlur={() => setIsEditing(false)}
+                  />
                 ) : (
-                  <Text style={styles.previewPlaceholder}>
-                    {entryType === ENTRY_TYPES.GRATITUDE
-                      ? 'Hôm nay tôi biết ơn...'
-                      : entryType === ENTRY_TYPES.GOAL_NOTE
-                      ? 'Ghi chú về mục tiêu...'
-                      : 'Viết suy nghĩ của bạn...'}
-                  </Text>
+                  <TouchableOpacity
+                    style={styles.previewContainer}
+                    onPress={() => setIsEditing(true)}
+                    activeOpacity={1}
+                  >
+                    {content ? (
+                      <RichTextRenderer content={content} style={styles.previewText} />
+                    ) : (
+                      <Text style={styles.previewPlaceholder}>
+                        {entryType === ENTRY_TYPES.GRATITUDE
+                          ? 'Hôm nay tôi biết ơn...'
+                          : entryType === ENTRY_TYPES.GOAL_NOTE
+                          ? 'Ghi chú về mục tiêu...'
+                          : 'Viết suy nghĩ của bạn...'}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+                <Text style={styles.charCount}>
+                  {content.length}/{charLimit}
+                </Text>
+              </View>
+
+              {/* Mood selector */}
+              <TouchableOpacity
+                style={styles.optionRow}
+                onPress={() => setShowMoodPicker(true)}
+              >
+                <Text style={styles.optionLabel}>Cảm xúc</Text>
+                {mood ? (
+                  <View style={[styles.moodBadge, { backgroundColor: MOODS[mood.toUpperCase()]?.color + '20' }]}>
+                    <Text style={[styles.moodBadgeText, { color: MOODS[mood.toUpperCase()]?.color }]}>
+                      {MOODS[mood.toUpperCase()]?.label}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={styles.optionValue}>Chọn</Text>
                 )}
               </TouchableOpacity>
-            )}
-            <Text style={styles.charCount}>
-              {content.length}/{charLimit}
-            </Text>
-          </View>
-
-          {/* Mood selector */}
-          <TouchableOpacity
-            style={styles.optionRow}
-            onPress={() => setShowMoodPicker(true)}
-          >
-            <Text style={styles.optionLabel}>Cảm xúc</Text>
-            {mood ? (
-              <View style={[styles.moodBadge, { backgroundColor: MOODS[mood.toUpperCase()]?.color + '20' }]}>
-                <Text style={[styles.moodBadgeText, { color: MOODS[mood.toUpperCase()]?.color }]}>
-                  {MOODS[mood.toUpperCase()]?.label}
-                </Text>
-              </View>
-            ) : (
-              <Text style={styles.optionValue}>Chọn</Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Life area selector */}
-          <TouchableOpacity
-            style={styles.optionRow}
-            onPress={() => setShowLifeAreaSelector(!showLifeAreaSelector)}
-          >
-            <Text style={styles.optionLabel}>Lĩnh vực</Text>
-            {lifeArea ? (
-              <View style={[styles.areaBadge, { backgroundColor: Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.color + '20' }]}>
-                <Text style={[styles.areaBadgeText, { color: Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.color }]}>
-                  {Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.label}
-                </Text>
-              </View>
-            ) : (
-              <Text style={styles.optionValue}>Chọn</Text>
-            )}
-          </TouchableOpacity>
-
-          {showLifeAreaSelector && (
-            <View style={styles.lifeAreaGrid}>
-              {Object.values(LIFE_AREAS).map((area) => {
-                const isSelected = lifeArea === area.id;
-                return (
-                  <TouchableOpacity
-                    key={area.id}
-                    style={[
-                      styles.lifeAreaItem,
-                      isSelected && { backgroundColor: area.color + '20', borderColor: area.color },
-                    ]}
-                    onPress={() => {
-                      setLifeArea(isSelected ? null : area.id);
-                      setShowLifeAreaSelector(false);
-                    }}
-                  >
-                    <Text style={[styles.lifeAreaText, isSelected && { color: area.color }]}>
-                      {area.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            </>
           )}
 
-          {/* Tags */}
-          <View style={styles.tagsSection}>
-            <Text style={styles.optionLabel}>Tags</Text>
-            <TagInput
-              tags={tags}
-              onTagsChange={setTags}
-              userId={userId}
-              placeholder="Thêm tag..."
-            />
-          </View>
+          {/* Only show for generic form (no template) */}
+          {!template && (
+            <>
+              {/* Life area selector */}
+              <TouchableOpacity
+                style={styles.optionRow}
+                onPress={() => setShowLifeAreaSelector(!showLifeAreaSelector)}
+              >
+                <Text style={styles.optionLabel}>Lĩnh vực</Text>
+                {lifeArea ? (
+                  <View style={[styles.areaBadge, { backgroundColor: Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.color + '20' }]}>
+                    <Text style={[styles.areaBadgeText, { color: Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.color }]}>
+                      {Object.values(LIFE_AREAS).find(la => la.id === lifeArea)?.label}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={styles.optionValue}>Chọn</Text>
+                )}
+              </TouchableOpacity>
 
-          {/* Pin & Favorite */}
-          <View style={styles.togglesRow}>
-            <TouchableOpacity
-              style={[styles.toggleButton, isPinned && styles.toggleButtonActive]}
-              onPress={() => setIsPinned(!isPinned)}
-            >
-              <Pin size={18} color={isPinned ? COLORS.gold : COLORS.textMuted} fill={isPinned ? COLORS.gold : 'transparent'} />
-              <Text style={[styles.toggleText, isPinned && styles.toggleTextActive]}>Ghim</Text>
-            </TouchableOpacity>
+              {showLifeAreaSelector && (
+                <View style={styles.lifeAreaGrid}>
+                  {Object.values(LIFE_AREAS).map((area) => {
+                    const isSelected = lifeArea === area.id;
+                    return (
+                      <TouchableOpacity
+                        key={area.id}
+                        style={[
+                          styles.lifeAreaItem,
+                          isSelected && { backgroundColor: area.color + '20', borderColor: area.color },
+                        ]}
+                        onPress={() => {
+                          setLifeArea(isSelected ? null : area.id);
+                          setShowLifeAreaSelector(false);
+                        }}
+                      >
+                        <Text style={[styles.lifeAreaText, isSelected && { color: area.color }]}>
+                          {area.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
 
-            <TouchableOpacity
-              style={[styles.toggleButton, isFavorite && styles.toggleButtonActive]}
-              onPress={() => setIsFavorite(!isFavorite)}
-            >
-              <Star size={18} color={isFavorite ? COLORS.gold : COLORS.textMuted} fill={isFavorite ? COLORS.gold : 'transparent'} />
-              <Text style={[styles.toggleText, isFavorite && styles.toggleTextActive]}>Yêu thích</Text>
-            </TouchableOpacity>
-          </View>
+              {/* Tags */}
+              <View style={styles.tagsSection}>
+                <Text style={styles.optionLabel}>Tags</Text>
+                <TagInput
+                  tags={tags}
+                  onTagsChange={setTags}
+                  userId={userId}
+                  placeholder="Thêm tag..."
+                />
+              </View>
+
+              {/* Pin & Favorite */}
+              <View style={styles.togglesRow}>
+                <TouchableOpacity
+                  style={[styles.toggleButton, isPinned && styles.toggleButtonActive]}
+                  onPress={() => setIsPinned(!isPinned)}
+                >
+                  <Pin size={18} color={isPinned ? COLORS.gold : COLORS.textMuted} fill={isPinned ? COLORS.gold : 'transparent'} />
+                  <Text style={[styles.toggleText, isPinned && styles.toggleTextActive]}>Ghim</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.toggleButton, isFavorite && styles.toggleButtonActive]}
+                  onPress={() => setIsFavorite(!isFavorite)}
+                >
+                  <Star size={18} color={isFavorite ? COLORS.gold : COLORS.textMuted} fill={isFavorite ? COLORS.gold : 'transparent'} />
+                  <Text style={[styles.toggleText, isFavorite && styles.toggleTextActive]}>Yêu thích</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
 
           <View style={styles.bottomSpacing} />
         </ScrollView>
@@ -569,6 +853,17 @@ const styles = StyleSheet.create({
   backButton: {
     padding: SPACING.xs,
   },
+  headerTitleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  headerTitleIcon: {
+    marginRight: SPACING.xs,
+  },
   headerTitle: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
@@ -607,6 +902,37 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.lg,
+  },
+  // Template form styles
+  templateFormContainer: {
+    flex: 1,
+  },
+  templateDescription: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+  },
+  templateDescriptionText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+  },
+  templateTooltip: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.lg,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.gold,
+  },
+  templateTooltipText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    fontStyle: 'italic',
   },
   typeSelector: {
     flexDirection: 'row',
