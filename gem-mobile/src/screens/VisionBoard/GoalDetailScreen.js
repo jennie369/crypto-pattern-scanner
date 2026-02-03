@@ -31,6 +31,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
+import { decode as decodeBase64 } from 'base64-arraybuffer';
 import * as Speech from 'expo-speech';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -1051,20 +1052,25 @@ const GoalDetailScreen = () => {
         const fileName = `${goalId}-${Date.now()}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
-        // Read file as base64
+        // Read file as base64 and decode to ArrayBuffer
         const base64 = await FileSystem.readAsStringAsync(imageUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
 
-        // Convert base64 to ArrayBuffer using fetch (works on both iOS and Android)
-        const response = await fetch(`data:image/${fileExt};base64,${base64}`);
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
+        // Decode base64 to ArrayBuffer using base64-arraybuffer library
+        const arrayBuffer = decodeBase64(base64);
 
-        await supabase.storage.from('vision-board').upload(filePath, arrayBuffer, {
-          contentType: `image/${fileExt}`,
-          upsert: true,
-        });
+        // Upload to Supabase storage
+        const { error: uploadError } = await supabase.storage
+          .from('vision-board')
+          .upload(filePath, arrayBuffer, {
+            contentType: `image/${fileExt}`,
+            upsert: true,
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
 
         const { data: { publicUrl } } = supabase.storage.from('vision-board').getPublicUrl(filePath);
 
