@@ -226,6 +226,7 @@ import { preloadVideo } from '../../components/Rituals/cosmic';
 import calendarService from '../../services/calendarService';
 import calendarJournalService from '../../services/calendarJournalService';
 import tradingJournalService from '../../services/tradingJournalService';
+import { deleteRitualCompletion } from '../../services/ritualService';
 import statsService from '../../services/statsService';
 import readingHistoryService from '../../services/readingHistoryService';
 import notificationService from '../../services/notificationService';
@@ -3793,8 +3794,8 @@ const VisionBoardScreen = () => {
       const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
 
       // ========== 1a. Load history from database ==========
-      // Fetch ritual completions, paper trades for 3 months range
-      const [ritualsResult, paperTradesResult, calendarEventsResult] = await Promise.all([
+      // Fetch ritual completions, paper trades, mood data for 3 months range
+      const [ritualsResult, paperTradesResult, calendarEventsResult, moodResult] = await Promise.all([
         supabase
           .from('vision_ritual_completions')
           .select('id, ritual_id, completed_at, xp_earned')
@@ -3808,6 +3809,12 @@ const VisionBoardScreen = () => {
           .gte('created_at', `${startDate}T00:00:00`)
           .lte('created_at', `${endDate}T23:59:59`),
         calendarService.getEventsGroupedByRange(user.id, startDate, endDate),
+        supabase
+          .from('calendar_daily_mood')
+          .select('id, mood_date, overall_mood_score, morning_mood, evening_mood, overall_mood')
+          .eq('user_id', user.id)
+          .gte('mood_date', startDate)
+          .lte('mood_date', endDate),
       ]);
 
       // DEBUG: Log fetched data
@@ -3815,6 +3822,7 @@ const VisionBoardScreen = () => {
       console.log('[VisionBoard] Rituals fetched:', ritualsResult.data?.length || 0, ritualsResult.error ? `Error: ${ritualsResult.error.message}` : 'OK');
       console.log('[VisionBoard] Paper trades fetched:', paperTradesResult.data?.length || 0, paperTradesResult.error ? `Error: ${paperTradesResult.error.message}` : 'OK');
       console.log('[VisionBoard] Calendar events:', calendarEventsResult.success ? 'OK' : 'FAIL', Object.keys(calendarEventsResult.eventsByDate || {}).length, 'dates');
+      console.log('[VisionBoard] Mood entries fetched:', moodResult.data?.length || 0, moodResult.error ? `Error: ${moodResult.error.message}` : 'OK');
 
       // Add ritual completions to eventsMap
       if (ritualsResult.data) {
@@ -3825,7 +3833,7 @@ const VisionBoardScreen = () => {
             eventsMap[date].push({
               id: ritual.id,
               title: ritual.ritual_id?.replace(/-/g, ' ') || 'Ritual',
-              type: 'ritual',
+              source_type: 'ritual',
               color: '#EC4899', // Pink for rituals
             });
           }
@@ -3841,8 +3849,26 @@ const VisionBoardScreen = () => {
             eventsMap[date].push({
               id: trade.id,
               title: `${trade.side} ${trade.symbol}`,
-              type: 'paper_trade',
+              source_type: 'paper_trade',
               color: trade.pnl >= 0 ? '#3AF7A6' : '#FF6B6B', // Green for profit, red for loss
+            });
+          }
+        });
+      }
+
+      // Add mood entries to eventsMap
+      if (moodResult.data) {
+        moodResult.data.forEach(mood => {
+          const date = mood.mood_date;
+          if (date) {
+            if (!eventsMap[date]) eventsMap[date] = [];
+            // Determine mood display text
+            const moodText = mood.overall_mood || mood.morning_mood || mood.evening_mood || 'Tâm trạng';
+            eventsMap[date].push({
+              id: mood.id,
+              title: moodText,
+              source_type: 'mood',
+              color: '#FFD700', // Gold for mood
             });
           }
         });
@@ -3856,7 +3882,7 @@ const VisionBoardScreen = () => {
             eventsMap[date].push({
               id: event.id,
               title: event.title,
-              type: event.source_type || 'event',
+              source_type: event.source_type || 'event',
               color: event.color || '#6A5BFF',
             });
           });
@@ -3901,7 +3927,7 @@ const VisionBoardScreen = () => {
             eventsMap[deadlineDate].push({
               id: w.id,
               title: eventTitle,
-              type: 'goal_deadline',
+              source_type: 'goal_deadline',
               color: '#6A5BFF',
             });
           }
@@ -3914,9 +3940,8 @@ const VisionBoardScreen = () => {
             id: w.id,
             title: content?.text || content?.title || 'Khẳng định hàng ngày',
             description: content?.text || content?.affirmation || null,
-            type: 'affirmation',
-            color: '#FFD700',
             source_type: 'affirmation',
+            color: '#FFD700',
             source_id: w.id,
             is_completed: content?.completed || w.is_completed || false,
           });
@@ -3928,7 +3953,7 @@ const VisionBoardScreen = () => {
           eventsMap[today].push({
             id: w.id,
             title: content?.title || 'Thói quen',
-            type: 'habit',
+            source_type: 'habit',
             color: '#00F0FF',
           });
         }
@@ -6120,24 +6145,29 @@ const VisionBoardScreen = () => {
                 eventsByDate={calendarEvents}
                 selectedDate={selectedDate}
                 onDateSelect={async (date) => {
+                  console.log('[VisionBoard] Date selected:', date);
                   setSelectedDate(date);
-                  // Fetch journal data for the selected date (including mood)
-                  if (user?.id) {
-                    const journalResult = await calendarService.getDayCalendarData(user.id, date);
-                    if (journalResult.success) {
-                      setJournalRituals(journalResult.rituals || []);
-                      setJournalReadings(journalResult.readings || []);
-                      setJournalPaperTrades(journalResult.paperTrades || []);
-                      setJournalTradingJournal(journalResult.tradingJournal || []);
-                      setJournalActions(journalResult.actions || []);
-                      // Calendar Smart Journal data
-                      setJournalEntries(journalResult.journal || []);
-                      setTradingEntries(journalResult.trading || []);
-                      setJournalMood(journalResult.mood || null);
-                    }
-                  }
-                  // Show day detail modal when date is selected
+                  // Show modal first for better UX
                   setDayDetailModalVisible(true);
+                  // Fetch journal data for the selected date (including mood)
+                  try {
+                    if (user?.id) {
+                      const journalResult = await calendarService.getDayCalendarData(user.id, date);
+                      if (journalResult.success) {
+                        setJournalRituals(journalResult.rituals || []);
+                        setJournalReadings(journalResult.readings || []);
+                        setJournalPaperTrades(journalResult.paperTrades || []);
+                        setJournalTradingJournal(journalResult.tradingJournal || []);
+                        setJournalActions(journalResult.actions || []);
+                        // Calendar Smart Journal data
+                        setJournalEntries(journalResult.journal || []);
+                        setTradingEntries(journalResult.trading || []);
+                        setJournalMood(journalResult.mood || null);
+                      }
+                    }
+                  } catch (error) {
+                    console.error('[VisionBoard] Error loading day data:', error);
+                  }
                 }}
                 onViewFullCalendar={() => navigation.navigate('VisionCalendar')}
                 showLegend={true}
@@ -6200,6 +6230,34 @@ const VisionBoardScreen = () => {
                   setShowCalendarTemplateSelector(true);
                 }, 200);
               }}
+              onEditEvent={(event) => {
+                console.log('[VisionBoard] Edit event:', event.id);
+                setDayDetailModalVisible(false);
+                // Navigate to edit event modal with event data
+                setAddEventModalVisible(true);
+                // TODO: Set event data for editing - for now we open add modal
+              }}
+              onDeleteEvent={async (event) => {
+                console.log('[VisionBoard] Delete event:', event.id);
+                try {
+                  const result = await calendarService.deleteEvent(event.id, user?.id);
+                  if (result.success) {
+                    // Update local state to remove the event
+                    setCalendarEvents(prev => {
+                      const updated = { ...prev };
+                      const dateKey = event.event_date || selectedDate;
+                      if (updated[dateKey]) {
+                        updated[dateKey] = updated[dateKey].filter(e => e.id !== event.id);
+                      }
+                      return updated;
+                    });
+                  } else {
+                    console.error('[VisionBoard] Delete event failed:', result.error);
+                  }
+                } catch (error) {
+                  console.error('[VisionBoard] Delete event error:', error);
+                }
+              }}
               onRitualPress={(ritual) => {
                 console.log('[VisionBoard] Ritual pressed:', ritual.ritual_slug);
                 setDayDetailModalVisible(false);
@@ -6235,14 +6293,28 @@ const VisionBoardScreen = () => {
                 });
               }}
               onTradePress={(trade) => {
-                console.log('[VisionBoard] Trade pressed:', trade.id);
+                console.log('[VisionBoard] Trading journal entry pressed:', trade.id);
                 setDayDetailModalVisible(false);
-                // Navigate to paper trade history or trading journal
+                // Navigate to trading journal entry (from trading_journal_entries table)
                 navigation.navigate('TradingJournal', {
                   mode: 'edit',
                   entryId: trade.id,
                   date: selectedDate,
                 });
+              }}
+              onPaperTradePress={(trade) => {
+                console.log('[VisionBoard] Paper trade pressed:', trade.id, trade.symbol);
+                setDayDetailModalVisible(false);
+                // Navigate to paper trade history (from paper_trades table)
+                navigation.navigate('PaperTradeHistory', {
+                  highlightTradeId: trade.id,
+                  symbol: trade.symbol,
+                });
+              }}
+              onViewTradingJournal={() => {
+                console.log('[VisionBoard] View Trading Journal pressed');
+                setDayDetailModalVisible(false);
+                navigation.navigate('TradingJournal', { date: selectedDate });
               }}
               onJournalPress={(entry) => {
                 console.log('[VisionBoard] Journal entry pressed:', entry.id);
@@ -6266,7 +6338,7 @@ const VisionBoardScreen = () => {
               onDeleteJournal={async (entry) => {
                 console.log('[VisionBoard] Delete journal entry:', entry.id);
                 try {
-                  const result = await calendarJournalService.deleteJournalEntry(entry.id);
+                  const result = await calendarJournalService.deleteJournalEntry(user?.id, entry.id);
                   if (result.success) {
                     // Remove from local state
                     setJournalEntries(prev => prev.filter(e => e.id !== entry.id));
@@ -6287,7 +6359,7 @@ const VisionBoardScreen = () => {
               onDeleteTradingEntry={async (trade) => {
                 console.log('[VisionBoard] Delete trading entry:', trade.id);
                 try {
-                  const result = await tradingJournalService.deleteEntry(trade.id);
+                  const result = await tradingJournalService.deleteTradingEntry(user?.id, trade.id);
                   if (result.success) {
                     // Remove from local state
                     setTradingEntries(prev => prev.filter(e => e.id !== trade.id));
@@ -6296,9 +6368,70 @@ const VisionBoardScreen = () => {
                   console.error('[VisionBoard] Delete trading entry error:', error);
                 }
               }}
+              onDeleteRitual={async (ritual) => {
+                console.log('[VisionBoard] Delete ritual completion:', ritual.id);
+                try {
+                  const result = await deleteRitualCompletion(user?.id, ritual.id);
+                  if (result.success) {
+                    // Remove from local state
+                    setJournalRituals(prev => prev.filter(r => r.id !== ritual.id));
+                  } else {
+                    console.error('[VisionBoard] Delete ritual failed:', result.error);
+                  }
+                } catch (error) {
+                  console.error('[VisionBoard] Delete ritual error:', error);
+                }
+              }}
               onMoodUpdated={async () => {
-                // Refresh journal data after mood is saved
+                // Refresh journal data AND calendar events after mood is saved
                 if (user?.id && selectedDate) {
+                  const now = new Date(selectedDate);
+                  const year = now.getFullYear();
+                  const month = now.getMonth() + 1;
+
+                  // Calculate date range for the month
+                  const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+                  const lastDay = new Date(year, month, 0).getDate();
+                  const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
+                  // 1. Refresh calendar events AND mood data for the current month (for dots/markers)
+                  const [eventsResult, moodResult] = await Promise.all([
+                    calendarService.getMonthEventsGrouped(user.id, year, month),
+                    supabase
+                      .from('calendar_daily_mood')
+                      .select('id, mood_date, overall_mood_score, morning_mood, evening_mood, overall_mood')
+                      .eq('user_id', user.id)
+                      .gte('mood_date', startDate)
+                      .lte('mood_date', endDate),
+                  ]);
+
+                  // Build events map including mood data
+                  const eventsMap = { ...(eventsResult.eventsByDate || {}) };
+
+                  // Add mood entries to eventsMap
+                  if (moodResult.data) {
+                    moodResult.data.forEach(mood => {
+                      const date = mood.mood_date;
+                      if (date) {
+                        if (!eventsMap[date]) eventsMap[date] = [];
+                        const moodText = mood.overall_mood || mood.morning_mood || mood.evening_mood || 'Tâm trạng';
+                        // Check if mood entry already exists to avoid duplicates
+                        const hasMoodEntry = eventsMap[date].some(e => e.source_type === 'mood' && e.id === mood.id);
+                        if (!hasMoodEntry) {
+                          eventsMap[date].push({
+                            id: mood.id,
+                            title: moodText,
+                            source_type: 'mood',
+                            color: '#FFD700',
+                          });
+                        }
+                      }
+                    });
+                  }
+
+                  setCalendarEvents(eventsMap);
+
+                  // 2. Refresh the day detail data
                   const journalResult = await calendarService.getDayCalendarData(user.id, selectedDate);
                   if (journalResult.success) {
                     setJournalRituals(journalResult.rituals || []);

@@ -85,6 +85,8 @@ const DayDetailModal = ({
   onRitualPress,
   onReadingPress,
   onTradePress,
+  onPaperTradePress, // Separate handler for paper trades (different table)
+  onViewTradingJournal, // Navigate to TradingJournalScreen
   onActionPress,
   onJournalPress,
   onAddJournal,
@@ -97,6 +99,8 @@ const DayDetailModal = ({
   onDeleteJournal,
   onEditTradingEntry,
   onDeleteTradingEntry,
+  // Ritual swipe actions
+  onDeleteRitual,
 }) => {
   // Mood Picker Modal state
   const [showMoodPicker, setShowMoodPicker] = useState(false);
@@ -254,6 +258,52 @@ const DayDetailModal = ({
       </Animated.View>
     );
   }, [onDeleteJournal, onDeleteTradingEntry]);
+
+  // Render ritual swipe actions (Delete only - rituals are already completed)
+  const renderRitualRightActions = useCallback((progress, dragX, ritual) => {
+    const trans = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [0, 80],
+      extrapolate: 'clamp',
+    });
+
+    const refKey = `ritual_${ritual.id}`;
+    const ritualName = RITUAL_NAMES[ritual.ritual_slug] || ritual.ritual_slug || 'Nghi thức';
+
+    return (
+      <Animated.View style={[styles.swipeActionRight, { transform: [{ translateX: trans }] }]}>
+        <TouchableOpacity
+          style={styles.deleteAction}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            Alert.alert(
+              'Xóa nghi thức',
+              `Bạn có chắc muốn xóa "${ritualName}"?`,
+              [
+                {
+                  text: 'Hủy',
+                  style: 'cancel',
+                  onPress: () => swipeableRefs.current[refKey]?.close(),
+                },
+                {
+                  text: 'Xóa',
+                  style: 'destructive',
+                  onPress: () => {
+                    swipeableRefs.current[refKey]?.close();
+                    onDeleteRitual?.(ritual);
+                  },
+                },
+              ]
+            );
+          }}
+        >
+          <Icons.Trash2 size={18} color="#FFFFFF" />
+          <Text style={styles.actionText}>Xóa</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }, [onDeleteRitual]);
+
   // Format date display
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -266,9 +316,48 @@ const DayDetailModal = ({
 
   const dateInfo = formatDate(date);
 
-  // Group events by source type
-  const groupedEvents = events.reduce((acc, event) => {
+  // Filter out divination/ritual events since they're shown in "Nghi thức đã hoàn thành" section
+  // Be aggressive about filtering to prevent any duplicates
+  const filteredEvents = events.filter(event => {
+    // Check source_type
+    const sourceType = event.source_type || '';
+    if (sourceType === 'divination') {
+      console.log('[DayDetailModal] Filtered out divination event:', event.title);
+      return false;
+    }
+
+    // Check title for ritual prefix (rituals have ✨ prefix)
+    if (event.title?.startsWith('✨')) {
+      console.log('[DayDetailModal] Filtered out ritual event by title:', event.title);
+      return false;
+    }
+
+    // Check metadata for ritual_slug
+    if (event.metadata?.ritual_slug) {
+      console.log('[DayDetailModal] Filtered out event with ritual_slug:', event.title);
+      return false;
+    }
+
+    // Check if icon is sparkles (ritual icon)
+    if (event.icon === 'sparkles') {
+      console.log('[DayDetailModal] Filtered out event with sparkles icon:', event.title);
+      return false;
+    }
+
+    return true;
+  });
+
+  // Debug: log filtered results
+  console.log('[DayDetailModal] Events received:', events.length, '-> After filter:', filteredEvents.length);
+  if (events.length > 0 && filteredEvents.length !== events.length) {
+    console.log('[DayDetailModal] Filtered out', events.length - filteredEvents.length, 'ritual events');
+  }
+
+  // Group filtered events by source type (exclude PAPER_TRADE - shown in Paper Trades section)
+  const groupedEvents = filteredEvents.reduce((acc, event) => {
     const type = event.source_type || 'manual';
+    // Skip PAPER_TRADE events - they're shown in the Paper Trades section below
+    if (type === 'PAPER_TRADE' || type === 'paper_trade') return acc;
     if (!acc[type]) acc[type] = [];
     acc[type].push(event);
     return acc;
@@ -279,7 +368,6 @@ const DayDetailModal = ({
     goal_deadline: 'Deadline Mục Tiêu',
     action_due: 'Hành Động',
     habit_daily: 'Thói Quen',
-    divination: 'Kết quả Tarot/Kinh Dịch',
     manual: 'Sự Kiện',
   };
 
@@ -346,78 +434,65 @@ const DayDetailModal = ({
                 contentContainerStyle={styles.eventsListContent}
                 showsVerticalScrollIndicator={false}
               >
-              {events.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Icons.CalendarX size={48} color={COSMIC_COLORS.text.muted} />
-                  <Text style={styles.emptyText}>Không có sự kiện nào</Text>
-                  {onAddEvent && (
-                    <TouchableOpacity
-                      onPress={() => onAddEvent(date)}
-                      style={styles.emptyAddButton}
-                    >
-                      <Icons.Plus size={16} color={COLORS.purple} />
-                      <Text style={styles.emptyAddText}>Thêm sự kiện</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ) : (
-                Object.entries(groupedEvents).map(([type, typeEvents]) => (
-                  <View key={type} style={styles.eventGroup}>
-                    <Text style={styles.groupTitle}>
-                      {sourceTypeLabels[type] || type}
-                    </Text>
-                    {typeEvents.map((event) => (
-                      <Swipeable
-                        key={event.id}
-                        ref={(ref) => {
-                          if (ref) swipeableRefs.current[event.id] = ref;
-                        }}
-                        renderLeftActions={(progress, dragX) =>
-                          onEditEvent ? renderLeftActions(progress, dragX, event) : null
-                        }
-                        renderRightActions={(progress, dragX) =>
-                          onDeleteEvent ? renderRightActions(progress, dragX, event) : null
-                        }
-                        onSwipeableWillOpen={() => closeAllSwipeables(event.id)}
-                        friction={2}
-                        overshootLeft={false}
-                        overshootRight={false}
-                      >
-                        <CalendarEventItem
-                          event={event}
-                          onPress={onEventPress}
-                          onComplete={onEventComplete}
-                        />
-                      </Swipeable>
-                    ))}
-                  </View>
-                ))
-              )}
+              {/* Events Section - Only show if there are filtered events */}
+              {Object.keys(groupedEvents).length > 0 && (
+                <>
+                  {Object.entries(groupedEvents).map(([type, typeEvents]) => (
+                    <View key={type} style={styles.eventGroup}>
+                      <Text style={styles.groupTitle}>
+                        {sourceTypeLabels[type] || type}
+                      </Text>
+                      {typeEvents.map((event) => (
+                        <Swipeable
+                          key={event.id}
+                          ref={(ref) => {
+                            if (ref) swipeableRefs.current[event.id] = ref;
+                          }}
+                          renderLeftActions={(progress, dragX) =>
+                            onEditEvent ? renderLeftActions(progress, dragX, event) : null
+                          }
+                          renderRightActions={(progress, dragX) =>
+                            onDeleteEvent ? renderRightActions(progress, dragX, event) : null
+                          }
+                          onSwipeableWillOpen={() => closeAllSwipeables(event.id)}
+                          friction={2}
+                          overshootLeft={false}
+                          overshootRight={false}
+                        >
+                          <CalendarEventItem
+                            event={event}
+                            onPress={onEventPress}
+                            onComplete={onEventComplete}
+                          />
+                        </Swipeable>
+                      ))}
+                    </View>
+                  ))}
 
-              {/* Summary stats */}
-              {events.length > 0 && (
-                <View style={styles.summaryContainer}>
-                  <View style={styles.summaryItem}>
-                    <Text style={styles.summaryValue}>
-                      {events.filter(e => e.is_completed).length}
-                    </Text>
-                    <Text style={styles.summaryLabel}>Hoàn thành</Text>
+                  {/* Summary stats for filtered events */}
+                  <View style={styles.summaryContainer}>
+                    <View style={styles.summaryItem}>
+                      <Text style={styles.summaryValue}>
+                        {filteredEvents.filter(e => e.is_completed).length}
+                      </Text>
+                      <Text style={styles.summaryLabel}>Hoàn thành</Text>
+                    </View>
+                    <View style={styles.summaryDivider} />
+                    <View style={styles.summaryItem}>
+                      <Text style={styles.summaryValue}>
+                        {filteredEvents.filter(e => !e.is_completed).length}
+                      </Text>
+                      <Text style={styles.summaryLabel}>Còn lại</Text>
+                    </View>
+                    <View style={styles.summaryDivider} />
+                    <View style={styles.summaryItem}>
+                      <Text style={styles.summaryValue}>
+                        {filteredEvents.length}
+                      </Text>
+                      <Text style={styles.summaryLabel}>Tổng</Text>
+                    </View>
                   </View>
-                  <View style={styles.summaryDivider} />
-                  <View style={styles.summaryItem}>
-                    <Text style={styles.summaryValue}>
-                      {events.filter(e => !e.is_completed).length}
-                    </Text>
-                    <Text style={styles.summaryLabel}>Còn lại</Text>
-                  </View>
-                  <View style={styles.summaryDivider} />
-                  <View style={styles.summaryItem}>
-                    <Text style={styles.summaryValue}>
-                      {events.length}
-                    </Text>
-                    <Text style={styles.summaryLabel}>Tổng</Text>
-                  </View>
-                </View>
+                </>
               )}
 
               {/* Mood Section */}
@@ -654,31 +729,46 @@ const DayDetailModal = ({
                       ? new Date(ritual.completed_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
                       : '';
                     const ritualColor = RITUAL_COLORS[ritual.ritual_slug] || COSMIC_COLORS.glow.purple;
+                    const refKey = `ritual_${ritual.id}`;
                     return (
-                      <TouchableOpacity
+                      <Swipeable
                         key={ritual.id || index}
-                        style={[styles.journalItem, { borderColor: `${ritualColor}30` }]}
-                        onPress={() => onRitualPress?.(ritual)}
-                        activeOpacity={0.7}
+                        ref={(ref) => {
+                          if (ref) swipeableRefs.current[refKey] = ref;
+                        }}
+                        renderRightActions={
+                          onDeleteRitual
+                            ? (progress, dragX) => renderRitualRightActions(progress, dragX, ritual)
+                            : null
+                        }
+                        onSwipeableWillOpen={() => closeAllSwipeables(refKey)}
+                        friction={2}
+                        overshootRight={false}
                       >
-                        <View style={[styles.journalIcon, { backgroundColor: `${ritualColor}25` }]}>
-                          <Icons.Heart size={16} color={ritualColor} />
-                        </View>
-                        <View style={styles.journalContent}>
-                          <Text style={styles.journalItemTitle}>
-                            {RITUAL_NAMES[ritual.ritual_slug] || ritual.ritual_slug}
-                          </Text>
-                          {ritual.content?.reflection && (
-                            <Text style={styles.journalReflection} numberOfLines={2}>
-                              "{ritual.content.reflection}"
+                        <TouchableOpacity
+                          style={[styles.journalItem, { borderColor: `${ritualColor}30` }]}
+                          onPress={() => onRitualPress?.(ritual)}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.journalIcon, { backgroundColor: `${ritualColor}25` }]}>
+                            <Icons.Heart size={16} color={ritualColor} />
+                          </View>
+                          <View style={styles.journalContent}>
+                            <Text style={styles.journalItemTitle}>
+                              {RITUAL_NAMES[ritual.ritual_slug] || ritual.ritual_slug}
                             </Text>
-                          )}
-                          <Text style={styles.journalTime}>{time}</Text>
-                        </View>
-                        <View style={[styles.journalXP, { backgroundColor: `${COSMIC_COLORS.functional.success}20`, borderColor: `${COSMIC_COLORS.functional.success}40` }]}>
-                          <Text style={styles.journalXPText}>+{ritual.xp_earned || 0} XP</Text>
-                        </View>
-                      </TouchableOpacity>
+                            {ritual.content?.reflection && (
+                              <Text style={styles.journalReflection} numberOfLines={2}>
+                                "{ritual.content.reflection}"
+                              </Text>
+                            )}
+                            <Text style={styles.journalTime}>{time}</Text>
+                          </View>
+                          <View style={[styles.journalXP, { backgroundColor: `${COSMIC_COLORS.functional.success}20`, borderColor: `${COSMIC_COLORS.functional.success}40` }]}>
+                            <Text style={styles.journalXPText}>+{ritual.xp_earned || 0} XP</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </Swipeable>
                     );
                   })}
                 </View>
@@ -726,10 +816,15 @@ const DayDetailModal = ({
               {/* Journal Section - Paper Trades */}
               {paperTrades.length > 0 && (
                 <View style={styles.journalSection}>
-                  <View style={styles.journalHeader}>
+                  <TouchableOpacity
+                    style={styles.journalHeader}
+                    onPress={onViewTradingJournal}
+                    activeOpacity={0.7}
+                  >
                     <Icons.LineChart size={18} color="#3AF7A6" />
                     <Text style={styles.journalTitle}>Paper Trades</Text>
-                  </View>
+                    <Icons.ChevronRight size={16} color={COSMIC_COLORS.text.muted} style={{ marginLeft: 'auto' }} />
+                  </TouchableOpacity>
                   {paperTrades.map((trade, index) => {
                     const isProfit = trade.pnl_percent > 0;
                     const time = trade.created_at
@@ -739,7 +834,7 @@ const DayDetailModal = ({
                       <TouchableOpacity
                         key={trade.id || index}
                         style={styles.journalItem}
-                        onPress={() => onTradePress?.(trade)}
+                        onPress={() => onPaperTradePress?.(trade)}
                         activeOpacity={0.7}
                       >
                         <View style={[styles.journalIcon, { backgroundColor: isProfit ? 'rgba(58, 247, 166, 0.2)' : 'rgba(255, 107, 107, 0.2)' }]}>
