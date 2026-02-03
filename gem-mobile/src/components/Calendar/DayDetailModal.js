@@ -26,9 +26,21 @@ import * as Haptics from 'expo-haptics';
 import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
 import { COSMIC_COLORS, COSMIC_GRADIENTS, COSMIC_SHADOWS, COSMIC_SPACING } from '../../theme/cosmicTokens';
 import { CalendarEventItem } from './MonthCalendar';
-import MoodPickerModal from './MoodPickerModal';
+import { useAuth } from '../../contexts/AuthContext';
+import { saveMoodCheckIn, CHECK_IN_TYPES } from '../../services/moodTrackingService';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Simple mood options with emojis - tap to save instantly
+const QUICK_MOODS = [
+  { id: 'happy', emoji: '😊', label: 'Vui' },
+  { id: 'peaceful', emoji: '😌', label: 'Yên' },
+  { id: 'excited', emoji: '🤩', label: 'Hưng' },
+  { id: 'neutral', emoji: '😐', label: 'Ổn' },
+  { id: 'tired', emoji: '😴', label: 'Mệt' },
+  { id: 'anxious', emoji: '😰', label: 'Lo' },
+  { id: 'sad', emoji: '😢', label: 'Buồn' },
+];
 
 // Vietnamese day names
 const DAY_NAMES = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
@@ -100,12 +112,66 @@ const DayDetailModal = ({
   onEditTradingEntry,
   onDeleteTradingEntry,
   // Ritual swipe actions
+  onEditRitual,
   onDeleteRitual,
 }) => {
-  // Mood Picker Modal state
-  const [showMoodPicker, setShowMoodPicker] = useState(false);
+  const { user, profile, userTier } = useAuth();
+  const [savingMood, setSavingMood] = useState(false);
+  const [selectedMood, setSelectedMood] = useState(null);
+
   // Swipeable refs for closing
   const swipeableRefs = useRef({});
+
+  // Quick save mood - tap emoji to save instantly
+  const handleQuickMoodSave = useCallback(async (moodId) => {
+    if (!user?.id || savingMood) return;
+
+    // Get role from profile (admin bypass)
+    const userRole = profile?.role;
+    const effectiveTier = userTier || profile?.tier || 'free';
+
+    console.log('[DayDetailModal] Saving mood:', {
+      moodId,
+      date,
+      userId: user.id,
+      userTier: effectiveTier,
+      userRole,
+      profileRole: profile?.role,
+    });
+
+    setSavingMood(true);
+    setSelectedMood(moodId);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    try {
+      const result = await saveMoodCheckIn(
+        user.id,
+        CHECK_IN_TYPES.MORNING,
+        { mood: moodId },
+        effectiveTier,
+        userRole,
+        date
+      );
+
+      console.log('[DayDetailModal] Save result:', result);
+
+      if (result.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        // Keep selected mood showing - don't reset it
+        onMoodUpdated?.();
+      } else {
+        console.error('[DayDetailModal] Save failed:', result.error);
+        // Reset on failure
+        setTimeout(() => setSelectedMood(null), 1500);
+      }
+    } catch (error) {
+      console.error('[DayDetailModal] Quick mood save error:', error);
+      // Reset on error
+      setTimeout(() => setSelectedMood(null), 1500);
+    } finally {
+      setSavingMood(false);
+    }
+  }, [user, profile, userTier, date, savingMood, onMoodUpdated]);
 
   // Close all swipeables
   const closeAllSwipeables = useCallback((exceptKey) => {
@@ -259,7 +325,34 @@ const DayDetailModal = ({
     );
   }, [onDeleteJournal, onDeleteTradingEntry]);
 
-  // Render ritual swipe actions (Delete only - rituals are already completed)
+  // Render ritual swipe actions - Left (Edit reflection)
+  const renderRitualLeftActions = useCallback((progress, dragX, ritual) => {
+    const trans = dragX.interpolate({
+      inputRange: [0, 80],
+      outputRange: [-80, 0],
+      extrapolate: 'clamp',
+    });
+
+    const refKey = `ritual_${ritual.id}`;
+
+    return (
+      <Animated.View style={[styles.swipeActionLeft, { transform: [{ translateX: trans }] }]}>
+        <TouchableOpacity
+          style={styles.editAction}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            swipeableRefs.current[refKey]?.close();
+            onEditRitual?.(ritual);
+          }}
+        >
+          <Icons.Pencil size={18} color="#FFFFFF" />
+          <Text style={styles.actionText}>Sửa</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }, [onEditRitual]);
+
+  // Render ritual swipe actions - Right (Delete)
   const renderRitualRightActions = useCallback((progress, dragX, ritual) => {
     const trans = dragX.interpolate({
       inputRange: [-80, 0],
@@ -268,7 +361,6 @@ const DayDetailModal = ({
     });
 
     const refKey = `ritual_${ritual.id}`;
-    const ritualName = RITUAL_NAMES[ritual.ritual_slug] || ritual.ritual_slug || 'Nghi thức';
 
     return (
       <Animated.View style={[styles.swipeActionRight, { transform: [{ translateX: trans }] }]}>
@@ -276,25 +368,8 @@ const DayDetailModal = ({
           style={styles.deleteAction}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            Alert.alert(
-              'Xóa nghi thức',
-              `Bạn có chắc muốn xóa "${ritualName}"?`,
-              [
-                {
-                  text: 'Hủy',
-                  style: 'cancel',
-                  onPress: () => swipeableRefs.current[refKey]?.close(),
-                },
-                {
-                  text: 'Xóa',
-                  style: 'destructive',
-                  onPress: () => {
-                    swipeableRefs.current[refKey]?.close();
-                    onDeleteRitual?.(ritual);
-                  },
-                },
-              ]
-            );
+            swipeableRefs.current[refKey]?.close();
+            onDeleteRitual?.(ritual);
           }}
         >
           <Icons.Trash2 size={18} color="#FFFFFF" />
@@ -316,13 +391,14 @@ const DayDetailModal = ({
 
   const dateInfo = formatDate(date);
 
-  // Filter out divination/ritual events since they're shown in "Nghi thức đã hoàn thành" section
+  // Filter out divination/ritual/affirmation events since they're shown in dedicated sections
   // Be aggressive about filtering to prevent any duplicates
   const filteredEvents = events.filter(event => {
-    // Check source_type
-    const sourceType = event.source_type || '';
-    if (sourceType === 'divination') {
-      console.log('[DayDetailModal] Filtered out divination event:', event.title);
+    // Check source_type - filter out ritual, affirmation, divination types
+    const sourceType = (event.source_type || '').toLowerCase();
+    const excludedTypes = ['divination', 'ritual', 'affirmation', 'habit', 'habit_daily'];
+    if (excludedTypes.includes(sourceType)) {
+      console.log('[DayDetailModal] Filtered out event by source_type:', sourceType, event.title);
       return false;
     }
 
@@ -358,6 +434,7 @@ const DayDetailModal = ({
     const type = event.source_type || 'manual';
     // Skip PAPER_TRADE events - they're shown in the Paper Trades section below
     if (type === 'PAPER_TRADE' || type === 'paper_trade') return acc;
+    if (type === 'AFFIRMATION' || type === 'affirmation') return acc;
     if (!acc[type]) acc[type] = [];
     acc[type].push(event);
     return acc;
@@ -495,77 +572,37 @@ const DayDetailModal = ({
                 </>
               )}
 
-              {/* Mood Section */}
-              {mood && (mood.morning_mood || mood.evening_mood || mood.overall_mood) ? (
-                <View style={styles.moodSection}>
-                  <View style={styles.journalHeader}>
-                    <Icons.Smile size={18} color={COSMIC_COLORS.glow.gold} />
-                    <Text style={styles.journalTitle}>Tâm trạng hôm nay</Text>
-                    <TouchableOpacity
-                      style={styles.moodEditButton}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setShowMoodPicker(true);
-                      }}
-                    >
-                      <Icons.Pencil size={14} color={COSMIC_COLORS.glow.gold} />
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.moodContainer}>
-                    {mood.morning_mood && (
-                      <View style={styles.moodItem}>
-                        <Text style={styles.moodLabel}>Sáng</Text>
-                        <Text style={styles.moodValue}>{mood.morning_mood}</Text>
-                      </View>
-                    )}
-                    {mood.evening_mood && (
-                      <View style={styles.moodItem}>
-                        <Text style={styles.moodLabel}>Tối</Text>
-                        <Text style={styles.moodValue}>{mood.evening_mood}</Text>
-                      </View>
-                    )}
-                    {mood.overall_mood && (
-                      <View style={styles.moodItem}>
-                        <Text style={styles.moodLabel}>Tổng</Text>
-                        <View style={[styles.moodBadge, { backgroundColor: `${COSMIC_COLORS.glow.gold}20` }]}>
-                          <Text style={[styles.moodBadgeText, { color: COSMIC_COLORS.glow.gold }]}>
-                            {mood.overall_mood}
-                          </Text>
-                        </View>
-                      </View>
-                    )}
-                  </View>
-                  {mood.day_highlight && (
-                    <Text style={styles.moodNote}>💡 {mood.day_highlight}</Text>
-                  )}
+              {/* Quick Mood Picker - Simple inline emoji row */}
+              <View style={styles.quickMoodSection}>
+                <Text style={styles.quickMoodQuestion}>
+                  {mood?.morning_mood || mood?.overall_mood
+                    ? `Tâm trạng: ${QUICK_MOODS.find(m => m.id === (mood?.morning_mood || mood?.overall_mood))?.emoji || '😊'} ${QUICK_MOODS.find(m => m.id === (mood?.morning_mood || mood?.overall_mood))?.label || ''}`
+                    : 'Hôm nay bạn cảm thấy thế nào?'}
+                </Text>
+                <View style={styles.quickMoodRow}>
+                  {QUICK_MOODS.map((m) => {
+                    const isSelected = selectedMood === m.id || mood?.morning_mood === m.id || mood?.overall_mood === m.id;
+                    return (
+                      <TouchableOpacity
+                        key={m.id}
+                        style={[
+                          styles.quickMoodButton,
+                          isSelected && styles.quickMoodButtonSelected,
+                        ]}
+                        onPress={() => handleQuickMoodSave(m.id)}
+                        disabled={savingMood}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.quickMoodEmoji}>{m.emoji}</Text>
+                        <Text style={[
+                          styles.quickMoodLabel,
+                          isSelected && styles.quickMoodLabelSelected,
+                        ]}>{m.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
-              ) : (
-                <View style={styles.moodSection}>
-                  <View style={styles.journalHeader}>
-                    <Icons.Smile size={18} color={COSMIC_COLORS.glow.gold} />
-                    <Text style={styles.journalTitle}>Tâm trạng hôm nay</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.addMoodButton}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setShowMoodPicker(true);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.addMoodIconContainer}>
-                      <Icons.Plus size={20} color={COSMIC_COLORS.glow.gold} />
-                    </View>
-                    <View style={styles.addMoodContent}>
-                      <Text style={styles.addMoodTitle}>Ghi nhận tâm trạng</Text>
-                      <Text style={styles.addMoodSubtitle}>
-                        Theo dõi cảm xúc buổi sáng và tối
-                      </Text>
-                    </View>
-                    <Icons.ChevronRight size={18} color={COSMIC_COLORS.text.muted} />
-                  </TouchableOpacity>
-                </View>
-              )}
+              </View>
 
               {/* Calendar Journal Entries Section */}
               {journalEntries.length > 0 && (
@@ -736,6 +773,11 @@ const DayDetailModal = ({
                         ref={(ref) => {
                           if (ref) swipeableRefs.current[refKey] = ref;
                         }}
+                        renderLeftActions={
+                          onEditRitual
+                            ? (progress, dragX) => renderRitualLeftActions(progress, dragX, ritual)
+                            : null
+                        }
                         renderRightActions={
                           onDeleteRitual
                             ? (progress, dragX) => renderRitualRightActions(progress, dragX, ritual)
@@ -743,6 +785,7 @@ const DayDetailModal = ({
                         }
                         onSwipeableWillOpen={() => closeAllSwipeables(refKey)}
                         friction={2}
+                        overshootLeft={false}
                         overshootRight={false}
                       >
                         <TouchableOpacity
@@ -964,17 +1007,6 @@ const DayDetailModal = ({
           </View>
       </View>
 
-      {/* Mood Picker Modal */}
-      <MoodPickerModal
-        visible={showMoodPicker}
-        onClose={() => setShowMoodPicker(false)}
-        date={date}
-        existingMood={mood}
-        onMoodSaved={() => {
-          setShowMoodPicker(false);
-          onMoodUpdated?.();
-        }}
-      />
     </Modal>
   );
 };
@@ -1289,7 +1321,55 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
   },
-  // Mood section styles
+  // Quick Mood Picker styles - Simple inline emoji row
+  quickMoodSection: {
+    marginTop: COSMIC_SPACING.md,
+    paddingVertical: COSMIC_SPACING.md,
+    paddingHorizontal: COSMIC_SPACING.sm,
+    backgroundColor: COSMIC_COLORS.glass.bg,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COSMIC_COLORS.glass.border,
+  },
+  quickMoodQuestion: {
+    color: COSMIC_COLORS.text.secondary,
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: COSMIC_SPACING.sm,
+  },
+  quickMoodRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 4,
+  },
+  quickMoodButton: {
+    width: 44,
+    paddingVertical: 6,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  quickMoodButtonSelected: {
+    backgroundColor: `${COSMIC_COLORS.glow.gold}25`,
+    borderWidth: 1.5,
+    borderColor: COSMIC_COLORS.glow.gold,
+  },
+  quickMoodEmoji: {
+    fontSize: 22,
+  },
+  quickMoodLabel: {
+    fontSize: 9,
+    color: COSMIC_COLORS.text.muted,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  quickMoodLabelSelected: {
+    color: COSMIC_COLORS.glow.gold,
+    fontWeight: '600',
+  },
+  // Old mood section styles (keep for reference)
   moodSection: {
     marginTop: COSMIC_SPACING.xl,
     paddingTop: COSMIC_SPACING.lg,
