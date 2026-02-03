@@ -32,7 +32,6 @@ import {
   Target,
   FileText,
   ChevronDown,
-  Edit3,
 } from 'lucide-react-native';
 
 import { COLORS, TYPOGRAPHY, SPACING, GRADIENTS, BORDER_RADIUS } from '../../utils/tokens';
@@ -394,10 +393,9 @@ const JournalEntryScreen = () => {
             maxLength={100}
           />
 
-          {/* Content - Tap to Edit */}
+          {/* Content - Seamless Edit */}
           <View style={styles.contentContainer}>
             {isEditing ? (
-              /* Edit Mode - TextInput */
               <TextInput
                 style={styles.contentInput}
                 placeholder={
@@ -413,25 +411,26 @@ const JournalEntryScreen = () => {
                 multiline
                 textAlignVertical="top"
                 maxLength={charLimit}
-                autoFocus={mode === 'create'}
-                onBlur={() => content.trim() && setIsEditing(false)}
+                autoFocus
+                onBlur={() => setIsEditing(false)}
               />
             ) : (
-              /* View Mode - Rendered Content (tap to edit) */
               <TouchableOpacity
                 style={styles.previewContainer}
                 onPress={() => setIsEditing(true)}
-                activeOpacity={0.8}
+                activeOpacity={1}
               >
                 {content ? (
                   <RichTextRenderer content={content} style={styles.previewText} />
                 ) : (
-                  <Text style={styles.previewPlaceholder}>Nhấn để viết...</Text>
+                  <Text style={styles.previewPlaceholder}>
+                    {entryType === ENTRY_TYPES.GRATITUDE
+                      ? 'Hôm nay tôi biết ơn...'
+                      : entryType === ENTRY_TYPES.GOAL_NOTE
+                      ? 'Ghi chú về mục tiêu...'
+                      : 'Viết suy nghĩ của bạn...'}
+                  </Text>
                 )}
-                <View style={styles.editHint}>
-                  <Edit3 size={14} color={COLORS.textMuted} />
-                  <Text style={styles.editHintText}>Nhấn để chỉnh sửa</Text>
-                </View>
               </TouchableOpacity>
             )}
             <Text style={styles.charCount}>
@@ -686,21 +685,6 @@ const styles = StyleSheet.create({
   },
   previewPlaceholder: {
     fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-  },
-  editHint: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: SPACING.md,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    gap: SPACING.xs,
-  },
-  editHintText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
   },
   charCount: {
