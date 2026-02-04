@@ -47,6 +47,7 @@ import TradingChart from './components/TradingChart';
 import ScanResultsSection from './components/ScanResultsSection';
 // V2 Paper Trade Modal with enhanced Binance-style UI
 import { PaperTradeModalV2, OpenPositionsSection } from '../../components/Trading';
+import { AdminAIBubble } from '../../components/AdminAI';
 import { MultiZoneOverlay } from '../../components/Scanner';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
 import SponsorBanner from '../../components/SponsorBanner';
@@ -82,7 +83,7 @@ const CHART_HEIGHT = 320;
 
 const ScannerScreen = ({ navigation }) => {
   // Get user and tier from Auth Context
-  const { user, userTier } = useAuth();
+  const { user, userTier, isAdmin } = useAuth();
 
   // Tooltip hook for feature discovery
   const { showTooltipForScreen, initialized: tooltipInitialized } = useTooltip();
@@ -1611,6 +1612,17 @@ const ScannerScreen = ({ navigation }) => {
           currentPrice={currentPrice || 0}
           mode={selectedPattern ? 'pattern' : 'custom'}
           onClose={handlePaperTradeSuccess}
+        />
+
+        {/* Admin AI Trading Brain - Floating bubble, admin only */}
+        <AdminAIBubble
+          symbol={displayCoin}
+          timeframe={selectedTimeframe}
+          currentPrice={currentPrice}
+          priceChange={priceChange}
+          scanResults={scanResults}
+          zones={zones}
+          patterns={patterns}
         />
       </SafeAreaView>
     </LinearGradient>
