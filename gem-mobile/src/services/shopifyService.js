@@ -808,8 +808,24 @@ export const preloadShopData = async () => {
 
   console.log('[Shopify] Preloading shop data...');
   preloadPromise = shopifyService.getProducts({ limit: 100 })
-    .then(products => {
+    .then(async products => {
       console.log(`[Shopify] Preloaded ${products.length} products`);
+
+      // Prefetch product images for INSTANT display when switching to Shop tab
+      try {
+        const { prefetchImages } = await import('../components/Common/OptimizedImage');
+        const imageUrls = products
+          .slice(0, 30) // Prefetch first 30 product images
+          .map(p => p.images?.[0]?.src || p.image?.src || p.image)
+          .filter(Boolean);
+        if (imageUrls.length > 0) {
+          prefetchImages(imageUrls);
+          console.log(`[Shopify] Prefetching ${imageUrls.length} product images`);
+        }
+      } catch (e) {
+        console.warn('[Shopify] Image prefetch failed:', e);
+      }
+
       preloadPromise = null;
       return products;
     })
@@ -849,8 +865,45 @@ export const preloadAllShopData = async () => {
       module.digitalProductService?.getHeroProducts?.(5).catch(() => null)
     ),
   ])
-    .then(([products]) => {
+    .then(async ([products, banners, digitalProducts, heroProducts]) => {
       console.log('[Shopify] ALL shop data preloaded');
+
+      // Prefetch ALL banner and product images for INSTANT display
+      try {
+        const { prefetchImages } = await import('../components/Common/OptimizedImage');
+        const allImageUrls = [];
+
+        // Banner images
+        if (banners?.data) {
+          banners.data.forEach(b => {
+            if (b.image_url) allImageUrls.push(b.image_url);
+          });
+        }
+
+        // Digital product images
+        if (Array.isArray(digitalProducts)) {
+          digitalProducts.slice(0, 10).forEach(p => {
+            const img = p.cover_image || p.image_url;
+            if (img) allImageUrls.push(img);
+          });
+        }
+
+        // Hero product images
+        if (Array.isArray(heroProducts)) {
+          heroProducts.forEach(p => {
+            const img = p.cover_image || p.image_url;
+            if (img) allImageUrls.push(img);
+          });
+        }
+
+        if (allImageUrls.length > 0) {
+          prefetchImages(allImageUrls);
+          console.log(`[Shopify] Prefetching ${allImageUrls.length} additional images (banners, digital)`);
+        }
+      } catch (e) {
+        console.warn('[Shopify] Additional image prefetch failed:', e);
+      }
+
       preloadAllPromise = null;
       return products;
     })
