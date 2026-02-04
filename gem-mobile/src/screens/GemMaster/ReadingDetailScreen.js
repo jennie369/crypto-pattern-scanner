@@ -3,7 +3,7 @@
  * Full view of a saved tarot or I-Ching reading
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   Share,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -37,17 +38,86 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/token
 import readingHistoryService from '../../services/readingHistoryService';
 import { getCardImage, getCardImageByName } from '../../assets/tarot';
 import { getHexagramImage } from '../../assets/iching';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ReadingDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const { user } = useAuth();
 
-  const { reading: initialReading, type = 'tarot' } = route.params || {};
+  // Support both formats:
+  // 1. { reading: Object, type: string } - full reading object (from VisionBoard history section)
+  // 2. { readingId: string, readingType: string } - just ID (from Calendar)
+  const {
+    reading: initialReading,
+    type: paramType,
+    readingId,
+    readingType,
+  } = route.params || {};
+
+  // Determine the reading type (prioritize readingType from params)
+  const type = readingType || paramType || 'tarot';
 
   // State
-  const [reading, setReading] = useState(initialReading);
+  const [reading, setReading] = useState(initialReading || null);
+  const [isLoading, setIsLoading] = useState(!initialReading && !!readingId);
+  const [loadError, setLoadError] = useState(null);
   const [isEditingNotes, setIsEditingNotes] = useState(false);
-  const [notes, setNotes] = useState(reading?.notes || '');
+  const [notes, setNotes] = useState(initialReading?.notes || '');
+
+  // Fetch reading by ID if only ID was provided
+  // Calendar uses divination_readings table (unified), while history uses separate tables
+  useEffect(() => {
+    const fetchReadingById = async () => {
+      if (initialReading || !readingId || !user?.id) {
+        return;
+      }
+
+      console.log('[ReadingDetailScreen] Fetching reading by ID:', readingId, 'type:', type);
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        // First try the unified divination_readings table (used by calendar)
+        const { data: divinationData, error: divinationError } =
+          await readingHistoryService.getDivinationReadingById(readingId, user.id);
+
+        if (divinationData) {
+          console.log('[ReadingDetailScreen] Reading loaded from divination_readings:', divinationData.id);
+          setReading(divinationData);
+          setNotes(divinationData.notes || '');
+          setIsLoading(false);
+          return;
+        }
+
+        // If not found, try the specific tables (tarot_readings / iching_readings)
+        console.log('[ReadingDetailScreen] Not found in divination_readings, trying specific tables');
+        const fetchFunc = type === 'tarot'
+          ? readingHistoryService.getTarotReadingById
+          : readingHistoryService.getIChingReadingById;
+
+        const { data, error } = await fetchFunc(readingId, user.id);
+
+        if (error) {
+          console.error('[ReadingDetailScreen] Fetch error:', error);
+          setLoadError(error);
+        } else if (data) {
+          console.log('[ReadingDetailScreen] Reading loaded from specific table:', data.id);
+          setReading(data);
+          setNotes(data.notes || '');
+        } else {
+          setLoadError('Không tìm thấy bài đọc');
+        }
+      } catch (err) {
+        console.error('[ReadingDetailScreen] Fetch exception:', err);
+        setLoadError(err?.message || 'Lỗi không xác định');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReadingById();
+  }, [readingId, initialReading, user?.id, type]);
 
   // Format date
   const formatDate = (dateString) => {
@@ -87,19 +157,35 @@ const ReadingDetailScreen = () => {
 
   const handleSaveNotes = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    try {
-      const updateFunc = type === 'tarot'
-        ? readingHistoryService.updateTarotNotes
-        : readingHistoryService.updateIChingNotes;
 
-      // Include userId in the update call (required by service)
-      const { error } = await updateFunc(reading?.id, reading?.user_id, notes);
-      if (!error) {
+    // Get userId from reading or from auth context
+    const userId = reading?.user_id || user?.id;
+    if (!reading?.id || !userId) {
+      console.error('[ReadingDetailScreen] Save notes error: missing readingId or userId');
+      Alert.alert('Lỗi', 'Không thể lưu ghi chú.');
+      return;
+    }
+
+    try {
+      let updateResult;
+
+      // Check if reading came from divination_readings table (unified table from calendar)
+      if (reading._source === 'divination_readings') {
+        updateResult = await readingHistoryService.updateDivinationNotes(reading.id, userId, notes);
+      } else {
+        // Use specific table methods
+        const updateFunc = type === 'tarot'
+          ? readingHistoryService.updateTarotNotes
+          : readingHistoryService.updateIChingNotes;
+        updateResult = await updateFunc(reading.id, userId, notes);
+      }
+
+      if (!updateResult.error) {
         setReading((prev) => ({ ...prev, notes }));
         setIsEditingNotes(false);
         Alert.alert('Đã lưu', 'Ghi chú đã được cập nhật.');
       } else {
-        console.error('[ReadingDetailScreen] Save notes error:', error);
+        console.error('[ReadingDetailScreen] Save notes error:', updateResult.error);
         Alert.alert('Lỗi', 'Không thể lưu ghi chú.');
       }
     } catch (err) {
@@ -158,14 +244,24 @@ const ReadingDetailScreen = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              const deleteFunc = type === 'tarot'
-                ? readingHistoryService.deleteTarotReading
-                : readingHistoryService.deleteIChingReading;
+              let deleteResult;
 
-              const { error } = await deleteFunc(reading?.id);
-              if (!error) {
+              // Check if reading came from divination_readings table (unified table from calendar)
+              if (reading?._source === 'divination_readings') {
+                deleteResult = await readingHistoryService.deleteDivinationReading(reading?.id, user?.id);
+              } else {
+                // Use specific table methods
+                const deleteFunc = type === 'tarot'
+                  ? readingHistoryService.deleteTarotReading
+                  : readingHistoryService.deleteIChingReading;
+                deleteResult = await deleteFunc(reading?.id, user?.id);
+              }
+
+              if (!deleteResult.error) {
                 Alert.alert('Đã xóa', 'Bài đọc đã được xóa.');
                 navigation.goBack();
+              } else {
+                Alert.alert('Lỗi', 'Không thể xóa bài đọc.');
               }
             } catch (err) {
               console.error('[ReadingDetailScreen] Delete error:', err);
@@ -180,7 +276,12 @@ const ReadingDetailScreen = () => {
   // ========== RENDER ==========
   const renderTarotContent = () => {
     const cards = reading?.cards || [];
+    // Support both nested interpretations object and flat database fields
     const interpretations = reading?.interpretations || {};
+    const summary = interpretations?.summary || reading?.overall_interpretation || reading?.ai_interpretation;
+    const advice = interpretations?.advice;
+
+    console.log('[ReadingDetailScreen] Tarot cards:', cards?.length, cards?.map(c => ({ id: c?.card_id || c?.id, name: c?.name_vi || c?.name })));
 
     return (
       <>
@@ -234,12 +335,12 @@ const ReadingDetailScreen = () => {
         </View>
 
         {/* Interpretation */}
-        {interpretations?.summary && (
+        {summary && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Giải bài</Text>
             <View style={styles.interpretationCard}>
               <Text style={styles.interpretationText}>
-                {interpretations.summary}
+                {summary}
               </Text>
             </View>
           </View>
@@ -263,11 +364,11 @@ const ReadingDetailScreen = () => {
         )}
 
         {/* Advice */}
-        {interpretations?.advice && (
+        {advice && (
           <View style={styles.section}>
             <View style={styles.adviceCard}>
               <Text style={styles.adviceLabel}>Lời khuyên</Text>
-              <Text style={styles.adviceText}>{interpretations.advice}</Text>
+              <Text style={styles.adviceText}>{advice}</Text>
             </View>
           </View>
         )}
@@ -278,11 +379,16 @@ const ReadingDetailScreen = () => {
   const renderIChingContent = () => {
     const hexagram = reading?.present_hexagram;
     const changingLines = reading?.changing_lines || [];
+    // Support both nested interpretations object and flat database fields
     const interpretations = reading?.interpretations || {};
+    const summary = interpretations?.summary || reading?.overall_interpretation || reading?.ai_interpretation;
+    const advice = interpretations?.advice;
 
-    // Get hexagram number for image
-    const hexagramNumber = hexagram?.number || reading?.hexagram_number || reading?.hexagramNumber;
+    // Get hexagram number for image - handle multiple data formats
+    const hexagramNumber = hexagram?.number || hexagram?.hexagram_number || reading?.hexagram_number || reading?.hexagramNumber;
     const hexagramImage = hexagramNumber ? getHexagramImage(hexagramNumber) : null;
+
+    console.log('[ReadingDetailScreen] I-Ching data:', { hexagram, hexagramNumber, hexagramImage: !!hexagramImage });
 
     return (
       <>
@@ -332,23 +438,23 @@ const ReadingDetailScreen = () => {
         )}
 
         {/* Interpretation */}
-        {interpretations?.summary && (
+        {summary && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Giải quẻ</Text>
             <View style={styles.interpretationCard}>
               <Text style={styles.interpretationText}>
-                {interpretations.summary}
+                {summary}
               </Text>
             </View>
           </View>
         )}
 
         {/* Advice */}
-        {interpretations?.advice && (
+        {advice && (
           <View style={styles.section}>
             <View style={styles.adviceCard}>
               <Text style={styles.adviceLabel}>Lời khuyên</Text>
-              <Text style={styles.adviceText}>{interpretations.advice}</Text>
+              <Text style={styles.adviceText}>{advice}</Text>
             </View>
           </View>
         )}
@@ -384,6 +490,7 @@ const ReadingDetailScreen = () => {
           <TouchableOpacity
             style={styles.starButton}
             onPress={handleToggleStar}
+            disabled={isLoading || !reading}
           >
             <Star
               size={24}
@@ -393,6 +500,29 @@ const ReadingDetailScreen = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Loading State */}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={COLORS.purple} />
+            <Text style={styles.loadingText}>Đang tải...</Text>
+          </View>
+        )}
+
+        {/* Error State */}
+        {loadError && !isLoading && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{loadError}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.retryText}>Quay lại</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Main Content - only show when not loading and no error */}
+        {!isLoading && !loadError && reading && (
         <ScrollView
           style={styles.content}
           contentContainerStyle={styles.scrollContent}
@@ -490,6 +620,7 @@ const ReadingDetailScreen = () => {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        )}
       </SafeAreaView>
     </View>
   );
@@ -536,6 +667,42 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.glassBg,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xl,
+  },
+  loadingText: {
+    marginTop: SPACING.md,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textMuted,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xl,
+  },
+  errorText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.error,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+  },
+  retryButton: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.glassBg,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+  },
+  retryText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
   content: {
     flex: 1,

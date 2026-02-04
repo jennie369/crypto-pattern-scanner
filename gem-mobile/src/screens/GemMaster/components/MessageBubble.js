@@ -172,6 +172,9 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
   // Check if message has action buttons
   const hasActionButtons = !isUser && message.actionButtons && Array.isArray(message.actionButtons) && message.actionButtons.length > 0;
 
+  // Check if message has upgrade button metadata
+  const showUpgradeButton = !isUser && message.metadata?.showUpgradeButton;
+
   // Handle action button press
   const handleActionButtonPress = useCallback((button) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -185,6 +188,17 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
       navigation.navigate(button.screen, button.params || {});
     }
   }, [navigation]);
+
+  // Handle upgrade button press - navigate to UpgradeScreen
+  const handleUpgradePress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const targetTier = message.metadata?.requiredTier || 'tier1';
+    navigation.navigate('UpgradeScreen', {
+      targetTier,
+      source: 'gem_master_template',
+      templateId: message.metadata?.templateId,
+    });
+  }, [navigation, message.metadata?.requiredTier, message.metadata?.templateId]);
 
   // Get products from message only (not from recommendations - those are handled by ProductRecommendations component)
   // Removed crystal fallback to avoid showing unrelated products for course/mindset messages
@@ -520,6 +534,19 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
                 })}
               </View>
             )}
+
+            {/* Upgrade Button (for template access restricted messages) */}
+            {showUpgradeButton && (
+              <TouchableOpacity
+                style={styles.upgradeButton}
+                onPress={handleUpgradePress}
+                activeOpacity={0.7}
+              >
+                <Crown size={16} color="#1a1a2e" />
+                <Text style={styles.upgradeButtonText}>Nâng cấp tài khoản</Text>
+                <ChevronRight size={16} color="#1a1a2e" />
+              </TouchableOpacity>
+            )}
           </View>
         </Pressable>
 
@@ -754,6 +781,23 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '500',
     color: COLORS.gold,
+  },
+  // Upgrade button styles (for template access restricted)
+  upgradeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.gold,
+    borderRadius: 12,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginTop: SPACING.md,
+    gap: SPACING.xs,
+  },
+  upgradeButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    color: '#1a1a2e',
   },
 });
 

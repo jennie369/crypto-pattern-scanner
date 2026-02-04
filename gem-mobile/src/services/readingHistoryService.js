@@ -389,6 +389,111 @@ class ReadingHistoryService {
       return { success: false, error: err?.message || 'Unknown error' };
     }
   }
+
+  /**
+   * Get a reading from the unified divination_readings table (used by calendar)
+   * This table has a different schema than tarot_readings/iching_readings
+   * @param {string} readingId - Reading ID
+   * @param {string} userId - User ID for security check
+   * @returns {Promise<{data: Object|null, error: string|null}>}
+   */
+  async getDivinationReadingById(readingId, userId) {
+    try {
+      const { data, error } = await supabase
+        .from('divination_readings')
+        .select('*')
+        .eq('id', readingId)
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('[ReadingHistoryService] getDivinationReadingById error:', error);
+        return { data: null, error: error.message };
+      }
+
+      // Transform to match expected format in ReadingDetailScreen
+      if (data) {
+        const transformed = {
+          ...data,
+          reading_type: data.type, // 'tarot' or 'iching'
+          _source: 'divination_readings', // Marker to identify source table for updates/deletes
+          // For tarot
+          spread_type: data.spread_type,
+          // The cards field is already JSONB
+          // For iching - transform hexagram_data to match expected structure
+          present_hexagram: data.hexagram_data ? {
+            ...data.hexagram_data,
+            number: data.hexagram_number,
+          } : null,
+          hexagram_number: data.hexagram_number,
+          // Interpretations - map from single interpretation field
+          overall_interpretation: data.interpretation,
+          ai_interpretation: data.interpretation,
+        };
+        return { data: transformed, error: null };
+      }
+
+      return { data: null, error: null };
+    } catch (err) {
+      console.error('[ReadingHistoryService] getDivinationReadingById exception:', err);
+      return { data: null, error: err?.message || 'Unknown error' };
+    }
+  }
+
+  /**
+   * Update notes for a divination reading (unified table)
+   * @param {string} readingId - Reading ID
+   * @param {string} userId - User ID
+   * @param {string} notes - Notes text
+   * @returns {Promise<{data: Object|null, error: string|null}>}
+   */
+  async updateDivinationNotes(readingId, userId, notes) {
+    try {
+      const { data, error } = await supabase
+        .from('divination_readings')
+        .update({ notes })
+        .eq('id', readingId)
+        .eq('user_id', userId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[ReadingHistoryService] updateDivinationNotes error:', error);
+        return { data: null, error: error.message };
+      }
+
+      return { data, error: null };
+    } catch (err) {
+      console.error('[ReadingHistoryService] updateDivinationNotes exception:', err);
+      return { data: null, error: err?.message || 'Unknown error' };
+    }
+  }
+
+  /**
+   * Delete a divination reading (unified table)
+   * @param {string} readingId - Reading ID
+   * @param {string} userId - User ID
+   * @returns {Promise<{success: boolean, error: string|null}>}
+   */
+  async deleteDivinationReading(readingId, userId) {
+    try {
+      const { error } = await supabase
+        .from('divination_readings')
+        .delete()
+        .eq('id', readingId)
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('[ReadingHistoryService] deleteDivinationReading error:', error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, error: null };
+    } catch (err) {
+      console.error('[ReadingHistoryService] deleteDivinationReading exception:', err);
+      return { success: false, error: err?.message || 'Unknown error' };
+    }
+  }
 }
 
 export const readingHistoryService = new ReadingHistoryService();

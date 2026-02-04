@@ -578,37 +578,51 @@ export const recalculateDailyScore = async (userId) => {
 
 // ============ GET TODAY'S ACTIVITY COUNTS ============
 // Returns counts for affirmations, habits completed today
+// Primary source: vision_daily_summary (saved by VisionBoardScreen widgets)
 export const getTodayActivityCounts = async (userId) => {
   const today = new Date().toISOString().split('T')[0];
 
   try {
-    // Get affirmations completed today
-    const { count: affirmationsCount } = await supabase
-      .from('vision_affirmation_logs')
-      .select('*', { count: 'exact', head: true })
+    // Primary source: Read from today's daily summary (saved by VisionBoardScreen)
+    const { data: summaryData, error: summaryError } = await supabase
+      .from('vision_daily_summary')
+      .select('affirmations_completed, habits_completed, ritual_completed, actions_completed')
       .eq('user_id', userId)
-      .gte('completed_at', today);
+      .eq('summary_date', today)
+      .single();
 
-    // Get habits completed today
-    const { count: habitsCount } = await supabase
-      .from('vision_habit_logs')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('log_date', today);
+    if (summaryData && !summaryError) {
+      console.log('[statsService] getTodayActivityCounts from summary:', summaryData);
+      return {
+        affirmationsCompleted: summaryData.affirmations_completed || 0,
+        habitsCompleted: summaryData.habits_completed || 0,
+        ritualsCompleted: summaryData.ritual_completed ? 1 : 0,
+        goalsCompleted: summaryData.actions_completed || 0,
+      };
+    }
 
-    // Get ritual completions today
+    // Fallback: Get ritual completions today from ritual_completions table
     const { count: ritualsCount } = await supabase
       .from('vision_ritual_completions')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
       .gte('completed_at', today);
 
-    console.log('[statsService] getTodayActivityCounts:', { affirmationsCount, habitsCount, ritualsCount });
+    // Fallback: Get completed calendar events (goals/tasks) today
+    const { count: goalsCount } = await supabase
+      .from('vision_calendar_events')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('event_date', today)
+      .eq('is_completed', true);
+
+    console.log('[statsService] getTodayActivityCounts fallback:', { ritualsCount, goalsCount });
 
     return {
-      affirmationsCompleted: affirmationsCount || 0,
-      habitsCompleted: habitsCount || 0,
+      affirmationsCompleted: 0,
+      habitsCompleted: 0,
       ritualsCompleted: ritualsCount || 0,
+      goalsCompleted: goalsCount || 0,
     };
   } catch (err) {
     console.error('[statsService] getTodayActivityCounts error:', err);
@@ -616,6 +630,7 @@ export const getTodayActivityCounts = async (userId) => {
       affirmationsCompleted: 0,
       habitsCompleted: 0,
       ritualsCompleted: 0,
+      goalsCompleted: 0,
     };
   }
 };

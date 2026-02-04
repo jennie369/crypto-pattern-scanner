@@ -135,7 +135,7 @@ import { useSmartTriggers } from '../../hooks/useSmartTriggers';
 
 // NEW: Centralized Templates - Intent Detection
 import { detectTemplateIntent, extractContextForAutoFill } from '../../services/templates/intentDetectionService';
-import { checkTemplateAccess } from '../../config/templateAccessControl';
+import { checkTemplateAccess, getUpgradePromptForTemplate } from '../../config/templateAccessControl';
 import { getTemplate } from '../../services/templates/journalTemplates';
 import TemplateInlineForm from '../../components/GemMaster/TemplateInlineForm';
 
@@ -1029,9 +1029,62 @@ const GemMasterScreen = ({ navigation, route }) => {
 
           return; // Don't continue to AI chat
         } else {
-          // User doesn't have access - show upgrade prompt
+          // User doesn't have access - show upgrade prompt message
           console.log('[GemMaster] Template access denied:', templateIntent.templateId, 'reason:', access.reason);
-          // Continue to normal AI flow which may suggest upgrade
+
+          // Add user message first
+          const userMessage = {
+            id: `user_${Date.now()}`,
+            type: 'user',
+            text,
+            timestamp: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, userMessage]);
+
+          // Get upgrade info for this template
+          const upgradeInfo = getUpgradePromptForTemplate(templateIntent.templateId, userTier);
+          const template = getTemplate(templateIntent.templateId);
+          const templateName = template?.name || upgradeInfo.title;
+
+          // Build personalized upgrade message
+          const upgradeMessages = {
+            // TIER1 (Pro) templates
+            fear_setting: `😰 Tôi hiểu bạn muốn sử dụng **Đối diện nỗi sợ (Fear-Setting)** - phương pháp Tim Ferriss để vượt qua nỗi sợ.\n\nTemplate này giúp bạn:\n• Phân tích chi tiết nỗi sợ\n• Tìm giải pháp phòng ngừa\n• Lên kế hoạch hành động\n\n🔒 **Nâng cấp lên Pro (Tier 1)** để sử dụng template này!`,
+            think_day: `🧠 Tôi thấy bạn muốn sử dụng **Think Day** - phương pháp review cuộc sống toàn diện.\n\nTemplate này giúp bạn:\n• Đánh giá cân bằng cuộc sống\n• Suy ngẫm về các lĩnh vực quan trọng\n• Lên kế hoạch cải thiện\n\n🔒 **Nâng cấp lên Pro (Tier 1)** để sử dụng template này!`,
+            weekly_planning: `📅 **Tuần mới** là template giúp bạn có định hướng rõ ràng cho tuần.\n\n🔒 **Nâng cấp lên Pro (Tier 1)** để sử dụng template này!`,
+            // TIER2 (Premium) templates
+            trading_journal: `📈 Tôi thấy bạn muốn sử dụng **Nhật Ký Giao Dịch** - công cụ ghi chép giao dịch chuyên nghiệp.\n\n🔒 **Nâng cấp lên Premium (Tier 2)** để mở khóa tính năng này!`,
+            vision_3_5_years: `🔮 **Tầm nhìn 3-5 năm** giúp bạn thiết kế cuộc sống lý tưởng.\n\n🔒 **Nâng cấp lên Premium (Tier 2)** để mở khóa template này!`,
+            daily_wins: `🏆 **Chiến thắng hôm nay** giúp bạn ghi nhận thành tựu mỗi ngày.\n\n🔒 **Nâng cấp lên Premium (Tier 2)** để sử dụng template này!`,
+            // TIER3 (VIP) templates
+            prosperity_frequency: `✨ Tôi hiểu bạn muốn khám phá **Tần Số Thịnh Vượng** - template cao cấp kết hợp tài chính và tâm linh.\n\nĐây là template VIP giúp bạn:\n• Phân tích tình trạng tài chính hiện tại\n• Chữa lành mối quan hệ với tiền bạc\n• Tạo khẳng định sự dồi dào\n• Thiết lập ý định tài chính mạnh mẽ\n\n🔒 **Nâng cấp lên VIP (Tier 3)** để mở khóa template này!`,
+            advanced_trading_psychology: `🧠 Tôi thấy bạn đang quan tâm đến **Tâm Lý Giao Dịch Nâng Cao** - công cụ chuyên sâu dành cho trader.\n\nTemplate VIP này giúp bạn:\n• Nhận dạng cognitive bias (FOMO, Revenge, Overconfidence...)\n• Phân tích pattern cảm xúc khi trading\n• Xây dựng chiến lược kiểm soát tâm lý\n• Theo dõi vi phạm quy tắc trading\n\n🔒 **Nâng cấp lên VIP (Tier 3)** để sử dụng template này!`,
+          };
+
+          const upgradeText = upgradeMessages[templateIntent.templateId] ||
+            `✨ Tôi hiểu bạn muốn sử dụng **${templateName}**.\n\n🔒 ${access.reason}. Nâng cấp tài khoản để mở khóa các template cao cấp và nhiều tính năng hữu ích khác!`;
+
+          // Add AI upgrade prompt message with special type
+          const upgradeMsg = {
+            id: `upgrade_prompt_${Date.now()}`,
+            type: 'assistant',
+            text: upgradeText,
+            timestamp: new Date().toISOString(),
+            source: 'template_upgrade_prompt',
+            metadata: {
+              showUpgradeButton: true,
+              templateId: templateIntent.templateId,
+              requiredTier: upgradeInfo.targetTier,
+            },
+          };
+          setMessages((prev) => [...prev, upgradeMsg]);
+
+          // Auto-scroll
+          setTimeout(() => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          }, 100);
+
+          return; // Don't continue to normal AI flow
         }
       }
 
