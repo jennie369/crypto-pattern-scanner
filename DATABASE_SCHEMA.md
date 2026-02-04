@@ -1,5 +1,5 @@
 # Gemral - Database Schema & Tier System
-## MASTER REFERENCE - Updated: 2025-12-05 (Synced with Production Triggers)
+## MASTER REFERENCE - Updated: 2026-02-04 (Added Vision Board, Calendar, Calls, Messages Privacy, Chatbot Memory)
 
 > **IMPORTANT**: Tất cả code phải sử dụng CHÍNH XÁC các table, column và values trong file này.
 > **PRIMARY TABLE**: `profiles` - Sử dụng cho TẤT CẢ user data
@@ -5032,3 +5032,1059 @@ trigger_zones_updated_at
 | `mtf_alignment_cache` | Cache MTF alignment calculations |
 | `zone_visualization_preferences` | User display settings |
 | `zone_alerts` | Zone-specific notifications |
+
+---
+
+## 66. VISION BOARD SYSTEM TABLES (Migration 2025-12-10)
+
+### 66.1 `vision_goals`
+```sql
+CREATE TABLE vision_goals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  life_area VARCHAR(50) NOT NULL,          -- 'finance', 'health', 'career', 'relationships', 'personal', 'spiritual'
+  icon VARCHAR(50) DEFAULT 'target',
+  color VARCHAR(20),
+  target_type VARCHAR(20) DEFAULT 'completion',
+  target_value NUMERIC DEFAULT 100,
+  target_unit VARCHAR(50),
+  current_value NUMERIC DEFAULT 0,
+  start_date DATE DEFAULT CURRENT_DATE,
+  end_date DATE,
+  progress_percent NUMERIC DEFAULT 0,
+  xp_earned INTEGER DEFAULT 0,
+  streak INTEGER DEFAULT 0,
+  best_streak INTEGER DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'active',     -- 'active', 'completed', 'archived'
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.2 `vision_milestones`
+```sql
+CREATE TABLE vision_milestones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  goal_id UUID REFERENCES vision_goals(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  target_percent INTEGER NOT NULL,
+  xp_reward INTEGER DEFAULT 50,
+  is_completed BOOLEAN DEFAULT FALSE,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.3 `vision_actions`
+```sql
+CREATE TABLE vision_actions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  goal_id UUID REFERENCES vision_goals(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  due_date DATE,
+  recurrence VARCHAR(20) DEFAULT 'once',   -- 'once', 'daily', 'weekly', 'monthly'
+  recurrence_days INTEGER[],               -- [1,3,5] for Mon,Wed,Fri
+  weight INTEGER DEFAULT 1,
+  xp_reward INTEGER DEFAULT 20,
+  is_completed BOOLEAN DEFAULT FALSE,
+  completed_at TIMESTAMPTZ,
+  last_completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.4 `vision_affirmations`
+```sql
+CREATE TABLE vision_affirmations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  goal_id UUID REFERENCES vision_goals(id) ON DELETE SET NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  audio_url TEXT,
+  life_area VARCHAR(50),
+  times_per_day INTEGER DEFAULT 3,
+  times_completed INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.5 `vision_affirmation_logs`
+```sql
+CREATE TABLE vision_affirmation_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  affirmation_id UUID REFERENCES vision_affirmations(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  completed_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.6 `vision_habits`
+```sql
+CREATE TABLE vision_habits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  goal_id UUID REFERENCES vision_goals(id) ON DELETE SET NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  frequency VARCHAR(20) DEFAULT 'daily',
+  target_streak INTEGER DEFAULT 30,
+  current_streak INTEGER DEFAULT 0,
+  best_streak INTEGER DEFAULT 0,
+  life_area VARCHAR(50),
+  icon VARCHAR(50) DEFAULT 'check-circle',
+  color VARCHAR(20) DEFAULT '#4CAF50',
+  last_checked_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.7 `vision_habit_logs`
+```sql
+CREATE TABLE vision_habit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  habit_id UUID REFERENCES vision_habits(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  log_date DATE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(habit_id, log_date)
+);
+```
+
+### 66.8 `vision_rituals` (Master List)
+```sql
+CREATE TABLE vision_rituals (
+  id VARCHAR(50) PRIMARY KEY,              -- 'star-wish', 'heart-expansion', etc.
+  name VARCHAR(100) NOT NULL,
+  name_vi VARCHAR(100),
+  description TEXT,
+  category VARCHAR(50) NOT NULL,           -- 'manifest', 'spiritual', 'healing', 'prosperity'
+  duration_minutes INTEGER DEFAULT 5,
+  icon VARCHAR(50),
+  color VARCHAR(20),
+  xp_per_completion INTEGER DEFAULT 20,
+  sort_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.9 `vision_ritual_completions`
+```sql
+CREATE TABLE vision_ritual_completions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  ritual_id VARCHAR(50) REFERENCES vision_rituals(id),
+  ritual_slug VARCHAR(50),                 -- Denormalized for quick access
+  completed_at TIMESTAMPTZ DEFAULT NOW(),
+  duration_seconds INTEGER,
+  user_input TEXT,
+  reflection TEXT,
+  content TEXT,                            -- User content (gratitude items, wishes, letters)
+  xp_earned INTEGER DEFAULT 0,
+  goal_id UUID REFERENCES vision_goals(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.10 `vision_ritual_streaks`
+```sql
+CREATE TABLE vision_ritual_streaks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  ritual_id VARCHAR(50) REFERENCES vision_rituals(id),
+  current_streak INTEGER DEFAULT 0,
+  best_streak INTEGER DEFAULT 0,
+  total_completions INTEGER DEFAULT 0,
+  last_completed_at TIMESTAMPTZ,
+  UNIQUE(user_id, ritual_id)
+);
+```
+
+### 66.11 `vision_user_stats`
+```sql
+CREATE TABLE vision_user_stats (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+  total_xp INTEGER DEFAULT 0,
+  current_streak INTEGER DEFAULT 0,
+  best_streak INTEGER DEFAULT 0,
+  goals_created INTEGER DEFAULT 0,
+  goals_completed INTEGER DEFAULT 0,
+  achievements TEXT[],
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.12 `vision_daily_summary`
+```sql
+CREATE TABLE vision_daily_summary (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  summary_date DATE NOT NULL,
+  daily_score INTEGER DEFAULT 0,
+  actions_completed INTEGER DEFAULT 0,
+  actions_total INTEGER DEFAULT 0,
+  affirmations_completed INTEGER DEFAULT 0,
+  habits_completed INTEGER DEFAULT 0,
+  ritual_completed BOOLEAN DEFAULT FALSE,
+  xp_earned INTEGER DEFAULT 0,
+  -- Calendar Journal Integration (2026-01)
+  journal_count INTEGER DEFAULT 0,
+  trading_count INTEGER DEFAULT 0,
+  trading_pnl DECIMAL(20, 2) DEFAULT 0,
+  trading_wins INTEGER DEFAULT 0,
+  trading_losses INTEGER DEFAULT 0,
+  divination_count INTEGER DEFAULT 0,
+  mood_morning VARCHAR(20),
+  mood_evening VARCHAR(20),
+  mood_overall VARCHAR(20),
+  mood_score INTEGER,
+  day_notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, summary_date)
+);
+```
+
+### 66.13 `divination_readings`
+```sql
+CREATE TABLE divination_readings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  type VARCHAR(20) NOT NULL,               -- 'tarot', 'iching', 'numerology'
+  question TEXT,
+  -- For Tarot
+  cards JSONB,
+  spread_type VARCHAR(50),
+  -- For I Ching
+  hexagram_number INTEGER,
+  hexagram_data JSONB,
+  -- Notes
+  interpretation TEXT,
+  notes TEXT,
+  is_starred BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 66.14 Vision Board Tables Quick Reference
+
+| Table | Purpose |
+|-------|---------|
+| `vision_goals` | User goals with targets, deadlines, progress |
+| `vision_milestones` | Goal milestones with XP rewards |
+| `vision_actions` | Action items linked to goals |
+| `vision_affirmations` | User affirmations with audio |
+| `vision_affirmation_logs` | Affirmation completion history |
+| `vision_habits` | Habit definitions with streak tracking |
+| `vision_habit_logs` | Daily habit completion logs |
+| `vision_rituals` | Master ritual definitions |
+| `vision_ritual_completions` | Individual ritual completion records |
+| `vision_ritual_streaks` | User streak per ritual |
+| `vision_user_stats` | Aggregated user statistics |
+| `vision_daily_summary` | Daily score, XP, completions summary |
+| `divination_readings` | Tarot/I-Ching readings |
+
+---
+
+## 67. CALENDAR & SMART JOURNAL TABLES (Migration 2026-01-28)
+
+### 67.1 `calendar_journal_entries`
+```sql
+CREATE TABLE calendar_journal_entries (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+
+  -- Date & Type
+  entry_date DATE NOT NULL,
+  entry_type VARCHAR(30) NOT NULL DEFAULT 'reflection',
+  -- Types: 'reflection', 'gratitude', 'goal_note', 'ritual_reflection', 'quick_note'
+
+  -- Content
+  title VARCHAR(200),
+  content TEXT NOT NULL,
+
+  -- Mood tracking
+  mood VARCHAR(20),                        -- 'happy', 'peaceful', 'neutral', 'sad', 'stressed', 'excited', 'anxious'
+  mood_score INTEGER CHECK (mood_score >= 1 AND mood_score <= 5),
+
+  -- Categorization
+  life_area VARCHAR(30),                   -- 'finance', 'health', 'career', 'relationships', 'personal', 'spiritual'
+  tags TEXT[] DEFAULT '{}',
+
+  -- Related entities
+  related_ritual_id UUID,
+  related_goal_id UUID,
+  related_habit_id UUID,
+
+  -- Media
+  attachments JSONB DEFAULT '[]',          -- [{url, type: 'image'|'file', name, size, uploaded_at}]
+  voice_note_url TEXT,
+  voice_note_duration INTEGER,             -- seconds
+
+  -- Metadata
+  is_pinned BOOLEAN DEFAULT FALSE,
+  is_private BOOLEAN DEFAULT TRUE,
+  is_favorite BOOLEAN DEFAULT FALSE,
+  word_count INTEGER DEFAULT 0,
+  is_first_entry BOOLEAN DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 67.2 `trading_journal_entries`
+```sql
+CREATE TABLE trading_journal_entries (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  calendar_entry_id UUID REFERENCES calendar_journal_entries(id) ON DELETE SET NULL,
+
+  -- Trade info
+  trade_date DATE NOT NULL,
+  trade_time TIME,
+  symbol VARCHAR(20) NOT NULL,
+  direction VARCHAR(10) NOT NULL CHECK (direction IN ('long', 'short')),
+
+  -- Pattern & Setup (from Scanner)
+  pattern_type VARCHAR(50),                -- 'DPD', 'UPU', 'head-shoulders', etc.
+  pattern_grade VARCHAR(5) CHECK (pattern_grade IN ('A+', 'A', 'B', 'C', 'D')),
+  timeframe VARCHAR(10),                   -- '15m', '1h', '4h', '1d'
+  zone_type VARCHAR(20),                   -- 'demand', 'supply', 'flip'
+  zone_strength INTEGER CHECK (zone_strength >= 1 AND zone_strength <= 5),
+
+  -- Prices
+  entry_price DECIMAL(20, 8) NOT NULL,
+  exit_price DECIMAL(20, 8),
+  stop_loss DECIMAL(20, 8),
+  take_profit_1 DECIMAL(20, 8),
+  take_profit_2 DECIMAL(20, 8),
+  take_profit_3 DECIMAL(20, 8),
+
+  -- Position sizing
+  position_size DECIMAL(20, 8),
+  position_value_usdt DECIMAL(20, 2),
+  risk_amount_usdt DECIMAL(20, 2),
+  risk_percent DECIMAL(5, 2),
+  risk_reward_ratio DECIMAL(5, 2),
+
+  -- Result
+  pnl_amount DECIMAL(20, 2),
+  pnl_percent DECIMAL(10, 4),
+  pnl_r DECIMAL(5, 2),                     -- P/L in R multiples
+  result VARCHAR(15) CHECK (result IN ('win', 'loss', 'breakeven', 'open', 'cancelled')),
+
+  -- Analysis notes
+  entry_reason TEXT,
+  exit_reason TEXT,
+  lessons_learned TEXT,
+  market_context TEXT,
+  what_went_well TEXT,
+  what_to_improve TEXT,
+
+  -- Rating & Discipline (1-5)
+  execution_rating INTEGER CHECK (execution_rating >= 1 AND execution_rating <= 5),
+  setup_rating INTEGER CHECK (setup_rating >= 1 AND setup_rating <= 5),
+  management_rating INTEGER CHECK (management_rating >= 1 AND management_rating <= 5),
+
+  -- Discipline checklist (JSONB for flexibility)
+  discipline_checklist JSONB DEFAULT '{
+    "correct_setup": null,
+    "correct_size": null,
+    "stop_loss_set": null,
+    "waited_confirmation": null,
+    "followed_plan": null,
+    "no_fomo": null,
+    "no_revenge_trade": null,
+    "proper_risk_management": null
+  }',
+  discipline_score INTEGER CHECK (discipline_score >= 0 AND discipline_score <= 100),
+
+  -- Psychology tracking
+  pre_trade_emotion VARCHAR(20),           -- 'calm', 'anxious', 'greedy', 'fomo', 'confident', 'fearful', 'revenge'
+  during_trade_emotion VARCHAR(20),
+  post_trade_emotion VARCHAR(20),
+  emotional_note TEXT,
+
+  -- Screenshots
+  screenshots JSONB DEFAULT '[]',          -- [{url, caption, type: 'entry'|'exit'|'analysis'|'setup', uploaded_at}]
+
+  -- Source tracking
+  source VARCHAR(30) DEFAULT 'manual',     -- 'manual', 'scanner_signal', 'paper_trade', 'shadow_mode', 'ai_suggestion'
+  source_reference_id UUID,
+  confirmations_used JSONB DEFAULT '[]',
+
+  -- Timestamps
+  entry_time TIMESTAMPTZ,
+  exit_time TIMESTAMPTZ,
+  holding_duration_minutes INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 67.3 `calendar_daily_mood`
+```sql
+CREATE TABLE calendar_daily_mood (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  mood_date DATE NOT NULL,
+
+  -- Morning check-in
+  morning_mood VARCHAR(20),
+  morning_mood_score INTEGER CHECK (morning_mood_score >= 1 AND morning_mood_score <= 5),
+  morning_note TEXT,
+  morning_energy INTEGER CHECK (morning_energy >= 1 AND morning_energy <= 5),
+  morning_sleep_quality INTEGER CHECK (morning_sleep_quality >= 1 AND morning_sleep_quality <= 5),
+  morning_checked_at TIMESTAMPTZ,
+
+  -- Midday check-in (optional)
+  midday_mood VARCHAR(20),
+  midday_mood_score INTEGER,
+  midday_note TEXT,
+  midday_checked_at TIMESTAMPTZ,
+
+  -- Evening check-in
+  evening_mood VARCHAR(20),
+  evening_mood_score INTEGER CHECK (evening_mood_score >= 1 AND evening_mood_score <= 5),
+  evening_note TEXT,
+  evening_productivity INTEGER CHECK (evening_productivity >= 1 AND evening_productivity <= 5),
+  evening_gratitude TEXT,
+  evening_checked_at TIMESTAMPTZ,
+
+  -- Overall
+  overall_mood VARCHAR(20),
+  overall_mood_score INTEGER CHECK (overall_mood_score >= 1 AND overall_mood_score <= 5),
+  mood_factors JSONB DEFAULT '[]',         -- ['good_sleep', 'exercise', 'stress', 'social', etc.]
+  day_highlight TEXT,
+  day_lowlight TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, mood_date)
+);
+```
+
+### 67.4 `calendar_ritual_logs`
+```sql
+CREATE TABLE calendar_ritual_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  ritual_completion_id UUID,               -- Link to original completion
+
+  log_date DATE NOT NULL,
+  log_time TIME,
+  ritual_slug VARCHAR(50) NOT NULL,
+  ritual_name VARCHAR(100) NOT NULL,
+  ritual_category VARCHAR(30),             -- 'mindfulness', 'manifestation', 'healing', 'gratitude'
+
+  duration_seconds INTEGER,
+  duration_minutes INTEGER GENERATED ALWAYS AS (duration_seconds / 60) STORED,
+  xp_earned INTEGER DEFAULT 0,
+  streak_count INTEGER DEFAULT 1,
+  is_streak_bonus BOOLEAN DEFAULT FALSE,
+
+  user_input TEXT,
+  reflection TEXT,
+  additional_notes TEXT,
+  notes_added_at TIMESTAMPTZ,
+
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 67.5 `calendar_divination_logs`
+```sql
+CREATE TABLE calendar_divination_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+
+  log_date DATE NOT NULL,
+  log_time TIME,
+  reading_type VARCHAR(20) NOT NULL CHECK (reading_type IN ('tarot', 'iching', 'numerology')),
+
+  result_summary TEXT NOT NULL,
+  result_data JSONB NOT NULL,
+
+  -- For Tarot
+  spread_type VARCHAR(30),
+  cards_drawn JSONB,                       -- [{position, card_name, is_reversed}]
+
+  -- For I Ching
+  hexagram_number INTEGER,
+  hexagram_name VARCHAR(100),
+  changing_lines JSONB,
+
+  -- User context
+  user_question TEXT,
+  user_intention TEXT,
+  life_area VARCHAR(30),
+
+  -- User interpretation
+  user_interpretation TEXT,
+  interpretation_added_at TIMESTAMPTZ,
+  action_taken TEXT,
+  action_taken_at TIMESTAMPTZ,
+
+  related_goal_id UUID,
+  is_favorite BOOLEAN DEFAULT FALSE,
+  is_significant BOOLEAN DEFAULT FALSE,
+
+  reading_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 67.6 `calendar_goal_progress_logs`
+```sql
+CREATE TABLE calendar_goal_progress_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  goal_id UUID NOT NULL,
+
+  log_date DATE NOT NULL,
+  log_time TIME,
+
+  progress_note TEXT,
+  progress_percent INTEGER CHECK (progress_percent >= 0 AND progress_percent <= 100),
+  previous_percent INTEGER,
+  progress_change INTEGER GENERATED ALWAYS AS (progress_percent - COALESCE(previous_percent, 0)) STORED,
+
+  milestone_title VARCHAR(200),
+  milestone_achieved BOOLEAN DEFAULT FALSE,
+  milestone_xp INTEGER DEFAULT 0,
+
+  actions_completed_today INTEGER DEFAULT 0,
+  actions_total_today INTEGER DEFAULT 0,
+  progress_mood VARCHAR(20),               -- 'motivated', 'frustrated', 'proud', 'stuck', 'excited'
+  blockers TEXT,
+  next_steps TEXT,
+  is_auto_logged BOOLEAN DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 67.7 `calendar_user_settings`
+```sql
+CREATE TABLE calendar_user_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+
+  -- Onboarding
+  has_seen_onboarding BOOLEAN DEFAULT FALSE,
+  onboarding_completed_at TIMESTAMPTZ,
+
+  -- Feature settings
+  auto_log_rituals BOOLEAN DEFAULT TRUE,
+  auto_log_divination BOOLEAN DEFAULT TRUE,
+  auto_log_goals BOOLEAN DEFAULT TRUE,
+
+  -- Reminder settings
+  morning_mood_reminder BOOLEAN DEFAULT TRUE,
+  morning_reminder_time TIME DEFAULT '07:00',
+  evening_mood_reminder BOOLEAN DEFAULT TRUE,
+  evening_reminder_time TIME DEFAULT '21:00',
+  journal_reminder BOOLEAN DEFAULT FALSE,
+  journal_reminder_time TIME DEFAULT '20:00',
+
+  -- Display settings
+  default_calendar_view VARCHAR(20) DEFAULT 'month',
+  show_mood_on_calendar BOOLEAN DEFAULT TRUE,
+  show_trading_on_calendar BOOLEAN DEFAULT TRUE,
+  show_divination_on_calendar BOOLEAN DEFAULT TRUE,
+
+  -- Privacy
+  share_mood_with_coach BOOLEAN DEFAULT FALSE,
+  share_trading_with_community BOOLEAN DEFAULT FALSE,
+  push_token TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+```
+
+### 67.8 Calendar Tables Quick Reference
+
+| Table | Purpose |
+|-------|---------|
+| `calendar_journal_entries` | Main journal entries (reflection, gratitude, notes) |
+| `trading_journal_entries` | Trading journal with metrics, psychology, discipline |
+| `calendar_daily_mood` | Morning, midday, evening mood check-ins |
+| `calendar_ritual_logs` | Auto-logged ritual completions |
+| `calendar_divination_logs` | Tarot/I-Ching readings with interpretations |
+| `calendar_goal_progress_logs` | Goal progress notes and milestones |
+| `calendar_user_settings` | Calendar preferences and notifications |
+
+---
+
+## 68. CALL SYSTEM TABLES (Migration 2025-12-28)
+
+### 68.1 `calls`
+```sql
+CREATE TABLE calls (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  caller_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Call type & mode
+  call_type TEXT NOT NULL DEFAULT 'audio' CHECK (call_type IN ('audio', 'video')),
+  is_group_call BOOLEAN DEFAULT FALSE,
+
+  -- Call status state machine
+  status TEXT NOT NULL DEFAULT 'initiating' CHECK (status IN (
+    'initiating',    -- Đang khởi tạo WebRTC
+    'ringing',       -- Đang đổ chuông bên callee
+    'connecting',    -- Đang thiết lập kết nối P2P
+    'connected',     -- Đang trong cuộc gọi
+    'reconnecting',  -- Đang kết nối lại sau mất mạng
+    'ended',         -- Kết thúc bình thường
+    'missed',        -- Không trả lời (timeout 60s)
+    'declined',      -- Từ chối
+    'cancelled',     -- Người gọi hủy trước khi nhận
+    'failed',        -- Lỗi kết nối
+    'busy'           -- Người nhận đang bận
+  )),
+
+  -- Timing
+  ring_started_at TIMESTAMPTZ,
+  started_at TIMESTAMPTZ,
+  ended_at TIMESTAMPTZ,
+  duration_seconds INTEGER DEFAULT 0,
+
+  -- WebRTC/LiveKit
+  room_id TEXT,
+
+  -- Quality & Metadata
+  end_reason TEXT,                         -- 'caller_ended', 'callee_ended', 'connection_failed', 'timeout'
+  quality_score SMALLINT CHECK (quality_score IS NULL OR (quality_score >= 1 AND quality_score <= 5)),
+  network_type TEXT,                       -- 'wifi', '4g', '3g'
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 68.2 `call_participants`
+```sql
+CREATE TABLE call_participants (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  call_id UUID NOT NULL REFERENCES calls(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Role
+  role TEXT NOT NULL DEFAULT 'participant' CHECK (role IN (
+    'caller',        -- Người gọi
+    'callee',        -- Người nhận
+    'participant'    -- Thành viên group call
+  )),
+
+  -- Participant status
+  status TEXT NOT NULL DEFAULT 'invited' CHECK (status IN (
+    'invited',       -- Được mời
+    'ringing',       -- Đang đổ chuông
+    'connecting',    -- Đang kết nối
+    'connected',     -- Đã kết nối
+    'reconnecting',  -- Đang kết nối lại
+    'left',          -- Đã rời
+    'declined',      -- Từ chối
+    'missed',        -- Không trả lời
+    'busy'           -- Đang bận
+  )),
+
+  -- Timing
+  invited_at TIMESTAMPTZ DEFAULT NOW(),
+  joined_at TIMESTAMPTZ,
+  left_at TIMESTAMPTZ,
+
+  -- Media state (realtime sync)
+  is_muted BOOLEAN DEFAULT FALSE,
+  is_video_enabled BOOLEAN DEFAULT TRUE,
+  is_screen_sharing BOOLEAN DEFAULT FALSE,
+  is_speaker_on BOOLEAN DEFAULT FALSE,
+
+  -- Connection info
+  connection_quality TEXT DEFAULT 'good' CHECK (connection_quality IN (
+    'excellent', 'good', 'fair', 'poor', 'bad'
+  )),
+  device_type TEXT,                        -- 'ios', 'android', 'web'
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(call_id, user_id)
+);
+```
+
+### 68.3 `call_events`
+```sql
+CREATE TABLE call_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  call_id UUID NOT NULL REFERENCES calls(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+
+  event_type TEXT NOT NULL CHECK (event_type IN (
+    -- Call lifecycle
+    'call_initiated', 'call_ringing', 'call_answered', 'call_declined',
+    'call_missed', 'call_cancelled', 'call_connected', 'call_ended', 'call_failed',
+    -- Participant events
+    'participant_joined', 'participant_left', 'participant_invited',
+    -- Media events
+    'mute_toggled', 'video_toggled', 'speaker_toggled',
+    'screen_share_started', 'screen_share_stopped', 'camera_switched',
+    -- Connection events
+    'connection_quality_changed', 'network_type_changed',
+    'reconnecting', 'reconnected', 'ice_candidate_added', 'ice_connection_failed',
+    -- Error events
+    'permission_denied', 'media_error', 'signaling_error'
+  )),
+
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 68.4 Call Tables Quick Reference
+
+| Table | Purpose |
+|-------|---------|
+| `calls` | Call records with status, timing, quality |
+| `call_participants` | Individual participant data per call |
+| `call_events` | Call lifecycle events for debugging/analytics |
+
+---
+
+## 69. MESSAGING PRIVACY TABLES (Migration 2026-02-01)
+
+### 69.1 `user_privacy_settings`
+```sql
+CREATE TABLE user_privacy_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
+
+  -- Messaging Privacy
+  allow_message_requests BOOLEAN DEFAULT true,
+  read_receipts_enabled BOOLEAN DEFAULT true,
+  typing_indicator_enabled BOOLEAN DEFAULT true,
+  online_status_enabled BOOLEAN DEFAULT true,
+  last_seen_enabled BOOLEAN DEFAULT true,
+
+  -- Call Privacy
+  allow_calls_from TEXT DEFAULT 'everyone' CHECK (allow_calls_from IN (
+    'everyone',
+    'contacts_only',
+    'nobody'
+  )),
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 69.2 `user_contacts`
+```sql
+CREATE TABLE user_contacts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  contact_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN (
+    'active',
+    'archived',
+    'removed'
+  )),
+  first_message_at TIMESTAMPTZ DEFAULT NOW(),
+  last_message_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(user_id, contact_id),
+  CONSTRAINT no_self_contact CHECK (user_id != contact_id)
+);
+```
+
+### 69.3 `message_requests`
+```sql
+CREATE TABLE message_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  requester_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  recipient_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN (
+    'pending',
+    'accepted',
+    'declined',
+    'blocked'
+  )),
+  message_preview TEXT,
+  messages_count INT DEFAULT 1,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  accepted_at TIMESTAMPTZ,
+  declined_at TIMESTAMPTZ,
+
+  UNIQUE(conversation_id, requester_id, recipient_id)
+);
+```
+
+### 69.4 `restricted_users`
+```sql
+CREATE TABLE restricted_users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  restricter_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  restricted_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  reason TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(restricter_id, restricted_id),
+  CONSTRAINT no_self_restrict CHECK (restricter_id != restricted_id)
+);
+```
+
+### 69.5 Messaging Privacy Helper Functions
+```sql
+-- Check if users are contacts
+CREATE OR REPLACE FUNCTION are_users_contacts(user_a UUID, user_b UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM user_contacts
+    WHERE (user_id = user_a AND contact_id = user_b AND status = 'active')
+       OR (user_id = user_b AND contact_id = user_a AND status = 'active')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Check if can call user
+CREATE OR REPLACE FUNCTION can_call_user(caller_id UUID, callee_id UUID)
+RETURNS TABLE (allowed BOOLEAN, reason TEXT);
+```
+
+### 69.6 Messaging Privacy Tables Quick Reference
+
+| Table | Purpose |
+|-------|---------|
+| `user_privacy_settings` | Read receipts, typing indicators, online status, call permissions |
+| `user_contacts` | Track who has chatted with whom |
+| `message_requests` | Message requests for privacy protection |
+| `restricted_users` | Silent block/restriction list |
+
+---
+
+## 70. CHATBOT MEMORY SYSTEM TABLES (Migration 2026-01-16)
+
+### 70.1 `user_chatbot_profiles`
+```sql
+CREATE TABLE user_chatbot_profiles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Basic Identity
+  display_name VARCHAR(100),
+  preferred_name VARCHAR(50),
+  birth_date DATE,
+  zodiac_sign VARCHAR(20),
+
+  -- Spiritual Journey
+  life_purpose TEXT,
+  core_values TEXT[] DEFAULT '{}',
+  spiritual_goals TEXT[] DEFAULT '{}',
+
+  -- Communication Preferences
+  communication_style VARCHAR(20) DEFAULT 'balanced' CHECK (communication_style IN (
+    'gentle', 'direct', 'balanced'
+  )),
+  language_preference VARCHAR(10) DEFAULT 'vi',
+
+  -- Journey Tracking
+  journey_start_date DATE DEFAULT CURRENT_DATE,
+  transformation_days INTEGER DEFAULT 0,   -- Auto-calculated
+
+  -- Notification Preferences
+  notification_preferences JSONB DEFAULT '{
+    "daily_insight": true,
+    "streak_alerts": true,
+    "ritual_reminders": true,
+    "pattern_observations": true,
+    "milestone_celebrations": true,
+    "preferred_time": "08:00"
+  }'::jsonb,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  CONSTRAINT unique_user_chatbot_profile UNIQUE (user_id)
+);
+```
+
+### 70.2 `chat_memories`
+```sql
+CREATE TABLE chat_memories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Memory Classification
+  memory_type VARCHAR(50) NOT NULL DEFAULT 'general' CHECK (memory_type IN (
+    'goal', 'value', 'preference', 'achievement', 'challenge',
+    'relationship', 'emotion', 'insight', 'divination', 'general'
+  )),
+  category VARCHAR(50) DEFAULT 'general',
+
+  -- Memory Content
+  title VARCHAR(200),
+  content TEXT NOT NULL,
+  summary TEXT,
+  context JSONB DEFAULT '{}',
+
+  -- Memory Importance
+  importance INTEGER DEFAULT 5 CHECK (importance >= 1 AND importance <= 10),
+  is_pinned BOOLEAN DEFAULT FALSE,
+
+  -- Source Tracking
+  source_type VARCHAR(50) DEFAULT 'conversation' CHECK (source_type IN (
+    'conversation', 'divination', 'goal', 'manual', 'extracted'
+  )),
+  source_reference_id UUID,
+
+  -- Expiration (null = never expires)
+  expires_at TIMESTAMPTZ,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 70.3 `emotional_states`
+```sql
+CREATE TABLE emotional_states (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Emotion Data
+  primary_emotion VARCHAR(50) NOT NULL,
+  secondary_emotions TEXT[] DEFAULT '{}',
+  intensity INTEGER DEFAULT 5 CHECK (intensity >= 1 AND intensity <= 10),
+
+  -- Frequency Data (GEM Method Hz mapping)
+  frequency_hz INTEGER CHECK (frequency_hz >= 20 AND frequency_hz <= 700),
+  frequency_level VARCHAR(20) CHECK (frequency_level IN ('low', 'medium', 'elevated')),
+
+  -- Context
+  trigger_topic VARCHAR(100),
+  message_excerpt TEXT,
+  session_id UUID,
+
+  detected_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 70.4 `proactive_messages` (Migration 2026-01-16)
+```sql
+CREATE TABLE proactive_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  message_type VARCHAR(50) NOT NULL,       -- 'daily_insight', 'ritual_reminder', 'streak_alert', 'milestone'
+  content TEXT NOT NULL,
+  metadata JSONB DEFAULT '{}',
+
+  scheduled_at TIMESTAMPTZ NOT NULL,
+  sent_at TIMESTAMPTZ,
+  is_sent BOOLEAN DEFAULT FALSE,
+  is_read BOOLEAN DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 70.5 Chatbot Memory Helper Functions
+```sql
+-- Get or create chatbot profile
+CREATE OR REPLACE FUNCTION get_or_create_chatbot_profile(p_user_id UUID)
+RETURNS user_chatbot_profiles;
+
+-- Search memories by relevance
+CREATE OR REPLACE FUNCTION search_memories(
+  p_user_id UUID,
+  p_query TEXT,
+  p_memory_type VARCHAR DEFAULT NULL,
+  p_limit INTEGER DEFAULT 10
+) RETURNS TABLE (...);
+
+-- Get emotional journey
+CREATE OR REPLACE FUNCTION get_emotional_journey(
+  p_user_id UUID,
+  p_days INTEGER DEFAULT 14
+) RETURNS TABLE (...);
+```
+
+### 70.6 Chatbot Memory Tables Quick Reference
+
+| Table | Purpose |
+|-------|---------|
+| `user_chatbot_profiles` | Long-term AI personalization profile |
+| `chat_memories` | Semantic memories extracted from conversations |
+| `emotional_states` | Emotion tracking history for adaptive AI |
+| `proactive_messages` | Scheduled AI-generated messages |
+
+---
+
+## 71. UPDATED QUICK REFERENCE - ALL TABLES BY FEATURE
+
+### Vision Board Tables
+| Table | Purpose |
+|-------|---------|
+| `vision_goals` | User goals with progress tracking |
+| `vision_milestones` | Goal milestones |
+| `vision_actions` | Action items |
+| `vision_affirmations` | Daily affirmations |
+| `vision_affirmation_logs` | Affirmation completions |
+| `vision_habits` | Habit tracking |
+| `vision_habit_logs` | Habit completions |
+| `vision_rituals` | Ritual definitions |
+| `vision_ritual_completions` | Ritual completions |
+| `vision_ritual_streaks` | Ritual streaks |
+| `vision_user_stats` | User statistics |
+| `vision_daily_summary` | Daily score summary |
+| `divination_readings` | Tarot/I-Ching readings |
+
+### Calendar & Journal Tables
+| Table | Purpose |
+|-------|---------|
+| `calendar_journal_entries` | Journal entries |
+| `trading_journal_entries` | Trading journal |
+| `calendar_daily_mood` | Mood tracking |
+| `calendar_ritual_logs` | Ritual logs |
+| `calendar_divination_logs` | Divination logs |
+| `calendar_goal_progress_logs` | Goal progress |
+| `calendar_user_settings` | Calendar settings |
+
+### Call System Tables
+| Table | Purpose |
+|-------|---------|
+| `calls` | Call records |
+| `call_participants` | Participants |
+| `call_events` | Event logs |
+
+### Messaging Privacy Tables
+| Table | Purpose |
+|-------|---------|
+| `user_privacy_settings` | Privacy settings |
+| `user_contacts` | Contact list |
+| `message_requests` | Message requests |
+| `restricted_users` | Block list |
+
+### Chatbot Memory Tables
+| Table | Purpose |
+|-------|---------|
+| `user_chatbot_profiles` | AI profile |
+| `chat_memories` | Semantic memories |
+| `emotional_states` | Emotion history |
+| `proactive_messages` | Scheduled messages |

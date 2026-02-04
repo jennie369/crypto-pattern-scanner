@@ -1,7 +1,7 @@
 # BÁO CÁO HỆ THỐNG ROLES, QUOTA & ACCESS CONTROL
-## GEMRAL Platform - Phiên bản 1.0.21
+## GEMRAL Platform - Phiên bản 1.0.22
 
-**Ngày cập nhật:** 28/01/2026
+**Ngày cập nhật:** 04/02/2026
 **Tác giả:** GEM Development Team
 
 ---
@@ -12,15 +12,16 @@
 2. [Roles & Quyền Hạn](#2-roles--quyền-hạn)
 3. [Quota - Giới Hạn Sử Dụng](#3-quota---giới-hạn-sử-dụng)
 4. [Feature Access Control](#4-feature-access-control)
-5. [Vision Board Limits](#5-vision-board-limits)
-6. [GEM Master Chatbot Features](#6-gem-master-chatbot-features)
-7. [Course Access Control](#7-course-access-control)
-8. [Zone Visualization Access](#8-zone-visualization-access)
-9. [Pricing & Upgrade Path](#9-pricing--upgrade-path)
-10. [Cấu Trúc Database](#10-cấu-trúc-database)
-11. [API & RPC Functions](#11-api--rpc-functions)
-12. [Source Code Files](#12-source-code-files)
-13. [Troubleshooting](#13-troubleshooting)
+5. [Template Access Control](#5-template-access-control)
+6. [Vision Board Limits](#6-vision-board-limits)
+7. [GEM Master Chatbot Features](#7-gem-master-chatbot-features)
+8. [Course Access Control](#8-course-access-control)
+9. [Zone Visualization Access](#9-zone-visualization-access)
+10. [Pricing & Upgrade Path](#10-pricing--upgrade-path)
+11. [Cấu Trúc Database](#11-cấu-trúc-database)
+12. [API & RPC Functions](#12-api--rpc-functions)
+13. [Source Code Files](#13-source-code-files)
+14. [Troubleshooting](#14-troubleshooting)
 
 ---
 
@@ -324,9 +325,117 @@ const hasAccess = canAccessRitual(userTier, 'burn-release'); // false nếu FREE
 
 ---
 
-## 5. VISION BOARD LIMITS
+## 5. TEMPLATE ACCESS CONTROL (MỚI - 04/02/2026)
 
-### 5.1 Giới Hạn Theo Tier
+### 5.1 Tổng Quan Template System
+
+Hệ thống Templates cho phép user tạo journal entries và goals có cấu trúc. Mỗi template có tier yêu cầu khác nhau.
+
+### 5.2 Template Tier Matrix
+
+| Template ID | Tên Tiếng Việt | Tier Yêu Cầu | Mô Tả |
+|-------------|----------------|--------------|-------|
+| `free_form` | Suy ngẫm mỗi ngày | **FREE** | Ghi chép suy nghĩ, trải nghiệm tự do |
+| `gratitude` | Biết ơn | **FREE** | 3 điều biết ơn hôm nay |
+| `simple_event` | Sự kiện đơn giản | **FREE** | Tạo sự kiện nhanh |
+| `fear_setting` | Đối diện nỗi sợ | **TIER1 (Pro)** | Phân tích nỗi sợ để vượt qua (Tim Ferriss) |
+| `think_day` | Think Day | **TIER1 (Pro)** | Dành thời gian suy nghĩ về cuộc sống |
+| `weekly_planning` | Tuần mới | **TIER1 (Pro)** | Lên kế hoạch cho tuần mới |
+| `trading_journal` | Nhật ký giao dịch | **TIER2 (Premium)** | Ghi chép giao dịch trading |
+| `vision_3_5_years` | Tầm nhìn 3-5 năm | **TIER2 (Premium)** | Thiết kế cuộc sống lý tưởng |
+| `daily_wins` | Chiến thắng hôm nay | **TIER2 (Premium)** | Ghi nhận thành tựu trong ngày |
+| `prosperity_frequency` | Tần Số Thịnh Vượng | **TIER3 (VIP)** | Tổng hợp tài chính + tâm linh |
+| `advanced_trading_psychology` | Tâm Lý Giao Dịch Nâng Cao | **TIER3 (VIP)** | Phân tích bias, kiểm soát tâm lý |
+
+### 5.3 Template Access by Tier
+
+| Tier | Số Templates | Templates Có Thể Access |
+|------|--------------|------------------------|
+| **FREE** | 3 | `free_form`, `gratitude`, `simple_event` |
+| **TIER1 (Pro)** | 6 | + `fear_setting`, `think_day`, `weekly_planning` |
+| **TIER2 (Premium)** | 9 | + `trading_journal`, `vision_3_5_years`, `daily_wins` |
+| **TIER3 (VIP)** | 11 | + `prosperity_frequency`, `advanced_trading_psychology` |
+| **MANAGER/ADMIN** | 11 | **Bypass tất cả** |
+
+### 5.4 Template Usage Limits
+
+| Tier | Templates/Ngày | Goals/Tháng | Actions/Goal | Journal Char Limit |
+|------|----------------|-------------|--------------|-------------------|
+| FREE | 3 | 10 | 5 | 500 |
+| TIER1 (Pro) | 10 | 50 | 10 | 2,000 |
+| TIER2 (Premium) | Unlimited | 200 | 20 | 5,000 |
+| TIER3 (VIP) | Unlimited | Unlimited | Unlimited | 10,000 |
+| MANAGER/ADMIN | **Unlimited** | **Unlimited** | **Unlimited** | **100,000** |
+
+### 5.5 GEM Master Chatbot Integration
+
+Khi user hỏi chatbot về keywords liên quan đến template premium:
+
+| User Tier | Template Intent | Hành Vi |
+|-----------|-----------------|---------|
+| FREE | `fear_setting` | Hiện upgrade prompt + button nâng cấp TIER1 |
+| FREE | `trading_journal` | Hiện upgrade prompt + button nâng cấp TIER2 |
+| FREE | `prosperity_frequency` | Hiện upgrade prompt + button nâng cấp TIER3 |
+| TIER1 | `trading_journal` | Hiện upgrade prompt + button nâng cấp TIER2 |
+| TIER2 | `prosperity_frequency` | Hiện upgrade prompt + button nâng cấp TIER3 |
+| TIER3+ | Bất kỳ | Hiện template form để điền |
+
+**Intent Detection Keywords:**
+
+| Template | Keywords (VI) | Keywords (EN) |
+|----------|---------------|---------------|
+| `fear_setting` | sợ, lo lắng, không dám, e ngại | fear, afraid, worried, anxious |
+| `think_day` | mất cân bằng, review cuộc sống, nhìn lại | life review, reflect on life |
+| `prosperity_frequency` | thịnh vượng, dồi dào, manifest tiền | prosperity, abundance, wealth |
+| `advanced_trading_psychology` | tâm lý trading, FOMO, bias | trading psychology, mindset |
+
+### 5.6 Source Files
+
+| File | Vị trí | Mô tả |
+|------|--------|-------|
+| `templateAccessControl.js` | gem-mobile/src/config/ | **Source of truth** - Ma trận tier access |
+| `journalTemplates.js` | gem-mobile/src/services/templates/ | Template definitions, delegates to templateAccessControl |
+| `intentDetectionService.js` | gem-mobile/src/services/templates/ | Intent detection keywords |
+| `GemMasterScreen.js` | gem-mobile/src/screens/GemMaster/ | Upgrade prompts cho premium templates |
+| `MessageBubble.js` | gem-mobile/src/screens/GemMaster/components/ | Upgrade button rendering |
+| `DayDetailModal.js` | gem-mobile/src/components/Calendar/ | Template selector với lock icons |
+| `TemplateSelector.js` | gem-mobile/src/components/shared/templates/ | Template grid với tier badges |
+
+### 5.7 Code Implementation
+
+```javascript
+// templateAccessControl.js - Source of truth
+export const TEMPLATE_ACCESS = {
+  features: {
+    // FREE
+    free_form: { free: true, tier1: true, tier2: true, tier3: true },
+    gratitude: { free: true, tier1: true, tier2: true, tier3: true },
+    simple_event: { free: true, tier1: true, tier2: true, tier3: true },
+    // TIER1 (Pro)
+    fear_setting: { free: false, tier1: true, tier2: true, tier3: true },
+    think_day: { free: false, tier1: true, tier2: true, tier3: true },
+    weekly_planning: { free: false, tier1: true, tier2: true, tier3: true },
+    // TIER2 (Premium)
+    trading_journal: { free: false, tier1: false, tier2: true, tier3: true },
+    vision_3_5_years: { free: false, tier1: false, tier2: true, tier3: true },
+    daily_wins: { free: false, tier1: false, tier2: true, tier3: true },
+    // TIER3 (VIP)
+    prosperity_frequency: { free: false, tier1: false, tier2: false, tier3: true },
+    advanced_trading_psychology: { free: false, tier1: false, tier2: false, tier3: true },
+  }
+};
+
+// Check access
+import { checkTemplateAccess } from '../config/templateAccessControl';
+const access = checkTemplateAccess('fear_setting', userTier);
+// Returns: { allowed: false, reason: 'Tính năng này yêu cầu Tier 1 trở lên' }
+```
+
+---
+
+## 6. VISION BOARD LIMITS
+
+### 6.1 Vision Board - Giới Hạn Theo Tier
 
 | Tier | Goals | Actions/Goal | Affirmations | Habits |
 |------|-------|--------------|--------------|--------|
@@ -360,7 +469,7 @@ MANAGER: {
 
 ---
 
-## 6. GEM MASTER CHATBOT FEATURES
+## 7. GEM MASTER CHATBOT FEATURES
 
 ### 6.1 Proactive AI Messages
 
@@ -392,7 +501,7 @@ MANAGER: {
 
 ---
 
-## 7. COURSE ACCESS CONTROL
+## 8. COURSE ACCESS CONTROL
 
 ### 7.1 Access Hierarchy
 
@@ -446,7 +555,7 @@ END IF;
 
 ---
 
-## 8. ZONE VISUALIZATION ACCESS
+## 9. ZONE VISUALIZATION ACCESS
 
 ### 8.1 Zone Features by Tier
 
@@ -484,7 +593,7 @@ MANAGER: {
 
 ---
 
-## 9. PRICING & UPGRADE PATH
+## 10. PRICING & UPGRADE PATH
 
 ### 9.1 Standalone Chatbot Pricing
 
@@ -514,7 +623,7 @@ FREE → TIER1 (PRO)
 
 ---
 
-## 10. CẤU TRÚC DATABASE
+## 11. CẤU TRÚC DATABASE
 
 ### 10.1 Core Tables
 
@@ -570,7 +679,7 @@ course_enrollments:
 
 ---
 
-## 11. API & RPC FUNCTIONS
+## 12. API & RPC FUNCTIONS
 
 ### 11.1 Quota Functions
 
@@ -670,7 +779,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
 
 ---
 
-## 12. SOURCE CODE FILES
+## 13. SOURCE CODE FILES
 
 ### 12.1 Files với Manager Bypass (đã implement)
 
@@ -704,7 +813,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
 
 ---
 
-## 13. TROUBLESHOOTING
+## 14. TROUBLESHOOTING
 
 ### 13.1 Manager Bị Lock Tính Năng / Quota
 
@@ -766,6 +875,14 @@ const freshQuota = await QuotaService.checkAllQuotas(userId, true);
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.0.22 | 04/02/2026 | **NEW:** Template Access Control - Centralized tier checking |
+| - | - | Thêm section 5 Template Access Control với ma trận tier đầy đủ |
+| - | - | FREE: `free_form`, `gratitude`, `simple_event` |
+| - | - | TIER1: + `fear_setting`, `think_day`, `weekly_planning` |
+| - | - | TIER2: + `trading_journal`, `vision_3_5_years`, `daily_wins` |
+| - | - | TIER3: + `prosperity_frequency`, `advanced_trading_psychology` |
+| - | - | GEM Master chatbot hiện upgrade prompt khi user hỏi về premium templates |
+| - | - | Intent detection cho VIP templates (prosperity, trading psychology) |
 | 1.0.21 | 28/01/2026 | **NEW:** Ritual Access Control - FREE chỉ 2 rituals, TIER1=5, TIER2+=8 |
 | - | - | Thêm section 4.4 Ritual Access Control |
 | - | - | Thêm requiredTier cho mỗi ritual trong metadata |
@@ -784,5 +901,6 @@ const freshQuota = await QuotaService.checkAllQuotas(userId, true);
 ---
 
 **Document maintained by:** GEM Development Team
-**Last updated:** 28/01/2026
+**Last updated:** 04/02/2026
 **Related SQL files:** `RUN_THIS_fix_manager_quota_FINAL.sql`
+**Related Config files:** `templateAccessControl.js`, `journalTemplates.js`
