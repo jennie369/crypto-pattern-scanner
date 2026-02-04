@@ -221,6 +221,9 @@ import {
   AboutScreen,
 } from '../screens/Settings';
 
+// ROI Proof System - Personal Insights
+import PersonalInsightsScreen from '../screens/Portfolio/PersonalInsightsScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function AccountStack() {
@@ -458,6 +461,15 @@ export default function AccountStack() {
       {/* KARMA SYSTEM SCREENS */}
       {/* ═══════════════════════════════════════════ */}
       <Stack.Screen name="KarmaDashboard" component={KarmaDashboardScreen} />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ROI PROOF SYSTEM - PERSONAL INSIGHTS */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen
+        name="PersonalInsights"
+        component={PersonalInsightsScreen}
+        options={{ headerShown: false }}
+      />
 
       {/* ═══════════════════════════════════════════ */}
       {/* SHADOW MODE SCREENS */}

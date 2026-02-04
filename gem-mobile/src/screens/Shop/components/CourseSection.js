@@ -14,10 +14,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Image,
   Animated,
   ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -198,11 +198,14 @@ const FeaturedCourseCard = ({ product, onPress, index }) => {
         onPress={() => onPress(product)}
         style={styles.featuredTouchable}
       >
-        {/* Background Image */}
+        {/* Background Image - expo-image for instant cached display */}
         <Image
           source={{ uri: imageUrl }}
           style={styles.featuredImage}
-          resizeMode="cover"
+          contentFit="cover"
+          transition={100}
+          cachePolicy="disk"
+          placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
         />
 
         {/* Gradient Overlay */}
@@ -293,7 +296,10 @@ const SmallCourseCard = ({ product, onPress, index }) => {
           <Image
             source={{ uri: imageUrl }}
             style={styles.smallImage}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={100}
+            cachePolicy="disk"
+            placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
           />
           {/* Gradient - lighter opacity for better visibility */}
           <LinearGradient
@@ -479,11 +485,14 @@ const CourseSection = ({
           activeOpacity={0.9}
           disabled={!heroBanner?.link_url}
         >
-          {/* Banner Image */}
+          {/* Banner Image - expo-image for instant cached display */}
           <Image
             source={{ uri: heroBanner.image_url }}
             style={styles.heroBannerImage}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={100}
+            cachePolicy="disk"
+            placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
           />
           {/* Banner text BELOW image (not overlaid) */}
           {(heroBanner.title || heroBanner.subtitle || heroBanner.link_url) && (

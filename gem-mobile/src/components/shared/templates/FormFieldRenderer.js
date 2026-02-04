@@ -237,7 +237,10 @@ const FormFieldRenderer = ({
         );
       }
 
-      // Regular text input
+      // Regular text input - with enhanced suggestions for VIP templates
+      const textFieldSuggestions = field.suggestions || textSuggestions;
+      const hasTextFieldSuggestions = textFieldSuggestions.length > 0;
+
       return (
         <View style={styles.fieldContainer}>
           <LabelWithTooltip
@@ -258,31 +261,42 @@ const FormFieldRenderer = ({
             editable={!disabled}
             maxLength={field.maxLength}
           />
-          {hasSuggestions && (
+          {hasTextFieldSuggestions && (
             <View style={styles.suggestionsContainer}>
-              <Text style={styles.suggestionsLabel}>Gợi ý:</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.suggestionsList}>
-                  {textSuggestions.map((suggestion, index) => (
+              <Text style={styles.suggestionsLabel}>Gợi ý nhanh:</Text>
+              <View style={styles.suggestionsWrap}>
+                {textFieldSuggestions.map((suggestion, index) => {
+                  const selected = value === suggestion;
+                  return (
                     <TouchableOpacity
                       key={index}
                       style={[
-                        styles.suggestionChip,
-                        value === suggestion && styles.suggestionChipSelected,
+                        styles.vipSuggestionChip,
+                        selected && styles.vipSuggestionChipSelected,
                       ]}
-                      onPress={() => !disabled && onChange?.(suggestion)}
+                      onPress={() => {
+                        if (disabled) return;
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        onChange?.(suggestion);
+                      }}
                       activeOpacity={0.7}
                     >
+                      <View style={[
+                        styles.vipCheckbox,
+                        selected && styles.vipCheckboxSelected,
+                      ]}>
+                        {selected && <Check size={12} color="#FFFFFF" />}
+                      </View>
                       <Text style={[
-                        styles.suggestionChipText,
-                        value === suggestion && styles.suggestionChipTextSelected,
-                      ]} numberOfLines={1}>
+                        styles.vipSuggestionText,
+                        selected && styles.vipSuggestionTextSelected,
+                      ]} numberOfLines={2}>
                         {suggestion}
                       </Text>
                     </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
+                  );
+                })}
+              </View>
             </View>
           )}
           {error && <Text style={styles.error}>{error}</Text>}
@@ -295,6 +309,40 @@ const FormFieldRenderer = ({
       );
 
     case FIELD_TYPES.TEXTAREA:
+      // Get field-specific suggestions from template definition
+      const fieldSuggestions = field.suggestions || textSuggestions;
+      const hasFieldSuggestions = fieldSuggestions.length > 0;
+
+      // Check if suggestion is already selected (exists as a line in value)
+      const isSuggestionSelected = (suggestion) => {
+        if (!value) return false;
+        // Check if suggestion exists as a bullet point line
+        return value.includes(`• ${suggestion}`) || value.includes(suggestion);
+      };
+
+      // Handle suggestion toggle - add/remove with bullet point
+      const handleSuggestionToggle = (suggestion) => {
+        if (disabled) return;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+        if (isSuggestionSelected(suggestion)) {
+          // Remove the suggestion
+          const lines = (value || '').split('\n').filter(line => {
+            const cleanLine = line.replace(/^[•\-]\s*/, '').trim();
+            return cleanLine !== suggestion;
+          });
+          onChange?.(lines.join('\n'));
+        } else {
+          // Add the suggestion with bullet point
+          const bulletLine = `• ${suggestion}`;
+          if (!value || value.trim() === '') {
+            onChange?.(bulletLine);
+          } else {
+            onChange?.(`${value}\n${bulletLine}`);
+          }
+        }
+      };
+
       return (
         <View style={styles.fieldContainer}>
           <LabelWithTooltip
@@ -319,28 +367,37 @@ const FormFieldRenderer = ({
             maxLength={field.maxLength}
             textAlignVertical="top"
           />
-          {hasSuggestions && (
+          {hasFieldSuggestions && (
             <View style={styles.suggestionsContainer}>
-              <Text style={styles.suggestionsLabel}>Gợi ý:</Text>
+              <Text style={styles.suggestionsLabel}>Gợi ý nhanh:</Text>
               <View style={styles.suggestionsWrap}>
-                {textSuggestions.map((suggestion, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.suggestionChip,
-                      value?.includes(suggestion) && styles.suggestionChipSelected,
-                    ]}
-                    onPress={() => !disabled && onChange?.(value ? `${value}\n${suggestion}` : suggestion)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[
-                      styles.suggestionChipText,
-                      value?.includes(suggestion) && styles.suggestionChipTextSelected,
-                    ]} numberOfLines={2}>
-                      {suggestion}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {fieldSuggestions.map((suggestion, index) => {
+                  const selected = isSuggestionSelected(suggestion);
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.vipSuggestionChip,
+                        selected && styles.vipSuggestionChipSelected,
+                      ]}
+                      onPress={() => handleSuggestionToggle(suggestion)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[
+                        styles.vipCheckbox,
+                        selected && styles.vipCheckboxSelected,
+                      ]}>
+                        {selected && <Check size={12} color="#FFFFFF" />}
+                      </View>
+                      <Text style={[
+                        styles.vipSuggestionText,
+                        selected && styles.vipSuggestionTextSelected,
+                      ]} numberOfLines={2}>
+                        {suggestion}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
           )}
@@ -934,6 +991,49 @@ const styles = StyleSheet.create({
   },
   suggestionChipTextSelected: {
     color: COSMIC_COLORS.glow.gold,
+  },
+
+  // VIP Suggestion Chips (checkbox style)
+  vipSuggestionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COSMIC_COLORS.glass.bgDark,
+    paddingHorizontal: COSMIC_SPACING.sm,
+    paddingVertical: COSMIC_SPACING.sm,
+    borderRadius: COSMIC_RADIUS.md,
+    borderWidth: 1.5,
+    borderColor: COSMIC_COLORS.glass.border,
+    marginBottom: COSMIC_SPACING.xs,
+    width: '100%',
+  },
+  vipSuggestionChipSelected: {
+    backgroundColor: COSMIC_COLORS.glow.gold + '15',
+    borderColor: COSMIC_COLORS.glow.gold,
+  },
+  vipCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: COSMIC_COLORS.glass.border,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: COSMIC_SPACING.sm,
+  },
+  vipCheckboxSelected: {
+    backgroundColor: COSMIC_COLORS.glow.gold,
+    borderColor: COSMIC_COLORS.glow.gold,
+  },
+  vipSuggestionText: {
+    flex: 1,
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.md,
+    color: COSMIC_COLORS.text.secondary,
+    lineHeight: 20,
+  },
+  vipSuggestionTextSelected: {
+    color: COSMIC_COLORS.glow.gold,
+    fontWeight: '500',
   },
 
   // Multi-select (Affirmations/Rituals)

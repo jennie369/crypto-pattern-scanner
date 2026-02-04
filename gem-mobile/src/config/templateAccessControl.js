@@ -22,14 +22,10 @@ export const TIERS = {
 export const TEMPLATE_ACCESS = {
   // Feature access by tier
   features: {
-    // Basic templates - FREE
-    goal_basic: {
-      free: true,
-      tier1: true,
-      tier2: true,
-      tier3: true,
-    },
-    fear_setting: {
+    // ═══════════════════════════════════════════
+    // FREE TEMPLATES
+    // ═══════════════════════════════════════════
+    free_form: {
       free: true,
       tier1: true,
       tier2: true,
@@ -41,43 +37,77 @@ export const TEMPLATE_ACCESS = {
       tier2: true,
       tier3: true,
     },
-    daily_wins: {
-      free: true,
-      tier1: true,
-      tier2: true,
-      tier3: true,
-    },
-    think_day: {
-      free: true,
-      tier1: true,
-      tier2: true,
-      tier3: true,
-    },
-    free_form: {
+    simple_event: {
       free: true,
       tier1: true,
       tier2: true,
       tier3: true,
     },
 
-    // Premium templates - TIER1+
+    // ═══════════════════════════════════════════
+    // TIER1 (Pro) TEMPLATES
+    // ═══════════════════════════════════════════
+    fear_setting: {
+      free: false,
+      tier1: true,
+      tier2: true,
+      tier3: true,
+    },
+    think_day: {
+      free: false,
+      tier1: true,
+      tier2: true,
+      tier3: true,
+    },
     weekly_planning: {
       free: false,
       tier1: true,
       tier2: true,
       tier3: true,
     },
+
+    // ═══════════════════════════════════════════
+    // TIER2 (Premium) TEMPLATES
+    // ═══════════════════════════════════════════
+    trading_journal: {
+      free: false,
+      tier1: false,
+      tier2: true,
+      tier3: true,
+    },
     vision_3_5_years: {
       free: false,
-      tier1: true,
+      tier1: false,
+      tier2: true,
+      tier3: true,
+    },
+    daily_wins: {
+      free: false,
+      tier1: false,
       tier2: true,
       tier3: true,
     },
 
-    // Advanced templates - TIER2+
-    trading_journal: {
+    // ═══════════════════════════════════════════
+    // TIER3 (VIP) TEMPLATES
+    // ═══════════════════════════════════════════
+    prosperity_frequency: {
       free: false,
       tier1: false,
+      tier2: false,
+      tier3: true,
+    },
+    advanced_trading_psychology: {
+      free: false,
+      tier1: false,
+      tier2: false,
+      tier3: true,
+    },
+
+    // Legacy/unused - keep for backward compatibility
+    goal_basic: {
+      free: true,
+      tier1: true,
       tier2: true,
       tier3: true,
     },
@@ -334,9 +364,18 @@ export const getUpgradePromptForTemplate = (templateId, currentTier) => {
   if (!access.tier2) requiredTier = 'tier3';
 
   const templateNames = {
+    // TIER1 (Pro)
+    fear_setting: 'Đối diện nỗi sợ',
+    think_day: 'Think Day',
     weekly_planning: 'Tuần mới',
-    vision_3_5_years: 'Tầm nhìn 3-5 năm',
+    // TIER2 (Premium)
     trading_journal: 'Nhật ký Trading',
+    vision_3_5_years: 'Tầm nhìn 3-5 năm',
+    daily_wins: 'Chiến thắng hôm nay',
+    // TIER3 (VIP)
+    prosperity_frequency: 'Tần Số Thịnh Vượng',
+    advanced_trading_psychology: 'Tâm Lý Giao Dịch Nâng Cao',
+    // Features
     template_analytics: 'Phân tích template',
     export_journal: 'Xuất nhật ký',
   };
