@@ -140,7 +140,8 @@
       "Bash(CI=1 timeout 45 npx expo export:*)",
       "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" log --oneline -20 -- gem-mobile/src/screens/VisionBoard/GoalDetailScreen.js)",
       "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" diff HEAD -- gem-mobile/src/screens/VisionBoard/GoalDetailScreen.js)",
-      "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" status -- gem-mobile/src/screens/VisionBoard/)"
+      "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" status -- gem-mobile/src/screens/VisionBoard/)",
+      "Bash(git revert:*)"
     ],
     "deny": [],
     "ask": []
