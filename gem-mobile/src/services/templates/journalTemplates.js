@@ -188,7 +188,7 @@ export const TEMPLATES = {
     triggerKeywords: ['sợ', 'lo lắng', 'không dám', 'e ngại', 'lo sợ', 'băn khoăn', 'ngại', 'fear', 'sợ thất bại'],
     confidenceThreshold: 0.6,
 
-    requiredTier: TIERS.FREE,
+    requiredTier: TIERS.TIER1, // TIER1 (Pro)
 
     fields: [
       {
@@ -280,7 +280,7 @@ export const TEMPLATES = {
     triggerKeywords: ['mất cân bằng', 'review cuộc sống', 'think day', 'đánh giá lại', 'nhìn lại', 'suy nghĩ về cuộc sống'],
     confidenceThreshold: 0.7,
 
-    requiredTier: TIERS.FREE,
+    requiredTier: TIERS.TIER1, // TIER1 (Pro)
 
     fields: [
       {
@@ -469,7 +469,7 @@ export const TEMPLATES = {
     triggerKeywords: ['thắng', 'thành tựu', 'đã làm được', 'hôm nay đã', 'win', 'hoàn thành'],
     confidenceThreshold: 0.7,
 
-    requiredTier: TIERS.FREE,
+    requiredTier: TIERS.TIER2, // TIER2 (Premium)
 
     fields: [
       {
@@ -604,7 +604,7 @@ export const TEMPLATES = {
     triggerKeywords: ['tương lai', '5 năm', '3 năm', 'tầm nhìn', 'lý tưởng', 'vision'],
     confidenceThreshold: 0.7,
 
-    requiredTier: TIERS.TIER1,
+    requiredTier: TIERS.TIER2, // TIER2 (Premium)
 
     fields: [
       {
@@ -675,14 +675,14 @@ export const TEMPLATES = {
   },
 
   // ==========================================
-  // FREE FORM - Tự do
+  // FREE FORM - Suy ngẫm mỗi ngày
   // ==========================================
   free_form: {
     id: 'free_form',
-    name: 'Tự do',
-    nameEn: 'Free Form',
-    icon: 'Edit3',
-    description: 'Viết bất cứ điều gì',
+    name: 'Suy ngẫm mỗi ngày',
+    nameEn: 'Daily Reflection',
+    icon: 'BookOpen',
+    description: 'Ghi chép suy nghĩ, trải nghiệm',
     category: TEMPLATE_CATEGORIES.JOURNAL_FOCUSED,
 
     triggerKeywords: [], // Không auto-trigger
@@ -851,6 +851,389 @@ export const TEMPLATES = {
       requireAtLeastOneAction: false,
     },
   },
+
+  // ==========================================
+  // SIMPLE EVENT - Sự kiện đơn giản
+  // ==========================================
+  simple_event: {
+    id: 'simple_event',
+    name: 'Sự kiện đơn giản',
+    nameEn: 'Simple Event',
+    icon: 'Calendar',
+    description: 'Tạo sự kiện nhanh',
+    category: TEMPLATE_CATEGORIES.JOURNAL_FOCUSED,
+
+    triggerKeywords: ['sự kiện', 'event', 'lịch', 'hẹn', 'cuộc họp'],
+    confidenceThreshold: 0.8,
+
+    requiredTier: TIERS.FREE,
+
+    fields: [
+      {
+        id: 'title',
+        type: FIELD_TYPES.TEXT,
+        label: 'Tiêu đề sự kiện *',
+        placeholder: 'Ví dụ: Họp team buổi sáng',
+        required: true,
+        maxLength: 200,
+      },
+      {
+        id: 'description',
+        type: FIELD_TYPES.TEXTAREA,
+        label: 'Mô tả (tùy chọn)',
+        placeholder: 'Thêm chi tiết về sự kiện...',
+        optional: true,
+        minRows: 2,
+        maxLength: 500,
+      },
+      {
+        id: 'time',
+        type: FIELD_TYPES.TEXT,
+        label: 'Thời gian',
+        placeholder: 'Ví dụ: 9:00 AM',
+        optional: true,
+        maxLength: 50,
+      },
+      {
+        id: 'location',
+        type: FIELD_TYPES.TEXT,
+        label: 'Địa điểm',
+        placeholder: 'Ví dụ: Phòng họp A',
+        optional: true,
+        maxLength: 200,
+      },
+    ],
+
+    outputType: 'journal',
+    defaultLifeArea: 'personal_growth',
+
+    tooltips: {
+      form: 'Tạo sự kiện nhanh để ghi nhớ các cuộc hẹn quan trọng.',
+    },
+
+    validation: {
+      minFieldsFilled: 1,
+      requireAtLeastOneAction: false,
+    },
+  },
+
+  // ==========================================
+  // PROSPERITY FREQUENCY - Tần số thịnh vượng (VIP)
+  // ==========================================
+  prosperity_frequency: {
+    id: 'prosperity_frequency',
+    name: 'Tần Số Thịnh Vượng',
+    nameEn: 'Prosperity Frequency',
+    icon: 'Sparkles',
+    description: 'Tổng hợp tài chính + tâm linh',
+    category: TEMPLATE_CATEGORIES.HYBRID,
+
+    triggerKeywords: ['thịnh vượng', 'prosperity', 'tần số', 'frequency', 'law of attraction', 'luật hấp dẫn'],
+    confidenceThreshold: 0.8,
+
+    requiredTier: TIERS.TIER3,
+
+    fields: [
+      {
+        id: 'financial_status',
+        type: FIELD_TYPES.TEXTAREA,
+        label: 'Tình trạng tài chính hiện tại *',
+        placeholder: 'Mô tả chi tiết tình trạng tài chính...',
+        required: true,
+        minRows: 3,
+        maxLength: 2000,
+        lifeArea: 'finance',
+        suggestions: [
+          'Thu nhập ổn định từ công việc chính',
+          'Có nguồn thu nhập thụ động từ đầu tư',
+          'Đang tiết kiệm được 20-30% thu nhập',
+          'Chi tiêu vượt quá thu nhập tháng này',
+          'Có quỹ khẩn cấp 6 tháng chi phí',
+          'Đang trong giai đoạn tích lũy',
+        ],
+      },
+      {
+        id: 'energy_level',
+        type: FIELD_TYPES.SLIDER,
+        label: 'Năng lượng tài chính hôm nay',
+        min: 1,
+        max: 10,
+        step: 1,
+        defaultValue: 5,
+        labels: { 1: 'Thiếu hụt', 5: 'Ổn định', 10: 'Dồi dào' },
+      },
+      {
+        id: 'spiritual_reflection',
+        type: FIELD_TYPES.TEXTAREA,
+        label: 'Suy ngẫm tâm linh về tiền bạc *',
+        placeholder: 'Bạn tin gì về tiền bạc?',
+        required: true,
+        minRows: 3,
+        maxLength: 2000,
+        lifeArea: 'spiritual',
+        suggestions: [
+          'Tiền bạc là năng lượng trao đổi giá trị',
+          'Tôi có niềm tin giới hạn: tiền khó kiếm',
+          'Tôi đang học cách yêu tiền mà không bám víu',
+          'Tôi tin rằng mình xứng đáng với sự giàu có',
+          'Tiền bạc không xấu, cách dùng mới quan trọng',
+          'Tôi cần chữa lành mối quan hệ với tiền bạc',
+        ],
+      },
+      {
+        id: 'abundance_affirmation',
+        type: FIELD_TYPES.TEXT,
+        label: 'Khẳng định sự dồi dào *',
+        placeholder: 'Chọn hoặc viết khẳng định...',
+        required: true,
+        maxLength: 300,
+        suggestions: [
+          'Tôi xứng đáng được giàu có và hạnh phúc',
+          'Tiền bạc đến với tôi dễ dàng và liên tục',
+          'Tôi thu hút sự thịnh vượng mỗi ngày',
+          'Tôi là nam châm thu hút tài lộc',
+          'Vũ trụ luôn cung cấp đủ cho tôi',
+          'Tôi biết ơn mọi nguồn thu nhập',
+        ],
+      },
+      {
+        id: 'gratitude_money',
+        type: FIELD_TYPES.TEXTAREA,
+        label: 'Biết ơn về tài chính',
+        placeholder: 'Liệt kê những điều bạn biết ơn...',
+        required: false,
+        minRows: 2,
+        maxLength: 1000,
+        suggestions: [
+          'Biết ơn vì có công việc ổn định',
+          'Biết ơn vì có mái nhà che nắng mưa',
+          'Biết ơn vì có đủ tiền cho nhu cầu cơ bản',
+          'Biết ơn những cơ hội kiếm tiền đến với tôi',
+          'Biết ơn khả năng tạo ra giá trị của mình',
+        ],
+      },
+      {
+        id: 'money_intentions',
+        type: FIELD_TYPES.ACTION_LIST,
+        label: 'Ý định tài chính tuần này',
+        allowAdd: true,
+        canCreateGoal: true,
+        requireLifeArea: true,
+        maxItems: 5,
+        defaultChecked: false,
+        placeholder: 'Thêm ý định...',
+        suggestions: [
+          { text: 'Ghi chép chi tiêu hàng ngày', lifeArea: 'finance' },
+          { text: 'Tiết kiệm thêm 10% thu nhập', lifeArea: 'finance' },
+          { text: 'Tìm hiểu một kênh đầu tư mới', lifeArea: 'finance' },
+          { text: 'Thiền về sự dồi dào 10 phút mỗi sáng', lifeArea: 'spiritual' },
+          { text: 'Đọc một cuốn sách về tài chính', lifeArea: 'personal_growth' },
+        ],
+      },
+      {
+        id: 'ritual',
+        type: FIELD_TYPES.TEXT,
+        label: 'Nghi thức thịnh vượng (tùy chọn)',
+        placeholder: 'Chọn hoặc tự tạo nghi thức...',
+        optional: true,
+        canCreateGoal: true,
+        maxLength: 200,
+      },
+    ],
+
+    outputType: 'hybrid',
+    defaultLifeArea: 'finance',
+
+    tooltips: {
+      form: 'Nhật ký bậc thầy kết hợp tài chính và tâm linh - dành riêng cho VIP.',
+      financial_status: 'Mô tả chân thực để nhận diện thực trạng.',
+      spiritual_reflection: 'Nhận diện và chuyển hóa những niềm tin giới hạn về tiền bạc.',
+      abundance_affirmation: 'Não bộ tin vào những gì bạn khẳng định liên tục.',
+      money_intentions: 'Tick vào để tạo mục tiêu theo dõi.',
+    },
+
+    validation: {
+      minFieldsFilled: 4,
+      requireAtLeastOneAction: false,
+    },
+  },
+
+  // ==========================================
+  // ADVANCED TRADING PSYCHOLOGY - Tâm lý giao dịch nâng cao (VIP)
+  // ==========================================
+  advanced_trading_psychology: {
+    id: 'advanced_trading_psychology',
+    name: 'Tâm Lý Giao Dịch Nâng Cao',
+    nameEn: 'Advanced Trading Psychology',
+    icon: 'BrainCircuit',
+    description: 'Phân tích bias, kiểm soát tâm lý',
+    category: TEMPLATE_CATEGORIES.JOURNAL_FOCUSED,
+
+    triggerKeywords: ['tâm lý trading', 'trading psychology', 'bias', 'FOMO', 'fear', 'greed', 'tham lam'],
+    confidenceThreshold: 0.8,
+
+    requiredTier: TIERS.TIER3,
+
+    fields: [
+      {
+        id: 'session_type',
+        type: FIELD_TYPES.SELECT,
+        label: 'Loại phiên giao dịch *',
+        options: [
+          { value: 'pre_session', label: 'Trước phiên - Chuẩn bị tâm lý' },
+          { value: 'during_session', label: 'Trong phiên - Ghi nhận real-time' },
+          { value: 'post_session', label: 'Sau phiên - Review & phân tích' },
+        ],
+        required: true,
+      },
+      {
+        id: 'emotional_state',
+        type: FIELD_TYPES.SLIDER,
+        label: 'Trạng thái cảm xúc',
+        min: 1,
+        max: 10,
+        step: 1,
+        defaultValue: 5,
+        labels: { 1: 'Sợ hãi', 5: 'Bình tĩnh', 10: 'Tự tin quá mức' },
+      },
+      {
+        id: 'bias_check',
+        type: FIELD_TYPES.CHECKLIST,
+        label: 'Nhận dạng Bias (tick những gì bạn cảm thấy)',
+        allowAdd: false,
+        defaultItems: [
+          { id: 'fomo', label: 'FOMO - Sợ bỏ lỡ cơ hội', checked: false },
+          { id: 'revenge', label: 'Revenge Trading - Gỡ lỗ', checked: false },
+          { id: 'overconfidence', label: 'Overconfidence - Quá tự tin', checked: false },
+          { id: 'loss_aversion', label: 'Loss Aversion - Sợ lỗ', checked: false },
+          { id: 'anchoring', label: 'Anchoring - Neo giá', checked: false },
+          { id: 'confirmation', label: 'Confirmation Bias - Tìm kiếm đồng ý', checked: false },
+          { id: 'recency', label: 'Recency Bias - Ưu tiên gần đây', checked: false },
+          { id: 'sunk_cost', label: 'Sunk Cost - Chi phí chìm', checked: false },
+        ],
+      },
+      {
+        id: 'trigger_analysis',
+        type: FIELD_TYPES.TEXTAREA,
+        label: 'Phân tích nguyên nhân *',
+        placeholder: 'Điều gì gây ra những cảm xúc/bias này?',
+        required: true,
+        minRows: 3,
+        maxLength: 2000,
+        suggestions: [
+          'Xem tin tức tiêu cực về thị trường',
+          'Portfolio đang âm nặng',
+          'Vừa miss một trade lớn',
+          'Áp lực từ việc so sánh với người khác',
+          'Giao dịch liên tục không nghỉ ngơi',
+          'Kỳ vọng quá cao về profit',
+          'Sợ mất số tiền đã kiếm được',
+        ],
+      },
+      {
+        id: 'pattern_recognition',
+        type: FIELD_TYPES.TEXTAREA,
+        label: 'Nhận dạng pattern cảm xúc',
+        placeholder: 'Bạn nhận ra pattern nào lặp lại?',
+        required: false,
+        minRows: 2,
+        maxLength: 1500,
+        suggestions: [
+          'Luôn FOMO sau khi miss trade tốt',
+          'Revenge trade ngay sau khi thua',
+          'Quá tự tin sau chuỗi thắng liên tiếp',
+          'Sợ vào lệnh sau chuỗi thua',
+          'Cắt lỗ quá sớm khi đang đúng',
+          'Để lỗ chạy quá lâu vì hy vọng',
+        ],
+      },
+      {
+        id: 'coping_strategy',
+        type: FIELD_TYPES.TEXTAREA,
+        label: 'Chiến lược đối phó *',
+        placeholder: 'Bạn sẽ làm gì để kiểm soát?',
+        required: true,
+        minRows: 2,
+        maxLength: 1500,
+        suggestions: [
+          'Tạm dừng trading 24h sau khi thua',
+          'Giảm position size 50%',
+          'Chỉ trade theo setup đã backtest',
+          'Viết journal trước và sau mỗi lệnh',
+          'Thiền định 10 phút trước khi trade',
+          'Đặt giới hạn lỗ trong ngày',
+          'Tắt app sau khi đạt target',
+        ],
+      },
+      {
+        id: 'rule_violations',
+        type: FIELD_TYPES.CHECKLIST,
+        label: 'Vi phạm quy tắc trading (nếu có)',
+        allowAdd: true,
+        maxItems: 10,
+        placeholder: 'Thêm quy tắc đã vi phạm...',
+        defaultItems: [
+          { id: 'no_sl', label: 'Không đặt Stop Loss', checked: false },
+          { id: 'oversize', label: 'Vào lệnh quá size cho phép', checked: false },
+          { id: 'no_plan', label: 'Trade không có kế hoạch rõ ràng', checked: false },
+          { id: 'against_trend', label: 'Trade ngược trend chính', checked: false },
+          { id: 'emotional', label: 'Trade theo cảm xúc, không logic', checked: false },
+          { id: 'overtrade', label: 'Overtrade - quá nhiều lệnh', checked: false },
+        ],
+      },
+      {
+        id: 'lesson_learned',
+        type: FIELD_TYPES.TEXTAREA,
+        label: 'Bài học rút ra',
+        placeholder: 'Hôm nay bạn học được gì?',
+        required: false,
+        minRows: 2,
+        maxLength: 1000,
+        suggestions: [
+          'Kiên nhẫn là chìa khóa thành công',
+          'Kỷ luật quan trọng hơn chiến thuật',
+          'Không có setup hoàn hảo, chỉ có quản lý rủi ro tốt',
+          'Cảm xúc là kẻ thù lớn nhất của trader',
+          'Nghỉ ngơi đúng lúc giúp trade tốt hơn',
+        ],
+      },
+      {
+        id: 'mental_actions',
+        type: FIELD_TYPES.ACTION_LIST,
+        label: 'Hành động cải thiện tâm lý',
+        allowAdd: true,
+        canCreateGoal: true,
+        requireLifeArea: true,
+        maxItems: 5,
+        defaultChecked: false,
+        placeholder: 'Thêm hành động...',
+        suggestions: [
+          { text: 'Viết trading plan chi tiết cho tuần tới', lifeArea: 'crypto' },
+          { text: 'Backtest chiến lược với 100 trades', lifeArea: 'crypto' },
+          { text: 'Thiền định mỗi sáng trước khi mở app', lifeArea: 'health' },
+          { text: 'Đọc sách Trading in the Zone', lifeArea: 'personal_growth' },
+          { text: 'Tập thể dục để giảm stress', lifeArea: 'health' },
+        ],
+      },
+    ],
+
+    outputType: 'journal',
+    defaultLifeArea: 'crypto',
+
+    tooltips: {
+      form: 'Nhật ký tâm lý giao dịch chuyên sâu - giúp bạn nhận diện và kiểm soát bias.',
+      bias_check: 'Tick vào những bias bạn cảm thấy để theo dõi pattern theo thời gian.',
+      trigger_analysis: 'Hiểu nguyên nhân giúp bạn kiểm soát tốt hơn.',
+      pattern_recognition: 'Nhận ra pattern lặp lại là bước đầu tiên để thay đổi.',
+      coping_strategy: 'Chọn chiến lược phù hợp với tình huống của bạn.',
+      mental_actions: 'Tick vào hành động bạn cam kết để tạo mục tiêu theo dõi.',
+    },
+
+    validation: {
+      minFieldsFilled: 4,
+      requireAtLeastOneAction: false,
+    },
+  },
 };
 
 // ========== HELPER FUNCTIONS ==========
@@ -883,21 +1266,24 @@ export const getTemplatesByCategory = (category) => {
 
 /**
  * Get templates available for user tier
+ * Uses centralized templateAccessControl.js for consistent tier checking
  * @param {string} userTier
  * @returns {Array}
  */
 export const getTemplatesForTier = (userTier) => {
-  const tierOrder = [TIERS.FREE, TIERS.TIER1, TIERS.TIER2, TIERS.TIER3];
-  const userTierIndex = tierOrder.indexOf(userTier?.toLowerCase() || TIERS.FREE);
+  // Import dynamically to avoid circular dependency
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { checkTemplateAccess } = require('../../config/templateAccessControl');
 
   return Object.values(TEMPLATES).filter((template) => {
-    const requiredIndex = tierOrder.indexOf(template.requiredTier);
-    return requiredIndex <= userTierIndex;
+    const access = checkTemplateAccess(template.id, userTier);
+    return access.allowed;
   });
 };
 
 /**
  * Check if user can access template
+ * DELEGATES to centralized templateAccessControl.js for consistent tier checking
  * @param {string} templateId
  * @param {string} userTier
  * @param {string} userRole - Optional role for admin/manager bypass
@@ -909,33 +1295,20 @@ export const canAccessTemplate = (templateId, userTier, userRole = null) => {
     return { allowed: false, reason: 'Template không tồn tại' };
   }
 
-  // Admin/Manager bypass - check both role and tier
-  const normalizedTier = userTier?.toString().toLowerCase() || 'free';
-  const normalizedRole = userRole?.toString().toLowerCase() || '';
+  // Import dynamically to avoid circular dependency
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { checkTemplateAccess, getUpgradePromptForTemplate } = require('../../config/templateAccessControl');
 
-  if (normalizedRole === 'admin' || normalizedRole === 'manager' ||
-      normalizedTier === 'admin' || normalizedTier === 'manager') {
-    return { allowed: true };
-  }
+  // Use centralized access control
+  const access = checkTemplateAccess(templateId, userTier, userRole);
 
-  const tierOrder = [TIERS.FREE, TIERS.TIER1, TIERS.TIER2, TIERS.TIER3];
-  const userTierIndex = tierOrder.indexOf(normalizedTier);
-  const requiredTierIndex = tierOrder.indexOf(template.requiredTier);
-
-  // If user tier not found in order, default to free (index 0)
-  const effectiveUserIndex = userTierIndex >= 0 ? userTierIndex : 0;
-
-  if (effectiveUserIndex < requiredTierIndex) {
-    const tierNames = {
-      [TIERS.FREE]: 'Miễn phí',
-      [TIERS.TIER1]: 'Tier 1',
-      [TIERS.TIER2]: 'Tier 2',
-      [TIERS.TIER3]: 'Tier 3',
-    };
+  if (!access.allowed) {
+    // Get upgrade info for more detailed message
+    const upgradeInfo = getUpgradePromptForTemplate(templateId, userTier);
     return {
       allowed: false,
-      reason: `Cần nâng cấp lên ${tierNames[template.requiredTier] || template.requiredTier} để sử dụng`,
-      upgradeRequired: template.requiredTier,
+      reason: access.reason || `Cần nâng cấp lên ${upgradeInfo.targetTier} để sử dụng`,
+      upgradeRequired: upgradeInfo.targetTier,
     };
   }
 

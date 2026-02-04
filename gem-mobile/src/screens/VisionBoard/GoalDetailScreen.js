@@ -1032,63 +1032,123 @@ const GoalDetailScreen = () => {
 
   // ========== COVER IMAGE HANDLERS ==========
   const handlePickCoverImage = async () => {
+    // Check user is logged in
+    if (!user?.id) {
+      Alert.alert('Lỗi', 'Vui lòng đăng nhập để tải ảnh lên.');
+      return;
+    }
+
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Cần quyền truy cập', 'Vui lòng cho phép truy cập thư viện ảnh.');
+        Alert.alert('Cần quyền truy cập', 'Vui lòng cho phép truy cập thư viện ảnh trong Cài đặt.');
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        quality: 0.8,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.7,
       });
 
       if (!result.canceled && result.assets[0]) {
         setUploadingImage(true);
-        const imageUri = result.assets[0].uri;
-        const fileExt = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
-        const fileName = `${goalId}-${Date.now()}.${fileExt}`;
+        const asset = result.assets[0];
+        const imageUri = asset.uri;
+
+        // Get file extension - ImagePicker with allowsEditing always returns JPEG on iOS
+        // When allowsEditing is true, iOS converts HEIC to JPEG automatically
+        const fileExt = 'jpg';
+        const contentType = 'image/jpeg';
+
+        const fileName = `goal-${goalId}-${Date.now()}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
-        // Read file as base64 and decode to ArrayBuffer
-        const base64 = await FileSystem.readAsStringAsync(imageUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+        console.log('[GoalDetail] Starting upload:', { imageUri: imageUri.substring(0, 50), filePath, userId: user.id });
 
-        // Decode base64 to ArrayBuffer using base64-arraybuffer library
+        // Read file as base64
+        let base64;
+        try {
+          base64 = await FileSystem.readAsStringAsync(imageUri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+        } catch (readError) {
+          console.error('[GoalDetail] File read error:', readError);
+          Alert.alert('Lỗi', 'Không thể đọc file ảnh. Vui lòng thử ảnh khác.');
+          return;
+        }
+
+        // Decode base64 to ArrayBuffer
         const arrayBuffer = decodeBase64(base64);
+        const fileSizeMB = (arrayBuffer.byteLength / (1024 * 1024)).toFixed(2);
+        console.log('[GoalDetail] File size:', fileSizeMB, 'MB');
+
+        // Check file size (max 10MB)
+        if (arrayBuffer.byteLength > 10 * 1024 * 1024) {
+          Alert.alert('Lỗi', `Ảnh quá lớn (${fileSizeMB}MB). Vui lòng chọn ảnh nhỏ hơn 10MB.`);
+          return;
+        }
 
         // Upload to Supabase storage
-        const { error: uploadError } = await supabase.storage
+        console.log('[GoalDetail] Uploading to Supabase storage...');
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('vision-board')
           .upload(filePath, arrayBuffer, {
-            contentType: `image/${fileExt}`,
+            contentType,
             upsert: true,
           });
 
         if (uploadError) {
-          throw uploadError;
+          console.error('[GoalDetail] Storage upload error:', JSON.stringify(uploadError));
+          // Parse specific error messages
+          const errMsg = uploadError.message || uploadError.error || '';
+          if (errMsg.includes('Bucket not found') || errMsg.includes('bucket')) {
+            Alert.alert('Lỗi hệ thống', 'Storage bucket chưa được cấu hình. Vui lòng liên hệ admin.');
+          } else if (errMsg.includes('row-level security') || errMsg.includes('policy')) {
+            Alert.alert('Lỗi quyền truy cập', 'Không có quyền upload. Vui lòng liên hệ admin.');
+          } else if (errMsg.includes('Payload too large') || errMsg.includes('file size')) {
+            Alert.alert('Lỗi', `Ảnh quá lớn (${fileSizeMB}MB). Vui lòng chọn ảnh nhỏ hơn.`);
+          } else if (errMsg.includes('mime') || errMsg.includes('type')) {
+            Alert.alert('Lỗi', 'Định dạng ảnh không được hỗ trợ. Vui lòng chọn JPG hoặc PNG.');
+          } else {
+            Alert.alert('Lỗi upload', errMsg || 'Không thể tải ảnh lên. Vui lòng thử lại.');
+          }
+          return;
         }
+
+        console.log('[GoalDetail] Upload success:', uploadData?.path);
 
         const { data: { publicUrl } } = supabase.storage.from('vision-board').getPublicUrl(filePath);
 
+        // Update database
         if (goal?._isLegacy) {
-          // Update both cover_image column AND content.cover_image for legacy widgets
-          await supabase.from('vision_board_widgets').update({
+          const { error: updateError } = await supabase.from('vision_board_widgets').update({
             cover_image: publicUrl,
             content: { ...goal._content, cover_image: publicUrl },
           }).eq('id', goalId);
+
+          if (updateError) {
+            console.error('[GoalDetail] Widget update error:', updateError);
+            Alert.alert('Lỗi', 'Đã upload ảnh nhưng không thể cập nhật mục tiêu.');
+            return;
+          }
         } else {
-          await supabase.from('vision_goals').update({ cover_image: publicUrl }).eq('id', goalId);
+          const { error: updateError } = await supabase.from('vision_goals').update({ cover_image: publicUrl }).eq('id', goalId);
+
+          if (updateError) {
+            console.error('[GoalDetail] Goal update error:', updateError);
+            Alert.alert('Lỗi', 'Đã upload ảnh nhưng không thể cập nhật mục tiêu.');
+            return;
+          }
         }
 
         setGoal(prev => ({ ...prev, cover_image: publicUrl }));
+        console.log('[GoalDetail] Cover image updated successfully');
       }
     } catch (error) {
-      console.error('[GoalDetail] Upload error:', error);
-      Alert.alert('Lỗi', 'Không thể tải hình lên.');
+      console.error('[GoalDetail] Unexpected error:', error);
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
     } finally {
       setUploadingImage(false);
     }

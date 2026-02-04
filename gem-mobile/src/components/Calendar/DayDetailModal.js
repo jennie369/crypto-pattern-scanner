@@ -31,8 +31,43 @@ import { COSMIC_COLORS, COSMIC_GRADIENTS, COSMIC_SHADOWS, COSMIC_SPACING } from 
 import { CalendarEventItem } from './MonthCalendar';
 import { useAuth } from '../../contexts/AuthContext';
 import { saveMoodCheckIn, CHECK_IN_TYPES } from '../../services/moodTrackingService';
+import { canAccessTemplate, TIERS } from '../../services/templates/journalTemplates';
+import { useNavigation } from '@react-navigation/native';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Helper function to strip markdown formatting for preview display
+const stripMarkdown = (text) => {
+  if (!text || typeof text !== 'string') return '';
+  return text
+    // Remove headers (# ## ###)
+    .replace(/^#{1,6}\s+/gm, '')
+    // Remove bold (**text** or __text__)
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    // Remove italic (*text* or _text_)
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    // Remove strikethrough (~~text~~)
+    .replace(/~~([^~]+)~~/g, '$1')
+    // Remove inline code (`code`)
+    .replace(/`([^`]+)`/g, '$1')
+    // Remove links [text](url)
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    // Remove images ![alt](url)
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+    // Remove blockquotes (> text)
+    .replace(/^>\s+/gm, '')
+    // Remove horizontal rules (---, ***, ___)
+    .replace(/^[-*_]{3,}\s*$/gm, '')
+    // Remove bullet points (- or * or +)
+    .replace(/^[-*+]\s+/gm, '')
+    // Remove numbered lists (1. 2. etc)
+    .replace(/^\d+\.\s+/gm, '')
+    // Clean up extra whitespace
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+};
 
 // Simple mood options with emojis - tap to save instantly
 const QUICK_MOODS = [
@@ -118,10 +153,54 @@ const DayDetailModal = ({
   onEditRitual,
   onDeleteRitual,
 }) => {
-  const { user, profile, userTier } = useAuth();
+  const navigation = useNavigation();
+  const { user, profile, userTier, isAdmin, isManager } = useAuth();
   const [savingMood, setSavingMood] = useState(false);
   const [selectedMood, setSelectedMood] = useState(null);
   const [showTemplates, setShowTemplates] = useState(false); // Inline template selector
+
+  // Helper to check template access with admin bypass
+  // userRole is derived from profile.role for the canAccessTemplate function
+  const userRole = profile?.role || null;
+
+  // Check if template is tier-locked (shows lock icon)
+  // This does NOT bypass for admin - we want admin to SEE the lock icons
+  const isTemplateTierLocked = useCallback((templateId) => {
+    const result = canAccessTemplate(templateId, userTier, null); // Pass null to skip role bypass
+    return !result.allowed;
+  }, [userTier]);
+
+  // Check if user can ACCESS template (includes admin bypass)
+  const checkTemplateAccess = useCallback((templateId) => {
+    // Admin/Manager bypass check - these accounts should have full access
+    if (isAdmin || isManager) {
+      return { allowed: true };
+    }
+    return canAccessTemplate(templateId, userTier, userRole);
+  }, [userTier, userRole, isAdmin, isManager]);
+
+  // Handle template press - either open template or show upgrade
+  const handleTemplatePress = useCallback((templateId) => {
+    const access = checkTemplateAccess(templateId);
+
+    if (access.allowed) {
+      // User has access - proceed to open template
+      setShowTemplates(false);
+      onAddEvent?.(date, templateId);
+    } else {
+      // User doesn't have access - show upgrade screen
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setShowTemplates(false);
+      onClose?.();
+      navigation.navigate('Account', {
+        screen: 'Upgrade',
+        params: {
+          reason: access.reason,
+          requiredTier: access.upgradeRequired,
+        },
+      });
+    }
+  }, [checkTemplateAccess, date, onAddEvent, onClose, navigation]);
 
   // Edit ritual reflection modal state
   const [editingRitual, setEditingRitual] = useState(null);
@@ -485,7 +564,7 @@ const DayDetailModal = ({
 
             {/* Show Templates or Events list */}
             {showTemplates ? (
-              /* Inline Template Selector */
+              /* Inline Template Selector with Access Control */
               <ScrollView
                 style={styles.templateList}
                 contentContainerStyle={styles.templateListContent}
@@ -493,185 +572,325 @@ const DayDetailModal = ({
               >
                 <Text style={styles.templateSectionTitle}>Chọn loại nhật ký</Text>
 
-                {/* Trading Journal */}
-                <TouchableOpacity
-                  style={styles.templateOption}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'trading_journal');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(58, 247, 166, 0.2)' }]}>
-                    <Icons.TrendingUp size={22} color="#3AF7A6" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Nhật ký giao dịch</Text>
-                    <Text style={styles.templateDesc}>Ghi chép trades, phân tích P&L</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
+                {/* FREE TIER TEMPLATES */}
+                <Text style={styles.tierLabel}>Miễn phí</Text>
 
-                {/* Daily Journal - Free Form */}
-                <TouchableOpacity
-                  style={styles.templateOption}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'free_form');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(168, 85, 247, 0.2)' }]}>
-                    <Icons.BookOpen size={22} color="#A855F7" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Nhật ký tự do</Text>
-                    <Text style={styles.templateDesc}>Ghi chép suy nghĩ, trải nghiệm</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
+                {/* Daily Journal - Free Form (Suy ngẫm mỗi ngày) */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('free_form');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('free_form');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(168, 85, 247, 0.2)' }]}>
+                        <Icons.BookOpen size={22} color="#A855F7" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Suy ngẫm mỗi ngày</Text>
+                        <Text style={styles.templateDesc}>Ghi chép suy nghĩ, trải nghiệm</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
 
                 {/* Gratitude */}
-                <TouchableOpacity
-                  style={styles.templateOption}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'gratitude');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(255, 215, 0, 0.2)' }]}>
-                    <Icons.Heart size={22} color="#FFD700" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Biết ơn</Text>
-                    <Text style={styles.templateDesc}>Những điều bạn biết ơn hôm nay</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
-
-                {/* Fear Setting */}
-                <TouchableOpacity
-                  style={styles.templateOption}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'fear_setting');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(255, 152, 0, 0.2)' }]}>
-                    <Icons.AlertTriangle size={22} color="#FF9800" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Đối diện nỗi sợ</Text>
-                    <Text style={styles.templateDesc}>Phân tích và vượt qua nỗi sợ</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
-
-                {/* Think Day */}
-                <TouchableOpacity
-                  style={styles.templateOption}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'think_day');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(156, 39, 176, 0.2)' }]}>
-                    <Icons.Brain size={22} color="#9C27B0" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Think Day</Text>
-                    <Text style={styles.templateDesc}>Review và suy nghĩ về cuộc sống</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
-
-                {/* Weekly Planning */}
-                <TouchableOpacity
-                  style={styles.templateOption}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'weekly_planning');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(0, 188, 212, 0.2)' }]}>
-                    <Icons.CalendarDays size={22} color="#00BCD4" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Tuần mới</Text>
-                    <Text style={styles.templateDesc}>Lên kế hoạch cho tuần mới</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
-
-                {/* Vision 3-5 Years */}
-                <TouchableOpacity
-                  style={styles.templateOption}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'vision_3_5_years');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(33, 150, 243, 0.2)' }]}>
-                    <Icons.Telescope size={22} color="#2196F3" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Tầm nhìn 3-5 năm</Text>
-                    <Text style={styles.templateDesc}>Thiết kế cuộc sống lý tưởng</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
-
-                {/* Daily Wins */}
-                <TouchableOpacity
-                  style={styles.templateOption}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'daily_wins');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(0, 240, 255, 0.2)' }]}>
-                    <Icons.Trophy size={22} color="#00F0FF" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Chiến thắng hôm nay</Text>
-                    <Text style={styles.templateDesc}>Ghi nhận thành tựu trong ngày</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
+                {(() => {
+                  const isLocked = isTemplateTierLocked('gratitude');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('gratitude');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(255, 215, 0, 0.2)' }]}>
+                        <Icons.Heart size={22} color="#FFD700" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Biết ơn</Text>
+                        <Text style={styles.templateDesc}>Những điều bạn biết ơn hôm nay</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
 
                 {/* Simple Event */}
-                <TouchableOpacity
-                  style={[styles.templateOption, styles.templateOptionSimple]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setShowTemplates(false);
-                    onAddEvent?.(date, 'simple_event');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.templateIcon, { backgroundColor: 'rgba(156, 163, 175, 0.2)' }]}>
-                    <Icons.Calendar size={22} color="#9CA3AF" />
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>Sự kiện đơn giản</Text>
-                    <Text style={styles.templateDesc}>Tạo sự kiện nhanh</Text>
-                  </View>
-                  <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
-                </TouchableOpacity>
+                {(() => {
+                  const isLocked = isTemplateTierLocked('simple_event');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, styles.templateOptionSimple, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('simple_event');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(156, 163, 175, 0.2)' }]}>
+                        <Icons.Calendar size={22} color="#9CA3AF" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Sự kiện đơn giản</Text>
+                        <Text style={styles.templateDesc}>Tạo sự kiện nhanh</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
+
+                {/* TIER 1 (PRO) TEMPLATES */}
+                <Text style={styles.tierLabel}>Pro</Text>
+
+                {/* Fear Setting */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('fear_setting');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('fear_setting');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(255, 152, 0, 0.2)' }]}>
+                        <Icons.AlertTriangle size={22} color="#FF9800" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Đối diện nỗi sợ</Text>
+                        <Text style={styles.templateDesc}>Phân tích và vượt qua nỗi sợ</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
+
+                {/* Think Day */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('think_day');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('think_day');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(156, 39, 176, 0.2)' }]}>
+                        <Icons.Brain size={22} color="#9C27B0" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Think Day</Text>
+                        <Text style={styles.templateDesc}>Review và suy nghĩ về cuộc sống</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
+
+                {/* Weekly Planning */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('weekly_planning');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('weekly_planning');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(0, 188, 212, 0.2)' }]}>
+                        <Icons.CalendarDays size={22} color="#00BCD4" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Tuần mới</Text>
+                        <Text style={styles.templateDesc}>Lên kế hoạch cho tuần mới</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
+
+                {/* TIER 2+ (PREMIUM/VIP) TEMPLATES */}
+                <Text style={styles.tierLabel}>Premium</Text>
+
+                {/* Trading Journal */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('trading_journal');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('trading_journal');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(58, 247, 166, 0.2)' }]}>
+                        <Icons.TrendingUp size={22} color="#3AF7A6" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Nhật ký giao dịch</Text>
+                        <Text style={styles.templateDesc}>Ghi chép trades, phân tích P&L</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
+
+                {/* Vision 3-5 Years */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('vision_3_5_years');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('vision_3_5_years');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(33, 150, 243, 0.2)' }]}>
+                        <Icons.Telescope size={22} color="#2196F3" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Tầm nhìn 3-5 năm</Text>
+                        <Text style={styles.templateDesc}>Thiết kế cuộc sống lý tưởng</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
+
+                {/* Daily Wins */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('daily_wins');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('daily_wins');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(0, 240, 255, 0.2)' }]}>
+                        <Icons.Trophy size={22} color="#00F0FF" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Chiến thắng hôm nay</Text>
+                        <Text style={styles.templateDesc}>Ghi nhận thành tựu trong ngày</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
+
+                {/* TIER 3 (VIP) TEMPLATES */}
+                <Text style={[styles.tierLabel, { color: COSMIC_COLORS.glow.purple }]}>VIP</Text>
+
+                {/* Prosperity Frequency - Tần Số Thịnh Vượng */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('prosperity_frequency');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('prosperity_frequency');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(255, 215, 0, 0.2)' }]}>
+                        <Icons.Sparkles size={22} color="#FFD700" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Tần Số Thịnh Vượng</Text>
+                        <Text style={styles.templateDesc}>Tài chính + tâm linh cho VIP</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
+
+                {/* Advanced Trading Psychology - Tâm Lý Giao Dịch Nâng Cao */}
+                {(() => {
+                  const isLocked = isTemplateTierLocked('advanced_trading_psychology');
+                  return (
+                    <TouchableOpacity
+                      style={[styles.templateOption, isLocked && styles.templateOptionLocked]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleTemplatePress('advanced_trading_psychology');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.templateIcon, { backgroundColor: 'rgba(156, 39, 176, 0.2)' }]}>
+                        <Icons.Brain size={22} color="#9C27B0" />
+                      </View>
+                      <View style={styles.templateInfo}>
+                        <Text style={[styles.templateTitle, isLocked && styles.templateTitleLocked]}>Tâm Lý Giao Dịch Nâng Cao</Text>
+                        <Text style={styles.templateDesc}>Phân tích bias, kiểm soát tâm lý</Text>
+                      </View>
+                      {isLocked ? (
+                        <Icons.Lock size={18} color={COSMIC_COLORS.text.muted} />
+                      ) : (
+                        <Icons.ChevronRight size={20} color={COSMIC_COLORS.text.muted} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })()}
               </ScrollView>
             ) : (
               /* Events list - Wrapped in GestureHandlerRootView for Swipeable to work in Modal */
@@ -822,7 +1041,7 @@ const DayDetailModal = ({
                             </Text>
                             {entry.content && (
                               <Text style={styles.journalReflection} numberOfLines={2}>
-                                {entry.content}
+                                {stripMarkdown(entry.content)}
                               </Text>
                             )}
                             <View style={styles.journalMeta}>
@@ -900,7 +1119,7 @@ const DayDetailModal = ({
                             </Text>
                             {trade.lessons_learned && (
                               <Text style={styles.journalReflection} numberOfLines={1}>
-                                💡 {trade.lessons_learned}
+                                💡 {stripMarkdown(trade.lessons_learned)}
                               </Text>
                             )}
                             <Text style={styles.journalTime}>{time}</Text>
@@ -976,7 +1195,7 @@ const DayDetailModal = ({
                             </Text>
                             {ritual.content?.reflection && (
                               <Text style={styles.journalReflection} numberOfLines={2}>
-                                "{ritual.content.reflection}"
+                                "{stripMarkdown(ritual.content.reflection)}"
                               </Text>
                             )}
                             <Text style={styles.journalTime}>{time}</Text>
@@ -1018,7 +1237,7 @@ const DayDetailModal = ({
                           <Text style={styles.journalItemTitle}>{readingType.name}</Text>
                           {reading.question && (
                             <Text style={styles.journalReflection} numberOfLines={2}>
-                              {reading.question}
+                              {stripMarkdown(reading.question)}
                             </Text>
                           )}
                           <Text style={styles.journalTime}>{time}</Text>
@@ -1109,7 +1328,7 @@ const DayDetailModal = ({
                           </Text>
                           {entry.lessons_learned && (
                             <Text style={styles.journalReflection} numberOfLines={2}>
-                              "{entry.lessons_learned}"
+                              "{stripMarkdown(entry.lessons_learned)}"
                             </Text>
                           )}
                           <Text style={styles.journalTime}>{time}</Text>
@@ -1406,6 +1625,22 @@ const styles = StyleSheet.create({
   templateOptionSimple: {
     marginTop: COSMIC_SPACING.md,
     borderStyle: 'dashed',
+  },
+  templateOptionLocked: {
+    opacity: 0.6,
+    borderColor: 'rgba(156, 163, 175, 0.3)',
+  },
+  templateTitleLocked: {
+    color: COSMIC_COLORS.text.muted,
+  },
+  tierLabel: {
+    color: COSMIC_COLORS.glow.gold,
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: COSMIC_SPACING.lg,
+    marginBottom: COSMIC_SPACING.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   templateIcon: {
     width: 48,

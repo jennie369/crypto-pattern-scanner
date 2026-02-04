@@ -152,6 +152,9 @@ const TradingJournalScreen = () => {
     prefillPnl,
     prefillResult,
     isPaperTrade = true,
+    // Navigation return params
+    sourceScreen,
+    returnDate,
   } = route.params || {};
 
   // State - Loading & User
@@ -510,7 +513,7 @@ const TradingJournalScreen = () => {
       }
 
       if (result.success) {
-        navigation.goBack();
+        navigateBack();
       } else {
         Alert.alert('Lỗi', result.error || 'Không thể lưu');
       }
@@ -536,7 +539,7 @@ const TradingJournalScreen = () => {
             try {
               const result = await deleteTradingEntry(userId, entryId);
               if (result.success) {
-                navigation.goBack();
+                navigateBack();
               } else {
                 Alert.alert('Lỗi', result.error);
               }
@@ -553,6 +556,21 @@ const TradingJournalScreen = () => {
   const getEmotionDisplay = (emotionId) => {
     const emotion = EMOTION_EMOJIS.find(e => e.id === emotionId);
     return emotion || null;
+  };
+
+  // Navigate back to the source screen
+  const navigateBack = () => {
+    if (sourceScreen === 'Calendar') {
+      navigation.navigate('Calendar', { selectedDate: returnDate, refreshData: true });
+    } else if (sourceScreen === 'VisionBoard') {
+      navigation.navigate('VisionBoard', {
+        openCalendarDate: returnDate,
+        showDayDetail: true,
+        refreshData: true,
+      });
+    } else {
+      navigation.goBack();
+    }
   };
 
   // Render Emotion Picker Modal

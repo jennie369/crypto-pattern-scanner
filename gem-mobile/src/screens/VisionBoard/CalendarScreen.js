@@ -259,15 +259,28 @@ const CalendarScreen = () => {
     }
   };
 
-  // Handle add event from DayDetailModal - now shows template selector first
-  const handleAddEvent = useCallback((date) => {
+  // Handle add event from DayDetailModal - if templateId provided, go directly to JournalEntry
+  const handleAddEvent = useCallback((date, templateId) => {
     const dateStr = typeof date === 'string' ? date : date?.toISOString().split('T')[0];
     setAddEventDate(dateStr);
     setShowDayModal(false); // Close day modal first
-    setTimeout(() => {
-      setShowTemplateSelector(true); // Show template selector first
-    }, 200);
-  }, []);
+
+    if (templateId) {
+      // DayDetailModal already selected a template - navigate directly
+      navigation.navigate('JournalEntry', {
+        mode: 'create',
+        date: dateStr,
+        templateId: templateId,
+        sourceScreen: 'Calendar',
+        returnDate: dateStr,
+      });
+    } else {
+      // No template selected - show template selector
+      setTimeout(() => {
+        setShowTemplateSelector(true);
+      }, 200);
+    }
+  }, [navigation]);
 
   // Handle template selection - TemplateSelector passes full template object
   const handleSelectTemplate = useCallback((template) => {
@@ -450,6 +463,8 @@ const CalendarScreen = () => {
               onPress={() => navigation.navigate('JournalEntry', {
                 mode: 'create',
                 date: selectedDate.toISOString().split('T')[0],
+                sourceScreen: 'Calendar',
+                returnDate: selectedDate.toISOString().split('T')[0],
               })}
             >
               <Icons.BookOpen size={18} color={COLORS.purple} />
@@ -460,6 +475,8 @@ const CalendarScreen = () => {
               onPress={() => navigation.navigate('TradingJournal', {
                 mode: 'create',
                 date: selectedDate.toISOString().split('T')[0],
+                sourceScreen: 'Calendar',
+                returnDate: selectedDate.toISOString().split('T')[0],
               })}
             >
               <Icons.TrendingUp size={18} color={COLORS.success} />
@@ -564,6 +581,8 @@ const CalendarScreen = () => {
             mode: 'edit',
             entryId: trade.id,
             date: selectedDate.toISOString().split('T')[0],
+            sourceScreen: 'Calendar',
+            returnDate: selectedDate.toISOString().split('T')[0],
           });
         }}
         onPaperTradePress={(trade) => {
@@ -583,6 +602,8 @@ const CalendarScreen = () => {
             mode: 'edit',
             entryId: entry.id,
             date: selectedDate.toISOString().split('T')[0],
+            sourceScreen: 'Calendar',
+            returnDate: selectedDate.toISOString().split('T')[0],
           });
         }}
         onAddJournal={() => {
@@ -590,6 +611,8 @@ const CalendarScreen = () => {
           navigation.navigate('JournalEntry', {
             mode: 'create',
             date: selectedDate.toISOString().split('T')[0],
+            sourceScreen: 'Calendar',
+            returnDate: selectedDate.toISOString().split('T')[0],
           });
         }}
         onAddTrade={() => {
@@ -597,6 +620,8 @@ const CalendarScreen = () => {
           navigation.navigate('TradingJournal', {
             mode: 'create',
             date: selectedDate.toISOString().split('T')[0],
+            sourceScreen: 'Calendar',
+            returnDate: selectedDate.toISOString().split('T')[0],
           });
         }}
         onEditJournal={(entry) => {
@@ -606,6 +631,8 @@ const CalendarScreen = () => {
             mode: 'edit',
             entryId: entry.id,
             date: selectedDate.toISOString().split('T')[0],
+            sourceScreen: 'Calendar',
+            returnDate: selectedDate.toISOString().split('T')[0],
           });
         }}
         onDeleteJournal={async (entry) => {
@@ -631,6 +658,8 @@ const CalendarScreen = () => {
             mode: 'edit',
             entryId: trade.id,
             date: selectedDate.toISOString().split('T')[0],
+            sourceScreen: 'Calendar',
+            returnDate: selectedDate.toISOString().split('T')[0],
           });
         }}
         onDeleteTradingEntry={async (trade) => {
