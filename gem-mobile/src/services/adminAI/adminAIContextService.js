@@ -61,6 +61,15 @@ class AdminAIContextService {
       types = ['market', 'pattern', 'zone', 'position'],
     } = options;
 
+    console.log('[AdminAIContext] buildContext called:', {
+      symbol, timeframe, currentPrice,
+      patternsCount: patterns?.length || 0,
+      zonesCount: zones?.length || 0,
+      scanResultsCount: scanResults?.length || 0,
+      userId: userId ? 'present' : 'none',
+      types,
+    });
+
     const context = {
       timestamp: Date.now(),
       symbol,
@@ -80,8 +89,10 @@ class AdminAIContextService {
       }
 
       if (types.includes('position') && userId) {
+        // Pass current symbol price; analyzeAllPositions will fetch prices for other symbols
+        const priceMap = currentPrice ? { [symbol]: currentPrice } : {};
         buildPromises.push(
-          this._buildPositionContext(userId, currentPrice ? { [symbol]: currentPrice } : {})
+          this._buildPositionContext(userId, priceMap)
             .then((data) => { context.position = data; })
         );
       }
@@ -155,18 +166,26 @@ class AdminAIContextService {
    * @private
    */
   _buildPatternContext(patterns, scanResults) {
-    // Process detected patterns
+    console.log('[AdminAIContext] _buildPatternContext input:', {
+      patternsCount: patterns?.length || 0,
+      sampleFields: patterns?.[0] ? Object.keys(patterns[0]).slice(0, 15) : [],
+    });
+
+    // Process detected patterns - handle multiple field name conventions
     const processedPatterns = patterns.map((p) => ({
-      name: p.name || p.patternName,
+      name: p.name || p.patternName || p.patternType || p.pattern_type || 'Unknown',
       direction: p.direction,
-      confidence: p.confidence || p.score,
-      type: p.type,
-      entryPrice: p.entryPrice,
-      stopLoss: p.stopLoss,
-      takeProfit: p.takeProfit,
-      riskReward: p.riskReward || p.rr,
-      zoneType: p.zoneType,
-      zoneStatus: p.zoneStatus,
+      confidence: p.confidence || p.score || p.combinedScore || p.v2?.confidence?.score || 0,
+      type: p.type || p.patternType || p.pattern_type,
+      entryPrice: p.entryPrice || p.entry_price,
+      stopLoss: p.stopLoss || p.stop_loss,
+      takeProfit: p.takeProfit || p.take_profit || p.target_1,
+      riskReward: p.riskReward || p.rr || p.riskRewardRatio,
+      zoneType: p.zoneType || p.zone_type,
+      zoneStatus: p.zoneStatus || p.zone_status,
+      confidenceGrade: p.confidenceGrade || p.v2?.confidence?.grade,
+      volumeValid: p.volumeValid,
+      volumeGrade: p.volumeGrade,
     }));
 
     // Process scan results
@@ -202,6 +221,12 @@ class AdminAIContextService {
    * @private
    */
   _buildZoneContext(zones, currentPrice) {
+    console.log('[AdminAIContext] _buildZoneContext input:', {
+      zonesCount: zones?.length || 0,
+      sampleFields: zones?.[0] ? Object.keys(zones[0]).slice(0, 15) : [],
+      currentPrice,
+    });
+
     if (!zones || zones.length === 0) {
       return {
         zones: [],
@@ -210,16 +235,30 @@ class AdminAIContextService {
       };
     }
 
-    // Process zones
+    // Process zones - handle multiple field name conventions from ScannerScreen
+    // ScannerScreen zones use: zone_high, zone_low, direction, pattern_type
+    // Some zones use: high, low, type, priceHigh, priceLow
     const processedZones = zones.map((z) => {
-      const zoneHigh = z.high || z.priceHigh;
-      const zoneLow = z.low || z.priceLow;
-      const zoneCenter = (zoneHigh + zoneLow) / 2;
+      const zoneHigh = z.zone_high || z.high || z.priceHigh;
+      const zoneLow = z.zone_low || z.low || z.priceLow;
+      const zoneCenter = zoneHigh && zoneLow ? (zoneHigh + zoneLow) / 2 : null;
+
+      // Derive zone type from available fields
+      // ScannerScreen zones have direction (LONG/SHORT) not type
+      // LONG direction = support zone (LFZ), SHORT direction = resistance zone (HFZ)
+      let zoneType = z.type;
+      if (!zoneType) {
+        if (z.isResistance === true) zoneType = 'HFZ';
+        else if (z.isResistance === false) zoneType = 'LFZ';
+        else if (z.direction === 'SHORT') zoneType = 'HFZ';
+        else if (z.direction === 'LONG') zoneType = 'LFZ';
+        else zoneType = z.pattern_type?.includes('D') ? 'HFZ' : 'LFZ'; // DPD/UPD → HFZ, UPU/DPU → LFZ
+      }
 
       // Calculate distance from current price
       let distance = null;
       let position = 'unknown';
-      if (currentPrice) {
+      if (currentPrice && zoneHigh != null && zoneLow != null) {
         if (currentPrice > zoneHigh) {
           distance = ((currentPrice - zoneHigh) / currentPrice) * 100;
           position = 'above';
@@ -234,18 +273,27 @@ class AdminAIContextService {
 
       return {
         id: z.id,
-        type: z.type || (z.isResistance ? 'HFZ' : 'LFZ'),
+        type: zoneType,
         high: zoneHigh,
         low: zoneLow,
         center: zoneCenter,
-        width: ((zoneHigh - zoneLow) / zoneLow) * 100,
+        width: zoneHigh && zoneLow ? ((zoneHigh - zoneLow) / zoneLow) * 100 : 0,
         touches: z.touches || z.touchCount || 0,
         freshness: this._getZoneFreshness(z.touches || z.touchCount || 0),
         distance: distance !== null ? parseFloat(distance.toFixed(2)) : null,
         position,
         timeframe: z.timeframe,
+        direction: z.direction,
+        patternType: z.pattern_type || z.patternType,
+        entryPrice: z.entry_price || z.entryPrice,
+        stopLoss: z.stop_loss || z.stopLoss,
+        takeProfit: z.take_profit || z.takeProfit || z.target_1,
       };
     });
+
+    console.log('[AdminAIContext] Processed zones:', processedZones.map(z => ({
+      type: z.type, high: z.high, low: z.low, distance: z.distance, position: z.position,
+    })));
 
     // Find nearest zone
     const nearestZone = processedZones
@@ -292,9 +340,11 @@ class AdminAIContextService {
         positions: analysis.positions,
         totalPnL: analysis.totalPnL,
         totalPnLPercent: analysis.totalPnLPercent,
+        totalExposure: analysis.totalExposure,
+        exposureRatio: analysis.exposureRatio,
         positionCount: analysis.positionCount,
         riskLevel: analysis.riskLevel,
-        alerts: analysis.alerts.slice(0, 5), // Limit alerts
+        alerts: analysis.alerts.slice(0, 5),
         balanceInfo: analysis.balanceInfo,
       };
     } catch (error) {
@@ -351,12 +401,17 @@ class AdminAIContextService {
         parts.push('- No patterns detected');
       } else {
         context.pattern.patterns.forEach((p) => {
-          parts.push(`- ${p.name}: ${p.direction} (${p.confidence || 0}% confidence)`);
+          const grade = p.confidenceGrade ? ` [${p.confidenceGrade}]` : '';
+          const vol = p.volumeGrade ? ` Vol: ${p.volumeGrade}` : '';
+          parts.push(`- **${p.name}**: ${p.direction} (${p.confidence || 0}% confidence${grade}${vol})`);
           if (p.entryPrice) parts.push(`  Entry: $${p.entryPrice}`);
+          if (p.stopLoss) parts.push(`  SL: $${p.stopLoss}`);
+          if (p.takeProfit) parts.push(`  TP: $${p.takeProfit}`);
           if (p.riskReward) parts.push(`  R:R: ${p.riskReward}`);
+          if (p.zoneType) parts.push(`  Zone: ${p.zoneType} (${p.zoneStatus || 'N/A'})`);
         });
       }
-      parts.push(`- Summary: ${context.pattern.summary.total} patterns (${context.pattern.summary.longCount} LONG, ${context.pattern.summary.shortCount} SHORT)`);
+      parts.push(`- Summary: ${context.pattern.summary.total} patterns (${context.pattern.summary.longCount} LONG, ${context.pattern.summary.shortCount} SHORT, ${context.pattern.summary.highConfidenceCount} high-confidence)`);
       parts.push('');
     }
 
@@ -366,34 +421,72 @@ class AdminAIContextService {
       if (context.zone.zones.length === 0) {
         parts.push('- No zones detected');
       } else {
-        context.zone.zones.slice(0, 5).forEach((z) => {
-          const freshLabel = z.freshness === 'fresh' ? '🟢' :
-                            z.freshness === 'tested_1x' ? '🟡' :
-                            z.freshness === 'tested_2x' ? '🟠' : '🔴';
-          parts.push(`- ${z.type} ${freshLabel}: $${z.low?.toFixed(2)} - $${z.high?.toFixed(2)} (${z.distance?.toFixed(1) || '?'}% ${z.position})`);
+        context.zone.zones.slice(0, 8).forEach((z) => {
+          const freshLabel = z.freshness === 'fresh' ? '🟢 FRESH' :
+                            z.freshness === 'tested_1x' ? '🟡 Tested 1x' :
+                            z.freshness === 'tested_2x' ? '🟠 Tested 2x' : '🔴 Exhausted';
+          parts.push(`- **${z.type}** [${freshLabel}]: $${z.low?.toFixed(2) || 'N/A'} - $${z.high?.toFixed(2) || 'N/A'} (${z.distance?.toFixed(1) || '?'}% ${z.position})`);
+          if (z.patternType) parts.push(`  Pattern: ${z.patternType} ${z.direction || ''}`);
+          if (z.entryPrice) parts.push(`  Entry: $${z.entryPrice} | SL: $${z.stopLoss || 'N/A'} | TP: $${z.takeProfit || 'N/A'}`);
         });
       }
       if (context.zone.nearestZone) {
-        parts.push(`- Nearest: ${context.zone.nearestZone.type} at ${context.zone.nearestZone.distance?.toFixed(1)}% ${context.zone.nearestZone.position}`);
+        parts.push(`- **Nearest zone:** ${context.zone.nearestZone.type} at ${context.zone.nearestZone.distance?.toFixed(1)}% ${context.zone.nearestZone.position} ($${context.zone.nearestZone.low?.toFixed(2)} - $${context.zone.nearestZone.high?.toFixed(2)})`);
       }
+      parts.push(`- Zone summary: ${context.zone.summary.total} total (${context.zone.summary.hfzCount} HFZ, ${context.zone.summary.lfzCount} LFZ, ${context.zone.summary.freshCount || 0} fresh)`);
       parts.push('');
     }
 
     // Position context
     if (context.position && !context.position.error) {
+      // Indicate focused position if selected
+      if (context.position.focusedPosition) {
+        const fp = context.position.focusedPosition;
+        parts.push(`### FOCUSED POSITION (User đang hỏi về position này)`);
+        parts.push(`**${fp.symbol} ${fp.side}** (x${fp.leverage || 1})`);
+        parts.push(`- Entry: $${fp.entryPrice} | Current: $${fp.currentPrice || 'N/A'}`);
+        parts.push(`- SL: ${fp.stopLoss ? '$' + fp.stopLoss : 'Không đặt'} | TP: ${fp.takeProfit ? '$' + fp.takeProfit : 'Không đặt'}`);
+        parts.push(`- P&L: ${fp.pnlPercent >= 0 ? '📈' : '📉'} ${fp.pnlPercent}% ($${fp.pnlAmount || 0})`);
+        parts.push('');
+      }
+
       parts.push('### OPEN POSITIONS');
       if (context.position.positionCount === 0) {
         parts.push('- No open positions');
       } else {
-        context.position.positions.forEach((p) => {
+        context.position.positions.forEach((p, i) => {
           const pnlEmoji = p.pnlPercent >= 0 ? '📈' : '📉';
-          parts.push(`- ${p.symbol} ${p.side}: ${pnlEmoji} ${p.pnlPercent}% (Risk: ${p.riskLevel})`);
+          parts.push(`**Position ${i + 1}: ${p.symbol} ${p.side}** (x${p.leverage || 1})`);
+          parts.push(`  - Entry: $${p.entryPrice} | Current: $${p.currentPrice || 'N/A'}`);
+          parts.push(`  - SL: ${p.stopLoss ? '$' + p.stopLoss : 'Không đặt'} | TP: ${p.takeProfit ? '$' + p.takeProfit : 'Không đặt'}`);
+          parts.push(`  - P&L: ${pnlEmoji} ${p.pnlPercent}% ($${p.pnlAmount || 0})`);
+          parts.push(`  - Distance to SL: ${p.distanceToSL != null ? p.distanceToSL + '%' : 'N/A'} | Distance to TP: ${p.distanceToTP != null ? p.distanceToTP + '%' : 'N/A'}`);
+          parts.push(`  - Risk: ${p.riskLevel} | R:R achieved: ${p.rrAchieved != null ? p.rrAchieved + 'R' : 'N/A'}`);
+          parts.push(`  - Size: $${p.positionSize || p.margin || 'N/A'} | Qty: ${p.quantity || 'N/A'}`);
+          if (p.patternType) parts.push(`  - Pattern: ${p.patternType} (${p.timeframe || 'N/A'})`);
+          if (p.openedAt) parts.push(`  - Opened: ${new Date(p.openedAt).toLocaleString('vi-VN')}`);
         });
+        parts.push('');
+        parts.push(`**Portfolio Summary:**`);
         parts.push(`- Total P&L: ${context.position.totalPnLPercent}%`);
+        parts.push(`- Total Exposure: $${context.position.totalExposure || 'N/A'}`);
+        parts.push(`- Exposure Ratio: ${context.position.exposureRatio != null ? (context.position.exposureRatio * 100).toFixed(1) + '%' : 'N/A'}`);
         parts.push(`- Portfolio Risk: ${context.position.riskLevel}`);
       }
+
+      // Balance info
+      if (context.position.balanceInfo) {
+        const bal = context.position.balanceInfo;
+        parts.push('');
+        parts.push('### ACCOUNT BALANCE');
+        parts.push(`- Balance: $${bal.balance?.toFixed(2) || 'N/A'}`);
+        parts.push(`- Initial Balance: $${bal.initialBalance?.toFixed(2) || 'N/A'}`);
+        parts.push(`- Account P&L: ${bal.pnlPercent?.toFixed(2) || 0}%`);
+      }
+
       if (context.position.alerts?.length > 0) {
-        parts.push('- Alerts:');
+        parts.push('');
+        parts.push('### ALERTS');
         context.position.alerts.forEach((a) => {
           parts.push(`  ${a.message}`);
         });

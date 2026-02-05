@@ -10,6 +10,7 @@
  */
 
 import paperTradeService from '../paperTradeService';
+import { binanceService } from '../binanceService';
 
 // ═══════════════════════════════════════════════════════════
 // ALERT TYPES
@@ -54,7 +55,14 @@ class AdminAIPositionService {
   async getOpenPositions(userId) {
     try {
       await paperTradeService.init(userId);
-      return paperTradeService.openPositions || [];
+      // Use the getOpenPositions METHOD (filters by userId) instead of raw property
+      const positions = paperTradeService.getOpenPositions(userId);
+      console.log('[AdminAIPosition] getOpenPositions result:', {
+        userId,
+        count: positions?.length || 0,
+        rawCount: paperTradeService.openPositions?.length || 0,
+      });
+      return positions || [];
     } catch (error) {
       console.error('[AdminAIPosition] getOpenPositions error:', error);
       return [];
@@ -69,7 +77,7 @@ class AdminAIPositionService {
   async getPendingOrders(userId) {
     try {
       await paperTradeService.init(userId);
-      return paperTradeService.pendingOrders || [];
+      return paperTradeService.getPendingOrders(userId) || [];
     } catch (error) {
       console.error('[AdminAIPosition] getPendingOrders error:', error);
       return [];
@@ -85,8 +93,8 @@ class AdminAIPositionService {
   async getTradeHistory(userId, limit = 10) {
     try {
       await paperTradeService.init(userId);
-      const history = paperTradeService.tradeHistory || [];
-      return history.slice(-limit);
+      const history = paperTradeService.getTradeHistory(userId, limit) || [];
+      return history;
     } catch (error) {
       console.error('[AdminAIPosition] getTradeHistory error:', error);
       return [];
@@ -127,7 +135,8 @@ class AdminAIPositionService {
       return { error: 'Invalid position or price' };
     }
 
-    const { entryPrice, stopLoss, takeProfit, side, quantity, leverage = 1 } = position;
+    const { entryPrice, stopLoss, takeProfit, quantity, leverage = 1 } = position;
+    const side = position.side || position.direction;
     const isLong = side === 'LONG';
 
     // Calculate P&L
@@ -164,6 +173,8 @@ class AdminAIPositionService {
       side,
       entryPrice,
       currentPrice,
+      stopLoss: stopLoss || null,
+      takeProfit: takeProfit || null,
       pnlPercent: parseFloat(pnlPercent.toFixed(2)),
       pnlAmount: parseFloat(pnlAmount.toFixed(2)),
       distanceToSL: distanceToSL ? parseFloat(distanceToSL.toFixed(2)) : null,
@@ -171,6 +182,12 @@ class AdminAIPositionService {
       riskLevel,
       rrAchieved: rrAchieved ? parseFloat(rrAchieved.toFixed(2)) : null,
       leverage,
+      quantity: quantity || 0,
+      positionSize: position.positionSize || position.margin || 0,
+      margin: position.margin || position.positionSize || 0,
+      openedAt: position.openedAt || null,
+      patternType: position.patternType || null,
+      timeframe: position.timeframe || null,
       isProfit: pnlPercent > 0,
       timestamp: Date.now(),
     };
@@ -203,6 +220,12 @@ class AdminAIPositionService {
     const positions = await this.getOpenPositions(userId);
     const balanceInfo = await this.getBalanceInfo(userId);
 
+    console.log('[AdminAIPosition] analyzeAllPositions:', {
+      userId,
+      positionCount: positions.length,
+      providedPrices: Object.keys(currentPrices),
+    });
+
     if (positions.length === 0) {
       return {
         positions: [],
@@ -211,8 +234,34 @@ class AdminAIPositionService {
         riskLevel: 'LOW',
         alerts: [],
         balanceInfo,
+        positionCount: 0,
         timestamp: Date.now(),
       };
+    }
+
+    // Fetch current prices for ALL position symbols (not just chart symbol)
+    const allPrices = { ...currentPrices };
+    const uniqueSymbols = [...new Set(
+      positions.map((p) => p.symbol).filter((s) => s && !allPrices[s])
+    )];
+
+    if (uniqueSymbols.length > 0) {
+      try {
+        // Fetch from Futures API in parallel
+        const pricePromises = uniqueSymbols.map(async (sym) => {
+          const price = await binanceService.getCurrentPrice(sym);
+          return { symbol: sym, price };
+        });
+        const results = await Promise.allSettled(pricePromises);
+        for (const result of results) {
+          if (result.status === 'fulfilled' && result.value?.price) {
+            allPrices[result.value.symbol] = result.value.price;
+          }
+        }
+        console.log('[AdminAIPosition] Fetched prices for:', uniqueSymbols, 'got:', Object.keys(allPrices));
+      } catch (priceError) {
+        console.log('[AdminAIPosition] Price fetch error (non-critical):', priceError.message);
+      }
     }
 
     const analyzedPositions = [];
@@ -221,14 +270,31 @@ class AdminAIPositionService {
     const alerts = [];
 
     for (const position of positions) {
-      const price = currentPrices[position.symbol];
-      if (!price) continue;
+      const price = allPrices[position.symbol] || position.currentPrice || position.entryPrice;
+      if (!price) {
+        // Still include position with basic info even without current price
+        analyzedPositions.push({
+          symbol: position.symbol,
+          side: position.side || position.direction,
+          entryPrice: position.entryPrice,
+          currentPrice: null,
+          pnlPercent: 0,
+          pnlAmount: 0,
+          riskLevel: 'UNKNOWN',
+          leverage: position.leverage || 1,
+          isProfit: false,
+          noPriceData: true,
+          timestamp: Date.now(),
+        });
+        totalExposure += (position.quantity || 0) * (position.entryPrice || 0);
+        continue;
+      }
 
       const analysis = this.analyzePosition(position, price);
       analyzedPositions.push(analysis);
 
       totalPnL += analysis.pnlAmount || 0;
-      totalExposure += position.quantity * position.entryPrice;
+      totalExposure += (position.quantity || 0) * (position.entryPrice || 0);
 
       // Generate alerts
       const positionAlerts = this.getPositionAlerts(position, price);

@@ -588,6 +588,10 @@ Bạn hiểu sâu về GEM Frequency Method:
 3. Cảnh báo nếu pattern có known bug
 4. Đề cập multi-timeframe alignment khi có
 5. KHÔNG bao giờ khuyến nghị all-in hoặc YOLO
+6. LUÔN sử dụng DỮ LIỆU THỰC từ context được cung cấp - KHÔNG NÓI "dữ liệu không được cung cấp" hay "không có thông tin"
+7. Khi review position: LUÔN nêu giá hiện tại, Entry, SL, TP, P&L, leverage
+8. Khi gợi ý entry: LUÔN cho giá CỤ THỂ (Entry, SL, TP), KHÔNG cho range mơ hồ
+9. Position size khuyến nghị dựa trên balance thực tế (1-3% risk rule)
 
 ## KNOWN BUGS
 - UPD pattern có thể detect entry sớm - cần verify lower high
@@ -596,79 +600,313 @@ Bạn hiểu sâu về GEM Frequency Method:
 
 ## FORMAT OUTPUT
 - Dùng Markdown: **bold**, bullet points
-- Ngắn gọn, súc tích
-- Action items rõ ràng
+- Ngắn gọn nhưng ĐẦY ĐỦ thông tin quan trọng
+- Mỗi position review phải có: Entry, Current, SL, TP, P&L, Risk, Khuyến nghị
+- Action items rõ ràng với giá CỤ THỂ
 - Emoji đầu mỗi section`;
 
 // ═══════════════════════════════════════════════════════════
 // QUICK ACTION PROMPTS
 // ═══════════════════════════════════════════════════════════
 export const QUICK_ACTION_PROMPTS = {
-  analyze_pattern: (context) => `
+  analyze_pattern: (context) => {
+    const patterns = context.pattern?.patterns || [];
+    const summary = context.pattern?.summary || {};
+    const zones = context.zone?.zones || [];
+    const market = context.market || {};
+
+    const patternsSummary = patterns.length > 0
+      ? patterns.map(p => {
+          const grade = p.confidenceGrade ? ` [${p.confidenceGrade}]` : '';
+          const vol = p.volumeGrade ? ` | Vol: ${p.volumeGrade}` : '';
+          let line = `- ${p.name}: ${p.direction} (${p.confidence || 0}%${grade})${vol}`;
+          if (p.entryPrice) line += ` | Entry: $${p.entryPrice}`;
+          if (p.stopLoss) line += ` | SL: $${p.stopLoss}`;
+          if (p.takeProfit) line += ` | TP: $${p.takeProfit}`;
+          if (p.riskReward) line += ` | R:R: ${p.riskReward}`;
+          if (p.zoneType) line += ` | Zone: ${p.zoneType}`;
+          return line;
+        }).join('\n')
+      : 'Không có pattern nào được phát hiện';
+
+    const nearestZones = zones.slice(0, 3).map(z => {
+      let line = `- ${z.type} [${z.freshness}]: $${z.low?.toFixed(0) || 'N/A'} - $${z.high?.toFixed(0) || 'N/A'} (${z.distance?.toFixed(1) || '?'}% ${z.position})`;
+      if (z.entryPrice) line += ` | Entry: $${z.entryPrice} SL: $${z.stopLoss || 'N/A'} TP: $${z.takeProfit || 'N/A'}`;
+      return line;
+    }).join('\n');
+
+    return `
 Phân tích pattern hiện tại cho ${context.symbol} (${context.timeframe}):
-- Giá hiện tại: ${context.currentPrice}
-- Patterns detected: ${JSON.stringify(context.patterns)}
-- Zones: ${JSON.stringify(context.zones)}
+Giá hiện tại: $${context.currentPrice}
+Trend: ${market.trend?.toUpperCase() || 'N/A'}
+RSI: ${market.indicators?.rsi?.toFixed(1) || 'N/A'} | SMA20: $${market.indicators?.sma20?.toFixed(2) || 'N/A'}
+24h Change: ${market.change24h?.toFixed(2) || 'N/A'}%
+Last candle: ${market.lastCandle?.type || 'N/A'} (${market.lastCandle?.signal || 'neutral'})
 
-Đánh giá chi tiết và khuyến nghị entry nếu phù hợp.
-`,
+Patterns detected (${patterns.length}):
+${patternsSummary}
 
-  check_zone: (context) => `
+Summary: ${summary.longCount || 0} LONG, ${summary.shortCount || 0} SHORT, ${summary.highConfidenceCount || 0} high-confidence
+
+Nearest zones:
+${nearestZones || 'Không có zone'}
+
+Hãy đánh giá chi tiết:
+1. Pattern nào mạnh nhất? Tại sao?
+2. Zone alignment với pattern?
+3. Confirmation signals (RSI, candle pattern, trend)
+4. Nếu phù hợp entry, cho plan: Entry, SL, TP1, TP2, R:R, Position size % balance
+5. Nếu KHÔNG nên entry, giải thích tại sao
+`;
+  },
+
+  check_zone: (context) => {
+    const zones = context.zone?.zones || [];
+    const nearestZone = context.zone?.nearestZone;
+    const summary = context.zone?.summary || {};
+    const market = context.market || {};
+    const patterns = context.pattern?.patterns || [];
+
+    const zonesSummary = zones.length > 0
+      ? zones.slice(0, 8).map(z => {
+          const freshLabel = z.freshness === 'fresh' ? 'FRESH' :
+                            z.freshness === 'tested_1x' ? 'Tested 1x' :
+                            z.freshness === 'tested_2x' ? 'Tested 2x' : 'Exhausted';
+          let line = `- ${z.type} [${freshLabel}]: $${z.low?.toFixed(0) || 'N/A'} - $${z.high?.toFixed(0) || 'N/A'} (width: ${z.width?.toFixed(2) || 'N/A'}%, ${z.distance?.toFixed(1) || '?'}% ${z.position}, touches: ${z.touches || 0})`;
+          if (z.patternType) line += ` | Pattern: ${z.patternType} ${z.direction || ''}`;
+          if (z.entryPrice) line += ` | Entry: $${z.entryPrice} SL: $${z.stopLoss || 'N/A'} TP: $${z.takeProfit || 'N/A'}`;
+          return line;
+        }).join('\n')
+      : 'Không có zone nào';
+
+    return `
 Phân tích zones cho ${context.symbol} (${context.timeframe}):
-- Zones hiện có: ${JSON.stringify(context.zones)}
-- Giá hiện tại: ${context.currentPrice}
+Giá hiện tại: $${context.currentPrice}
+Trend: ${market.trend?.toUpperCase() || 'N/A'}
+RSI: ${market.indicators?.rsi?.toFixed(1) || 'N/A'}
 
-Đánh giá:
-1. Zone nào đang active/fresh?
-2. Khoảng cách tới zone gần nhất?
-3. Khả năng price reaction tại zone?
-`,
+Zones (${zones.length} total - ${summary.hfzCount || 0} HFZ, ${summary.lfzCount || 0} LFZ, ${summary.freshCount || 0} fresh):
+${zonesSummary}
 
-  entry_suggestion: (context) => `
-Dựa trên dữ liệu ${context.symbol} (${context.timeframe}):
-- Patterns: ${JSON.stringify(context.patterns)}
-- Zones: ${JSON.stringify(context.zones)}
-- Giá hiện tại: ${context.currentPrice}
+${nearestZone ? `Nearest zone: ${nearestZone.type} [${nearestZone.freshness}] at ${nearestZone.distance?.toFixed(1)}% ${nearestZone.position} ($${nearestZone.low?.toFixed(0)} - $${nearestZone.high?.toFixed(0)})` : 'Không có zone gần'}
 
-Có nên entry không? Nếu có, cho entry plan chi tiết (Entry, SL, TP, R:R).
-`,
+Active patterns: ${patterns.map(p => `${p.name} ${p.direction}`).join(', ') || 'Không có'}
 
-  position_review: (context) => `
-Review các positions đang mở:
-${JSON.stringify(context.positions)}
+Hãy đánh giá:
+1. Zone nào fresh và có khả năng phản ứng cao?
+2. Price đang ở vị trí nào so với các zone (above/inside/below)?
+3. Zone nào là key support/resistance gần nhất?
+4. Nếu price tiến về zone, khả năng bounce hay break?
+5. Kết hợp zone + pattern + trend → gợi ý trade setup nếu phù hợp
+`;
+  },
 
-Giá hiện tại các coins:
-${JSON.stringify(context.prices)}
+  entry_suggestion: (context) => {
+    const patterns = context.pattern?.patterns || [];
+    const zones = context.zone?.zones || [];
+    const nearestZone = context.zone?.nearestZone;
+    const market = context.market || {};
+    const balanceInfo = context.position?.balanceInfo || {};
+    const openPositions = context.position?.positions || [];
 
-Phân tích từng position:
-1. P&L hiện tại
-2. Risk level (distance to SL)
-3. Khuyến nghị: HOLD / CLOSE / PARTIAL
-`,
+    const highConfPatterns = patterns.filter(p => (p.confidence || 0) >= 70);
 
-  risk_check: (context) => `
+    const patternDetails = patterns.map(p => {
+      let line = `- ${p.name}: ${p.direction} (${p.confidence}%)`;
+      if (p.entryPrice) line += ` | Suggested entry: $${p.entryPrice}`;
+      if (p.stopLoss) line += ` | SL: $${p.stopLoss}`;
+      if (p.takeProfit) line += ` | TP: $${p.takeProfit}`;
+      if (p.riskReward) line += ` | R:R: ${p.riskReward}`;
+      return line;
+    }).join('\n') || 'Không có';
+
+    const nearestZones = zones.slice(0, 3).map(z => {
+      let line = `- ${z.type} [${z.freshness}]: $${z.low?.toFixed(0) || 'N/A'} - $${z.high?.toFixed(0) || 'N/A'} (${z.distance?.toFixed(1) || '?'}% ${z.position})`;
+      if (z.entryPrice) line += ` | Entry: $${z.entryPrice} SL: $${z.stopLoss || 'N/A'} TP: $${z.takeProfit || 'N/A'}`;
+      return line;
+    }).join('\n') || 'Không có';
+
+    return `
+Gợi ý entry cho ${context.symbol} (${context.timeframe}):
+Giá hiện tại: $${context.currentPrice}
+Trend: ${market.trend?.toUpperCase() || 'N/A'}
+RSI: ${market.indicators?.rsi?.toFixed(1) || 'N/A'}
+24h Change: ${market.change24h?.toFixed(2) || 'N/A'}%
+ATR: $${market.indicators?.atr?.toFixed(2) || 'N/A'}
+
+Patterns (${patterns.length} total, ${highConfPatterns.length} high-conf):
+${patternDetails}
+
+Nearest zones:
+${nearestZones}
+
+Account: Balance $${balanceInfo.balance?.toFixed(2) || 'N/A'} | Open positions: ${openPositions.length}
+
+Có nên entry không? Trả lời RÕ RÀNG:
+1. **Có/Không** entry và lý do
+2. Nếu CÓ, cho entry plan CHI TIẾT:
+   - Entry price (giá entry cụ thể)
+   - Stop Loss (và lý do chọn mức SL này)
+   - Take Profit 1 và Take Profit 2
+   - Risk:Reward ratio
+   - Position size ($) dựa trên balance $${balanceInfo.balance?.toFixed(0) || '10000'} (khuyến nghị 1-3% risk)
+   - Leverage phù hợp
+3. Nếu KHÔNG, chờ điều kiện gì?
+`;
+  },
+
+  position_review: (context) => {
+    const positions = context.position?.positions || [];
+    const positionCount = positions.length;
+    const totalPnL = context.position?.totalPnLPercent || 0;
+    const riskLevel = context.position?.riskLevel || 'UNKNOWN';
+    const balanceInfo = context.position?.balanceInfo || {};
+    const focusedPosition = context.position?.focusedPosition;
+
+    if (positionCount === 0) {
+      return `Không có positions đang mở. Tài khoản hiện không có vị thế nào.
+
+Thông tin tài khoản:
+- Balance: $${balanceInfo.balance?.toFixed(2) || 'N/A'}
+- Initial: $${balanceInfo.initialBalance?.toFixed(2) || 'N/A'}
+- P&L tài khoản: ${balanceInfo.pnlPercent?.toFixed(2) || 0}%
+
+Symbol đang xem: ${context.symbol} (${context.timeframe}) - Giá: $${context.currentPrice}
+Hãy tóm tắt tình hình tài khoản và gợi ý trade nếu phù hợp.`;
+    }
+
+    const positionsSummary = positions.map(p => {
+      const sl = p.stopLoss ? `$${p.stopLoss}` : 'Không đặt';
+      const tp = p.takeProfit ? `$${p.takeProfit}` : 'Không đặt';
+      const distSL = p.distanceToSL != null ? `${p.distanceToSL}%` : 'N/A';
+      const distTP = p.distanceToTP != null ? `${p.distanceToTP}%` : 'N/A';
+      const rr = p.rrAchieved != null ? `${p.rrAchieved}R` : 'N/A';
+      const opened = p.openedAt ? new Date(p.openedAt).toLocaleString('vi-VN') : 'N/A';
+      return `### ${p.symbol} ${p.side} (x${p.leverage || 1})
+- Entry: $${p.entryPrice} | Current: $${p.currentPrice || 'N/A'}
+- SL: ${sl} (distance: ${distSL}) | TP: ${tp} (distance: ${distTP})
+- P&L: ${p.pnlPercent}% ($${p.pnlAmount || 0})
+- Risk: ${p.riskLevel} | R:R achieved: ${rr}
+- Size: $${p.positionSize || p.margin || 'N/A'} | Qty: ${p.quantity || 'N/A'}
+- Pattern: ${p.patternType || 'N/A'} (${p.timeframe || 'N/A'})
+- Opened: ${opened}`;
+    }).join('\n\n');
+
+    const focusNote = focusedPosition
+      ? `\n**User đang focus vào: ${focusedPosition.symbol} ${focusedPosition.side}** - Hãy phân tích position này chi tiết nhất.\n`
+      : '';
+
+    return `
+Review ${positionCount} positions đang mở:
+${focusNote}
+${positionsSummary}
+
+**Tổng quan portfolio:**
+- Tổng P&L: ${totalPnL}%
+- Risk Level: ${riskLevel}
+- Exposure: $${context.position?.totalExposure?.toFixed(2) || 'N/A'} (${context.position?.exposureRatio != null ? (context.position.exposureRatio * 100).toFixed(1) + '%' : 'N/A'} of balance)
+- Balance: $${balanceInfo.balance?.toFixed(2) || 'N/A'} (initial: $${balanceInfo.initialBalance?.toFixed(2) || 'N/A'})
+
+Symbol đang xem: ${context.symbol} (${context.timeframe}) - Giá: $${context.currentPrice}
+
+Hãy phân tích CHI TIẾT từng position:
+1. P&L hiện tại, giá hiện tại so với entry
+2. Distance to SL/TP và mức độ rủi ro
+3. Đánh giá vị thế dựa trên xu hướng thị trường
+4. Khuyến nghị cụ thể: HOLD / CLOSE / PARTIAL CLOSE / TRAIL STOP (dịch SL về breakeven)
+5. Nếu cần dịch SL/TP, cho giá cụ thể
+`;
+  },
+
+  risk_check: (context) => {
+    const positions = context.position?.positions || [];
+    const totalExposure = context.position?.exposureRatio || 0;
+    const totalPnL = context.position?.totalPnLPercent || 0;
+    const riskLevel = context.position?.riskLevel || 'UNKNOWN';
+    const alerts = context.position?.alerts || [];
+    const balanceInfo = context.position?.balanceInfo || {};
+    const focusedPosition = context.position?.focusedPosition;
+
+    const positionsSummary = positions.map(p => {
+      const distSL = p.distanceToSL != null ? `${p.distanceToSL}%` : 'No SL';
+      return `- ${p.symbol} ${p.side} (x${p.leverage || 1}): Entry $${p.entryPrice}, Current $${p.currentPrice || 'N/A'}, P&L: ${p.pnlPercent}%, SL distance: ${distSL}, Risk: ${p.riskLevel}, Size: $${p.positionSize || p.margin || 'N/A'}`;
+    }).join('\n');
+
+    const alertsSummary = alerts.length > 0
+      ? alerts.map(a => `⚠️ ${a.message}`).join('\n')
+      : 'Không có cảnh báo';
+
+    return `
 Kiểm tra risk tổng thể:
-- Positions: ${JSON.stringify(context.positions)}
-- Total exposure: ${context.totalExposure}
-- Current P&L: ${context.totalPnL}
 
-Đánh giá:
-1. Risk level (LOW/MEDIUM/HIGH/CRITICAL)
-2. Correlation risk
-3. Khuyến nghị điều chỉnh nếu cần
-`,
+**Tài khoản:**
+- Balance: $${balanceInfo.balance?.toFixed(2) || 'N/A'} (initial: $${balanceInfo.initialBalance?.toFixed(2) || 'N/A'})
+- Account P&L: ${balanceInfo.pnlPercent?.toFixed(2) || 0}%
 
-  predict_candle: (context) => `
-Dựa trên ${context.symbol} (${context.timeframe}):
-- Last 5 candles: ${JSON.stringify(context.recentCandles)}
-- Current pattern: ${context.currentPattern}
-- Zone proximity: ${context.zoneDistance}
+**Positions (${positions.length}):**
+${positionsSummary || 'Không có positions'}
 
-Dự đoán nến tiếp theo:
-1. Bullish / Bearish / Neutral probability
-2. Key levels to watch
-3. Potential candle pattern formation
-`,
+**Risk Metrics:**
+- Total Exposure: $${context.position?.totalExposure?.toFixed(2) || 'N/A'} (${(totalExposure * 100).toFixed(1)}% of balance)
+- Unrealized P&L: ${totalPnL}%
+- Portfolio Risk Level: ${riskLevel}
+
+**Alerts:**
+${alertsSummary}
+
+**Market Context:**
+- ${context.symbol} (${context.timeframe}): $${context.currentPrice}
+- Trend: ${context.market?.trend?.toUpperCase() || 'N/A'}
+- RSI: ${context.market?.indicators?.rsi?.toFixed(1) || 'N/A'}
+
+${focusedPosition ? `**User đang focus vào: ${focusedPosition.symbol} ${focusedPosition.side}** - Đánh giá risk cho position này chi tiết nhất.\n` : ''}
+Hãy đánh giá chi tiết:
+1. Mức độ risk tổng thể của portfolio
+2. Từng position: risk level, distance to SL, khả năng bị liquidated
+3. Correlation risk (các positions cùng hướng, cùng sector?)
+4. Exposure ratio so với balance - có quá lớn không?
+5. Khuyến nghị cụ thể để giảm risk nếu cần (close position nào, dịch SL nào)
+`;
+  },
+
+  predict_candle: (context) => {
+    const recentCandles = context.market?.recentCandles || [];
+    const lastCandle = context.market?.lastCandle;
+    const candlePatterns = context.market?.candlePatterns || [];
+    const nearestZone = context.zone?.nearestZone;
+    const market = context.market || {};
+    const patterns = context.pattern?.patterns || [];
+
+    const candlesSummary = recentCandles.slice(-5).map((c, i) =>
+      `${i + 1}. ${c.isBullish ? 'BULL' : 'BEAR'} O:${c.open?.toFixed(0)} H:${c.high?.toFixed(0)} L:${c.low?.toFixed(0)} C:${c.close?.toFixed(0)}`
+    ).join('\n');
+
+    return `
+Dự đoán nến tiếp theo cho ${context.symbol} (${context.timeframe}):
+Giá hiện tại: $${context.currentPrice}
+Trend: ${market.trend?.toUpperCase() || 'N/A'}
+RSI: ${market.indicators?.rsi?.toFixed(1) || 'N/A'}
+SMA20: $${market.indicators?.sma20?.toFixed(2) || 'N/A'}
+ATR: $${market.indicators?.atr?.toFixed(2) || 'N/A'}
+24h Change: ${market.change24h?.toFixed(2) || 'N/A'}%
+
+Last 5 candles (${context.timeframe}):
+${candlesSummary || 'Không có dữ liệu'}
+
+Last candle: ${lastCandle?.type || 'N/A'} (${lastCandle?.signal || 'neutral'})
+${lastCandle?.bodyPercent ? `Body: ${lastCandle.bodyPercent?.toFixed(1)}% | Wick ratio: ${lastCandle.wickRatio?.toFixed(2) || 'N/A'}` : ''}
+Candle patterns detected: ${candlePatterns.map(p => p.type).join(', ') || 'Không có'}
+Active chart patterns: ${patterns.map(p => `${p.name} ${p.direction}`).join(', ') || 'Không có'}
+Nearest zone: ${nearestZone ? `${nearestZone.type} [${nearestZone.freshness}] at ${nearestZone.distance?.toFixed(1)}% ${nearestZone.position}` : 'N/A'}
+
+Hãy dự đoán nến ${context.timeframe} tiếp theo:
+1. **Bullish / Bearish / Doji** - xác suất % cho mỗi khả năng
+2. Range dự kiến (High/Low) dựa trên ATR
+3. Key levels cần theo dõi (support/resistance gần nhất)
+4. Candle pattern nào có thể hình thành?
+5. Nếu đang có position, nến tiếp theo ảnh hưởng thế nào?
+`;
+  },
 };
 
 export default {

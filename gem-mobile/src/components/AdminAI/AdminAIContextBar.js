@@ -1,11 +1,12 @@
 /**
  * GEM AI Trading Brain - Context Bar Component
  * Displays current trading context (symbol, timeframe, price, patterns)
+ * Includes position selector for switching between open positions
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { TrendingUp, TrendingDown, Layers, Activity } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { TrendingUp, TrendingDown, Layers, Activity, Briefcase, ChevronRight } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { formatPrice } from '../../utils/formatters';
 
@@ -17,66 +18,149 @@ const AdminAIContextBar = ({
   patternCount = 0,
   zoneCount = 0,
   trend,
+  // Position selector props
+  positions = [],
+  selectedPositionIndex = -1,
+  onSelectPosition,
 }) => {
   const isPositive = priceChange >= 0;
   const TrendIcon = isPositive ? TrendingUp : TrendingDown;
+  const hasPositions = positions.length > 0;
 
   return (
-    <View style={styles.container}>
-      {/* Symbol & Timeframe */}
-      <View style={styles.symbolSection}>
-        <Text style={styles.symbol}>{symbol.replace('USDT', '')}</Text>
-        <View style={styles.timeframeBadge}>
-          <Text style={styles.timeframeText}>{timeframe}</Text>
+    <View style={styles.wrapper}>
+      {/* Main context row */}
+      <View style={styles.container}>
+        {/* Symbol & Timeframe */}
+        <View style={styles.symbolSection}>
+          <Text style={styles.symbol}>{symbol.replace('USDT', '')}</Text>
+          <View style={styles.timeframeBadge}>
+            <Text style={styles.timeframeText}>{timeframe}</Text>
+          </View>
         </View>
-      </View>
 
-      {/* Price */}
-      <View style={styles.priceSection}>
-        {currentPrice ? (
-          <>
-            <Text style={styles.price}>${formatPrice(currentPrice)}</Text>
-            {priceChange !== null && priceChange !== undefined && (
-              <View style={[styles.changeBadge, isPositive ? styles.changeBadgePositive : styles.changeBadgeNegative]}>
-                <TrendIcon size={10} color={isPositive ? COLORS.success : COLORS.error} />
-                <Text style={[styles.changeText, isPositive ? styles.changeTextPositive : styles.changeTextNegative]}>
-                  {isPositive ? '+' : ''}{priceChange.toFixed(2)}%
-                </Text>
-              </View>
-            )}
-          </>
-        ) : (
-          <Text style={styles.priceLoading}>Loading...</Text>
-        )}
-      </View>
+        {/* Price */}
+        <View style={styles.priceSection}>
+          {currentPrice ? (
+            <>
+              <Text style={styles.price}>${formatPrice(currentPrice)}</Text>
+              {priceChange !== null && priceChange !== undefined && (
+                <View style={[styles.changeBadge, isPositive ? styles.changeBadgePositive : styles.changeBadgeNegative]}>
+                  <TrendIcon size={10} color={isPositive ? COLORS.success : COLORS.error} />
+                  <Text style={[styles.changeText, isPositive ? styles.changeTextPositive : styles.changeTextNegative]}>
+                    {isPositive ? '+' : ''}{priceChange.toFixed(2)}%
+                  </Text>
+                </View>
+              )}
+            </>
+          ) : (
+            <Text style={styles.priceLoading}>Loading...</Text>
+          )}
+        </View>
 
-      {/* Pattern & Zone Count */}
-      <View style={styles.statsSection}>
-        {patternCount > 0 && (
-          <View style={styles.statBadge}>
-            <Activity size={12} color={COLORS.purple} />
-            <Text style={styles.statText}>{patternCount}</Text>
+        {/* Pattern & Zone Count */}
+        <View style={styles.statsSection}>
+          {patternCount > 0 && (
+            <View style={styles.statBadge}>
+              <Activity size={12} color={COLORS.purple} />
+              <Text style={styles.statText}>{patternCount}</Text>
+            </View>
+          )}
+          {zoneCount > 0 && (
+            <View style={styles.statBadge}>
+              <Layers size={12} color={COLORS.cyan} />
+              <Text style={styles.statText}>{zoneCount}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Trend indicator */}
+        {trend && (
+          <View style={[
+            styles.trendBadge,
+            trend === 'uptrend' && styles.trendBadgeUp,
+            trend === 'downtrend' && styles.trendBadgeDown,
+            trend === 'sideways' && styles.trendBadgeSideways,
+          ]}>
+            <Text style={styles.trendText}>
+              {trend === 'uptrend' ? '↑' : trend === 'downtrend' ? '↓' : '→'}
+            </Text>
           </View>
         )}
-        {zoneCount > 0 && (
-          <View style={styles.statBadge}>
-            <Layers size={12} color={COLORS.cyan} />
-            <Text style={styles.statText}>{zoneCount}</Text>
-          </View>
-        )}
       </View>
 
-      {/* Trend indicator */}
-      {trend && (
-        <View style={[
-          styles.trendBadge,
-          trend === 'uptrend' && styles.trendBadgeUp,
-          trend === 'downtrend' && styles.trendBadgeDown,
-          trend === 'sideways' && styles.trendBadgeSideways,
-        ]}>
-          <Text style={styles.trendText}>
-            {trend === 'uptrend' ? '↑' : trend === 'downtrend' ? '↓' : '→'}
-          </Text>
+      {/* Position selector row */}
+      {hasPositions && (
+        <View style={styles.positionRow}>
+          <View style={styles.positionLabel}>
+            <Briefcase size={12} color={COLORS.gold} />
+            <Text style={styles.positionLabelText}>{positions.length}</Text>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.positionScrollContent}
+          >
+            {/* "All" chip */}
+            <TouchableOpacity
+              style={[
+                styles.positionChip,
+                selectedPositionIndex === -1 && styles.positionChipSelected,
+              ]}
+              onPress={() => onSelectPosition?.(-1)}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.positionChipText,
+                selectedPositionIndex === -1 && styles.positionChipTextSelected,
+              ]}>
+                All
+              </Text>
+            </TouchableOpacity>
+
+            {/* Individual position chips */}
+            {positions.map((pos, index) => {
+              const isSelected = selectedPositionIndex === index;
+              const isLong = (pos.side || pos.direction) === 'LONG';
+              const pnlAmount = pos.pnlAmount || 0;
+              const isProfit = pnlAmount >= 0;
+
+              return (
+                <TouchableOpacity
+                  key={pos.symbol + index}
+                  style={[
+                    styles.positionChip,
+                    isSelected && styles.positionChipSelected,
+                    isSelected && isLong && styles.positionChipLong,
+                    isSelected && !isLong && styles.positionChipShort,
+                  ]}
+                  onPress={() => onSelectPosition?.(index)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[
+                    styles.positionChipSymbol,
+                    isSelected && styles.positionChipTextSelected,
+                  ]}>
+                    {pos.symbol?.replace('USDT', '')}
+                  </Text>
+                  <View style={[
+                    styles.positionChipDirection,
+                    isLong ? styles.directionLong : styles.directionShort,
+                  ]}>
+                    <Text style={styles.positionChipDirectionText}>
+                      {isLong ? 'L' : 'S'}
+                    </Text>
+                  </View>
+                  <Text style={[
+                    styles.positionChipPnl,
+                    isProfit ? styles.pnlPositive : styles.pnlNegative,
+                  ]}>
+                    {isProfit ? '+' : ''}{pnlAmount.toFixed(2)}$
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </View>
       )}
     </View>
@@ -84,14 +168,16 @@ const AdminAIContextBar = ({
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    backgroundColor: 'rgba(15, 16, 48, 0.8)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    backgroundColor: 'rgba(15, 16, 48, 0.8)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
   },
   symbolSection: {
     flexDirection: 'row',
@@ -195,6 +281,94 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: COLORS.textPrimary,
+  },
+
+  // Position selector row
+  positionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: SPACING.md,
+    paddingRight: SPACING.xs,
+    paddingBottom: SPACING.sm,
+    gap: SPACING.xs,
+  },
+  positionLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  positionLabelText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
+  positionScrollContent: {
+    gap: SPACING.xs,
+    paddingRight: SPACING.md,
+  },
+  positionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  positionChipSelected: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+  },
+  positionChipLong: {
+    backgroundColor: 'rgba(58, 247, 166, 0.12)',
+    borderColor: 'rgba(58, 247, 166, 0.3)',
+  },
+  positionChipShort: {
+    backgroundColor: 'rgba(255, 107, 107, 0.12)',
+    borderColor: 'rgba(255, 107, 107, 0.3)',
+  },
+  positionChipText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  positionChipTextSelected: {
+    color: COLORS.textPrimary,
+  },
+  positionChipSymbol: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.textSecondary,
+  },
+  positionChipDirection: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  directionLong: {
+    backgroundColor: 'rgba(58, 247, 166, 0.25)',
+  },
+  directionShort: {
+    backgroundColor: 'rgba(255, 107, 107, 0.25)',
+  },
+  positionChipDirectionText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+  },
+  positionChipPnl: {
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  pnlPositive: {
+    color: COLORS.success,
+  },
+  pnlNegative: {
+    color: COLORS.error,
   },
 });
 
