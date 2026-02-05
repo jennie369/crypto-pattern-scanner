@@ -971,7 +971,8 @@ const DayDetailModal = ({
                 </Text>
                 <View style={styles.quickMoodRow}>
                   {QUICK_MOODS.map((m) => {
-                    const isSelected = selectedMood === m.id || mood?.morning_mood === m.id || mood?.overall_mood === m.id;
+                    const activeMood = selectedMood || mood?.overall_mood || mood?.morning_mood;
+                    const isSelected = activeMood === m.id;
                     return (
                       <TouchableOpacity
                         key={m.id}
@@ -1504,8 +1505,8 @@ const styles = StyleSheet.create({
   modalContainer: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    marginTop: SCREEN_HEIGHT * 0.1,
-    height: SCREEN_HEIGHT * 0.85,
+    marginTop: SCREEN_HEIGHT * 0.05,
+    height: SCREEN_HEIGHT * 0.92,
     paddingBottom: 24,
     overflow: 'hidden',
     borderWidth: 1,

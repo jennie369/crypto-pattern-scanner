@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     marginBottom: COSMIC_SPACING.xs,
   },
   label: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.xs,
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.md,
     fontWeight: COSMIC_TYPOGRAPHY.fontWeight.medium,
     color: COSMIC_COLORS.text.secondary,
   },

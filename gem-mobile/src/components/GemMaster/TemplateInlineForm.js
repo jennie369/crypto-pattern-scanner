@@ -20,6 +20,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -99,6 +100,26 @@ const TemplateInlineForm = ({
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const scrollViewRef = useRef(null);
+
+  // Track keyboard height for proper scrolling on Android
+  useEffect(() => {
+    if (!visible) return;
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [visible]);
 
   // Initialize form data
   useEffect(() => {
@@ -106,6 +127,7 @@ const TemplateInlineForm = ({
       const defaults = getDefaultFormData(template);
       setFormData({ ...defaults, ...autoFillData });
       setErrors({});
+      setKeyboardHeight(0);
     }
   }, [visible, template, autoFillData]);
 
@@ -272,8 +294,11 @@ const TemplateInlineForm = ({
   const IconComponent = TEMPLATE_ICONS[templateId] || Sparkles;
   const isTradingJournal = templateId === 'trading_journal';
 
-  // Calculate card height with safe area
-  const cardHeight = SCREEN_HEIGHT * 0.82; // Balanced height for content and buttons
+  // Calculate card height - shrink when keyboard is visible on Android
+  const baseCardHeight = SCREEN_HEIGHT * 0.92;
+  const effectiveCardHeight = (Platform.OS === 'android' && keyboardHeight > 0)
+    ? SCREEN_HEIGHT - keyboardHeight - insets.top - 20
+    : baseCardHeight;
 
   return (
     <Modal
@@ -284,7 +309,7 @@ const TemplateInlineForm = ({
       statusBarTranslucent
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.modalContainer}
       >
         {/* Tap outside to close - animated overlay */}
@@ -301,8 +326,9 @@ const TemplateInlineForm = ({
           style={[
             styles.card,
             {
-              height: cardHeight,
-              paddingBottom: insets.bottom,
+              height: effectiveCardHeight,
+              paddingBottom: (Platform.OS === 'android' && keyboardHeight > 0) ? COSMIC_SPACING.sm : insets.bottom,
+              marginBottom: (Platform.OS === 'android' && keyboardHeight > 0) ? keyboardHeight : 0,
               transform: [{ translateY: slideAnim }],
             },
           ]}
@@ -332,12 +358,17 @@ const TemplateInlineForm = ({
 
           {/* Form Fields */}
           <ScrollView
+            ref={scrollViewRef}
             style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              keyboardHeight > 0 && { paddingBottom: COSMIC_SPACING.xxxl + 60 },
+            ]}
             showsVerticalScrollIndicator={true}
             keyboardShouldPersistTaps="handled"
-            bounces={false}
+            bounces={Platform.OS === 'ios'}
             overScrollMode="never"
+            automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
           >
             {/* Paper Trade Selector for Trading Journal */}
             {isTradingJournal && (
@@ -408,7 +439,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   card: {
-    backgroundColor: '#1a1a2e', // Blue-ish matching chat theme
+    backgroundColor: '#0D0D2B', // Deep navy matching chat theme
     overflow: 'hidden',
     borderTopLeftRadius: COSMIC_RADIUS.xl,
     borderTopRightRadius: COSMIC_RADIUS.xl,
@@ -421,7 +452,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: COSMIC_SPACING.md,
     paddingVertical: COSMIC_SPACING.sm,
-    backgroundColor: '#16162a', // Slightly darker header
+    backgroundColor: '#0A0A1F', // Darker navy header
   },
   headerLeft: {
     flexDirection: 'row',
@@ -485,7 +516,7 @@ const styles = StyleSheet.create({
     paddingTop: COSMIC_SPACING.sm,
     paddingBottom: COSMIC_SPACING.md,
     gap: COSMIC_SPACING.md,
-    backgroundColor: '#16162a', // Match header
+    backgroundColor: '#0A0A1F', // Match header - deep navy
   },
   cancelButton: {
     paddingVertical: COSMIC_SPACING.sm,
@@ -512,7 +543,7 @@ const styles = StyleSheet.create({
 
   // Locked state
   lockedCard: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#0D0D2B',
     borderTopLeftRadius: COSMIC_RADIUS.xl,
     borderTopRightRadius: COSMIC_RADIUS.xl,
     padding: COSMIC_SPACING.xl,

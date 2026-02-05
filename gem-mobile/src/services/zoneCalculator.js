@@ -67,6 +67,12 @@ export const calculateZoneBoundaries = (pauseCandles, zoneType, currentPrice) =>
     ? stopPrice + stopBuffer
     : stopPrice - stopBuffer;
 
+  // Distance from current price to entry
+  const distanceFromPrice = Math.abs(currentPrice - entryPrice);
+  const distancePercent = currentPrice > 0
+    ? parseFloat(((distanceFromPrice / currentPrice) * 100).toFixed(2))
+    : 0;
+
   return {
     zoneType,
     entryPrice,
@@ -76,6 +82,11 @@ export const calculateZoneBoundaries = (pauseCandles, zoneType, currentPrice) =>
     zoneWidthPercent: parseFloat(zoneWidthPercent.toFixed(2)),
     pauseHigh,
     pauseLow,
+    // Aliases for compatibility with FL/DP detectors
+    zoneHigh: pauseHigh,
+    zoneLow: pauseLow,
+    distanceFromPrice,
+    distancePercent,
     pauseCandleCount: pauseCandles.length,
     isValid: zoneWidth > 0,
   };

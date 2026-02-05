@@ -9,8 +9,8 @@
  * - Unread count badge
  */
 
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -61,11 +61,6 @@ const AdminAIBubble = ({
   const contextX = useSharedValue(0);
   const contextY = useSharedValue(0);
 
-  // Don't render if not admin
-  if (!isAdmin) {
-    return null;
-  }
-
   // Pulse animation when there are alerts
   useEffect(() => {
     if (hasNewAlert) {
@@ -101,18 +96,28 @@ const AdminAIBubble = ({
     }
   }, [patterns]);
 
-  // Drag gesture handler
-  const panGesture = Gesture.Pan()
+  // Handle tap - MUST be defined before gestures that use it
+  const handleTap = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setHasNewAlert(false); // Clear alert on open
+    setModalVisible(true);
+  }, []);
+
+  // Gesture handlers - memoized to prevent recreation
+  const panGesture = useMemo(() => Gesture.Pan()
     .onStart(() => {
+      'worklet';
       contextX.value = translateX.value;
       contextY.value = translateY.value;
       scale.value = withSpring(1.1);
     })
     .onUpdate((event) => {
+      'worklet';
       translateX.value = contextX.value + event.translationX;
       translateY.value = contextY.value + event.translationY;
     })
     .onEnd(() => {
+      'worklet';
       scale.value = withSpring(1);
 
       // Snap to nearest edge
@@ -134,22 +139,20 @@ const AdminAIBubble = ({
         damping: 20,
         stiffness: 200,
       });
-    });
+    }), [translateX, translateY, scale, contextX, contextY]);
 
   // Tap gesture handler
-  const tapGesture = Gesture.Tap()
+  const tapGesture = useMemo(() => Gesture.Tap()
     .onEnd(() => {
+      'worklet';
       runOnJS(handleTap)();
-    });
+    }), [handleTap]);
 
   // Combined gestures
-  const composedGesture = Gesture.Simultaneous(panGesture, tapGesture);
-
-  const handleTap = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setHasNewAlert(false); // Clear alert on open
-    setModalVisible(true);
-  };
+  const composedGesture = useMemo(
+    () => Gesture.Simultaneous(panGesture, tapGesture),
+    [panGesture, tapGesture]
+  );
 
   // Animated styles
   const bubbleAnimatedStyle = useAnimatedStyle(() => ({
@@ -165,6 +168,11 @@ const AdminAIBubble = ({
     opacity: pulseScale.value > 1 ? 0.7 : 0,
   }));
 
+  // Don't render if not admin - placed after all hooks to follow React Rules of Hooks
+  if (!isAdmin) {
+    return null;
+  }
+
   return (
     <>
       <GestureDetector gesture={composedGesture}>
@@ -175,13 +183,9 @@ const AdminAIBubble = ({
           )}
 
           {/* Main bubble */}
-          <TouchableOpacity
-            style={styles.bubble}
-            activeOpacity={0.9}
-            onPress={handleTap}
-          >
+          <View style={styles.bubble}>
             <Brain size={28} color={COLORS.gold} strokeWidth={2} />
-          </TouchableOpacity>
+          </View>
 
           {/* Alert badge */}
           {alertCount > 0 && (

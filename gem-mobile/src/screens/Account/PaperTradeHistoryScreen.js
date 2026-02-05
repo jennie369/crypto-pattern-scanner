@@ -1497,19 +1497,20 @@ const styles = StyleSheet.create({
   },
 
   // Trade List
-  tradeList: {},
-  tradeCard: {
+  tradeList: {
     backgroundColor: GLASS.background,
-    borderRadius: 12,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  tradeCard: {
+    backgroundColor: 'transparent',
     padding: SPACING.sm,
     paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
   tradeCardOpen: {
-    borderColor: 'rgba(255, 255, 255, 0.25)',
-    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
   expandedContent: {
     marginTop: SPACING.sm,

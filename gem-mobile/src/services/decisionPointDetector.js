@@ -12,93 +12,7 @@
  */
 
 import { ZONE_HIERARCHY, DECISION_POINT_CONFIG } from '../constants/zoneHierarchyConfig';
-
-// ═══════════════════════════════════════════════════════════
-// ZONE BOUNDARY CALCULATION
-// ═══════════════════════════════════════════════════════════
-
-/**
- * Calculate zone boundaries from candles
- */
-const calculateZoneBoundaries = (candles, zoneType, currentPrice) => {
-  if (!candles || candles.length === 0) return null;
-
-  const high = Math.max(...candles.map(c => c.high));
-  const low = Math.min(...candles.map(c => c.low));
-  const width = high - low;
-  const widthPercent = (width / ((high + low) / 2)) * 100;
-
-  const entryPrice = zoneType === 'LFZ' ? high : low;
-  const stopPrice = zoneType === 'LFZ' ? low : high;
-
-  return {
-    entryPrice,
-    stopPrice,
-    zoneWidth: width,
-    zoneWidthPercent: widthPercent.toFixed(2),
-    zoneHigh: high,
-    zoneLow: low,
-    distanceFromPrice: Math.abs(currentPrice - entryPrice),
-    distancePercent: ((Math.abs(currentPrice - entryPrice) / currentPrice) * 100).toFixed(2),
-  };
-};
-
-// ═══════════════════════════════════════════════════════════
-// SWING POINT DETECTION
-// ═══════════════════════════════════════════════════════════
-
-/**
- * Find swing highs in candle data
- * @param {Array} candles - OHLCV candles
- * @param {number} lookback - Candles to look back for swing
- * @returns {Array} Array of swing high indices and prices
- */
-const findSwingHighs = (candles, lookback = 3) => {
-  const swings = [];
-
-  for (let i = lookback; i < candles.length - lookback; i++) {
-    const current = candles[i].high;
-    let isSwingHigh = true;
-
-    for (let j = 1; j <= lookback; j++) {
-      if (candles[i - j].high >= current || candles[i + j].high >= current) {
-        isSwingHigh = false;
-        break;
-      }
-    }
-
-    if (isSwingHigh) {
-      swings.push({ index: i, price: current, type: 'high' });
-    }
-  }
-
-  return swings;
-};
-
-/**
- * Find swing lows in candle data
- */
-const findSwingLows = (candles, lookback = 3) => {
-  const swings = [];
-
-  for (let i = lookback; i < candles.length - lookback; i++) {
-    const current = candles[i].low;
-    let isSwingLow = true;
-
-    for (let j = 1; j <= lookback; j++) {
-      if (candles[i - j].low <= current || candles[i + j].low <= current) {
-        isSwingLow = false;
-        break;
-      }
-    }
-
-    if (isSwingLow) {
-      swings.push({ index: i, price: current, type: 'low' });
-    }
-  }
-
-  return swings;
-};
+import { calculateZoneBoundaries, findSwingHighs, findSwingLows } from './zoneCalculator';
 
 // ═══════════════════════════════════════════════════════════
 // BULLISH DECISION POINT
@@ -410,6 +324,4 @@ export default {
   detectDecisionPoints,
   isValidDecisionPoint,
   getBestDecisionPoint,
-  findSwingHighs,
-  findSwingLows,
 };

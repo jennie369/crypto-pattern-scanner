@@ -47,22 +47,107 @@ const ICON_SIZE = 16;
 const ICON_COLOR = COLORS.gold; // Gold for visibility on dark background
 
 /**
+ * Normalize text to replace Unicode asterisks with ASCII asterisks
+ * and remove zero-width characters between asterisks
+ */
+const normalizeMarkdown = (text) => {
+  if (!text) return text;
+  return text
+    .replace(/＊/g, '*')  // Full-width asterisk U+FF0A
+    .replace(/∗/g, '*')   // Asterisk operator U+2217
+    .replace(/٭/g, '*')   // Arabic five pointed star U+066D
+    .replace(/\*[\u200B\u200C\u200D\uFEFF]+\*/g, '**'); // Remove zero-width chars between asterisks
+};
+
+/**
+ * Render icon elements from [icon:Name] syntax
+ */
+const renderIconSegment = (text, keyPrefix) => {
+  if (!text) return null;
+
+  const iconParts = text.split(/(\[icon:[A-Za-z]+\])/);
+  const result = [];
+  let key = 0;
+
+  for (const part of iconParts) {
+    if (!part) continue;
+    const iconMatch = part.match(/^\[icon:([A-Za-z]+)\]$/);
+    if (iconMatch) {
+      const IconComponent = ICON_MAP[iconMatch[1]];
+      if (IconComponent) {
+        result.push(
+          <View key={`${keyPrefix}_i${key++}`} style={{ marginRight: 4, marginTop: 2 }}>
+            <IconComponent size={ICON_SIZE} color={ICON_COLOR} strokeWidth={2} />
+          </View>
+        );
+      } else {
+        result.push(<Text key={`${keyPrefix}_i${key++}`}>{part}</Text>);
+      }
+    } else {
+      result.push(<Text key={`${keyPrefix}_i${key++}`}>{part}</Text>);
+    }
+  }
+  return result;
+};
+
+/**
+ * Render inline markdown (bold, icons) using split approach
+ * More reliable than regex while-loop for bold detection
+ */
+const renderInlineMarkdown = (text, baseStyle) => {
+  if (!text) return text;
+
+  const normalized = normalizeMarkdown(text);
+
+  // Split by bold markers **...** using capture group
+  // Result: [plainText, boldContent, plainText, boldContent, ...]
+  // Even indices = plain text, odd indices = bold content
+  const segments = normalized.split(/\*\*([^*]+?)\*\*/);
+
+  // If no bold markers found, just handle icons
+  if (segments.length === 1) {
+    return renderIconSegment(normalized, 'seg');
+  }
+
+  const parts = [];
+  segments.forEach((segment, index) => {
+    if (!segment) return;
+
+    if (index % 2 === 1) {
+      // Bold content (captured group - odd index)
+      parts.push(
+        <Text key={`b${index}`} style={{ fontWeight: '700', color: COLORS.textPrimary }}>
+          {segment}
+        </Text>
+      );
+    } else {
+      // Plain text - also handle icons
+      const iconElements = renderIconSegment(segment, `p${index}`);
+      if (iconElements) {
+        parts.push(...iconElements);
+      }
+    }
+  });
+
+  return parts.length > 0 ? parts : text;
+};
+
+/**
  * Simple markdown text renderer
- * Supports: **bold**, *italic*, bullet points, [icon:Name]
+ * Supports: **bold**, bullet points, [icon:Name]
  */
 const renderMarkdownText = (text, baseStyle) => {
   if (!text) return null;
 
-  // Split by lines first
-  const lines = text.split('\n');
+  const normalizedText = normalizeMarkdown(text);
+  const lines = normalizedText.split('\n');
 
   return lines.map((line, lineIndex) => {
-    // Check if line is a bullet point
-    const isBullet = line.trim().startsWith('•') || line.trim().startsWith('*') && !line.trim().startsWith('**');
-    const bulletMatch = line.match(/^(\s*)[•\*]\s+(.*)$/);
+    // Check if line is a bullet point: • or - or single * (not **) followed by space
+    const bulletMatch = line.match(/^(\s*)([•\-]|\*(?!\*))\s+(.*)$/);
 
     if (bulletMatch) {
-      const content = bulletMatch[2];
+      const content = bulletMatch[3];
       return (
         <Text key={lineIndex} style={baseStyle}>
           {'  • '}{renderInlineMarkdown(content, baseStyle)}
@@ -78,83 +163,6 @@ const renderMarkdownText = (text, baseStyle) => {
       </Text>
     );
   });
-};
-
-/**
- * Render inline markdown (bold, italic, icons)
- * Supports: **bold**, [icon:Name]
- */
-const renderInlineMarkdown = (text, baseStyle) => {
-  if (!text) return null;
-
-  const parts = [];
-  let remaining = text;
-  let key = 0;
-
-  // Combined pattern for **bold** and [icon:Name]
-  const boldPattern = /\*\*([^*]+)\*\*/;
-  const iconPattern = /\[icon:([A-Za-z]+)\]/;
-
-  while (remaining.length > 0) {
-    const boldMatch = remaining.match(boldPattern);
-    const iconMatch = remaining.match(iconPattern);
-
-    // Find which match comes first
-    let firstMatch = null;
-    let matchType = null;
-
-    if (boldMatch && iconMatch) {
-      if (boldMatch.index <= iconMatch.index) {
-        firstMatch = boldMatch;
-        matchType = 'bold';
-      } else {
-        firstMatch = iconMatch;
-        matchType = 'icon';
-      }
-    } else if (boldMatch) {
-      firstMatch = boldMatch;
-      matchType = 'bold';
-    } else if (iconMatch) {
-      firstMatch = iconMatch;
-      matchType = 'icon';
-    }
-
-    if (firstMatch) {
-      // Add text before the match
-      const beforeMatch = remaining.slice(0, firstMatch.index);
-      if (beforeMatch) {
-        parts.push(<Text key={key++}>{beforeMatch}</Text>);
-      }
-
-      if (matchType === 'bold') {
-        parts.push(
-          <Text key={key++} style={{ fontWeight: '700', color: COLORS.textPrimary }}>
-            {firstMatch[1]}
-          </Text>
-        );
-      } else if (matchType === 'icon') {
-        const iconName = firstMatch[1];
-        const IconComponent = ICON_MAP[iconName];
-        if (IconComponent) {
-          parts.push(
-            <View key={key++} style={{ marginRight: 4, marginTop: 2 }}>
-              <IconComponent size={ICON_SIZE} color={ICON_COLOR} strokeWidth={2} />
-            </View>
-          );
-        } else {
-          // Icon not found, just render the text
-          parts.push(<Text key={key++}>{firstMatch[0]}</Text>);
-        }
-      }
-
-      remaining = remaining.slice(firstMatch.index + firstMatch[0].length);
-    } else {
-      parts.push(<Text key={key++}>{remaining}</Text>);
-      break;
-    }
-  }
-
-  return parts;
 };
 
 const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, onOptionSelect, onQuickBuy, onFeedback, onRichAction }) => {

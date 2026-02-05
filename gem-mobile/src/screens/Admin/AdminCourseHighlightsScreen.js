@@ -121,8 +121,7 @@ export default function AdminCourseHighlightsScreen({ navigation }) {
             id,
             title,
             thumbnail_url,
-            price,
-            is_free
+            price
           )
         `)
         .order('display_order');
@@ -133,7 +132,7 @@ export default function AdminCourseHighlightsScreen({ navigation }) {
       // Load all courses for picker
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
-        .select('id, title, thumbnail_url, price, is_free, is_published')
+        .select('id, title, thumbnail_url, price, is_published')
         .eq('is_published', true)
         .order('title');
 
@@ -516,7 +515,7 @@ export default function AdminCourseHighlightsScreen({ navigation }) {
                     {course.title}
                   </Text>
                   <Text style={styles.pickerItemPrice}>
-                    {course.is_free ? 'Miễn phí' : `${course.price?.toLocaleString()}đ`}
+                    {!course.price || course.price === 0 ? 'Miễn phí' : `${course.price?.toLocaleString()}đ`}
                   </Text>
                 </View>
                 {form.course_id === course.id && (

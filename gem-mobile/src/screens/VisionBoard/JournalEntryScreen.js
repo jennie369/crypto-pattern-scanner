@@ -39,6 +39,7 @@ import {
 import * as LucideIcons from 'lucide-react-native';
 
 import { COLORS, TYPOGRAPHY, SPACING, GRADIENTS, BORDER_RADIUS } from '../../utils/tokens';
+import { COSMIC_GRADIENTS, COSMIC_COLORS } from '../../theme/cosmicTokens';
 import { supabase } from '../../services/supabase';
 import {
   createJournalEntry,
@@ -309,13 +310,22 @@ const JournalEntryScreen = () => {
 
       // Format value based on type
       if (Array.isArray(value)) {
-        // Action list or checklist
         for (const item of value) {
           if (typeof item === 'object') {
-            // Action item with checked state
-            const checkbox = item.checked ? '[x]' : '[ ]';
-            const lifeAreaText = item.lifeArea ? ` (${item.lifeArea})` : '';
-            lines.push(`- ${checkbox} ${item.text}${lifeAreaText}`);
+            if (field.type === 'checklist') {
+              // Checklist: completed means "done" → use checkbox
+              const checkbox = item.completed ? '[x]' : '[ ]';
+              lines.push(`- ${checkbox} ${item.text}`);
+            } else if (field.type === 'action_list') {
+              // Action list: checked means "create goal" → no checkbox, use target marker
+              const goalMarker = item.checked ? '🎯 ' : '';
+              const lifeAreaText = item.lifeArea ? ` (${item.lifeArea})` : '';
+              lines.push(`- ${goalMarker}${item.text}${lifeAreaText}`);
+            } else {
+              // Other array of objects
+              const lifeAreaText = item.lifeArea ? ` (${item.lifeArea})` : '';
+              lines.push(`- ${item.text || item}${lifeAreaText}`);
+            }
           } else {
             lines.push(`- ${item}`);
           }
@@ -493,7 +503,7 @@ const JournalEntryScreen = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <LinearGradient colors={GRADIENTS.darkPurple} style={StyleSheet.absoluteFill} />
+        <LinearGradient colors={COSMIC_GRADIENTS.cosmicBg} style={StyleSheet.absoluteFill} />
         <ActivityIndicator size="large" color={COLORS.purple} />
       </SafeAreaView>
     );
@@ -501,7 +511,7 @@ const JournalEntryScreen = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <LinearGradient colors={GRADIENTS.darkPurple} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={COSMIC_GRADIENTS.cosmicBg} style={StyleSheet.absoluteFill} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -833,13 +843,13 @@ const JournalEntryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDarkest,
+    backgroundColor: '#0D0D2B',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.bgDarkest,
+    backgroundColor: '#0D0D2B',
   },
   header: {
     flexDirection: 'row',
@@ -987,20 +997,20 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   contentInput: {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(13, 13, 43, 0.6)',
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
+    borderColor: 'rgba(106, 91, 255, 0.25)',
     padding: SPACING.md,
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textPrimary,
     minHeight: 200,
   },
   previewContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(13, 13, 43, 0.6)',
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
+    borderColor: 'rgba(106, 91, 255, 0.25)',
     padding: SPACING.md,
     minHeight: 200,
   },

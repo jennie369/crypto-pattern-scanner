@@ -238,15 +238,15 @@ const styles = StyleSheet.create({
   },
   bubble: {
     maxWidth: '75%',
-    backgroundColor: COLORS.glassBg,
+    backgroundColor: 'rgba(25, 27, 65, 0.95)',
     borderRadius: GLASS.borderRadius,
     borderWidth: 1,
     borderColor: 'rgba(255, 189, 89, 0.3)',
     padding: SPACING.md,
   },
   bubbleUser: {
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    borderColor: 'rgba(106, 91, 255, 0.4)',
+    backgroundColor: 'rgba(106, 91, 255, 0.35)',
+    borderColor: 'rgba(106, 91, 255, 0.5)',
   },
   textContainer: {
     marginBottom: SPACING.xs,

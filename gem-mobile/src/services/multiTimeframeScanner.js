@@ -100,6 +100,69 @@ const sanitizeSymbol = (symbol) => {
   return cleaned;
 };
 
+// ═══════════════════════════════════════════════════════════
+// HTF TREND DETERMINATION
+// Determines the higher-timeframe trend from pattern directions
+// ═══════════════════════════════════════════════════════════
+
+const HTF_TIMEFRAMES = ['1d', '1w', '1M'];
+const LTF_TIMEFRAMES = ['1m', '5m', '15m', '1h', '4h'];
+
+/**
+ * Determine HTF trend from detected patterns on higher timeframes
+ * @param {Array} htfResults - Pattern results from HTF scans
+ * @returns {Object} { trend: 'up'|'down'|'neutral', strength: 0-100, zones: Array }
+ */
+const determineHTFTrend = (htfResults) => {
+  let longScore = 0;
+  let shortScore = 0;
+  const htfZones = [];
+
+  htfResults.forEach(({ timeframe, patterns }) => {
+    const tfWeight = (TIMEFRAME_STRENGTH[timeframe]?.weight || 50) / 100;
+
+    (patterns || []).forEach(pattern => {
+      const dir = pattern.direction;
+      const conf = (pattern.confidence || 50) / 100;
+      const weight = tfWeight * conf;
+
+      if (dir === 'LONG') longScore += weight;
+      else if (dir === 'SHORT') shortScore += weight;
+
+      // Collect HTF zones for zone-in-zone
+      if (pattern.zoneHigh && pattern.zoneLow) {
+        htfZones.push({
+          zoneHigh: pattern.zoneHigh,
+          zoneLow: pattern.zoneLow,
+          direction: dir,
+          timeframe,
+          patternType: pattern.patternType,
+        });
+      }
+    });
+  });
+
+  const total = longScore + shortScore;
+  let trend = 'neutral';
+  let strength = 0;
+
+  if (total > 0) {
+    const ratio = longScore / total;
+    if (ratio > 0.6) {
+      trend = 'up';
+      strength = Math.round(ratio * 100);
+    } else if (ratio < 0.4) {
+      trend = 'down';
+      strength = Math.round((1 - ratio) * 100);
+    } else {
+      trend = 'neutral';
+      strength = 50;
+    }
+  }
+
+  return { trend, strength, zones: htfZones };
+};
+
 // 🔍 SCAN MULTIPLE TIMEFRAMES
 export const scanMultipleTimeframes = async (symbol, timeframes, userTier) => {
   console.log('[Multi-TF] scanMultipleTimeframes CALLED');
@@ -124,46 +187,56 @@ export const scanMultipleTimeframes = async (symbol, timeframes, userTier) => {
     // ⚠️ Limit timeframes based on tier
     const limitedTimeframes = timeframes.slice(0, access.maxTimeframes);
 
-    // 🚀 Scan each timeframe in parallel
-    console.log(`[Multi-TF] Scanning ${cleanSymbol} across ${limitedTimeframes.length} timeframes:`, limitedTimeframes);
+    // Separate HTF and LTF for two-phase scanning
+    const htfTFs = limitedTimeframes.filter(tf => HTF_TIMEFRAMES.includes(tf));
+    const ltfTFs = limitedTimeframes.filter(tf => !HTF_TIMEFRAMES.includes(tf));
 
-    const scanPromises = limitedTimeframes.map(async (tf) => {
+    console.log(`[Multi-TF] Scanning ${cleanSymbol}: HTF=[${htfTFs}], LTF=[${ltfTFs}]`);
+
+    // Helper to scan a single timeframe
+    const scanTF = async (tf, options = {}) => {
       try {
-        // Check if timeframe is allowed for this tier
         if (!access.allowedTimeframes.includes(tf)) {
           console.log(`[Multi-TF] Timeframe ${tf} not allowed for ${access.tier}`);
-          return {
-            timeframe: tf,
-            patterns: [],
-            error: `Timeframe ${tf} not available in ${access.tier}`
-          };
+          return { timeframe: tf, patterns: [], error: `Timeframe ${tf} not available in ${access.tier}` };
         }
 
         console.log(`[Multi-TF] Scanning ${cleanSymbol} on ${tf}...`);
-
-        // Use detectPatterns method (not scanSymbol which doesn't exist)
-        const patterns = await patternDetection.detectPatterns(cleanSymbol, tf, access.tier);
-
+        const patterns = await patternDetection.detectPatterns(cleanSymbol, tf, access.tier, options);
         console.log(`[Multi-TF] ${tf} result:`, patterns?.length ? `${patterns.length} pattern(s) found` : 'No pattern');
 
-        return {
-          timeframe: tf,
-          patterns: patterns,
-          patternCount: patterns.length,
-          scannedAt: new Date().toISOString()
-        };
+        return { timeframe: tf, patterns, patternCount: patterns.length, scannedAt: new Date().toISOString() };
       } catch (error) {
         console.error(`[Multi-TF] Error scanning ${tf}:`, error);
-        return {
-          timeframe: tf,
-          patterns: [],
-          patternCount: 0,
-          error: error.message
-        };
+        return { timeframe: tf, patterns: [], patternCount: 0, error: error.message };
       }
-    });
+    };
 
-    const results = await Promise.all(scanPromises);
+    // Phase 1: Scan HTF timeframes first (in parallel)
+    const htfResults = htfTFs.length > 0
+      ? await Promise.all(htfTFs.map(tf => scanTF(tf)))
+      : [];
+
+    // Determine HTF trend and collect HTF zones
+    const htfContext = determineHTFTrend(htfResults);
+    console.log(`[Multi-TF] HTF trend: ${htfContext.trend} (strength: ${htfContext.strength}), HTF zones: ${htfContext.zones.length}`);
+
+    // Phase 2: Scan LTF timeframes with HTF context (in parallel)
+    const ltfOptions = {
+      htfTrend: htfContext.trend !== 'neutral' ? htfContext.trend : undefined,
+      htfZones: htfContext.zones.length > 0 ? htfContext.zones : undefined,
+    };
+
+    const ltfResults = ltfTFs.length > 0
+      ? await Promise.all(ltfTFs.map(tf => scanTF(tf, ltfOptions)))
+      : [];
+
+    // Combine results in original timeframe order
+    const results = limitedTimeframes.map(tf => {
+      const htf = htfResults.find(r => r.timeframe === tf);
+      if (htf) return htf;
+      return ltfResults.find(r => r.timeframe === tf) || { timeframe: tf, patterns: [], patternCount: 0 };
+    });
 
     // 📊 Log results summary
     const totalPatterns = results.reduce((sum, r) => sum + r.patterns.length, 0);
@@ -188,6 +261,11 @@ export const scanMultipleTimeframes = async (symbol, timeframes, userTier) => {
       results,
       grouped: groupedPatterns,
       confluence: confluenceData,
+      htfContext: {
+        trend: htfContext.trend,
+        strength: htfContext.strength,
+        htfZoneCount: htfContext.zones.length,
+      },
       totalPatterns,
       timestamp: new Date().toISOString()
     };

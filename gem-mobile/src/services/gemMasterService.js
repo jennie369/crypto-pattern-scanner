@@ -2,7 +2,7 @@
 // GEM Master AI Service - WITH QUESTIONNAIRE FLOW + LOCAL KNOWLEDGE BASE + RAG
 // GEMRAL AI BRAIN - Updated with RAG integration
 
-import { supabase } from './supabase';
+import { supabase, getSession, SUPABASE_URL } from './supabase';
 import {
   MONEY_QUESTIONS,
   LOVE_QUESTIONS,
@@ -50,13 +50,8 @@ import {
 import { createQuickGoalWithJournal } from './templates/journalRoutingService';
 
 // ========== API CONFIG ==========
-// API key from environment variable (set in .env file)
-const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-
-if (!API_KEY) {
-  console.warn('[GEM] WARNING: EXPO_PUBLIC_GEMINI_API_KEY is not set in .env file!');
-}
+// SECURE: Use Edge Function proxy instead of exposing API key in client
+const GEMINI_PROXY_URL = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 
 // API Request timeout (ms)
 const API_TIMEOUT = 60000; // 60 seconds
@@ -65,8 +60,8 @@ const API_TIMEOUT = 60000; // 60 seconds
 const USE_RAG = true; // Enable RAG by default
 const RAG_FALLBACK_TO_API = true; // Fallback to direct API if RAG fails
 
-console.log('[GEM] API Key exists:', !!API_KEY);
-console.log('[GEM] API URL:', API_URL);
+console.log('[GEM] Using secure Edge Function proxy');
+console.log('[GEM] Proxy URL:', GEMINI_PROXY_URL);
 console.log('[GEM] Local Knowledge loaded:', !!gemKnowledge?.faq);
 console.log('[GEM] RAG enabled:', USE_RAG);
 
@@ -94,38 +89,72 @@ const fetchWithTimeout = async (url, options, timeout = API_TIMEOUT) => {
 };
 
 /**
- * Call Gemini API with retry logic
+ * Call Gemini API via secure Edge Function proxy
+ * API key is stored securely on server, not exposed to client
  */
 const callGeminiAPI = async (prompt, config = {}) => {
-  const { temperature = 0.7, maxOutputTokens = 8192, retries = 2 } = config;
+  const {
+    temperature = 0.7,
+    maxOutputTokens = 8192,
+    retries = 2,
+    feature = 'gem_master',
+    systemPrompt = null,
+  } = config;
 
   let lastError = null;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      console.log(`[GEM] API call attempt ${attempt + 1}/${retries + 1}`);
+      console.log(`[GEM] Secure API call attempt ${attempt + 1}/${retries + 1}`);
 
-      const res = await fetchWithTimeout(API_URL, {
+      // Get auth session for JWT token
+      const { session, error: sessionError } = await getSession();
+
+      if (sessionError || !session?.access_token) {
+        throw new Error('Vui lòng đăng nhập để sử dụng AI');
+      }
+
+      // Build request for Edge Function
+      const requestBody = {
+        feature,
+        messages: [
+          { role: 'user', parts: [{ text: prompt }] }
+        ],
+        generationConfig: { temperature, maxOutputTokens },
+      };
+
+      // Add system prompt if provided
+      if (systemPrompt) {
+        requestBody.systemPrompt = systemPrompt;
+      }
+
+      const res = await fetchWithTimeout(GEMINI_PROXY_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature, maxOutputTokens },
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'x-request-feature': feature,
+        },
+        body: JSON.stringify(requestBody),
       });
 
-      console.log('[GEM] API Status:', res.status);
+      console.log('[GEM] Proxy Status:', res.status);
 
       if (!res.ok) {
-        const errText = await res.text();
-        console.error('[GEM] API Error:', errText);
+        const errData = await res.json().catch(() => ({}));
+        console.error('[GEM] Proxy Error:', errData);
 
-        // Parse error message
-        let errorMsg = `API ${res.status}`;
-        try {
-          const errJson = JSON.parse(errText);
-          errorMsg = errJson.error?.message || errorMsg;
-        } catch (e) {}
+        let errorMsg = errData.error || `API ${res.status}`;
+
+        // Handle specific errors
+        if (res.status === 429) {
+          const resetAt = errData.rateLimit?.resetAt;
+          errorMsg = resetAt
+            ? `Đã đạt giới hạn. Thử lại lúc ${new Date(resetAt).toLocaleTimeString('vi-VN')}`
+            : 'Đã đạt giới hạn request. Vui lòng thử lại sau.';
+        } else if (res.status === 401) {
+          errorMsg = 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.';
+        }
 
         // Don't retry on 4xx errors (except 429 rate limit)
         if (res.status >= 400 && res.status < 500 && res.status !== 429) {
@@ -143,24 +172,25 @@ const callGeminiAPI = async (prompt, config = {}) => {
       }
 
       const data = await res.json();
-      console.log('[GEM] API Response received');
+      console.log('[GEM] Proxy Response received');
 
-      // Extract text from response
-      let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!text && data.candidates?.[0]?.output) {
-        text = data.candidates[0].output;
+      // Check for success
+      if (!data.success) {
+        throw new Error(data.error || 'Không nhận được phản hồi từ AI');
       }
 
+      // Extract text from Edge Function response
+      const text = data.data?.text;
+
       if (!text) {
-        const finishReason = data.candidates?.[0]?.finishReason;
-        if (finishReason === 'SAFETY') {
-          return { text: 'Xin lỗi, tôi không thể trả lời câu hỏi này. Hãy thử hỏi cách khác nhé!', blocked: true };
-        }
         throw new Error('Không nhận được phản hồi từ AI');
       }
 
-      return { text, usage: data.usageMetadata };
+      return {
+        text,
+        usage: data.data?.usage,
+        rateLimit: data.rateLimit,
+      };
 
     } catch (error) {
       console.error(`[GEM] Attempt ${attempt + 1} failed:`, error.message);
@@ -181,19 +211,21 @@ const callGeminiAPI = async (prompt, config = {}) => {
  * Test API connection - call this to debug
  */
 export const testAPIConnection = async () => {
-  console.log('[GEM] Testing API connection...');
-  console.log('[GEM] URL:', API_URL);
+  console.log('[GEM] Testing secure proxy connection...');
+  console.log('[GEM] Proxy URL:', GEMINI_PROXY_URL);
 
   try {
     const result = await callGeminiAPI('Hello, respond with just "OK"', {
       temperature: 0.1,
       maxOutputTokens: 100,
       retries: 0, // No retry for test
+      feature: 'gem_master',
     });
 
     return {
       success: true,
       response: result.text,
+      rateLimit: result.rateLimit,
     };
   } catch (error) {
     console.error('[GEM] Test Error:', error);
@@ -2246,13 +2278,8 @@ export const processMessage = async (userMessage, history = [], options = {}) =>
       }
     }
 
-    // ========== STEP 4: ENHANCED CHATBOT PROCESSING + DIRECT GEMINI API ==========
-    console.log('[GEM] Using enhanced chatbot + direct Gemini API...');
-
-    // Regular chat - Use Gemini API
-    if (!API_KEY) {
-      return { text: '⚠️ Thiếu API key trong .env', error: 'no-key' };
-    }
+    // ========== STEP 4: ENHANCED CHATBOT PROCESSING + SECURE GEMINI PROXY ==========
+    console.log('[GEM] Using enhanced chatbot + secure Gemini proxy...');
 
     // ========== NEW: ENHANCED MESSAGE PROCESSOR ==========
     // Use the new chatbot upgrade modules for better context and knowledge

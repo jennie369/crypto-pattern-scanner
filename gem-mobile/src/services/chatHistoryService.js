@@ -106,14 +106,29 @@ const saveConversation = async (conversationId, messages, userId) => {
 
     // Ensure messages are serializable (remove any functions, circular refs)
     // Generate unique IDs for any messages missing them to avoid React key warnings
-    const cleanMessages = messages.map((m, index) => ({
-      id: m?.id || `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
-      type: m?.type || 'user',
-      text: m?.text || '',
-      timestamp: m?.timestamp || new Date().toISOString(),
-      ...(m?.quickActions && { quickActions: m.quickActions }),
-      ...(m?.data && { data: m.data }),
-    })).filter(m => m.text); // Only keep messages with text
+    // Preserve all serializable fields needed for proper rendering after reload
+    const cleanMessages = messages.map((m, index) => {
+      if (!m) return null;
+      const cleaned = {
+        id: m.id || `msg_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
+        type: m.type || 'user',
+        text: m.text || '',
+        timestamp: m.timestamp || new Date().toISOString(),
+      };
+      // Preserve optional fields if present (for proper rendering after reload)
+      const optionalFields = [
+        'quickActions', 'actionButtons', 'data', 'source',
+        'products', 'metadata', 'responseType', 'richData',
+        'options', 'questionId', 'questionIndex', 'totalQuestions',
+        'divinationType', 'hexagram', 'cards', 'interpretation',
+      ];
+      for (const field of optionalFields) {
+        if (m[field] != null) {
+          cleaned[field] = m[field];
+        }
+      }
+      return cleaned;
+    }).filter(m => m && m.text); // Only keep messages with text
 
     // Skip save if no valid messages
     if (cleanMessages.length === 0) {

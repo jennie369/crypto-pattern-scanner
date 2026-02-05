@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     color: COSMIC_COLORS.text.secondary,
   },
   helpText: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.xs, // Increased
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm,
     color: COSMIC_COLORS.text.hint,
     fontStyle: 'italic',
   },
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     backgroundColor: COSMIC_COLORS.functional.warning + '15',
   },
   lifeAreaTagText: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.xs, // Increased
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm,
     color: COSMIC_COLORS.glow.gold,
   },
   lifeAreaTagTextWarning: {
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     marginBottom: COSMIC_SPACING.sm,
   },
   suggestionsLabel: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm, // Increased
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
     color: COSMIC_COLORS.text.hint,
     marginBottom: COSMIC_SPACING.xs,
   },
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   suggestionText: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm, // Increased
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
     color: COSMIC_COLORS.text.secondary,
     maxWidth: 160,
   },

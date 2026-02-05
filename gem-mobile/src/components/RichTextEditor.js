@@ -604,8 +604,7 @@ const rendererStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
   checkboxTextChecked: {
-    textDecorationLine: 'line-through',
-    color: COLORS.textMuted,
+    color: COLORS.textPrimary,
   },
   // Bullet styles
   bulletRow: {

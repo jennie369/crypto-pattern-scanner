@@ -2,9 +2,11 @@
  * GEM Mobile - Pattern Configuration
  * CORRECT strength ranking: Reversal patterns > Continuation patterns
  *
- * GEM Method Rule:
- * - UPD/DPU (Reversal) = 5 stars = Win rate 70-72%
- * - DPD/UPU (Continuation) = 3 stars = Win rate 56-58%
+ * GEM Method Rule (from reference documents):
+ * - UPD (Reversal) = 5 stars = Win rate 65%, R:R 2.2
+ * - DPU (Reversal) = 5 stars = Win rate 69%, R:R 2.6
+ * - DPD (Continuation) = 3 stars = Win rate 68%, R:R 2.5
+ * - UPU (Continuation) = 3 stars = Win rate 71%, R:R 2.8
  */
 
 // ═══════════════════════════════════════════════════════════
@@ -21,7 +23,8 @@ export const PATTERN_CONFIG = {
     strength: 5,
     stars: 5,
     starsDisplay: '⭐⭐⭐⭐⭐',
-    winRate: 0.72,
+    winRate: 0.65,
+    riskReward: 2.2,
     description: 'Tăng → Nghỉ → Giảm (Đảo chiều từ tăng sang giảm)',
     descriptionEn: 'Up → Pause → Down (Reversal from uptrend)',
     tradingBias: 'SELL',
@@ -37,7 +40,8 @@ export const PATTERN_CONFIG = {
     strength: 5,
     stars: 5,
     starsDisplay: '⭐⭐⭐⭐⭐',
-    winRate: 0.70,
+    winRate: 0.69,
+    riskReward: 2.6,
     description: 'Giảm → Nghỉ → Tăng (Đảo chiều từ giảm sang tăng)',
     descriptionEn: 'Down → Pause → Up (Reversal from downtrend)',
     tradingBias: 'BUY',
@@ -54,7 +58,8 @@ export const PATTERN_CONFIG = {
     strength: 3,
     stars: 3,
     starsDisplay: '⭐⭐⭐',
-    winRate: 0.58,
+    winRate: 0.68,
+    riskReward: 2.5,
     description: 'Giảm → Nghỉ → Giảm tiếp (Tiếp tục xu hướng giảm)',
     descriptionEn: 'Down → Pause → Down (Continuation of downtrend)',
     tradingBias: 'SELL',
@@ -70,7 +75,8 @@ export const PATTERN_CONFIG = {
     strength: 3,
     stars: 3,
     starsDisplay: '⭐⭐⭐',
-    winRate: 0.56,
+    winRate: 0.71,
+    riskReward: 2.8,
     description: 'Tăng → Nghỉ → Tăng tiếp (Tiếp tục xu hướng tăng)',
     descriptionEn: 'Up → Pause → Up (Continuation of uptrend)',
     tradingBias: 'BUY',
@@ -88,6 +94,7 @@ export const PATTERN_CONFIG = {
     stars: 4,
     starsDisplay: '⭐⭐⭐⭐',
     winRate: 0.72,
+    riskReward: 3.0,
     description: 'Đầu vai - Đảo chiều giảm',
     descriptionEn: 'Classic bearish reversal pattern',
     tradingBias: 'SELL',
@@ -103,7 +110,8 @@ export const PATTERN_CONFIG = {
     strength: 4,
     stars: 4,
     starsDisplay: '⭐⭐⭐⭐',
-    winRate: 0.70,
+    winRate: 0.75,
+    riskReward: 3.0,
     description: 'Đầu vai ngược - Đảo chiều tăng',
     descriptionEn: 'Classic bullish reversal pattern',
     tradingBias: 'BUY',
@@ -119,7 +127,8 @@ export const PATTERN_CONFIG = {
     strength: 4,
     stars: 4,
     starsDisplay: '⭐⭐⭐⭐',
-    winRate: 0.67,
+    winRate: 0.68,
+    riskReward: 2.5,
     description: 'Đỉnh đôi - Đảo chiều giảm',
     descriptionEn: 'Two peaks at similar level - bearish reversal',
     tradingBias: 'SELL',
@@ -135,7 +144,8 @@ export const PATTERN_CONFIG = {
     strength: 4,
     stars: 4,
     starsDisplay: '⭐⭐⭐⭐',
-    winRate: 0.68,
+    winRate: 0.70,
+    riskReward: 2.7,
     description: 'Đáy đôi - Đảo chiều tăng',
     descriptionEn: 'Two troughs at similar level - bullish reversal',
     tradingBias: 'BUY',

@@ -864,6 +864,10 @@ export const preloadAllShopData = async () => {
     import('./digitalProductService').then(module =>
       module.digitalProductService?.getHeroProducts?.(5).catch(() => null)
     ),
+    // Preload PromoBar for instant display
+    import('../components/shop/PromoBar').then(module =>
+      module.preloadPromoBar?.().catch(() => null)
+    ),
   ])
     .then(async ([products, banners, digitalProducts, heroProducts]) => {
       console.log('[Shopify] ALL shop data preloaded');

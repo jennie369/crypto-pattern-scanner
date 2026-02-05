@@ -53,6 +53,7 @@ const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState([]);
+  const [eventsByDate, setEventsByDate] = useState({});
   const [selectedDateEvents, setSelectedDateEvents] = useState([]);
 
   // Modal
@@ -90,7 +91,19 @@ const CalendarScreen = () => {
     try {
       const data = await calendarService.getCalendarEvents(userId, currentMonth);
       console.log('[Calendar] Loaded events:', data?.length || 0);
-      setEvents(data || []);
+      const eventsArray = data || [];
+      setEvents(eventsArray);
+
+      // Convert array to date-keyed object for MonthCalendar
+      const grouped = {};
+      eventsArray.forEach(e => {
+        const date = (e.event_date || e.date || '')?.split('T')[0];
+        if (date) {
+          if (!grouped[date]) grouped[date] = [];
+          grouped[date].push(e);
+        }
+      });
+      setEventsByDate(grouped);
     } catch (error) {
       console.error('[Calendar] Load events error:', error);
     }
@@ -145,12 +158,11 @@ const CalendarScreen = () => {
         const dateObj = typeof returnDate === 'string' ? new Date(returnDate) : returnDate;
         setSelectedDate(dateObj);
 
-        // Fetch fresh data for that date, then open modal
+        // Fetch data first, then open modal with content ready
         const loadAndOpenModal = async () => {
           try {
             if (userId) {
               const dateStr = dateObj.toISOString().split('T')[0];
-              console.log('[Calendar] Loading data for return date:', dateStr);
               const dayData = await calendarService.getDayCalendarData(userId, dateStr);
               if (dayData.success) {
                 setJournalRituals(dayData.rituals || []);
@@ -160,13 +172,11 @@ const CalendarScreen = () => {
                 setJournalEntries(dayData.journal || []);
                 setTradingEntries(dayData.trading || []);
                 setMoodData(dayData.mood);
-                console.log('[Calendar] Loaded journal entries:', dayData.journal?.length || 0);
               }
             }
           } catch (error) {
             console.error('[Calendar] Error loading return date data:', error);
           }
-          // Open modal after data is loaded
           setShowDayModal(true);
         };
 
@@ -194,28 +204,26 @@ const CalendarScreen = () => {
     setSelectedDate(today);
   };
 
-  // Handle date selection
+  // Handle date selection - load data first so modal shows content immediately
   const handleDateSelect = async (date) => {
     setSelectedDate(date);
-    // Fetch all calendar data for the selected date
+
     if (userId) {
-      const dateStr = date.toISOString().split('T')[0];
-      console.log('[Calendar] Fetching calendar data for:', dateStr);
+      const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
 
-      // Use getDayCalendarData for comprehensive data including journal entries
-      const dayData = await calendarService.getDayCalendarData(userId, dateStr);
-      console.log('[Calendar] Day data result:', dayData.success);
-
-      if (dayData.success) {
-        // Legacy data from rituals/readings
-        setJournalRituals(dayData.rituals || []);
-        setJournalReadings(dayData.readings || []);
-        setJournalPaperTrades(dayData.paperTrades || []);
-        setJournalTradingJournal(dayData.tradingJournal || []);
-        // New Calendar Smart Journal data
-        setJournalEntries(dayData.journal || []);
-        setTradingEntries(dayData.trading || []);
-        setMoodData(dayData.mood);
+      try {
+        const dayData = await calendarService.getDayCalendarData(userId, dateStr);
+        if (dayData.success) {
+          setJournalRituals(dayData.rituals || []);
+          setJournalReadings(dayData.readings || []);
+          setJournalPaperTrades(dayData.paperTrades || []);
+          setJournalTradingJournal(dayData.tradingJournal || []);
+          setJournalEntries(dayData.journal || []);
+          setTradingEntries(dayData.trading || []);
+          setMoodData(dayData.mood);
+        }
+      } catch (error) {
+        console.error('[Calendar] Error loading day data:', error);
       }
     }
     setShowDayModal(true);
@@ -404,10 +412,10 @@ const CalendarScreen = () => {
 
         {/* Calendar */}
         <MonthCalendar
-          currentMonth={currentMonth}
+          initialDate={currentMonth}
           selectedDate={selectedDate}
           onDateSelect={handleDateSelect}
-          events={events}
+          eventsByDate={eventsByDate}
           style={styles.calendar}
         />
 

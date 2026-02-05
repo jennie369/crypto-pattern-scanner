@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
     marginTop: COSMIC_SPACING.xs,
   },
   suggestionsLabel: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm, // Increased
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
     color: COSMIC_COLORS.text.hint,
     marginBottom: COSMIC_SPACING.xxs,
   },
@@ -986,7 +986,7 @@ const styles = StyleSheet.create({
     borderColor: COSMIC_COLORS.glow.gold,
   },
   suggestionChipText: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm, // Increased
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
     color: COSMIC_COLORS.text.muted,
   },
   suggestionChipTextSelected: {
@@ -1027,7 +1027,7 @@ const styles = StyleSheet.create({
   },
   vipSuggestionText: {
     flex: 1,
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.md,
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
     color: COSMIC_COLORS.text.secondary,
     lineHeight: 20,
   },
@@ -1065,7 +1065,7 @@ const styles = StyleSheet.create({
     marginRight: COSMIC_SPACING.xxs,
   },
   multiSelectChipText: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm, // Increased
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
     color: COSMIC_COLORS.text.secondary,
     flexShrink: 1,
   },
@@ -1101,7 +1101,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   selectedCount: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm, // Increased
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
     color: COSMIC_COLORS.glow.gold,
     marginTop: COSMIC_SPACING.xs,
   },
@@ -1152,7 +1152,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   moodLabel: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.xs, // Increased (was 10)
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm,
     color: COSMIC_COLORS.text.muted,
   },
   moodLabelSelected: {
@@ -1194,7 +1194,7 @@ const styles = StyleSheet.create({
     marginBottom: COSMIC_SPACING.xs,
   },
   appRitualName: {
-    fontSize: COSMIC_TYPOGRAPHY.fontSize.xs, // Increased (was 10)
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.sm,
     color: COSMIC_COLORS.text.secondary,
     textAlign: 'center',
   },

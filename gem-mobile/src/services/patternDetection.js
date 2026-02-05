@@ -42,6 +42,13 @@ import {
   extractPauseCandles,
 } from './zoneCalculator';
 
+// Phase 5: Dedicated advanced pattern detectors
+import { detectBearishQM, detectBullishQM } from './quasimodoDetector';
+import { detectBearishFTR, detectBullishFTR } from './ftrDetector';
+import { detectBearishFlagLimit, detectBullishFlagLimit } from './flagLimitDetector';
+import { detectDecisionPoints } from './decisionPointDetector';
+import { scanConfirmationPatterns, calculateConfirmationScore } from './confirmationPatterns';
+
 // Enhancement utilities (TIER2/3 features)
 import { analyzeVolumeProfile, confirmVolumeDirection } from '../utils/volumeAnalysis';
 import { analyzeTrend, calculateTrendBonus, getTrendAlignment } from '../utils/trendAnalysis';
@@ -58,43 +65,43 @@ import { hasFeature, TIER_ACCESS } from '../config/tierAccess';
 const PATTERN_SIGNALS = {
   DPD: {
     name: 'DPD',
-    fullName: 'Down-Peak-Down',
+    fullName: 'Down-Pause-Down',
     direction: 'SHORT',
     type: 'continuation',
     color: '#FF6B6B',
-    description: 'Bearish continuation - Lower high formed, expect further downside',
-    expectedWinRate: 65,
-    avgRR: 2.1,
+    description: 'Bearish continuation - Down move, pause, down continuation',
+    expectedWinRate: 68,
+    avgRR: 2.5,
   },
   UPU: {
     name: 'UPU',
-    fullName: 'Up-Peak-Up',
+    fullName: 'Up-Pause-Up',
     direction: 'LONG',
     type: 'continuation',
     color: '#3AF7A6',
-    description: 'Bullish continuation - Higher low formed, expect further upside',
-    expectedWinRate: 68,
-    avgRR: 2.3,
+    description: 'Bullish continuation - Up move, pause, up continuation',
+    expectedWinRate: 71,
+    avgRR: 2.8,
   },
   DPU: {
     name: 'DPU',
-    fullName: 'Down-Peak-Up',
+    fullName: 'Down-Pause-Up',
     direction: 'LONG',
     type: 'reversal',
     color: '#3AF7A6',
-    description: 'Bullish reversal - Downtrend ending, higher low signals reversal',
-    expectedWinRate: 62,
-    avgRR: 2.0,
+    description: 'Bullish reversal - Down move, pause, up reversal',
+    expectedWinRate: 69,
+    avgRR: 2.6,
   },
   UPD: {
     name: 'UPD',
-    fullName: 'Up-Peak-Down',
+    fullName: 'Up-Pause-Down',
     direction: 'SHORT',
     type: 'reversal',
     color: '#FF6B6B',
-    description: 'Bearish reversal - Uptrend ending, lower high signals reversal',
-    expectedWinRate: 60,
-    avgRR: 2.0,
+    description: 'Bearish reversal - Up move, pause, down reversal',
+    expectedWinRate: 65,
+    avgRR: 2.2,
   },
   'Head & Shoulders': {
     name: 'H&S',
@@ -104,7 +111,7 @@ const PATTERN_SIGNALS = {
     color: '#FF6B6B',
     description: 'Classic bearish reversal - Break neckline to confirm',
     expectedWinRate: 72,
-    avgRR: 2.5,
+    avgRR: 3.0,
   },
   'Inverse H&S': {
     name: 'IH&S',
@@ -113,8 +120,8 @@ const PATTERN_SIGNALS = {
     type: 'reversal',
     color: '#3AF7A6',
     description: 'Classic bullish reversal pattern',
-    expectedWinRate: 70,
-    avgRR: 2.4,
+    expectedWinRate: 75,
+    avgRR: 3.0,
   },
   'Double Top': {
     name: 'DT',
@@ -123,8 +130,8 @@ const PATTERN_SIGNALS = {
     type: 'reversal',
     color: '#FF6B6B',
     description: 'Bearish reversal at resistance - Two peaks at similar level',
-    expectedWinRate: 67,
-    avgRR: 2.2,
+    expectedWinRate: 68,
+    avgRR: 2.5,
   },
   'Double Bottom': {
     name: 'DB',
@@ -133,8 +140,8 @@ const PATTERN_SIGNALS = {
     type: 'reversal',
     color: '#3AF7A6',
     description: 'Bullish reversal at support - Two troughs at similar level',
-    expectedWinRate: 68,
-    avgRR: 2.3,
+    expectedWinRate: 70,
+    avgRR: 2.7,
   },
   // TIER 2 PATTERNS (8)
   'Ascending Triangle': {
@@ -989,7 +996,7 @@ class PatternDetectionService {
    * @param {number} minCandles - Minimum candles for valid move
    * @returns {Object|null} { startIdx, endIdx, strength, moveSize }
    */
-  detectImpulsiveMove(candles, startIdx, direction, minCandles = 2) {
+  detectImpulsiveMove(candles, startIdx, direction, minCandles = 2, minMovePercent = 0.015) {
     if (startIdx < 0 || startIdx >= candles.length) return null;
 
     const atr = this.calculateATR(candles.slice(Math.max(0, startIdx - 14), startIdx + 1), 14);
@@ -1017,6 +1024,20 @@ class PatternDetectionService {
     const endPrice = direction === 'up' ? candles[moveEnd].high : candles[moveEnd].low;
     const moveSize = Math.abs(endPrice - startPrice);
 
+    // Percentage-based move validation (ref: >= 2% for continuation, >= 1.5% for reversal)
+    const movePercent = moveSize / startPrice;
+    if (movePercent < minMovePercent) return null;
+
+    // Volume check - if volume data available, check for increasing volume
+    let volumeConfirmed = true;
+    if (candles[moveStart].volume && candles[moveStart].volume > 0) {
+      const moveCandles = candles.slice(moveStart, moveEnd + 1);
+      const avgVol = moveCandles.reduce((sum, c) => sum + (c.volume || 0), 0) / moveCandles.length;
+      const preVol = candles.slice(Math.max(0, moveStart - 5), moveStart)
+        .reduce((sum, c) => sum + (c.volume || 0), 0) / Math.max(1, Math.min(5, moveStart));
+      volumeConfirmed = preVol <= 0 || avgVol >= preVol * 0.8; // Allow slight volume drop
+    }
+
     return {
       startIdx: moveStart,
       endIdx: moveEnd,
@@ -1024,8 +1045,10 @@ class PatternDetectionService {
       endPrice,
       strength: moveSize / atr,
       moveSize,
+      movePercent,
       direction,
       candleCount: consecutiveCount,
+      volumeConfirmed,
     };
   }
 
@@ -1047,18 +1070,16 @@ class PatternDetectionService {
     for (let i = startIdx; i < Math.min(startIdx + 8, candles.length); i++) {
       const candle = candles[i];
       const bodySize = Math.abs(candle.close - candle.open);
-      const fullRange = candle.high - candle.low;
 
       // Pause candle criteria: small body relative to ATR
       const isSmallBody = bodySize < atr * 0.7;
 
-      if (isSmallBody || pauseCandles.length === 0) {
-        pauseCandles.push({ ...candle, index: i });
-        pauseHigh = Math.max(pauseHigh, candle.high);
-        pauseLow = Math.min(pauseLow, candle.low);
-      } else {
-        break;
-      }
+      // First candle must also meet body size criteria (not auto-include)
+      if (!isSmallBody) break;
+
+      pauseCandles.push({ ...candle, index: i });
+      pauseHigh = Math.max(pauseHigh, candle.high);
+      pauseLow = Math.min(pauseLow, candle.low);
 
       // Pause zone typically 2-6 candles
       if (pauseCandles.length >= 6) break;
@@ -1067,6 +1088,12 @@ class PatternDetectionService {
     if (pauseCandles.length < 2) return null;
 
     const zoneWidth = pauseHigh - pauseLow;
+
+    // Total pause range as percentage check (ref: range < 1.5% of price)
+    const avgPrice = (pauseHigh + pauseLow) / 2;
+    const pauseRangePercent = zoneWidth / avgPrice;
+    if (pauseRangePercent > 0.015) return null;
+
     const avgBody = pauseCandles.reduce((sum, c) => sum + Math.abs(c.close - c.open), 0) / pauseCandles.length;
 
     return {
@@ -1075,6 +1102,7 @@ class PatternDetectionService {
       high: pauseHigh,
       low: pauseLow,
       zoneWidth,
+      pauseRangePercent,
       avgBodySize: avgBody,
       candles: pauseCandles,
       candleCount: pauseCandles.length,
@@ -1110,6 +1138,7 @@ class PatternDetectionService {
     if (!candles || candles.length < 30) return null;
 
     const atr = this.calculateATR(candles, 14);
+    const isReversal = patternType === 'UPD' || patternType === 'DPU';
     const patterns = {
       'UPD': { move1: 'up', move2: 'down', zoneType: 'HFZ' },
       'DPU': { move1: 'down', move2: 'up', zoneType: 'LFZ' },
@@ -1120,12 +1149,15 @@ class PatternDetectionService {
     const config = patterns[patternType];
     if (!config) return null;
 
+    // Minimum move percent: 2% for continuation, 1.5% for reversal
+    const minMovePercent = isReversal ? 0.015 : 0.02;
+
     // Scan from recent candles backwards to find pattern
     for (let scanStart = candles.length - 10; scanStart >= 20; scanStart -= 3) {
       // Look for Move 1
       let move1Start = -1;
       for (let i = scanStart; i >= Math.max(0, scanStart - 30); i--) {
-        const move = this.detectImpulsiveMove(candles, i, config.move1, 2);
+        const move = this.detectImpulsiveMove(candles, i, config.move1, 2, minMovePercent);
         if (move && move.strength > 1.5) {
           move1Start = i;
           break;
@@ -1134,7 +1166,7 @@ class PatternDetectionService {
 
       if (move1Start < 0) continue;
 
-      const move1 = this.detectImpulsiveMove(candles, move1Start, config.move1, 2);
+      const move1 = this.detectImpulsiveMove(candles, move1Start, config.move1, 2, minMovePercent);
       if (!move1) continue;
 
       // Look for Pause after Move 1
@@ -1146,7 +1178,7 @@ class PatternDetectionService {
       const move2StartIdx = pause.endIdx + 1;
       if (move2StartIdx >= candles.length - 2) continue;
 
-      const move2 = this.detectImpulsiveMove(candles, move2StartIdx, config.move2, 2);
+      const move2 = this.detectImpulsiveMove(candles, move2StartIdx, config.move2, 2, minMovePercent);
       if (!move2) continue;
 
       // Valid pattern found!
@@ -1188,45 +1220,60 @@ class PatternDetectionService {
     const enhancers = {
       departureStrength: 0,
       timeAtLevel: 0,
-      freshness: 2, // Assume fresh for new detection
+      freshness: 0,
       profitMargin: 0,
       bigPicture: 0,
       zoneOrigin: 0,
-      arrival: 1, // Default to good
+      arrival: 0,
       riskReward: 0,
     };
 
-    // 1. Departure Strength (0-2)
+    // 1. Departure Strength (0-2) - how fast price left the zone
     if (pattern.departureStrength >= 3) enhancers.departureStrength = 2;
     else if (pattern.departureStrength >= 1.5) enhancers.departureStrength = 1;
 
-    // 2. Time at Level (0-2) - fewer candles = better
+    // 2. Time at Level (0-2) - fewer candles = better (less order absorption)
     if (pattern.pauseCandleCount <= 2) enhancers.timeAtLevel = 2;
     else if (pattern.pauseCandleCount <= 4) enhancers.timeAtLevel = 1;
 
-    // 3. Freshness (0-2) - new detection = fresh
-    enhancers.freshness = 2;
+    // 3. Freshness (0-2) - first touch back = 2, second = 1, more = 0
+    // New detection = first touch back (FTB) = strongest
+    enhancers.freshness = 2; // FTB by definition for new detections
 
-    // 4. Profit Margin (0-2) - based on zone width vs distance to opposing zone
+    // 4. Profit Margin (0-2) - distance to OPPOSING zone, not distance from current price
+    // Look for the nearest opposing zone boundary in recent price action
     const zoneWidth = pattern.zoneHigh - pattern.zoneLow;
-    const distanceToZone = Math.abs(currentPrice - (pattern.zoneType === 'HFZ' ? pattern.zoneLow : pattern.zoneHigh));
-    if (distanceToZone > zoneWidth * 3) enhancers.profitMargin = 2;
-    else if (distanceToZone > zoneWidth * 1.5) enhancers.profitMargin = 1;
+    const isHFZ = pattern.zoneType === 'HFZ';
+    // Estimate opposing zone distance using recent swing extremes
+    const recentSlice = candles.slice(-50);
+    let opposingDistance;
+    if (isHFZ) {
+      // For sell zones, look for nearest demand below
+      const recentLow = Math.min(...recentSlice.map(c => c.low));
+      opposingDistance = pattern.zoneLow - recentLow;
+    } else {
+      // For buy zones, look for nearest supply above
+      const recentHigh = Math.max(...recentSlice.map(c => c.high));
+      opposingDistance = recentHigh - pattern.zoneHigh;
+    }
+    if (opposingDistance > zoneWidth * 3) enhancers.profitMargin = 2;
+    else if (opposingDistance > zoneWidth * 1.5) enhancers.profitMargin = 1;
 
     // 5. Big Picture (0-2) - trend alignment
     const trend = this.calculateTrend(candles, 50);
     const isReversal = pattern.patternType === 'UPD' || pattern.patternType === 'DPU';
     if (isReversal) {
-      // Reversal at trend extremes = good
       if ((pattern.patternType === 'UPD' && trend === 'uptrend') ||
           (pattern.patternType === 'DPU' && trend === 'downtrend')) {
         enhancers.bigPicture = 2;
       }
     } else {
-      // Continuation with trend = good
       if ((pattern.patternType === 'DPD' && trend === 'downtrend') ||
           (pattern.patternType === 'UPU' && trend === 'uptrend')) {
         enhancers.bigPicture = 2;
+      } else if ((pattern.patternType === 'DPD' && trend === 'sideways') ||
+                 (pattern.patternType === 'UPU' && trend === 'sideways')) {
+        enhancers.bigPicture = 1;
       }
     }
 
@@ -1237,13 +1284,24 @@ class PatternDetectionService {
       enhancers.zoneOrigin = 1;
     }
 
-    // 7. Arrival (0-2) - default to 1 (good)
-    enhancers.arrival = 1;
+    // 7. Arrival (0-2) - how price arrives at the zone
+    // Slow, grinding arrival = good (2). Fast, impulsive arrival = bad (0)
+    if (candles.length >= 5) {
+      const last5 = candles.slice(-5);
+      const arrivalRange = Math.max(...last5.map(c => c.high)) - Math.min(...last5.map(c => c.low));
+      const avgCandleRange = last5.reduce((s, c) => s + (c.high - c.low), 0) / 5;
+      const atr = this.calculateATR(candles, 14);
+      // If arrival candles are smaller than ATR, it's a slow arrival (good)
+      if (avgCandleRange < atr * 0.6) enhancers.arrival = 2;
+      else if (avgCandleRange < atr) enhancers.arrival = 1;
+    }
 
     // 8. Risk/Reward (0-2)
-    const rr = distanceToZone / zoneWidth;
-    if (rr >= 3) enhancers.riskReward = 2;
-    else if (rr >= 2) enhancers.riskReward = 1;
+    if (opposingDistance && zoneWidth > 0) {
+      const rr = opposingDistance / zoneWidth;
+      if (rr >= 3) enhancers.riskReward = 2;
+      else if (rr >= 2) enhancers.riskReward = 1;
+    }
 
     const totalScore = Object.values(enhancers).reduce((a, b) => a + b, 0);
 
@@ -1453,12 +1511,9 @@ class PatternDetectionService {
   detectDPD(candles, symbol, timeframe) {
     if (candles.length < this.MIN_CANDLES) return null;
 
-    // Use GEM Frequency Method detection
+    // Use GEM Frequency Method detection (Move-Pause-Move only)
     const gemPattern = this.findGEMPattern(candles, 'DPD');
-    if (!gemPattern) {
-      // Fallback to swing-based detection for compatibility
-      return this._detectDPDSwingBased(candles, symbol, timeframe);
-    }
+    if (!gemPattern) return null;
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.DPD;
@@ -1473,7 +1528,7 @@ class PatternDetectionService {
     const slBuffer = this.scaleSL(0.005, timeframe); // Small buffer above zone
     const stopLoss = zoneHigh * (1 + slBuffer);
     const riskAmount = stopLoss - entry;
-    const rrMultiplier = 2.0;
+    const rrMultiplier = PATTERN_CONFIG.DPD?.riskReward || 2.5;
     const target = entry - (riskAmount * rrMultiplier);
 
     // Convert timestamps to seconds
@@ -1522,59 +1577,6 @@ class PatternDetectionService {
     };
   }
 
-  // Fallback swing-based DPD detection
-  _detectDPDSwingBased(candles, symbol, timeframe) {
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
-    if (swingHighs.length < 2) return null;
-
-    const recentHighs = swingHighs.slice(-4);
-    const recentLows = swingLows.slice(-4);
-    if (recentHighs.length < 2) return null;
-
-    const high1 = recentHighs[recentHighs.length - 2];
-    const high2 = recentHighs[recentHighs.length - 1];
-    const highDiff = (high1.price - high2.price) / high1.price;
-    if (highDiff < 0.005) return null;
-
-    let lowBetween = recentLows.find(l => l.index > high1.index && l.index < high2.index);
-    if (!lowBetween && recentLows.length > 0) {
-      lowBetween = recentLows.find(l => l.index < high2.index) || recentLows[recentLows.length - 1];
-    }
-    if (!lowBetween) return null;
-
-    const confidence = this.calculateConfidence({
-      symmetry: Math.min(highDiff * 10, 1),
-      trendAligned: this.calculateTrend(candles.slice(0, 20)) === 'downtrend',
-      swingClarity: 0.6,
-    });
-    if (confidence < 45) return null;
-
-    const currentPrice = candles[candles.length - 1].close;
-    const signal = PATTERN_SIGNALS.DPD;
-    const entry = high2.price;
-    const slPercent = this.scaleSL(0.01, timeframe);
-    const stopLoss = high1.price * (1 + slPercent);
-    const riskAmount = stopLoss - entry;
-    const target = entry - (riskAmount * 2.0);
-
-    const high1Time = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
-    const lowTime = lowBetween.timestamp > 9999999999 ? Math.floor(lowBetween.timestamp / 1000) : lowBetween.timestamp;
-
-    return {
-      id: `DPD-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'DPD',
-      symbol, timeframe, confidence,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.0,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      points: { high1, high2, lowBetween },
-      zoneHigh: stopLoss, zoneLow: entry,
-      startTime: high1Time, endTime: lowTime, formationTime: high1Time,
-      startCandleIndex: high1.index, endCandleIndex: lowBetween.index,
-    };
-  }
-
   /**
    * UPU Pattern (Up-Pause-Up) - Bullish Continuation
    * GEM Frequency Method: UP move → PAUSE (zone) → UP move
@@ -1583,12 +1585,9 @@ class PatternDetectionService {
   detectUPU(candles, symbol, timeframe) {
     if (candles.length < this.MIN_CANDLES) return null;
 
-    // Use GEM Frequency Method detection
+    // Use GEM Frequency Method detection (Move-Pause-Move only)
     const gemPattern = this.findGEMPattern(candles, 'UPU');
-    if (!gemPattern) {
-      // Fallback to swing-based detection
-      return this._detectUPUSwingBased(candles, symbol, timeframe);
-    }
+    if (!gemPattern) return null;
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPU;
@@ -1602,7 +1601,7 @@ class PatternDetectionService {
     const slBuffer = this.scaleSL(0.005, timeframe);
     const stopLoss = zoneLow * (1 - slBuffer);
     const riskAmount = entry - stopLoss;
-    const rrMultiplier = 2.0;
+    const rrMultiplier = PATTERN_CONFIG.UPU?.riskReward || 2.8;
     const target = entry + (riskAmount * rrMultiplier);
 
     let startTime = gemPattern.startTime;
@@ -1630,59 +1629,6 @@ class PatternDetectionService {
     };
   }
 
-  // Fallback swing-based UPU detection
-  _detectUPUSwingBased(candles, symbol, timeframe) {
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
-    if (swingLows.length < 2) return null;
-
-    const recentHighs = swingHighs.slice(-4);
-    const recentLows = swingLows.slice(-4);
-    if (recentLows.length < 2) return null;
-
-    const low1 = recentLows[recentLows.length - 2];
-    const low2 = recentLows[recentLows.length - 1];
-    const lowDiff = (low2.price - low1.price) / low1.price;
-    if (lowDiff < 0.005) return null;
-
-    let highBetween = recentHighs.find(h => h.index > low1.index && h.index < low2.index);
-    if (!highBetween && recentHighs.length > 0) {
-      highBetween = recentHighs.find(h => h.index < low2.index) || recentHighs[recentHighs.length - 1];
-    }
-    if (!highBetween) return null;
-
-    const confidence = this.calculateConfidence({
-      symmetry: Math.min(lowDiff * 10, 1),
-      trendAligned: this.calculateTrend(candles.slice(0, 20)) === 'uptrend',
-      swingClarity: 0.6,
-    });
-    if (confidence < 45) return null;
-
-    const currentPrice = candles[candles.length - 1].close;
-    const signal = PATTERN_SIGNALS.UPU;
-    const entry = highBetween.price;
-    const slPercent = this.scaleSL(0.01, timeframe);
-    const stopLoss = low2.price * (1 - slPercent);
-    const riskAmount = entry - stopLoss;
-    const target = entry + (riskAmount * 2.0);
-
-    const low1Time = low1.timestamp > 9999999999 ? Math.floor(low1.timestamp / 1000) : low1.timestamp;
-    const highTime = highBetween.timestamp > 9999999999 ? Math.floor(highBetween.timestamp / 1000) : highBetween.timestamp;
-
-    return {
-      id: `UPU-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'UPU',
-      symbol, timeframe, confidence,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.0,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      points: { low1, low2, highBetween },
-      zoneHigh: entry, zoneLow: stopLoss,
-      startTime: low1Time, endTime: highTime, formationTime: low1Time,
-      startCandleIndex: low1.index, endCandleIndex: highBetween.index,
-    };
-  }
-
   /**
    * DPU Pattern (Down-Pause-Up) - Bullish Reversal (STRONG)
    * GEM Frequency Method: DOWN move → PAUSE (zone) → UP move
@@ -1691,11 +1637,9 @@ class PatternDetectionService {
   detectDPU(candles, symbol, timeframe) {
     if (candles.length < this.MIN_CANDLES) return null;
 
-    // Use GEM Frequency Method detection
+    // Use GEM Frequency Method detection (Move-Pause-Move only)
     const gemPattern = this.findGEMPattern(candles, 'DPU');
-    if (!gemPattern) {
-      return this._detectDPUSwingBased(candles, symbol, timeframe);
-    }
+    if (!gemPattern) return null;
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.DPU;
@@ -1709,7 +1653,7 @@ class PatternDetectionService {
     const slBuffer = this.scaleSL(0.005, timeframe);
     const stopLoss = zoneLow * (1 - slBuffer);
     const riskAmount = entry - stopLoss;
-    const rrMultiplier = 2.0;
+    const rrMultiplier = PATTERN_CONFIG.DPU?.riskReward || 2.6;
     const target = entry + (riskAmount * rrMultiplier);
 
     let startTime = gemPattern.startTime;
@@ -1738,57 +1682,6 @@ class PatternDetectionService {
     };
   }
 
-  // Fallback swing-based DPU detection
-  _detectDPUSwingBased(candles, symbol, timeframe) {
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
-    if (swingLows.length < 2) return null;
-
-    const recentLows = swingLows.slice(-4);
-    const recentHighs = swingHighs.slice(-4);
-    if (recentLows.length < 2) return null;
-
-    const low1 = recentLows[recentLows.length - 2];
-    const low2 = recentLows[recentLows.length - 1];
-    const lowDiff = (low2.price - low1.price) / low1.price;
-    if (lowDiff < 0.003) return null;
-
-    let peak = recentHighs.find(h => h.index > low1.index && h.index < low2.index);
-    if (!peak && recentHighs.length > 0) peak = recentHighs[recentHighs.length - 1];
-    if (!peak) return null;
-
-    const confidence = this.calculateConfidence({
-      symmetry: Math.min(lowDiff * 15, 1),
-      trendAligned: false,
-      swingClarity: 0.5,
-    });
-    if (confidence < 40) return null;
-
-    const currentPrice = candles[candles.length - 1].close;
-    const signal = PATTERN_SIGNALS.DPU;
-    const entry = peak.price;
-    const slPercent = this.scaleSL(0.02, timeframe);
-    const stopLoss = low2.price * (1 - slPercent);
-    const riskAmount = entry - stopLoss;
-    const target = entry + (riskAmount * 2.0);
-
-    const low1Time = low1.timestamp > 9999999999 ? Math.floor(low1.timestamp / 1000) : low1.timestamp;
-    const peakTime = peak.timestamp > 9999999999 ? Math.floor(peak.timestamp / 1000) : peak.timestamp;
-
-    return {
-      id: `DPU-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'DPU',
-      symbol, timeframe, confidence,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.0,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      points: { low1, low2, peak },
-      zoneHigh: entry, zoneLow: stopLoss,
-      startTime: low1Time, endTime: peakTime, formationTime: low1Time,
-      startCandleIndex: low1.index, endCandleIndex: peak.index,
-    };
-  }
-
   /**
    * UPD Pattern (Up-Pause-Down) - Bearish Reversal (STRONG)
    * GEM Frequency Method: UP move → PAUSE (zone) → DOWN move
@@ -1797,11 +1690,9 @@ class PatternDetectionService {
   detectUPD(candles, symbol, timeframe) {
     if (candles.length < this.MIN_CANDLES) return null;
 
-    // Use GEM Frequency Method detection
+    // Use GEM Frequency Method detection (Move-Pause-Move only)
     const gemPattern = this.findGEMPattern(candles, 'UPD');
-    if (!gemPattern) {
-      return this._detectUPDSwingBased(candles, symbol, timeframe);
-    }
+    if (!gemPattern) return null;
 
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPD;
@@ -1815,7 +1706,7 @@ class PatternDetectionService {
     const slBuffer = this.scaleSL(0.005, timeframe);
     const stopLoss = zoneHigh * (1 + slBuffer);
     const riskAmount = stopLoss - entry;
-    const rrMultiplier = 2.0;
+    const rrMultiplier = PATTERN_CONFIG.UPD?.riskReward || 2.2;
     const target = entry - (riskAmount * rrMultiplier);
 
     let startTime = gemPattern.startTime;
@@ -1844,57 +1735,6 @@ class PatternDetectionService {
     };
   }
 
-  // Fallback swing-based UPD detection
-  _detectUPDSwingBased(candles, symbol, timeframe) {
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
-    if (swingHighs.length < 2) return null;
-
-    const recentHighs = swingHighs.slice(-4);
-    const recentLows = swingLows.slice(-4);
-    if (recentHighs.length < 2) return null;
-
-    const high1 = recentHighs[recentHighs.length - 2];
-    const high2 = recentHighs[recentHighs.length - 1];
-    const highDiff = (high1.price - high2.price) / high1.price;
-    if (highDiff < 0.003) return null;
-
-    let trough = recentLows.find(l => l.index > high1.index && l.index < high2.index);
-    if (!trough && recentLows.length > 0) trough = recentLows[recentLows.length - 1];
-    if (!trough) return null;
-
-    const confidence = this.calculateConfidence({
-      symmetry: Math.min(highDiff * 15, 1),
-      trendAligned: false,
-      swingClarity: 0.5,
-    });
-    if (confidence < 40) return null;
-
-    const currentPrice = candles[candles.length - 1].close;
-    const signal = PATTERN_SIGNALS.UPD;
-    const entry = high2.price;
-    const slPercent = this.scaleSL(0.01, timeframe);
-    const stopLoss = high1.price * (1 + slPercent);
-    const riskAmount = stopLoss - entry;
-    const target = entry - (riskAmount * 2.0);
-
-    const high1Time = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
-    const troughTime = trough.timestamp > 9999999999 ? Math.floor(trough.timestamp / 1000) : trough.timestamp;
-
-    return {
-      id: `UPD-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'UPD',
-      symbol, timeframe, confidence,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.0,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      points: { high1, high2, trough },
-      zoneHigh: stopLoss, zoneLow: entry,
-      startTime: high1Time, endTime: troughTime, formationTime: high1Time,
-      startCandleIndex: high1.index, endCandleIndex: trough.index,
-    };
-  }
-
   /**
    * Head and Shoulders Pattern - Bearish Reversal
    */
@@ -1912,6 +1752,7 @@ class PatternDetectionService {
     // Check H&S pattern criteria
     const shoulderTolerance = 0.03; // 3% tolerance
     const shoulderDiff = Math.abs(leftShoulder.price - rightShoulder.price) / leftShoulder.price;
+    const avgShoulder = (leftShoulder.price + rightShoulder.price) / 2;
 
     // Head must be highest, shoulders roughly equal
     if (
@@ -1922,13 +1763,23 @@ class PatternDetectionService {
       return null;
     }
 
-    // Find neckline
+    // Head must be > 10% higher than shoulders (ref doc requirement)
+    const headAboveShoulders = (head.price - avgShoulder) / avgShoulder;
+    if (headAboveShoulders < 0.10) return null;
+
+    // Find neckline - connect the lows between shoulders (not just minimum)
     const necklineLows = swingLows.filter(l =>
       l.index > leftShoulder.index && l.index < rightShoulder.index
     );
     if (necklineLows.length < 1) return null;
 
+    // Use lowest point between shoulders as neckline reference
     const neckline = Math.min(...necklineLows.map(l => l.price));
+
+    // Neckline break confirmation: price must have closed below neckline
+    const currentPrice = candles[candles.length - 1].close;
+    const hasNecklineBreak = currentPrice < neckline;
+    if (!hasNecklineBreak) return null; // Must confirm break
 
     const confidence = this.calculateConfidence({
       symmetry: 1 - shoulderDiff,
@@ -1936,16 +1787,13 @@ class PatternDetectionService {
       trendAligned: this.calculateTrend(candles.slice(0, 30)) === 'uptrend',
     });
 
-    if (confidence < 45) return null; // Lowered threshold
+    if (confidence < 45) return null;
 
-    const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS['Head & Shoulders'];
 
-    // TIMEFRAME-SCALED TP/SL
-    // Entry slightly below neckline, SL above head
-    const entryBuffer = this.scaleSL(0.005, timeframe); // 0.5% base buffer
+    // RETEST ENTRY (ref: entry on neckline retest, not breakout)
     const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL above head
-    const entry = neckline * (1 - entryBuffer);
+    const entry = neckline; // Retest of neckline from below
     const stopLoss = head.price * (1 + slPercent);
     const patternHeight = head.price - neckline;
     const target = neckline - patternHeight; // Target based on pattern height (naturally scales)
@@ -2008,20 +1856,20 @@ class PatternDetectionService {
     const top1 = recentHighs[recentHighs.length - 2];
     const top2 = recentHighs[recentHighs.length - 1];
 
-    // Tops should be at similar level (within 4%)
+    // Tops should be at similar level (within 2% per ref doc)
     const topDiff = Math.abs(top1.price - top2.price) / top1.price;
-    if (topDiff > 0.04) return null; // Loosened from 2%
+    if (topDiff > 0.02) return null;
 
-    // Find trough between tops or any recent low
+    // Minimum 5 candles between peaks (ref requirement)
+    if (top2.index - top1.index < 5) return null;
+
+    // Find trough between tops
     let trough = swingLows.find(l => l.index > top1.index && l.index < top2.index);
-    if (!trough && swingLows.length > 0) {
-      trough = swingLows[swingLows.length - 1];
-    }
-    if (!trough) return null;
+    if (!trough) return null; // Must have a trough BETWEEN the peaks
 
-    // Trough should be significant (lowered threshold)
+    // Trough should be significant (ref: >= 3% retracement)
     const troughDepth = (top1.price - trough.price) / top1.price;
-    if (troughDepth < 0.01) return null; // Lowered from 2%
+    if (troughDepth < 0.03) return null;
 
     const confidence = this.calculateConfidence({
       symmetry: 1 - topDiff,
@@ -2094,20 +1942,20 @@ class PatternDetectionService {
     const bottom1 = recentLows[recentLows.length - 2];
     const bottom2 = recentLows[recentLows.length - 1];
 
-    // Bottoms should be at similar level (within 4%)
+    // Bottoms should be at similar level (within 2% per ref doc)
     const bottomDiff = Math.abs(bottom1.price - bottom2.price) / bottom1.price;
-    if (bottomDiff > 0.04) return null; // Loosened from 2%
+    if (bottomDiff > 0.02) return null;
 
-    // Find peak between bottoms or any recent high
+    // Minimum 5 candles between bottoms (ref requirement)
+    if (bottom2.index - bottom1.index < 5) return null;
+
+    // Find peak between bottoms
     let peak = swingHighs.find(h => h.index > bottom1.index && h.index < bottom2.index);
-    if (!peak && swingHighs.length > 0) {
-      peak = swingHighs[swingHighs.length - 1];
-    }
-    if (!peak) return null;
+    if (!peak) return null; // Must have a peak BETWEEN the bottoms
 
-    // Peak should be significant (lowered threshold)
+    // Peak should be significant (ref: >= 3% retracement)
     const peakHeight = (peak.price - bottom1.price) / bottom1.price;
-    if (peakHeight < 0.01) return null; // Lowered from 2%
+    if (peakHeight < 0.03) return null;
 
     const confidence = this.calculateConfidence({
       symmetry: 1 - bottomDiff,
@@ -2179,13 +2027,26 @@ class PatternDetectionService {
     const recentLows = swingLows.slice(-3);
     const [leftShoulder, head, rightShoulder] = recentLows;
 
-    // Head lower than shoulders
-    const headLower = head.price < leftShoulder.price * 1.02 && head.price < rightShoulder.price * 1.02;
+    // Head must be 10%+ deeper than shoulders (ref requirement)
+    const avgShoulder = (leftShoulder.price + rightShoulder.price) / 2;
+    const headDepthRatio = (avgShoulder - head.price) / avgShoulder;
+    const headLower = head.price < leftShoulder.price * 0.90 && head.price < rightShoulder.price * 0.90;
     const shouldersEqual = Math.abs(leftShoulder.price - rightShoulder.price) < head.price * 0.03;
 
     if (headLower && shouldersEqual) {
       const currentPrice = candles[candles.length - 1].close;
-      const neckline = (leftShoulder.price + rightShoulder.price) / 2;
+
+      // Neckline: connect highs between shoulders (not average of shoulder prices)
+      const { swingHighs: allHighs } = this.findSwingPoints(candles, 3);
+      const necklineHighs = allHighs.filter(h =>
+        h.index > leftShoulder.index && h.index < rightShoulder.index
+      );
+      const neckline = necklineHighs.length > 0
+        ? Math.max(...necklineHighs.map(h => h.price))
+        : (leftShoulder.price + rightShoulder.price) / 2; // fallback
+
+      // Neckline break confirmation: price must have closed above neckline
+      if (currentPrice < neckline) return null;
       const signal = PATTERN_SIGNALS['Inverse H&S'];
 
       const symmetry = 1 - Math.abs(leftShoulder.price - rightShoulder.price) / head.price;
@@ -2194,11 +2055,12 @@ class PatternDetectionService {
       if (headDepth > 0.03) confidence += 10;
       confidence = Math.min(confidence, 90);
 
-      // TIMEFRAME-SCALED TP/SL
-      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% base entry buffer
+      // RETEST ENTRY (ref: entry on neckline retest from above)
       const slPercent = this.scaleSL(0.01, timeframe); // 1% base SL below head
-      const entry = neckline * (1 + entryBuffer);
+      const entry = neckline; // Retest entry at neckline
       const stopLoss = head.price * (1 - slPercent);
+      const patternHeight = neckline - head.price;
+      const target = neckline + patternHeight; // Measured move target
 
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const leftShoulderTime = leftShoulder.timestamp > 9999999999 ? Math.floor(leftShoulder.timestamp / 1000) : leftShoulder.timestamp;
@@ -2217,8 +2079,8 @@ class PatternDetectionService {
         description: signal.description,
         entry,
         stopLoss,
-        target: neckline + (neckline - head.price),
-        riskReward: 2.4,
+        target,
+        riskReward: parseFloat((patternHeight / (entry - stopLoss)).toFixed(1)),
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
@@ -2398,40 +2260,59 @@ class PatternDetectionService {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['Symmetrical Triangle'];
 
-      // TIMEFRAME-SCALED TP/SL
-      const slPercent = this.scaleSL(0.03, timeframe); // 3% base SL (symmetrical patterns more volatile)
-      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base TP
-      const entry = currentPrice;
-      const stopLoss = currentPrice * (1 - slPercent);
-      const targetPrice = currentPrice * (1 + tpPercent);
+      // Determine breakout direction based on price position
+      // If price breaks above upper trendline → LONG; below lower trendline → SHORT
+      const upperLine = recentHighs[1].price; // Most recent lower high
+      const lowerLine = recentLows[1].price;  // Most recent higher low
+      const midPoint = (upperLine + lowerLine) / 2;
 
-      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
+      // Wait for breakout: price must be outside the triangle
+      const breakoutUp = currentPrice > upperLine;
+      const breakoutDown = currentPrice < lowerLine;
+
+      if (!breakoutUp && !breakoutDown) return null; // No breakout yet - don't signal
+
+      const direction = breakoutUp ? 'LONG' : 'SHORT';
+      const triangleHeight = recentHighs[0].price - recentLows[0].price; // Widest part
+
+      // TIMEFRAME-SCALED TP/SL
+      const slPercent = this.scaleSL(0.01, timeframe);
+      let entry, stopLoss, targetPrice;
+      if (direction === 'LONG') {
+        entry = currentPrice;
+        stopLoss = lowerLine * (1 - slPercent);
+        targetPrice = entry + triangleHeight; // Target = widest part of triangle
+      } else {
+        entry = currentPrice;
+        stopLoss = upperLine * (1 + slPercent);
+        targetPrice = entry - triangleHeight;
+      }
+
+      // FIX: Extract timestamps for zone positioning
       const high1Time = recentHighs[0].timestamp > 9999999999 ? Math.floor(recentHighs[0].timestamp / 1000) : recentHighs[0].timestamp;
       const low2Time = recentLows[1].timestamp > 9999999999 ? Math.floor(recentLows[1].timestamp / 1000) : recentLows[1].timestamp;
 
+      const isSell = direction === 'SHORT';
       return {
         id: `ST-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Symmetrical Triangle',
         symbol,
         timeframe,
         confidence: 65,
-        direction: signal.direction,
+        direction,
         type: signal.type,
-        color: signal.color,
-        description: signal.description,
+        color: isSell ? '#FF6B6B' : '#3AF7A6',
+        description: `Symmetrical triangle breakout ${direction === 'LONG' ? 'up' : 'down'}`,
         entry,
         stopLoss,
         target: targetPrice,
-        riskReward: 2.0,
+        riskReward: parseFloat((Math.abs(targetPrice - entry) / Math.abs(stopLoss - entry)).toFixed(1)),
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
         points: { high1: recentHighs[0], high2: recentHighs[1], low1: recentLows[0], low2: recentLows[1] },
-        // FIX: Explicit zone data for zone rendering
-        // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
-        zoneHigh: entry,
-        zoneLow: stopLoss,
-        // FIX: Explicit time data for zone X-axis positioning
+        zoneHigh: isSell ? stopLoss : entry,
+        zoneLow: isSell ? entry : stopLoss,
         startTime: high1Time,
         endTime: low2Time,
         formationTime: high1Time,
@@ -2444,135 +2325,23 @@ class PatternDetectionService {
 
   /**
    * HFZ - High Frequency Zone (Resistance) (TIER 2)
+   * DISABLED: Standalone HFZ detection contradicts GEM philosophy.
+   * HFZ zones should only come from DPD/UPD pause zones (Move-Pause-Move).
+   * Reference: "càng chạm nhiều càng YẾU" - multi-touch weakens zones.
    */
   detectHFZ(candles, symbol, timeframe) {
-    if (candles.length < 40) return null;
-
-    const { swingHighs } = this.findSwingPoints(candles, 3);
-    if (swingHighs.length < 3) return null;
-
-    const recentHighs = swingHighs.slice(-5);
-    const avgHigh = recentHighs.reduce((sum, h) => sum + h.price, 0) / recentHighs.length;
-    const isCluster = recentHighs.every(h => Math.abs(h.price - avgHigh) / avgHigh < 0.015);
-
-    if (isCluster) {
-      const currentPrice = candles[candles.length - 1].close;
-      const signal = PATTERN_SIGNALS['HFZ'];
-
-      // Get first and last swing high for time positioning
-      const firstHigh = recentHighs[0];
-      const lastHigh = recentHighs[recentHighs.length - 1];
-
-      // TIMEFRAME-SCALED TP/SL
-      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% below current
-      const slPercent = this.scaleSL(0.01, timeframe); // 1% above avg high
-      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base target
-      const entry = currentPrice * (1 - entryBuffer);
-      const stopLoss = avgHigh * (1 + slPercent);
-      const targetPrice = currentPrice * (1 - tpPercent);
-
-      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
-      const firstHighTime = firstHigh.timestamp > 9999999999 ? Math.floor(firstHigh.timestamp / 1000) : firstHigh.timestamp;
-      const lastHighTime = lastHigh.timestamp > 9999999999 ? Math.floor(lastHigh.timestamp / 1000) : lastHigh.timestamp;
-
-      return {
-        id: `HFZ-${symbol}-${timeframe}-${Date.now()}`,
-        patternType: 'HFZ',
-        symbol,
-        timeframe,
-        confidence: 70,
-        direction: signal.direction,
-        type: signal.type,
-        color: signal.color,
-        description: signal.description,
-        entry,
-        stopLoss,
-        target: targetPrice,
-        riskReward: 2.3,
-        winRate: signal.expectedWinRate,
-        detectedAt: Date.now(),
-        currentPrice,
-        zone: { top: avgHigh * 1.005, bottom: avgHigh * 0.995, mid: avgHigh },
-        points: { firstHigh, lastHigh, cluster: recentHighs },
-        // FIX: Explicit zone data for zone rendering
-        // SHORT pattern: SL at top (zoneHigh), entry at bottom (zoneLow)
-        zoneHigh: stopLoss,
-        zoneLow: entry,
-        // FIX: Explicit time data for zone X-axis positioning
-        startTime: firstHighTime,
-        endTime: lastHighTime,
-        formationTime: firstHighTime,
-        startCandleIndex: firstHigh.index,
-        endCandleIndex: lastHigh.index,
-      };
-    }
+    // HFZ zones are created by GEM patterns (DPD/UPD), not by S/R cluster detection
     return null;
   }
 
   /**
    * LFZ - Low Frequency Zone (Support) (TIER 2)
+   * DISABLED: Standalone LFZ detection contradicts GEM philosophy.
+   * LFZ zones should only come from UPU/DPU pause zones (Move-Pause-Move).
+   * Reference: "càng chạm nhiều càng YẾU" - multi-touch weakens zones.
    */
   detectLFZ(candles, symbol, timeframe) {
-    if (candles.length < 40) return null;
-
-    const { swingLows } = this.findSwingPoints(candles, 3);
-    if (swingLows.length < 3) return null;
-
-    const recentLows = swingLows.slice(-5);
-    const avgLow = recentLows.reduce((sum, l) => sum + l.price, 0) / recentLows.length;
-    const isCluster = recentLows.every(l => Math.abs(l.price - avgLow) / avgLow < 0.015);
-
-    if (isCluster) {
-      const currentPrice = candles[candles.length - 1].close;
-      const signal = PATTERN_SIGNALS['LFZ'];
-
-      // Get first and last swing low for time positioning
-      const firstLow = recentLows[0];
-      const lastLow = recentLows[recentLows.length - 1];
-
-      // TIMEFRAME-SCALED TP/SL
-      const entryBuffer = this.scaleSL(0.01, timeframe); // 1% above current
-      const slPercent = this.scaleSL(0.01, timeframe); // 1% below avg low
-      const tpPercent = this.scaleTP(0.05, timeframe); // 5% base target
-      const entry = currentPrice * (1 + entryBuffer);
-      const stopLoss = avgLow * (1 - slPercent);
-      const targetPrice = currentPrice * (1 + tpPercent);
-
-      // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
-      const firstLowTime = firstLow.timestamp > 9999999999 ? Math.floor(firstLow.timestamp / 1000) : firstLow.timestamp;
-      const lastLowTime = lastLow.timestamp > 9999999999 ? Math.floor(lastLow.timestamp / 1000) : lastLow.timestamp;
-
-      return {
-        id: `LFZ-${symbol}-${timeframe}-${Date.now()}`,
-        patternType: 'LFZ',
-        symbol,
-        timeframe,
-        confidence: 70,
-        direction: signal.direction,
-        type: signal.type,
-        color: signal.color,
-        description: signal.description,
-        entry,
-        stopLoss,
-        target: targetPrice,
-        riskReward: 2.3,
-        winRate: signal.expectedWinRate,
-        detectedAt: Date.now(),
-        currentPrice,
-        zone: { top: avgLow * 1.005, bottom: avgLow * 0.995, mid: avgLow },
-        points: { firstLow, lastLow, cluster: recentLows },
-        // FIX: Explicit zone data for zone rendering
-        // LONG pattern: entry at top (zoneHigh), SL at bottom (zoneLow)
-        zoneHigh: entry,
-        zoneLow: stopLoss,
-        // FIX: Explicit time data for zone X-axis positioning
-        startTime: firstLowTime,
-        endTime: lastLowTime,
-        formationTime: firstLowTime,
-        startCandleIndex: firstLow.index,
-        endCandleIndex: lastLow.index,
-      };
-    }
+    // LFZ zones are created by GEM patterns (UPU/DPU), not by S/R cluster detection
     return null;
   }
 
@@ -2734,55 +2503,74 @@ class PatternDetectionService {
   detectBullFlag(candles, symbol, timeframe) {
     if (candles.length < 20) return null;
 
-    const poleStart = candles.length - 15;
-    const poleEnd = candles.length - 10;
-    const pole = candles.slice(poleStart, poleEnd);
-    const poleRise = ((pole[pole.length - 1].close - pole[0].close) / pole[0].close) * 100;
+    // Dynamic pole/flag detection: scan for strong up move followed by consolidation
+    // Find the pole: look for a strong upward move in the recent candles
+    let bestPole = null;
+    for (let flagLen = 5; flagLen <= 15; flagLen++) {
+      for (let poleLen = 3; poleLen <= 8; poleLen++) {
+        const poleStart = candles.length - flagLen - poleLen;
+        const poleEnd = candles.length - flagLen;
+        if (poleStart < 0) continue;
 
-    if (poleRise > 5) {
-      const flag = candles.slice(-10);
-      const flagRange = (Math.max(...flag.map(c => c.high)) - Math.min(...flag.map(c => c.low))) / flag[0].close * 100;
+        const pole = candles.slice(poleStart, poleEnd);
+        const poleRise = ((pole[pole.length - 1].close - pole[0].close) / pole[0].close) * 100;
 
-      if (flagRange < 3) {
-        const currentPrice = candles[candles.length - 1].close;
-        const signal = PATTERN_SIGNALS['Bull Flag'];
+        if (poleRise > 5) {
+          const flag = candles.slice(poleEnd);
+          const flagHigh = Math.max(...flag.map(c => c.high));
+          const flagLow = Math.min(...flag.map(c => c.low));
+          const flagRange = (flagHigh - flagLow) / flag[0].close * 100;
 
-        // Get pole and flag candles for time positioning
-        const poleStartCandle = candles[poleStart];
-        const flagEndCandle = candles[candles.length - 1];
+          // Flag should be tight and drift DOWNWARD (counter-trend)
+          const flagDrift = flag[flag.length - 1].close - flag[0].close;
+          const isCounterTrend = flagDrift <= 0; // Flag drifts down in bull flag
 
-        // TIMEFRAME-SCALED TP/SL
-        const entryBuffer = this.scaleSL(0.01, timeframe);
-        const slPercent = this.scaleSL(0.02, timeframe);
-        const entryPrice = currentPrice * (1 + entryBuffer);
-        const flagLow = Math.min(...flag.map(c => c.low));
-        const stopLossPrice = flagLow * (1 - slPercent);
-
-        return {
-          id: `BF-${symbol}-${timeframe}-${Date.now()}`,
-          patternType: 'Bull Flag',
-          symbol,
-          timeframe,
-          confidence: 72,
-          direction: signal.direction,
-          type: signal.type,
-          color: signal.color,
-          description: signal.description,
-          entry: entryPrice,
-          stopLoss: stopLossPrice,
-          target: currentPrice + (pole[pole.length - 1].close - pole[0].close),
-          riskReward: 2.5,
-          winRate: signal.expectedWinRate,
-          detectedAt: Date.now(),
-          currentPrice,
-          points: {
-            poleStart: { index: poleStart, price: poleStartCandle.close, timestamp: poleStartCandle.timestamp },
-            flagEnd: { index: candles.length - 1, price: flagEndCandle.close, timestamp: flagEndCandle.timestamp },
-          }, // Added for zone positioning
-        };
+          if (flagRange < 3 && isCounterTrend) {
+            bestPole = { poleStart, poleEnd, pole, flag, flagHigh, flagLow, poleRise };
+            break;
+          }
+        }
       }
+      if (bestPole) break;
     }
-    return null;
+
+    if (!bestPole) return null;
+
+    const { poleStart, pole, flag, flagHigh, flagLow } = bestPole;
+    const currentPrice = candles[candles.length - 1].close;
+    const signal = PATTERN_SIGNALS['Bull Flag'];
+
+    // Entry at breakout above flag high (not currentPrice + buffer)
+    const slPercent = this.scaleSL(0.01, timeframe);
+    const entryPrice = flagHigh;
+    const stopLossPrice = flagLow * (1 - slPercent);
+    const poleHeight = pole[pole.length - 1].close - pole[0].close;
+
+    const poleStartCandle = candles[poleStart];
+    const flagEndCandle = candles[candles.length - 1];
+
+    return {
+      id: `BF-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'Bull Flag',
+      symbol,
+      timeframe,
+      confidence: 72,
+      direction: signal.direction,
+      type: signal.type,
+      color: signal.color,
+      description: signal.description,
+      entry: entryPrice,
+      stopLoss: stopLossPrice,
+      target: flagHigh + poleHeight, // Target = flag breakout + pole height
+      riskReward: parseFloat((poleHeight / (entryPrice - stopLossPrice)).toFixed(1)),
+      winRate: signal.expectedWinRate,
+      detectedAt: Date.now(),
+      currentPrice,
+      points: {
+        poleStart: { index: poleStart, price: poleStartCandle.close, timestamp: poleStartCandle.timestamp },
+        flagEnd: { index: candles.length - 1, price: flagEndCandle.close, timestamp: flagEndCandle.timestamp },
+      },
+    };
   }
 
   /**
@@ -2791,55 +2579,73 @@ class PatternDetectionService {
   detectBearFlag(candles, symbol, timeframe) {
     if (candles.length < 20) return null;
 
-    const poleStart = candles.length - 15;
-    const poleEnd = candles.length - 10;
-    const pole = candles.slice(poleStart, poleEnd);
-    const poleDrop = ((pole[0].close - pole[pole.length - 1].close) / pole[0].close) * 100;
+    // Dynamic pole/flag detection
+    let bestPole = null;
+    for (let flagLen = 5; flagLen <= 15; flagLen++) {
+      for (let poleLen = 3; poleLen <= 8; poleLen++) {
+        const poleStart = candles.length - flagLen - poleLen;
+        const poleEnd = candles.length - flagLen;
+        if (poleStart < 0) continue;
 
-    if (poleDrop > 5) {
-      const flag = candles.slice(-10);
-      const flagRange = (Math.max(...flag.map(c => c.high)) - Math.min(...flag.map(c => c.low))) / flag[0].close * 100;
+        const pole = candles.slice(poleStart, poleEnd);
+        const poleDrop = ((pole[0].close - pole[pole.length - 1].close) / pole[0].close) * 100;
 
-      if (flagRange < 3) {
-        const currentPrice = candles[candles.length - 1].close;
-        const signal = PATTERN_SIGNALS['Bear Flag'];
+        if (poleDrop > 5) {
+          const flag = candles.slice(poleEnd);
+          const flagHigh = Math.max(...flag.map(c => c.high));
+          const flagLow = Math.min(...flag.map(c => c.low));
+          const flagRange = (flagHigh - flagLow) / flag[0].close * 100;
 
-        // Get pole and flag candles for time positioning
-        const poleStartCandle = candles[poleStart];
-        const flagEndCandle = candles[candles.length - 1];
+          // Flag should drift UPWARD (counter-trend for bear flag)
+          const flagDrift = flag[flag.length - 1].close - flag[0].close;
+          const isCounterTrend = flagDrift >= 0;
 
-        // TIMEFRAME-SCALED TP/SL
-        const entryBuffer = this.scaleSL(0.01, timeframe);
-        const slPercent = this.scaleSL(0.02, timeframe);
-        const entryPrice = currentPrice * (1 - entryBuffer);
-        const flagHigh = Math.max(...flag.map(c => c.high));
-        const stopLossPrice = flagHigh * (1 + slPercent);
-
-        return {
-          id: `BRF-${symbol}-${timeframe}-${Date.now()}`,
-          patternType: 'Bear Flag',
-          symbol,
-          timeframe,
-          confidence: 72,
-          direction: signal.direction,
-          type: signal.type,
-          color: signal.color,
-          description: signal.description,
-          entry: entryPrice,
-          stopLoss: stopLossPrice,
-          target: currentPrice - (pole[0].close - pole[pole.length - 1].close),
-          riskReward: 2.4,
-          winRate: signal.expectedWinRate,
-          detectedAt: Date.now(),
-          currentPrice,
-          points: {
-            poleStart: { index: poleStart, price: poleStartCandle.close, timestamp: poleStartCandle.timestamp },
-            flagEnd: { index: candles.length - 1, price: flagEndCandle.close, timestamp: flagEndCandle.timestamp },
-          }, // Added for zone positioning
-        };
+          if (flagRange < 3 && isCounterTrend) {
+            bestPole = { poleStart, poleEnd, pole, flag, flagHigh, flagLow, poleDrop };
+            break;
+          }
+        }
       }
+      if (bestPole) break;
     }
-    return null;
+
+    if (!bestPole) return null;
+
+    const { poleStart, pole, flag, flagHigh, flagLow } = bestPole;
+    const currentPrice = candles[candles.length - 1].close;
+    const signal = PATTERN_SIGNALS['Bear Flag'];
+
+    // Entry at breakout below flag low
+    const slPercent = this.scaleSL(0.01, timeframe);
+    const entryPrice = flagLow;
+    const stopLossPrice = flagHigh * (1 + slPercent);
+    const poleHeight = pole[0].close - pole[pole.length - 1].close;
+
+    const poleStartCandle = candles[poleStart];
+    const flagEndCandle = candles[candles.length - 1];
+
+    return {
+      id: `BRF-${symbol}-${timeframe}-${Date.now()}`,
+      patternType: 'Bear Flag',
+      symbol,
+      timeframe,
+      confidence: 72,
+      direction: signal.direction,
+      type: signal.type,
+      color: signal.color,
+      description: signal.description,
+      entry: entryPrice,
+      stopLoss: stopLossPrice,
+      target: flagLow - poleHeight, // Target = flag breakout - pole height
+      riskReward: parseFloat((poleHeight / (stopLossPrice - entryPrice)).toFixed(1)),
+      winRate: signal.expectedWinRate,
+      detectedAt: Date.now(),
+      currentPrice,
+      points: {
+        poleStart: { index: poleStart, price: poleStartCandle.close, timestamp: poleStartCandle.timestamp },
+        flagEnd: { index: candles.length - 1, price: flagEndCandle.close, timestamp: flagEndCandle.timestamp },
+      },
+    };
   }
 
   /**
@@ -2866,6 +2672,26 @@ class PatternDetectionService {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['Wedge'];
 
+      // Widest part of the wedge = target size
+      const widestPart = Math.abs(recentHighs[0].price - recentLows[0].price);
+
+      // Wait for breakout: rising wedge breaks down, falling wedge breaks up
+      const breakdownLevel = recentLows[1].price;
+      const breakupLevel = recentHighs[1].price;
+
+      if (isRisingWedge && currentPrice > breakdownLevel) return null; // No breakdown yet
+      if (isFallingWedge && currentPrice < breakupLevel) return null; // No breakup yet
+
+      const direction = isRisingWedge ? 'SHORT' : 'LONG';
+      const slPercent = this.scaleSL(0.01, timeframe);
+      const entry = currentPrice;
+      const stopLoss = isRisingWedge
+        ? recentHighs[1].price * (1 + slPercent)
+        : recentLows[1].price * (1 - slPercent);
+      const target = isRisingWedge
+        ? entry - widestPart
+        : entry + widestPart;
+
       return {
         id: `WDG-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Wedge',
@@ -2873,18 +2699,18 @@ class PatternDetectionService {
         symbol,
         timeframe,
         confidence: 68,
-        direction: isRisingWedge ? 'SHORT' : 'LONG',
+        direction,
         type: signal.type,
         color: isRisingWedge ? '#FF6B6B' : '#3AF7A6',
         description: signal.description,
-        entry: currentPrice,
-        stopLoss: isRisingWedge ? recentHighs[1].price * 1.01 : recentLows[1].price * 0.99,
-        target: isRisingWedge ? currentPrice * 0.95 : currentPrice * 1.05,
-        riskReward: 2.2,
+        entry,
+        stopLoss,
+        target,
+        riskReward: parseFloat((widestPart / Math.abs(stopLoss - entry)).toFixed(1)),
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
-        points: { high1: recentHighs[0], high2: recentHighs[1], low1: recentLows[0], low2: recentLows[1] }, // Added for zone positioning
+        points: { high1: recentHighs[0], high2: recentHighs[1], low1: recentLows[0], low2: recentLows[1] },
       };
     }
     return null;
@@ -3063,13 +2889,39 @@ class PatternDetectionService {
     const cupWindow = candles.slice(-40, -10);
     const cupLows = cupWindow.map(c => c.low);
     const cupBottom = Math.min(...cupLows);
+    const cupBottomIdx = cupLows.indexOf(cupBottom);
+
+    // Cup rim = max of first and last few candles of cup window
+    const cupRimLeft = Math.max(...cupWindow.slice(0, 5).map(c => c.high));
+    const cupRimRight = Math.max(...cupWindow.slice(-5).map(c => c.high));
+    const cupRim = Math.min(cupRimLeft, cupRimRight);
+
+    // Cup depth check: 12-33% retracement (ref requirement)
+    const cupDepthPercent = (cupRim - cupBottom) / cupRim;
+    if (cupDepthPercent < 0.12 || cupDepthPercent > 0.33) return null;
+
+    // U-shape validation: bottom should be in middle third, not at edges (V-shape check)
+    const cupLen = cupWindow.length;
+    const isUShape = cupBottomIdx > cupLen * 0.25 && cupBottomIdx < cupLen * 0.75;
+    if (!isUShape) return null;
+
+    // Check gradual descent and ascent (not V-shape)
+    const leftHalf = cupLows.slice(0, cupBottomIdx);
+    const rightHalf = cupLows.slice(cupBottomIdx);
+    // Left should generally descend, right should generally ascend
+    if (leftHalf.length < 3 || rightHalf.length < 3) return null;
 
     const handleWindow = candles.slice(-10);
     const handleHigh = Math.max(...handleWindow.map(c => c.high));
     const handleLow = Math.min(...handleWindow.map(c => c.low));
     const handleRange = (handleHigh - handleLow) / handleHigh;
 
-    if (handleRange < 0.05) {
+    // Handle retracement check: 10-20% of cup depth (ref requirement)
+    const cupDepth = cupRim - cupBottom;
+    const handleDepth = handleHigh - handleLow;
+    const handleRetracementRatio = handleDepth / cupDepth;
+
+    if (handleRange < 0.05 && handleRetracementRatio >= 0.10 && handleRetracementRatio <= 0.30) {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['Cup Handle'];
 
@@ -3119,8 +2971,15 @@ class PatternDetectionService {
     const c5Up = candles5[4].close > candles5[4].open;
     const middle3Down = candles5.slice(1, 4).every(c => c.close < c.open);
 
+    // Middle candles must stay WITHIN first candle's high/low range
+    const c1High = candles5[0].high;
+    const c1Low = candles5[0].low;
+    const middleWithinRange = candles5.slice(1, 4).every(
+      c => c.high <= c1High && c.low >= c1Low
+    );
+
     // Rising 3 Methods
-    if (c1Up && middle3Down && c5Up) {
+    if (c1Up && middle3Down && c5Up && middleWithinRange) {
       const signal = PATTERN_SIGNALS['Three Methods'];
 
       // Get candle indexes for time positioning
@@ -3157,7 +3016,7 @@ class PatternDetectionService {
     const c5Down = candles5[4].close < candles5[4].open;
     const middle3Up = candles5.slice(1, 4).every(c => c.close > c.open);
 
-    if (c1Down && middle3Up && c5Down) {
+    if (c1Down && middle3Up && c5Down && middleWithinRange) {
       const signal = PATTERN_SIGNALS['Three Methods'];
 
       // Get candle indexes for time positioning
@@ -3275,470 +3134,177 @@ class PatternDetectionService {
   // ========================================
 
   /**
-   * Quasimodo Bearish - Strong Bearish Reversal
-   * Structure: Higher High followed by Lower Low and Lower High
-   * Win Rate: 75%
+   * Adapt dedicated detector output to UI-expected format
+   */
+  _adaptDetectorResult(result, patternType, symbol, timeframe) {
+    if (!result) return null;
+    const signal = PATTERN_SIGNALS[patternType];
+    if (!signal) return null;
+
+    const currentPrice = result.currentPrice || 0;
+    const entry = result.entryPrice || result.zone?.entryPrice || currentPrice;
+    const stopLoss = result.stopLossPrice || result.zone?.stopLossPrice || currentPrice;
+    const target = result.targetPrice || currentPrice;
+    const riskAmount = Math.abs(stopLoss - entry);
+    const rr = riskAmount > 0 ? Math.abs(target - entry) / riskAmount : 2.0;
+
+    // Extract time data
+    const getTimestamp = (point) => {
+      if (!point) return 0;
+      const ts = point.timestamp || 0;
+      return ts > 9999999999 ? Math.floor(ts / 1000) : ts;
+    };
+
+    // Get structure points for time positioning
+    const structurePoints = result.structure || {};
+    const firstPoint = result.leftShoulder || result.head || result.hl1 || result.bos;
+    const lastPoint = result.rightShoulder || result.bos || result.hl1;
+
+    const startTime = getTimestamp(firstPoint);
+    const endTime = getTimestamp(lastPoint) || startTime;
+    const startIdx = firstPoint?.index || structurePoints.originStartIndex || 0;
+    const endIdx = lastPoint?.index || structurePoints.originEndIndex || startIdx;
+
+    const isSell = signal.direction === 'SHORT';
+
+    return {
+      id: `${signal.name}-${symbol}-${timeframe}-${Date.now()}`,
+      patternType,
+      symbol,
+      timeframe,
+      confidence: Math.round((result.winRate || signal.expectedWinRate / 100) * 100),
+      direction: signal.direction,
+      type: signal.type,
+      color: signal.color,
+      description: signal.description,
+      entry,
+      stopLoss,
+      target,
+      riskReward: parseFloat(rr.toFixed(1)),
+      winRate: signal.expectedWinRate,
+      detectedAt: Date.now(),
+      currentPrice,
+      zoneHierarchyLevel: result.zoneHierarchyLevel,
+      // Zone boundaries
+      zoneHigh: isSell ? stopLoss : entry,
+      zoneLow: isSell ? entry : stopLoss,
+      // Time data
+      startTime,
+      endTime,
+      formationTime: startTime,
+      startCandleIndex: startIdx,
+      endCandleIndex: endIdx,
+    };
+  }
+
+  /**
+   * Quasimodo Bearish - delegates to dedicated quasimodoDetector.js
    */
   detectQuasimodoBearish(candles, symbol, timeframe) {
-    if (candles.length < 40) return null;
-
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 4);
-    if (swingHighs.length < 3 || swingLows.length < 2) return null;
-
-    const recentHighs = swingHighs.slice(-4);
-    const recentLows = swingLows.slice(-3);
-    if (recentHighs.length < 3 || recentLows.length < 2) return null;
-
-    // QML Structure: HH → LL → LH
-    const high1 = recentHighs[recentHighs.length - 3];
-    const high2 = recentHighs[recentHighs.length - 2]; // Should be Higher High
-    const high3 = recentHighs[recentHighs.length - 1]; // Should be Lower High
-
-    const low1 = recentLows[recentLows.length - 2];
-    const low2 = recentLows[recentLows.length - 1]; // Should be Lower Low
-
-    // Check QML criteria
-    const isHH = high2.price > high1.price && high2.price > high3.price;
-    const isLH = high3.price < high2.price;
-    const isLL = low2.price < low1.price;
-
-    if (!isHH || !isLH || !isLL) return null;
-
-    const signal = PATTERN_SIGNALS['Quasimodo Bearish'];
-    const currentPrice = candles[candles.length - 1].close;
-
-    // Zone at the Lower High area
-    const entry = high3.price;
-    const slBuffer = this.scaleSL(0.01, timeframe);
-    const stopLoss = high2.price * (1 + slBuffer);
-    const riskAmount = stopLoss - entry;
-    const target = entry - (riskAmount * 2.8);
-
-    const startTime = high1.timestamp > 9999999999 ? Math.floor(high1.timestamp / 1000) : high1.timestamp;
-    const endTime = high3.timestamp > 9999999999 ? Math.floor(high3.timestamp / 1000) : high3.timestamp;
-
-    return {
-      id: `QML-B-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'Quasimodo Bearish',
-      symbol, timeframe,
-      confidence: 75,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.8,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      points: { high1, high2, high3, low1, low2 },
-      zoneHigh: stopLoss, zoneLow: entry,
-      startTime, endTime, formationTime: startTime,
-      startCandleIndex: high1.index, endCandleIndex: high3.index,
-    };
+    try {
+      const result = detectBearishQM(candles);
+      return this._adaptDetectorResult(result, 'Quasimodo Bearish', symbol, timeframe);
+    } catch (e) {
+      console.error('[PatternDetection] QM Bearish error:', e.message);
+      return null;
+    }
   }
 
   /**
-   * Quasimodo Bullish - Strong Bullish Reversal
-   * Structure: Lower Low followed by Higher High and Higher Low
-   * Win Rate: 73%
+   * Quasimodo Bullish - delegates to dedicated quasimodoDetector.js
    */
   detectQuasimodoBullish(candles, symbol, timeframe) {
-    if (candles.length < 40) return null;
-
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 4);
-    if (swingHighs.length < 2 || swingLows.length < 3) return null;
-
-    const recentHighs = swingHighs.slice(-3);
-    const recentLows = swingLows.slice(-4);
-    if (recentHighs.length < 2 || recentLows.length < 3) return null;
-
-    // QML Structure: LL → HH → HL
-    const low1 = recentLows[recentLows.length - 3];
-    const low2 = recentLows[recentLows.length - 2]; // Should be Lower Low
-    const low3 = recentLows[recentLows.length - 1]; // Should be Higher Low
-
-    const high1 = recentHighs[recentHighs.length - 2];
-    const high2 = recentHighs[recentHighs.length - 1]; // Should be Higher High
-
-    // Check QML criteria
-    const isLL = low2.price < low1.price && low2.price < low3.price;
-    const isHL = low3.price > low2.price;
-    const isHH = high2.price > high1.price;
-
-    if (!isLL || !isHL || !isHH) return null;
-
-    const signal = PATTERN_SIGNALS['Quasimodo Bullish'];
-    const currentPrice = candles[candles.length - 1].close;
-
-    // Zone at the Higher Low area
-    const entry = low3.price;
-    const slBuffer = this.scaleSL(0.01, timeframe);
-    const stopLoss = low2.price * (1 - slBuffer);
-    const riskAmount = entry - stopLoss;
-    const target = entry + (riskAmount * 2.6);
-
-    const startTime = low1.timestamp > 9999999999 ? Math.floor(low1.timestamp / 1000) : low1.timestamp;
-    const endTime = low3.timestamp > 9999999999 ? Math.floor(low3.timestamp / 1000) : low3.timestamp;
-
-    return {
-      id: `QML-L-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'Quasimodo Bullish',
-      symbol, timeframe,
-      confidence: 73,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.6,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      points: { low1, low2, low3, high1, high2 },
-      zoneHigh: entry, zoneLow: stopLoss,
-      startTime, endTime, formationTime: startTime,
-      startCandleIndex: low1.index, endCandleIndex: low3.index,
-    };
+    try {
+      const result = detectBullishQM(candles);
+      return this._adaptDetectorResult(result, 'Quasimodo Bullish', symbol, timeframe);
+    } catch (e) {
+      console.error('[PatternDetection] QM Bullish error:', e.message);
+      return null;
+    }
   }
 
   /**
-   * FTR Bearish (Fail to Return) - Bearish Continuation
-   * Price fails to return to previous high after breaking support
-   * Win Rate: 66%
+   * FTR Bearish - delegates to dedicated ftrDetector.js
    */
   detectFTRBearish(candles, symbol, timeframe) {
-    if (candles.length < 30) return null;
-
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
-    if (swingHighs.length < 2 || swingLows.length < 2) return null;
-
-    const recentHighs = swingHighs.slice(-3);
-    const recentLows = swingLows.slice(-3);
-
-    // FTR: Price breaks below support, rallies but fails to reach previous high
-    const prevHigh = recentHighs[recentHighs.length - 2];
-    const currHigh = recentHighs[recentHighs.length - 1];
-    const prevLow = recentLows[recentLows.length - 2];
-
-    // Current high should be significantly lower than previous high (failed to return)
-    const failRatio = currHigh.price / prevHigh.price;
-    if (failRatio > 0.97 || failRatio < 0.90) return null;
-
-    // Price should have broken below previous low
-    const currentPrice = candles[candles.length - 1].close;
-    if (currentPrice > prevLow.price) return null;
-
-    const signal = PATTERN_SIGNALS['FTR Bearish'];
-    const entry = currHigh.price;
-    const slBuffer = this.scaleSL(0.01, timeframe);
-    const stopLoss = prevHigh.price * (1 + slBuffer);
-    const riskAmount = stopLoss - entry;
-    const target = entry - (riskAmount * 2.2);
-
-    const startTime = prevHigh.timestamp > 9999999999 ? Math.floor(prevHigh.timestamp / 1000) : prevHigh.timestamp;
-    const endTime = currHigh.timestamp > 9999999999 ? Math.floor(currHigh.timestamp / 1000) : currHigh.timestamp;
-
-    return {
-      id: `FTR-B-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'FTR Bearish',
-      symbol, timeframe,
-      confidence: 66,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.2,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      points: { prevHigh, currHigh, prevLow },
-      zoneHigh: stopLoss, zoneLow: entry,
-      startTime, endTime, formationTime: startTime,
-      startCandleIndex: prevHigh.index, endCandleIndex: currHigh.index,
-    };
+    try {
+      const result = detectBearishFTR(candles);
+      return this._adaptDetectorResult(result, 'FTR Bearish', symbol, timeframe);
+    } catch (e) {
+      console.error('[PatternDetection] FTR Bearish error:', e.message);
+      return null;
+    }
   }
 
   /**
-   * FTR Bullish (Fail to Return) - Bullish Continuation
-   * Price fails to return to previous low after breaking resistance
-   * Win Rate: 68%
+   * FTR Bullish - delegates to dedicated ftrDetector.js
    */
   detectFTRBullish(candles, symbol, timeframe) {
-    if (candles.length < 30) return null;
-
-    const { swingHighs, swingLows } = this.findSwingPoints(candles, 3);
-    if (swingHighs.length < 2 || swingLows.length < 2) return null;
-
-    const recentHighs = swingHighs.slice(-3);
-    const recentLows = swingLows.slice(-3);
-
-    // FTR: Price breaks above resistance, pulls back but fails to reach previous low
-    const prevLow = recentLows[recentLows.length - 2];
-    const currLow = recentLows[recentLows.length - 1];
-    const prevHigh = recentHighs[recentHighs.length - 2];
-
-    // Current low should be significantly higher than previous low (failed to return)
-    const failRatio = currLow.price / prevLow.price;
-    if (failRatio < 1.03 || failRatio > 1.10) return null;
-
-    // Price should have broken above previous high
-    const currentPrice = candles[candles.length - 1].close;
-    if (currentPrice < prevHigh.price) return null;
-
-    const signal = PATTERN_SIGNALS['FTR Bullish'];
-    const entry = currLow.price;
-    const slBuffer = this.scaleSL(0.01, timeframe);
-    const stopLoss = prevLow.price * (1 - slBuffer);
-    const riskAmount = entry - stopLoss;
-    const target = entry + (riskAmount * 2.3);
-
-    const startTime = prevLow.timestamp > 9999999999 ? Math.floor(prevLow.timestamp / 1000) : prevLow.timestamp;
-    const endTime = currLow.timestamp > 9999999999 ? Math.floor(currLow.timestamp / 1000) : currLow.timestamp;
-
-    return {
-      id: `FTR-L-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'FTR Bullish',
-      symbol, timeframe,
-      confidence: 68,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.3,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      points: { prevLow, currLow, prevHigh },
-      zoneHigh: entry, zoneLow: stopLoss,
-      startTime, endTime, formationTime: startTime,
-      startCandleIndex: prevLow.index, endCandleIndex: currLow.index,
-    };
+    try {
+      const result = detectBullishFTR(candles);
+      return this._adaptDetectorResult(result, 'FTR Bullish', symbol, timeframe);
+    } catch (e) {
+      console.error('[PatternDetection] FTR Bullish error:', e.message);
+      return null;
+    }
   }
 
   /**
-   * Flag Limit Bearish - Bearish Reversal
-   * Price fails to break flag high, forms rejection
-   * Win Rate: 65%
+   * Flag Limit Bearish - delegates to dedicated flagLimitDetector.js
    */
   detectFlagLimitBearish(candles, symbol, timeframe) {
-    if (candles.length < 25) return null;
-
-    // Look for consolidation (flag) after a down move
-    const recentCandles = candles.slice(-25);
-    const atr = this.calculateATR(recentCandles, 14);
-
-    // Find flag boundaries (last 10 candles as potential flag)
-    const flagCandles = recentCandles.slice(-10);
-    const flagHigh = Math.max(...flagCandles.map(c => c.high));
-    const flagLow = Math.min(...flagCandles.map(c => c.low));
-    const flagHeight = flagHigh - flagLow;
-
-    // Flag should be tight (less than 2x ATR)
-    if (flagHeight > atr * 2.5) return null;
-
-    // Check if there was a down move before the flag
-    const preFlag = recentCandles.slice(0, 15);
-    const preFlagMove = preFlag[0].close - preFlag[preFlag.length - 1].close;
-    if (preFlagMove < atr * 1.5) return null; // Need significant down move
-
-    // Check for rejection at flag high (recent price action near high but failing)
-    const lastCandle = candles[candles.length - 1];
-    const distanceFromHigh = flagHigh - lastCandle.close;
-    if (distanceFromHigh < flagHeight * 0.3 || distanceFromHigh > flagHeight * 0.8) return null;
-
-    const signal = PATTERN_SIGNALS['Flag Limit Bearish'];
-    const currentPrice = lastCandle.close;
-    const entry = flagHigh;
-    const slBuffer = this.scaleSL(0.005, timeframe);
-    const stopLoss = flagHigh * (1 + slBuffer);
-    const riskAmount = stopLoss - entry;
-    const target = entry - (riskAmount * 2.1);
-
-    const startIdx = candles.length - 25;
-    const endIdx = candles.length - 1;
-    const startTime = candles[startIdx].timestamp > 9999999999 ? Math.floor(candles[startIdx].timestamp / 1000) : candles[startIdx].timestamp;
-    const endTime = candles[endIdx].timestamp > 9999999999 ? Math.floor(candles[endIdx].timestamp / 1000) : candles[endIdx].timestamp;
-
-    return {
-      id: `FL-B-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'Flag Limit Bearish',
-      symbol, timeframe,
-      confidence: 65,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.1,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      flagHigh, flagLow, flagHeight,
-      zoneHigh: stopLoss, zoneLow: entry,
-      startTime, endTime, formationTime: startTime,
-      startCandleIndex: startIdx, endCandleIndex: endIdx,
-    };
+    try {
+      const result = detectBearishFlagLimit(candles);
+      return this._adaptDetectorResult(result, 'Flag Limit Bearish', symbol, timeframe);
+    } catch (e) {
+      console.error('[PatternDetection] FL Bearish error:', e.message);
+      return null;
+    }
   }
 
   /**
-   * Flag Limit Bullish - Bullish Reversal
-   * Price fails to break flag low, forms support
-   * Win Rate: 65%
+   * Flag Limit Bullish - delegates to dedicated flagLimitDetector.js
    */
   detectFlagLimitBullish(candles, symbol, timeframe) {
-    if (candles.length < 25) return null;
-
-    const recentCandles = candles.slice(-25);
-    const atr = this.calculateATR(recentCandles, 14);
-
-    const flagCandles = recentCandles.slice(-10);
-    const flagHigh = Math.max(...flagCandles.map(c => c.high));
-    const flagLow = Math.min(...flagCandles.map(c => c.low));
-    const flagHeight = flagHigh - flagLow;
-
-    if (flagHeight > atr * 2.5) return null;
-
-    // Check if there was an up move before the flag
-    const preFlag = recentCandles.slice(0, 15);
-    const preFlagMove = preFlag[preFlag.length - 1].close - preFlag[0].close;
-    if (preFlagMove < atr * 1.5) return null;
-
-    // Check for support at flag low
-    const lastCandle = candles[candles.length - 1];
-    const distanceFromLow = lastCandle.close - flagLow;
-    if (distanceFromLow < flagHeight * 0.3 || distanceFromLow > flagHeight * 0.8) return null;
-
-    const signal = PATTERN_SIGNALS['Flag Limit Bullish'];
-    const currentPrice = lastCandle.close;
-    const entry = flagLow;
-    const slBuffer = this.scaleSL(0.005, timeframe);
-    const stopLoss = flagLow * (1 - slBuffer);
-    const riskAmount = entry - stopLoss;
-    const target = entry + (riskAmount * 2.1);
-
-    const startIdx = candles.length - 25;
-    const endIdx = candles.length - 1;
-    const startTime = candles[startIdx].timestamp > 9999999999 ? Math.floor(candles[startIdx].timestamp / 1000) : candles[startIdx].timestamp;
-    const endTime = candles[endIdx].timestamp > 9999999999 ? Math.floor(candles[endIdx].timestamp / 1000) : candles[endIdx].timestamp;
-
-    return {
-      id: `FL-L-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'Flag Limit Bullish',
-      symbol, timeframe,
-      confidence: 65,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.1,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      flagHigh, flagLow, flagHeight,
-      zoneHigh: entry, zoneLow: stopLoss,
-      startTime, endTime, formationTime: startTime,
-      startCandleIndex: startIdx, endCandleIndex: endIdx,
-    };
+    try {
+      const result = detectBullishFlagLimit(candles);
+      return this._adaptDetectorResult(result, 'Flag Limit Bullish', symbol, timeframe);
+    } catch (e) {
+      console.error('[PatternDetection] FL Bullish error:', e.message);
+      return null;
+    }
   }
 
   /**
-   * Decision Point Bearish - Key resistance area
-   * Win Rate: 64%
+   * Decision Point Bearish - delegates to dedicated decisionPointDetector.js
    */
   detectDecisionPointBearish(candles, symbol, timeframe) {
-    if (candles.length < 30) return null;
-
-    const { swingHighs } = this.findSwingPoints(candles, 4);
-    if (swingHighs.length < 2) return null;
-
-    // Find a key resistance level (multiple touches)
-    const recentHighs = swingHighs.slice(-5);
-    const tolerance = 0.02; // 2% tolerance for same level
-
-    let resistanceLevel = null;
-    let touches = 0;
-
-    for (const high of recentHighs) {
-      const matchingHighs = recentHighs.filter(h =>
-        Math.abs(h.price - high.price) / high.price < tolerance
-      );
-      if (matchingHighs.length >= 2 && matchingHighs.length > touches) {
-        resistanceLevel = high.price;
-        touches = matchingHighs.length;
-      }
+    try {
+      const results = detectDecisionPoints(candles, { direction: 'bearish' });
+      if (!results || results.length === 0) return null;
+      // Use the best (first) bearish DP
+      const best = results.find(r => r.pattern === 'DECISION_POINT_BEARISH') || results[0];
+      return this._adaptDetectorResult(best, 'Decision Point Bearish', symbol, timeframe);
+    } catch (e) {
+      console.error('[PatternDetection] DP Bearish error:', e.message);
+      return null;
     }
-
-    if (!resistanceLevel || touches < 2) return null;
-
-    const currentPrice = candles[candles.length - 1].close;
-    const distanceToLevel = (resistanceLevel - currentPrice) / currentPrice;
-
-    // Price should be approaching the decision point
-    if (distanceToLevel < 0 || distanceToLevel > 0.05) return null;
-
-    const signal = PATTERN_SIGNALS['Decision Point Bearish'];
-    const entry = resistanceLevel;
-    const slBuffer = this.scaleSL(0.01, timeframe);
-    const stopLoss = resistanceLevel * (1 + slBuffer);
-    const riskAmount = stopLoss - entry;
-    const target = entry - (riskAmount * 2.0);
-
-    const firstHigh = recentHighs[0];
-    const lastHigh = recentHighs[recentHighs.length - 1];
-    const startTime = firstHigh.timestamp > 9999999999 ? Math.floor(firstHigh.timestamp / 1000) : firstHigh.timestamp;
-    const endTime = lastHigh.timestamp > 9999999999 ? Math.floor(lastHigh.timestamp / 1000) : lastHigh.timestamp;
-
-    return {
-      id: `DP-B-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'Decision Point Bearish',
-      symbol, timeframe,
-      confidence: 64,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.0,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      resistanceLevel, touches,
-      zoneHigh: stopLoss, zoneLow: entry,
-      startTime, endTime, formationTime: startTime,
-      startCandleIndex: firstHigh.index, endCandleIndex: lastHigh.index,
-    };
   }
 
   /**
-   * Decision Point Bullish - Key support area
-   * Win Rate: 64%
+   * Decision Point Bullish - delegates to dedicated decisionPointDetector.js
    */
   detectDecisionPointBullish(candles, symbol, timeframe) {
-    if (candles.length < 30) return null;
-
-    const { swingLows } = this.findSwingPoints(candles, 4);
-    if (swingLows.length < 2) return null;
-
-    // Find a key support level (multiple touches)
-    const recentLows = swingLows.slice(-5);
-    const tolerance = 0.02;
-
-    let supportLevel = null;
-    let touches = 0;
-
-    for (const low of recentLows) {
-      const matchingLows = recentLows.filter(l =>
-        Math.abs(l.price - low.price) / low.price < tolerance
-      );
-      if (matchingLows.length >= 2 && matchingLows.length > touches) {
-        supportLevel = low.price;
-        touches = matchingLows.length;
-      }
+    try {
+      const results = detectDecisionPoints(candles, { direction: 'bullish' });
+      if (!results || results.length === 0) return null;
+      // Use the best (first) bullish DP
+      const best = results.find(r => r.pattern === 'DECISION_POINT_BULLISH') || results[0];
+      return this._adaptDetectorResult(best, 'Decision Point Bullish', symbol, timeframe);
+    } catch (e) {
+      console.error('[PatternDetection] DP Bullish error:', e.message);
+      return null;
     }
-
-    if (!supportLevel || touches < 2) return null;
-
-    const currentPrice = candles[candles.length - 1].close;
-    const distanceToLevel = (currentPrice - supportLevel) / currentPrice;
-
-    // Price should be approaching the decision point
-    if (distanceToLevel < 0 || distanceToLevel > 0.05) return null;
-
-    const signal = PATTERN_SIGNALS['Decision Point Bullish'];
-    const entry = supportLevel;
-    const slBuffer = this.scaleSL(0.01, timeframe);
-    const stopLoss = supportLevel * (1 - slBuffer);
-    const riskAmount = entry - stopLoss;
-    const target = entry + (riskAmount * 2.0);
-
-    const firstLow = recentLows[0];
-    const lastLow = recentLows[recentLows.length - 1];
-    const startTime = firstLow.timestamp > 9999999999 ? Math.floor(firstLow.timestamp / 1000) : firstLow.timestamp;
-    const endTime = lastLow.timestamp > 9999999999 ? Math.floor(lastLow.timestamp / 1000) : lastLow.timestamp;
-
-    return {
-      id: `DP-L-${symbol}-${timeframe}-${Date.now()}`,
-      patternType: 'Decision Point Bullish',
-      symbol, timeframe,
-      confidence: 64,
-      direction: signal.direction, type: signal.type, color: signal.color,
-      description: signal.description,
-      entry, stopLoss, target, riskReward: 2.0,
-      winRate: signal.expectedWinRate, detectedAt: Date.now(), currentPrice,
-      supportLevel, touches,
-      zoneHigh: entry, zoneLow: stopLoss,
-      startTime, endTime, formationTime: startTime,
-      startCandleIndex: firstLow.index, endCandleIndex: lastLow.index,
-    };
   }
 
   /**
@@ -3747,7 +3313,7 @@ class PatternDetectionService {
    * @param {String} timeframe - Candle timeframe
    * @param {String} userTier - Optional: override user tier for this scan
    */
-  async detectPatterns(symbol, timeframe = '4h', userTier = null) {
+  async detectPatterns(symbol, timeframe = '4h', userTier = null, options = {}) {
     try {
       console.log(`[PatternDetection] Scanning ${symbol} on ${timeframe}...`);
 
@@ -3755,6 +3321,9 @@ class PatternDetectionService {
       if (userTier) {
         this.setUserTier(userTier);
       }
+
+      // HTF context for weighting patterns (passed from MTF scanner)
+      const { htfTrend, htfZones } = options;
 
       const rawCandles = await binanceService.getCandles(symbol, timeframe, 1500);
 
@@ -3921,6 +3490,51 @@ class PatternDetectionService {
         });
       });
 
+      // =====================================================
+      // CONFIRMATION PATTERN CHECK: Scan last candles for
+      // candlestick confirmations at each detected zone
+      // =====================================================
+      zoneEnrichedPatterns.forEach(pattern => {
+        try {
+          if (!pattern.zoneHigh || !pattern.zoneLow) return;
+
+          // Get last 5 candles for confirmation check
+          const recentCandles = candles.slice(-5);
+          const currentPrice = recentCandles[recentCandles.length - 1]?.close;
+          if (!currentPrice) return;
+
+          // Only check confirmation if price is near the zone
+          const zoneWidth = pattern.zoneHigh - pattern.zoneLow;
+          const zoneBuffer = zoneWidth * 0.5;
+          const nearZone = currentPrice >= (pattern.zoneLow - zoneBuffer) &&
+                           currentPrice <= (pattern.zoneHigh + zoneBuffer);
+
+          if (!nearZone) return;
+
+          const zone = {
+            zoneType: pattern.direction === 'LONG' ? 'LFZ' : 'HFZ',
+            zoneHigh: pattern.zoneHigh,
+            zoneLow: pattern.zoneLow,
+          };
+
+          const confirmations = scanConfirmationPatterns(recentCandles, zone);
+          const confirmScore = calculateConfirmationScore(confirmations);
+
+          if (confirmations.length > 0) {
+            pattern.confirmation = {
+              patterns: confirmations.map(c => ({ name: c.name, type: c.type, score: c.score })),
+              score: confirmScore,
+              bestPattern: confirmations[0]?.name,
+            };
+            // Boost confidence based on confirmation strength
+            const confBoost = Math.min(10, confirmScore * 2);
+            pattern.confidence = Math.min(95, pattern.confidence + confBoost);
+          }
+        } catch (confErr) {
+          // Non-critical, don't break detection
+        }
+      });
+
       // Apply TIER2/3 enhancements if user has access
       const enhancedPatterns = zoneEnrichedPatterns.map(pattern =>
         this.applyEnhancements(pattern, candles, timeframe)
@@ -3974,6 +3588,56 @@ class PatternDetectionService {
       }
 
       // =====================================================
+      // HTF CONTEXT: Weight patterns based on higher timeframe trend
+      // and boost patterns whose zones fall within HTF zones
+      // =====================================================
+      if (htfTrend || htfZones) {
+        v2EnhancedPatterns.forEach(pattern => {
+          // 7.1: HTF trend weighting
+          if (htfTrend) {
+            const patDir = pattern.direction;
+            const isWithHTF = (htfTrend === 'up' && patDir === 'LONG') ||
+                              (htfTrend === 'down' && patDir === 'SHORT');
+            const isCounterHTF = (htfTrend === 'up' && patDir === 'SHORT') ||
+                                 (htfTrend === 'down' && patDir === 'LONG');
+            const isReversal = pattern.patternConfig?.context === 'reversal';
+
+            if (isWithHTF) {
+              // Continuation with HTF trend = confidence boost
+              pattern.confidence = Math.min(95, pattern.confidence + 10);
+              pattern.htfAlignment = 'WITH_TREND';
+            } else if (isCounterHTF && !isReversal) {
+              // Non-reversal counter-trend = confidence penalty
+              pattern.confidence = Math.max(20, pattern.confidence - 15);
+              pattern.htfAlignment = 'COUNTER_TREND';
+            } else if (isCounterHTF && isReversal) {
+              // Reversal counter-trend = small boost (reversal is expected)
+              pattern.confidence = Math.min(95, pattern.confidence + 5);
+              pattern.htfAlignment = 'REVERSAL_COUNTER';
+            } else {
+              pattern.htfAlignment = 'NEUTRAL';
+            }
+          }
+
+          // 7.2: Zone-in-zone prioritization
+          if (htfZones && htfZones.length > 0 && pattern.zoneHigh && pattern.zoneLow) {
+            const patMid = (pattern.zoneHigh + pattern.zoneLow) / 2;
+            const isInsideHTFZone = htfZones.some(hz => {
+              const hzHigh = hz.zoneHigh || hz.high;
+              const hzLow = hz.zoneLow || hz.low;
+              return patMid >= hzLow && patMid <= hzHigh;
+            });
+
+            if (isInsideHTFZone) {
+              pattern.confidence = Math.min(95, pattern.confidence + 12);
+              pattern.insideHTFZone = true;
+              console.log(`[PatternDetection] Zone-in-zone boost: ${pattern.patternType} inside HTF zone`);
+            }
+          }
+        });
+      }
+
+      // =====================================================
       // ZONE VALIDITY FILTER: Remove broken zones
       // Only keep zones that haven't been broken by price action
       // =====================================================
@@ -4017,8 +3681,54 @@ class PatternDetectionService {
 
       console.log(`[PatternDetection] Zone validity filter: ${v2EnhancedPatterns.length} -> ${validPatterns.length} patterns (removed ${v2EnhancedPatterns.length - validPatterns.length} broken zones)`);
 
-      // Phase 1A: Sort by pattern strength first, then confidence
+      // =====================================================
+      // LOOK RIGHT VALIDATION: Check R:R to nearest opposing zone
+      // Skip patterns where opposing zone is too close (< 2:1 R:R)
+      // =====================================================
+      const beforeLookRight = validPatterns.length;
+      validPatterns = validPatterns.filter(pattern => {
+        if (!pattern.entry || !pattern.stopLoss) return true;
+
+        const riskAmount = Math.abs(pattern.entry - pattern.stopLoss);
+        if (riskAmount <= 0) return true;
+
+        // Find nearest opposing zone from other detected patterns
+        const opposingPatterns = validPatterns.filter(p =>
+          p !== pattern &&
+          p.direction !== pattern.direction &&
+          p.zoneHigh && p.zoneLow
+        );
+
+        if (opposingPatterns.length === 0) return true; // No opposing zones, keep
+
+        // Calculate distance to nearest opposing zone
+        let minOpposingDistance = Infinity;
+        for (const opp of opposingPatterns) {
+          const oppEntry = pattern.direction === 'LONG' ? opp.zoneLow : opp.zoneHigh;
+          const dist = Math.abs(oppEntry - pattern.entry);
+          if (dist < minOpposingDistance) {
+            minOpposingDistance = dist;
+          }
+        }
+
+        const lookRightRR = minOpposingDistance / riskAmount;
+        pattern.lookRightRR = parseFloat(lookRightRR.toFixed(1));
+
+        if (lookRightRR < 2.0) {
+          console.log(`[PatternDetection] LOOK RIGHT FAIL - ${pattern.patternType}: R:R to opposing zone = ${lookRightRR.toFixed(1)} (min 2.0)`);
+          return false;
+        }
+
+        return true;
+      });
+
+      if (beforeLookRight !== validPatterns.length) {
+        console.log(`[PatternDetection] Look Right filter: ${beforeLookRight} -> ${validPatterns.length} patterns`);
+      }
+
+      // Sort by: pattern strength > zone hierarchy > confidence
       // Reversal patterns (5 stars) > Continuation patterns (3 stars)
+      // DP (level 1) > FTR (level 2) > FL (level 3) > Regular (level 4)
       return validPatterns.sort((a, b) => {
         // Primary sort: pattern strength (descending)
         const strengthA = a.patternConfig?.strength || 1;
@@ -4026,7 +3736,13 @@ class PatternDetectionService {
         if (strengthB !== strengthA) {
           return strengthB - strengthA;
         }
-        // Secondary sort: confidence (descending)
+        // Secondary sort: zone hierarchy level (ascending = lower level is better)
+        const hierA = a.zoneHierarchyLevel || 4;
+        const hierB = b.zoneHierarchyLevel || 4;
+        if (hierA !== hierB) {
+          return hierA - hierB;
+        }
+        // Tertiary sort: confidence (descending)
         return b.confidence - a.confidence;
       });
     } catch (error) {

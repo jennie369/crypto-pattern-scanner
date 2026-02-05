@@ -6203,20 +6203,11 @@ const VisionBoardScreen = () => {
                 eventsByDate={calendarEvents}
                 selectedDate={selectedDate}
                 onDateSelect={async (date) => {
-                  console.log('[VisionBoard] Date selected:', date);
                   setSelectedDate(date);
-                  // Fetch journal data FIRST, then open modal with data
+                  // Fetch data first so it's ready when modal opens
                   try {
                     if (user?.id) {
                       const journalResult = await calendarService.getDayCalendarData(user.id, date);
-                      console.log('[VisionBoard] Day data loaded:', {
-                        date,
-                        journal: journalResult.journal?.length || 0,
-                        trading: journalResult.trading?.length || 0,
-                        rituals: journalResult.rituals?.length || 0,
-                        readings: journalResult.readings?.length || 0,
-                        actions: journalResult.actions?.length || 0,
-                      });
                       if (journalResult.success) {
                         setJournalRituals(journalResult.rituals || []);
                         setJournalReadings(journalResult.readings || []);
@@ -6232,7 +6223,7 @@ const VisionBoardScreen = () => {
                   } catch (error) {
                     console.error('[VisionBoard] Error loading day data:', error);
                   }
-                  // Open modal AFTER data is loaded
+                  // Open modal after data is ready
                   setDayDetailModalVisible(true);
                 }}
                 showLegend={true}

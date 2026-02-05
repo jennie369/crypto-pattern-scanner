@@ -83,7 +83,7 @@ export interface GeminiErrorResponse {
 // ===========================================
 
 export interface ProxyRequest {
-  feature: 'gem_master' | 'tarot' | 'i_ching' | 'tu_vi' | 'chat' | 'analysis';
+  feature: 'gem_master' | 'tarot' | 'i_ching' | 'tu_vi' | 'chat' | 'analysis' | 'admin_ai_trading';
   messages: GeminiMessage[];
   systemPrompt?: string;
   generationConfig?: GeminiRequest['generationConfig'];
@@ -182,6 +182,10 @@ export const FEATURE_CONFIGS: Record<string, Partial<GeminiRequest['generationCo
   },
   analysis: {
     temperature: 0.3,
+    maxOutputTokens: 4096,
+  },
+  admin_ai_trading: {
+    temperature: 0.6,
     maxOutputTokens: 4096,
   },
 };

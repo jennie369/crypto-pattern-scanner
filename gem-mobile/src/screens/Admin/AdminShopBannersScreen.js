@@ -56,6 +56,7 @@ import ShopBannerCard from '../../components/Admin/ShopBannerCard';
 import { TooltipSequence, SHOP_BANNER_TOOLTIPS } from '../../components/Admin/AdminTooltip';
 import shopBannerService from '../../services/shopBannerService';
 import { supabase } from '../../services/supabase';
+import ColorPicker from '../../components/Admin/ColorPicker';
 
 // Link type options
 const LINK_TYPE_OPTIONS = [
@@ -1932,28 +1933,22 @@ export default function AdminShopBannersScreen({ navigation }) {
                     />
                   </View>
 
-                  {/* Colors */}
+                  {/* Colors - với Color Picker */}
                   <View style={styles.colorRow}>
                     <View style={[styles.inputGroup, { flex: 1 }]}>
-                      <Text style={styles.inputLabel}>Màu nền</Text>
-                      <TextInput
-                        style={styles.input}
-                        value={form.background_color}
-                        onChangeText={(text) =>
-                          setForm((prev) => ({ ...prev, background_color: text }))
+                      <ColorPicker
+                        label="Màu nền"
+                        value={form.background_color || '#1a0b2e'}
+                        onChange={(color) =>
+                          setForm((prev) => ({ ...prev, background_color: color }))
                         }
-                        placeholder="#1a0b2e"
-                        placeholderTextColor={COLORS.textMuted}
                       />
                     </View>
                     <View style={[styles.inputGroup, { flex: 1 }]}>
-                      <Text style={styles.inputLabel}>Màu chữ</Text>
-                      <TextInput
-                        style={styles.input}
-                        value={form.text_color}
-                        onChangeText={(text) => setForm((prev) => ({ ...prev, text_color: text }))}
-                        placeholder="#FFFFFF"
-                        placeholderTextColor={COLORS.textMuted}
+                      <ColorPicker
+                        label="Màu chữ"
+                        value={form.text_color || '#FFFFFF'}
+                        onChange={(color) => setForm((prev) => ({ ...prev, text_color: color }))}
                       />
                     </View>
                   </View>
@@ -2187,28 +2182,22 @@ export default function AdminShopBannersScreen({ navigation }) {
                     />
                   </View>
 
-                  {/* Colors */}
+                  {/* Colors - với Color Picker */}
                   <View style={styles.colorRow}>
                     <View style={[styles.inputGroup, { flex: 1 }]}>
-                      <Text style={styles.inputLabel}>Màu nền</Text>
-                      <TextInput
-                        style={styles.input}
-                        value={promoForm.background_color}
-                        onChangeText={(text) =>
-                          setPromoForm((prev) => ({ ...prev, background_color: text }))
+                      <ColorPicker
+                        label="Màu nền"
+                        value={promoForm.background_color || '#FF4757'}
+                        onChange={(color) =>
+                          setPromoForm((prev) => ({ ...prev, background_color: color }))
                         }
-                        placeholder="#FF4757"
-                        placeholderTextColor={COLORS.textMuted}
                       />
                     </View>
                     <View style={[styles.inputGroup, { flex: 1 }]}>
-                      <Text style={styles.inputLabel}>Màu chữ</Text>
-                      <TextInput
-                        style={styles.input}
-                        value={promoForm.text_color}
-                        onChangeText={(text) => setPromoForm((prev) => ({ ...prev, text_color: text }))}
-                        placeholder="#FFFFFF"
-                        placeholderTextColor={COLORS.textMuted}
+                      <ColorPicker
+                        label="Màu chữ"
+                        value={promoForm.text_color || '#FFFFFF'}
+                        onChange={(color) => setPromoForm((prev) => ({ ...prev, text_color: color }))}
                       />
                     </View>
                   </View>
@@ -2581,53 +2570,41 @@ export default function AdminShopBannersScreen({ navigation }) {
                     </View>
                   )}
 
-                  {/* Gradient Colors */}
+                  {/* Gradient Colors - với Color Picker */}
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Màu gradient nền</Text>
                     <View style={styles.colorRow}>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.inputHint}>Bắt đầu</Text>
-                        <TextInput
-                          style={styles.input}
-                          value={featuredForm.background_gradient_start}
-                          onChangeText={(text) => setFeaturedForm((prev) => ({ ...prev, background_gradient_start: text }))}
-                          placeholder="#1a0b2e"
-                          placeholderTextColor={COLORS.textMuted}
+                        <ColorPicker
+                          label="Bắt đầu"
+                          value={featuredForm.background_gradient_start || '#1a0b2e'}
+                          onChange={(color) => setFeaturedForm((prev) => ({ ...prev, background_gradient_start: color }))}
                         />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.inputHint}>Kết thúc</Text>
-                        <TextInput
-                          style={styles.input}
-                          value={featuredForm.background_gradient_end}
-                          onChangeText={(text) => setFeaturedForm((prev) => ({ ...prev, background_gradient_end: text }))}
-                          placeholder="#2d1b4e"
-                          placeholderTextColor={COLORS.textMuted}
+                        <ColorPicker
+                          label="Kết thúc"
+                          value={featuredForm.background_gradient_end || '#2d1b4e'}
+                          onChange={(color) => setFeaturedForm((prev) => ({ ...prev, background_gradient_end: color }))}
                         />
                       </View>
                     </View>
                   </View>
 
-                  {/* Accent & Text Colors */}
+                  {/* Accent & Text Colors - với Color Picker */}
                   <View style={styles.colorRow}>
                     <View style={[styles.inputGroup, { flex: 1 }]}>
-                      <Text style={styles.inputLabel}>Màu nhấn</Text>
-                      <TextInput
-                        style={styles.input}
-                        value={featuredForm.accent_color}
-                        onChangeText={(text) => setFeaturedForm((prev) => ({ ...prev, accent_color: text }))}
-                        placeholder="#FFD700"
-                        placeholderTextColor={COLORS.textMuted}
+                      <ColorPicker
+                        label="Màu nhấn"
+                        value={featuredForm.accent_color || '#FFD700'}
+                        onChange={(color) => setFeaturedForm((prev) => ({ ...prev, accent_color: color }))}
                       />
                     </View>
                     <View style={[styles.inputGroup, { flex: 1 }]}>
-                      <Text style={styles.inputLabel}>Màu chữ</Text>
-                      <TextInput
-                        style={styles.input}
-                        value={featuredForm.text_color}
-                        onChangeText={(text) => setFeaturedForm((prev) => ({ ...prev, text_color: text }))}
-                        placeholder="#FFFFFF"
-                        placeholderTextColor={COLORS.textMuted}
+                      <ColorPicker
+                        label="Màu chữ"
+                        value={featuredForm.text_color || '#FFFFFF'}
+                        onChange={(color) => setFeaturedForm((prev) => ({ ...prev, text_color: color }))}
                       />
                     </View>
                   </View>

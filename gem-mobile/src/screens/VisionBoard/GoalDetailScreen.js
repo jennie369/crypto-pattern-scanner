@@ -1123,8 +1123,8 @@ const GoalDetailScreen = () => {
 
         // Update database
         if (goal?._isLegacy) {
+          // For legacy widgets, only update the content JSON (cover_image column may not exist)
           const { error: updateError } = await supabase.from('vision_board_widgets').update({
-            cover_image: publicUrl,
             content: { ...goal._content, cover_image: publicUrl },
           }).eq('id', goalId);
 

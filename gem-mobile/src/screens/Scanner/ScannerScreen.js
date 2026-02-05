@@ -159,6 +159,7 @@ const ScannerScreen = ({ navigation }) => {
   // =====================================================
   const [selectedPosition, setSelectedPosition] = useState(null); // Currently selected position
   const [showPositionZone, setShowPositionZone] = useState(true); // Toggle for position zone visibility
+  const [zoneViewSource, setZoneViewSource] = useState(null); // 'position' | 'scan' | null - tracks where zones come from
 
   // =====================================================
   // EXCHANGE AFFILIATE STATE - Show CTA for users without exchange
@@ -510,6 +511,9 @@ const ScannerScreen = ({ navigation }) => {
 
     try {
       setScanning(true);
+      setSelectedPosition(null);        // Clear position when scanning
+      setShowPositionZone(false);
+      setZoneViewSource('scan');         // Mark source as scan
       setPatterns([]);
       setScanResults([]);
 
@@ -1010,6 +1014,9 @@ const ScannerScreen = ({ navigation }) => {
   // This prevents race condition that causes price flickering
   const handleSelectFromResults = (symbol) => {
     setSelectedCoins([symbol]);
+    setSelectedPosition(null);       // Clear position
+    setShowPositionZone(false);      // Hide position zone
+    setZoneViewSource('scan');       // Mark source as scan
     // Don't call subscribeToPrice here - useEffect handles it when displayCoin changes
   };
 
@@ -1184,8 +1191,9 @@ const ScannerScreen = ({ navigation }) => {
 
               // ═══════════════════════════════════════════════════════════
               // 1. POSITION ZONE - from selected open position (Pattern Mode)
+              // Only show when zoneViewSource === 'position' or null (not 'scan')
               // ═══════════════════════════════════════════════════════════
-              if (showPositionZone && selectedPosition) {
+              if (showPositionZone && selectedPosition && zoneViewSource !== 'scan') {
                 const pd = selectedPosition.patternData || {};
 
                 console.log('[ZONE] Position zone check:', {
@@ -1297,6 +1305,12 @@ const ScannerScreen = ({ navigation }) => {
                       startTime = typeof openedAt === 'string' ? Math.floor(new Date(openedAt).getTime() / 1000) : Math.floor(openedAt / 1000);
                     }
 
+                    if (!startTime) {
+                      // Last resort: no time data available for position zone
+                      // This prevents chart from placing zone at 8 candles from right
+                      console.log('[ZONE] ⚠️ No time data for position zone - will use chart fallback');
+                    }
+
                     console.log('[ZONE] Formation time from patternData:', {
                       formationTime,
                       endFormationTime,
@@ -1314,8 +1328,11 @@ const ScannerScreen = ({ navigation }) => {
                       zone_high: zoneHigh,
                       zone_low: zoneLow,
                       start_time: startTime,
+                      startTime: startTime,              // camelCase variant for TradingChart
                       end_time: endTime,
+                      endTime: endTime,                  // camelCase variant for TradingChart
                       formation_time: startTime, // ✅ Explicit formation_time for chart positioning
+                      formationTime: startTime,          // camelCase variant for TradingChart
                       entry_price: entry,
                       stop_loss: sl,
                       take_profit: tp,
@@ -1341,15 +1358,17 @@ const ScannerScreen = ({ navigation }) => {
 
               // ═══════════════════════════════════════════════════════════
               // 2. SCAN RESULT ZONES - from scan results (if enabled)
+              // Only show when zoneViewSource !== 'position'
               // ═══════════════════════════════════════════════════════════
               console.log('[ZONE] DEBUG:', {
                 showZones,
                 zoneDisplayMode,
+                zoneViewSource,
                 selectedZonePatternId,
                 totalZones: zones.length,
                 displayCoin,
               });
-              if (showZones && zoneDisplayMode !== 'hidden') {
+              if (showZones && zoneDisplayMode !== 'hidden' && zoneViewSource !== 'position') {
                 const coinZones = zones.filter(z => z.symbol === displayCoin);
                 console.log('[ZONE] coinZones filtered:', coinZones.length, 'from', zones.length);
 
@@ -1448,6 +1467,9 @@ const ScannerScreen = ({ navigation }) => {
                     setSelectedTimeframe(pattern.timeframe);
                   }
                   setSelectedPattern(pattern);
+                  setSelectedPosition(null);
+                  setShowPositionZone(false);
+                  setZoneViewSource('scan');
                   // ⚠️ ZONE-PATTERN SYNC: Update selected zone pattern ID
                   setSelectedZonePatternId(pattern.pattern_id);
                   setZoneDisplayMode('selected'); // Show only this zone
@@ -1480,6 +1502,7 @@ const ScannerScreen = ({ navigation }) => {
                   setSelectedCoins([symbol]);
                   setSelectedPosition(position || null);
                   setShowPositionZone(true); // Auto-show zone when position selected
+                  setZoneViewSource('position'); // Mark source as position
                 }}
                 onPositionClose={() => {
                   setPositionsRefreshTrigger(prev => prev + 1);
@@ -1512,6 +1535,9 @@ const ScannerScreen = ({ navigation }) => {
                     setSelectedTimeframe(pattern.timeframe);
                   }
                   setSelectedPattern(pattern);
+                  setSelectedPosition(null);
+                  setShowPositionZone(false);
+                  setZoneViewSource('scan');
                   // ⚠️ ZONE-PATTERN SYNC: Update selected zone pattern ID
                   setSelectedZonePatternId(pattern.pattern_id);
                   setZoneDisplayMode('selected'); // Show only this zone
@@ -1544,6 +1570,7 @@ const ScannerScreen = ({ navigation }) => {
                   setSelectedCoins([symbol]);
                   setSelectedPosition(position || null);
                   setShowPositionZone(true); // Auto-show zone when position selected
+                  setZoneViewSource('position'); // Mark source as position
                 }}
                 onPositionClose={() => {
                   setPositionsRefreshTrigger(prev => prev + 1);

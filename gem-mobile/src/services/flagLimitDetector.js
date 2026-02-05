@@ -13,42 +13,7 @@
  */
 
 import { ZONE_HIERARCHY, FLAG_LIMIT_CONFIG } from '../constants/zoneHierarchyConfig';
-
-// ═══════════════════════════════════════════════════════════
-// ZONE BOUNDARY CALCULATION
-// ═══════════════════════════════════════════════════════════
-
-/**
- * Calculate zone boundaries from candles
- * @param {Array} candles - Candles forming the zone
- * @param {string} zoneType - 'LFZ' or 'HFZ'
- * @param {number} currentPrice - Current market price
- * @returns {Object} Zone boundaries
- */
-const calculateZoneBoundaries = (candles, zoneType, currentPrice) => {
-  if (!candles || candles.length === 0) return null;
-
-  const high = Math.max(...candles.map(c => c.high));
-  const low = Math.min(...candles.map(c => c.low));
-  const width = high - low;
-  const widthPercent = (width / ((high + low) / 2)) * 100;
-
-  // LFZ: Entry at top, Stop at bottom
-  // HFZ: Entry at bottom, Stop at top
-  const entryPrice = zoneType === 'LFZ' ? high : low;
-  const stopPrice = zoneType === 'LFZ' ? low : high;
-
-  return {
-    entryPrice,
-    stopPrice,
-    zoneWidth: width,
-    zoneWidthPercent: widthPercent.toFixed(2),
-    zoneHigh: high,
-    zoneLow: low,
-    distanceFromPrice: Math.abs(currentPrice - entryPrice),
-    distancePercent: ((Math.abs(currentPrice - entryPrice) / currentPrice) * 100).toFixed(2),
-  };
-};
+import { calculateZoneBoundaries } from './zoneCalculator';
 
 // ═══════════════════════════════════════════════════════════
 // BULLISH FLAG LIMIT DETECTION

@@ -2,6 +2,7 @@
  * PromoBar.js - Promotional Banner Bar Component
  * Dismissible promotional message bar at top of shop
  * Fetches active promo config from Supabase
+ * Updated: Feb 2026 - Added caching for instant display
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -20,37 +21,95 @@ import { supabase } from '../../services/supabase';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import InAppBrowser from '../Common/InAppBrowser';
 
+// =========== GLOBAL CACHE for instant display ===========
+const promoCache = {
+  data: null,
+  lastFetch: 0,
+  CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+};
+
+// Preload function - call early in app lifecycle
+export const preloadPromoBar = async () => {
+  if (promoCache.data) return promoCache.data;
+
+  try {
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('promo_bar_config')
+      .select('*')
+      .eq('is_active', true)
+      .or(`start_date.is.null,start_date.lte.${now}`)
+      .or(`end_date.is.null,end_date.gte.${now}`)
+      .order('display_order', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (!error && data) {
+      promoCache.data = data;
+      promoCache.lastFetch = Date.now();
+      console.log('[PromoBar] Preloaded promo data');
+    }
+    return data;
+  } catch (err) {
+    console.warn('[PromoBar] Preload error:', err);
+    return null;
+  }
+};
+
 const PromoBar = ({ style, onDismiss }) => {
-  const [promo, setPromo] = useState(null);
+  // Initialize from cache for instant display
+  const [promo, setPromo] = useState(() => promoCache.data);
   const [visible, setVisible] = useState(true);
   const [copied, setCopied] = useState(false);
-  const heightAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+  // Start with full height/opacity if we have cached data
+  const heightAnim = useRef(new Animated.Value(promoCache.data ? 48 : 0)).current;
+  const opacityAnim = useRef(new Animated.Value(promoCache.data ? 1 : 0)).current;
 
   // InAppBrowser state for URL links
   const [browserVisible, setBrowserVisible] = useState(false);
   const [browserUrl, setBrowserUrl] = useState('');
   const [browserTitle, setBrowserTitle] = useState('');
 
-  // Fetch active promo
+  // Fetch active promo - with cache support
   const fetchPromo = useCallback(async () => {
+    const now = Date.now();
+    const cacheExpired = now - promoCache.lastFetch > promoCache.CACHE_DURATION;
+
+    // Use cache if valid
+    if (promoCache.data && !cacheExpired) {
+      if (!promo) {
+        setPromo(promoCache.data);
+        // Animate in if not already showing
+        Animated.parallel([
+          Animated.timing(heightAnim, { toValue: 48, duration: 200, useNativeDriver: false }),
+          Animated.timing(opacityAnim, { toValue: 1, duration: 200, useNativeDriver: false }),
+        ]).start();
+      }
+      return;
+    }
+
     try {
-      const now = new Date().toISOString();
+      const nowISO = new Date().toISOString();
 
       const { data, error } = await supabase
         .from('promo_bar_config')
         .select('*')
         .eq('is_active', true)
-        .or(`start_date.is.null,start_date.lte.${now}`)
-        .or(`end_date.is.null,end_date.gte.${now}`)
+        .or(`start_date.is.null,start_date.lte.${nowISO}`)
+        .or(`end_date.is.null,end_date.gte.${nowISO}`)
         .order('display_order', { ascending: true })
         .limit(1)
         .single();
 
       if (error || !data) {
         setVisible(false);
+        promoCache.data = null;
         return;
       }
+
+      // Update cache
+      promoCache.data = data;
+      promoCache.lastFetch = Date.now();
 
       setPromo(data);
 
@@ -71,11 +130,11 @@ const PromoBar = ({ style, onDismiss }) => {
       console.error('[PromoBar] Fetch error:', err);
       setVisible(false);
     }
-  }, [heightAnim, opacityAnim]);
+  }, [heightAnim, opacityAnim, promo]);
 
   useEffect(() => {
     fetchPromo();
-  }, [fetchPromo]);
+  }, []);
 
   const handleDismiss = () => {
     // Haptic feedback

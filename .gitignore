@@ -3,3 +3,22 @@ frontend/nul
 
 .vercel
 shopify-app/gem-payment-qr/
+
+# Environment variables - NEVER commit these
+.env
+.env.local
+.env.*.local
+*.env
+**/.env
+**/**.env
+
+# Specific project env files
+gem-mobile/.env
+admin/.env
+supabase/.env
+
+# Other sensitive files
+*.pem
+*.key
+credentials.json
+service-account.json
