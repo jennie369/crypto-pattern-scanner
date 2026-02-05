@@ -19,7 +19,7 @@ import {
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CommonActions, useScrollToTop } from '@react-navigation/native';
+import { CommonActions, useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { Menu, Search, Bell, FileText, Gem, DollarSign, Music, Zap, RotateCcw } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import PostCard from './components/PostCard';
@@ -47,6 +47,7 @@ import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // Global forum cache - persists data between tab switches
 const forumCache = {
@@ -434,6 +435,27 @@ const ForumScreen = ({ navigation }) => {
       // Use cached data, no need to reload
       setLoading(false);
     }
+  }, [selectedFeed, selectedTopic]);
+
+  // Refetch when screen gains focus if cache is stale
+  useFocusEffect(
+    useCallback(() => {
+      const now = Date.now();
+      const cacheExpired = now - forumCache.lastFetch > forumCache.CACHE_DURATION;
+      if (cacheExpired && forumCache.posts && forumCache.posts.length > 0) {
+        loadPosts(true);
+      }
+    }, [selectedFeed, selectedTopic])
+  );
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ForumScreen] Force refresh event received');
+      forumCache.lastFetch = 0; // Invalidate cache
+      loadPosts(true);
+    });
+    return () => listener.remove();
   }, [selectedFeed, selectedTopic]);
 
   // Load posts using hybrid feed algorithm or legacy method

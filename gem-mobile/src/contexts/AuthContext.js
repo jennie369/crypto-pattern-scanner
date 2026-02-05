@@ -10,6 +10,10 @@ import biometricService from '../services/biometricService';
 import notificationScheduler from '../services/notificationScheduler';
 import QuotaService from '../services/quotaService';
 import paperTradeService from '../services/paperTradeService';
+import connectionHealthMonitor from '../services/connectionHealthMonitor';
+import { websocketService } from '../services/websocketService';
+import { hybridChatService } from '../services/hybridChatService';
+import cacheService from '../services/cacheService';
 
 // Helper: Handle invalid refresh token by clearing session
 const handleInvalidRefreshToken = async (setUser, setProfile) => {
@@ -26,6 +30,12 @@ const handleInvalidRefreshToken = async (setUser, setProfile) => {
     presenceService.cleanup();
     QuotaService.clearCache();
     paperTradeService.stopGlobalMonitoring();
+    connectionHealthMonitor.stop();
+    websocketService.disconnect();
+    hybridChatService.cleanup();
+    try {
+      supabase.getChannels().forEach(ch => supabase.removeChannel(ch));
+    } catch (e) {}
 
     Alert.alert(
       'Phiên đăng nhập hết hạn',
@@ -407,6 +417,35 @@ export const AuthProvider = ({ children }) => {
 
           // STOP PAPER TRADE MONITORING on logout
           paperTradeService.stopGlobalMonitoring();
+
+          // Stop connection health monitor
+          connectionHealthMonitor.stop();
+
+          // Stop zone price monitor (lazy loaded to avoid circular deps)
+          try {
+            const { zonePriceMonitor } = require('../services/zonePriceMonitor');
+            zonePriceMonitor.stop();
+          } catch (e) {
+            // zonePriceMonitor may not be loaded
+          }
+
+          // Disconnect WebSocket service
+          websocketService.disconnect();
+
+          // Cleanup hybrid chat service
+          hybridChatService.cleanup();
+
+          // Clear user cache
+          if (user?.id) {
+            cacheService.clearUserCache(user.id).catch(() => {});
+          }
+
+          // Remove all Supabase Realtime channels
+          try {
+            supabase.getChannels().forEach(ch => supabase.removeChannel(ch));
+          } catch (e) {
+            console.warn('[AuthContext] Channel cleanup error:', e.message);
+          }
         }
         setLoading(false);
       }

@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -77,6 +78,7 @@ import { useScanner } from '../../contexts/ScannerContext';
 import { useUpgrade } from '../../hooks/useUpgrade';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { formatPrice } from '../../utils/formatters';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_HEIGHT = 320;
@@ -992,6 +994,16 @@ const ScannerScreen = ({ navigation }) => {
       restoreZonesFromCache();
     }, [zones.length, scanResults.length, displayCoin, selectedTimeframe, user?.id])
   );
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[Scanner] Force refresh event received');
+      setLoading(false);
+      setScanning(false);
+    });
+    return () => listener.remove();
+  }, []);
 
   // Handle selecting coin from scan results
   // NOTE: Only update state - useEffect will handle subscribeToPrice automatically

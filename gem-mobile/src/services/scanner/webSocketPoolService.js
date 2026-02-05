@@ -46,6 +46,7 @@ class WebSocketPoolService {
     this.reconnectAttempts = 0;
     this.isConnecting = false;
     this.isConnected = false;
+    this.permanentlyDisconnected = false;
     this.appStateSubscription = null;
     this.messageId = 1;
 
@@ -212,6 +213,7 @@ class WebSocketPoolService {
     this.isConnected = false;
     this.isConnecting = false;
     this.reconnectAttempts = 0;
+    this.permanentlyDisconnected = false;
 
     if (this.DEBUG) {
       console.log('[WSPool] Destroyed');
@@ -453,9 +455,25 @@ class WebSocketPoolService {
     });
   }
 
+  /**
+   * Reset reconnect counter and reconnect - used by health monitor
+   * to revive permanently dead connections
+   */
+  resetAndReconnect() {
+    console.log('[WSPool] resetAndReconnect called - resetting reconnect counter');
+    this.reconnectAttempts = 0;
+    this.permanentlyDisconnected = false;
+    if (!this.isConnected && !this.isConnecting) {
+      this._connect();
+      this._startBatchInterval();
+      this._setupAppStateListener();
+    }
+  }
+
   _scheduleReconnect() {
     if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
       console.error('[WSPool] Max reconnect attempts reached');
+      this.permanentlyDisconnected = true;
       return;
     }
 

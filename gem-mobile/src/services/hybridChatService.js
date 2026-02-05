@@ -46,6 +46,7 @@ class HybridChatService {
     this.messageIdCounter = 0;
     this.currentConversationId = null;
     this.messageHistory = [];
+    this.staleCleanupInterval = null;
   }
 
   /**
@@ -71,6 +72,25 @@ class HybridChatService {
     } else if (CONFIG.SKIP_WS_IN_DEV) {
       console.log('[HybridChat] Skipping WebSocket in DEV mode (using HTTP fallback)');
     }
+
+    // Periodic cleanup of stale pending responses (older than 2 minutes)
+    this.staleCleanupInterval = setInterval(() => {
+      const now = Date.now();
+      const STALE_THRESHOLD = 2 * 60 * 1000; // 2 minutes
+      this.pendingResponses.forEach((pending, id) => {
+        // Extract timestamp from message ID format: ws_<timestamp>
+        const parts = id.split('_');
+        const timestamp = parseInt(parts[1], 10);
+        if (timestamp && now - timestamp > STALE_THRESHOLD) {
+          console.warn('[HybridChat] Cleaning stale pending response:', id);
+          if (!pending.resolved) {
+            pending.resolved = true;
+            pending.reject(new Error('Stale response cleaned up'));
+          }
+          this.pendingResponses.delete(id);
+        }
+      });
+    }, 60 * 1000); // Check every 60 seconds
 
     this.initialized = true;
     console.log('[HybridChat] Initialized');
@@ -274,12 +294,12 @@ class HybridChatService {
    */
   async sendViaWebSocket(content, options = {}) {
     return new Promise((resolve, reject) => {
+      const messageId = `ws_${Date.now()}`;
+
       const timeout = setTimeout(() => {
         this.pendingResponses.delete(messageId);
         reject(new Error('Response timeout'));
       }, CONFIG.WS_RESPONSE_TIMEOUT);
-
-      const messageId = `ws_${Date.now()}`;
 
       // Store pending response
       this.pendingResponses.set(messageId, {
@@ -445,6 +465,10 @@ class HybridChatService {
       onQuotaWarning: [],
     };
     this.pendingResponses.clear();
+    if (this.staleCleanupInterval) {
+      clearInterval(this.staleCleanupInterval);
+      this.staleCleanupInterval = null;
+    }
     this.initialized = false;
   }
 }

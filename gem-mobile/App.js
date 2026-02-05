@@ -58,6 +58,9 @@ try {
   console.warn('[App] Failed to load zonePriceMonitor:', e.message);
 }
 
+// Connection Health Monitor - detects and recovers dead connections during active use
+import connectionHealthMonitor from './src/services/connectionHealthMonitor';
+
 // Hooks
 import { useActionReset } from './src/hooks/useActionReset';
 import { usePendingOrdersChecker } from './src/hooks/usePendingOrdersChecker';
@@ -100,6 +103,23 @@ function AppContent() {
         zonePriceMonitor.stop();
         if (__DEV__) {
           console.log('[App] Zone Price Monitor stopped');
+        }
+      };
+    }
+  }, [user?.id]);
+
+  // Start Connection Health Monitor when user is logged in
+  useEffect(() => {
+    if (user?.id) {
+      connectionHealthMonitor.start();
+      if (__DEV__) {
+        console.log('[App] Connection Health Monitor started');
+      }
+
+      return () => {
+        connectionHealthMonitor.stop();
+        if (__DEV__) {
+          console.log('[App] Connection Health Monitor stopped');
         }
       };
     }

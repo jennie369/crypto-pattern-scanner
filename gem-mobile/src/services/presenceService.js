@@ -34,6 +34,12 @@ class PresenceService {
    * Call this when user logs in
    */
   async initialize() {
+    // Guard against duplicate initialization (called from multiple places in AuthContext)
+    if (this.isInitialized) {
+      console.log('PresenceService: Already initialized, skipping');
+      return;
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {

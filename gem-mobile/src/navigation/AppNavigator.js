@@ -34,6 +34,9 @@ import CallStack from './CallStack';
 // Auth context
 import { useAuth } from '../contexts/AuthContext';
 
+// Global app resume - recovery system for stuck loading states + reconnections
+import { useGlobalAppResume } from '../hooks/useAppResume';
+
 // In-App Notification Provider
 import { InAppNotificationProvider } from '../contexts/InAppNotificationContext';
 
@@ -146,6 +149,12 @@ export default function AppNavigator() {
   const [hasCompletedWelcome, setHasCompletedWelcome] = useState(null);
   const [welcomeChecked, setWelcomeChecked] = useState(false);
   const appStateRef = useRef(AppState.currentState);
+
+  // CRITICAL: Activate global recovery system
+  // - Resets stuck loading states every 30s
+  // - Clears stale caches on background resume
+  // - Reconnects WebSocket/Supabase on foreground
+  useGlobalAppResume();
 
   // Check welcome completion on mount
   useEffect(() => {

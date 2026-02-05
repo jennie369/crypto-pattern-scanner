@@ -552,13 +552,19 @@ const GemMasterScreen = ({ navigation, route }) => {
   // Reset tab bar visibility when screen gains focus
   // IMPORTANT: Disable auto-hide for GemMaster to prevent flickering
   // With inverted FlatList, newest messages are always at bottom - no scroll needed
+  // Also check WS connection and reconnect if needed
   useFocusEffect(
     useCallback(() => {
       // Show tab bar and disable auto-hide when entering screen
       showTabBar();
       disableAutoHide();
-      // No scroll needed - inverted FlatList always shows bottom first
-    }, [showTabBar, disableAutoHide])
+
+      // Check WS connection on focus, reconnect if needed
+      if (!wsIsConnected && wsIsOnline) {
+        console.log('[GemMaster] Screen focused - WS disconnected, reconnecting...');
+        wsConnect();
+      }
+    }, [showTabBar, disableAutoHide, wsIsConnected, wsIsOnline, wsConnect])
   );
 
   // Handle initialPrompt from VisionBoard or other screens

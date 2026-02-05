@@ -23,6 +23,7 @@ class ZonePriceMonitor {
     this.isRunning = false;
     this.lastPrices = {}; // Track last prices for each symbol
     this.checkInterval = null;
+    this.reconnectTimeouts = {}; // symbol -> timeout ID (for cleanup)
   }
 
   /**
@@ -187,9 +188,13 @@ class ZonePriceMonitor {
       console.log('[ZonePriceMonitor] WebSocket closed:', symbol);
       delete this.websockets[symbol];
 
-      // Reconnect if still monitoring
-      if (this.subscribedAlerts.some(a => a.symbol === symbol)) {
-        setTimeout(() => this.startMonitoringSymbol(symbol), 5000);
+      // Only reconnect if monitor is still running (prevents orphan connections on stop)
+      if (this.isRunning && this.subscribedAlerts.some(a => a.symbol === symbol)) {
+        const timeoutId = setTimeout(() => {
+          delete this.reconnectTimeouts[symbol];
+          this.startMonitoringSymbol(symbol);
+        }, 5000);
+        this.reconnectTimeouts[symbol] = timeoutId;
       }
     };
 
@@ -360,6 +365,12 @@ class ZonePriceMonitor {
   stop() {
     this.isRunning = false;
 
+    // Cancel all pending reconnect timeouts FIRST (prevents orphan connections)
+    Object.keys(this.reconnectTimeouts).forEach(symbol => {
+      clearTimeout(this.reconnectTimeouts[symbol]);
+    });
+    this.reconnectTimeouts = {};
+
     // Close all WebSockets
     Object.keys(this.websockets).forEach(symbol => {
       this.stopMonitoringSymbol(symbol);
@@ -372,6 +383,18 @@ class ZonePriceMonitor {
     }
 
     console.log('[ZonePriceMonitor] Stopped');
+  }
+
+  /**
+   * Full cleanup - stop + clear all state
+   */
+  destroy() {
+    this.stop();
+    this.subscribedAlerts = [];
+    this.activeZones = {};
+    this.lastPrices = {};
+    this.userId = null;
+    console.log('[ZonePriceMonitor] Destroyed');
   }
 
   /**
