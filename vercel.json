@@ -3,8 +3,21 @@
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "cd frontend && npm install --legacy-peer-deps",
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "trailingSlash": false
+    { "source": "/scanner-v2", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/admin/(.*)", "destination": "/index.html" },
+    { "source": "/courses", "destination": "/index.html" },
+    { "source": "/courses/(.*)", "destination": "/index.html" },
+    { "source": "/pricing", "destination": "/index.html" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/signup", "destination": "/index.html" },
+    { "source": "/forgot-password", "destination": "/index.html" },
+    { "source": "/reset-password", "destination": "/index.html" },
+    { "source": "/shop", "destination": "/index.html" },
+    { "source": "/shop/(.*)", "destination": "/index.html" },
+    { "source": "/checkout/(.*)", "destination": "/index.html" },
+    { "source": "/dashboard/(.*)", "destination": "/index.html" }
+  ]
 }
