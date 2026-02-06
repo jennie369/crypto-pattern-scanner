@@ -7,9 +7,8 @@
   "devCommand": "cd frontend && npm run dev",
   "cleanUrls": true,
   "trailingSlash": false,
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/:path((?!assets|favicon|index\\.html).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
