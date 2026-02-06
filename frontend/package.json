@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "vite",
     "dev:watch": "node scripts/watch-and-fix.js",
-    "build": "vite build && cp dist/index.html dist/200.html",
+    "build": "vite build",
+    "postbuild": "node scripts/generate-fallback.cjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
