@@ -52,6 +52,7 @@ import useScrollToTop from '../../hooks/useScrollToTop';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const READ_NOTIFICATIONS_KEY = '@gem_read_notification_ids';
+const DELETED_NOTIFICATIONS_KEY = '@gem_deleted_notification_ids';
 
 // ============================================
 // GLOBAL CACHE - persists across tab switches
@@ -81,8 +82,30 @@ const saveLocalReadIds = async () => {
     console.warn('[Notifications] Failed to save local read IDs');
   }
 };
+
+// Local deleted IDs cache - persists deleted state even if DB delete fails
+let localDeletedIds = new Set();
+const loadLocalDeletedIds = async () => {
+  try {
+    const stored = await AsyncStorage.getItem(DELETED_NOTIFICATIONS_KEY);
+    if (stored) {
+      localDeletedIds = new Set(JSON.parse(stored));
+    }
+  } catch (e) {
+    console.warn('[Notifications] Failed to load local deleted IDs');
+  }
+};
+const saveLocalDeletedIds = async () => {
+  try {
+    await AsyncStorage.setItem(DELETED_NOTIFICATIONS_KEY, JSON.stringify([...localDeletedIds]));
+  } catch (e) {
+    console.warn('[Notifications] Failed to save local deleted IDs');
+  }
+};
+
 // Load on module init
 loadLocalReadIds();
+loadLocalDeletedIds();
 
 // Notification type configurations
 const NOTIFICATION_CONFIG = {
@@ -191,8 +214,14 @@ export default function NotificationsScreen() {
         return;
       }
 
-      // Ensure local read IDs are loaded
-      await loadLocalReadIds();
+      // Ensure local caches are loaded
+      await Promise.all([loadLocalReadIds(), loadLocalDeletedIds()]);
+
+      // Helper: check if notification was deleted locally
+      const isDeleted = (n) => {
+        if (!n.id) return false;
+        return localDeletedIds.has(n.id.toString());
+      };
 
       // Fetch from BOTH tables in parallel and merge results
       const [systemResult, forumData] = await Promise.all([
@@ -224,8 +253,9 @@ export default function NotificationsScreen() {
         read: isRead(n),
       }));
 
-      // Merge all notifications
-      let allNotifications = [...systemNotifications, ...forumNotifications];
+      // Merge all notifications and filter out locally deleted ones
+      let allNotifications = [...systemNotifications, ...forumNotifications]
+        .filter(n => !isDeleted(n));
 
       // Collect user IDs that need profile fetching (no from_user data)
       const userIdsToFetch = new Set();
@@ -291,15 +321,24 @@ export default function NotificationsScreen() {
     // Mark as read - check both `read` and `is_read` fields
     const isRead = notification.read || notification.is_read;
     if (!isRead) {
-      // Try both services to ensure we update the correct table
+      // 1. Update local state and global cache immediately for instant UI feedback
+      const updatedNotifications = notifications.map(n =>
+        n.id === notification.id ? { ...n, read: true, is_read: true } : n
+      );
+      updateNotifications(updatedNotifications);
+
+      // 2. Save to local read cache (persists even if DB fails)
+      if (notification.id) {
+        localReadIds.add(notification.id.toString());
+        saveLocalReadIds();
+      }
+
+      // 3. Try both services to ensure we update the correct table (background)
       // notificationService for 'notifications' table, forumService for 'forum_notifications' table
-      await Promise.all([
+      Promise.all([
         notificationService.markNotificationAsRead(notification.id, user?.id),
         forumService.markAsRead(notification.id),
-      ]);
-      setNotifications(prev =>
-        prev.map(n => n.id === notification.id ? { ...n, read: true, is_read: true } : n)
-      );
+      ]).catch(err => console.warn('[Notifications] DB mark read failed:', err));
     }
 
     // Navigate based on type
@@ -423,10 +462,25 @@ export default function NotificationsScreen() {
     setDeletingIds(prev => new Set(prev).add(notificationId));
 
     try {
-      await forumService.deleteNotification(notificationId);
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      // 1. Update local state and global cache immediately for instant UI feedback
+      const updatedNotifications = notifications.filter(n => n.id !== notificationId);
+      updateNotifications(updatedNotifications);
+
+      // 2. Save to local deleted cache (persists even if DB fails)
+      if (notificationId) {
+        localDeletedIds.add(notificationId.toString());
+        saveLocalDeletedIds();
+      }
+
+      // 3. Try to delete from BOTH tables (background)
+      // forumService for 'forum_notifications' table, notificationService for 'notifications' table
+      Promise.all([
+        forumService.deleteNotification(notificationId),
+        notificationService.deleteNotification(notificationId, user?.id),
+      ]).catch(err => console.warn('[Notifications] DB delete failed:', err));
     } catch (error) {
       console.error('[Notifications] Delete error:', error);
+      // Don't restore - local state is source of truth for this session
     } finally {
       setDeletingIds(prev => {
         const newSet = new Set(prev);
