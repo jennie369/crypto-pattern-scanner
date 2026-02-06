@@ -1,9 +1,9 @@
 # RITUALS & VISION BOARD - ĐẶC TẢ TÍNH NĂNG HOÀN CHỈNH
 ## Vision Board 2.0 - GEM Mobile App
 
-**Phiên bản tài liệu:** 4.1
+**Phiên bản tài liệu:** 4.2
 **Ngày tạo:** 28/12/2025
-**Cập nhật lần cuối:** 29/01/2026
+**Cập nhật lần cuối:** 07/02/2026
 
 ---
 
@@ -45,18 +45,13 @@
 - **Trading Journal** - Ghi nhận giao dịch với P/L, discipline checklist, emotions
 - **Mood Tracking** - Check-in buổi sáng/trưa/tối với mood, energy, sleep quality
 - **Unified Calendar View** - Xem tất cả hoạt động trên một calendar
-- **Heat Map** - Visualization hoạt động theo tháng
 
 #### 3. Divination - Trải Bài & Gieo Quẻ
 - **Tarot Reading** - Trải bài với AI interpretation
 - **I Ching** - Gieo quẻ Kinh Dịch với trading insights
 - **Auto-log to Calendar** - Tự động ghi vào calendar khi làm reading
 
-#### 4. Gamification
-- **XP System** - Tích điểm qua mỗi hoạt động
-- **Streak Badges** - Huy hiệu cho chuỗi ngày liên tục (3, 7, 14, 30, 60, 90, 180, 365 ngày)
-- **Achievements** - Thành tựu unlock qua milestones
-- **Level System** - Cấp bậc tăng theo XP
+
 
 ### Phân Quyền Theo Cấp (Tier Access)
 
@@ -100,6 +95,7 @@
 3. [Kiến Trúc Tính Năng](#3-kiến-trúc-tính-năng)
 4. [Hệ Thống Context (Split Architecture)](#4-hệ-thống-context-split-architecture)
 5. [Calendar Smart Journal System (MỚI)](#5-calendar-smart-journal-system-mới)
+   - 5.8 [Journal Templates System (MỚI)](#58-journal-templates-system-mới---2026-02-02)
 6. [Danh Mục Nghi Thức](#6-danh-mục-nghi-thức)
 7. [Hệ Thống Cosmic Components](#7-hệ-thống-cosmic-components)
 8. [VisionBoard UI Components](#8-visionboard-ui-components)
@@ -719,6 +715,213 @@ await calendarService.logDivination(
 
 ---
 
+# 5.8 JOURNAL TEMPLATES SYSTEM (MỚI - 2026-02-02)
+
+## Tổng Quan
+
+Hệ thống Journal Templates cung cấp các mẫu nhật ký có cấu trúc để giúp người dùng ghi chép hiệu quả hơn. Templates được sử dụng chung cho:
+- **GEM Master Chat** - InlineChatForm
+- **Vision Board** - GoalCreationForm
+- **Calendar** - JournalEntryForm
+
+**File:** `gem-mobile/src/services/templates/journalTemplates.js`
+
+## Field Types
+
+| Field Type | Mô tả |
+|------------|-------|
+| `text` | Input một dòng |
+| `textarea` | Input nhiều dòng |
+| `slider` | Thanh trượt (1-10) |
+| `checklist` | Danh sách tick |
+| `action_list` | Danh sách hành động (có thể tạo goal) |
+| `select` | Dropdown chọn |
+| `date` | Chọn ngày |
+| `life_area` | Chọn lĩnh vực cuộc sống |
+| `mood` | Chọn tâm trạng |
+
+## Life Areas
+
+| ID | Tên | Icon | Màu |
+|----|-----|------|-----|
+| `finance` | Tài chính | DollarSign | #FFD700 |
+| `crypto` | Crypto | Bitcoin | #FF9800 |
+| `love` | Mối quan hệ | Heart | #E91E63 |
+| `career` | Sự nghiệp | Briefcase | #6A5BFF |
+| `health` | Sức khỏe | Activity | #3AF7A6 |
+| `personal_growth` | Phát triển cá nhân | Star | #00F0FF |
+| `spiritual` | Tâm linh | Sparkles | #9C0612 |
+
+## Template Categories
+
+| Category | Mô tả |
+|----------|-------|
+| `goal_focused` | Templates tập trung tạo mục tiêu |
+| `journal_focused` | Templates tập trung ghi nhật ký |
+| `hybrid` | Kết hợp cả hai (tạo goal từ nhật ký) |
+
+## Danh Sách 13 Templates
+
+### Templates FREE (Miễn phí)
+
+| Template ID | Tên | Icon | Category | Mô tả |
+|-------------|-----|------|----------|-------|
+| `goal_basic` | Mục tiêu cơ bản | Target | goal_focused | Tạo mục tiêu đơn giản với hành động |
+| `gratitude` | Biết ơn | Heart | hybrid | 3 điều biết ơn hôm nay |
+| `free_form` | Suy ngẫm mỗi ngày | BookOpen | journal_focused | Ghi chép suy nghĩ, trải nghiệm tự do |
+| `simple_event` | Sự kiện đơn giản | Calendar | journal_focused | Tạo sự kiện nhanh |
+
+### Templates TIER1 (Pro)
+
+| Template ID | Tên | Icon | Category | Mô tả |
+|-------------|-----|------|----------|-------|
+| `fear_setting` | Đối diện nỗi sợ | AlertTriangle | hybrid | Phân tích nỗi sợ để vượt qua (Tim Ferriss method) |
+| `think_day` | Think Day | Brain | hybrid | Dành thời gian suy nghĩ về cuộc sống |
+| `weekly_planning` | Tuần mới | Calendar | hybrid | Lên kế hoạch cho tuần mới |
+
+### Templates TIER2 (Premium)
+
+| Template ID | Tên | Icon | Category | Mô tả |
+|-------------|-----|------|----------|-------|
+| `daily_wins` | Chiến thắng hôm nay | Trophy | journal_focused | Ghi nhận thành tựu trong ngày |
+| `vision_3_5_years` | Tầm nhìn 3-5 năm | Telescope | hybrid | Thiết kế cuộc sống lý tưởng |
+| `trading_journal` | Nhật ký Trading | TrendingUp | journal_focused | Ghi chép giao dịch chi tiết |
+
+### Templates TIER3 (VIP)
+
+| Template ID | Tên | Icon | Category | Mô tả |
+|-------------|-----|------|----------|-------|
+| `prosperity_frequency` | Tần Số Thịnh Vượng | Sparkles | hybrid | Tổng hợp tài chính + tâm linh |
+| `advanced_trading_psychology` | Tâm Lý Giao Dịch Nâng Cao | BrainCircuit | journal_focused | Phân tích bias, kiểm soát tâm lý trading |
+
+## Chi Tiết Một Số Templates Quan Trọng
+
+### goal_basic - Mục tiêu cơ bản (FREE)
+
+**Trigger keywords:** `mục tiêu`, `goal`, `muốn đạt`, `đặt mục tiêu`, `tôi muốn`
+
+**Fields:**
+- `title` (text, required) - Tên mục tiêu
+- `description` (textarea) - Mô tả chi tiết
+- `life_area` (life_area, required) - Lĩnh vực
+- `actions` (action_list) - Kế hoạch hành động (có thể tạo goal)
+- `affirmation` (text) - Khẳng định
+- `ritual` (text) - Nghi thức duy trì
+
+### fear_setting - Đối diện nỗi sợ (TIER1)
+
+**Trigger keywords:** `sợ`, `lo lắng`, `không dám`, `e ngại`, `fear`, `sợ thất bại`
+
+**Fields:**
+- `fear_target` (text, required) - Điều bạn muốn làm nhưng sợ
+- `worst_case` (textarea, required) - Kịch bản xấu nhất
+- `mitigation` (action_list) - Biện pháp giảm thiểu rủi ro
+- `recovery` (textarea, required) - Cách phục hồi nếu thất bại
+- `affirmation` (text) - Khẳng định
+- `ritual` (text) - Nghi thức
+
+### trading_journal - Nhật ký Trading (TIER2)
+
+**Trigger keywords:** `lệnh`, `trade`, `giao dịch`, `trading`, `entry`, `exit`
+
+**Fields:**
+- `pair` (text, required) - Cặp giao dịch (VD: BTC/USDT)
+- `direction` (select, required) - Long/Short
+- `entry_price` (text, required) - Giá vào lệnh
+- `exit_price` (text) - Giá thoát lệnh
+- `position_size` (text, required) - Khối lượng
+- `pnl` (text) - Lãi/Lỗ (USDT)
+- `reason` (textarea, required) - Lý do vào lệnh
+- `lesson` (textarea) - Bài học
+- `emotion` (slider) - Mức độ tự tin (1-10)
+
+### prosperity_frequency - Tần Số Thịnh Vượng (TIER3)
+
+**Trigger keywords:** `thịnh vượng`, `prosperity`, `tần số`, `frequency`, `law of attraction`
+
+**Fields:**
+- `financial_status` (textarea, required) - Tình trạng tài chính hiện tại
+- `energy_level` (slider) - Năng lượng tài chính (1-10)
+- `spiritual_reflection` (textarea, required) - Suy ngẫm tâm linh về tiền bạc
+- `abundance_affirmation` (text, required) - Khẳng định sự dồi dào
+- `gratitude_money` (textarea) - Biết ơn về tài chính
+- `money_intentions` (action_list) - Ý định tài chính tuần này
+- `ritual` (text) - Nghi thức thịnh vượng
+
+### advanced_trading_psychology - Tâm Lý Giao Dịch Nâng Cao (TIER3)
+
+**Trigger keywords:** `tâm lý trading`, `trading psychology`, `bias`, `FOMO`, `fear`, `greed`
+
+**Fields:**
+- `session_type` (select, required) - Loại phiên (pre/during/post)
+- `emotional_state` (slider) - Trạng thái cảm xúc (1-10)
+- `bias_check` (checklist) - Nhận dạng bias (FOMO, Revenge Trading, Overconfidence, Loss Aversion, Anchoring, Confirmation Bias, Recency Bias, Sunk Cost)
+- `trigger_analysis` (textarea, required) - Phân tích nguyên nhân
+- `pattern_recognition` (textarea) - Nhận dạng pattern cảm xúc
+- `coping_strategy` (textarea, required) - Chiến lược đối phó
+- `rule_violations` (checklist) - Vi phạm quy tắc trading
+- `lesson_learned` (textarea) - Bài học rút ra
+- `mental_actions` (action_list) - Hành động cải thiện tâm lý
+
+## Helper Functions
+
+```javascript
+import {
+  // Get template
+  getTemplate,              // getTemplate('goal_basic')
+  getAllTemplates,          // Lấy tất cả templates
+  getTemplatesByCategory,   // getTemplatesByCategory('hybrid')
+  getTemplatesForTier,      // getTemplatesForTier('tier1')
+
+  // Access control
+  canAccessTemplate,        // canAccessTemplate('fear_setting', 'tier1')
+
+  // Life areas
+  getLifeArea,              // getLifeArea('finance')
+  getAllLifeAreas,          // Lấy tất cả life areas
+
+  // Trigger templates
+  getTriggeredTemplates,    // Templates có trigger keywords
+
+  // Constants
+  FIELD_TYPES,
+  LIFE_AREAS,
+  TEMPLATE_CATEGORIES,
+  TIERS,
+  TEMPLATES,
+} from '../services/templates/journalTemplates';
+```
+
+## Access Control Integration
+
+Templates tích hợp với `templateAccessControl.js` để kiểm soát quyền truy cập theo tier:
+
+```javascript
+import { checkTemplateAccess, getUpgradePromptForTemplate } from '../config/templateAccessControl';
+
+// Kiểm tra quyền truy cập
+const access = checkTemplateAccess('fear_setting', 'free');
+// { allowed: false, reason: 'Cần nâng cấp lên tier1' }
+
+// Lấy thông tin upgrade
+const upgradeInfo = getUpgradePromptForTemplate('fear_setting', 'free');
+// { targetTier: 'tier1', ... }
+```
+
+## Auto-Trigger từ Chat
+
+Templates có `triggerKeywords` và `confidenceThreshold` để tự động suggest template phù hợp khi user nhập text trong GEM Master Chat:
+
+```javascript
+// Template fear_setting sẽ được suggest khi user nhập:
+// "Tôi sợ nghỉ việc để khởi nghiệp"
+// "Tôi lo lắng về tương lai"
+
+// confidenceThreshold = 0.6 (thấp hơn = dễ trigger hơn)
+```
+
+---
+
 # 6. DANH MỤC NGHI THỨC
 
 ## 6.1 Danh Mục 8 Nghi Thức
@@ -887,5 +1090,5 @@ import {
 
 **KẾT THÚC TÀI LIỆU**
 
-*Tài liệu được cập nhật: 29/01/2026*
-*Phiên bản: 4.1*
+*Tài liệu được cập nhật: 07/02/2026*
+*Phiên bản: 4.2*

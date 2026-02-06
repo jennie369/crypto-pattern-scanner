@@ -142,7 +142,9 @@
       "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" diff HEAD -- gem-mobile/src/screens/VisionBoard/GoalDetailScreen.js)",
       "Bash(git -C \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\" status -- gem-mobile/src/screens/VisionBoard/)",
       "Bash(git revert:*)",
-      "Bash(del \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\\\\frontend\\\\vercel.json\")"
+      "Bash(del \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\\\\frontend\\\\vercel.json\")",
+      "Bash(git fetch:*)",
+      "Bash(git update-index:*)"
     ],
     "deny": [],
     "ask": []

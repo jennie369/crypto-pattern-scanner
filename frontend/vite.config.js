@@ -9,6 +9,9 @@ export default defineConfig({
     consoleMonitor(), // Browser console logs forwarded to terminal
   ],
 
+  // QUAN TRỌNG: Base path cho Vercel
+  base: '/',
+
   // Production optimizations
   build: {
     // Output directory
