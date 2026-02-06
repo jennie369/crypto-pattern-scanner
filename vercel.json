@@ -5,10 +5,8 @@
   "framework": "vite",
   "installCommand": "cd frontend && npm install --legacy-peer-deps",
   "devCommand": "cd frontend && npm run dev",
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
-    { "source": "/:path((?!assets|favicon|index\\.html).*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/" }
   ],
   "headers": [
     {
