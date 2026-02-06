@@ -71,7 +71,7 @@ const PartnershipTypeSelector = ({ onSelectCTV, onSelectKOL, isCTV, ctvTier }) =
           </View>
           <View style={styles.benefitRow}>
             <Clock size={16} color={COLORS.info} />
-            <Text style={styles.benefitText}>Tự động duyệt sau 3 ngày</Text>
+            <Text style={styles.benefitText}>Xét duyệt trong 3 ngày</Text>
           </View>
         </View>
 
@@ -114,10 +114,6 @@ const PartnershipTypeSelector = ({ onSelectCTV, onSelectKOL, isCTV, ctvTier }) =
               Sub-affiliate: {formatPercent(KOL_CONFIG.subAffiliate)}
             </Text>
           </View>
-          <View style={styles.benefitRow}>
-            <Clock size={16} color={COLORS.info} />
-            <Text style={styles.benefitText}>Thanh toán: 2 lần/tháng</Text>
-          </View>
         </View>
 
         {/* Requirements Warning */}
@@ -156,7 +152,7 @@ const PartnershipTypeSelector = ({ onSelectCTV, onSelectKOL, isCTV, ctvTier }) =
           </View>
           <View style={styles.comparisonRow}>
             <Text style={styles.comparisonLabel}>Duyệt đơn</Text>
-            <Text style={styles.comparisonValue}>Tự động 3 ngày</Text>
+            <Text style={styles.comparisonValue}>Trong 3 ngày</Text>
             <Text style={styles.comparisonValue}>Admin duyệt</Text>
           </View>
           <View style={styles.comparisonRow}>

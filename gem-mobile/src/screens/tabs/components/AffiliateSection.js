@@ -334,7 +334,6 @@ export default function AffiliateSection({ user, navigation }) {
               <View style={styles.programFeatures}>
                 <Text style={styles.featureText}>• Hoa hồng 20% tất cả sản phẩm</Text>
                 <Text style={styles.featureText}>• Sub-affiliate: 3.5%</Text>
-                <Text style={styles.featureText}>• Thanh toán 2 lần/tháng</Text>
                 <Text style={styles.featureText}>• Marketing kit đặc biệt</Text>
               </View>
 

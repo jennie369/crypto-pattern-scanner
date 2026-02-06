@@ -126,7 +126,6 @@ export const CTV_TIER_CONFIG = {
     benefits: [
       'Hoa hồng 20% sản phẩm Digital',
       'Hoa hồng 10% sản phẩm Physical',
-      'Thanh toán 2 lần/tháng',
       'Vé VIP sự kiện',
       'Early access sản phẩm mới',
     ],
@@ -219,7 +218,6 @@ export const KOL_CONFIG = {
   benefits: [
     'Hoa hồng 20% tất cả sản phẩm',
     'Sub-affiliate 3.5%',
-    'Thanh toán 2 lần/tháng',
     'Creative Kit độc quyền',
     'Featured trên GEM Platform',
     'Co-marketing opportunities',

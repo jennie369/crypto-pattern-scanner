@@ -124,7 +124,7 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
       if (result.success) {
         Alert.alert(
           '🎉 Đăng ký thành công!',
-          'Đơn đăng ký CTV của bạn sẽ được tự động duyệt sau 3 ngày.',
+          'Đơn đăng ký CTV của bạn sẽ được xem xét trong vòng 3 ngày.',
           [
             {
               text: 'OK',

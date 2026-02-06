@@ -120,7 +120,7 @@ const CTVRegistrationForm = ({ userProfile, onSubmit }) => {
         <View style={styles.autoApproveNote}>
           <Info size={16} color={COLORS.gold} />
           <Text style={styles.autoApproveText}>
-            Đơn đăng ký sẽ được tự động duyệt sau 3 ngày
+            Đơn đăng ký sẽ được xem xét trong vòng 3 ngày
           </Text>
         </View>
       </View>
