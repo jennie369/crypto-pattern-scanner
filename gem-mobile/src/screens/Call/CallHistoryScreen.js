@@ -70,13 +70,19 @@ const CallHistoryScreen = ({ navigation }) => {
   // ========== HANDLERS ==========
 
   const handleCallBack = (item) => {
-    const otherUser = item.otherUser || {};
-    navigation.navigate('OutgoingCall', {
-      call: {
-        call_type: item.call_type || CALL_TYPE.AUDIO,
-        conversation_id: item.conversation_id,
+    // Handle both camelCase and snake_case field names
+    const otherUser = item.otherUser || item.other_user || {};
+
+    // Navigate to Call stack -> OutgoingCall screen
+    navigation.navigate('Call', {
+      screen: 'OutgoingCall',
+      params: {
+        call: {
+          call_type: item.call_type || CALL_TYPE.AUDIO,
+          conversation_id: item.conversation_id,
+        },
+        callee: otherUser,
       },
-      callee: otherUser,
     });
   };
 
