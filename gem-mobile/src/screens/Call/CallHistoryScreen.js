@@ -42,10 +42,16 @@ const CallHistoryScreen = ({ navigation }) => {
 
   const fetchCallHistory = useCallback(async () => {
     try {
-      const history = await callService.getCallHistory(50);
-      setCalls(history);
+      const result = await callService.getCallHistory(50);
+      if (result.success && result.data) {
+        setCalls(result.data);
+      } else {
+        console.warn('[CallHistory] Failed to fetch:', result.error);
+        setCalls([]);
+      }
     } catch (error) {
-      console.error('Error fetching call history:', error);
+      console.error('[CallHistory] Error fetching call history:', error);
+      setCalls([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -91,7 +97,9 @@ const CallHistoryScreen = ({ navigation }) => {
       return { Icon: PhoneMissed, color: COLORS.error };
     }
 
-    if (item.is_caller) {
+    // Handle both is_caller and is_outgoing field names
+    const isOutgoing = item.is_caller || item.is_outgoing;
+    if (isOutgoing) {
       return { Icon: PhoneOutgoing, color: COLORS.success };
     }
 
@@ -132,8 +140,9 @@ const CallHistoryScreen = ({ navigation }) => {
   const renderCallItem = ({ item }) => {
     const { Icon: DirectionIcon, color: directionColor } = getCallIcon(item);
     const TypeIcon = getCallTypeIcon(item.call_type);
-    const otherUser = item.otherUser || {};
-    const duration = formatDuration(item.duration);
+    // Handle both camelCase and snake_case field names
+    const otherUser = item.otherUser || item.other_user || {};
+    const duration = formatDuration(item.duration || item.duration_seconds);
     const timeAgo = formatTime(item.created_at);
 
     const isMissed = item.status === CALL_STATUS.MISSED ||
