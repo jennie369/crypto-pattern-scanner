@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   thumbnailContainer: {
     position: 'relative',
     width: '100%',
-    height: 160,
+    aspectRatio: 4 / 3, // Match cover image ratio (square/3:4 images display well)
   },
   thumbnail: {
     width: '100%',

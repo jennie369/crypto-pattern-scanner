@@ -2535,14 +2535,16 @@ const GemMasterScreen = ({ navigation, route }) => {
 
               switch (actionType) {
                 case 'SUGGEST_PAPER_TRADE':
-                  navigation.navigate('Scanner');
+                  // Navigate to Trading tab (ScannerStack)
+                  navigation.navigate('Trading');
                   break;
                 case 'SUGGEST_UPGRADE':
-                  navigation.navigate('Subscription');
+                  // Navigate to Upgrade screen (UpgradeScreen is in AccountStack)
+                  navigation.navigate('Account', { screen: 'UpgradeScreen' });
                   break;
                 case 'WELCOME_BACK':
-                  // Navigate to VisionBoard for returning users
-                  navigation.navigate('VisionBoard');
+                  // Navigate to VisionBoard for returning users (VisionBoard is in AccountStack)
+                  navigation.navigate('Account', { screen: 'VisionBoard' });
                   break;
                 case 'SUGGEST_HEALING':
                   // Send a message to start healing meditation

@@ -809,8 +809,18 @@ const CoursesScreen = ({ navigation, route }) => {
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => {
-              // Navigate back to source tab (default: Tài Sản/Account)
-              navigation.navigate('MainTabs', { screen: sourceTab });
+              // If we're in a filtered view (category selected), clear filter first
+              if (activeFilterTags || pageTitleOverride) {
+                setActiveFilterTags(null);
+                setPageTitleOverride(null);
+                setActiveFilter('all');
+                setActiveQuickFilters([]);
+                setAppliedFilters({});
+                navigation.setParams({ filterTags: null, title: null, categoryId: null });
+              } else {
+                // Go back to previous screen
+                navigation.goBack();
+              }
             }}
           >
             <ArrowLeft size={24} color={COLORS.textPrimary} />
@@ -1115,10 +1125,12 @@ const styles = StyleSheet.create({
   // List
   listContent: {
     paddingTop: 0,
-    paddingHorizontal: SPACING.md,
+    // Note: No paddingHorizontal here - each section manages its own padding
+    // This prevents double-padding on horizontal scrolling sections
   },
   courseCard: {
     marginBottom: SPACING.md,
+    marginHorizontal: SPACING.lg, // Match section padding (16px)
   },
 
   // Empty State

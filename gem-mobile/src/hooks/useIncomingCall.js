@@ -176,16 +176,27 @@ export const useIncomingCall = (userId, options = {}) => {
   useEffect(() => {
     if (!incomingCall) return;
 
-    // Monitor call status for missed/cancelled
+    // Monitor call status for missed/cancelled/deleted
     const checkCallStatus = async () => {
-      const { call } = await callService.getCall(incomingCall.id);
+      try {
+        const { call } = await callService.getCall(incomingCall.id);
 
-      if (call) {
+        // Call no longer exists in database (was cleaned up or deleted)
+        if (!call) {
+          console.log('[useIncomingCall] Call no longer exists, stopping ringing');
+          dismissCall();
+          return;
+        }
+
         if (call.status === 'missed' || call.status === 'cancelled') {
           handleCallMissed();
         } else if (call.status === 'ended' || call.status === 'declined') {
           dismissCall();
         }
+      } catch (error) {
+        // If error fetching call, assume it's gone and stop ringing
+        console.log('[useIncomingCall] Error checking call status, stopping ringing:', error);
+        dismissCall();
       }
     };
 

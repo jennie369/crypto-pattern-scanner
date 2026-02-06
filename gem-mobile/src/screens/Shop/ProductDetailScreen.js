@@ -59,6 +59,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { DARK_THEME } from '../../theme/darkTheme';
 import { TrendingUp, Eye, Layers, Grid3X3, Link2 } from 'lucide-react-native';
 import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../constants/layout';
+import { Platform } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -120,7 +121,11 @@ const detectProductType = (product) => {
   return isDigital ? 'course' : 'crystal';
 };
 
-const TAB_BAR_HEIGHT = 115; // Tab bar height for proper spacing above tab
+// Tab bar height for proper spacing above tab - iOS needs smaller value due to safe area handling
+const TAB_BAR_HEIGHT = Platform.select({
+  ios: 78,     // iOS: Tab bar sits closer, safe area handled by tab bar itself
+  android: 115, // Android: Works correctly with this value
+});
 
 const ProductDetailScreen = ({ navigation, route }) => {
   // CRITICAL: Validate route.params and product before destructuring

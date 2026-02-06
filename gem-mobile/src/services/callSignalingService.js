@@ -107,7 +107,8 @@ class CallSignalingService {
    */
   async _sendSignal(signal) {
     if (!this.channel) {
-      console.error('[Signaling] No channel to send signal');
+      // Silently ignore if no channel - this can happen after call ends
+      // Don't log error as it's expected behavior during cleanup
       return;
     }
 
@@ -123,7 +124,10 @@ class CallSignalingService {
       });
       console.log('[Signaling] Sent signal:', signal.type);
     } catch (error) {
-      console.error('[Signaling] Send signal error:', error);
+      // Only log if it's not a channel closed error
+      if (!error.message?.includes('closed') && !error.message?.includes('not found')) {
+        console.error('[Signaling] Send signal error:', error);
+      }
     }
   }
 
@@ -215,12 +219,25 @@ class CallSignalingService {
 
   /**
    * Send ready signal (callee tells caller they're ready to receive offer)
+   * Returns false if no channel available
    */
   async sendReady() {
+    if (!this.channel) {
+      // Silently fail - no channel means call has ended
+      return false;
+    }
     console.log('[Signaling] Sending ready signal');
     await this._sendSignal({
       type: SIGNAL_TYPE.READY,
     });
+    return true;
+  }
+
+  /**
+   * Check if channel is active
+   */
+  hasActiveChannel() {
+    return this.channel !== null;
   }
 
   // ========== HANDLE SIGNALS ==========
@@ -307,6 +324,22 @@ class CallSignalingService {
     this.resetCallbacks();
     this.userId = null;
     console.log('[Signaling] Cleanup complete');
+  }
+
+  /**
+   * Force reset - clears all state immediately without async operations
+   * Use this when you need to ensure a clean state synchronously
+   */
+  forceReset() {
+    console.log('[Signaling] Force reset');
+    if (this.channel) {
+      // Try to remove channel but don't wait
+      supabase.removeChannel(this.channel).catch(() => {});
+      this.channel = null;
+    }
+    this.callId = null;
+    this.userId = null;
+    this.resetCallbacks();
   }
 }
 

@@ -128,17 +128,32 @@ serve(async (req) => {
         });
       }
     }
-    // ========== Android: High-priority FCM ==========
+    // ========== Android: High-priority FCM or Expo ==========
     else if (tokenData.platform === 'android') {
-      // Android uses FCM data messages with high priority
-      pushResult = await sendFCMHighPriority(tokenData.token, {
-        callId,
-        callerName,
-        callerId,
-        callType,
-        conversationId,
-        callerAvatar,
-      });
+      // Check if token is Expo push token or native FCM token
+      // Expo tokens start with 'ExponentPushToken[' and should use Expo API
+      // Native FCM tokens are different and should use FCM API
+      if (tokenData.token.startsWith('ExponentPushToken[')) {
+        console.log('[VoIPPush] Android with Expo token, using Expo push');
+        pushResult = await sendExpoPush(tokenData.token, {
+          callId,
+          callerName,
+          callerId,
+          callType,
+          conversationId,
+          callerAvatar,
+        });
+      } else {
+        // Native FCM token - use FCM data messages with high priority
+        pushResult = await sendFCMHighPriority(tokenData.token, {
+          callId,
+          callerName,
+          callerId,
+          callType,
+          conversationId,
+          callerAvatar,
+        });
+      }
     }
     // ========== Unknown platform ==========
     else {

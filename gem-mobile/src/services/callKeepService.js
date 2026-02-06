@@ -165,8 +165,14 @@ class CallKeepService {
     // Call state changes
     RNCallKeep.addEventListener('didDisplayIncomingCall', this._onDisplayIncomingCall);
 
-    // Android: Show incoming call UI
-    RNCallKeep.addEventListener('showIncomingCallUi', this._onShowIncomingCallUI);
+    // Android only: Show incoming call UI (this event doesn't exist on iOS)
+    if (Platform.OS === 'android') {
+      try {
+        RNCallKeep.addEventListener('showIncomingCallUi', this._onShowIncomingCallUI);
+      } catch (e) {
+        console.log('[CallKeep] showIncomingCallUi event not supported');
+      }
+    }
 
     // Android: Check reachability
     RNCallKeep.addEventListener('checkReachability', this._onCheckReachability);

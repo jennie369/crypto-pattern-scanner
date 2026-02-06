@@ -1,14 +1,14 @@
 /**
  * Gemral - Privacy Settings Screen
- * Manage messaging and call privacy settings
+ * Quản lý cài đặt riêng tư cho tin nhắn và cuộc gọi
  *
- * Features:
- * - Read receipts toggle
- * - Online status toggle
- * - Typing indicator toggle
- * - Last seen toggle
- * - Call restrictions
- * - Message requests toggle
+ * Tính năng:
+ * - Bật/tắt xác nhận đã đọc
+ * - Bật/tắt trạng thái trực tuyến
+ * - Bật/tắt hiển thị đang nhập
+ * - Bật/tắt hoạt động lần cuối
+ * - Giới hạn cuộc gọi
+ * - Bật/tắt yêu cầu tin nhắn
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -38,9 +38,9 @@ import {
 } from '../../utils/tokens';
 
 const CALL_OPTIONS = [
-  { value: 'everyone', label: 'Everyone', description: 'Anyone can call you' },
-  { value: 'contacts_only', label: 'Contacts Only', description: 'Only people you\'ve chatted with' },
-  { value: 'nobody', label: 'Nobody', description: 'Block all incoming calls' },
+  { value: 'everyone', label: 'Tất cả mọi người', description: 'Bất kỳ ai cũng có thể gọi cho bạn' },
+  { value: 'contacts_only', label: 'Chỉ liên hệ', description: 'Chỉ những người bạn đã nhắn tin' },
+  { value: 'nobody', label: 'Không ai', description: 'Chặn tất cả cuộc gọi đến' },
 ];
 
 export default function PrivacySettingsScreen({ navigation }) {
@@ -68,7 +68,7 @@ export default function PrivacySettingsScreen({ navigation }) {
           setSettings(result.settings);
         }
       } catch (error) {
-        console.error('Error fetching privacy settings:', error);
+        console.error('Lỗi khi tải cài đặt riêng tư:', error);
       } finally {
         setLoading(false);
       }
@@ -93,7 +93,7 @@ export default function PrivacySettingsScreen({ navigation }) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (error) {
-      console.error('Error updating setting:', error);
+      console.error('Lỗi khi cập nhật cài đặt:', error);
       setSettings(prev => ({ ...prev, [key]: !value }));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -115,7 +115,7 @@ export default function PrivacySettingsScreen({ navigation }) {
         setSettings(prev => ({ ...prev, allow_calls_from: 'everyone' }));
       }
     } catch (error) {
-      console.error('Error updating call setting:', error);
+      console.error('Lỗi khi cập nhật cài đặt cuộc gọi:', error);
     } finally {
       setSaving(false);
     }
@@ -151,8 +151,8 @@ export default function PrivacySettingsScreen({ navigation }) {
           <Ionicons name="call-outline" size={22} color={COLORS.purple} />
         </View>
         <View style={styles.settingContent}>
-          <Text style={styles.settingTitle}>Who Can Call Me</Text>
-          <Text style={styles.settingDescription}>Control who can make calls to you</Text>
+          <Text style={styles.settingTitle}>Ai có thể gọi cho tôi</Text>
+          <Text style={styles.settingDescription}>Kiểm soát ai có thể gọi điện cho bạn</Text>
         </View>
         <TouchableOpacity
           style={styles.callOptionButton}
@@ -231,7 +231,7 @@ export default function PrivacySettingsScreen({ navigation }) {
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Privacy Settings</Text>
+        <Text style={styles.title}>Cài đặt riêng tư</Text>
 
         <View style={styles.placeholder}>
           {saving && <ActivityIndicator size="small" color={COLORS.gold} />}
@@ -245,56 +245,56 @@ export default function PrivacySettingsScreen({ navigation }) {
       >
         {/* Message Requests Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Message Requests</Text>
+          <Text style={styles.sectionTitle}>Yêu cầu tin nhắn</Text>
           {renderToggleItem(
             'allow_message_requests',
-            'Allow Message Requests',
-            'Receive messages from people you haven\'t chatted with before',
+            'Cho phép yêu cầu tin nhắn',
+            'Nhận tin nhắn từ những người bạn chưa từng trò chuyện',
             'mail-unread-outline'
           )}
         </View>
 
         {/* Read Receipts Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Messaging</Text>
+          <Text style={styles.sectionTitle}>Tin nhắn</Text>
 
           {renderToggleItem(
             'read_receipts_enabled',
-            'Read Receipts',
-            'Let others know when you\'ve read their messages. If off, you also won\'t see when others read yours.',
+            'Xác nhận đã đọc',
+            'Cho người khác biết khi bạn đã đọc tin nhắn của họ. Nếu tắt, bạn cũng không thấy khi người khác đọc tin của bạn.',
             'checkmark-done-outline'
           )}
 
           {renderToggleItem(
             'typing_indicator_enabled',
-            'Typing Indicator',
-            'Show when you\'re typing. If off, you also won\'t see when others are typing.',
+            'Hiển thị đang nhập',
+            'Hiển thị khi bạn đang nhập. Nếu tắt, bạn cũng không thấy khi người khác đang nhập.',
             'ellipsis-horizontal-outline'
           )}
         </View>
 
         {/* Online Status Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Activity Status</Text>
+          <Text style={styles.sectionTitle}>Trạng thái hoạt động</Text>
 
           {renderToggleItem(
             'online_status_enabled',
-            'Online Status',
-            'Show others when you\'re online',
+            'Trạng thái trực tuyến',
+            'Hiển thị cho người khác biết khi bạn đang trực tuyến',
             'radio-button-on-outline'
           )}
 
           {renderToggleItem(
             'last_seen_enabled',
-            'Last Seen',
-            'Show when you were last active',
+            'Hoạt động lần cuối',
+            'Hiển thị thời gian bạn hoạt động lần cuối',
             'time-outline'
           )}
         </View>
 
         {/* Calls Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Calls</Text>
+          <Text style={styles.sectionTitle}>Cuộc gọi</Text>
           {renderCallOptions()}
           {renderCallOptionsDropdown()}
         </View>
@@ -303,13 +303,13 @@ export default function PrivacySettingsScreen({ navigation }) {
         <View style={styles.infoBanner}>
           <Ionicons name="shield-checkmark-outline" size={20} color={COLORS.cyan} />
           <Text style={styles.infoText}>
-            Your privacy is important. These settings help you control who can interact with you and what information they can see.
+            Quyền riêng tư của bạn rất quan trọng. Các cài đặt này giúp bạn kiểm soát ai có thể tương tác với bạn và những thông tin họ có thể thấy.
           </Text>
         </View>
 
         {/* Links to other screens */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>More Options</Text>
+          <Text style={styles.sectionTitle}>Tùy chọn khác</Text>
 
           <TouchableOpacity
             style={styles.linkItem}
@@ -319,8 +319,8 @@ export default function PrivacySettingsScreen({ navigation }) {
               <Ionicons name="ban-outline" size={22} color={COLORS.error} />
             </View>
             <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Blocked Users</Text>
-              <Text style={styles.settingDescription}>Manage blocked accounts</Text>
+              <Text style={styles.settingTitle}>Người dùng bị chặn</Text>
+              <Text style={styles.settingDescription}>Quản lý các tài khoản bị chặn</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
@@ -333,8 +333,8 @@ export default function PrivacySettingsScreen({ navigation }) {
               <Ionicons name="chatbox-ellipses-outline" size={22} color={COLORS.gold} />
             </View>
             <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Message Requests</Text>
-              <Text style={styles.settingDescription}>View pending message requests</Text>
+              <Text style={styles.settingTitle}>Yêu cầu tin nhắn</Text>
+              <Text style={styles.settingDescription}>Xem các yêu cầu tin nhắn đang chờ</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>

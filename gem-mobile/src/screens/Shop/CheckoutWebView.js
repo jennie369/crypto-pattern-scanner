@@ -69,7 +69,14 @@ const CheckoutWebView = () => {
     const { returnScreen, returnTab } = route.params || {};
     console.log('[CheckoutWebView] Cancel checkout, returnScreen:', returnScreen, 'returnTab:', returnTab);
 
-    // If we have a specific return screen, navigate there
+    // If opened from Account tab (UpgradeScreen), just go back
+    // This avoids the complex reset that causes navigation loops
+    if (returnTab === 'Account') {
+      navigation.goBack();
+      return;
+    }
+
+    // If we have a specific return screen (from Shop), navigate there
     if (returnScreen) {
       // Reset Shop stack to ShopMain to clear WebView from history
       navigation.dispatch(
@@ -103,13 +110,22 @@ const CheckoutWebView = () => {
     }
   };
 
-  // Prevent back button during checkout
+  // Get isLandingPage flag from params
+  const { isLandingPage } = route.params || {};
+
+  // Prevent back button during checkout (not for landing pages)
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
         if (checkoutCompleted || cancelConfirmed) {
           return false; // Allow back after success or cancel confirmed
+        }
+
+        // Landing pages don't need confirmation - just go back
+        if (isLandingPage) {
+          handleCancelCheckout();
+          return true;
         }
 
         alert({
@@ -802,9 +818,15 @@ const CheckoutWebView = () => {
     });
   };
 
-  // Handle back button press with confirmation
+  // Handle back button press with confirmation (not for landing pages)
   const handleBackPress = () => {
     if (checkoutCompleted || cancelConfirmed) {
+      handleCancelCheckout();
+      return;
+    }
+
+    // Landing pages don't need confirmation - just go back
+    if (isLandingPage) {
       handleCancelCheckout();
       return;
     }

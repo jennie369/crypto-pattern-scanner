@@ -17,24 +17,33 @@ import Constants from 'expo-constants';
 import { supabase } from './supabase';
 import callKeepService from './callKeepService';
 
-// Dynamic import for VoIP push (iOS only, may not be installed)
+// VoIP push module - loaded lazily to prevent crash if not properly linked
+// IMPORTANT: Don't load at module initialization - load only when needed
 let VoipPushNotification = null;
-try {
-  if (Platform.OS === 'ios') {
-    VoipPushNotification = require('react-native-voip-push-notification').default;
+let voipModuleLoaded = false;
+
+function getVoipModule() {
+  if (voipModuleLoaded) return VoipPushNotification;
+  voipModuleLoaded = true;
+
+  if (Platform.OS !== 'ios') {
+    return null;
   }
-} catch (e) {
-  console.log('[PushToken] VoIP push not available:', e.message);
+
+  try {
+    const voipModule = require('react-native-voip-push-notification');
+    VoipPushNotification = voipModule?.default || voipModule;
+    console.log('[PushToken] VoIP module loaded successfully');
+    return VoipPushNotification;
+  } catch (e) {
+    console.log('[PushToken] VoIP push not available:', e?.message || 'unknown error');
+    VoipPushNotification = null;
+    return null;
+  }
 }
 
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// NOTE: Notification handler is configured in InAppNotificationContext.js
+// Do NOT configure it here to avoid conflicts and duplicate handlers
 
 const PUSH_TOKEN_SERVICE = {
   /**
@@ -160,39 +169,73 @@ const PUSH_TOKEN_SERVICE = {
       return null;
     }
 
-    if (!VoipPushNotification) {
-      console.log('[PushToken] VoIP push module not available');
+    if (!Device.isDevice) {
+      console.log('[PushToken] VoIP push requires physical device (not simulator)');
       return null;
     }
 
-    if (!Device.isDevice) {
-      console.log('[PushToken] VoIP push requires physical device');
+    // Load VoIP module lazily
+    const voipModule = getVoipModule();
+    if (!voipModule) {
+      console.log('[PushToken] VoIP push module not available - check if react-native-voip-push-notification is installed and linked');
       return null;
     }
+
+    // Capture 'this' for use in callbacks
+    const self = this;
 
     return new Promise((resolve) => {
+      let resolved = false;
+
+      const resolveOnce = (token) => {
+        if (!resolved) {
+          resolved = true;
+          resolve(token);
+        }
+      };
+
       try {
-        console.log('[PushToken] Registering for VoIP push...');
+        console.log('[PushToken] REGISTERING FOR VoIP PUSH');
+
+        // Check if addEventListener exists
+        if (typeof voipModule.addEventListener !== 'function') {
+          console.log('[PushToken] VoIP module does not have addEventListener - may not be properly configured');
+          resolveOnce(null);
+          return;
+        }
 
         // Listen for VoIP token
-        VoipPushNotification.addEventListener('register', async (token) => {
-          console.log('[PushToken] VoIP token received:', token?.substring(0, 20) + '...');
+        voipModule.addEventListener('register', async (token) => {
+          console.log('[PushToken] ========================================');
+          console.log('[PushToken] VoIP TOKEN RECEIVED!');
+          console.log('[PushToken] Token:', token);
+          console.log('[PushToken] Token length:', token?.length);
+          console.log('[PushToken] ========================================');
 
           // Save to database
-          await this.saveVoIPToken(token);
+          try {
+            await self.saveVoIPToken(token);
+            console.log('[PushToken] VoIP token saved to database');
+          } catch (saveErr) {
+            console.error('[PushToken] Failed to save VoIP token:', saveErr);
+          }
 
-          resolve(token);
+          resolveOnce(token);
         });
 
         // Listen for incoming VoIP notifications
-        VoipPushNotification.addEventListener('notification', (notification) => {
-          console.log('[PushToken] VoIP notification received:', notification);
+        voipModule.addEventListener('notification', (notification) => {
+          console.log('[PushToken] ========================================');
+          console.log('[PushToken] VoIP NOTIFICATION RECEIVED');
+          console.log('[PushToken] Notification:', JSON.stringify(notification, null, 2));
+          console.log('[PushToken] ========================================');
 
           // Extract call data
           const { callId, callerName, callType, callerId, conversationId } = notification;
 
           // Display native incoming call UI via CallKeep
           if (callId && callerName && callKeepService.available) {
+            console.log('[PushToken] Displaying incoming call via CallKeep');
             callKeepService.displayIncomingCall(
               callId,
               callerName,
@@ -200,22 +243,30 @@ const PUSH_TOKEN_SERVICE = {
               '',
               { callerId, conversationId, callType }
             );
+          } else {
+            console.log('[PushToken] Cannot display call - callId:', callId, 'callerName:', callerName, 'callKeepAvailable:', callKeepService.available);
           }
         });
 
         // Listen for when remote notifications are registered
-        VoipPushNotification.addEventListener('didLoadWithEvents', (events) => {
-          console.log('[PushToken] VoIP didLoadWithEvents:', events?.length);
+        voipModule.addEventListener('didLoadWithEvents', (events) => {
+          console.log('[PushToken] VoIP didLoadWithEvents:', events?.length, 'events');
 
           // Process any queued events
           if (events && Array.isArray(events)) {
-            events.forEach((event) => {
+            events.forEach((event, index) => {
+              console.log(`[PushToken] Processing queued event ${index}:`, event.name);
               if (event.name === 'RNVoipPushRemoteNotificationsRegisteredEvent') {
-                // Token event
-                console.log('[PushToken] Processing queued token event');
+                // Token event - extract token from event data
+                console.log('[PushToken] Queued token event data:', event.data);
+                if (event.data) {
+                  // The token might be in event.data
+                  self.saveVoIPToken(event.data).catch(e => console.error('[PushToken] Save queued token failed:', e));
+                }
               } else if (event.name === 'RNVoipPushRemoteNotificationReceivedEvent') {
                 // Notification event - process incoming call
                 const notification = event.data;
+                console.log('[PushToken] Queued notification event:', notification);
                 if (notification) {
                   const { callId, callerName, callType, callerId, conversationId } = notification;
                   if (callId && callerName && callKeepService.available) {
@@ -233,17 +284,33 @@ const PUSH_TOKEN_SERVICE = {
           }
         });
 
-        // Request VoIP push registration
-        VoipPushNotification.registerVoipToken();
+        // Request VoIP push registration - wrap in separate try/catch
+        try {
+          console.log('[PushToken] Calling registerVoipToken()...');
+          if (typeof voipModule.registerVoipToken === 'function') {
+            voipModule.registerVoipToken();
+            console.log('[PushToken] registerVoipToken() called, waiting for callback...');
+          } else {
+            console.log('[PushToken] registerVoipToken is not a function - module may not be properly linked');
+            resolveOnce(null);
+            return;
+          }
+        } catch (regErr) {
+          console.log('[PushToken] registerVoipToken() failed:', regErr?.message || regErr);
+          resolveOnce(null);
+          return;
+        }
 
-        // Timeout after 10 seconds if no token
+        // Timeout after 15 seconds if no token
         setTimeout(() => {
-          console.log('[PushToken] VoIP registration timeout');
-          resolve(null);
-        }, 10000);
+          if (!resolved) {
+            console.log('[PushToken] VoIP REGISTRATION TIMEOUT (15s)');
+            resolveOnce(null);
+          }
+        }, 15000);
       } catch (err) {
-        console.error('[PushToken] VoIP registration error:', err);
-        resolve(null);
+        console.log('[PushToken] VoIP registration error:', err?.message || err);
+        resolveOnce(null);
       }
     });
   },
@@ -253,45 +320,89 @@ const PUSH_TOKEN_SERVICE = {
    * @param {string} token - VoIP PushKit token
    */
   async saveVoIPToken(token) {
+    console.log('[PushToken] ========================================');
+    console.log('[PushToken] SAVING VoIP TOKEN TO DATABASE');
+    console.log('[PushToken] Token to save:', token?.substring(0, 30) + '...');
+    console.log('[PushToken] ========================================');
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('[PushToken] Auth error:', authError);
+        return;
+      }
       if (!user) {
         console.log('[PushToken] No user logged in, cannot save VoIP token');
         return;
       }
 
-      // Use RPC function to upsert VoIP token
-      const { error: rpcError } = await supabase.rpc('update_voip_token', {
-        p_user_id: user.id,
-        p_voip_token: token,
-        p_platform: 'ios',
-      });
+      console.log('[PushToken] Saving VoIP token for user:', user.id);
 
-      if (rpcError) {
-        // Fallback to direct upsert if RPC doesn't exist
-        console.log('[PushToken] RPC failed, trying direct upsert:', rpcError.message);
+      // Try direct upsert first (more reliable than RPC)
+      const { data: upsertData, error: upsertError } = await supabase.from('user_push_tokens').upsert(
+        {
+          user_id: user.id,
+          voip_token: token,
+          platform: 'ios',
+          is_active: true,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      ).select();
 
-        const { error: upsertError } = await supabase.from('user_push_tokens').upsert(
-          {
-            user_id: user.id,
-            voip_token: token,
-            platform: 'ios',
-            is_active: true,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id' }
-        );
+      if (upsertError) {
+        console.error('[PushToken] Direct upsert failed:', upsertError.message);
+        console.error('[PushToken] Error details:', JSON.stringify(upsertError, null, 2));
 
-        if (upsertError) {
-          console.error('[PushToken] VoIP token save failed:', upsertError.message);
+        // Try RPC as fallback
+        console.log('[PushToken] Trying RPC fallback...');
+        const { error: rpcError } = await supabase.rpc('update_voip_token', {
+          p_user_id: user.id,
+          p_voip_token: token,
+          p_platform: 'ios',
+        });
+
+        if (rpcError) {
+          console.error('[PushToken] RPC also failed:', rpcError.message);
+
+          // Last resort: try simple update
+          console.log('[PushToken] Trying simple update...');
+          const { error: updateError } = await supabase
+            .from('user_push_tokens')
+            .update({ voip_token: token, updated_at: new Date().toISOString() })
+            .eq('user_id', user.id);
+
+          if (updateError) {
+            console.error('[PushToken] All save methods failed:', updateError.message);
+          } else {
+            console.log('[PushToken] VoIP token saved via simple update');
+          }
         } else {
-          console.log('[PushToken] VoIP token saved via upsert');
+          console.log('[PushToken] VoIP token saved via RPC');
         }
       } else {
-        console.log('[PushToken] VoIP token saved via RPC');
+        console.log('[PushToken] VoIP token saved via upsert');
+        console.log('[PushToken] Upsert result:', JSON.stringify(upsertData, null, 2));
+      }
+
+      // Verify the save
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('user_push_tokens')
+        .select('voip_token')
+        .eq('user_id', user.id)
+        .single();
+
+      if (verifyError) {
+        console.error('[PushToken] Verify failed:', verifyError.message);
+      } else {
+        console.log('[PushToken] Verified saved token:', verifyData?.voip_token?.substring(0, 30) + '...');
+        if (!verifyData?.voip_token) {
+          console.error('[PushToken] WARNING: voip_token is still null after save!');
+        }
       }
     } catch (err) {
       console.error('[PushToken] saveVoIPToken error:', err);
+      console.error('[PushToken] Error stack:', err.stack);
     }
   },
 
@@ -418,22 +529,34 @@ const PUSH_TOKEN_SERVICE = {
 
   /**
    * Remove push token (on logout)
+   * IMPORTANT: Completely delete the token to prevent notifications going to wrong device
+   * when user logs into a different account on the same device
    */
   async removePushToken() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Completely delete the token instead of just deactivating
+      // This ensures when user logs in on another device, the new token is used
       const { error } = await supabase
         .from('user_push_tokens')
-        .update({ is_active: false })
+        .delete()
         .eq('user_id', user.id);
 
       if (error) {
         console.error('[PushToken] Remove error:', error);
       } else {
-        console.log('[PushToken] Deactivated in database');
+        console.log('[PushToken] Token deleted from database');
       }
+
+      // Also clear from profiles table
+      await supabase
+        .from('profiles')
+        .update({ expo_push_token: null })
+        .eq('id', user.id);
+
+      console.log('[PushToken] Cleared expo_push_token from profile');
     } catch (err) {
       console.error('[PushToken] Remove error:', err);
     }

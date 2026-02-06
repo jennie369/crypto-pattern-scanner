@@ -15,9 +15,10 @@ export { default as HighlightedCourseSection } from './HighlightedCourseSection'
 // Import cache reset functions separately for safer bundling
 import { resetFlashSaleCache } from './CourseFlashSaleSection';
 import { resetHighlightedCourseCache } from './HighlightedCourseSection';
+import { resetBannerCache } from './HeroBannerCarousel';
 
 // Re-export the reset functions
-export { resetFlashSaleCache, resetHighlightedCourseCache };
+export { resetFlashSaleCache, resetHighlightedCourseCache, resetBannerCache };
 
 // Utility function to reset all course section caches (call on pull-to-refresh)
 export const resetAllCourseSectionCaches = () => {
@@ -26,5 +27,8 @@ export const resetAllCourseSectionCaches = () => {
   }
   if (typeof resetHighlightedCourseCache === 'function') {
     resetHighlightedCourseCache();
+  }
+  if (typeof resetBannerCache === 'function') {
+    resetBannerCache();
   }
 };

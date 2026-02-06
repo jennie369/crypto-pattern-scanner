@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "759835159842",
+    "project_id": "gemral-f6450",
+    "storage_bucket": "gemral-f6450.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:759835159842:android:d0d1a32be035b8f694097b",
+        "android_client_info": {
+          "package_name": "com.gemral.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8GlUCXZyeSBzf1UmWJ8xNcjCR3Nf-hJ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

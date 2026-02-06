@@ -72,15 +72,31 @@ export default function ConversationInfoScreen({ route, navigation }) {
   const [chatTheme, setChatTheme] = useState(conversation?.theme || 'default');
   const [muteUntil, setMuteUntil] = useState(conversation?.muted_until || null);
 
-  // Get other participant info
+  // Get other participant info - check multiple possible data structures
   const otherParticipant = conversation?.other_participant ||
-    conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.profiles;
+    conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.profiles ||
+    conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.users ||
+    conversation?.conversation_participants?.find(p => p.user_id !== user?.id);
 
-  const isGroup = conversation?.is_group;
+  // Get the user ID from various possible field names
+  const otherParticipantId = otherParticipant?.id || otherParticipant?.user_id ||
+    conversation?.conversation_participants?.find(p => p.user_id !== user?.id)?.user_id;
+
+  // Explicitly check for group - default to false for DM
+  const isGroup = conversation?.is_group === true;
   const displayName = isGroup
     ? conversation.name
-    : otherParticipant?.display_name || 'Unknown User';
+    : otherParticipant?.display_name || otherParticipant?.username || 'Unknown User';
   const isOnline = presenceService.isOnline(otherParticipant?.online_status);
+
+  // Debug log
+  console.log('[ConversationInfo] Data:', {
+    conversationId,
+    isGroup,
+    otherParticipantId,
+    otherParticipant: otherParticipant ? 'exists' : 'null',
+    conversationType: conversation?.is_group,
+  });
 
   // Group participants
   const participants = conversation?.conversation_participants || [];
@@ -392,8 +408,18 @@ export default function ConversationInfoScreen({ route, navigation }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile Section */}
-        <View style={styles.profileSection}>
+        {/* Profile Section - Tap to view full profile */}
+        <TouchableOpacity
+          style={styles.profileSection}
+          onPress={() => {
+            console.log('[ConversationInfo] Profile tapped:', { isGroup, otherParticipantId });
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            if (!isGroup && otherParticipantId) {
+              navigation.navigate('ProfileFull', { userId: otherParticipantId });
+            }
+          }}
+          activeOpacity={0.7}
+        >
           {otherParticipant?.avatar_url ? (
             <Image source={{ uri: otherParticipant.avatar_url }} style={styles.avatar} />
           ) : (
@@ -421,25 +447,51 @@ export default function ConversationInfoScreen({ route, navigation }) {
               </Text>
             </View>
           )}
-        </View>
+
+          {/* Tap hint for DM */}
+          {!isGroup && otherParticipantId && (
+            <Text style={styles.tapHint}>Nhấn để xem hồ sơ</Text>
+          )}
+        </TouchableOpacity>
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.quickAction} onPress={handleSearchConversation}>
+          <TouchableOpacity
+            style={styles.quickAction}
+            onPress={() => {
+              console.log('[ConversationInfo] Search pressed, conversationId:', conversationId);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate('MessageSearch', { conversationId, conversationName: displayName });
+            }}
+          >
             <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(0, 221, 235, 0.2)' }]}>
               <Ionicons name="search" size={22} color={COLORS.cyan} />
             </View>
             <Text style={styles.quickActionLabel}>Search</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.quickAction} onPress={() => setShowMute(true)}>
+          <TouchableOpacity
+            style={styles.quickAction}
+            onPress={() => {
+              console.log('[ConversationInfo] Mute pressed');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowMute(true);
+            }}
+          >
             <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(255, 189, 89, 0.2)' }]}>
               <Ionicons name={muteUntil ? 'notifications-off' : 'notifications'} size={22} color={COLORS.gold} />
             </View>
             <Text style={styles.quickActionLabel}>{muteUntil ? 'Muted' : 'Mute'}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.quickAction} onPress={() => setShowThemes(true)}>
+          <TouchableOpacity
+            style={styles.quickAction}
+            onPress={() => {
+              console.log('[ConversationInfo] Theme pressed');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowThemes(true);
+            }}
+          >
             <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
               <Ionicons name="color-palette" size={22} color={COLORS.purple} />
             </View>
@@ -447,7 +499,14 @@ export default function ConversationInfoScreen({ route, navigation }) {
           </TouchableOpacity>
 
           {isGroup && isAdmin && (
-            <TouchableOpacity style={styles.quickAction} onPress={() => setShowGroupSettings(true)}>
+            <TouchableOpacity
+              style={styles.quickAction}
+              onPress={() => {
+                console.log('[ConversationInfo] Group Settings pressed');
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowGroupSettings(true);
+              }}
+            >
               <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(76, 175, 80, 0.2)' }]}>
                 <Ionicons name="settings" size={22} color={COLORS.success} />
               </View>
@@ -460,7 +519,14 @@ export default function ConversationInfoScreen({ route, navigation }) {
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Chat Options</Text>
 
-          <TouchableOpacity style={styles.actionItem} onPress={handleViewMedia}>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => {
+              console.log('[ConversationInfo] Media & Files pressed');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate('MediaGallery', { conversationId });
+            }}
+          >
             <View style={styles.actionIcon}>
               <Ionicons name="images-outline" size={22} color={COLORS.purple} />
             </View>
@@ -468,7 +534,14 @@ export default function ConversationInfoScreen({ route, navigation }) {
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem} onPress={handleViewPinned}>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => {
+              console.log('[ConversationInfo] Pinned Messages pressed');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate('PinnedMessages', { conversationId });
+            }}
+          >
             <View style={styles.actionIcon}>
               <Ionicons name="pin-outline" size={22} color={COLORS.gold} />
             </View>
@@ -476,7 +549,14 @@ export default function ConversationInfoScreen({ route, navigation }) {
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem} onPress={handleViewStarred}>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => {
+              console.log('[ConversationInfo] Starred Messages pressed');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate('StarredMessages');
+            }}
+          >
             <View style={styles.actionIcon}>
               <Ionicons name="star-outline" size={22} color={COLORS.gold} />
             </View>
@@ -484,7 +564,14 @@ export default function ConversationInfoScreen({ route, navigation }) {
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem} onPress={handleScheduledMessages}>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => {
+              console.log('[ConversationInfo] Scheduled Messages pressed');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate('ScheduledMessages', { conversationId });
+            }}
+          >
             <View style={styles.actionIcon}>
               <Ionicons name="calendar-outline" size={22} color={COLORS.cyan} />
             </View>
@@ -497,7 +584,14 @@ export default function ConversationInfoScreen({ route, navigation }) {
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Privacy</Text>
 
-          <TouchableOpacity style={styles.actionItem} onPress={() => setShowDisappearing(true)}>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => {
+              console.log('[ConversationInfo] Disappearing Messages pressed');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowDisappearing(true);
+            }}
+          >
             <View style={styles.actionIcon}>
               <Ionicons name="timer-outline" size={22} color={COLORS.warning} />
             </View>
@@ -508,7 +602,14 @@ export default function ConversationInfoScreen({ route, navigation }) {
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem} onPress={() => navigation.navigate('BlockedUsers')}>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => {
+              console.log('[ConversationInfo] Blocked Users pressed');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate('BlockedUsers');
+            }}
+          >
             <View style={styles.actionIcon}>
               <Ionicons name="ban-outline" size={22} color={COLORS.textMuted} />
             </View>
@@ -721,6 +822,12 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     color: COLORS.textMuted,
+  },
+  tapHint: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    marginTop: SPACING.sm,
+    fontStyle: 'italic',
   },
 
   // Quick Actions

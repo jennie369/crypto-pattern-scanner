@@ -147,6 +147,7 @@ const EnrollmentModal = ({
         title: 'Tìm hiểu thêm',
         productName: course.title,
         returnScreen: 'CourseDetail',
+        isLandingPage: true, // Skip cancel confirmation for landing pages
       },
     });
   };

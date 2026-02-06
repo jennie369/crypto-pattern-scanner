@@ -5,6 +5,7 @@
 
 import { shopifyService } from './shopifyService';
 import { supabase } from './supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   DIGITAL_PRODUCT_TAGS,
   DIGITAL_CATEGORIES,
@@ -13,16 +14,94 @@ import {
   isDigitalProduct,
 } from '../utils/digitalProductsConfig';
 
+// AsyncStorage key for persistent caching
+const STORAGE_KEY_DIGITAL_PRODUCTS = '@digital_products_cache';
+const PERSISTENT_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
 class DigitalProductService {
   constructor() {
     this._cache = null;
     this._cacheTime = 0;
     this._cacheDuration = 5 * 60 * 1000; // 5 minutes
+    this._storageInitialized = false;
+    this._prefetchedImages = new Set(); // Track prefetched images to avoid duplicates
+  }
+
+  /**
+   * Prefetch product images for instant display
+   * @param {Array} products - Products to prefetch images for
+   */
+  async _prefetchProductImages(products) {
+    if (!products || products.length === 0) return;
+
+    try {
+      const { prefetchImages } = await import('../components/Common/OptimizedImage');
+
+      // Collect all image URLs
+      const imageUrls = [];
+      products.forEach(product => {
+        const imageUrl = this._extractImageUrl(product);
+        if (imageUrl &&
+            imageUrl.startsWith('http') &&
+            !imageUrl.includes('placehold.co') &&
+            !this._prefetchedImages.has(imageUrl)) {
+          imageUrls.push(imageUrl);
+          this._prefetchedImages.add(imageUrl);
+        }
+      });
+
+      if (imageUrls.length > 0) {
+        console.log('[DigitalProductService] Prefetching', imageUrls.length, 'images');
+        await prefetchImages(imageUrls);
+      }
+    } catch (error) {
+      // Silent fail - prefetching is optimization, not critical
+      console.warn('[DigitalProductService] Prefetch error:', error?.message);
+    }
   }
 
   // ═══════════════════════════════════════════════════════════
   // FETCH PRODUCTS
   // ═══════════════════════════════════════════════════════════
+
+  /**
+   * Initialize cache from AsyncStorage (call early for instant display)
+   */
+  async initializeFromStorage() {
+    if (this._storageInitialized) return;
+    this._storageInitialized = true;
+
+    try {
+      const cached = await AsyncStorage.getItem(STORAGE_KEY_DIGITAL_PRODUCTS);
+      if (!cached) return;
+
+      const { data, timestamp } = JSON.parse(cached);
+      if (data && data.length > 0) {
+        this._cache = data;
+        // Mark as expired if older than 24h so we refresh in background
+        this._cacheTime = Date.now() - timestamp > PERSISTENT_CACHE_EXPIRY ? 0 : Date.now();
+        console.log('[DigitalProductService] Loaded from AsyncStorage:', data.length);
+        // Prefetch images for instant display
+        this._prefetchProductImages(data.slice(0, 20));
+      }
+    } catch (error) {
+      console.warn('[DigitalProductService] Storage init error:', error?.message);
+    }
+  }
+
+  /**
+   * Save products to AsyncStorage for persistent caching
+   */
+  async _saveToStorage(products) {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY_DIGITAL_PRODUCTS, JSON.stringify({
+        data: products,
+        timestamp: Date.now(),
+      }));
+    } catch (error) {
+      console.warn('[DigitalProductService] Storage save error:', error?.message);
+    }
+  }
 
   /**
    * Get all digital products
@@ -36,6 +115,24 @@ class DigitalProductService {
       return this._cache;
     }
 
+    // Try to load from AsyncStorage if no memory cache
+    if (!this._cache) {
+      await this.initializeFromStorage();
+      // Return storage cache while we fetch fresh data in background
+      if (this._cache && this._cache.length > 0) {
+        // Start background refresh
+        this._fetchAndCacheProducts();
+        return this._cache;
+      }
+    }
+
+    return this._fetchAndCacheProducts();
+  }
+
+  /**
+   * Internal: Fetch products from API and update caches
+   */
+  async _fetchAndCacheProducts() {
     try {
       // Check if shopifyService already has cached products (from ShopScreen preload)
       // This avoids duplicate API calls
@@ -58,9 +155,15 @@ class DigitalProductService {
       // Enhance products with metadata
       const enhancedProducts = (products || []).map(product => this._enhanceProduct(product));
 
-      // Update cache
+      // Update memory cache
       this._cache = enhancedProducts;
       this._cacheTime = Date.now();
+
+      // Save to AsyncStorage for next app start
+      this._saveToStorage(enhancedProducts);
+
+      // Prefetch images for instant display (first 20 products for hero/carousel)
+      this._prefetchProductImages(enhancedProducts.slice(0, 20));
 
       return enhancedProducts;
     } catch (error) {

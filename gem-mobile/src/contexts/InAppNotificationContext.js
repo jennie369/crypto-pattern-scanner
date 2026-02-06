@@ -15,6 +15,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 
 import InAppNotificationToast, { NOTIFICATION_TYPES } from '../components/Notifications/InAppNotificationToast';
 import { notificationService } from '../services/notificationService';
@@ -23,6 +24,44 @@ import { supabase } from '../services/supabase';
 import { navigationRef } from '../navigation/navigationRef';
 import { callService } from '../services/callService';
 import { triggerIncomingCallFromPush } from './CallContext';
+
+// CRITICAL: Configure notification handler for foreground notifications
+// This handler is ONLY called when the app is in the FOREGROUND.
+// For background notifications, the system handles display based on push payload.
+Notifications.setNotificationHandler({
+  handleNotification: async (notification) => {
+    const data = notification.request.content.data;
+    const notificationType = data?.type || data?.notification_type;
+
+    console.log('[NotificationHandler] ========================================');
+    console.log('[NotificationHandler] Notification received in FOREGROUND');
+    console.log('[NotificationHandler] Type:', notificationType);
+    console.log('[NotificationHandler] Platform:', Platform.OS);
+    console.log('[NotificationHandler] Data:', JSON.stringify(data, null, 2));
+    console.log('[NotificationHandler] ========================================');
+
+    // For incoming calls in foreground:
+    // - iOS: Suppress system banner (we show CallKit or our custom fullscreen UI)
+    // - Android: Suppress system banner (we show our custom fullscreen UI)
+    // The actual fullscreen UI is triggered by addNotificationReceivedListener below
+    if (notificationType === 'incoming_call') {
+      console.log('[NotificationHandler] Incoming call - suppressing system banner');
+      console.log('[NotificationHandler] Our fullscreen UI will be triggered by notificationReceivedListener');
+      return {
+        shouldShowAlert: false, // Don't show system banner - we show fullscreen
+        shouldPlaySound: false, // Our CallContext handles ringtone
+        shouldSetBadge: false,
+      };
+    }
+
+    // For other notifications (messages, etc.), show normally
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    };
+  },
+});
 
 const InAppNotificationContext = createContext(null);
 
@@ -223,12 +262,27 @@ export const InAppNotificationProvider = ({ children }) => {
   }, []);
 
   // Listen for system notifications when app is in foreground
+  // IMPORTANT: This only fires when app is actively in the foreground
+  // For background, users tap the notification which triggers addNotificationResponseReceivedListener
   useEffect(() => {
+    console.log('[InAppNotification] Setting up foreground notification listener');
+
     const subscription = Notifications.addNotificationReceivedListener((notification) => {
       const data = notification.request.content.data;
+      const notificationType = data?.type || data?.notification_type;
+
+      console.log('[InAppNotification] ========================================');
+      console.log('[InAppNotification] FOREGROUND NOTIFICATION RECEIVED');
+      console.log('[InAppNotification] Platform:', Platform.OS);
+      console.log('[InAppNotification] Type:', notificationType);
+      console.log('[InAppNotification] Title:', notification.request.content.title);
+      console.log('[InAppNotification] Body:', notification.request.content.body);
+      console.log('[InAppNotification] Data keys:', Object.keys(data || {}));
+      console.log('[InAppNotification] ========================================');
 
       // Handle message notifications
-      if (data?.type === 'new_message') {
+      if (notificationType === 'new_message') {
+        console.log('[InAppNotification] Processing new_message notification');
         // Don't show in-app if in the same conversation
         if (data.conversationId !== currentConversationRef.current) {
           showNotification({
@@ -238,13 +292,14 @@ export const InAppNotificationProvider = ({ children }) => {
             avatar: data.senderAvatar,
             data,
           });
+        } else {
+          console.log('[InAppNotification] Skipping message - user is in conversation');
         }
       }
 
-      // Handle call notifications
-      // Show toast with working accept/decline handlers as FALLBACK
-      // (in case realtime subscription doesn't detect the call)
-      if (data?.type === 'incoming_call') {
+      // Handle incoming call notifications
+      // This triggers our fullscreen incoming call UI
+      if (notificationType === 'incoming_call') {
         const callId = data.callId || data.call_id; // Support both formats
         console.log('[InAppNotification] ========================================');
         console.log('[InAppNotification] INCOMING CALL PUSH RECEIVED');
@@ -299,6 +354,75 @@ export const InAppNotificationProvider = ({ children }) => {
 
     return () => subscription.remove();
   }, [showNotification, user?.id]);
+
+  // Listen for notification responses (user tapping on notification)
+  // This is CRITICAL for handling incoming calls when app was in background/killed
+  useEffect(() => {
+    const responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+      const notificationType = data?.type || data?.notification_type;
+
+      console.log('[InAppNotification] ========================================');
+      console.log('[InAppNotification] USER TAPPED ON NOTIFICATION');
+      console.log('[InAppNotification] Type:', notificationType);
+      console.log('[InAppNotification] Data:', JSON.stringify(data, null, 2));
+      console.log('[InAppNotification] ========================================');
+
+      // Handle incoming call notification tap
+      // This is important for when user taps notification from background/lock screen
+      if (notificationType === 'incoming_call') {
+        const callId = data.callId || data.call_id;
+        console.log('[InAppNotification] User tapped incoming call notification, callId:', callId);
+
+        if (callId) {
+          // Don't check for duplicates here - user explicitly tapped the notification
+          // They expect to see the incoming call screen
+          console.log('[InAppNotification] Triggering full-screen overlay from notification tap');
+          triggerIncomingCallFromPush(callId).catch(err => {
+            console.error('[InAppNotification] Failed to trigger full-screen overlay from tap:', err);
+          });
+        }
+        return;
+      }
+
+      // Handle missed call notification tap
+      if (notificationType === 'missed_call') {
+        console.log('[InAppNotification] User tapped missed call notification');
+        // Navigate to conversations list
+        const navReady = navigationRef.current &&
+          (typeof navigationRef.current.isReady === 'function'
+            ? navigationRef.current.isReady()
+            : true);
+        if (navReady) {
+          navigationRef.current.navigate('Messages', {
+            screen: 'ConversationsList',
+          });
+        }
+        return;
+      }
+
+      // Handle message notification tap
+      if (notificationType === 'new_message' && data.conversationId) {
+        console.log('[InAppNotification] User tapped message notification, conversationId:', data.conversationId);
+        const navReady = navigationRef.current &&
+          (typeof navigationRef.current.isReady === 'function'
+            ? navigationRef.current.isReady()
+            : true);
+        if (navReady) {
+          navigationRef.current.navigate('Messages', {
+            screen: 'Chat',
+            params: {
+              conversationId: data.conversationId,
+              fromNotification: true,
+            },
+          });
+        }
+        return;
+      }
+    });
+
+    return () => responseSubscription.remove();
+  }, []);
 
   // Subscribe to real-time messages for global in-app notifications
   // This provides notifications even without backend push notification infrastructure

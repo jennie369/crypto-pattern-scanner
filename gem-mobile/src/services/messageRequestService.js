@@ -21,6 +21,7 @@ class MessageRequestService {
         return { success: false, error: 'Not authenticated', requests: [] };
       }
 
+      // First, get message requests
       let query = supabase
         .from('message_requests')
         .select(`
@@ -32,14 +33,7 @@ class MessageRequestService {
           message_preview,
           messages_count,
           created_at,
-          updated_at,
-          requester:profiles!message_requests_requester_id_fkey (
-            id,
-            display_name,
-            full_name,
-            username,
-            avatar_url
-          )
+          updated_at
         `)
         .eq('recipient_id', user.id)
         .order('updated_at', { ascending: false });
@@ -48,15 +42,41 @@ class MessageRequestService {
         query = query.eq('status', status);
       }
 
-      const { data, error } = await query;
+      const { data: requests, error } = await query;
 
       if (error) {
         console.error('[MessageRequest] Error fetching requests:', error);
         return { success: false, error: error.message, requests: [] };
       }
 
-      console.log('[MessageRequest] Fetched requests:', data?.length || 0);
-      return { success: true, requests: data || [] };
+      if (!requests || requests.length === 0) {
+        return { success: true, requests: [] };
+      }
+
+      // Get unique requester IDs and fetch their profiles
+      const requesterIds = [...new Set(requests.map(r => r.requester_id))];
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, username, avatar_url')
+        .in('id', requesterIds);
+
+      if (profilesError) {
+        console.error('[MessageRequest] Error fetching profiles:', profilesError);
+        // Return requests without profile data
+        return { success: true, requests: requests.map(r => ({ ...r, requester: null })) };
+      }
+
+      // Create a map of profiles for quick lookup
+      const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      // Combine requests with profile data
+      const requestsWithProfiles = requests.map(request => ({
+        ...request,
+        requester: profilesMap.get(request.requester_id) || null,
+      }));
+
+      console.log('[MessageRequest] Fetched requests:', requestsWithProfiles.length);
+      return { success: true, requests: requestsWithProfiles };
     } catch (error) {
       console.error('[MessageRequest] Exception:', error);
       return { success: false, error: error.message, requests: [] };
@@ -258,7 +278,8 @@ class MessageRequestService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data, error } = await supabase
+      // Get the message request
+      const { data: request, error } = await supabase
         .from('message_requests')
         .select(`
           id,
@@ -266,14 +287,7 @@ class MessageRequestService {
           requester_id,
           message_preview,
           messages_count,
-          created_at,
-          requester:profiles!message_requests_requester_id_fkey (
-            id,
-            display_name,
-            full_name,
-            username,
-            avatar_url
-          )
+          created_at
         `)
         .eq('conversation_id', conversationId)
         .eq('recipient_id', user.id)
@@ -283,7 +297,19 @@ class MessageRequestService {
         return null;
       }
 
-      return data;
+      if (!request) return null;
+
+      // Fetch the requester's profile separately
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, username, avatar_url')
+        .eq('id', request.requester_id)
+        .single();
+
+      return {
+        ...request,
+        requester: profile || null,
+      };
     } catch (error) {
       return null;
     }

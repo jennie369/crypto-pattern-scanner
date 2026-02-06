@@ -83,6 +83,11 @@ export default function ProductAffiliateLinkSheet({
     return product?.image || product?.images?.[0]?.src || product?.image_url || product?.thumbnail_url || null;
   };
 
+  // Extract product handle for URL generation
+  const getProductHandle = () => {
+    return product?.handle || product?.slug || null;
+  };
+
   // Animate sheet on visibility change
   useEffect(() => {
     if (visible) {
@@ -130,6 +135,7 @@ export default function ProductAffiliateLinkSheet({
           name: getProductName(),
           price: getProductPrice(),
           image_url: getProductImage(),
+          handle: getProductHandle(), // Include handle to skip product query
         }
       );
 

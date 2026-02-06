@@ -26,6 +26,26 @@ const BANNER_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
 const BANNER_HEIGHT = 160;
 const TOTAL_HEIGHT = BANNER_HEIGHT + SPACING.md + 20; // Banner + pagination + margin
 const AUTO_SLIDE_INTERVAL = 5000;
+const LOAD_TIMEOUT = 3000; // 3 second timeout for loading
+
+// =============================================
+// MODULE-LEVEL CACHE - Persists across remounts
+// =============================================
+let cachedBanners = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+
+// Reset cache (can be called on pull-to-refresh)
+export const resetBannerCache = () => {
+  cachedBanners = null;
+  cacheTimestamp = null;
+};
+
+// Check if cache is still valid
+const isCacheValid = () => {
+  if (!cachedBanners || !cacheTimestamp) return false;
+  return Date.now() - cacheTimestamp < CACHE_DURATION;
+};
 
 // Skeleton placeholder for loading state
 const SkeletonBanner = React.memo(() => {
@@ -71,12 +91,13 @@ const SkeletonBanner = React.memo(() => {
 const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
   const navigation = useNavigation();
   const flatListRef = useRef(null);
-  const [banners, setBanners] = useState([]);
+  // Initialize from cache if available - prevents loading flash
+  const [banners, setBanners] = useState(() => cachedBanners || []);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [hasLoaded, setHasLoaded] = useState(false); // Track if we've loaded once
+  const [loading, setLoading] = useState(() => !isCacheValid());
   const autoSlideTimer = useRef(null);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const loadTimeoutRef = useRef(null);
+  const fadeAnim = useRef(new Animated.Value(isCacheValid() ? 1 : 0)).current;
 
   // Load banners
   useEffect(() => {
@@ -85,29 +106,50 @@ const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
       if (autoSlideTimer.current) {
         clearInterval(autoSlideTimer.current);
       }
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
     };
   }, [userTier]);
 
   const loadBanners = async () => {
+    // Use cache if still valid
+    if (isCacheValid()) {
+      setBanners(cachedBanners);
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (!hasLoaded) setLoading(true);
+      setLoading(true);
+
+      // Set timeout to stop showing loading after LOAD_TIMEOUT
+      loadTimeoutRef.current = setTimeout(() => {
+        setLoading(false);
+      }, LOAD_TIMEOUT);
+
       const result = await getPromoBanners(userTier);
-      if (result.success) {
-        setBanners(result.data || []);
+
+      // Clear timeout since we got response
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+
+      if (result.success && result.data?.length > 0) {
+        cachedBanners = result.data;
+        cacheTimestamp = Date.now();
+        setBanners(result.data);
         // Fade in animation after load
-        if (!hasLoaded) {
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }).start();
-        }
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
       }
     } catch (error) {
       console.error('[HeroBannerCarousel] loadBanners error:', error);
     } finally {
       setLoading(false);
-      setHasLoaded(true);
     }
   };
 
@@ -210,8 +252,9 @@ const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
     </TouchableOpacity>
   );
 
-  // Show skeleton while loading (first load only)
-  if (loading && !hasLoaded) {
+  // Show skeleton only during initial load (max 3 seconds)
+  // If we have cached banners, show them immediately
+  if (loading && banners.length === 0) {
     return (
       <View style={[styles.fixedContainer, style]}>
         <SkeletonBanner />
@@ -219,11 +262,8 @@ const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
     );
   }
 
-  // Don't collapse space - keep fixed height even when no banners
-  // This prevents layout shift on subsequent loads
+  // No banners available - don't show anything
   if (banners.length === 0) {
-    // Return empty fixed-height container to prevent layout shift
-    // Or return null if you prefer collapsing (but causes layout shift)
     return null;
   }
 

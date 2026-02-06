@@ -849,6 +849,23 @@ export const preloadAllShopData = async () => {
 
   console.log('[Shopify] Preloading ALL shop data (products, banners, digital)...');
 
+  // FIRST: Initialize all caches from AsyncStorage for INSTANT display
+  // This loads cached data before any network requests
+  try {
+    const [shopBannerService, digitalProductService] = await Promise.all([
+      import('./shopBannerService'),
+      import('./digitalProductService'),
+    ]);
+
+    await Promise.all([
+      shopBannerService.default.initializeBannerCache(),
+      digitalProductService.digitalProductService?.initializeFromStorage?.(),
+    ]);
+    console.log('[Shopify] Storage caches initialized for instant display');
+  } catch (e) {
+    console.warn('[Shopify] Cache init error:', e?.message);
+  }
+
   preloadAllPromise = Promise.all([
     // Preload main products
     preloadShopData(),
@@ -868,8 +885,12 @@ export const preloadAllShopData = async () => {
     import('../components/shop/PromoBar').then(module =>
       module.preloadPromoBar?.().catch(() => null)
     ),
+    // Preload section banners (for course section hero banners)
+    import('./shopBannerService').then(module =>
+      module.default.getAllSectionBanners().catch(() => null)
+    ),
   ])
-    .then(async ([products, banners, digitalProducts, heroProducts]) => {
+    .then(async ([products, banners, digitalProducts, heroProducts, , sectionBanners]) => {
       console.log('[Shopify] ALL shop data preloaded');
 
       // Prefetch ALL banner and product images for INSTANT display
@@ -877,17 +898,42 @@ export const preloadAllShopData = async () => {
         const { prefetchImages } = await import('../components/Common/OptimizedImage');
         const allImageUrls = [];
 
-        // Banner images
+        // Helper to extract image URL from various product formats
+        const extractProductImage = (p) => {
+          if (!p) return null;
+          // Try multiple sources
+          if (p.cover_image) return p.cover_image;
+          if (p.image_url) return p.image_url;
+          if (p.featuredImage?.url) return p.featuredImage.url;
+          if (p.featuredImage?.src) return p.featuredImage.src;
+          if (typeof p.featuredImage === 'string') return p.featuredImage;
+          if (p.image?.url) return p.image.url;
+          if (p.image?.src) return p.image.src;
+          if (typeof p.image === 'string') return p.image;
+          if (p.images?.[0]?.url) return p.images[0].url;
+          if (p.images?.[0]?.src) return p.images[0].src;
+          if (typeof p.images?.[0] === 'string') return p.images[0];
+          return null;
+        };
+
+        // Banner images (hero carousel)
         if (banners?.data) {
           banners.data.forEach(b => {
             if (b.image_url) allImageUrls.push(b.image_url);
           });
         }
 
-        // Digital product images
+        // Section banner images (course section hero)
+        if (sectionBanners?.data) {
+          sectionBanners.data.forEach(b => {
+            if (b.image_url) allImageUrls.push(b.image_url);
+          });
+        }
+
+        // Digital product images (first 15 for carousel + grid)
         if (Array.isArray(digitalProducts)) {
-          digitalProducts.slice(0, 10).forEach(p => {
-            const img = p.cover_image || p.image_url;
+          digitalProducts.slice(0, 15).forEach(p => {
+            const img = extractProductImage(p);
             if (img) allImageUrls.push(img);
           });
         }
@@ -895,7 +941,7 @@ export const preloadAllShopData = async () => {
         // Hero product images
         if (Array.isArray(heroProducts)) {
           heroProducts.forEach(p => {
-            const img = p.cover_image || p.image_url;
+            const img = extractProductImage(p);
             if (img) allImageUrls.push(img);
           });
         }

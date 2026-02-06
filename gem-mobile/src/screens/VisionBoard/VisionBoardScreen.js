@@ -3009,6 +3009,7 @@ const VisionBoardScreen = () => {
   const scrollViewRef = useRef(null);
   const goalsSectionY = useRef(0);
   const pendingScrollToGoals = useRef(false); // Track pending scroll request
+  const pendingModalReopen = useRef(null); // Track pending modal reopen after returning from JournalEntry/EditEvent
 
   // Tooltip hook for feature discovery
   const { showTooltipForScreen, initialized: tooltipInitialized } = useTooltip();
@@ -3690,23 +3691,33 @@ const VisionBoardScreen = () => {
     }, [route.params?.scrollToSection, navigation, scrollToGoalsSection])
   );
 
-  // Handle return from JournalEntry - open day detail modal with fresh data
+  // Handle return from JournalEntry/EditEvent - open day detail modal with fresh data
+  // Supports both: (1) pendingModalReopen ref from goBack(), (2) route params for legacy
   useFocusEffect(
     useCallback(() => {
+      // Check pendingModalReopen ref first (faster path via goBack)
+      const pendingDate = pendingModalReopen.current;
       const { openCalendarDate, showDayDetail, refreshData } = route.params || {};
-      if (openCalendarDate && showDayDetail) {
-        // Clear the params immediately to prevent re-triggering
-        navigation.setParams({ openCalendarDate: undefined, showDayDetail: undefined, refreshData: undefined });
+
+      // Determine which date to use (ref takes priority)
+      const targetDate = pendingDate || (showDayDetail ? openCalendarDate : null);
+
+      if (targetDate) {
+        // Clear the ref and params immediately to prevent re-triggering
+        pendingModalReopen.current = null;
+        if (openCalendarDate && showDayDetail) {
+          navigation.setParams({ openCalendarDate: undefined, showDayDetail: undefined, refreshData: undefined });
+        }
 
         // Set the selected date
-        setSelectedDate(openCalendarDate);
+        setSelectedDate(targetDate);
 
         // Fetch fresh data for that date, then open modal
         const loadAndOpenModal = async () => {
           try {
             if (user?.id) {
-              console.log('[VisionBoard] Loading data for return date:', openCalendarDate);
-              const journalResult = await calendarService.getDayCalendarData(user.id, openCalendarDate);
+              console.log('[VisionBoard] Loading data for return date:', targetDate);
+              const journalResult = await calendarService.getDayCalendarData(user.id, targetDate);
               if (journalResult.success) {
                 setJournalRituals(journalResult.rituals || []);
                 setJournalReadings(journalResult.readings || []);
@@ -6287,8 +6298,9 @@ const VisionBoardScreen = () => {
                   setTimeout(() => setAddEventModalVisible(true), 100);
                 } else if (templateType) {
                   // Navigate directly to JournalEntry with template
-                  // Keep modal visible state so it opens when returning
+                  // Set pending reopen so modal reopens on goBack()
                   const eventDate = date || selectedDate;
+                  pendingModalReopen.current = eventDate;
                   setDayDetailModalVisible(false);
                   setTimeout(() => {
                     navigation.navigate('JournalEntry', {
@@ -6307,11 +6319,16 @@ const VisionBoardScreen = () => {
               }}
               onEditEvent={(event) => {
                 console.log('[VisionBoard] Edit event:', event.id);
+                // Set pending reopen so modal reopens on goBack()
+                const eventDate = selectedDate || event.event_date;
+                pendingModalReopen.current = eventDate;
                 setDayDetailModalVisible(false);
                 // Navigate to EditEvent screen with event data
                 navigation.navigate('EditEvent', {
                   eventId: event.id,
-                  date: selectedDate || event.event_date,
+                  date: eventDate,
+                  sourceScreen: 'VisionBoard',
+                  returnDate: eventDate,
                 });
               }}
               onDeleteEvent={async (event) => {
@@ -6371,12 +6388,16 @@ const VisionBoardScreen = () => {
               }}
               onTradePress={(trade) => {
                 console.log('[VisionBoard] Trading journal entry pressed:', trade.id);
+                // Set pending reopen so modal reopens on goBack()
+                pendingModalReopen.current = selectedDate;
                 setDayDetailModalVisible(false);
                 // Navigate to trading journal entry (from trading_journal_entries table)
                 navigation.navigate('TradingJournal', {
                   mode: 'edit',
                   entryId: trade.id,
                   date: selectedDate,
+                  sourceScreen: 'VisionBoard',
+                  returnDate: selectedDate,
                 });
               }}
               onPaperTradePress={(trade) => {
@@ -6390,26 +6411,40 @@ const VisionBoardScreen = () => {
               }}
               onViewTradingJournal={() => {
                 console.log('[VisionBoard] View Trading Journal pressed');
+                // Set pending reopen so modal reopens on goBack()
+                pendingModalReopen.current = selectedDate;
                 setDayDetailModalVisible(false);
-                navigation.navigate('TradingJournal', { date: selectedDate });
+                navigation.navigate('TradingJournal', {
+                  date: selectedDate,
+                  sourceScreen: 'VisionBoard',
+                  returnDate: selectedDate,
+                });
               }}
               onJournalPress={(entry) => {
                 console.log('[VisionBoard] Journal entry pressed:', entry.id);
+                // Set pending reopen so modal reopens on goBack()
+                pendingModalReopen.current = selectedDate;
                 setDayDetailModalVisible(false);
                 // Navigate to journal entry detail/edit screen
                 navigation.navigate('JournalEntry', {
                   mode: 'edit',
                   entryId: entry.id,
                   date: selectedDate,
+                  sourceScreen: 'VisionBoard',
+                  returnDate: selectedDate,
                 });
               }}
               onEditJournal={(entry) => {
                 console.log('[VisionBoard] Edit journal entry:', entry.id);
+                // Set pending reopen so modal reopens on goBack()
+                pendingModalReopen.current = selectedDate;
                 setDayDetailModalVisible(false);
                 navigation.navigate('JournalEntry', {
                   mode: 'edit',
                   entryId: entry.id,
                   date: selectedDate,
+                  sourceScreen: 'VisionBoard',
+                  returnDate: selectedDate,
                 });
               }}
               onDeleteJournal={async (entry) => {
@@ -6426,11 +6461,15 @@ const VisionBoardScreen = () => {
               }}
               onEditTradingEntry={(trade) => {
                 console.log('[VisionBoard] Edit trading entry:', trade.id);
+                // Set pending reopen so modal reopens on goBack()
+                pendingModalReopen.current = selectedDate;
                 setDayDetailModalVisible(false);
                 navigation.navigate('TradingJournal', {
                   mode: 'edit',
                   entryId: trade.id,
                   date: selectedDate,
+                  sourceScreen: 'VisionBoard',
+                  returnDate: selectedDate,
                 });
               }}
               onDeleteTradingEntry={async (trade) => {
@@ -7052,7 +7091,8 @@ const VisionBoardScreen = () => {
               }}
               onUpgradePress={() => {
                 setShowTemplateSelectorModal(false);
-                navigation.navigate('Subscription');
+                // UpgradeScreen is in same stack (AccountStack), so direct navigation works
+                navigation.navigate('UpgradeScreen');
               }}
               layout="grid"
               showDescription={true}

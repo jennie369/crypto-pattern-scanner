@@ -113,6 +113,9 @@ const ForumScreen = ({ navigation }) => {
   const lastPostIdRef = useRef(null);
   const lastCreatedAtRef = useRef(null); // Track last post created_at for pagination
 
+  // Request ID for cancelling stale requests when user switches tabs quickly
+  const currentRequestIdRef = useRef(0);
+
   // FlatList ref for scroll to top
   const flatListRef = useRef(null);
 
@@ -465,6 +468,10 @@ const ForumScreen = ({ navigation }) => {
     if (loadingMore && !reset) return;
     if (!reset && !hasMore) return;
 
+    // Generate unique request ID for this load to handle race conditions
+    // When user switches tabs quickly, older requests will be ignored
+    const requestId = reset ? ++currentRequestIdRef.current : currentRequestIdRef.current;
+
     // Track load performance (dev only)
     performanceService.startMeasure(`loadPosts.${reset ? 'reset' : 'page'}`);
 
@@ -480,7 +487,7 @@ const ForumScreen = ({ navigation }) => {
 
       // Use new hybrid feed algorithm for "explore" tab
       if (useHybridFeed && selectedFeed === 'explore' && user?.id) {
-        await loadHybridFeed(reset);
+        await loadHybridFeed(reset, requestId);
         return;
       }
 
@@ -490,7 +497,7 @@ const ForumScreen = ({ navigation }) => {
       // ============================================
       const currentPage = reset ? 1 : page;
 
-      console.log(`[ForumScreen] Loading ${selectedFeed} feed, page ${currentPage}`);
+      console.log(`[ForumScreen] Loading ${selectedFeed} feed, page ${currentPage}, requestId: ${requestId}`);
 
       // Get posts from API with feed type and topic filter
       // OPTIMIZED: Reduced limit for faster initial load
@@ -501,6 +508,13 @@ const ForumScreen = ({ navigation }) => {
         limit: 20,
         sortBy: selectedFeed === 'explore' ? 'hot' : 'latest',
       });
+
+      // RACE CONDITION FIX: Check if this request is still current
+      // If user switched tabs while loading, ignore this stale response
+      if (requestId !== currentRequestIdRef.current) {
+        console.log(`[ForumScreen] Ignoring stale response (requestId: ${requestId}, current: ${currentRequestIdRef.current})`);
+        return;
+      }
 
       // Handle new return format - posts is now an array of { type: 'post'/'ad', data: {...} }
       const feedData = result.posts || [];
@@ -551,29 +565,40 @@ const ForumScreen = ({ navigation }) => {
       console.log(`[ForumScreen] ${selectedFeed} feed: ${postsOnly.length} posts, hasMore: ${hasMoreData}`);
     } catch (error) {
       console.error('Error loading posts:', error);
-      // On error, still allow retry
-      setHasMore(true);
+      // On error, still allow retry (only if this is still the current request)
+      if (requestId === currentRequestIdRef.current) {
+        setHasMore(true);
+      }
     } finally {
       // End performance measurement (dev only)
       performanceService.endMeasure(`loadPosts.${reset ? 'reset' : 'page'}`, 2500);
-      setLoading(false);
-      setLoadingMore(false);
+      // Only update loading states if this is still the current request
+      if (requestId === currentRequestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   };
 
   // New: Load feed using hybrid algorithm with ads
   // INFINITE SCROLL: Always allow more loading
-  const loadHybridFeed = async (reset = false) => {
+  const loadHybridFeed = async (reset = false, requestId) => {
     // Track hybrid feed load performance (dev only)
     performanceService.startMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`);
 
     try {
       if (!reset) setLoadingMore(true);
-      console.log('[ForumScreen] Loading hybrid feed...', reset ? 'RESET' : `page after ${lastPostIdRef.current}`);
+      console.log('[ForumScreen] Loading hybrid feed...', reset ? 'RESET' : `page after ${lastPostIdRef.current}`, `requestId: ${requestId}`);
 
       if (reset) {
         // Generate new feed with new session - OPTIMIZED: reduced limit for faster initial load
         const result = await generateFeed(user.id, null, 15, false, true);
+
+        // RACE CONDITION FIX: Check if this request is still current
+        if (requestId !== currentRequestIdRef.current) {
+          console.log(`[ForumScreen] Ignoring stale hybrid feed response (requestId: ${requestId}, current: ${currentRequestIdRef.current})`);
+          return;
+        }
 
         setFeedItems(result.feed);
         setSessionId(result.sessionId);
@@ -610,6 +635,12 @@ const ForumScreen = ({ navigation }) => {
         }
 
         const result = await getNextFeedPage(user.id, sessionId, lastPostIdRef.current, 20);
+
+        // RACE CONDITION FIX: Check if this request is still current
+        if (requestId !== currentRequestIdRef.current) {
+          console.log(`[ForumScreen] Ignoring stale next page response (requestId: ${requestId}, current: ${currentRequestIdRef.current})`);
+          return;
+        }
 
         // Dedupe feed items before appending
         let newItemsCount = 0;
@@ -654,6 +685,13 @@ const ForumScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('[ForumScreen] Error loading hybrid feed:', error);
+
+      // RACE CONDITION FIX: Check if this request is still current before fallback
+      if (requestId !== currentRequestIdRef.current) {
+        console.log(`[ForumScreen] Ignoring stale error fallback (requestId: ${requestId}, current: ${currentRequestIdRef.current})`);
+        return;
+      }
+
       // Fallback to legacy loading with new return format
       setUseHybridFeed(false);
       const currentPage = reset ? 1 : page;
@@ -663,6 +701,13 @@ const ForumScreen = ({ navigation }) => {
         page: currentPage,
         limit: 20,
       });
+
+      // Check again after fallback fetch
+      if (requestId !== currentRequestIdRef.current) {
+        console.log(`[ForumScreen] Ignoring stale fallback response (requestId: ${requestId}, current: ${currentRequestIdRef.current})`);
+        return;
+      }
+
       // Handle new return format
       const feedData = result.posts || [];
       const postsOnly = feedData
@@ -698,8 +743,11 @@ const ForumScreen = ({ navigation }) => {
     } finally {
       // End performance measurement (dev only)
       performanceService.endMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`, 2500);
-      setLoading(false);
-      setLoadingMore(false);
+      // Only update loading states if this is still the current request
+      if (requestId === currentRequestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -1443,7 +1491,7 @@ const ForumScreen = ({ navigation }) => {
         <ScrollToTopButton
           visible={showScrollToTop}
           onPress={scrollToTop}
-          bottomOffset={160} // Above FABButton
+          bottomOffset={210} // Above FABButton (140 + 56 + 14 gap)
         />
       </View>
       {AlertComponent}

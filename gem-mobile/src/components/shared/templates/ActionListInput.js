@@ -529,17 +529,16 @@ const styles = StyleSheet.create({
     marginBottom: COSMIC_SPACING.xs,
   },
   suggestionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
     gap: COSMIC_SPACING.xs,
   },
   suggestionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     backgroundColor: COSMIC_COLORS.glass.bgDark,
     paddingHorizontal: COSMIC_SPACING.sm,
-    paddingVertical: COSMIC_SPACING.xs,
+    paddingVertical: COSMIC_SPACING.sm,
     borderRadius: COSMIC_RADIUS.sm,
     borderWidth: 1,
     borderColor: COSMIC_COLORS.glow.gold + '30',
@@ -548,7 +547,7 @@ const styles = StyleSheet.create({
   suggestionText: {
     fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
     color: COSMIC_COLORS.text.secondary,
-    maxWidth: 160,
+    flex: 1,
   },
 });
 

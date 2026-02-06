@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bai 2.2: Falling Wedge - Cai Nem Giam | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #8B5CF6;
+            --purple-dark: #6D28D9;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--purple); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--gold); bottom: -50px; right: 20%; }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: white;
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .highlight-box ul { color: var(--text-secondary); margin: 0.5rem 0 0 1.5rem; }
+        .highlight-box li { margin-bottom: var(--space-xs); }
+
+        .highlight-box.purple {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        @media (max-width: 600px) {
+            .highlight-box.purple {
+                border: none;
+                border-left: 4px solid var(--purple);
+            }
+        }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        @media (max-width: 600px) {
+            .highlight-box.cyan {
+                border: none;
+                border-left: 4px solid var(--cyan);
+            }
+        }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.green {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 1px solid rgba(0, 200, 83, 0.2);
+        }
+        @media (max-width: 600px) {
+            .highlight-box.green {
+                border: none;
+                border-left: 4px solid var(--success);
+            }
+        }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .highlight-box.red {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.1), rgba(255, 82, 82, 0.02));
+            border: 1px solid rgba(255, 82, 82, 0.2);
+        }
+        @media (max-width: 600px) {
+            .highlight-box.red {
+                border: none;
+                border-left: 4px solid var(--error);
+            }
+        }
+        .highlight-box.red .highlight-box-title { color: var(--error); }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        .pattern-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .pattern-flow {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-phase {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-phase {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+            }
+        }
+        .phase-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        .phase-content { flex: 1; }
+        .phase-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .phase-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .grid-item {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .grid-item {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md) 16px;
+                border-left: 4px solid var(--glass-border);
+            }
+        }
+        .grid-item.purple { border-left-color: var(--purple); }
+        .grid-item.gold { border-left-color: var(--gold); }
+        .grid-item.cyan { border-left-color: var(--cyan); }
+        .grid-item.green { border-left-color: var(--success); }
+        .grid-item.red { border-left-color: var(--error); }
+        .grid-item h4 { margin-bottom: var(--space-sm); }
+        .grid-item p { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.2), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--success);
+            margin-bottom: var(--space-xs);
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .comparison-table {
+                margin: var(--space-md) 0;
+            }
+        }
+        .comparison-table th, .comparison-table td {
+            padding: var(--space-md);
+            text-align: left;
+            border: 1px solid var(--glass-border);
+        }
+        .comparison-table th {
+            background: var(--bg-card);
+            color: var(--gold);
+            font-weight: 700;
+        }
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
+        .comparison-table tr:nth-child(even) td {
+            background: rgba(17, 34, 80, 0.3);
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: -16px;
+                margin-right: -16px;
+                margin-left: calc(-16px - 4px);
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+            color: var(--text-primary);
+        }
+        .quiz-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>Tier 3 Elite</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - Wedge Patterns</div>
+            <h1 class="lesson-title">Falling Wedge - Cai Nem Giam</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>Bai 2.2</span></div>
+                <div class="meta-item"><span>10 phut doc</span></div>
+                <div class="meta-item"><span>3 cau quiz</span></div>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span>📚</span> Falling Wedge La Gi?</h2>
+            <p>Falling Wedge la mot trong nhung bullish reversal pattern duoc trader ua chuong nhat. Pattern nay xuat hien khi gia giam dan nhung luc ban yeu di. No bao hieu xu huong giam sap ket thuc va gia se tang manh.</p>
+
+            <p>Day la nguoc lai hoan toan voi Rising Wedge ma ban hoc o bai truoc. Neu Rising Wedge la bearish thi Falling Wedge la bullish. Hieu ca hai se giup ban trade hieu qua hon.</p>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>🎯</span> Dinh nghia chinh xac</div>
+                <p>Falling Wedge la pattern voi hai duong trendline hoi tu huong xuong. Duong resistance noi cac dinh thap dan. Duong support noi cac day thap dan. Khoang cach giua hai duong thu hep lai theo thoi gian.</p>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-value">68-74%</div>
+                <div class="stat-label">Win Rate trung binh cua Falling Wedge Breakout (theo Bulkowski)</div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://placehold.co/800x400/112250/00C853?text=Falling+Wedge+-+Bullish+Reversal" alt="Falling Wedge Anatomy">
+                <p class="image-caption">Hinh 2.2.1: Cau truc co ban cua Falling Wedge - Bullish Reversal Pattern</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🔧</span> Cau Truc Cua Falling Wedge</h2>
+            <p>Falling Wedge co cau truc nguoc lai voi Rising Wedge. Hieu ro tung thanh phan giup ban nhan dien pattern chinh xac hon nhieu.</p>
+
+            <div class="pattern-flow">
+                <div class="flow-phase">
+                    <div class="phase-icon">📉</div>
+                    <div class="phase-content">
+                        <div class="phase-title">1. Downtrend Ban Dau</div>
+                        <div class="phase-desc">Falling Wedge thuong hinh thanh sau mot giai doan giam gia. Day la dieu kien de pattern mang y nghia reversal. Gia phai giam truoc do thi breakout moi co gia tri.</div>
+                    </div>
+                </div>
+                <div class="flow-phase">
+                    <div class="phase-icon">📐</div>
+                    <div class="phase-content">
+                        <div class="phase-title">2. Hai Duong Trendline Hoi Tu</div>
+                        <div class="phase-desc">Duong tren noi cac dinh Lower High. Duong duoi noi cac day Lower Low. Ca hai duong deu huong xuong nhung duong tren doc hon. Dieu nay tao hinh nem thu hep huong xuong.</div>
+                    </div>
+                </div>
+                <div class="flow-phase">
+                    <div class="phase-icon">📊</div>
+                    <div class="phase-content">
+                        <div class="phase-title">3. Volume Giam Dan</div>
+                        <div class="phase-desc">Volume thuong giam dan khi pattern phat trien. Day la dau hieu cho thay luc ban dang yeu di. Nguoi ban mat dan dong luc tiep tuc ban. Day la tin hieu bullish tiem an.</div>
+                    </div>
+                </div>
+                <div class="flow-phase">
+                    <div class="phase-icon">🚀</div>
+                    <div class="phase-content">
+                        <div class="phase-title">4. Breakout</div>
+                        <div class="phase-desc">Gia pha vo duong resistance phia tren voi volume tang manh. Day la tin hieu vao lenh Long. Breakout thuong xay ra o khoang 2/3 chieu dai cua wedge.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Luu Y Quan Trong</div>
+                <p>Falling Wedge can it nhat 2 diem cham cho moi duong trendline. Ly tuong la 3 diem cham tro len. Mot so trader doi 5 diem cham de dam bao pattern that su dang tin cay.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🧠</span> Tam Ly Dang Sau Falling Wedge</h2>
+            <p>Falling Wedge phan anh su thay doi tam ly tu bi quan sang lac quan. Hieu dieu nay giup ban tu tin hon khi trade pattern nay.</p>
+
+            <div class="grid-2">
+                <div class="grid-item red">
+                    <h4 style="color: var(--error);">😰 Giai Doan 1: Bi Quan</h4>
+                    <p>Nguoi ban van bi quan va tiep tuc day gia xuong. Ho tin rang xu huong giam se tiep tuc. Nhung moi dot giam gia lai yeu hon lan truoc.</p>
+                </div>
+                <div class="grid-item gold">
+                    <h4 style="color: var(--gold);">🤔 Giai Doan 2: Suy Nghi Lai</h4>
+                    <p>Nguoi ban bat dau suy nghi lai khi gia giam cham lai. Mot so nguoi mua bat dau tich luy. Thi truong dang can bang lai dan dan.</p>
+                </div>
+                <div class="grid-item cyan">
+                    <h4 style="color: var(--cyan);">😊 Giai Doan 3: Ky Vong</h4>
+                    <p>Nguoi mua bat dau tin tuong hon. Ho thay luc ban yeu di ro rang. Smart money bat dau tich luy o vung thap. Day la giai doan chuan bi.</p>
+                </div>
+                <div class="grid-item green">
+                    <h4 style="color: var(--success);">🎉 Giai Doan 4: Bung No</h4>
+                    <p>Khi breakout xay ra, nguoi mua nhay vao manh me. Nguoi Short bi quet stop loss. Gia tang manh va nhanh. Day la luc profit lon nhat.</p>
+                </div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🎯</span> Key Insight</div>
+                <p>Falling Wedge the hien su kiet suc cua phe ban. Gia giam nhung volume giam cho thay it nguoi muon ban o muc gia thap. Khi khong con ai ban, gia chi co the tang.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> So Sanh Rising Wedge vs Falling Wedge</h2>
+            <p>Hieu su khac biet giua hai pattern giup ban tranh nham lan. Day la bang so sanh chi tiet va de nho.</p>
+
+            <table class="comparison-table">
+                <tr>
+                    <th>Dac Diem</th>
+                    <th>Rising Wedge</th>
+                    <th>Falling Wedge</th>
+                </tr>
+                <tr>
+                    <td>Huong Pattern</td>
+                    <td>Huong len</td>
+                    <td>Huong xuong</td>
+                </tr>
+                <tr>
+                    <td>Loai Pattern</td>
+                    <td>Bearish Reversal</td>
+                    <td>Bullish Reversal</td>
+                </tr>
+                <tr>
+                    <td>Breakout</td>
+                    <td>Xuong duoi (Breakdown)</td>
+                    <td>Len tren (Breakout)</td>
+                </tr>
+                <tr>
+                    <td>Win Rate</td>
+                    <td>67-72%</td>
+                    <td>68-74%</td>
+                </tr>
+                <tr>
+                    <td>Entry</td>
+                    <td>Short sau breakdown</td>
+                    <td>Long sau breakout</td>
+                </tr>
+                <tr>
+                    <td>Stop Loss</td>
+                    <td>Tren dinh wedge</td>
+                    <td>Duoi day wedge</td>
+                </tr>
+            </table>
+
+            <div class="image-container">
+                <img src="https://placehold.co/800x350/112250/FFBD59?text=Rising+vs+Falling+Wedge+Comparison" alt="Comparison">
+                <p class="image-caption">Hinh 2.2.2: So sanh truc quan giua Rising Wedge va Falling Wedge</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Cach Trade Falling Wedge Hieu Qua</h2>
+            <p>Day la quy trinh trade Falling Wedge ma cac trader chuyen nghiep su dung. Lam theo tung buoc de tang ty le thanh cong.</p>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🎯</span> Entry Strategy</div>
+                <ul>
+                    <li><strong>Conservative:</strong> Cho gia dong cua tren resistance + retest thanh cong</li>
+                    <li><strong>Aggressive:</strong> Vao lenh ngay khi gia break len tren resistance</li>
+                    <li><strong>Confirmation:</strong> Volume phai tang it nhat 50% so voi trung binh</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>📏</span> Price Target</div>
+                <ul>
+                    <li><strong>Target 1:</strong> Chieu cao cua wedge (tu dinh den day) tinh tu diem breakout</li>
+                    <li><strong>Target 2:</strong> Dinh cua downtrend truoc do (neu co)</li>
+                    <li><strong>Target 3:</strong> Fibonacci 61.8% retracement cua downtrend truoc do</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>🛑</span> Stop Loss</div>
+                <ul>
+                    <li><strong>Vi tri:</strong> Dat stop loss duoi day thap nhat cua wedge</li>
+                    <li><strong>Buffer:</strong> Them 1-2% de tranh bi quet boi noise</li>
+                    <li><strong>Risk/Reward:</strong> Dam bao ty le toi thieu 1:2 truoc khi vao lenh</li>
+                </ul>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Pro Tip</div>
+                <p>Falling Wedge co win rate cao hon Rising Wedge mot chut (68-74% vs 67-72%). Ly do la breakout bullish thuong manh hon vi thuong co short squeeze kem theo.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> Canh Bao Va Luu Y</h2>
+            <p>Khong phai Falling Wedge nao cung thanh cong. Day la nhung dieu ban can luu y de tranh mat tien.</p>
+
+            <div class="grid-2">
+                <div class="grid-item gold">
+                    <h4 style="color: var(--gold);">⏰ Thoi Gian Hinh Thanh</h4>
+                    <p>Wedge can thoi gian de phat trien. Pattern qua ngan (duoi 3 nen) thuong khong dang tin cay. Ly tuong la 10-50 nen.</p>
+                </div>
+                <div class="grid-item cyan">
+                    <h4 style="color: var(--cyan);">📊 Volume Confirmation</h4>
+                    <p>Volume giam trong wedge, tang manh khi breakout. Neu breakout khong co volume, do la false breakout.</p>
+                </div>
+                <div class="grid-item purple">
+                    <h4 style="color: var(--purple);">🔄 Retest</h4>
+                    <p>Sau breakout, gia thuong quay lai test resistance cu. Day la co hoi entry tot nhat neu ban bo lo lan dau.</p>
+                </div>
+                <div class="grid-item green">
+                    <h4 style="color: var(--success);">📈 Trend Context</h4>
+                    <p>Falling Wedge trong uptrend lon la continuation. Falling Wedge trong downtrend la reversal. Boi canh rat quan trong.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="summary-box">
+            <div class="summary-title"><span>📋</span> Tom Tat Bai Hoc</div>
+            <ul class="summary-list">
+                <li>Falling Wedge la bullish reversal pattern voi win rate 68-74%</li>
+                <li>Hai duong trendline hoi tu huong xuong, khoang cach thu hep dan</li>
+                <li>Volume giam dan la dau hieu xac nhan quan trong</li>
+                <li>Entry khi gia break len resistance voi volume tang</li>
+                <li>Target bang chieu cao wedge tinh tu diem breakout</li>
+                <li>Stop loss dat duoi day thap nhat cua wedge</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiem Tra Kien Thuc</h2>
+                <p class="quiz-subtitle">Chon dap an dung de kiem tra hieu biet cua ban</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="A">
+                <div class="question-number">1</div>
+                <div class="question-text">Falling Wedge la loai pattern gi?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Bullish reversal pattern</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Bearish reversal pattern</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Neutral continuation pattern</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="B">
+                <div class="question-number">2</div>
+                <div class="question-text">Diem khac biet chinh giua Rising Wedge va Falling Wedge la gi?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">So diem cham trendline</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Huong breakout va y nghia bullish/bearish</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Thoi gian hinh thanh pattern</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="C">
+                <div class="question-number">3</div>
+                <div class="question-text">Win Rate cua Falling Wedge breakout la bao nhieu?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">55-60%</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">60-65%</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">68-74%</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoan thanh!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Lam Lai</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = 3;
+
+            const explanations = {
+                1: {
+                    correct: 'Chinh xac! Falling Wedge la bullish reversal pattern voi win rate 68-74%.',
+                    incorrect: 'Sai! Falling Wedge la bullish reversal pattern - bao hieu xu huong giam sap ket thuc.'
+                },
+                2: {
+                    correct: 'Dung! Rising Wedge bearish break xuong, Falling Wedge bullish break len.',
+                    incorrect: 'Sai! Diem khac biet chinh la huong breakout va y nghia bullish/bearish.'
+                },
+                3: {
+                    correct: 'Chinh xac! Theo nghien cuu cua Bulkowski, win rate la 68-74%.',
+                    incorrect: 'Sai! Win rate cua Falling Wedge breakout la 68-74% theo Bulkowski.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = 'Chinh xac!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = 'Sai roi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = correctCount + '/' + totalQuestions;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = 'Xuat sac! Ban da hieu ro Falling Wedge!';
+                            } else if (correctCount >= 2) {
+                                messageDiv.textContent = 'Tot lam! Xem lai phan ban tra loi sai nhe!';
+                            } else {
+                                messageDiv.textContent = 'Can xem lai bai hoc nhe!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

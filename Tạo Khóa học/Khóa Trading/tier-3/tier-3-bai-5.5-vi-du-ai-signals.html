@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.5: Ví Dụ AI Signals | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="tier-badge">TIER 3 - Elite</span>
+            <h1 class="lesson-title">Ví Dụ AI Signals</h1>
+            <p class="lesson-subtitle">Case Studies Thực Tế Với GEM AI Brain</p>
+        </header>
+
+        <section class="content-section">
+            <div class="section-icon">📚</div>
+            <h2 class="section-title">Học Từ Ví Dụ Thực Tế</h2>
+            <p>Trong bài này, chúng ta sẽ phân tích 3 case studies thực tế về cách sử dụng AI Signals kết hợp với phân tích con người. Mỗi ví dụ sẽ cho thấy quy trình đầy đủ từ nhận signal đến kết quả.</p>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>💡 Mục Tiêu:</strong> Hiểu rõ quy trình Hybrid Trading qua 3 scenarios khác nhau: trade thành công, trade thất bại, và quyết định skip.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">✅</div>
+            <h2 class="section-title">Case Study #1: Trade Thành Công</h2>
+
+            <div class="case-study-box success">
+                <h4>🟢 ETH/USDT - Long Setup thắng +18%</h4>
+                <p>Ngày 15/12/2024, AI phát hiện UPU pattern trên ETH 4H với confluence cao.</p>
+            </div>
+
+            <div class="signal-card">
+                <div class="signal-header">
+                    <span class="signal-pair">📊 ETH/USDT</span>
+                    <span class="signal-score high">Score: 87</span>
+                </div>
+                <div class="signal-details">
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Pattern:</span>
+                        <span class="signal-detail-value">UPU Retest</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Timeframe:</span>
+                        <span class="signal-detail-value">4H</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Zone:</span>
+                        <span class="signal-detail-value">$2,180 Support</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Confluence:</span>
+                        <span class="signal-detail-value">4/5 factors</span>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Timeline Quyết Định:</h4>
+
+            <div class="timeline-step">
+                <span class="timeline-time">14:00</span>
+                <div class="timeline-content">
+                    <h4>AI Alert Nhận Được</h4>
+                    <p>AI phát hiện ETH đang retest zone $2,180 với UPU pattern. Quality Score 87/100.</p>
+                </div>
+            </div>
+
+            <div class="timeline-step">
+                <span class="timeline-time">14:15</span>
+                <div class="timeline-content">
+                    <h4>Human Review</h4>
+                    <p>Kiểm tra checklist: Không có tin tức lớn, BTC đang sideway ổn định, Karma score tốt.</p>
+                </div>
+            </div>
+
+            <div class="timeline-step">
+                <span class="timeline-time">14:30</span>
+                <div class="timeline-content">
+                    <h4>Xác Nhận Candlestick</h4>
+                    <p>Thấy Bullish Engulfing hình thành tại zone. Quyết định vào lệnh Long.</p>
+                </div>
+            </div>
+
+            <div class="timeline-step">
+                <span class="timeline-time">14:35</span>
+                <div class="timeline-content">
+                    <h4>Entry Executed</h4>
+                    <p>Entry: $2,185 | SL: $2,120 (-3%) | TP: $2,580 (+18%)</p>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <div>
+                    <div class="result-value positive">+18.1%</div>
+                    <div class="result-label">Lợi Nhuận Đạt Được</div>
+                </div>
+                <div>
+                    <div class="result-value positive">6:1</div>
+                    <div class="result-label">Risk/Reward</div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x450/112250/10B981?text=ETH+UPU+Pattern+Chart+Win" alt="ETH UPU Pattern Thắng">
+                <p class="image-caption">Chart ETH/USDT 4H với UPU Pattern và kết quả trade</p>
+            </div>
+
+            <div class="highlight-box green">
+                <p style="margin-bottom: 0;"><strong>🎯 Key Takeaway:</strong> AI score 87 + Human confirmation (candlestick + checklist pass) = Trade thành công với R:R 6:1</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">❌</div>
+            <h2 class="section-title">Case Study #2: Trade Thất Bại - Bài Học</h2>
+
+            <div class="case-study-box" style="border-color: #EF4444;">
+                <h4 style="color: #EF4444;">🔴 SOL/USDT - Long Setup hit SL -2.5%</h4>
+                <p>Ngày 18/12/2024, trade với AI signal nhưng bỏ qua context quan trọng.</p>
+            </div>
+
+            <div class="signal-card">
+                <div class="signal-header">
+                    <span class="signal-pair">📊 SOL/USDT</span>
+                    <span class="signal-score high">Score: 82</span>
+                </div>
+                <div class="signal-details">
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Pattern:</span>
+                        <span class="signal-detail-value">DPU Breakout</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Timeframe:</span>
+                        <span class="signal-detail-value">1H</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Zone:</span>
+                        <span class="signal-detail-value">$98 Resistance</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Confluence:</span>
+                        <span class="signal-detail-value">3/5 factors</span>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Điều Gì Đã Xảy Ra:</h4>
+
+            <ul>
+                <li><strong>Bỏ qua tin tức:</strong> FOMC meeting diễn ra 2 giờ sau entry</li>
+                <li><strong>BTC đang yếu:</strong> BTC đang tạo lower high, không phải thời điểm long altcoins</li>
+                <li><strong>Vội vàng entry:</strong> Không chờ candlestick confirmation đầy đủ</li>
+            </ul>
+
+            <div class="result-box">
+                <div>
+                    <div class="result-value negative">-2.5%</div>
+                    <div class="result-label">Lỗ Chịu Được</div>
+                </div>
+                <div>
+                    <div class="result-value" style="color: #FFBD59;">Checklist Fail</div>
+                    <div class="result-label">Bỏ Qua 2/5 Câu</div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x450/112250/EF4444?text=SOL+Failed+Trade+Analysis" alt="SOL Trade Thất Bại">
+                <p class="image-caption">Phân tích trade SOL thất bại với các yếu tố bỏ qua</p>
+            </div>
+
+            <div class="highlight-box red">
+                <p style="margin-bottom: 0;"><strong>📚 Bài Học:</strong> AI score cao (82) vẫn có thể thua nếu bỏ qua Human Checklist. Luôn kiểm tra tin tức và BTC context trước khi trade.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">⏸️</div>
+            <h2 class="section-title">Case Study #3: Quyết Định SKIP</h2>
+
+            <div class="case-study-box warning">
+                <h4>🟡 AVAX/USDT - Skip Signal, Tránh Được -8%</h4>
+                <p>Ngày 20/12/2024, AI đưa signal nhưng trader quyết định skip dựa trên context.</p>
+            </div>
+
+            <div class="signal-card">
+                <div class="signal-header">
+                    <span class="signal-pair">📊 AVAX/USDT</span>
+                    <span class="signal-score medium">Score: 74</span>
+                </div>
+                <div class="signal-details">
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Pattern:</span>
+                        <span class="signal-detail-value">UPD Support</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Timeframe:</span>
+                        <span class="signal-detail-value">4H</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Zone:</span>
+                        <span class="signal-detail-value">$38 Support</span>
+                    </div>
+                    <div class="signal-detail">
+                        <span class="signal-detail-label">Confluence:</span>
+                        <span class="signal-detail-value">3/5 factors</span>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Lý Do Skip:</h4>
+
+            <ul>
+                <li><strong>Score chỉ 74:</strong> Đủ threshold nhưng không outstanding</li>
+                <li><strong>BTC đang dump:</strong> BTC giảm 4% trong 24h, risk cho altcoins cao</li>
+                <li><strong>Đã có 2 lệnh mở:</strong> Thêm AVAX sẽ overexposure crypto</li>
+                <li><strong>Volume thấp bất thường:</strong> Liquidity kém, dễ bị stop hunt</li>
+            </ul>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Điều Xảy Ra Sau Đó:</h4>
+            <p>AVAX break support $38 và dump thêm 8% xuống $35. Nếu đã entry, SL sẽ hit và còn có thể bị slippage.</p>
+
+            <div class="result-box">
+                <div>
+                    <div class="result-value positive">0%</div>
+                    <div class="result-label">Không Mất Tiền</div>
+                </div>
+                <div>
+                    <div class="result-value positive">-8% Avoided</div>
+                    <div class="result-label">Tránh Được Lỗ</div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x450/112250/FFBD59?text=AVAX+Skip+Decision+Chart" alt="AVAX Skip Decision">
+                <p class="image-caption">Chart AVAX và lý do quyết định skip trade</p>
+            </div>
+
+            <div class="highlight-box gold">
+                <p style="margin-bottom: 0;"><strong>💡 Wisdom:</strong> Đôi khi KHÔNG trade là trade tốt nhất. AI chỉ là công cụ - con người vẫn có quyền quyết định cuối cùng.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">📊</div>
+            <h2 class="section-title">Tổng Kết 3 Case Studies</h2>
+
+            <div class="highlight-box">
+                <p><strong>🎯 Pattern Nhận Ra:</strong></p>
+                <ul style="margin-bottom: 0;">
+                    <li><strong>Case 1 (Win):</strong> AI Score cao + Human Checklist PASS = Entry</li>
+                    <li><strong>Case 2 (Lose):</strong> AI Score cao + Human Checklist FAIL = Không nên entry</li>
+                    <li><strong>Case 3 (Skip):</strong> AI Score trung bình + Context xấu = Skip</li>
+                </ul>
+            </div>
+
+            <p>Điều quan trọng không phải là win rate 100% (không thể đạt được), mà là:</p>
+            <ol>
+                <li><strong>Tuân thủ quy trình:</strong> AI Scan → Human Review → Decision</li>
+                <li><strong>Bảo toàn vốn:</strong> Chấp nhận skip trade hơn là mất tiền</li>
+                <li><strong>Học từ lỗi:</strong> Mỗi trade (win hay lose) đều là bài học</li>
+            </ol>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/8B5CF6?text=3+Case+Studies+Summary+Infographic" alt="Tổng Kết 3 Cases">
+                <p class="image-caption">Infographic tổng kết 3 case studies và bài học</p>
+            </div>
+        </section>
+
+        <section class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul>
+                <li><strong>AI Score cao không đảm bảo win</strong> - cần Human Review</li>
+                <li><strong>Checklist 5 câu</strong> là yếu tố quyết định cuối cùng</li>
+                <li><strong>Skip trade</strong> khi context không phù hợp dù signal đẹp</li>
+                <li><strong>Tin tức và BTC context</strong> là 2 yếu tố override quan trọng nhất</li>
+                <li><strong>Trade tốt nhất</strong> đôi khi là không trade</li>
+            </ul>
+        </section>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">1. Trong Case Study #2 (SOL thua), yếu tố nào đã bị bỏ qua?</p>
+                <button class="quiz-option" data-index="0">AI Score quá thấp</button>
+                <button class="quiz-option" data-index="1">Tin tức FOMC và BTC context</button>
+                <button class="quiz-option" data-index="2">Pattern không đúng</button>
+                <button class="quiz-option" data-index="3">Zone support sai</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">2. Trong Case Study #3 (AVAX skip), quyết định skip đã giúp tránh được bao nhiêu % lỗ tiềm năng?</p>
+                <button class="quiz-option" data-index="0">2.5%</button>
+                <button class="quiz-option" data-index="1">5%</button>
+                <button class="quiz-option" data-index="2">8%</button>
+                <button class="quiz-option" data-index="3">18%</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="quiz-score-text">Bạn trả lời đúng <span id="correct-count">0</span>/2 câu hỏi!</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 3 Elite</p>
+            <p>© 2024 GEM Trading. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(q => {
+            const ci = parseInt(q.dataset.correct);
+            const opts = q.querySelectorAll('.quiz-option');
+            const res = q.querySelector('.quiz-result');
+            opts.forEach(o => {
+                o.addEventListener('click', function() {
+                    if (q.classList.contains('answered')) return;
+                    q.classList.add('answered');
+                    answeredCount++;
+                    const si = parseInt(this.dataset.index);
+                    if (si === ci) {
+                        this.classList.add('correct');
+                        res.textContent = '✓ Chính xác!';
+                        res.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        opts[ci].classList.add('correct');
+                        res.textContent = '✗ Chưa đúng. Hãy xem lại case study.';
+                        res.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

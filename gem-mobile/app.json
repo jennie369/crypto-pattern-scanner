@@ -45,7 +45,13 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#05040B"
       },
+      "splash": {
+        "image": "./assets/splash-android.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#05040B"
+      },
       "package": "com.gemral.mobile",
+      "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "resize",
       "permissions": [
         "android.permission.CAMERA",
@@ -103,8 +109,13 @@
             },
             {
               "scheme": "https",
-              "host": "link.gemral.app",
-              "pathPrefix": "/p/"
+              "host": "gemral.com",
+              "pathPrefix": "/products/"
+            },
+            {
+              "scheme": "https",
+              "host": "www.gemral.com",
+              "pathPrefix": "/products/"
             },
             {
               "scheme": "https",

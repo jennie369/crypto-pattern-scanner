@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.1: Whale Là Ai? | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="tier-badge">TIER 3 - Elite</span>
+            <h1 class="lesson-title">Whale Là Ai?</h1>
+            <p class="lesson-subtitle">Hiểu Về Những Người Chơi Lớn Trong Crypto</p>
+        </header>
+
+        <section class="content-section">
+            <div class="section-icon">🐋</div>
+            <h2 class="section-title">Định Nghĩa Whale</h2>
+            <p>Trong crypto, "Whale" (cá voi) là thuật ngữ chỉ những <strong style="color: #6366F1;">người hoặc tổ chức nắm giữ lượng lớn cryptocurrency</strong>. Họ có khả năng ảnh hưởng đáng kể đến giá thị trường thông qua các giao dịch của mình.</p>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>🐋 Quy Ước Phổ Biến:</strong> Whale là ví nắm giữ ≥ 1,000 BTC hoặc tương đương (khoảng $40-50 triệu USD)</p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-item">
+                    <div class="stat-value">~2,000</div>
+                    <div class="stat-label">Ví Whale BTC</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">40%</div>
+                    <div class="stat-label">Supply Nắm Giữ</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">$1B+</div>
+                    <div class="stat-label">Giao Dịch/Ngày</div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/6366F1?text=Whale+Distribution+Chart" alt="Phân Bố Whale">
+                <p class="image-caption">Biểu đồ phân bố ví Whale trong thị trường crypto</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">👥</div>
+            <h2 class="section-title">Các Loại Whale</h2>
+            <p>Không phải tất cả whale đều giống nhau. Hiểu các loại whale giúp bạn dự đoán hành vi của họ:</p>
+
+            <div class="whale-type-grid">
+                <div class="whale-type">
+                    <h4>🏛️ Tổ Chức (Institutions)</h4>
+                    <div class="size">$100M - $10B+</div>
+                    <p>Quỹ đầu tư, công ty như MicroStrategy, Tesla. Giao dịch có kế hoạch, ít tác động ngắn hạn.</p>
+                </div>
+
+                <div class="whale-type" style="border-top-color: #FFBD59;">
+                    <h4>💼 Quỹ Hedge (Hedge Funds)</h4>
+                    <div class="size">$50M - $500M</div>
+                    <p>Giao dịch tích cực, có thể long/short. Ảnh hưởng lớn đến biến động ngắn hạn.</p>
+                </div>
+
+                <div class="whale-type" style="border-top-color: #10B981;">
+                    <h4>👤 Early Adopters</h4>
+                    <div class="size">$10M - $1B</div>
+                    <p>Những người mua BTC sớm (2009-2013). Thường HODL dài hạn, ít trade.</p>
+                </div>
+
+                <div class="whale-type" style="border-top-color: #00F0FF;">
+                    <h4>🏦 Sàn Giao Dịch</h4>
+                    <div class="size">$1B - $50B</div>
+                    <p>Ví cold storage của Binance, Coinbase. Di chuyển để rebalance, không phải trade.</p>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/FFBD59?text=Whale+Types+Infographic" alt="Các Loại Whale">
+                <p class="image-caption">Infographic các loại Whale và đặc điểm của họ</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">🎯</div>
+            <h2 class="section-title">Tại Sao Theo Dõi Whale?</h2>
+            <p>Whale tracking là kỹ năng quan trọng của Elite Trader. Đây là lý do:</p>
+
+            <div class="reason-list">
+                <div class="reason-item">
+                    <div class="reason-number">1</div>
+                    <div class="reason-content">
+                        <h4>Họ Có Thông Tin Tốt Hơn</h4>
+                        <p>Institutions có team phân tích, insider connections, và resources mà retail không có.</p>
+                    </div>
+                </div>
+
+                <div class="reason-item">
+                    <div class="reason-number">2</div>
+                    <div class="reason-content">
+                        <h4>Họ Di Chuyển Thị Trường</h4>
+                        <p>Một lệnh $50M có thể đẩy giá 2-5%. Biết trước = cơ hội lớn.</p>
+                    </div>
+                </div>
+
+                <div class="reason-item">
+                    <div class="reason-number">3</div>
+                    <div class="reason-content">
+                        <h4>Họ Không Thể Ẩn</h4>
+                        <p>Blockchain là công khai. Mọi giao dịch đều visible - chỉ cần biết cách tìm.</p>
+                    </div>
+                </div>
+
+                <div class="reason-item">
+                    <div class="reason-number">4</div>
+                    <div class="reason-content">
+                        <h4>Họ Có Pattern</h4>
+                        <p>Tích lũy trước khi pump, phân phối trước khi dump. Pattern lặp lại.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box gold">
+                <p style="margin-bottom: 0;"><strong>💡 Pro Tip:</strong> "Trade with whales, not against them." - Đi cùng chiều với whale, không chống lại họ.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">🔍</div>
+            <h2 class="section-title">Whale Không Thể Ẩn</h2>
+            <p>Điểm mạnh lớn nhất của crypto: <strong style="color: #00F0FF;">blockchain là công khai</strong>. Mọi giao dịch đều được ghi lại và ai cũng có thể xem.</p>
+
+            <div class="whale-card">
+                <h4>📊 Những Gì Có Thể Theo Dõi:</h4>
+                <ul style="margin-bottom: 0;">
+                    <li><strong>Wallet addresses:</strong> Theo dõi ví whale đã biết</li>
+                    <li><strong>Large transactions:</strong> Giao dịch > $1M</li>
+                    <li><strong>Exchange inflows/outflows:</strong> Tiền vào/ra sàn</li>
+                    <li><strong>Accumulation patterns:</strong> Mua dần nhiều ngày</li>
+                    <li><strong>Distribution patterns:</strong> Bán dần ra</li>
+                </ul>
+            </div>
+
+            <p>Các công cụ phổ biến để theo dõi whale:</p>
+            <ul>
+                <li><strong>Whale Alert:</strong> Twitter bot báo giao dịch lớn</li>
+                <li><strong>Glassnode:</strong> On-chain analytics cao cấp</li>
+                <li><strong>Santiment:</strong> Social + on-chain data</li>
+                <li><strong>Etherscan/Blockchain.com:</strong> Xem trực tiếp blockchain</li>
+            </ul>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/00F0FF?text=Whale+Tracking+Tools+Dashboard" alt="Công Cụ Theo Dõi Whale">
+                <p class="image-caption">Dashboard các công cụ theo dõi whale phổ biến</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">⚠️</div>
+            <h2 class="section-title">Cảnh Báo: Không Phải Mọi Whale Move Đều Có Ý Nghĩa</h2>
+            <p>Trước khi hành động theo whale, hãy hiểu context:</p>
+
+            <ul>
+                <li><strong>Exchange rebalancing:</strong> Sàn di chuyển tiền giữa ví hot/cold - không phải trade signal</li>
+                <li><strong>OTC trades:</strong> Giao dịch ngoài sàn, không ảnh hưởng giá ngay</li>
+                <li><strong>HODL wallets:</strong> Early adopters di chuyển tiền để bảo mật, không phải bán</li>
+                <li><strong>Smart contract interactions:</strong> DeFi, staking - không phải dump</li>
+            </ul>
+
+            <div class="highlight-box cyan">
+                <p style="margin-bottom: 0;"><strong>🛡️ Quy Tắc:</strong> Whale move + GEM pattern confirmation = High probability trade. Whale move alone = Cần xác minh thêm.</p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x350/112250/EF4444?text=False+Whale+Signals+Warning" alt="Cảnh Báo Tín Hiệu Sai">
+                <p class="image-caption">Các tình huống whale move KHÔNG phải trading signal</p>
+            </div>
+        </section>
+
+        <section class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul>
+                <li><strong>Whale</strong> là ví nắm ≥ 1,000 BTC hoặc tương đương $40-50M</li>
+                <li><strong>4 loại chính:</strong> Institutions, Hedge Funds, Early Adopters, Exchanges</li>
+                <li><strong>Theo dõi whale</strong> vì họ có thông tin tốt và di chuyển thị trường</li>
+                <li><strong>Blockchain công khai</strong> - whale không thể ẩn giao dịch</li>
+                <li><strong>Luôn xác minh context</strong> - không phải mọi whale move đều có ý nghĩa</li>
+            </ul>
+        </section>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">1. Theo quy ước phổ biến, whale BTC là ví nắm giữ bao nhiêu?</p>
+                <button class="quiz-option" data-index="0">≥ 100 BTC</button>
+                <button class="quiz-option" data-index="1">≥ 500 BTC</button>
+                <button class="quiz-option" data-index="2">≥ 1,000 BTC</button>
+                <button class="quiz-option" data-index="3">≥ 10,000 BTC</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">2. Tại sao whale KHÔNG THỂ ẩn giao dịch của họ?</p>
+                <button class="quiz-option" data-index="0">Vì sàn giao dịch báo cáo</button>
+                <button class="quiz-option" data-index="1">Vì blockchain là công khai</button>
+                <button class="quiz-option" data-index="2">Vì chính phủ theo dõi</button>
+                <button class="quiz-option" data-index="3">Vì họ phải đăng ký với SEC</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="quiz-score-text">Bạn trả lời đúng <span id="correct-count">0</span>/2 câu hỏi!</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 3 Elite</p>
+            <p>© 2024 GEM Trading. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(q => {
+            const ci = parseInt(q.dataset.correct);
+            const opts = q.querySelectorAll('.quiz-option');
+            const res = q.querySelector('.quiz-result');
+            opts.forEach(o => {
+                o.addEventListener('click', function() {
+                    if (q.classList.contains('answered')) return;
+                    q.classList.add('answered');
+                    answeredCount++;
+                    const si = parseInt(this.dataset.index);
+                    if (si === ci) {
+                        this.classList.add('correct');
+                        res.textContent = '✓ Chính xác!';
+                        res.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        opts[ci].classList.add('correct');
+                        res.textContent = '✗ Chưa đúng. Hãy xem lại nội dung bài học.';
+                        res.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

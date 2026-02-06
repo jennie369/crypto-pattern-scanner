@@ -156,6 +156,13 @@ const InAppNotificationToast = memo(({
 
   if (!notification) return null;
 
+  // CRITICAL: NEVER show toast for incoming calls - we use fullscreen UI instead
+  // This prevents duplicate notification UI on iOS (fullscreen + toast)
+  if (notification.type === NOTIFICATION_TYPES.INCOMING_CALL) {
+    console.log('[InAppNotificationToast] Blocking toast for incoming call - use fullscreen UI');
+    return null;
+  }
+
   // Get icon based on type
   const getIcon = () => {
     switch (notification.type) {

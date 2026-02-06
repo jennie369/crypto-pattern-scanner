@@ -261,56 +261,60 @@ class NotificationService {
 
   /**
    * Save push token to database
+   * IMPORTANT: Use correct column names and include platform
    */
   async savePushTokenToDatabase(userId, pushToken) {
     try {
-      const deviceType = Platform.OS;
-      const deviceName = Device?.modelName || Device?.deviceName || 'Unknown Device';
-
-      // Upsert token (insert or update if exists)
+      // Use upsert with user_id as conflict key to ensure one token per user
+      // This also updates platform when user switches devices
       const { error } = await supabase
         .from('user_push_tokens')
         .upsert({
           user_id: userId,
-          push_token: pushToken,
-          device_type: deviceType,
-          device_name: deviceName,
+          token: pushToken,  // Correct column name is 'token', not 'push_token'
+          platform: Platform.OS,  // CRITICAL: Include platform for correct push routing
           is_active: true,
           updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id,push_token',
-        });
+        }, { onConflict: 'user_id' });
 
       if (error) {
-        // Table might not exist yet
-        if (error.code === 'PGRST205' || error.code === '42P01') {
-          console.warn('[Notifications] user_push_tokens table not found');
+        // Ignore table/column issues
+        if (error.code === 'PGRST205' || error.code === 'PGRST204' || error.code === '42P01' || error.code === '42501') {
+          console.warn('[Notifications] user_push_tokens table/column issue:', error.code);
           return;
         }
-        console.error('[Notifications] savePushTokenToDatabase error:', error);
+        console.error('[Notifications] Save push token error:', error.message, error.code);
       } else {
-        console.log('[Notifications] Push token saved to database');
+        console.log('[Notifications] Push token saved to database, platform:', Platform.OS);
       }
     } catch (error) {
-      console.error('[Notifications] savePushTokenToDatabase error:', error);
+      console.error('[Notifications] savePushTokenToDatabase exception:', error?.message || error);
     }
   }
 
   /**
    * Remove push token from database (on logout)
+   * IMPORTANT: Completely delete the token to prevent notifications going to wrong device
    */
   async removePushToken() {
     try {
       const storedToken = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
-      if (!storedToken) return;
 
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Completely delete the token instead of just deactivating
         await supabase
           .from('user_push_tokens')
-          .update({ is_active: false })
-          .eq('user_id', user.id)
-          .eq('push_token', storedToken);
+          .delete()
+          .eq('user_id', user.id);
+
+        // Also clear from profiles table
+        await supabase
+          .from('profiles')
+          .update({ expo_push_token: null })
+          .eq('id', user.id);
+
+        console.log('[Notifications] Push token deleted from database');
       }
 
       await AsyncStorage.removeItem(PUSH_TOKEN_KEY);

@@ -51,6 +51,10 @@ class WebRTCService {
     this.isVideoEnabled = false;
     this.isSpeakerOn = false;
     this.isFrontCamera = true;
+    this.hasRemoteDescription = false; // Track if remote description is set
+
+    // ICE candidate queue - store candidates that arrive before remote description
+    this.pendingIceCandidates = [];
 
     // Quality monitoring
     this.statsInterval = null;
@@ -224,6 +228,20 @@ class WebRTCService {
     try {
       console.log('[WebRTC] Creating offer');
 
+      // GUARD: Check if peer connection exists
+      if (!this.peerConnection) {
+        console.error('[WebRTC] createOffer called but peerConnection is null');
+        throw new Error('Peer connection not initialized');
+      }
+
+      // GUARD: Check signaling state
+      const signalingState = this.peerConnection.signalingState;
+      console.log('[WebRTC] Current signaling state:', signalingState);
+      if (signalingState === 'closed') {
+        console.error('[WebRTC] createOffer called but peerConnection is closed');
+        throw new Error('Peer connection is closed');
+      }
+
       const offer = await this.peerConnection.createOffer({
         offerToReceiveAudio: true,
         offerToReceiveVideo: this.isVideoEnabled,
@@ -248,11 +266,46 @@ class WebRTCService {
   /**
    * Set remote offer và tạo answer (Callee)
    * @param {Object} offer - SDP offer từ caller
-   * @returns {Promise<{type: string, sdp: string}>}
+   * @returns {Promise<{type: string, sdp: string}|null>}
    */
   async handleOffer(offer) {
     try {
       console.log('[WebRTC] Handling offer');
+
+      // GUARD: Check if peer connection exists
+      if (!this.peerConnection) {
+        console.error('[WebRTC] handleOffer called but peerConnection is null');
+        throw new Error('Peer connection not initialized');
+      }
+
+      // GUARD: Check signaling state
+      const signalingState = this.peerConnection.signalingState;
+      console.log('[WebRTC] Current signaling state:', signalingState);
+      console.log('[WebRTC] hasRemoteDescription:', this.hasRemoteDescription);
+
+      // Check if connection is closed
+      if (signalingState === 'closed') {
+        console.error('[WebRTC] handleOffer called but peerConnection is closed');
+        throw new Error('Peer connection is closed');
+      }
+
+      // If we already have a remote description AND we're in stable state,
+      // it means we've already completed a negotiation - this is a duplicate offer
+      // NOTE: "stable" state for a fresh peer connection is NORMAL - it means ready to receive offer
+      if (signalingState === 'stable' && this.hasRemoteDescription) {
+        console.log('[WebRTC] Already negotiated (stable with remote desc), ignoring duplicate offer');
+        return null;
+      }
+
+      // CRITICAL: If we already have a local offer (have-local-offer state),
+      // we need to handle this as a "glare" situation (both sides sent offers)
+      // The polite peer should rollback, the impolite peer continues
+      if (signalingState === 'have-local-offer') {
+        console.log('[WebRTC] Glare detected - we have local offer but received remote offer');
+        // For simplicity, we'll rollback our offer and accept the remote one
+        await this.peerConnection.setLocalDescription({ type: 'rollback' });
+        console.log('[WebRTC] Rolled back local offer');
+      }
 
       await this.peerConnection.setRemoteDescription(
         new RTCSessionDescription({
@@ -260,6 +313,10 @@ class WebRTCService {
           sdp: offer.sdp,
         })
       );
+
+      // Mark remote description as set and process queued ICE candidates
+      this.hasRemoteDescription = true;
+      await this._processPendingIceCandidates();
 
       const answer = await this.peerConnection.createAnswer();
       await this.peerConnection.setLocalDescription(answer);
@@ -284,6 +341,40 @@ class WebRTCService {
     try {
       console.log('[WebRTC] Handling answer');
 
+      // GUARD: Check if peer connection exists
+      if (!this.peerConnection) {
+        console.error('[WebRTC] handleAnswer called but peerConnection is null');
+        return;
+      }
+
+      // GUARD: Check if we already have a remote description (answer already processed)
+      if (this.hasRemoteDescription) {
+        console.log('[WebRTC] Already have remote description, ignoring duplicate answer');
+        return;
+      }
+
+      // Check signaling state
+      const signalingState = this.peerConnection.signalingState;
+      console.log('[WebRTC] Current signaling state:', signalingState);
+
+      // Check if already in stable state (connection already established)
+      if (signalingState === 'stable') {
+        console.log('[WebRTC] Already in stable state, ignoring duplicate answer');
+        return;
+      }
+
+      // Check if connection is closed
+      if (signalingState === 'closed') {
+        console.error('[WebRTC] handleAnswer called but peerConnection is closed');
+        return;
+      }
+
+      // Only proceed if we're in the correct state (have-local-offer)
+      if (signalingState !== 'have-local-offer') {
+        console.warn('[WebRTC] Unexpected signaling state for answer:', signalingState);
+        return;
+      }
+
       await this.peerConnection.setRemoteDescription(
         new RTCSessionDescription({
           type: 'answer',
@@ -291,8 +382,18 @@ class WebRTCService {
         })
       );
 
+      // Mark remote description as set and process queued ICE candidates
+      this.hasRemoteDescription = true;
+      await this._processPendingIceCandidates();
+
       console.log('[WebRTC] Remote description set');
     } catch (error) {
+      // Handle "wrong state: stable" error gracefully - this means connection is already established
+      if (error.message?.includes('stable')) {
+        console.log('[WebRTC] Answer arrived but connection already stable - ignoring');
+        this.hasRemoteDescription = true; // Mark as processed
+        return;
+      }
       console.error('[WebRTC] Failed to handle answer:', error);
       throw error;
     }
@@ -302,11 +403,21 @@ class WebRTCService {
 
   /**
    * Thêm ICE candidate
+   * If remote description is not set yet, queue the candidate for later
    * @param {Object} candidate - ICE candidate
    */
   async addIceCandidate(candidate) {
     try {
-      if (this.peerConnection && candidate) {
+      if (!candidate) return;
+
+      // If remote description not set yet, queue the candidate
+      if (!this.hasRemoteDescription) {
+        console.log('[WebRTC] Remote description not set, queueing ICE candidate');
+        this.pendingIceCandidates.push(candidate);
+        return;
+      }
+
+      if (this.peerConnection) {
         await this.peerConnection.addIceCandidate(
           new RTCIceCandidate(candidate)
         );
@@ -316,6 +427,32 @@ class WebRTCService {
       console.error('[WebRTC] Failed to add ICE candidate:', error);
       // Non-fatal error, continue
     }
+  }
+
+  /**
+   * Process pending ICE candidates after remote description is set
+   * @private
+   */
+  async _processPendingIceCandidates() {
+    if (this.pendingIceCandidates.length === 0) return;
+
+    console.log('[WebRTC] Processing', this.pendingIceCandidates.length, 'queued ICE candidates');
+
+    for (const candidate of this.pendingIceCandidates) {
+      try {
+        if (this.peerConnection) {
+          await this.peerConnection.addIceCandidate(
+            new RTCIceCandidate(candidate)
+          );
+          console.log('[WebRTC] Queued ICE candidate added');
+        }
+      } catch (error) {
+        console.error('[WebRTC] Failed to add queued ICE candidate:', error);
+      }
+    }
+
+    // Clear the queue
+    this.pendingIceCandidates = [];
   }
 
   // ========== MEDIA CONTROLS ==========
@@ -634,6 +771,8 @@ class WebRTCService {
     this.isVideoEnabled = false;
     this.isSpeakerOn = false;
     this.lastStats = null;
+    this.hasRemoteDescription = false;
+    this.pendingIceCandidates = [];
 
     // Reset callbacks
     this.onRemoteStream = null;

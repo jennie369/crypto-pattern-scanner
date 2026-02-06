@@ -277,7 +277,8 @@ const TemplateInlineForm = ({
               style={styles.upgradeButton}
               onPress={() => {
                 handleClose();
-                navigation.navigate('Subscription');
+                // Navigate to Upgrade screen (UpgradeScreen is in AccountStack)
+                navigation.navigate('Account', { screen: 'UpgradeScreen' });
               }}
             >
               <Text style={styles.upgradeButtonText}>Nâng cấp ngay</Text>

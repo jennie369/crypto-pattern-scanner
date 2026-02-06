@@ -120,6 +120,9 @@ import SupportTicketsScreen from '../screens/Admin/SupportTicketsScreen';
 import TicketDetailScreen from '../screens/Admin/TicketDetailScreen';
 import CreateTicketScreen from '../screens/Help/CreateTicketScreen';
 
+// Checkout WebView (for UpgradeScreen navigation from modal)
+import CheckoutWebView from '../screens/Shop/CheckoutWebView';
+
 // VisionBoard Screens
 import {
   VisionBoardScreen,
@@ -264,6 +267,16 @@ export default function AccountStack() {
       <Stack.Screen
         name="TierDetail"
         component={TierDetailScreen}
+        options={{
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Checkout WebView - For UpgradeScreen Learn More */}
+      <Stack.Screen
+        name="CheckoutWebView"
+        component={CheckoutWebView}
         options={{
           headerShown: false,
           animation: 'slide_from_right',

@@ -31,6 +31,10 @@ const CACHE_KEYS = {
   PRODUCTS: '@gem_cache_products',
   COURSES: '@gem_cache_courses',
   ACHIEVEMENTS: '@gem_cache_achievements',
+  // Messaging cache keys
+  CONVERSATIONS: '@gem_cache_conversations',
+  PINNED_CONVERSATIONS: '@gem_cache_pinned_convos',
+  ARCHIVED_CONVERSATIONS: '@gem_cache_archived_convos',
   // GEM Master Chatbot Enhancement keys
   CHATBOT_PROFILE: '@gem_cache_chatbot_profile',
   RECENT_MEMORIES: '@gem_cache_memories',
@@ -55,6 +59,10 @@ const TTL_CONFIG = {
   PRODUCTS: 15 * 60 * 1000,              // 15 minutes
   COURSES: 1 * 60 * 60 * 1000,           // 1 hour
   ACHIEVEMENTS: 24 * 60 * 60 * 1000,     // 24 hours
+  // Messaging TTLs
+  CONVERSATIONS: 5 * 60 * 1000,          // 5 minutes
+  PINNED_CONVERSATIONS: 15 * 60 * 1000,  // 15 minutes
+  ARCHIVED_CONVERSATIONS: 15 * 60 * 1000, // 15 minutes
   // GEM Master Chatbot Enhancement TTLs
   CHATBOT_PROFILE: 5 * 60 * 1000,        // 5 minutes
   RECENT_MEMORIES: 2 * 60 * 1000,        // 2 minutes

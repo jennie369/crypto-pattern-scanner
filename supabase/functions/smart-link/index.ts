@@ -7,7 +7,10 @@
  * 3. Redirects to App Store / Play Store if app not installed
  * 4. Tracks clicks in database
  *
- * URL Format: https://link.gemral.app/p/{shortCode}?ref={affiliateCode}&pid={productId}&handle={productHandle}
+ * URL Format: https://gemral.com/products/{handle}?ref={affiliateCode}&pid={productId}
+ *
+ * NOTE: This function requires a dedicated subdomain (e.g., go.gemral.com) that is NOT on Shopify,
+ * since Shopify handles all traffic to gemral.com and doesn't allow custom server-side logic.
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -127,8 +130,8 @@ serve(async (req) => {
 
     // For desktop, redirect to Shopify product page
     const shopifyUrl = productHandle || productInfo?.product_handle
-      ? `https://yinyangmasters.com/products/${productHandle || productInfo.product_handle}?ref=${affiliateCode}`
-      : 'https://yinyangmasters.com/collections/all';
+      ? `https://gemral.com/products/${productHandle || productInfo.product_handle}?ref=${affiliateCode}`
+      : 'https://gemral.com/collections/all';
 
     return Response.redirect(shopifyUrl, 302);
   } catch (error) {
@@ -423,7 +426,7 @@ function getErrorPage() {
   <div class="container">
     <h1>Link không hợp lệ</h1>
     <p>Đường dẫn này không tồn tại hoặc đã hết hạn.</p>
-    <a href="https://yinyangmasters.com">Về trang chủ</a>
+    <a href="https://gemral.com">Về trang chủ</a>
   </div>
 </body>
 </html>

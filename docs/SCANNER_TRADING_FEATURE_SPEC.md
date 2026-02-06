@@ -1,8 +1,8 @@
 # GEM Mobile - Scanner/Trading Tab
 # COMPLETE FEATURE SPECIFICATION
 
-**Version:** 3.2
-**Last Updated:** 2026-01-29
+**Version:** 4.0
+**Last Updated:** 2026-02-06
 **Platform:** React Native (Expo)
 **Author:** GEM Development Team
 
@@ -26,9 +26,10 @@
 ## Lợi Ích Chính
 
 ### 1. Phát Hiện Mẫu Hình Tự Động
-- **24 mẫu hình kỹ thuật** được hỗ trợ: Head & Shoulders, Double Top/Bottom, Flag, Wedge, Triangle, và nhiều hơn nữa
-- **Độ chính xác cao** với thuật toán AI phân tích hành động giá
-- **Tỷ lệ thắng lịch sử** hiển thị cho từng pattern (dựa trên backtest data)
+- **24+ mẫu hình kỹ thuật** được hỗ trợ: Head & Shoulders, Double Top/Bottom, Flag, Wedge, Triangle, và nhiều hơn nữa
+- **GEM Frequency Method**: Phương pháp Move-Pause-Move độc quyền (DPD/UPU/DPU/UPD)
+- **Zone Hierarchy**: DP > FTR > FL > Regular (xếp hạng độ mạnh zone)
+- **8 Odds Enhancers**: Hệ thống chấm điểm chất lượng zone (0-16 điểm)
 - **Tự động tính Entry, Stop Loss, Take Profit** - không cần tính toán thủ công
 
 ### 2. Quét Đa Coin & Đa Khung Thời Gian
@@ -73,54 +74,11 @@
 
 ---
 
-## Điểm Nổi Bật So Với Đối Thủ
-
-| Tính Năng | GEM Scanner | TradingView | Coinigy |
-|-----------|-------------|-------------|---------|
-| Quét tự động 500+ coin | ✅ | ❌ Manual | ❌ Limited |
-| Paper Trading tích hợp | ✅ | ❌ | ❌ |
-| AI đề xuất Entry/SL/TP | ✅ | ❌ | ❌ |
-| Multi-TF Confluence | ✅ | ❌ | ❌ |
-| Mobile-first | ✅ | ⚠️ Web-based | ⚠️ Web-based |
-| Định dạng số Việt Nam | ✅ | ❌ | ❌ |
-| Mindset Check trước giao dịch | ✅ | ❌ | ❌ |
-
----
-
-## Các Trường Hợp Sử Dụng
-
-### 1. Tìm Cơ Hội Giao Dịch Nhanh
-> "Tôi có 15 phút buổi sáng, muốn xem thị trường có setup nào tốt không"
-
-→ Mở Scanner → Chọn Top 20 coin → Scan Now → Xem patterns với confidence > 80%
-
-### 2. Luyện Tập Không Rủi Ro
-> "Tôi mới học trading, muốn thử chiến lược mà không mất tiền thật"
-
-→ Sử dụng Paper Trading → Mở lệnh theo pattern → Theo dõi P&L → Học từ kết quả
-
-### 3. Xác Nhận Setup Cá Nhân
-> "Tôi thấy 1 setup trên BTCUSDT, muốn AI đánh giá xem có tốt không"
-
-→ Chọn Custom Mode → Nhập Entry/SL/TP của bạn → Xem AI Score (0-100)
-
-### 4. Theo Dõi Đa Coin
-> "Tôi muốn biết coin nào đang có pattern trên H4"
-
-→ Chọn ALL coins → Scan trên H4 → Xem kết quả grouped theo coin
-
-### 5. Phân Tích Multi-Timeframe
-> "Pattern này có mạnh không? Các TF khác có confirm không?"
-
-→ Scan 1 coin → Xem Multi-TF Results (TIER2+) → Check Confluence Score
-
----
-
 ## Bảng So Sánh Các Gói
 
 | Tính Năng | FREE | TIER1 | TIER2 | TIER3 |
 |-----------|------|-------|-------|-------|
-| Số mẫu hình | 3 | 7 | 15 | **24** |
+| Số mẫu hình | 3 | 7 | 15 | **24+** |
 | Coin/lần quét | 1 | 5 | 20 | **Không giới hạn** |
 | Khung thời gian | 1 | 1 | 3 | **5+** |
 | Multi-TF Scan | ❌ | ❌ | ✅ | ✅ |
@@ -135,30 +93,6 @@
 
 ---
 
-## Hỗ Trợ Kỹ Thuật
-
-### Dữ Liệu Giá
-- **Nguồn**: Binance Futures API (realtime)
-- **Fallback**: Binance Spot API
-- **Cập nhật**: WebSocket streaming cho giá live
-
-### Lưu Trữ Dữ Liệu
-- **Paper Trades**: AsyncStorage (local) + Supabase (cloud sync)
-- **Drawings**: Supabase (cloud, cross-device)
-- **Settings**: AsyncStorage (local)
-
-### Hiển Thị
-- **Chart**: lightweight-charts v4.1.0 (WebView)
-- **Định dạng số**: Vietnamese locale (dấu phẩy là phần thập phân)
-
----
-
-## Keywords (SEO/ASO)
-
-`crypto scanner`, `pattern detection`, `trading bot`, `paper trading`, `binance futures`, `technical analysis`, `chart patterns`, `head and shoulders`, `fibonacci`, `multi-timeframe`, `AI trading`, `quét pattern crypto`, `giao dịch giả lập`, `phân tích kỹ thuật`
-
----
-
 # TÀI LIỆU KỸ THUẬT CHI TIẾT
 
 *Phần dưới đây dành cho developers và technical reference.*
@@ -169,20 +103,23 @@
 
 1. [Executive Summary](#1-executive-summary)
 2. [Architecture Overview](#2-architecture-overview)
-3. [Core Screens](#3-core-screens)
-4. [Scanner Components](#4-scanner-components)
-5. [Trading Components](#5-trading-components)
-6. [Drawing Tools](#6-drawing-tools)
-7. [Services & Business Logic](#7-services--business-logic)
-8. [Design System](#8-design-system)
-9. [User Flows](#9-user-flows)
-10. [Data Structures](#10-data-structures)
-11. [Trading Modes](#11-trading-modes)
-12. [Tier Access Control](#12-tier-access-control)
-13. [Real-time Features](#13-real-time-features)
-14. [Error Handling](#14-error-handling)
-15. [Performance Optimizations](#15-performance-optimizations)
-16. [File Manifest](#16-file-manifest)
+3. [Pattern Detection Engine](#3-pattern-detection-engine)
+4. [Zone Hierarchy System](#4-zone-hierarchy-system)
+5. [Odds Enhancers Scoring](#5-odds-enhancers-scoring)
+6. [Core Screens](#6-core-screens)
+7. [Scanner Components](#7-scanner-components)
+8. [Trading Components](#8-trading-components)
+9. [Drawing Tools](#9-drawing-tools)
+10. [Services & Business Logic](#10-services--business-logic)
+11. [Design System](#11-design-system)
+12. [User Flows](#12-user-flows)
+13. [Data Structures](#13-data-structures)
+14. [Trading Modes](#14-trading-modes)
+15. [Tier Access Control](#15-tier-access-control)
+16. [Real-time Features](#16-real-time-features)
+17. [Error Handling](#17-error-handling)
+18. [Performance Optimizations](#18-performance-optimizations)
+19. [File Manifest](#19-file-manifest)
 
 ---
 
@@ -190,7 +127,7 @@
 
 ### 1.1 Overview
 The Scanner/Trading tab is the core trading interface of GEM Mobile, enabling users to:
-- Detect technical patterns across 500+ cryptocurrency pairs
+- Detect technical patterns across 500+ cryptocurrency pairs using the GEM Frequency Method
 - Execute paper trades with simulated capital (Pattern Mode & Custom Mode)
 - Track portfolio performance in real-time
 - Analyze multi-timeframe confluence (TIER2+)
@@ -200,7 +137,9 @@ The Scanner/Trading tab is the core trading interface of GEM Mobile, enabling us
 ### 1.2 Key Features
 | Feature | Description |
 |---------|-------------|
-| Pattern Detection | AI-driven analysis of 24 technical patterns |
+| Pattern Detection | GEM Frequency Method + 24 technical patterns |
+| Zone Hierarchy | DP > FTR > FL > Regular classification |
+| 8 Odds Enhancers | Zone quality scoring (0-16 points) |
 | Multi-Coin Scanning | Scan up to 1000 coins in parallel batches |
 | Paper Trading | Simulated trading with configurable capital |
 | Pending Orders | Limit orders that fill when price reaches entry |
@@ -235,7 +174,7 @@ ScannerScreen (Main Tab)
 │   │   ├── VolumeToggle
 │   │   ├── DrawingToggle
 │   │   └── ZoomControls
-│   ├── DrawingToolbar (NEW)
+│   ├── DrawingToolbar
 │   │   ├── ToolButtons (6 tools)
 │   │   ├── MagnetToggle
 │   │   └── DeleteAll
@@ -256,24 +195,6 @@ ScannerScreen (Main Tab)
 │   ├── Calculations
 │   └── SubmitButton
 └── SponsorBanners
-
-OpenPositionsScreen
-├── StatsContainer
-│   ├── BalanceCard
-│   └── StatsGrid
-├── PendingOrdersSection (NEW)
-│   └── PendingOrderCard[]
-├── PositionCard[]
-│   ├── EditMode (Custom Mode)
-│   └── CloseButton
-└── HistoryLink
-
-PortfolioScreen
-├── BalanceCard
-├── ActionButtons
-├── SponsorBanners
-└── CoinList
-    └── CoinCard[]
 ```
 
 ### 2.2 Data Flow
@@ -284,9 +205,10 @@ Scan Flow:
 1. User clicks "Scan Now"
 2. patternDetection.detectPatterns() called
 3. binanceService.getKlines() fetches candles
-4. Algorithm analyzes patterns
-5. Results stored in ScannerContext
-6. UI updates with patterns
+4. GEM Frequency Method + pattern algorithms analyze data
+5. Zone hierarchy and odds enhancers calculated
+6. Results stored in ScannerContext
+7. UI updates with patterns (sorted by strength + hierarchy)
 
 Paper Trade Flow:
 1. User opens PaperTradeModal
@@ -295,38 +217,325 @@ Paper Trade Flow:
 4. Position stored locally + synced to Supabase
 5. Real-time P&L tracking begins
 6. Auto-close on SL/TP hit
-
-Drawing Flow:
-1. User opens DrawingToolbar
-2. Selects tool (1-click or 2-click)
-3. Clicks on chart
-4. WebView captures click, snaps to OHLC (magnet mode)
-5. Drawing rendered and saved to Supabase
-6. Loaded on next chart open
-```
-
-### 2.3 Navigation Structure
-```
-AccountStack
-├── AccountScreen
-│   └── PortfolioScreen
-│   └── PaperTradeHistoryScreen
-
-ScannerScreen (Tab - No Stack)
-├── NavigateTo: PatternDetailScreen
-├── NavigateTo: OpenPositionsScreen
-└── Modal: PaperTradeModal
 ```
 
 ---
 
-## 3. CORE SCREENS
+## 3. PATTERN DETECTION ENGINE
 
-### 3.1 ScannerScreen (Main)
+### 3.1 GEM Frequency Method (Core Engine)
+**Path:** `gem-mobile/src/services/patternDetection.js`
+
+The GEM Frequency Method is the core pattern detection algorithm based on the Move-Pause-Move structure.
+
+#### 3.1.1 Core Patterns
+| Pattern | Structure | Zone Type | Direction | Win Rate | R:R |
+|---------|-----------|-----------|-----------|----------|-----|
+| **UPD** | Up→Pause→Down | HFZ (Supply) | SHORT | 65% | 2.2 |
+| **DPU** | Down→Pause→Up | LFZ (Demand) | LONG | 69% | 2.6 |
+| **DPD** | Down→Pause→Down | HFZ | SHORT | 68% | 2.5 |
+| **UPU** | Up→Pause→Up | LFZ | LONG | 71% | 2.8 |
+
+#### 3.1.2 Zone Types
+| Zone | Full Name | Trading Bias | Entry Rule | Stop Rule |
+|------|-----------|--------------|------------|-----------|
+| **HFZ** | High Frequency Zone (Supply) | SELL | Entry = LOW of pause | Stop = HIGH of pause |
+| **LFZ** | Low Frequency Zone (Demand) | BUY | Entry = HIGH of pause | Stop = LOW of pause |
+
+#### 3.1.3 Detection Algorithm
+```javascript
+// Core GEM Pattern Detection (patternDetection.js)
+findGEMPattern(candles, type) {
+  // Phase 1: Detect Impulsive Move
+  const move1 = detectImpulsiveMove(candles, lookback, type);
+  // Requirements:
+  // - Minimum 2% move for continuation
+  // - Minimum 1.5% for reversal
+  // - >= 2 consecutive candles in direction
+
+  // Phase 2: Detect Pause Zone
+  const pause = detectPauseZone(candles, move1EndIndex, maxPauseCandles);
+  // Requirements:
+  // - 2-6 candles maximum
+  // - Total range < 1.5% of price
+  // - Small body candles (consolidation)
+
+  // Phase 3: Detect Continuation/Reversal Move
+  const move2 = detectMove2(candles, pauseEndIndex, type);
+  // Requirements:
+  // - Confirms direction (DPD/UPU = same, DPU/UPD = opposite)
+  // - Impulsive ratio check
+
+  return { move1, pause, move2, zoneHigh, zoneLow };
+}
+```
+
+### 3.2 Classic Patterns
+
+#### 3.2.1 Head & Shoulders / Inverse H&S
+| Pattern | Win Rate | R:R | Detection Logic |
+|---------|----------|-----|-----------------|
+| H&S | 72% | 3.0 | 3 peaks, head > shoulders by 10%, neckline break confirmation |
+| IH&S | 75% | 3.0 | 3 troughs, head deeper by 10%, neckline break confirmation |
+
+```javascript
+// H&S Detection Requirements
+- 3 swing highs (left shoulder, head, right shoulder)
+- Head > Shoulders * 1.10 (10% higher)
+- Shoulders within 3% of each other
+- Neckline break confirmation (close below neckline)
+- Entry: Neckline retest (not breakout)
+- Stop: Above head
+- Target: Measured move (head height projected from neckline)
+```
+
+#### 3.2.2 Double Top / Double Bottom
+| Pattern | Win Rate | R:R | Detection Logic |
+|---------|----------|-----|-----------------|
+| Double Top | 68% | 2.5 | 2 peaks within 2%, trough depth >= 3%, min 5 candles between |
+| Double Bottom | 70% | 2.7 | 2 troughs within 2%, peak height >= 3%, min 5 candles between |
+
+### 3.3 Continuation Patterns
+
+#### Bull/Bear Flag
+```javascript
+// Flag Detection Requirements
+- Pole: >= 5% directional move
+- Flag: Range < 3% of price
+- Flag drifts counter to pole direction
+- Entry: Breakout above/below flag boundary
+- Target: Pole length projected from breakout
+```
+
+#### Triangles
+| Pattern | Type | Entry | Target |
+|---------|------|-------|--------|
+| Ascending Triangle | Bullish | Breakout above flat resistance | Height of triangle |
+| Descending Triangle | Bearish | Breakout below flat support | Height of triangle |
+| Symmetrical Triangle | Neutral | Wait for breakout direction | Height of triangle |
+
+#### Wedge
+```javascript
+// Wedge Detection
+- Rising Wedge: Bearish (converging highs/lows, both rising)
+- Falling Wedge: Bullish (converging highs/lows, both falling)
+- Entry: Breakout opposite to wedge direction
+- Target: Widest part of wedge
+```
+
+### 3.4 Advanced Patterns (Dedicated Detectors)
+
+#### 3.4.1 Quasimodo (QM)
+**Path:** `gem-mobile/src/services/quasimodoDetector.js`
+
+```javascript
+// QM Bullish Structure
+Prior downtrend → LL (Head) → LH1 (QML) → HH → HL1 → Break of Structure
+
+// Entry at QML retest
+// Stop at MPL (Maximum Pain Level = Head)
+// Win Rate: ~68%
+
+// Key Detection Points:
+- HEAD = lowest/highest point
+- QML = first higher low / lower high (entry point)
+- BOS = Break of Structure confirmation (HH/LL)
+- MPL = Head level (stop loss reference)
+```
+
+#### 3.4.2 Fail To Return (FTR)
+**Path:** `gem-mobile/src/services/ftrDetector.js`
+
+```javascript
+// FTR Bearish Structure
+Price breaks resistance → Forms base above broken level →
+"Fails to return" below → Creates HFZ
+
+// Requirements:
+- S/R break >= 0.5%
+- Base stays beyond broken level
+- Return distance < 30% of move
+- New high/low confirmation
+- FTB (First Time Back) = freshest zone
+```
+
+#### 3.4.3 Flag Limit (FL)
+**Path:** `gem-mobile/src/services/flagLimitDetector.js`
+
+```javascript
+// Flag Limit = FTR with 1-2 candle base
+// "Every FL is an FTR, but not every FTR is an FL"
+
+// Requirements:
+- Must be UPU (bullish) or DPD (bearish) pattern
+- Base must have ONLY 1-2 candles
+- Must be WITHIN existing trend (not at turning point)
+- Pause range < 2x average candle range
+```
+
+#### 3.4.4 Decision Point (DP)
+**Path:** `gem-mobile/src/services/decisionPointDetector.js`
+
+```javascript
+// DP = Origin of major impulsive move
+
+// Requirements:
+- Minimum move percent from origin (configurable)
+- Move must be multiple of pause range (minMoveMultiple)
+- Impulsive ratio check (% of candles in direction)
+- Zone hierarchy level 1 (highest priority)
+```
+
+### 3.5 Candlestick Patterns
+
+| Pattern | Direction | Detection | Win Rate |
+|---------|-----------|-----------|----------|
+| Bullish Engulfing | LONG | Current body > 1.5x previous, engulfs fully | 64% |
+| Bearish Engulfing | SHORT | Current body > 1.5x previous, engulfs fully | 64% |
+| Morning Star | LONG | 3-candle: down, small doji, up | 66% |
+| Evening Star | SHORT | 3-candle: up, small doji, down | 66% |
+| Hammer | LONG | Lower shadow > 2x body, small upper shadow, after downtrend | 62% |
+| Shooting Star | SHORT | Upper shadow > 2x body, small lower shadow, after uptrend | 62% |
+| Rising Three Methods | LONG | 5-candle: up, 3 small counter-trend within range, up | 67% |
+| Falling Three Methods | SHORT | 5-candle: down, 3 small counter-trend within range, down | 67% |
+
+### 3.6 Confirmation Patterns
+**Path:** `gem-mobile/src/services/confirmationPatterns.js`
+
+Confirmation patterns are detected AT zone touches to increase trade probability.
+
+```javascript
+// Scan for confirmation when price is near zone
+scanConfirmationPatterns(candles, zone) {
+  // Check last 5 candles for:
+  - Engulfing (bullish/bearish)
+  - Pin Bar (long wick rejection)
+  - Hammer / Shooting Star
+  - Doji at zone
+
+  // Returns: { patterns, score, bestPattern }
+}
+
+// Confirmation boost: +10 confidence if confirmScore >= 5
+```
+
+---
+
+## 4. ZONE HIERARCHY SYSTEM
+
+**Path:** `gem-mobile/src/constants/zoneHierarchyConfig.js`
+
+### 4.1 Hierarchy Levels
+| Level | Name | Short | Strength | Color | Description |
+|-------|------|-------|----------|-------|-------------|
+| 1 | Decision Point | DP | ⭐⭐⭐⭐⭐ | #9C0612 (Burgundy) | Origin of major move - Strongest zone |
+| 2 | Fail To Return | FTR | ⭐⭐⭐⭐ | #FFBD59 (Gold) | Zone after S/R break - Trend confirmation |
+| 3 | Flag Limit | FL | ⭐⭐⭐ | #22C55E (Green) | Zone in trend with 1-2 candle base |
+| 4 | Regular | REG | ⭐⭐ | #6B7280 (Gray) | Regular zone - Needs additional confluence |
+
+### 4.2 Sorting Priority
+Patterns are sorted by:
+1. **Primary:** Pattern strength (stars) descending
+2. **Secondary:** Zone hierarchy level ascending (DP=1 best)
+3. **Tertiary:** Confidence descending
+
+```javascript
+// Sort implementation (patternDetection.js)
+validPatterns.sort((a, b) => {
+  // Primary: strength descending
+  const strengthA = PATTERN_CONFIG[a.patternType]?.strength || 0;
+  const strengthB = PATTERN_CONFIG[b.patternType]?.strength || 0;
+  if (strengthB !== strengthA) return strengthB - strengthA;
+
+  // Secondary: hierarchy ascending (1 best)
+  const hierA = a.zoneHierarchyLevel || 4;
+  const hierB = b.zoneHierarchyLevel || 4;
+  if (hierA !== hierB) return hierA - hierB;
+
+  // Tertiary: confidence descending
+  return b.confidence - a.confidence;
+});
+```
+
+### 4.3 Zone Hierarchy Display
+```javascript
+// ZoneHierarchyBadge component
+const hierarchyConfig = {
+  DECISION_POINT: { icon: 'Crown', color: '#9C0612' },
+  FTR: { icon: 'Target', color: '#FFBD59' },
+  FLAG_LIMIT: { icon: 'Flag', color: '#22C55E' },
+  REGULAR: { icon: 'Circle', color: '#6B7280' },
+};
+```
+
+---
+
+## 5. ODDS ENHANCERS SCORING
+
+**Path:** `gem-mobile/src/constants/oddsEnhancersConfig.js`
+
+### 5.1 The 8 Odds Enhancers
+Each criterion scores 0-2 points. Total max score: 16 points.
+
+| # | Enhancer | Description | Score 0 | Score 1 | Score 2 |
+|---|----------|-------------|---------|---------|---------|
+| 1 | **Departure Strength** | How fast price left zone | Weak candle | Body >= 50% range | Body >= 70%, gap |
+| 2 | **Time at Level** | Candles in pause zone | > 6 candles | 3-6 candles | 1-2 candles (fresh) |
+| 3 | **Freshness** | Times zone tested | 3+ tests (stale) | 1-2 tests | FTB (never tested) |
+| 4 | **Profit Margin** | Distance to opposing zone | < 2x width | 2-4x width | > 4x width |
+| 5 | **Big Picture** | HTF trend alignment | Counter trend | Unknown/sideways | With trend |
+| 6 | **Zone Origin** | Hierarchy classification | Regular | FTR/FL | DP/QM |
+| 7 | **Arrival Speed** | How price arrived at zone | Fast/impulsive | Medium | Slow/grinding |
+| 8 | **Risk/Reward** | R:R ratio to opposing zone | < 2:1 | 2-3:1 | >= 3:1 |
+
+### 5.2 Grade Calculation
+```javascript
+// Grade based on total score (0-16)
+const GRADE_THRESHOLDS = {
+  'A+': { min: 14, color: '#00FF88' },
+  'A':  { min: 12, color: '#00FF88' },
+  'B+': { min: 10, color: '#FFBD59' },
+  'B':  { min: 8,  color: '#FFBD59' },
+  'C':  { min: 6,  color: '#FF9500' },
+  'D':  { min: 0,  color: '#FF4757' },
+};
+```
+
+### 5.3 Odds Calculation Logic
+```javascript
+// patternDetection.js - calculateOddsEnhancers()
+calculateOddsEnhancers(pattern, candles, currentPrice) {
+  const enhancers = {};
+
+  // 1. Departure Strength
+  if (pattern.departureStrength >= 3) enhancers.departureStrength = 2;
+  else if (pattern.departureStrength >= 1.5) enhancers.departureStrength = 1;
+
+  // 2. Time at Level
+  if (pattern.pauseCandleCount <= 2) enhancers.timeAtLevel = 2;
+  else if (pattern.pauseCandleCount <= 6) enhancers.timeAtLevel = 1;
+
+  // 3. Freshness (FTB for new detections)
+  enhancers.freshness = 2; // New zones are FTB by definition
+
+  // 4. Profit Margin (distance to opposing zone)
+  const opposingDistance = calculateOpposingZoneDistance(pattern, candles);
+  if (opposingDistance > zoneWidth * 3) enhancers.profitMargin = 2;
+  else if (opposingDistance > zoneWidth * 1.5) enhancers.profitMargin = 1;
+
+  // 5. Big Picture (trend alignment)
+  // ...continues for all 8 enhancers
+
+  return { totalScore, maxScore: 16, enhancers };
+}
+```
+
+---
+
+## 6. CORE SCREENS
+
+### 6.1 ScannerScreen (Main)
 **Path:** `gem-mobile/src/screens/Scanner/ScannerScreen.js`
-
-#### Purpose
-Main trading interface for pattern detection, paper trading, and chart analysis
 
 #### Layout Structure
 ```
@@ -349,9 +558,9 @@ Main trading interface for pattern detection, paper trading, and chart analysis
 │ └─────────────────────────────────┘ │
 ├─────────────────────────────────────┤
 │ ▼ BTCUSDT (3 patterns)             │
-│   ├── [Head & Shoulders] 85% SHORT │  ← Scan Results
-│   ├── [Double Top] 78% SHORT       │
-│   └── [Bullish Flag] 72% LONG      │
+│   ├── [UPD] 85% SHORT ⭐⭐⭐⭐⭐    │  ← Scan Results
+│   ├── [H&S] 78% SHORT ⭐⭐⭐⭐     │
+│   └── [DPD] 72% SHORT ⭐⭐⭐       │
 ├─────────────────────────────────────┤
 │ 📊 Multi-TF Confluence (TIER2+)    │  ← Multi-TF Section
 └─────────────────────────────────────┘
@@ -362,7 +571,7 @@ Main trading interface for pattern detection, paper trading, and chart analysis
 // From ScannerContext (Persisted)
 const {
   scanResults,        // Array<ScanResult>
-  patterns,           // Array<Pattern> - sorted by confidence
+  patterns,           // Array<Pattern> - sorted by strength + hierarchy
   selectedCoins,      // Array<string> - symbols to scan
   selectedTimeframe,  // string - '1h', '4h', '1d', '1w'
   multiTFResults,     // MultiTFResult | null
@@ -379,51 +588,10 @@ const [currentPrice, setCurrentPrice] = useState(null);
 const [priceChange, setPriceChange] = useState(null);
 const [paperTradeModalVisible, setPaperTradeModalVisible] = useState(false);
 const [selectedPattern, setSelectedPattern] = useState(null);
-const [openPositionsCount, setOpenPositionsCount] = useState(0);
-const [scanQuota, setScanQuota] = useState({ allowed: true, remaining: 5 });
-
-// Drawing State (in TradingChart)
-const [showDrawingToolbar, setShowDrawingToolbar] = useState(false);
-const [drawingMode, setDrawingMode] = useState(null);
-const [drawings, setDrawings] = useState([]);
-const [magnetMode, setMagnetMode] = useState(true);
-const [pendingPoints, setPendingPoints] = useState(0);
 ```
 
-#### Key Functions
-```javascript
-// Scan all selected coins
-handleScan(coinsToScan = null)
-  → Sets scanning state
-  → Calls patternDetection.detectPatterns() for each coin
-  → Batches 50 coins at a time (parallel)
-  → Updates scanResults & patterns in context
-  → Auto-triggers multi-TF for TIER2+ (single coin)
-  → Increments scan quota
-
-// Subscribe to price updates
-subscribeToPrice(symbol)
-  → Opens WebSocket to Binance (fstream.binance.com)
-  → Updates currentPrice & priceChange on message
-
-// Open paper trade modal
-handlePaperTrade(pattern)
-  → Sets selectedPattern
-  → Opens PaperTradeModal
-
-// Refresh positions count
-handlePaperTradeSuccess()
-  → Closes modal
-  → Updates openPositionsCount
-```
-
----
-
-### 3.2 OpenPositionsScreen
+### 6.2 OpenPositionsScreen
 **Path:** `gem-mobile/src/screens/Scanner/OpenPositionsScreen.js`
-
-#### Purpose
-View and manage open paper trading positions and pending limit orders with real-time P&L
 
 #### Layout Structure
 ```
@@ -455,69 +623,13 @@ View and manage open paper trading positions and pending limit orders with real-
 │ │ SL: $41,000     TP: $44,000    │ │
 │ │ Margin: $500    Lev: 10x       │ │
 │ └─────────────────────────────────┘ │
-│ ┌─────────────────────────────────┐ │
-│ │ ETHUSDT  SHORT [Custom]  [X]   │ │
-│ │ -$45.20 (-4.5%)   [Chỉnh TP/SL]│ │  ← Editable
-│ │ ...                             │ │
-│ └─────────────────────────────────┘ │
 ├─────────────────────────────────────┤
 │ 📜 Xem Lịch Sử Paper Trade →       │  ← History Link
 └─────────────────────────────────────┘
 ```
 
-#### Real-time Updates
-```javascript
-// Price update interval
-useEffect(() => {
-  const interval = setInterval(async () => {
-    // Fetch current prices from Binance
-    const prices = await binanceService.getBatchPrices(symbols);
-
-    // Check pending orders
-    const { filled } = await paperTradeService.checkPendingOrders(prices);
-
-    // Update positions with new prices
-    const { closed } = await paperTradeService.updatePrices(prices);
-
-    // Reload positions
-    setPositions(paperTradeService.getOpenPositions(userId));
-    setPendingOrders(paperTradeService.getPendingOrders(userId));
-  }, 10000); // Every 10 seconds
-
-  return () => clearInterval(interval);
-}, [symbols]);
-```
-
-#### Close Position Flow
-```javascript
-handleClosePosition(position)
-  → Show confirmation alert
-  → Get current price from Binance
-  → Call paperTradeService.closePosition()
-  → Calculate realized P&L
-  → Show success/loss notification
-  → Remove from positions list
-  → Update balance
-```
-
-#### Edit TP/SL Flow (Custom Mode Only)
-```javascript
-handleEditSave(positionId)
-  → Validate SL/TP values
-    → LONG: SL < Entry < TP
-    → SHORT: SL > Entry > TP
-  → Call paperTradeService.updatePosition()
-  → Recalculate risk/reward
-  → Update UI
-```
-
----
-
-### 3.3 PatternDetailScreen
+### 6.3 PatternDetailScreen
 **Path:** `gem-mobile/src/screens/Scanner/PatternDetailScreen.js`
-
-#### Purpose
-Detailed analysis view of a detected pattern with editable price levels
 
 #### Layout Structure
 ```
@@ -534,68 +646,25 @@ Detailed analysis view of a detected pattern with editable price levels
 │ │                                 │ │
 │ └─────────────────────────────────┘ │
 ├─────────────────────────────────────┤
-│ Current Price: $42,100              │  ← Price Card
-│ P&L: +$125 (+2.5%)  (if open)      │
-├─────────────────────────────────────┤
-│ ┌───────────┐ ┌───────────┐        │
-│ │ Entry     │ │ Take Profit│        │
-│ │ $42,000   │ │ $40,000 ✏️ │        │  ← Price Levels
-│ └───────────┘ └───────────┘        │
-│ ┌───────────┐ ┌───────────┐        │
-│ │ Stop Loss │ │ Liquidation│        │
-│ │ $43,000 ✏️│ │ $37,000   │        │
-│ └───────────┘ └───────────┘        │
+│ Zone Hierarchy: DP ⭐⭐⭐⭐⭐        │  ← Zone Info
+│ Odds Score: 14/16 (Grade A+)       │
 ├─────────────────────────────────────┤
 │ ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐
 │ │ 85%   │ │ 2.1:1 │ │ 72%   │ │  4H   │  ← Stats Grid
 │ │Confid.│ │  R:R  │ │WinRate│ │  TF   │
 │ └───────┘ └───────┘ └───────┘ └───────┘
 ├─────────────────────────────────────┤
-│ AI Score: 78/100  (Custom Mode)    │  ← AI Assessment
+│ ✓ Departure: Strong (2/2)          │
+│ ✓ Time at Level: Fresh (2/2)       │  ← Odds Enhancers
+│ ✓ Big Picture: With Trend (2/2)    │
+│ ✓ Zone Origin: DP (2/2)            │
 ├─────────────────────────────────────┤
-│ ✓ Volume Confirmation               │
-│ ✓ Trend Alignment: Strong           │  ← Enhancement (TIER2+)
-│ ✓ S/R Confluence: 85                │
-│ ✓ RSI Divergence Detected           │
-├─────────────────────────────────────┤
-│ Classic bearish reversal pattern... │  ← Description
-├─────────────────────────────────────┤
-│ [       Đóng Lệnh (red)          ] │  ← Close Button (if open)
+│ [       Đóng Lệnh (red)          ] │  ← Close Button
 └─────────────────────────────────────┘
 ```
 
-#### Trade Modes Comparison
-| Feature | Pattern Mode | Custom Mode |
-|---------|--------------|-------------|
-| Entry Price | Auto (locked) | Editable |
-| Stop Loss | Auto (locked) | Editable |
-| Take Profit | Auto (locked) | Editable |
-| AI Score | Not shown | Shown (0-100) |
-| Order Type | Always MARKET | MARKET or LIMIT |
-| Badge Color | Gold (#FFBD59) | Warning (#FFB900) |
-
-#### Liquidation Calculation
-```javascript
-// Binance Futures formula
-const mmr = 0.004; // 0.4% maintenance margin rate
-const imr = 1 / leverage;
-
-// LONG Position
-liquidationPrice = entry * (1 - imr + mmr);
-// Example: 42000 * (1 - 0.1 + 0.004) = 42000 * 0.904 = 37,968
-
-// SHORT Position
-liquidationPrice = entry * (1 + imr - mmr);
-// Example: 42000 * (1 + 0.1 - 0.004) = 42000 * 1.096 = 46,032
-```
-
----
-
-### 3.4 PaperTradeHistoryScreen
+### 6.4 PaperTradeHistoryScreen
 **Path:** `gem-mobile/src/screens/Account/PaperTradeHistoryScreen.js`
-
-#### Purpose
-View closed paper trades and trading statistics with settings
 
 #### Layout Structure
 ```
@@ -606,10 +675,6 @@ View closed paper trades and trading statistics with settings
 │ │   1   │ │   5   │ │ 60%   │     │  ← Stats Row 1
 │ │Đang Mở│ │Đã Đóng│ │WinRate│     │
 │ └───────┘ └───────┘ └───────┘     │
-│ ┌───────┐ ┌───────┐               │
-│ │   3   │ │   2   │               │  ← Stats Row 2
-│ │ Thắng │ │ Thua  │               │
-│ └───────┘ └───────┘               │
 ├─────────────────────────────────────┤
 │ ┌─────────────┐ ┌─────────────┐   │
 │ │ Vốn Ban Đầu │ │ Số Dư Hiện  │   │  ← Balance Cards
@@ -630,255 +695,25 @@ View closed paper trades and trading statistics with settings
 └─────────────────────────────────────┘
 ```
 
-#### Settings Modal Features
-```
-┌─────────────────────────────────────┐
-│ Cài Đặt Paper Trade           [X]  │
-├─────────────────────────────────────┤
-│ Cài Đặt Hiện Tại                    │
-│ ┌─────────────────────────────────┐ │
-│ │ Vốn ban đầu:     $10,000       │ │
-│ │ Số dư hiện tại:  $10,500       │ │
-│ │ Lệnh đang mở:    1             │ │
-│ │ Tổng lệnh đã đóng: 5           │ │
-│ └─────────────────────────────────┘ │
-├─────────────────────────────────────┤
-│ Đặt Vốn Ban Đầu Mới                 │
-│ ┌─────────────────────────────────┐ │
-│ │ $ [_______________]            │ │
-│ └─────────────────────────────────┘ │
-│ [$1K][$5K][$10K][$50K][$100K]      │  ← Quick Set
-│                                     │
-│ [  Áp Dụng (Giữ Lịch Sử)      ]   │
-│ [  Áp Dụng & Reset Tài Khoản   ]   │
-├─────────────────────────────────────┤
-│ Tùy Chọn Reset                      │
-│ [🔄 Reset Tài Khoản               ]│
-│ [⚠️ Reset Về Mặc Định             ]│
-└─────────────────────────────────────┘
-```
-
 ---
 
-### 3.5 PortfolioScreen
-**Path:** `gem-mobile/src/screens/Account/PortfolioScreen.js`
+## 7. SCANNER COMPONENTS
 
-#### Purpose
-Track real crypto portfolio holdings (separate from paper trading)
-
-#### Features
-- Total balance display with show/hide toggle
-- Quick action buttons (Send, Receive, Buy, P2P, Swap)
-- Individual coin holdings with live Binance prices
-- 24h price change tracking
-- Add/Edit/Delete holdings modal
-- Coin search with auto-complete
-- Real-time price updates
-
-#### Layout Structure
-```
-┌─────────────────────────────────────┐
-│ ← Portfolio              🔔 ⚙️     │  ← Header
-├─────────────────────────────────────┤
-│ ┌─────────────────────────────────┐ │
-│ │ Tổng tài sản           [👁]    │ │
-│ │ $12,345.67                     │ │  ← Balance Card
-│ │ +$234.56 (+1.93%) 24h          │ │
-│ └─────────────────────────────────┘ │
-├─────────────────────────────────────┤
-│ [Send][Receive][Buy][P2P][Swap]    │  ← Action Buttons
-├─────────────────────────────────────┤
-│ 📣 Sponsor Banners                  │
-├─────────────────────────────────────┤
-│ Danh Mục                  [+ Thêm] │
-│ ┌─────────────────────────────────┐ │
-│ │ 🪙 BTC                 0.5     │ │
-│ │    $21,000  +2.5%              │ │  ← Coin Card
-│ │    Total: $10,500  +$250 🗑️   │ │
-│ └─────────────────────────────────┘ │
-│ ┌─────────────────────────────────┐ │
-│ │ 🪙 ETH                 2.0     │ │
-│ │    $1,600  -1.2%               │ │
-│ │    Total: $3,200  -$40  🗑️    │ │
-│ └─────────────────────────────────┘ │
-└─────────────────────────────────────┘
-```
-
----
-
-## 4. SCANNER COMPONENTS
-
-### 4.1 CoinSelector
-**Path:** `gem-mobile/src/screens/Scanner/components/CoinSelector.js`
-
-#### Features
-| Feature | Description |
-|---------|-------------|
-| 500+ Coins | All Binance USDT perpetual pairs |
-| Search | Real-time search by symbol/name |
-| Favorites | Save frequently traded coins |
-| Recent | Quick access to recently scanned |
-| Multi-select | Select multiple coins (tier-limited) |
-| Price Display | Live prices with 24h change |
-| Volume | USDT trading volume |
-
-#### Props
-```typescript
-interface CoinSelectorProps {
-  selected: string;                    // Currently selected coin
-  onSelect: (coin: string) => void;    // Single selection callback
-  multiSelect: boolean;                // Enable multi-select mode
-  selectedCoins: string[];             // Array of selected coins
-  onCoinsChange: (coins: string[]) => void;
-  maxSelection: number;                // Tier-based limit
-  userTier: 'FREE' | 'TIER1' | 'TIER2' | 'TIER3';
-  onScanNow: (coins: string[]) => void;
-  isScanning: boolean;
-}
-```
-
-#### Tier Limits
-| Tier | Max Coins |
-|------|-----------|
-| FREE | 1 |
-| TIER1 | 5 |
-| TIER2 | 20 |
-| TIER3 | Unlimited (1000) |
-
----
-
-### 4.2 TradingChart
-**Path:** `gem-mobile/src/screens/Scanner/components/TradingChart.js`
-
-#### Technology
-- **Library:** lightweight-charts v4.1.0
-- **Rendering:** WebView for cross-platform
-- **Data Source:** Binance REST API (Futures + Spot fallback)
-
-#### Features
-| Feature | Description |
-|---------|-------------|
-| Candlestick | OHLCV data visualization |
-| Volume Bars | Volume confirmation toggle |
-| Price Lines | Entry (blue), TP (green), SL (red) |
-| Timeframes | 1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w |
-| Zoom/Pan | Interactive navigation |
-| Dark/Light | Theme toggle |
-| Fullscreen | Expandable modal view |
-| **Drawing Tools** | 6 annotation tools |
-| **Magnet Mode** | Snap to OHLC prices |
-
-#### Props
-```typescript
-interface TradingChartProps {
-  symbol: string;
-  timeframe: string;
-  height: number;
-  onSymbolPress?: () => void;
-  onTimeframeChange?: (tf: string) => void;
-  selectedPattern?: Pattern | null;
-  patterns?: Pattern[];
-  zoneData?: ZoneData | null;        // Zone visualization data
-  onPriceUpdate?: (price: number) => void;  // Real-time price callback for P&L sync
-}
-```
-
-#### Chart Configuration
-```javascript
-const chartConfig = {
-  backgroundColor: '#0D0D0D',
-  textColor: '#D1D4DC',
-  gridColor: 'rgba(42, 46, 57, 0.5)',
-  candleUpColor: '#22C55E',    // Green
-  candleDownColor: '#EF4444',  // Red
-  volumeUpColor: 'rgba(34, 197, 94, 0.5)',
-  volumeDownColor: 'rgba(239, 68, 68, 0.5)',
-};
-```
-
-#### Zone Visualization
-The chart can display pattern zones showing the exact candles where the pattern was detected.
-
-**Zone Data Structure:**
-```typescript
-interface ZoneData {
-  entry: number;
-  stopLoss: number;
-  takeProfit: number;
-  direction: 'LONG' | 'SHORT';
-  formation_time: number;      // Unix timestamp when pattern was detected
-  start_time?: number;         // Alias for formation_time
-  end_time?: number;           // Optional zone end time
-  isPositionZone?: boolean;    // Whether this is from an open position
-}
-```
-
-**Zone Positioning (CRITICAL):**
-- Zones MUST be positioned at the exact candles where the pattern was detected
-- Uses `formation_time` from patternData, NOT recent candles
-- Time-based coordinates ensure zones are "sticky" to candles and move with zoom/pan
-- Sources for formation_time (in priority order):
-  1. `pattern.formation_time`
-  2. `pattern.formationTime`
-  3. `pattern.start_time`
-  4. `pattern.startTime`
-  5. `position.openedAt` (fallback for positions)
-
-```javascript
-// Zone creation in ScannerScreen/PatternDetailScreen
-const formationTime = pd.formation_time || pd.formationTime ||
-                      pd.start_time || pd.startTime;
-const positionZone = {
-  entry: pattern.entry,
-  stopLoss: pattern.stopLoss,
-  takeProfit: pattern.takeProfit,
-  direction: pattern.direction,
-  formation_time: formationTime,  // ✅ Correct: at pattern detection candles
-  isPositionZone: true,
-};
-```
-
-#### P&L Real-time Sync
-The chart emits price updates via WebSocket for synchronized P&L display.
-
-```javascript
-// TradingChart sends price updates to React Native
-window.ReactNativeWebView.postMessage(JSON.stringify({
-  type: 'price_update',
-  price: closePrice,
-  symbol: SYMBOL
-}));
-
-// Parent component receives price updates
-const handleChartPriceUpdate = useCallback((price) => {
-  if (price && !isNaN(price)) {
-    setCurrentPrice(price);  // P&L updates immediately
-  }
-}, []);
-
-<TradingChart
-  onPriceUpdate={handleChartPriceUpdate}
-  // ... other props
-/>
-```
-
----
-
-### 4.3 PatternCard
+### 7.1 PatternCard
 **Path:** `gem-mobile/src/screens/Scanner/components/PatternCard.js`
 
 #### Layout
 ```
 ┌─────────────────────────────────────┐
-│ ↗️ Head & Shoulders  [FRESH] [A+]  │
-│    BTCUSDT           [SHORT]       │
+│ ↗️ UPD (Reversal)    [FRESH] [A+]  │
+│    BTCUSDT  ⭐⭐⭐⭐⭐   [SHORT]    │
 ├─────────────────────────────────────┤
 │ Confidence: ████████░░ 85%         │
 ├─────────────────────────────────────┤
 │ Entry: $42,000                      │
 │ TP: $40,000 (green)  SL: $43,000   │
 ├─────────────────────────────────────┤
-│ R:R 2.1:1  |  WR 72%  |  2m ago    │
+│ R:R 2.2:1  |  WR 65%  |  DP Zone   │
 │                       [Paper Trade] │
 └─────────────────────────────────────┘
 ```
@@ -889,76 +724,140 @@ interface PatternCardProps {
   pattern: Pattern;
   onPress: () => void;
   onPaperTrade: () => void;
-  userTier: string;
+  userTier: 'FREE' | 'TIER1' | 'TIER2' | 'TIER3';
 }
+```
+
+#### Quality Grade Styles
+```javascript
+const gradeConfig = {
+  'A+': { color: '#00FF88', bg: 'rgba(0, 255, 136, 0.15)' },
+  'A':  { color: '#00FF88', bg: 'rgba(0, 255, 136, 0.12)' },
+  'B+': { color: '#FFBD59', bg: 'rgba(255, 189, 89, 0.15)' },
+  'B':  { color: '#FFBD59', bg: 'rgba(255, 189, 89, 0.12)' },
+  'C':  { color: '#FF9500', bg: 'rgba(255, 149, 0, 0.15)' },
+  'D':  { color: '#FF4757', bg: 'rgba(255, 71, 87, 0.15)' },
+};
+```
+
+### 7.2 Zone Components
+
+#### ZoneHierarchyBadge
+**Path:** `gem-mobile/src/components/Scanner/ZoneHierarchyBadge.js`
+```javascript
+// Displays zone hierarchy level with icon and color
+<ZoneHierarchyBadge
+  hierarchy="DECISION_POINT"  // DP | FTR | FLAG_LIMIT | REGULAR
+  size="sm" | "md" | "lg"
+/>
+```
+
+#### OddsEnhancerScorecard
+**Path:** `gem-mobile/src/components/Scanner/OddsEnhancerScorecard.js`
+```javascript
+// Displays all 8 odds enhancers with scores
+<OddsEnhancerScorecard
+  enhancers={{
+    departureStrength: 2,
+    timeAtLevel: 2,
+    freshness: 2,
+    profitMargin: 1,
+    bigPicture: 2,
+    zoneOrigin: 2,
+    arrival: 1,
+    riskReward: 2
+  }}
+  totalScore={14}
+  maxScore={16}
+/>
+```
+
+#### FreshnessIndicator
+**Path:** `gem-mobile/src/components/Scanner/FreshnessIndicator.js`
+```javascript
+// Shows zone freshness (FTB = First Time Back)
+<FreshnessIndicator
+  testCount={0}  // 0 = FTB (freshest)
+/>
+```
+
+### 7.3 Advanced Pattern Cards
+
+#### QMPatternCard
+**Path:** `gem-mobile/src/components/Scanner/QMPatternCard.js`
+```javascript
+// Specialized display for Quasimodo pattern
+- Shows HEAD, QML, MPL levels
+- BOS (Break of Structure) indicator
+- Entry at QML retest
+```
+
+#### FTRZoneCard
+**Path:** `gem-mobile/src/components/Scanner/FTRZoneCard.js`
+```javascript
+// Specialized display for FTR zones
+- Shows broken S/R level
+- Base formation
+- FTB freshness indicator
+```
+
+#### DecisionPointCard
+**Path:** `gem-mobile/src/components/Scanner/DecisionPointCard.js`
+```javascript
+// Specialized display for Decision Points
+- Crown icon (level 1)
+- Move multiple indicator
+- Origin candle count
 ```
 
 ---
 
-### 4.4 ScanResultsSection
-**Path:** `gem-mobile/src/screens/Scanner/components/ScanResultsSection.js`
+## 8. TRADING COMPONENTS
 
-#### Features
-- Accordion UI (one coin expanded at a time)
-- Patterns grouped by coin
-- Filter toggle (show all / only with patterns)
-- Sort by pattern count
-- Stats summary (total coins, patterns, long/short ratio)
+### 8.1 PaperTradeModal
+**Path:** `gem-mobile/src/screens/Scanner/components/PaperTradeModal.js`
 
----
+#### Layout
+```
+┌─────────────────────────────────────┐
+│ Paper Trade: UPD            [X]    │
+├─────────────────────────────────────┤
+│ BTCUSDT | SHORT | 4H | 85%         │
+│ Zone: DP ⭐⭐⭐⭐⭐  Score: 14/16   │
+├─────────────────────────────────────┤
+│ [Pattern Mode] [Custom Mode]        │  ← Mode Tabs
+├─────────────────────────────────────┤
+│ Trade Type                          │
+│ [  LONG (green) ][  SHORT (red)  ] │
+├─────────────────────────────────────┤
+│ Position Size (Margin)              │
+│ ┌─────────────────────────────────┐ │
+│ │ $ [500_____________]            │ │
+│ └─────────────────────────────────┘ │
+│ [$50][$100][$250][$500][$1000]     │
+│ [10%][25%][50%][100%]              │
+├─────────────────────────────────────┤
+│ Leverage                            │
+│ [1x][5x][10x][20x][50x][100x]      │
+├─────────────────────────────────────┤
+│ Position Value: $5,000              │
+│ Quantity:      0.119 BTC            │
+│ Risk (SL):     2.4% ($120)          │
+│ Reward (TP):   4.8% ($240)          │
+│ R:R Ratio:     2.2:1                │
+├─────────────────────────────────────┤
+│ Entry:  $42,000 (blue)  🔒         │  ← Locked in Pattern Mode
+│ TP:     $40,000 (green) 🔒         │
+│ SL:     $43,000 (red)   🔒         │
+├─────────────────────────────────────┤
+│ Available: $9,500                    │
+├─────────────────────────────────────┤
+│ [  Cancel  ][     Open Trade      ] │
+└─────────────────────────────────────┘
+```
 
-### 4.5 MultiTFResultsSection
-**Path:** `gem-mobile/src/screens/Scanner/components/MultiTFResultsSection.js`
-
-#### Purpose
-Display multi-timeframe scan results with confluence analysis (TIER2+ only)
-
-#### Confluence Scoring
-| Score | Level | Color |
-|-------|-------|-------|
-| >75% | HIGH | Green (#3AF7A6) |
-| 50-75% | MEDIUM | Gold (#FFBD59) |
-| <50% | LOW | Red (#FF6B6B) |
-
----
-
-## 5. TRADING COMPONENTS
-
-### 5.1 ChartToolbar
+### 8.2 ChartToolbar
 **Path:** `gem-mobile/src/components/Trading/ChartToolbar.js`
-
-#### Purpose
-Horizontal scrollable toolbar for chart controls
-
-#### Props
-```typescript
-interface ChartToolbarProps {
-  // Timeframe controls
-  timeframes?: string[];           // Default: ['1m', '5m', '15m', '1h', '4h', '1D', '1W']
-  activeTimeframe?: string;        // Default: '4h'
-  onTimeframeChange?: (tf: string) => void;
-
-  // Price lines
-  showPriceLines?: boolean;        // Default: true
-  onTogglePriceLines?: () => void;
-
-  // Volume
-  showVolume?: boolean;            // Default: false
-  onToggleVolume?: () => void;
-
-  // Drawing tools
-  onToggleDrawing?: () => void;
-  activeIndicators?: string[];     // ['drawing'] when active
-
-  // Other controls
-  onToggleIndicators?: () => void;
-  onZoomIn?: () => void;
-  onZoomOut?: () => void;
-  onFullscreen?: () => void;
-  onToggleTheme?: () => void;
-  compact?: boolean;
-}
-```
 
 #### Styles
 ```javascript
@@ -974,7 +873,6 @@ timeframeButton: {
   paddingVertical: 6,
   borderRadius: 6,
   backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  marginRight: 4,
 }
 
 timeframeButtonActive: {
@@ -982,229 +880,10 @@ timeframeButtonActive: {
   borderWidth: 1,
   borderColor: 'rgba(255, 189, 89, 0.5)',
 }
-
-toolButton: {
-  width: 32,
-  height: 32,
-  borderRadius: 6,
-  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-}
-
-toolButtonActive: {
-  backgroundColor: 'rgba(255, 189, 89, 0.2)',
-  borderWidth: 1,
-  borderColor: 'rgba(255, 189, 89, 0.5)',
-}
 ```
 
----
-
-### 5.2 PendingOrdersSection
-**Path:** `gem-mobile/src/components/Trading/PendingOrdersSection.js`
-
-#### Purpose
-Display pending limit orders waiting to be filled
-
-#### Props
-```typescript
-interface PendingOrdersSectionProps {
-  orders: PendingOrder[];
-  onCancel: (orderId: string) => Promise<void>;
-  cancellingId?: string | null;
-  loading?: boolean;
-}
-```
-
-#### Fill Logic
-```javascript
-// LONG order fills when price DROPS to entry
-fills when: currentPrice <= entryPrice
-
-// SHORT order fills when price RISES to entry
-fills when: currentPrice >= entryPrice
-```
-
-#### Styles
-```javascript
-container: {
-  marginBottom: SPACING.lg,
-}
-
-orderCard: {
-  backgroundColor: GLASS.background,
-  borderRadius: 14,
-  padding: SPACING.md,
-  borderWidth: 1,
-  borderColor: 'rgba(255, 189, 89, 0.2)',  // Gold border
-}
-
-priceContainer: {
-  backgroundColor: 'rgba(255, 189, 89, 0.1)',
-  borderRadius: 10,
-  padding: SPACING.sm,
-}
-
-// Direction badges
-LONG: { backgroundColor: COLORS.success, color: '#000' }
-SHORT: { backgroundColor: COLORS.error, color: '#FFF' }
-```
-
----
-
-### 5.3 MindsetCheckModal & MindsetAdvisor
-**Paths:**
-- `gem-mobile/src/components/Trading/MindsetCheckModal.js`
-- `gem-mobile/src/components/Trading/MindsetAdvisor.js`
-
-#### Purpose
-Prompt traders to assess their mental state before opening a trade. Logs mindset assessments to Supabase for analytics.
-
-#### Layout
-```
-┌─────────────────────────────────────┐
-│ Kiểm Tra Tâm Lý Trading        [X] │
-├─────────────────────────────────────┤
-│ Bạn đang cảm thấy thế nào?          │
-│                                     │
-│ ┌───────────────────────────────┐   │
-│ │ 😊 Tự tin & Bình tĩnh         │   │
-│ └───────────────────────────────┘   │
-│ ┌───────────────────────────────┐   │
-│ │ 😐 Bình thường                │   │
-│ └───────────────────────────────┘   │
-│ ┌───────────────────────────────┐   │
-│ │ 😰 Lo lắng / Căng thẳng       │   │
-│ └───────────────────────────────┘   │
-│ ┌───────────────────────────────┐   │
-│ │ 🤑 FOMO / Nóng vội            │   │
-│ └───────────────────────────────┘   │
-├─────────────────────────────────────┤
-│ [      Tiếp tục giao dịch        ] │
-└─────────────────────────────────────┘
-```
-
-#### Props
-```typescript
-interface MindsetAdvisorProps {
-  visible: boolean;
-  onClose: () => void;
-  onComplete: () => void;
-  tradeInfo: {
-    symbol: string;
-    direction: 'LONG' | 'SHORT';
-    amount: number;
-    riskPercent?: number;
-  };
-  sourceScreen: 'paper_trade_modal' | 'gemmaster' | 'quick_action' | 'scanner';
-}
-```
-
-#### Database Schema
-```sql
-CREATE TABLE trading_mindset_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES auth.users(id),
-  source_screen VARCHAR(30) CHECK (source_screen IN (
-    'paper_trade_modal', 'gemmaster', 'quick_action', 'scanner'
-  )),
-  mindset_state VARCHAR(30),
-  trade_symbol VARCHAR(20),
-  trade_direction VARCHAR(10),
-  trade_amount DECIMAL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-#### Integration in PaperTradeModalV2
-```javascript
-// PaperTradeModalV2.js
-import { MindsetAdvisor } from '../components/Trading';
-
-// Show mindset check before confirming trade
-<MindsetAdvisor
-  visible={showMindsetCheck}
-  onClose={() => setShowMindsetCheck(false)}
-  onComplete={handleMindsetComplete}
-  tradeInfo={{
-    symbol: pattern.symbol,
-    direction: tradeType,
-    amount: positionSize,
-  }}
-  sourceScreen="paper_trade_modal"  // MUST use allowed value
-/>
-```
-
----
-
-### 5.4 PaperTradeModal
-**Path:** `gem-mobile/src/screens/Scanner/components/PaperTradeModal.js`
-
-#### Purpose
-Form to open a new paper trade position from a pattern
-
-#### Layout
-```
-┌─────────────────────────────────────┐
-│ Paper Trade: Bullish Flag     [X]  │
-├─────────────────────────────────────┤
-│ BTCUSDT | LONG | 4H | 85%         │
-├─────────────────────────────────────┤
-│ Trade Type                          │
-│ [  LONG (green) ][  SHORT (red)  ] │
-├─────────────────────────────────────┤
-│ Position Size (Margin)              │
-│ ┌─────────────────────────────────┐ │
-│ │ $ [500_____________]            │ │
-│ └─────────────────────────────────┘ │
-│ [$50][$100][$250][$500][$1000]     │
-│ [10%][25%][50%][100%]              │
-├─────────────────────────────────────┤
-│ Leverage                            │
-│ ┌─────────────────────────────────┐ │
-│ │ [10_______________] x           │ │
-│ └─────────────────────────────────┘ │
-├─────────────────────────────────────┤
-│ Position Value: $5,000              │
-│ Quantity:      0.119 BTC            │
-│ Risk (SL):     2.4% ($120)          │
-│ Reward (TP):   4.8% ($240)          │
-│ R:R Ratio:     2.0:1                │
-├─────────────────────────────────────┤
-│ Entry:  $42,000 (blue)              │
-│ TP:     $44,000 (green)             │
-│ SL:     $41,000 (red)               │
-├─────────────────────────────────────┤
-│ Available: $9,500                    │
-├─────────────────────────────────────┤
-│ [  Cancel  ][     Open Trade      ] │
-└─────────────────────────────────────┘
-```
-
-#### Calculations
-```javascript
-// Position sizing
-positionValue = margin * leverage;
-quantity = positionValue / entryPrice;
-
-// Risk/Reward (leveraged)
-direction = tradeType === 'long' ? 1 : -1;
-profitPercent = ((TP - entry) / entry) * direction * 100;
-lossPercent = ((entry - SL) / entry) * direction * 100;
-
-profit = (margin * leverage * profitPercent) / 100;
-loss = (margin * leverage * Math.abs(lossPercent)) / 100;
-riskReward = loss > 0 ? Math.abs(profit / loss) : 0;
-```
-
----
-
-## 6. DRAWING TOOLS
-
-### 6.1 DrawingToolbar
+### 8.3 DrawingToolbar
 **Path:** `gem-mobile/src/components/Trading/DrawingToolbar.js`
-
-#### Purpose
-Drawing tool selection and controls for chart annotations
 
 #### Tools
 | Tool ID | Icon | Label | Clicks | Description |
@@ -1216,190 +895,62 @@ Drawing tool selection and controls for chart annotations
 | long_position | ArrowUpCircle | Long | 1 | Entry + TP (+4%) + SL (-2%) |
 | short_position | ArrowDownCircle | Short | 1 | Entry + TP (-4%) + SL (+2%) |
 
-#### Props
-```typescript
-interface DrawingToolbarProps {
-  visible?: boolean;               // Default: false
-  activeTool?: string | null;      // Currently selected tool
-  magnetMode?: boolean;            // Default: true
-  onSelectTool?: (toolId: string) => void;
-  onToggleMagnet?: () => void;
-  onDeleteAll?: () => void;
-  onClose?: () => void;
-  pendingPoints?: number;          // For multi-click tools (0, 1)
-}
-```
-
-#### Styles
+#### Tool Icon Colors
 ```javascript
-container: {
-  backgroundColor: 'rgba(26, 32, 44, 0.98)',
-  borderTopWidth: 1,
-  borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  paddingVertical: SPACING.sm,
-  paddingHorizontal: SPACING.md,
-}
-
-toolButton: {
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingVertical: SPACING.sm,
-  paddingHorizontal: SPACING.xs,
-  borderRadius: 8,
-  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  minHeight: 56,
-}
-
-toolButtonActive: {
-  backgroundColor: 'rgba(255, 189, 89, 0.15)',
-  borderWidth: 1,
-  borderColor: 'rgba(255, 189, 89, 0.4)',
-}
-
-toolButtonPending: {
-  backgroundColor: 'rgba(0, 240, 255, 0.1)',
-  borderColor: 'rgba(0, 240, 255, 0.4)',
-}
-
-// Tool icon colors
 horizontal_line: COLORS.gold (#FFBD59)
 trend_line: COLORS.cyan (#00F0FF)
 rectangle: COLORS.purple (#6A5BFF)
 fibonacci_retracement: COLORS.gold (#FFBD59)
 long_position: COLORS.success (#3AF7A6)
 short_position: COLORS.error (#FF6B6B)
-
-// Magnet button
-magnetActive: {
-  backgroundColor: 'rgba(0, 240, 255, 0.15)',
-  borderColor: 'rgba(0, 240, 255, 0.4)',
-}
-
-// Delete button
-deleteButton: {
-  backgroundColor: 'rgba(255, 107, 107, 0.1)',
-  borderColor: 'rgba(255, 107, 107, 0.3)',
-}
 ```
 
 ---
 
-### 6.2 Drawing Service
-**Path:** `gem-mobile/src/services/drawingService.js`
+## 9. DRAWING TOOLS
 
-#### Purpose
-Supabase CRUD operations for chart drawings
+### 9.1 Drawing Service
+**Path:** `gem-mobile/src/services/drawingService.js`
 
 #### Methods
 ```javascript
-// Fetch drawings for a chart
 fetchDrawings(userId, symbol, timeframe)
-// Returns: { data: Drawing[], error: string|null }
-
-// Fetch all drawings for a symbol (all timeframes)
-fetchAllDrawingsForSymbol(userId, symbol)
-// Returns: { data: Drawing[], error: string|null }
-
-// Save a new drawing
 saveDrawing(drawing)
-// Returns: { data: Drawing|null, error: string|null }
-
-// Update an existing drawing
 updateDrawing(id, updates)
-// Returns: { data: Drawing|null, error: string|null }
-
-// Delete a single drawing
 deleteDrawing(id)
-// Returns: { success: boolean, error: string|null }
-
-// Delete all drawings for a symbol
 deleteAllDrawings(userId, symbol)
-// Returns: { success: boolean, count: number, error: string|null }
-
-// Toggle visibility
 toggleDrawingVisibility(id, isVisible)
-// Returns: updateDrawing result
-
-// Export drawings as JSON
 exportDrawings(userId, symbol)
-// Returns: { data: ExportData|null, error: string|null }
-
-// Import drawings from JSON
 importDrawings(userId, importData)
-// Returns: { count: number, error: string|null }
 ```
 
-#### Drawing Object
+### 9.2 Drawing Object
 ```typescript
 interface Drawing {
   id: UUID;
   user_id: UUID;
   symbol: string;              // 'BTCUSDT'
   timeframe: string;           // '4h'
-  tool_type: string;           // 'horizontal_line', 'fibonacci_retracement', etc.
+  tool_type: string;           // 'horizontal_line', etc.
   drawing_data: {
-    // horizontal_line
-    price: number;
-    color: string;
-
-    // trend_line, rectangle, fibonacci_retracement
-    startPrice: number;
-    startTime: number;
-    endPrice: number;
-    endTime: number;
-    color: string;
-
-    // long_position, short_position
-    entryPrice: number;
+    price?: number;            // horizontal_line
+    startPrice?: number;       // 2-click tools
+    startTime?: number;
+    endPrice?: number;
+    endTime?: number;
+    entryPrice?: number;       // position tools
+    color?: string;
   };
   name?: string;
   is_visible: boolean;
   z_index: number;
-  visible_timeframes: string[];  // Default: all timeframes
+  visible_timeframes: string[];
   created_at: ISO8601;
   updated_at: ISO8601;
 }
 ```
 
----
-
-### 6.3 Database Schema
-**Path:** `supabase/migrations/20251219_chart_drawings.sql`
-
-```sql
-CREATE TABLE IF NOT EXISTS chart_drawings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  symbol VARCHAR(20) NOT NULL,
-  timeframe VARCHAR(10) NOT NULL,
-  tool_type VARCHAR(30) NOT NULL,
-  drawing_data JSONB NOT NULL,
-  name VARCHAR(100),
-  is_visible BOOLEAN DEFAULT TRUE,
-  z_index INTEGER DEFAULT 0,
-  visible_timeframes TEXT[] DEFAULT ARRAY['1m','5m','15m','1h','4h','1d','1w'],
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- RLS Policies
-CREATE POLICY "Users can view own drawings" ON chart_drawings
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own drawings" ON chart_drawings
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own drawings" ON chart_drawings
-  FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own drawings" ON chart_drawings
-  FOR DELETE USING (auth.uid() = user_id);
-```
-
----
-
-### 6.4 Fibonacci Levels
+### 9.3 Fibonacci Levels
 ```javascript
 const FIBONACCI_LEVELS = [
   { value: 0, label: '0%', color: '#787B86' },
@@ -1414,40 +965,9 @@ const FIBONACCI_LEVELS = [
 
 ---
 
-### 6.5 Magnet Mode
-When enabled, drawing clicks snap to nearest OHLC value of the clicked candle.
+## 10. SERVICES & BUSINESS LOGIC
 
-```javascript
-function applyMagnetMode(price, time, candleData) {
-  // Find candle closest to clicked time
-  const closestCandle = findClosestCandle(candleData, time);
-
-  // Get OHLC values
-  const ohlc = [candle.open, candle.high, candle.low, candle.close];
-
-  // Find nearest value
-  let nearestPrice = price;
-  let minDiff = Infinity;
-
-  for (const p of ohlc) {
-    const diff = Math.abs(p - price);
-    if (diff < minDiff) {
-      minDiff = diff;
-      nearestPrice = p;
-    }
-  }
-
-  // Only snap if within 2% threshold
-  const snapThreshold = price * 0.02;
-  return minDiff < snapThreshold ? nearestPrice : price;
-}
-```
-
----
-
-## 7. SERVICES & BUSINESS LOGIC
-
-### 7.1 Pattern Detection Service
+### 10.1 Pattern Detection Service
 **Path:** `gem-mobile/src/services/patternDetection.js`
 
 #### Available Patterns by Tier
@@ -1455,116 +975,112 @@ function applyMagnetMode(price, time, candleData) {
 **FREE Tier (3 patterns)**
 | Pattern | Type | Direction | Win Rate | R:R |
 |---------|------|-----------|----------|-----|
-| DPD | Continuation | SHORT | 71% | 2.5 |
-| UPU | Continuation | LONG | 68% | 2.8 |
-| Head & Shoulders | Reversal | SHORT | 68% | 2.5 |
+| DPD | Continuation | SHORT | 68% | 2.5 |
+| UPU | Continuation | LONG | 71% | 2.8 |
+| Head & Shoulders | Reversal | SHORT | 72% | 3.0 |
 
 **TIER1 Exclusive (+4 patterns)**
 | Pattern | Type | Direction | Win Rate | R:R |
 |---------|------|-----------|----------|-----|
 | UPD | Reversal | SHORT | 65% | 2.2 |
-| DPU | Reversal | LONG | 67% | 2.4 |
-| Double Top | Reversal | SHORT | 66% | 2.3 |
-| Double Bottom | Reversal | LONG | 67% | 2.4 |
+| DPU | Reversal | LONG | 69% | 2.6 |
+| Double Top | Reversal | SHORT | 68% | 2.5 |
+| Double Bottom | Reversal | LONG | 70% | 2.7 |
 
 **TIER2 Exclusive (+8 patterns)**
 | Pattern | Type | Direction | Win Rate |
 |---------|------|-----------|----------|
-| Inv. Head & Shoulders | Reversal | LONG | 69% |
+| Inv. Head & Shoulders | Reversal | LONG | 75% |
 | Ascending Triangle | Continuation | LONG | 66% |
 | Descending Triangle | Continuation | SHORT | 65% |
-| HFZ | Zone | LONG | 70% |
-| LFZ | Zone | SHORT | 71% |
 | Symmetrical Triangle | Neutral | BOTH | 63% |
 | Rounding Bottom | Reversal | LONG | 68% |
 | Rounding Top | Reversal | SHORT | 67% |
+| Cup & Handle | Continuation | LONG | 72% |
+| Wedge | Reversal | BOTH | 64% |
 
 **TIER3 Exclusive (+9 patterns)**
 | Pattern | Type | Direction | Win Rate |
 |---------|------|-----------|----------|
+| Quasimodo (QM) | Reversal | BOTH | 68% |
+| FTR | Continuation | BOTH | 70% |
+| Flag Limit | Continuation | BOTH | 65% |
+| Decision Point | Origin | BOTH | 72% |
 | Bull Flag | Continuation | LONG | 70% |
 | Bear Flag | Continuation | SHORT | 69% |
-| Wedge | Reversal | BOTH | 64% |
-| Cup & Handle | Continuation | LONG | 72% |
 | Engulfing | Candlestick | BOTH | 64% |
 | Morning/Evening Star | Candlestick | BOTH | 66% |
 | Three Methods | Continuation | BOTH | 67% |
-| Hammer | Candlestick | LONG | 62% |
-| Flag | Continuation | BOTH | 65% |
 
-#### Key Methods
+### 10.2 Dedicated Detectors
+| Detector | Path | Purpose |
+|----------|------|---------|
+| quasimodoDetector.js | services/ | QM pattern with BOS, QML, MPL |
+| ftrDetector.js | services/ | FTR with S/R break + base |
+| flagLimitDetector.js | services/ | FL with 1-2 candle base |
+| decisionPointDetector.js | services/ | DP (origin of major move) |
+| compressionDetector.js | services/ | Price compression before breakout |
+| engulfingDetector.js | services/ | Engulfing candle patterns |
+| pinBarDetector.js | services/ | Pin bars, hammers, shooting stars |
+| inducementDetector.js | services/ | Liquidity grab patterns |
+
+### 10.3 Zone Calculator
+**Path:** `gem-mobile/src/services/zoneCalculator.js`
+
 ```javascript
-// Main detection method
-async detectPatterns(symbol, timeframe): Promise<Pattern[]>
+// Zone boundary calculation
+calculateZoneBoundaries(pauseCandles, zoneType, currentPrice) {
+  const pauseHigh = Math.max(...pauseCandles.map(c => c.high));
+  const pauseLow = Math.min(...pauseCandles.map(c => c.low));
 
-// Scan single symbol
-async scanSymbol(symbol, mode, options): Promise<Pattern>
+  // HFZ (Supply Zone)
+  if (zoneType === 'HFZ') {
+    return {
+      entryPrice: pauseLow,      // Entry = LOW (near price)
+      stopPrice: pauseHigh * 1.10, // Stop = HIGH + buffer
+      zoneHigh: pauseHigh,
+      zoneLow: pauseLow,
+    };
+  }
 
-// Get patterns available for tier
-getPatternsByTier(userTier): PatternType[]
-
-// Set user tier (affects available patterns)
-setUserTier(tier: string): void
+  // LFZ (Demand Zone)
+  return {
+    entryPrice: pauseHigh,       // Entry = HIGH (near price)
+    stopPrice: pauseLow * 0.90,  // Stop = LOW - buffer
+    zoneHigh: pauseHigh,
+    zoneLow: pauseLow,
+  };
+}
 ```
 
-#### Enhancement Features (TIER2+)
+### 10.4 Multi-Timeframe Scanner
+**Path:** `gem-mobile/src/services/multiTimeframeScanner.js`
+
+#### Two-Phase Scanning
 ```javascript
-volumeConfirmation()      // Volume spike detection
-trendContext()            // Larger timeframe alignment
-zoneRetestValidation()    // S/R retest validation
-supportResistance()       // Key S/R confluence
-candleConfirmation()      // Candle pattern check
-rsiDivergence()           // RSI divergence detection
-dynamicRROptimization()   // R:R optimization
+// Phase 1: Scan HTF (1D, 1W, 1M) first
+const htfResults = await scanTimeframes(HTF_TIMEFRAMES);
+const htfContext = determineHTFTrend(htfResults);
+
+// Phase 2: Scan LTF with HTF context
+const ltfOptions = { htfTrend: htfContext.trend, htfZones: htfContext.zones };
+const ltfResults = await scanTimeframes(LTF_TIMEFRAMES, ltfOptions);
+
+// HTF context boosts/penalties
+- With-trend pattern: +10 confidence
+- Counter-trend non-reversal: -15 confidence
+- Counter-trend reversal: +5 confidence
+- Zone-in-zone (LTF in HTF): +12 confidence
 ```
 
----
-
-### 7.2 Binance Service
-**Path:** `gem-mobile/src/services/binanceService.js`
-
-#### API Endpoints
-| Endpoint | Purpose |
-|----------|---------|
-| `/fapi/v1/exchangeInfo` | Coin list (FUTURES) |
-| `/fapi/v1/ticker/24hr` | 24h tickers (FUTURES) |
-| `/fapi/v1/klines` | Candlestick data (FUTURES) |
-| `/api/v3/ticker/24hr` | 24h tickers (SPOT fallback) |
-| `/api/v3/klines` | Candlestick data (SPOT fallback) |
-
-#### WebSocket
+#### Confluence Calculation
 ```javascript
-// Futures price subscription
-wss://fstream.binance.com/ws/{symbol}@ticker
-
-// Spot price subscription (fallback)
-wss://stream.binance.com:9443/ws/{symbol}@ticker
-
-// Kline subscription
-wss://fstream.binance.com/ws/{symbol}@kline_{interval}
+const confluenceScore = (matchingTimeframes / totalScanned) * 100;
+const level = score > 75 ? 'HIGH' : score >= 50 ? 'MEDIUM' : 'LOW';
 ```
 
-#### Key Methods
-```javascript
-getAllCoins()                    // 500+ USDT perpetual pairs
-getDefaultCoins()                // Top 12 coins
-get24hTickers(symbols)           // Spot 24h data
-getAllFuturesTickers()           // All futures with volume
-getCurrentPrice(symbol)          // Latest price
-getKlines(symbol, interval, options) // Candlesticks
-subscribe(symbol, callback)      // WebSocket subscription
-connect(symbols)                 // Multi-symbol WebSocket
-disconnect()                     // Close connections
-```
-
----
-
-### 7.3 Paper Trade Service
+### 10.5 Paper Trade Service
 **Path:** `gem-mobile/src/services/paperTradeService.js`
-
-#### Storage
-- **Local:** AsyncStorage (fast, always available)
-- **Sync:** Supabase (backup/cross-device)
 
 #### Storage Keys
 ```javascript
@@ -1579,115 +1095,27 @@ const STORAGE_KEYS = {
 const DEFAULT_INITIAL_BALANCE = 10000; // USDT
 ```
 
-#### Key Methods
-```javascript
-// Initialization
-async init(): Promise<void>
-
-// Position Management
-async openPosition({
-  pattern,
-  positionSize,      // Margin in USDT
-  userId,
-  leverage = 10,
-  positionValue,     // margin * leverage
-  currentMarketPrice,
-  tradeMode,         // 'pattern' | 'custom'
-  patternEntry,
-  patternSL,
-  patternTP,
-  entryDeviationPercent,
-  slDeviationPercent,
-  tpDeviationPercent,
-  aiScore,
-  aiFeedback,
-}): Promise<Position>
-
-async closePosition(positionId, exitPrice, exitReason): Promise<ClosedTrade>
-async updatePrices(prices): Promise<{closed: [], updated: []}>
-async updatePosition(positionId, updates): Promise<Position>
-
-// Pending Orders
-getPendingOrders(userId?): PendingOrder[]
-async checkPendingOrders(prices): Promise<{filled: [], notFilled: []}>
-
-// Getters
-getOpenPositions(userId?): Position[]
-getTradeHistory(userId?, limit?): ClosedTrade[]
-getBalance(): number
-getPositionById(id): Position | null
-
-// Statistics
-getStats(userId?): Stats
-getEquity(userId?): EquityData
-
-// Balance Management
-async recalculateBalance(): Promise<RecalculateResult>
-async setInitialBalance(amount, resetAccount?): Promise<SetBalanceResult>
-async resetAll(): Promise<ResetResult>
-async resetToDefault(): Promise<ResetResult>
-getInitialBalance(): number
-
-// Supabase Sync
-async syncPositionToSupabase(position, action): Promise<void>
-async loadFromSupabase(userId): Promise<void>
-```
-
 #### P&L Calculation
 ```javascript
-// For LONG positions
+// LONG Position
 unrealizedPnL = (currentPrice - entryPrice) * quantity;
-unrealizedPnLPercent = ((currentPrice - entryPrice) / entryPrice) * 100;
 ROE = unrealizedPnLPercent * leverage;
 
-// For SHORT positions
+// SHORT Position
 unrealizedPnL = (entryPrice - currentPrice) * quantity;
-unrealizedPnLPercent = ((entryPrice - currentPrice) / entryPrice) * 100;
 ROE = unrealizedPnLPercent * leverage;
-```
 
-#### Balance Calculation
-```javascript
-// Recalculate balance formula
-correctBalance = initialBalance + totalRealizedPnL - usedMargin;
-
-// Equity formula
-equity = balance + usedMargin + unrealizedPnL;
+// Liquidation (Binance formula)
+const mmr = 0.004; // 0.4% maintenance margin rate
+const imr = 1 / leverage;
+liquidationPrice = entry * (isLong ? (1 - imr + mmr) : (1 + imr - mmr));
 ```
 
 ---
 
-### 7.4 Multi-Timeframe Scanner Service
-**Path:** `gem-mobile/src/services/multiTimeframeScanner.js`
+## 11. DESIGN SYSTEM
 
-#### Tier Access
-| Tier | Max TFs | Allowed |
-|------|---------|---------|
-| FREE | 1 | Current only |
-| TIER1 | 1 | Current only |
-| TIER2 | 3 | 15m, 1h, 4h, 1d, 1w |
-| TIER3 | 5+ | All including 5m, 1M |
-
-#### Key Method
-```javascript
-async scanMultipleTimeframes(symbol, timeframes, userTier): Promise<MultiTFResult>
-```
-
-#### Confluence Calculation
-```javascript
-const score = (matchingTimeframes / totalScanned) * 100;
-
-// Level determination
-if (score > 75) level = 'HIGH';
-else if (score >= 50) level = 'MEDIUM';
-else level = 'LOW';
-```
-
----
-
-## 8. DESIGN SYSTEM
-
-### 8.1 Colors
+### 11.1 Colors
 **Path:** `gem-mobile/src/utils/tokens.js`
 
 #### Brand Colors
@@ -1695,53 +1123,31 @@ else level = 'LOW';
 |------|-----|-------|
 | burgundy | #9C0612 | Primary buttons, scan button |
 | burgundyDark | #6B0F1A | Button pressed states |
-| burgundyLight | #C41E2A | Highlights |
-| gold | #FFBD59 | Premium features, CTAs, active states |
-| goldBright | #FFD700 | Emphasis |
+| gold | #FFBD59 | Premium features, active states |
 
 #### Functional Colors
 | Name | Hex | Usage |
 |------|-----|-------|
-| success | #3AF7A6 | Bullish, profit, LONG, positive |
-| error | #FF6B6B | Bearish, loss, SHORT, negative |
-| warning | #FFB800 | Caution, alerts, custom mode |
+| success | #3AF7A6 | Bullish, profit, LONG |
+| error | #FF6B6B | Bearish, loss, SHORT |
+| warning | #FFB800 | Caution, alerts |
 | info | #3B82F6 | Information, entry price |
 
 #### Accent Colors
 | Name | Hex | Usage |
 |------|-----|-------|
-| purple | #6A5BFF | Interactive elements, borders |
-| purpleGlow | #8C64FF | Glow effects |
-| cyan | #00F0FF | Entry prices, trend lines, magnet mode |
-
-#### Background Colors
-| Name | Hex | Usage |
-|------|-----|-------|
-| bgDarkest | #05040B | Main background |
-| bgMid | #0F1030 | Card backgrounds |
-| bgLight | #1a0b2e | Elevated surfaces |
+| purple | #6A5BFF | Interactive elements |
+| cyan | #00F0FF | Entry prices, magnet mode |
 
 #### Glass Morphism
 | Property | Value |
 |----------|-------|
 | background | rgba(15, 16, 48, 0.55) |
 | blur | 18 |
-| saturate | 180 |
 | borderWidth | 1.2 |
 | borderRadius | 18 |
 
-#### Text Colors
-| Name | Value | Usage |
-|------|-------|-------|
-| textPrimary | #FFFFFF | Headings, important |
-| textSecondary | rgba(255,255,255,0.8) | Body text |
-| textMuted | rgba(255,255,255,0.6) | Labels, hints |
-| textSubtle | rgba(255,255,255,0.5) | Disabled |
-| textDisabled | rgba(255,255,255,0.4) | Inactive |
-
----
-
-### 8.2 Spacing Scale
+### 11.2 Spacing Scale
 ```javascript
 const SPACING = {
   xxs: 2,
@@ -1757,9 +1163,7 @@ const SPACING = {
 };
 ```
 
----
-
-### 8.3 Typography
+### 11.3 Typography
 ```javascript
 const TYPOGRAPHY = {
   sizes: {
@@ -1780,188 +1184,37 @@ const TYPOGRAPHY = {
     medium: '500',
     semibold: '600',
     bold: '700',
-    extrabold: '800',
-  },
-  families: {
-    primary: 'System',
-    mono: 'Menlo',
   },
 };
 ```
 
----
-
-### 8.4 Component Styles
-
-#### Glass Card
-```javascript
-const glassCard = {
-  backgroundColor: 'rgba(15, 16, 48, 0.55)',
-  borderRadius: 18,
-  borderWidth: 1.2,
-  borderColor: 'rgba(106, 91, 255, 0.2)',
-  padding: 20,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 10 },
-  shadowOpacity: 0.3,
-  shadowRadius: 20,
-};
-```
-
-#### Primary Button
-```javascript
-const primaryButton = {
-  backgroundColor: '#9C0612',
-  borderRadius: 12,
-  paddingVertical: 14,
-  paddingHorizontal: 20,
-  borderWidth: 1.5,
-  borderColor: '#FFBD59',
-};
-
-const primaryButtonText = {
-  color: '#FFFFFF',
-  fontSize: 15,
-  fontWeight: '700',
-};
-
-// Pressed state
-const primaryButtonPressed = {
-  backgroundColor: '#6B0F1A',
-  transform: [{ scale: 0.98 }],
-};
-```
+### 11.4 Component Styles
 
 #### Direction Badge
 ```javascript
 // LONG Badge
-const longBadge = {
-  backgroundColor: 'rgba(58, 247, 166, 0.2)',
-  paddingHorizontal: 8,
-  paddingVertical: 3,
-  borderRadius: 6,
-};
-const longBadgeText = {
-  color: '#3AF7A6',
-  fontWeight: '700',
-};
+{ backgroundColor: 'rgba(58, 247, 166, 0.2)', color: '#3AF7A6' }
 
 // SHORT Badge
-const shortBadge = {
-  backgroundColor: 'rgba(255, 107, 107, 0.2)',
-  paddingHorizontal: 8,
-  paddingVertical: 3,
-  borderRadius: 6,
-};
-const shortBadgeText = {
-  color: '#FF6B6B',
-  fontWeight: '700',
-};
+{ backgroundColor: 'rgba(255, 107, 107, 0.2)', color: '#FF6B6B' }
 ```
 
-#### Filter Button
+#### Zone Hierarchy Badge
 ```javascript
-const filterButton = {
-  paddingHorizontal: 14,
-  paddingVertical: 8,
-  borderRadius: 20,
-  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  borderWidth: 1,
-  borderColor: 'rgba(255, 255, 255, 0.1)',
-};
+// DP (Level 1)
+{ backgroundColor: 'rgba(156, 6, 18, 0.2)', color: '#9C0612' }
 
-const filterButtonActive = {
-  backgroundColor: 'rgba(106, 91, 255, 0.2)',
-  borderColor: '#6A5BFF',
-};
+// FTR (Level 2)
+{ backgroundColor: 'rgba(255, 189, 89, 0.2)', color: '#FFBD59' }
+
+// FL (Level 3)
+{ backgroundColor: 'rgba(34, 197, 94, 0.2)', color: '#22C55E' }
+
+// Regular (Level 4)
+{ backgroundColor: 'rgba(107, 114, 128, 0.2)', color: '#6B7280' }
 ```
 
-#### Input Field
-```javascript
-const input = {
-  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: 'rgba(106, 91, 255, 0.3)',
-  padding: 18,
-  color: '#FFFFFF',
-  fontSize: 16,
-};
-
-const inputFocused = {
-  borderColor: '#6A5BFF',
-};
-```
-
----
-
-### 8.5 Gradients
-```javascript
-const GRADIENTS = {
-  background: ['#05040B', '#0F1030', '#1a0b2e'],
-  backgroundLocations: [0, 0.5, 1],
-
-  primaryButton: ['#9C0612', '#6B0F1A'],
-
-  glassBorder: ['#6A5BFF', '#00F0FF'],
-
-  toggleActive: ['#3AF7A6', '#00F0FF'],
-
-  card: ['rgba(15, 16, 48, 0.55)', 'rgba(15, 16, 48, 0.45)'],
-
-  gold: ['#FFBD59', '#FFD700'],
-};
-```
-
----
-
-### 8.6 Shadows
-```javascript
-const SHADOWS = {
-  // Glass card shadow
-  glass: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.7,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-
-  // Button shadow
-  button: {
-    shadowColor: '#9C0612',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 15,
-    elevation: 8,
-  },
-
-  // Light shadow (for light theme)
-  sm: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-};
-```
-
----
-
-### 8.7 Touch Targets
-```javascript
-const TOUCH = {
-  minimum: 44,      // Apple HIG minimum
-  recommended: 48,  // Standard button
-  comfortable: 56,  // Large touch targets
-  gap: 8,           // Minimum gap between targets
-};
-```
-
----
-
-### 8.8 Animations
+### 11.5 Animations
 ```javascript
 const ANIMATION = {
   duration: {
@@ -1969,982 +1222,481 @@ const ANIMATION = {
     normal: 300,
     slow: 400,
   },
-  easing: {
-    default: [0.4, 0, 0.2, 1],  // cubic-bezier
-  },
 };
 
-// Common animations
 // Button press: scale(0.98), duration: 150ms
 // Modal open: fadeIn + slideUp, duration: 300ms
-// Loading spinner: rotate 360deg, duration: 1000ms, linear
 // Badge pulse: scale(1.1) + opacity(0.8), duration: 500ms
 ```
 
 ---
 
-### 8.9 Number Formatting (Vietnamese Locale)
-**Path:** `gem-mobile/src/utils/formatters.js`
+## 12. USER FLOWS
 
-Vietnamese number format uses:
-- Decimal separator: comma (,) instead of dot (.)
-- Thousands separator: dot (.) instead of comma (,)
-- Example: `$259,174.55` (EN) → `$259.174,55` (VI)
-
-#### Available Functions
-```javascript
-// Price formatting with dynamic precision
-formatPrice(price, withSeparators = true)
-// >= 1000:    2 decimals (e.g., 90.363,84)
-// >= 1:       4 decimals (e.g., 13,5752)
-// >= 0.01:    4 decimals (e.g., 0,3195) ← Matches chart labels
-// >= 0.0001:  6 decimals
-// < 0.0001:   8 decimals
-
-// Percentage formatting
-formatConfidence(value, decimals = 1)  // 85.234 → "85,2%"
-formatPercent(value, decimals = 1)     // 82.872 → "82,9%"
-formatPercentChange(value)             // -2.5 → "-2,50%", +3.2 → "+3,20%"
-
-// Currency formatting
-formatCurrency(amount, decimals = 2)   // 9040 → "9.040,00"
-formatPriceWithCurrency(price)         // 42000 → "$42.000,00"
-
-// Large numbers with suffixes
-formatLargeNumber(num)                 // 1500000 → "1,50M"
-formatVolume(volume)                   // Same as formatLargeNumber
-formatMarketCap(marketCap)             // 1000000000 → "$1,00B"
-
-// Risk:Reward
-formatRiskReward(entry, stopLoss, takeProfit)  // → "1:2,50"
-calculateRR(pattern)                            // Returns numeric R:R ratio
-
-// Time formatting
-formatTimestamp(timestamp)             // → "24/01/2026, 14:30"
-formatRelativeTime(timestamp)          // → "2 giờ trước"
+### 12.1 Main Scanning Flow
+```
+User Opens App
+    ↓
+Scanner Tab Loads
+  - Last coins restored
+  - Last timeframe restored
+  - WebSocket connects
+    ↓
+User Selects Coins
+  - CoinSelector modal
+  - Search or browse
+  - Select 1-N coins (tier-limited)
+    ↓
+User Clicks "Scan Now"
+  - Check quota
+  - Show spinner
+    ↓
+Pattern Detection
+  - Fetch klines from Binance
+  - GEM Frequency Method analysis
+  - Zone hierarchy classification
+  - Odds enhancers calculation
+  - Confirmation pattern check
+    ↓
+Results Displayed
+  - Sorted by strength + hierarchy
+  - Grouped by coin (CoinAccordion)
+  - Quality grade badges
+    ↓
+[View Details] [Paper Trade] [Draw on Chart]
 ```
 
-#### Usage Example
-```javascript
-import {
-  formatPrice,
-  formatConfidence,
-  formatCurrency,
-  calculateRR,
-} from '../utils/formatters';
-
-// In component
-<Text>Entry: ${formatPrice(pattern.entry)}</Text>
-<Text>Confidence: {formatConfidence(pattern.confidence)}</Text>
-<Text>Margin: ${formatCurrency(position.margin)}</Text>
-<Text>R:R: 1:{calculateRR(pattern).toFixed(2)}</Text>
+### 12.2 Paper Trading Flow
 ```
-
----
-
-## 9. USER FLOWS
-
-### 9.1 Main Scanning Flow
-```
-┌─────────────────────────────────────────────────────────┐
-│                    USER OPENS APP                        │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│              SCANNER TAB LOADS                           │
-│  - Last selected coins restored                          │
-│  - Last timeframe restored                               │
-│  - Cached results displayed                              │
-│  - WebSocket connects for live prices                    │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           USER SELECTS COINS                             │
-│  - Click CoinSelector                                    │
-│  - Search or browse                                      │
-│  - Select 1-N coins (tier-limited)                      │
-│  - Click Apply                                           │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           USER CLICKS "SCAN NOW"                         │
-│  - Check scan quota                                      │
-│  - Scanning state = true                                 │
-│  - UI shows spinner                                      │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           PATTERN DETECTION                              │
-│  - Fetch klines from Binance (Futures → Spot fallback)  │
-│  - Analyze price action                                  │
-│  - Detect matching patterns                              │
-│  - Calculate entry/SL/TP                                │
-│  - Apply enhancements (TIER2+)                          │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           RESULTS DISPLAYED                              │
-│  - Patterns grouped by coin (CoinAccordion)             │
-│  - Sorted by confidence                                  │
-│  - Multi-TF results (TIER2+, single coin)               │
-│  - Increment quota usage                                 │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌───────────────┬─────┴─────┬───────────────┐
-│               │           │               │
-▼               ▼           ▼               ▼
-[View Details] [Paper Trade] [Draw on Chart] [Rescan]
+User Clicks "Paper Trade" on Pattern
+    ↓
+PaperTradeModal Opens
+  - Pattern details displayed
+  - Entry/SL/TP auto-filled
+  - Zone hierarchy shown
+    ↓
+User Configures Trade
+  - Select LONG/SHORT
+  - Enter margin
+  - Set leverage (1-125x)
+  - (Custom Mode) Edit Entry/SL/TP
+    ↓
+System Calculates
+  - Position value = margin × leverage
+  - Quantity = value / entry
+  - Risk/Reward amounts
+  - Liquidation price
+    ↓
+Order Type Determined
+  - Pattern Mode: Always MARKET
+  - Custom Mode: MARKET or LIMIT
+    ↓
+Position Tracking
+  - Save to AsyncStorage
+  - Sync to Supabase
+  - Real-time P&L (every 10s)
+  - Auto-close on TP/SL
+    ↓
+Position Closed
+  - Calculate realized P&L
+  - Update balance
+  - Move to history
 ```
 
 ---
 
-### 9.2 Paper Trading Flow
-```
-┌─────────────────────────────────────────────────────────┐
-│           USER CLICKS "PAPER TRADE" ON PATTERN           │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           PAPER TRADE MODAL OPENS                        │
-│  - Pattern details displayed                             │
-│  - Entry/SL/TP auto-filled from pattern                 │
-│  - Balance shown                                         │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           USER CONFIGURES TRADE                          │
-│  - Select trade type (LONG/SHORT)                       │
-│  - Enter position size (margin)                         │
-│  - Set leverage (1-125x)                                │
-│  - (Custom Mode) Edit Entry/SL/TP                       │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           SYSTEM CALCULATES                              │
-│  - Position value = margin × leverage                   │
-│  - Quantity = value / entry                             │
-│  - Risk % and amount                                     │
-│  - Reward % and amount                                   │
-│  - R:R ratio                                             │
-│  - Liquidation price                                     │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           USER CLICKS "OPEN TRADE"                       │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           ORDER TYPE DETERMINED                          │
-│  Pattern Mode:                                           │
-│    → Always MARKET order (immediate fill)               │
-│  Custom Mode:                                            │
-│    → If entry = market price: MARKET order              │
-│    → If entry ≠ market price: LIMIT order (PENDING)     │
-└───────────────┬─────────────────┬───────────────────────┘
-                │                 │
-        ┌───────▼───────┐ ┌───────▼───────┐
-        │ MARKET ORDER  │ │  LIMIT ORDER  │
-        │ Status: OPEN  │ │Status: PENDING│
-        └───────┬───────┘ └───────┬───────┘
-                │                 │
-                ▼                 ▼
-┌─────────────────────────────────────────────────────────┐
-│           POSITION TRACKING                              │
-│  - Save to AsyncStorage                                  │
-│  - Sync to Supabase                                      │
-│  - Deduct margin from balance                            │
-│  - Real-time P&L updates (every 10s)                    │
-│  - Check pending orders for fills                        │
-│  - Auto-close on TP/SL hit                              │
-│  - Manual close available                                │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           POSITION CLOSED                                │
-│  - Calculate realized P&L                                │
-│  - Update balance                                        │
-│  - Move to history                                       │
-│  - Show result notification                              │
-└─────────────────────────────────────────────────────────┘
-```
+## 13. DATA STRUCTURES
 
----
-
-### 9.3 Drawing Tools Flow
-```
-┌─────────────────────────────────────────────────────────┐
-│       USER CLICKS DRAWING ICON IN CHART TOOLBAR          │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           DRAWING TOOLBAR OPENS                          │
-│  - 6 tool buttons displayed                              │
-│  - Magnet mode toggle (default: ON)                     │
-│  - Delete all button                                     │
-│  - Close button                                          │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           USER SELECTS TOOL                              │
-│  - Tool becomes active (gold highlight)                 │
-│  - Helper text shows instructions                        │
-│  - WebView enters drawing mode                          │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌───────────────────────────────────────────────────────────┐
-│                   TOOL TYPE?                              │
-├───────────────────────┬───────────────────────────────────┤
-│    1-CLICK TOOLS      │         2-CLICK TOOLS             │
-│  horizontal_line      │  trend_line                       │
-│  long_position        │  rectangle                        │
-│  short_position       │  fibonacci_retracement            │
-└───────────┬───────────┴───────────────┬───────────────────┘
-            │                           │
-            ▼                           ▼
-┌───────────────────────┐   ┌───────────────────────────────┐
-│  USER CLICKS CHART    │   │   USER CLICKS FIRST POINT     │
-│  (1 click = complete) │   │   - Badge shows "1/2"         │
-│                       │   │   - Helper: "Tap second point"│
-│                       │   └───────────────┬───────────────┘
-│                       │                   ▼
-│                       │   ┌───────────────────────────────┐
-│                       │   │   USER CLICKS SECOND POINT    │
-│                       │   │   - Drawing completes          │
-└───────────┬───────────┘   └───────────────┬───────────────┘
-            │                               │
-            └───────────────┬───────────────┘
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│           MAGNET MODE APPLIED (if enabled)               │
-│  - Find closest candle to click time                    │
-│  - Find nearest OHLC value                              │
-│  - Snap if within 2% threshold                          │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           DRAWING RENDERED                               │
-│  - Immediately visible on chart                         │
-│  - WebView posts message to React Native                │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│           DRAWING SAVED                                  │
-│  - drawingService.saveDrawing() called                  │
-│  - Stored in Supabase                                   │
-│  - Loaded on next chart open                            │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-## 10. DATA STRUCTURES
-
-### 10.1 Pattern Object
+### 13.1 Pattern Object
 ```typescript
 interface Pattern {
   // Identification
   id: string;
   symbol: string;
-  baseAsset: string;
-
-  // Pattern Info
   patternType: string;
-  type: 'reversal' | 'continuation' | 'zone' | 'candlestick';
+
+  // Direction & Type
   direction: 'LONG' | 'SHORT' | 'NEUTRAL';
+  type: 'reversal' | 'continuation' | 'zone' | 'candlestick';
   timeframe: string;
-  description: string;
 
   // Price Levels
   entry: number;
-  entryPrice: number;
   stopLoss: number;
   takeProfit: number;
-  target: number;
-  targets: number[];
-  takeProfit1: number;
-  takeProfit2?: number;
 
   // Confidence & Risk
   confidence: number;      // 0-100
   riskReward: number;      // Ratio
   winRate: number;         // Expected %
 
-  // Current State
-  currentPrice: number;
-  priceChangePercent: number;
+  // Zone Hierarchy (NEW)
+  zoneHierarchy: 'DECISION_POINT' | 'FTR' | 'FLAG_LIMIT' | 'REGULAR';
+  zoneHierarchyLevel: number;  // 1-4
+
+  // Odds Enhancers (NEW)
+  oddsEnhancers: {
+    totalScore: number;
+    maxScore: number;
+    enhancers: {
+      departureStrength: number;
+      timeAtLevel: number;
+      freshness: number;
+      profitMargin: number;
+      bigPicture: number;
+      zoneOrigin: number;
+      arrival: number;
+      riskReward: number;
+    };
+  };
+  qualityGrade: 'A+' | 'A' | 'B+' | 'B' | 'C' | 'D';
+
+  // MTF Context (NEW)
+  htfAlignment: 'WITH_TREND' | 'COUNTER_TREND' | 'REVERSAL_COUNTER';
+  insideHTFZone: boolean;
+  lookRightRR: number;
+
+  // Confirmation (NEW)
+  confirmation: {
+    patterns: string[];
+    score: number;
+    bestPattern: string | null;
+  };
+
+  // State
   state: 'FRESH' | 'ACTIVE' | 'WAITING' | 'INVALID' | 'EXPIRED';
-
-  // Timing
-  detectedAt: string;      // ISO8601
-  createdAt: string;
-  updatedAt: string;
-
-  // Enhancement (TIER2+)
-  volumeConfirmation?: boolean;
-  trendAlignment?: 'strong' | 'moderate' | 'weak';
-  confluenceScore?: number;
-  rsiDivergence?: boolean;
-  qualityGrade?: 'A+' | 'A' | 'B+' | 'B' | 'C' | 'D';
+  detectedAt: string;
 }
 ```
 
----
-
-### 10.2 Position Object
+### 13.2 Position Object
 ```typescript
 interface Position {
-  // Identification
   id: string;
-  orderId: string;
-
-  // User & Source
   userId: string;
-  source: 'PATTERN_SCANNER';
-
-  // Symbol & Pattern
   symbol: string;
-  baseAsset: string;
-  patternType: string;
-  timeframe: string;
-  confidence: number;
 
-  // Direction & Prices
   direction: 'LONG' | 'SHORT';
   entryPrice: number;
   stopLoss: number;
   takeProfit: number;
-  takeProfit2?: number;
   currentPrice: number;
 
-  // Position Sizing (Binance Futures style)
-  margin: number;           // Collateral in USDT
-  positionSize: number;     // Same as margin
-  positionValue: number;    // margin × leverage
-  quantity: number;         // positionValue / entryPrice
+  margin: number;
+  positionValue: number;
+  quantity: number;
   leverage: number;
 
-  // Risk Calculations
-  riskAmount: number;
-  rewardAmount: number;
-  riskRewardRatio: string;
-
-  // P&L Tracking
   unrealizedPnL: number;
   unrealizedPnLPercent: number;
 
-  // Timing
-  openedAt: string;         // ISO8601
-  filledAt?: string;        // For limit orders
-  updatedAt: string;
-
-  // Status
   status: 'OPEN' | 'CLOSED' | 'PENDING';
   orderType: 'MARKET' | 'LIMIT';
-
-  // Trade Mode
   tradeMode: 'pattern' | 'custom';
 
-  // Custom Mode Fields
-  patternEntryOriginal?: number;
-  patternSLOriginal?: number;
-  patternTPOriginal?: number;
-  entryDeviationPercent?: number;
-  slDeviationPercent?: number;
-  tpDeviationPercent?: number;
-  aiScore?: number;
-  aiFeedback?: string;
+  openedAt: string;
+  patternType: string;
+  zoneHierarchy?: string;
+  oddsScore?: number;
 }
 ```
 
 ---
 
-### 10.3 Closed Trade Object
-```typescript
-interface ClosedTrade extends Position {
-  // Exit Info
-  exitPrice: number;
-  exitReason: 'MANUAL' | 'TAKE_PROFIT' | 'STOP_LOSS' | 'EXPIRE';
-  closedAt: string;        // ISO8601
+## 14. TRADING MODES
 
-  // Final P&L
-  realizedPnL: number;
-  realizedPnLPercent: number;
-  result: 'WIN' | 'LOSS';
-  holdingTime: string;
-
-  // Status
-  status: 'CLOSED';
-}
-```
-
----
-
-### 10.4 Pending Order Object
-```typescript
-interface PendingOrder {
-  id: string;
-  userId: string;
-  symbol: string;
-  direction: 'LONG' | 'SHORT';
-  entryPrice: number;       // Target entry price
-  currentPrice: number;     // Current market price
-  margin: number;
-  leverage: number;
-  status: 'PENDING';
-  orderType: 'LIMIT';
-  pendingAt: string;        // ISO8601
-
-  // Fills when:
-  // LONG: currentPrice <= entryPrice
-  // SHORT: currentPrice >= entryPrice
-}
-```
-
----
-
-### 10.5 Stats Object
-```typescript
-interface Stats {
-  balance: number;
-  equity: number;
-  initialBalance: number;
-  usedMargin: number;
-  availableBalance: number;
-
-  totalTrades: number;     // Closed trades
-  openTrades: number;
-  pendingOrders: number;
-  wins: number;
-  losses: number;
-  winRate: number;
-
-  totalPnL: number;        // Realized + Unrealized
-  realizedPnL: number;
-  unrealizedPnL: number;
-  avgPnL: number;
-
-  bestTrade: number;
-  worstTrade: number;
-  profitFactor: number;
-}
-```
-
----
-
-## 11. TRADING MODES
-
-### 11.1 Pattern Mode (GEM AI-Generated)
+### 14.1 Pattern Mode (GEM AI-Generated)
 ```javascript
 tradeMode: 'pattern'
 
-// Characteristics
-- Entry: Auto-calculated from pattern detection (locked)
-- Stop Loss: Auto-calculated from zone boundary (locked)
-- Take Profit: Auto-calculated with TP1/TP2 (locked)
-- Order Type: Always MARKET (immediate fill)
-- Editable: NO (TP/SL cannot be modified)
-- AI Score: Not shown (confidence already in pattern)
+- Entry: Auto-calculated (locked)
+- Stop Loss: Auto-calculated (locked)
+- Take Profit: Auto-calculated (locked)
+- Order Type: Always MARKET
+- Editable: NO
+- AI Score: Not shown
 
 // UI Indicators
-- Badge: "GEM Pattern Mode" (gold background, lock icon)
-- Hint: "TP/SL đã được tối ưu"
-- Edit icon: NOT shown on price levels
-- Price levels: Read-only display
+- Badge: "GEM Pattern Mode" (gold, lock icon)
+- Edit icon: NOT shown
 ```
 
-### 11.2 Custom Mode (User-Defined)
+### 14.2 Custom Mode (User-Defined)
 ```javascript
 tradeMode: 'custom'
 
-// Characteristics
-- Entry: User-defined (can differ from pattern/market)
-- Stop Loss: User-defined with validation
-- Take Profit: User-defined with validation
-- Order Type: MARKET (if entry = current) or LIMIT (if entry ≠ current)
-- Editable: YES (before AND after opening position)
-- AI Score: Shown (0-100 assessment of trade quality)
+- Entry: User-defined
+- Stop Loss: User-defined (with validation)
+- Take Profit: User-defined (with validation)
+- Order Type: MARKET or LIMIT (auto-detected)
+- Editable: YES
+- AI Score: Shown (0-100)
 
-// Validation Rules
-LONG Position:
-  - stopLoss < entryPrice (SL must be below entry)
-  - takeProfit > entryPrice (TP must be above entry)
-
-SHORT Position:
-  - stopLoss > entryPrice (SL must be above entry)
-  - takeProfit < entryPrice (TP must be below entry)
-
-// UI Indicators
-- Badge: "Custom Mode" (warning color, edit icon)
-- Hint: "(Có thể chỉnh sửa)"
-- Edit icon: Shown on TP/SL fields
-- Price levels: Editable with validation
-- AI Score: Color-coded (≥80 green, ≥60 gold, ≥40 warning, <40 red)
+// Validation
+LONG: stopLoss < entry < takeProfit
+SHORT: stopLoss > entry > takeProfit
 
 // Limit Order Detection
 isLimitOrder = (
-  tradeMode === 'custom' &&
-  (
-    (direction === 'LONG' && entryPrice < currentMarketPrice) ||
-    (direction === 'SHORT' && entryPrice > currentMarketPrice)
-  )
+  (direction === 'LONG' && entry < currentPrice) ||
+  (direction === 'SHORT' && entry > currentPrice)
 )
 ```
 
 ---
 
-## 12. TIER ACCESS CONTROL
+## 15. TIER ACCESS CONTROL
 
-### 12.1 Tier Comparison Table
+### 15.1 Tier Comparison
 | Feature | FREE | TIER1 | TIER2 | TIER3 |
 |---------|------|-------|-------|-------|
-| **Patterns** | 3 | 7 | 15 | 24 |
-| **Max Coins/Scan** | 1 | 5 | 20 | Unlimited |
-| **Timeframes** | 1 | 1 | 3 | 5+ |
-| **Multi-TF Scan** | No | No | Yes | Yes |
-| **Enhancement Stats** | No | No | Yes | Yes |
-| **Quality Grade** | No | No | Yes | Yes |
-| **Confluence Score** | No | No | Yes | Yes |
-| **Custom Mode** | No | No | Yes | Yes |
-| **Pending Orders** | No | No | Yes | Yes |
-| **Drawing Tools** | Yes | Yes | Yes | Yes |
-| **Paper Trading** | Yes | Yes | Yes | Yes |
-| **Trade History** | Yes | Yes | Yes | Yes |
-| **Scan Quota/Day** | 5 | 15 | 50 | Unlimited |
-| **Max Leverage** | 10x | 20x | 50x | 125x |
+| Patterns | 3 | 7 | 15 | 24+ |
+| Max Coins/Scan | 1 | 5 | 20 | Unlimited |
+| Timeframes | 1 | 1 | 3 | 5+ |
+| Multi-TF Scan | No | No | Yes | Yes |
+| Custom Mode | No | No | Yes | Yes |
+| Zone Hierarchy Display | No | No | Yes | Yes |
+| Odds Enhancers | No | No | Yes | Yes |
+| Quality Grade | No | No | Yes | Yes |
+| Scan Quota/Day | 5 | 15 | 50 | Unlimited |
+| Max Leverage | 10x | 20x | 50x | 125x |
 
 ---
 
-### 12.2 Pattern Access by Tier
+## 16. REAL-TIME FEATURES
+
+### 16.1 WebSocket Implementation
 ```javascript
-const TIER_PATTERNS = {
-  FREE: ['DPD', 'UPU', 'HEAD_SHOULDERS'],
+// Price subscription
+const ws = new WebSocket(
+  `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`
+);
 
-  TIER1: [
-    ...FREE,
-    'UPD', 'DPU', 'DOUBLE_TOP', 'DOUBLE_BOTTOM'
-  ],
-
-  TIER2: [
-    ...TIER1,
-    'INVERSE_HEAD_SHOULDERS', 'ASCENDING_TRIANGLE',
-    'DESCENDING_TRIANGLE', 'HFZ', 'LFZ',
-    'SYMMETRICAL_TRIANGLE', 'ROUNDING_BOTTOM', 'ROUNDING_TOP'
-  ],
-
-  TIER3: [
-    ...TIER2,
-    'BULL_FLAG', 'BEAR_FLAG', 'WEDGE', 'CUP_HANDLE',
-    'ENGULFING', 'MORNING_EVENING_STAR', 'THREE_METHODS',
-    'HAMMER', 'FLAG'
-  ]
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  setCurrentPrice(parseFloat(data.c));
+  setPriceChange(parseFloat(data.P));
 };
 ```
 
----
-
-## 13. REAL-TIME FEATURES
-
-### 13.1 WebSocket Implementation
+### 16.2 Auto-Close Logic
 ```javascript
-// Price subscription (ScannerScreen)
-const subscribeToPrice = (symbol) => {
-  const ws = new WebSocket(
-    `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`
-  );
-
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    setCurrentPrice(parseFloat(data.c));     // Current price
-    setPriceChange(parseFloat(data.P));      // 24h % change
-  };
-
-  ws.onerror = () => {
-    console.log('WebSocket connection issue - will retry');
-  };
-
-  ws.onclose = () => {
-    // Reconnect after 5 seconds
-    setTimeout(() => subscribeToPrice(symbol), 5000);
-  };
-};
-```
-
----
-
-### 13.2 Price Update Intervals
-| Feature | Update Frequency | Method |
-|---------|------------------|--------|
-| Chart Price | Real-time | WebSocket (kline) |
-| Current Price Display | Real-time | WebSocket (ticker) |
-| Position P&L | 10 seconds | REST API batch |
-| Pending Order Check | 10 seconds | REST API batch |
-| Coin Selector Prices | 5 minutes (cached) | REST API |
-
----
-
-### 13.3 Auto-Close Logic
-```javascript
-// Check TP/SL in updatePrices()
+// Check TP/SL every 10 seconds
 for (const position of openPositions) {
   const isLong = position.direction === 'LONG';
 
-  // Check Stop Loss
   const hitStopLoss = isLong
     ? currentPrice <= position.stopLoss
     : currentPrice >= position.stopLoss;
 
-  if (hitStopLoss) {
-    await closePosition(position.id, position.stopLoss, 'STOP_LOSS');
-    continue;
-  }
-
-  // Check Take Profit
   const hitTakeProfit = isLong
     ? currentPrice >= position.takeProfit
     : currentPrice <= position.takeProfit;
 
-  if (hitTakeProfit) {
-    await closePosition(position.id, position.takeProfit, 'TAKE_PROFIT');
-  }
+  if (hitStopLoss) await closePosition(position.id, position.stopLoss, 'STOP_LOSS');
+  if (hitTakeProfit) await closePosition(position.id, position.takeProfit, 'TAKE_PROFIT');
 }
 ```
 
 ---
 
-### 13.4 Pending Order Fill Logic
-```javascript
-// Check pending orders in checkPendingOrders()
-for (const order of pendingOrders) {
-  const isLong = order.direction === 'LONG';
+## 17. ERROR HANDLING
 
-  // LONG fills when price drops to entry
-  // SHORT fills when price rises to entry
-  const shouldFill = isLong
-    ? currentPrice <= order.entryPrice
-    : currentPrice >= order.entryPrice;
-
-  if (shouldFill) {
-    await convertToOpenPosition(order);
-    filled.push(order);
-  }
-}
-```
-
----
-
-## 14. ERROR HANDLING
-
-### 14.1 Pattern Detection Errors
+### 17.1 Pattern Detection Errors
 | Error | Handling |
 |-------|----------|
 | Invalid symbol | Sanitize & retry |
 | API rate limit | Queue & retry with delay |
 | Insufficient candles | Return empty patterns |
-| Corrupted data | Skip pattern, continue |
 | Network error | Silent fail, show retry button |
 
----
-
-### 14.2 Paper Trade Validation
+### 17.2 Paper Trade Validation
 ```javascript
-// Input Validation
-if (positionSize <= 0) {
-  Alert.alert('Lỗi', 'Vui lòng nhập số tiền hợp lệ');
-  return;
-}
-
-if (positionSize > balance) {
-  Alert.alert('Lỗi', 'Số dư không đủ');
-  return;
-}
-
-if (!pattern.entry || !pattern.stopLoss) {
-  Alert.alert('Lỗi', 'Pattern không hợp lệ');
-  return;
-}
+if (positionSize <= 0) Alert.alert('Lỗi', 'Vui lòng nhập số tiền hợp lệ');
+if (positionSize > balance) Alert.alert('Lỗi', 'Số dư không đủ');
+if (!pattern.entry || !pattern.stopLoss) Alert.alert('Lỗi', 'Pattern không hợp lệ');
 
 // Custom Mode Validation
-if (tradeMode === 'custom') {
-  if (direction === 'LONG' && stopLoss >= entry) {
-    Alert.alert('Lỗi', 'Stop Loss phải nhỏ hơn Entry cho lệnh LONG');
-    return;
-  }
-  if (direction === 'SHORT' && stopLoss <= entry) {
-    Alert.alert('Lỗi', 'Stop Loss phải lớn hơn Entry cho lệnh SHORT');
-    return;
-  }
+if (direction === 'LONG' && stopLoss >= entry) {
+  Alert.alert('Lỗi', 'Stop Loss phải nhỏ hơn Entry cho lệnh LONG');
 }
 ```
 
 ---
 
-### 14.3 Drawing Tool Errors
+## 18. PERFORMANCE OPTIMIZATIONS
+
+### 18.1 Batch Processing
 ```javascript
-// WebView message error handling
-const handleWebViewMessage = (event) => {
-  try {
-    const data = JSON.parse(event.nativeEvent.data);
-    // Process drawing data...
-  } catch (e) {
-    console.log('[TradingChart] Message parse error:', e);
-    // Silently fail - don't disrupt chart interaction
-  }
-};
-
-// Database save error
-const { error } = await drawingService.saveDrawing(drawing);
-if (error) {
-  console.error('[Drawing] Save failed:', error);
-  // Drawing still visible locally, will retry on next save
-}
-```
-
----
-
-## 15. PERFORMANCE OPTIMIZATIONS
-
-### 15.1 Batch Processing
-```javascript
-// Scan 50 coins at a time (parallel)
 const BATCH_SIZE = 50;
 
 for (let i = 0; i < coins.length; i += BATCH_SIZE) {
   const batch = coins.slice(i, i + BATCH_SIZE);
-
   await Promise.all(
     batch.map(coin => patternDetection.detectPatterns(coin, tf))
   );
 }
 ```
 
----
-
-### 15.2 Memoization
+### 18.2 Memoization
 ```javascript
-// ScannerScreen
 const filteredResults = useMemo(() => {
   return results.filter(r => r.patterns.length > 0);
-}, [results, showOnlyWithPatterns]);
+}, [results]);
 
-// PatternCard
-const formattedPrice = useMemo(() => {
-  return formatPrice(pattern.entry);
-}, [pattern.entry]);
-
-// TradingChart
-const chartHtml = useMemo(() => {
-  return generateChartHTML();
-}, [symbol, timeframe, showVolume, darkTheme, showPriceLines]);
+const sortedPatterns = useMemo(() => {
+  return patterns.sort((a, b) => {
+    // Primary: strength, Secondary: hierarchy, Tertiary: confidence
+  });
+}, [patterns]);
 ```
 
 ---
 
-### 15.3 Lazy Loading
-- Chart loads only when viewed (WebView on-demand)
-- Sponsor banners distributed throughout scroll
-- Patterns in accordion (one coin expanded at a time)
-- Drawings loaded per-symbol, per-timeframe
-
----
-
-### 15.4 Caching
-```javascript
-// Binance coins cached 5 minutes
-const CACHE_DURATION = 5 * 60 * 1000;
-
-// AsyncStorage for paper trades
-// - Positions persisted locally
-// - Synced to Supabase for backup
-
-// Drawings cached per symbol
-// - Loaded once per chart open
-// - Updated on save/delete
-```
-
----
-
-## 16. FILE MANIFEST
+## 19. FILE MANIFEST
 
 ```
 gem-mobile/src/
 ├── screens/
 │   ├── Scanner/
-│   │   ├── ScannerScreen.js           # Main trading screen
-│   │   ├── OpenPositionsScreen.js     # Paper trade positions
-│   │   ├── PatternDetailScreen.js     # Pattern analysis
-│   │   ├── MTFDashboardScreen.js      # Multi-timeframe dashboard
-│   │   ├── AlertsManagementScreen.js  # Price alerts management
-│   │   ├── OddsAnalysisScreen.js      # Odds/probability analysis
-│   │   ├── ZoneDetailScreen.js        # Zone detail view
+│   │   ├── ScannerScreen.js
+│   │   ├── OpenPositionsScreen.js
+│   │   ├── PatternDetailScreen.js
+│   │   ├── MTFDashboardScreen.js
+│   │   ├── OddsAnalysisScreen.js
+│   │   ├── ZoneDetailScreen.js
 │   │   └── components/
-│   │       ├── CoinSelector.js        # Coin picker
-│   │       ├── TradingChart.js        # Candlestick chart + drawings
-│   │       ├── PatternCard.js         # Pattern display
-│   │       ├── ScanResultsSection.js  # Results grouping
-│   │       ├── MultiTFResultsSection.js # Multi-TF results
-│   │       ├── PaperTradeModal.js     # Trade entry
-│   │       ├── ConfidenceBar.js       # Confidence display
-│   │       ├── TimeframeButtons.js    # TF selector
-│   │       ├── TimeframeSelector.js   # TF selector (alternative)
-│   │       └── index.js
+│   │       ├── CoinSelector.js
+│   │       ├── TradingChart.js
+│   │       ├── PatternCard.js
+│   │       ├── ScanResultsSection.js
+│   │       ├── MultiTFResultsSection.js
+│   │       ├── PaperTradeModal.js
+│   │       └── ConfidenceBar.js
 │   └── Account/
-│       ├── PortfolioScreen.js         # Real portfolio
-│       └── PaperTradeHistoryScreen.js # Trade history
+│       ├── PortfolioScreen.js
+│       └── PaperTradeHistoryScreen.js
 ├── components/
+│   ├── Scanner/
+│   │   ├── ZoneHierarchyBadge.js
+│   │   ├── OddsEnhancerScorecard.js
+│   │   ├── FreshnessIndicator.js
+│   │   ├── QMPatternCard.js
+│   │   ├── FTRZoneCard.js
+│   │   ├── DecisionPointCard.js
+│   │   ├── FlagLimitCard.js
+│   │   ├── ConfirmationBadge.js
+│   │   └── ValidationBadges.js
 │   └── Trading/
-│       ├── ChartToolbar.js            # Chart controls
-│       ├── DrawingToolbar.js          # Drawing tools
-│       ├── DrawingListModal.js        # Drawing list management
-│       ├── PendingOrdersSection.js    # Pending orders
-│       ├── OpenPositionsSection.js    # Open positions
-│       ├── PaperTradeModal.js         # Trade modal (deprecated)
-│       ├── PaperTradeModalV2.js       # Trade modal with MindsetAdvisor
-│       ├── MindsetCheckModal.js       # Mindset assessment modal
-│       ├── MindsetAdvisor.js          # Mindset advisor component
-│       ├── QuickMindsetWidget.js      # Quick mindset widget
-│       ├── AITradeGuard.js            # AI assessment
-│       ├── AIAssessmentSection.js     # AI assessment display
-│       ├── CoinSelectorModal.js       # Coin selector modal
-│       ├── CoinAccordion.js           # Coin accordion
-│       ├── CustomModeFields.js        # Custom mode inputs
-│       ├── PatternModeFields.js       # Pattern mode display
-│       ├── DeviationBadge.js          # Deviation indicator
-│       ├── EnhancementStatsCard.js    # Enhancement stats
-│       ├── MarginLeverageBar.js       # Margin/leverage bar
-│       ├── ModeBanner.js              # Mode indicator banner
-│       ├── ModeTabSelector.js         # Mode tab selector
-│       ├── MTFAlignmentPanel.js       # MTF alignment panel
-│       ├── OnboardingModal.js         # Onboarding modal
-│       ├── OrderCalculations.js       # Order calculations
-│       ├── OrderLinesSettings.js      # Order lines settings
-│       ├── OrderLinesToggle.js        # Order lines toggle
-│       ├── OrderTypeSelector.js       # Order type selector
-│       ├── PatternInfoCard.js         # Pattern info card
-│       ├── PriceInput.js              # Price input
-│       ├── PriceLines.js              # Price lines
-│       ├── QuantitySlider.js          # Quantity slider
-│       ├── ScanResultsAccordion.js    # Results accordion
-│       ├── ScoreGauge.js              # Score gauge
-│       ├── TPSLSection.js             # TP/SL section
-│       ├── ZoneTooltip.js             # Zone tooltip
-│       └── index.js
+│       ├── ChartToolbar.js
+│       ├── DrawingToolbar.js
+│       ├── PaperTradeModal.js
+│       ├── MindsetCheckModal.js
+│       ├── AIAssessmentSection.js
+│       └── PendingOrdersSection.js
 ├── services/
-│   ├── patternDetection.js            # Pattern algorithm
-│   ├── binanceService.js              # Binance API
-│   ├── paperTradeService.js           # Paper trading
-│   ├── drawingService.js              # Chart drawings
-│   ├── multiTimeframeScanner.js       # Multi-TF scanning
-│   ├── tierAccessService.js           # Feature gating
-│   ├── alertService.js                # Price alerts
-│   └── mindsetAdvisorService.js       # Mindset tracking
-├── contexts/
-│   ├── ScannerContext.js              # Scanner state
-│   └── AuthContext.js                 # User & tier
-├── utils/
-│   ├── tokens.js                      # Design tokens
-│   └── formatters.js                  # Number formatting (Vietnamese locale)
-└── constants/
-    └── patternSignals.js              # Pattern definitions
-
-supabase/
-├── migrations/
-│   ├── 20251219_chart_drawings.sql    # Drawings table
-│   ├── 20260124_trading_mindset_logs.sql # Mindset logs table
-│   └── ...
+│   ├── patternDetection.js          # Core pattern engine
+│   ├── quasimodoDetector.js         # QM detection
+│   ├── ftrDetector.js               # FTR detection
+│   ├── flagLimitDetector.js         # FL detection
+│   ├── decisionPointDetector.js     # DP detection
+│   ├── compressionDetector.js       # Compression detection
+│   ├── engulfingDetector.js         # Engulfing patterns
+│   ├── pinBarDetector.js            # Pin bars
+│   ├── inducementDetector.js        # Inducement patterns
+│   ├── confirmationPatterns.js      # Confirmation at zone
+│   ├── zoneCalculator.js            # Zone boundaries
+│   ├── zoneManager.js               # Zone lifecycle
+│   ├── zoneHierarchy.js             # Zone classification
+│   ├── oddsEnhancers.js             # 8 odds scoring
+│   ├── multiTimeframeScanner.js     # MTF scanning
+│   ├── mtfAlignmentService.js       # MTF alignment
+│   ├── binanceService.js            # Binance API
+│   ├── paperTradeService.js         # Paper trading
+│   └── drawingService.js            # Chart drawings
+├── constants/
+│   ├── patternConfig.js             # Pattern win rates, R:R
+│   ├── patternSignals.js            # Pattern definitions
+│   ├── zoneHierarchyConfig.js       # Zone hierarchy config
+│   ├── oddsEnhancersConfig.js       # Odds enhancers config
+│   └── tierFeatures.js              # Tier access
+└── utils/
+    ├── tokens.js                    # Design tokens
+    └── formatters.js                # Number formatting
 ```
 
 ---
 
 ## CHANGELOG
 
+### Version 4.0 (2026-02-06)
+- **Pattern Detection Engine Audit & Fix:**
+  - Fixed GEM Frequency Method (detectImpulsiveMove, detectPauseZone)
+  - Fixed DPD/UPU/DPU/UPD detection with correct R:R values
+  - Fixed H&S/IH&S: Head must be 10% above/below shoulders
+  - Fixed Double Top/Bottom: 2% tolerance, 3% trough depth
+  - Fixed Bull/Bear Flag: Dynamic lookback, breakout entry
+  - Fixed Symmetrical Triangle: Wait for breakout direction
+  - Fixed Three Methods: Middle candles must stay within first candle range
+  - Removed dead swing fallback code (4 functions, ~200 lines)
+
+- **Zone Hierarchy System:**
+  - Added DP > FTR > FL > Regular classification
+  - Replaced inline QM/FTR/FL/DP with dedicated detectors
+  - Added zone hierarchy sorting (secondary sort criterion)
+
+- **8 Odds Enhancers:**
+  - Fixed departure strength calculation
+  - Fixed profit margin (opposing zone distance)
+  - Fixed arrival speed (ATR-based)
+  - All 8 enhancers now work correctly
+
+- **MTF Integration:**
+  - Added two-phase scanning (HTF first, then LTF with context)
+  - Added HTF trend weighting (+10 with-trend, -15 counter-trend)
+  - Added zone-in-zone prioritization (+12 confidence)
+
+- **Confirmation Patterns:**
+  - Added confirmation pattern scanning at zone touches
+  - Integrated engulfing, pin bar, hammer detection
+  - Added confirmation score boost (+10 confidence max)
+
+- **Look Right Validation:**
+  - Added opposing zone R:R filter (min 2:1)
+  - Patterns failing Look Right are filtered out
+
+- **Documentation Update:**
+  - Complete rewrite of pattern detection section
+  - Added zone hierarchy documentation
+  - Added odds enhancers documentation
+  - Updated file manifest with all new services/components
+
 ### Version 3.2 (2026-01-29)
-- **Marketing Introduction:** Added comprehensive Vietnamese marketing section
-  - Feature overview and benefits
-  - Use cases and comparison table
-  - Tier comparison for sales reference
-  - SEO/ASO keywords
-- **Documentation Update:** Updated file manifest with all current components
-- **Components Added:**
-  - AIAssessmentSection.js
-  - CoinSelectorModal.js
-  - CoinAccordion.js
-  - DrawingListModal.js
-  - EnhancementStatsCard.js
-  - MarginLeverageBar.js
-  - MTFAlignmentPanel.js
-  - OrderLinesSettings.js
-  - OrderLinesToggle.js
-  - ScoreGauge.js
-  - ZoneTooltip.js
-- **Screens Added:**
-  - AlertsManagementScreen.js
-  - OddsAnalysisScreen.js
-  - ZoneDetailScreen.js
-  - MTFDashboardScreen.js
+- Added comprehensive Vietnamese marketing section
+- Updated file manifest with all current components
 
 ### Version 3.1 (2026-01-24)
-- **Zone Positioning Fix:** Zones now display at correct candle positions
-  - Uses `formation_time` from pattern data
-  - Zones are "sticky" to candles (move with zoom/pan)
-  - Removed incorrect "8 recent candles" fallback logic
-  - Priority: formation_time > formationTime > start_time > startTime > openedAt
-- **P&L Real-time Sync:** Added onPriceUpdate callback to TradingChart
-  - Chart emits price updates via WebSocket
-  - PatternDetailScreen uses callback for synchronized P&L display
-  - Eliminates delay between chart and P&L section
-- **MindsetCheckModal Integration:**
-  - New MindsetAdvisor component for trading psychology
-  - Integrated into PaperTradeModalV2
-  - Logs mindset assessments to Supabase
-  - sourceScreen constraint: 'paper_trade_modal', 'gemmaster', 'quick_action', 'scanner'
-- **Vietnamese Number Formatting (formatters.js):**
-  - Centralized number formatting utility
-  - Vietnamese locale: comma as decimal, dot as thousands
-  - formatPrice: 4 decimals for prices >= 0.01 (matches chart labels)
-  - formatConfidence, formatPercent, formatDecimal, formatCurrency
-  - formatRiskReward, calculateRR, formatTimestamp, formatRelativeTime
-- **Bug Fixes:**
-  - Fixed MindsetAdvisor database constraint error (sourceScreen value)
-  - Fixed decimal formatting mismatch between chart and display
+- Zone positioning fix (uses formation_time)
+- P&L real-time sync via onPriceUpdate callback
+- MindsetCheckModal integration
+- Vietnamese number formatting (formatters.js)
 
 ### Version 3.0 (2025-12-20)
-- **Drawing Tools:** Added 6 chart annotation tools
-  - Horizontal line, trend line, rectangle
-  - Fibonacci retracement (7 levels)
-  - Long/Short position (auto TP/SL)
-  - Magnet mode for OHLC snapping
-  - Supabase persistence
-- **Pending Orders:** Added limit order support
-  - PENDING status for unfilled orders
-  - Auto-fill detection every 10s
-  - Cancel pending orders
-  - PendingOrdersSection component
-- **Custom Mode:** Added user-defined trading
-  - Editable Entry/SL/TP
-  - AI score assessment
-  - Deviation tracking from pattern prices
-  - LIMIT order when entry differs from market
-- **Trade Modes:** Separated Pattern vs Custom mode
-  - Pattern Mode: locked, AI-optimized
-  - Custom Mode: editable, AI-scored
-- Updated all data structures with new fields
-- Enhanced UI/UX documentation
+- Added 6 drawing tools with Supabase persistence
+- Added pending orders (limit order support)
+- Added Custom Mode with AI scoring
+- Separated Pattern vs Custom mode
 
 ### Version 2.0 (2025-12-13)
-- Added custom initial balance feature
-- Added reset account functionality
-- Added settings modal in PaperTradeHistoryScreen
-- Fixed badge count sync between Scanner and History
-- Improved balance calculation accuracy
-- Added recalculateBalance() function
-- Added getEquity() function with initialBalance
+- Custom initial balance feature
+- Reset account functionality
+- Settings modal in history screen
 
 ### Version 1.0 (Initial)
 - Core scanner functionality
-- Pattern detection (24 patterns)
+- 24 pattern detection
 - Paper trading system
 - Multi-timeframe scanning
-- Tier-based access control
 
 ---
 

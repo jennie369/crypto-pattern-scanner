@@ -968,18 +968,16 @@ const styles = StyleSheet.create({
     paddingVertical: COSMIC_SPACING.xxs,
   },
   suggestionsWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
     gap: COSMIC_SPACING.xs,
   },
   suggestionChip: {
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
     paddingHorizontal: COSMIC_SPACING.sm,
-    paddingVertical: COSMIC_SPACING.xxs,
+    paddingVertical: COSMIC_SPACING.xs,
     borderRadius: COSMIC_RADIUS.sm,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
-    maxWidth: 180,
   },
   suggestionChipSelected: {
     backgroundColor: COSMIC_COLORS.glow.gold + '20',

@@ -186,19 +186,22 @@ const UpgradeScreen = () => {
     try {
       setCheckingOut(product.variantId);
 
-      // Navigate to Shop CheckoutWebView with cart URL
-      // Pass returnTab to ensure proper navigation back to Assets tab
-      navigation.navigate('Shop', {
-        screen: 'CheckoutWebView',
-        params: {
-          checkoutUrl: product.cartUrl,
-          title: product.name,
-          productName: product.name,
-          variantId: product.variantId,
-          returnScreen: 'UpgradeScreen',
-          returnTab: 'Account', // Return to Assets tab
-        },
-      });
+      // First close the modal, then navigate to Shop checkout
+      // This prevents WebView opening behind modal issue
+      navigation.goBack(); // Close UpgradeScreen modal
+
+      // Small delay to let modal close, then navigate to Shop checkout
+      setTimeout(() => {
+        navigation.navigate('Shop', {
+          screen: 'CheckoutWebView',
+          params: {
+            checkoutUrl: product.cartUrl,
+            title: product.name,
+            productName: product.name,
+            variantId: product.variantId,
+          },
+        });
+      }, 100);
     } catch (err) {
       console.error('[UpgradeScreen] Checkout error:', err);
     } finally {
@@ -207,18 +210,16 @@ const UpgradeScreen = () => {
   };
 
   const handleLearnMore = (product) => {
-    // Navigate to landing page in WebView
+    // Navigate to landing page in WebView (within same stack to work from modal)
     const landingUrl = product.landingPage || 'https://gemral.com';
 
-    navigation.navigate('Shop', {
-      screen: 'CheckoutWebView',
-      params: {
-        checkoutUrl: landingUrl,
-        title: 'Tìm hiểu thêm',
-        productName: product.name,
-        returnScreen: 'UpgradeScreen',
-        returnTab: 'Account', // Return to Assets tab
-      },
+    navigation.navigate('CheckoutWebView', {
+      checkoutUrl: landingUrl,
+      title: 'Tìm hiểu thêm',
+      productName: product.name,
+      returnScreen: 'UpgradeScreen',
+      returnTab: 'Account',
+      isLandingPage: true, // Skip cancel confirmation for landing pages
     });
   };
 

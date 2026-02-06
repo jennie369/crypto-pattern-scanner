@@ -4,6 +4,74 @@
  */
 
 import { supabase } from './supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// AsyncStorage keys for persistent caching
+const STORAGE_KEY_BANNERS = '@shop_banners_cache';
+const STORAGE_KEY_SECTION_BANNERS = '@section_banners_cache';
+const PERSISTENT_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
+// ========================================
+// PERSISTENT CACHE HELPERS
+// ========================================
+
+/**
+ * Load banners from AsyncStorage (for instant display on app start)
+ */
+const loadBannersFromStorage = async (key) => {
+  try {
+    const cached = await AsyncStorage.getItem(key);
+    if (!cached) return null;
+
+    const { data, timestamp } = JSON.parse(cached);
+    // Return cached data even if expired (will refresh in background)
+    return { data, expired: Date.now() - timestamp > PERSISTENT_CACHE_EXPIRY };
+  } catch (error) {
+    console.warn('[shopBannerService] Storage load error:', error?.message);
+    return null;
+  }
+};
+
+/**
+ * Save banners to AsyncStorage (for instant display on next app start)
+ */
+const saveBannersToStorage = async (key, data) => {
+  try {
+    await AsyncStorage.setItem(key, JSON.stringify({
+      data,
+      timestamp: Date.now(),
+    }));
+  } catch (error) {
+    console.warn('[shopBannerService] Storage save error:', error?.message);
+  }
+};
+
+// ========================================
+// IMAGE PREFETCHING HELPER
+// ========================================
+
+/**
+ * Prefetch banner images for instant display
+ * @param {Array} banners - Array of banner objects with image_url
+ */
+const prefetchBannerImages = async (banners) => {
+  if (!banners || banners.length === 0) return;
+
+  try {
+    const { prefetchImages } = await import('../components/Common/OptimizedImage');
+    const imageUrls = banners
+      .map(b => b.image_url)
+      .filter(url => url && url.startsWith('http'));
+
+    if (imageUrls.length > 0) {
+      console.log('[shopBannerService] Prefetching', imageUrls.length, 'banner images');
+      await prefetchImages(imageUrls);
+    }
+  } catch (error) {
+    // Silent fail - prefetching is optimization, not critical
+    console.warn('[shopBannerService] Prefetch error:', error?.message);
+  }
+};
 
 // ========================================
 // BANNER CACHE - for instant display
@@ -43,6 +111,7 @@ export const getAllShopBanners = async () => {
 
 /**
  * Get active shop banners (user view) - with caching for instant display
+ * Uses AsyncStorage for persistent caching across app restarts
  * @param {boolean} forceRefresh - Force refresh from server
  * @returns {Promise<{success: boolean, data: Array, error?: string, cached?: boolean}>}
  */
@@ -50,11 +119,24 @@ export const getActiveShopBanners = async (forceRefresh = false) => {
   try {
     const now = Date.now();
 
-    // Return cached data if still fresh and not forcing refresh
+    // 1. Return memory cache if still fresh
     if (!forceRefresh && bannerCache.data && (now - bannerCache.lastFetch < bannerCache.CACHE_DURATION)) {
       return { success: true, data: bannerCache.data, cached: true };
     }
 
+    // 2. Try AsyncStorage cache for instant display (even if expired)
+    if (!bannerCache.data) {
+      const stored = await loadBannersFromStorage(STORAGE_KEY_BANNERS);
+      if (stored?.data) {
+        bannerCache.data = stored.data;
+        bannerCache.lastFetch = stored.expired ? 0 : now;
+        // Prefetch images from stored data for instant display
+        prefetchBannerImages(stored.data);
+        console.log('[shopBannerService] Loaded banners from AsyncStorage:', stored.data.length);
+      }
+    }
+
+    // 3. Fetch fresh data from server
     const nowISO = new Date().toISOString();
 
     const { data, error } = await supabase
@@ -67,9 +149,15 @@ export const getActiveShopBanners = async (forceRefresh = false) => {
 
     if (error) throw error;
 
-    // Update cache
+    // 4. Update memory cache
     bannerCache.data = data || [];
     bannerCache.lastFetch = now;
+
+    // 5. Save to AsyncStorage for next app start
+    saveBannersToStorage(STORAGE_KEY_BANNERS, data);
+
+    // 6. Prefetch images for instant display
+    prefetchBannerImages(data);
 
     return { success: true, data: data || [] };
   } catch (error) {
@@ -917,16 +1005,32 @@ let allSectionBannersCache = {
 
 /**
  * Get all section banners (with caching for instant display)
+ * Uses AsyncStorage for persistent caching across app restarts
  * @param {boolean} forceRefresh - Force refresh from database
  */
 const getAllSectionBanners = async (forceRefresh = false) => {
   try {
-    // Return cached data if fresh and not forcing refresh
+    // 1. Return memory cache if fresh
     if (!forceRefresh && allSectionBannersCache.data &&
         Date.now() - allSectionBannersCache.timestamp < SECTION_BANNER_CACHE_TTL) {
       return { success: true, data: allSectionBannersCache.data, cached: true };
     }
 
+    // 2. Try AsyncStorage cache for instant display
+    if (!allSectionBannersCache.data) {
+      const stored = await loadBannersFromStorage(STORAGE_KEY_SECTION_BANNERS);
+      if (stored?.data) {
+        allSectionBannersCache = {
+          data: stored.data,
+          timestamp: stored.expired ? 0 : Date.now(),
+        };
+        // Prefetch images from stored data
+        prefetchBannerImages(stored.data);
+        console.log('[shopBannerService] Loaded section banners from AsyncStorage:', stored.data.length);
+      }
+    }
+
+    // 3. Fetch fresh data from server
     const { data, error } = await supabase
       .from('section_banners')
       .select('*')
@@ -934,11 +1038,17 @@ const getAllSectionBanners = async (forceRefresh = false) => {
 
     if (error) throw error;
 
-    // Update cache
+    // 4. Update memory cache
     allSectionBannersCache = {
       data: data || [],
       timestamp: Date.now(),
     };
+
+    // 5. Save to AsyncStorage for next app start
+    saveBannersToStorage(STORAGE_KEY_SECTION_BANNERS, data);
+
+    // 6. Prefetch section banner images for instant display
+    prefetchBannerImages(data);
 
     return { success: true, data: data || [] };
   } catch (error) {
@@ -1093,6 +1203,49 @@ const getCachedShopBanners = () => {
   return null;
 };
 
+/**
+ * Initialize banner caches from AsyncStorage (call early on app start)
+ * This ensures banners are available immediately when Shop tab opens
+ */
+const initializeBannerCache = async () => {
+  try {
+    // Load both banner caches in parallel
+    const [shopBanners, sectionBanners] = await Promise.all([
+      loadBannersFromStorage(STORAGE_KEY_BANNERS),
+      loadBannersFromStorage(STORAGE_KEY_SECTION_BANNERS),
+    ]);
+
+    // Populate memory caches
+    if (shopBanners?.data) {
+      bannerCache.data = shopBanners.data;
+      bannerCache.lastFetch = shopBanners.expired ? 0 : Date.now();
+      console.log('[shopBannerService] Initialized shop banners from storage:', shopBanners.data.length);
+    }
+
+    if (sectionBanners?.data) {
+      allSectionBannersCache = {
+        data: sectionBanners.data,
+        timestamp: sectionBanners.expired ? 0 : Date.now(),
+      };
+      console.log('[shopBannerService] Initialized section banners from storage:', sectionBanners.data.length);
+    }
+
+    // Prefetch all banner images immediately
+    const allBanners = [
+      ...(shopBanners?.data || []),
+      ...(sectionBanners?.data || []),
+    ];
+    if (allBanners.length > 0) {
+      prefetchBannerImages(allBanners);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.warn('[shopBannerService] Initialize cache error:', error?.message);
+    return { success: false };
+  }
+};
+
 // ========================================
 // DEFAULT EXPORT
 // ========================================
@@ -1144,4 +1297,6 @@ export default {
   deleteSectionBanner,
   toggleSectionBannerActive,
   clearSectionBannersCache,
+  // Initialization
+  initializeBannerCache,
 };

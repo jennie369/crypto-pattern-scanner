@@ -29,6 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import messagingService from '../../services/messagingService';
 import presenceService from '../../services/presenceService';
 import { messageRequestService } from '../../services/messageRequestService';
+import cacheService from '../../services/cacheService';
 
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
@@ -66,7 +67,33 @@ export default function ConversationsListScreen({ navigation }) {
   // FETCH & REAL-TIME
   // =====================================================
 
-  const fetchConversations = useCallback(async () => {
+  // Load cached data immediately (synchronous-like behavior)
+  const loadCachedData = useCallback(async () => {
+    if (!user?.id) return false;
+
+    try {
+      const [cachedConvos, cachedPinned, cachedArchived] = await Promise.all([
+        cacheService.getForUser('CONVERSATIONS', user.id),
+        cacheService.getForUser('PINNED_CONVERSATIONS', user.id),
+        cacheService.getForUser('ARCHIVED_CONVERSATIONS', user.id),
+      ]);
+
+      if (cachedConvos && cachedConvos.length > 0) {
+        console.log('[ConversationsList] Loaded from cache:', cachedConvos.length);
+        setConversations(cachedConvos);
+        setPinnedIds(cachedPinned || []);
+        setArchivedIds(cachedArchived || []);
+        setLoading(false); // Show cached data immediately
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[ConversationsList] Cache load error:', error);
+      return false;
+    }
+  }, [user?.id]);
+
+  const fetchConversations = useCallback(async (isBackgroundRefresh = false) => {
     try {
       // Fetch conversations, pinned IDs, archived IDs, and message requests count in parallel
       const [data, pinnedData, archivedData, requestsCount] = await Promise.all([
@@ -75,21 +102,44 @@ export default function ConversationsListScreen({ navigation }) {
         messagingService.getArchivedConversationIds(),
         messageRequestService.getMessageRequestsCount(),
       ]);
+
+      // Update state
       setConversations(data);
-      setPinnedIds(pinnedData?.data || pinnedData || []);
+      const pinnedArray = pinnedData?.data || pinnedData || [];
+      setPinnedIds(pinnedArray);
       setArchivedIds(archivedData || []);
       setMessageRequestsCount(requestsCount || 0);
+
+      // Save to cache for instant load next time
+      if (user?.id) {
+        await Promise.all([
+          cacheService.setForUser('CONVERSATIONS', user.id, data),
+          cacheService.setForUser('PINNED_CONVERSATIONS', user.id, pinnedArray),
+          cacheService.setForUser('ARCHIVED_CONVERSATIONS', user.id, archivedData || []),
+        ]);
+        console.log('[ConversationsList] Saved to cache');
+      }
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
-      setLoading(false);
+      if (!isBackgroundRefresh) {
+        setLoading(false);
+      }
       setRefreshing(false);
     }
-  }, []);
+  }, [user?.id]);
 
-  // Initial load
+  // Initial load - cache first, then fetch fresh data
   useEffect(() => {
-    fetchConversations();
+    const initializeConversations = async () => {
+      // Step 1: Load cached data immediately (shows instantly)
+      const hasCache = await loadCachedData();
+
+      // Step 2: Fetch fresh data (background if cache exists, foreground if not)
+      fetchConversations(hasCache);
+    };
+
+    initializeConversations();
 
     // Subscribe to unread count changes for badge updates
     if (user?.id) {
@@ -97,7 +147,7 @@ export default function ConversationsListScreen({ navigation }) {
         user.id,
         () => {
           // Refresh conversations when unread count changes
-          fetchConversations();
+          fetchConversations(true); // Background refresh
         }
       );
     }
@@ -107,7 +157,7 @@ export default function ConversationsListScreen({ navigation }) {
         messagingService.unsubscribe(unreadSubscription.current);
       }
     };
-  }, [user?.id, fetchConversations]);
+  }, [user?.id, fetchConversations, loadCachedData]);
 
   // =====================================================
   // HANDLERS
@@ -115,7 +165,7 @@ export default function ConversationsListScreen({ navigation }) {
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchConversations();
+    fetchConversations(false); // Show refresh indicator
   }, [fetchConversations]);
 
   const handleConversationPress = useCallback((conversation) => {
@@ -231,7 +281,7 @@ export default function ConversationsListScreen({ navigation }) {
       >
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={COLORS.textMuted} />
-          <Text style={styles.searchPlaceholder}>Search</Text>
+          <Text style={styles.searchPlaceholder}>Tìm kiếm</Text>
         </View>
       </TouchableOpacity>
 
@@ -245,7 +295,7 @@ export default function ConversationsListScreen({ navigation }) {
           <View style={[styles.archivedIcon, { backgroundColor: 'rgba(255, 215, 0, 0.15)' }]}>
             <Ionicons name="mail-unread" size={20} color={COLORS.gold} />
           </View>
-          <Text style={styles.archivedText}>Message Requests</Text>
+          <Text style={styles.archivedText}>Yêu cầu tin nhắn</Text>
           <View style={[styles.archivedBadge, { backgroundColor: COLORS.gold }]}>
             <Text style={[styles.archivedBadgeText, { color: COLORS.background }]}>{messageRequestsCount}</Text>
           </View>
@@ -263,7 +313,7 @@ export default function ConversationsListScreen({ navigation }) {
           <View style={styles.archivedIcon}>
             <Ionicons name="archive" size={20} color={COLORS.textSecondary} />
           </View>
-          <Text style={styles.archivedText}>Archived Chats</Text>
+          <Text style={styles.archivedText}>Đã lưu trữ</Text>
           <View style={styles.archivedBadge}>
             <Text style={styles.archivedBadgeText}>{archivedCount}</Text>
           </View>
@@ -285,9 +335,9 @@ export default function ConversationsListScreen({ navigation }) {
           <Ionicons name="chatbubbles-outline" size={48} color={COLORS.textPrimary} />
         </LinearGradient>
       </View>
-      <Text style={styles.emptyTitle}>No messages yet</Text>
+      <Text style={styles.emptyTitle}>Chưa có tin nhắn</Text>
       <Text style={styles.emptySubtitle}>
-        Start a conversation with someone from the community
+        Bắt đầu trò chuyện với ai đó từ cộng đồng
       </Text>
       <TouchableOpacity
         style={styles.emptyButton}
@@ -298,7 +348,7 @@ export default function ConversationsListScreen({ navigation }) {
           colors={GRADIENTS.primaryButton}
           style={styles.emptyButtonGradient}
         >
-          <Text style={styles.emptyButtonText}>Start Chatting</Text>
+          <Text style={styles.emptyButtonText}>Bắt đầu trò chuyện</Text>
         </LinearGradient>
       </TouchableOpacity>
     </View>
@@ -333,8 +383,15 @@ export default function ConversationsListScreen({ navigation }) {
           >
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.title}>Chats</Text>
+          <Text style={styles.title}>Tin nhắn</Text>
           <View style={styles.headerActions}>
+            {/* Call History */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate('CallHistory')}
+              style={styles.headerAction}
+            >
+              <Ionicons name="call-outline" size={22} color={COLORS.textPrimary} />
+            </TouchableOpacity>
             {/* Privacy Settings */}
             <TouchableOpacity
               onPress={() => navigation.navigate('PrivacySettings')}

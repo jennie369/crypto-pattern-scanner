@@ -181,7 +181,8 @@ const styles = StyleSheet.create({
     marginRight: SPACING.xxs,
   },
   listContent: {
-    paddingHorizontal: SPACING.lg,
+    paddingLeft: SPACING.lg,
+    paddingRight: SPACING.sm, // Less right padding to show "peek" of next card
     paddingBottom: SPACING.sm,
   },
   separator: {

@@ -6,25 +6,37 @@
 -- 1. Check if calls table has correct schema
 DO $$
 BEGIN
-  -- Add missing columns if they don't exist
+  -- Add caller_id if it doesn't exist
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'calls' AND column_name = 'caller_id') THEN
-    ALTER TABLE calls ADD COLUMN caller_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
-    -- Copy from initiator_id if exists
-    UPDATE calls SET caller_id = initiator_id WHERE caller_id IS NULL AND initiator_id IS NOT NULL;
+    -- Check if initiator_id exists and rename it
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'calls' AND column_name = 'initiator_id') THEN
+      ALTER TABLE calls RENAME COLUMN initiator_id TO caller_id;
+      RAISE NOTICE 'Renamed initiator_id to caller_id';
+    ELSE
+      ALTER TABLE calls ADD COLUMN caller_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+      RAISE NOTICE 'Added caller_id column';
+    END IF;
   END IF;
 
+  -- Add end_reason if it doesn't exist
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'calls' AND column_name = 'end_reason') THEN
     ALTER TABLE calls ADD COLUMN end_reason TEXT;
+    RAISE NOTICE 'Added end_reason column';
   END IF;
 
+  -- Add conversation_id if it doesn't exist
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'calls' AND column_name = 'conversation_id') THEN
     ALTER TABLE calls ADD COLUMN conversation_id UUID;
+    RAISE NOTICE 'Added conversation_id column';
   END IF;
 
-  RAISE NOTICE 'Calls table schema updated';
+  RAISE NOTICE 'Calls table schema check complete';
 END $$;
 
--- 2. Create or replace get_call_history function
+-- 2. Drop existing function first (return type changed)
+DROP FUNCTION IF EXISTS get_call_history(UUID, INTEGER, INTEGER);
+
+-- 3. Create get_call_history function
 CREATE OR REPLACE FUNCTION get_call_history(
   p_user_id UUID,
   p_limit INTEGER DEFAULT 50,
@@ -52,9 +64,9 @@ BEGIN
     c.status::TEXT,
     COALESCE(c.duration_seconds, 0),
     c.created_at,
-    (COALESCE(c.caller_id, c.initiator_id) = p_user_id) AS is_outgoing,
+    (c.caller_id = p_user_id) AS is_outgoing,
     CASE
-      WHEN COALESCE(c.caller_id, c.initiator_id) = p_user_id THEN (
+      WHEN c.caller_id = p_user_id THEN (
         SELECT jsonb_build_object(
           'id', p.id,
           'display_name', COALESCE(p.display_name, p.full_name, p.username, 'Người dùng'),
@@ -73,7 +85,7 @@ BEGIN
           'avatar_url', p.avatar_url
         )
         FROM profiles p
-        WHERE p.id = COALESCE(c.caller_id, c.initiator_id)
+        WHERE p.id = c.caller_id
       )
     END AS other_user,
     c.conversation_id,
@@ -88,10 +100,10 @@ BEGIN
 END;
 $$;
 
--- 3. Grant execute permission
+-- 4. Grant execute permission
 GRANT EXECUTE ON FUNCTION get_call_history(UUID, INTEGER, INTEGER) TO authenticated;
 
--- 4. Verify function exists
+-- 5. Verify function exists
 SELECT
   routine_name,
   routine_type
@@ -99,7 +111,7 @@ FROM information_schema.routines
 WHERE routine_schema = 'public'
 AND routine_name = 'get_call_history';
 
--- 5. Test the function (optional - replace with your user_id)
+-- 6. Test the function (optional - replace with your user_id)
 -- SELECT * FROM get_call_history('your-user-id-here', 10, 0);
 
 SELECT 'SUCCESS: Call history function has been created/updated!' AS result;

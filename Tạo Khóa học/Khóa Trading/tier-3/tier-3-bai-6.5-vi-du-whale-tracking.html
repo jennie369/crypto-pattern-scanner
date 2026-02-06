@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.5: Ví Dụ Whale Tracking | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="tier-badge">TIER 3 - Elite</span>
+            <h1 class="lesson-title">Ví Dụ Whale Tracking</h1>
+            <p class="lesson-subtitle">Case Studies Thực Tế Với Whale Data</p>
+        </header>
+
+        <section class="content-section">
+            <div class="section-icon">📚</div>
+            <h2 class="section-title">Học Từ Thực Tế</h2>
+            <p>Trong bài này, chúng ta sẽ phân tích 3 case studies thực tế về việc sử dụng whale tracking kết hợp với GEM analysis. Mỗi ví dụ sẽ cho thấy toàn bộ quy trình từ alert đến kết quả.</p>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>🎯 Mục Tiêu:</strong> Hiểu cách áp dụng whale tracking trong thực tế qua 3 scenarios: trade thành công, tránh trap, và false signal.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">✅</div>
+            <h2 class="section-title">Case Study #1: Accumulation Thành Công</h2>
+
+            <div class="case-study-box success">
+                <h4>🟢 BTC/USDT - Long từ Whale Accumulation +12%</h4>
+                <p>Ngày 10/12/2024, phát hiện pattern accumulation từ nhiều whale alerts.</p>
+            </div>
+
+            <div class="whale-alert-box">
+                <span class="icon">🐋</span>
+                <span class="amount">1,500 BTC</span> ($63M) transferred from
+                <span class="direction">Binance → Unknown wallet</span>
+            </div>
+            <div class="whale-alert-box">
+                <span class="icon">🐋</span>
+                <span class="amount">2,200 BTC</span> ($92M) transferred from
+                <span class="direction">Coinbase → Unknown wallet</span>
+            </div>
+            <div class="whale-alert-box">
+                <span class="icon">🐋</span>
+                <span class="amount">800 BTC</span> ($33M) transferred from
+                <span class="direction">Kraken → Unknown wallet</span>
+            </div>
+
+            <p><strong>Phân Tích:</strong> 3 whale alerts trong 24h, tất cả đều OUTFLOW từ sàn. Tổng cộng 4,500 BTC ($188M) rời sàn.</p>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Confluence Check:</h4>
+            <div class="confluence-checklist">
+                <div class="confluence-item"><span class="check">✓</span> GEM Zone: $41,500 support (tested 3 lần)</div>
+                <div class="confluence-item"><span class="check">✓</span> Pattern: UPU retest hoàn thành</div>
+                <div class="confluence-item"><span class="check">✓</span> Whale: Massive outflow (accumulation)</div>
+                <div class="confluence-item"><span class="check">✓</span> Order Flow: Bid imbalance 68%</div>
+                <div class="confluence-item"><span class="check">✓</span> Candlestick: Bullish Engulfing trên 4H</div>
+            </div>
+
+            <p><strong>Kết quả:</strong> 5/5 confluence → Entry Long tại $41,800</p>
+
+            <div class="result-box">
+                <div>
+                    <div class="result-value positive">+12.4%</div>
+                    <div class="result-label">Profit Đạt Được</div>
+                </div>
+                <div>
+                    <div class="result-value positive">4.1:1</div>
+                    <div class="result-label">Risk/Reward</div>
+                </div>
+                <div>
+                    <div class="result-value">5/5</div>
+                    <div class="result-label">Confluence Score</div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x450/112250/10B981?text=BTC+Whale+Accumulation+Chart" alt="BTC Accumulation">
+                <p class="image-caption">Chart BTC/USDT với whale accumulation signals</p>
+            </div>
+
+            <div class="highlight-box green">
+                <p style="margin-bottom: 0;"><strong>🎯 Bài Học:</strong> Nhiều whale outflows liên tiếp từ sàn + GEM zone support = High probability accumulation phase.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">🛡️</div>
+            <h2 class="section-title">Case Study #2: Tránh Được Trap</h2>
+
+            <div class="case-study-box warning">
+                <h4>🟡 ETH/USDT - Skip Signal, Tránh -15% Dump</h4>
+                <p>Ngày 15/12/2024, whale alert báo inflow lớn trong khi nhiều người đang bullish.</p>
+            </div>
+
+            <div class="whale-alert-box">
+                <span class="icon">🐋</span>
+                <span class="amount">15,000 ETH</span> ($36M) transferred from
+                <span class="direction sell">Unknown wallet → Binance</span>
+            </div>
+            <div class="whale-alert-box">
+                <span class="icon">🐋</span>
+                <span class="amount">22,000 ETH</span> ($53M) transferred from
+                <span class="direction sell">Unknown wallet → Coinbase</span>
+            </div>
+
+            <p><strong>Context:</strong> ETH đang ở $2,400, gần resistance $2,450. Sentiment retail rất bullish.</p>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Confluence Check:</h4>
+            <div class="confluence-checklist">
+                <div class="confluence-item"><span class="check">✓</span> GEM Zone: $2,450 resistance (strong)</div>
+                <div class="confluence-item"><span class="cross">✗</span> Pattern: Không có clear pattern</div>
+                <div class="confluence-item"><span class="cross">✗</span> Whale: Massive INFLOW (distribution)</div>
+                <div class="confluence-item"><span class="cross">✗</span> Order Flow: Ask imbalance 62%</div>
+                <div class="confluence-item"><span class="cross">✗</span> Candlestick: Shooting Star forming</div>
+            </div>
+
+            <p><strong>Quyết Định:</strong> 1/5 confluence cho long, 4/5 cho short potential → SKIP LONG, consider short</p>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Điều Xảy Ra Sau Đó:</h4>
+            <div class="timeline-step">
+                <span class="timeline-time">2 giờ sau</span>
+                <div class="timeline-content">
+                    <h4>ETH reject tại $2,450</h4>
+                    <p>Giá chạm resistance và bị rejected mạnh</p>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <span class="timeline-time">12 giờ sau</span>
+                <div class="timeline-content">
+                    <h4>ETH dump xuống $2,050</h4>
+                    <p>Giảm 15% từ high, đúng như whale distribution signal</p>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <div>
+                    <div class="result-value positive">-15% Avoided</div>
+                    <div class="result-label">Tránh Được Lỗ</div>
+                </div>
+                <div>
+                    <div class="result-value">Capital Protected</div>
+                    <div class="result-label">Vốn An Toàn</div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x450/112250/FFBD59?text=ETH+Distribution+Trap+Avoided" alt="ETH Trap Avoided">
+                <p class="image-caption">Chart ETH/USDT với whale distribution warning</p>
+            </div>
+
+            <div class="highlight-box gold">
+                <p style="margin-bottom: 0;"><strong>🛡️ Bài Học:</strong> Whale inflow lớn tại resistance = Distribution signal. Đừng FOMO theo retail sentiment khi whale đang bán.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">❌</div>
+            <h2 class="section-title">Case Study #3: False Signal</h2>
+
+            <div class="case-study-box" style="border-color: #EF4444;">
+                <h4 style="color: #EF4444;">🔴 SOL/USDT - Whale Alert Gây Hiểu Lầm</h4>
+                <p>Ngày 18/12/2024, whale alert lớn nhưng hóa ra là exchange rebalancing.</p>
+            </div>
+
+            <div class="whale-alert-box">
+                <span class="icon">🐋</span>
+                <span class="amount">500,000 SOL</span> ($55M) transferred from
+                <span class="direction sell">Binance Hot Wallet → Binance Cold Wallet</span>
+            </div>
+
+            <p><strong>Vấn Đề:</strong> Alert này trông như whale rút tiền khỏi sàn (bullish), nhưng thực ra chỉ là Binance di chuyển nội bộ.</p>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Những Trader Đã Mắc Lỗi:</h4>
+            <ul>
+                <li>Không kiểm tra wallet addresses để xác minh</li>
+                <li>Vào Long ngay sau alert mà không chờ confluence</li>
+                <li>Bỏ qua việc SOL đang ở mid-range (không có zone)</li>
+            </ul>
+
+            <h4 style="color: #ffffff; margin: 1rem 0 0.5rem;">Cách Phát Hiện False Signal:</h4>
+            <ul>
+                <li><strong>Check wallet labels:</strong> Etherscan/Solscan có label cho exchange wallets</li>
+                <li><strong>Pattern không có:</strong> SOL không ở GEM zone nào</li>
+                <li><strong>Confluence thấp:</strong> Chỉ có 1/5 factor (whale alert alone)</li>
+            </ul>
+
+            <div class="result-box">
+                <div>
+                    <div class="result-value negative">-4.2%</div>
+                    <div class="result-label">Lỗ Nếu Trade</div>
+                </div>
+                <div>
+                    <div class="result-value">1/5</div>
+                    <div class="result-label">Confluence (Quá Thấp)</div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x450/112250/EF4444?text=SOL+False+Whale+Signal" alt="SOL False Signal">
+                <p class="image-caption">Ví dụ whale alert gây hiểu lầm</p>
+            </div>
+
+            <div class="highlight-box red">
+                <p style="margin-bottom: 0;"><strong>⚠️ Bài Học:</strong> Whale alert alone = 1/5 confluence. LUÔN kiểm tra wallet source và đợi đủ confluence trước khi trade.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">📊</div>
+            <h2 class="section-title">Tổng Kết 3 Case Studies</h2>
+
+            <div class="highlight-box">
+                <p><strong>🎯 Key Takeaways:</strong></p>
+                <ul style="margin-bottom: 0;">
+                    <li><strong>Case 1:</strong> Multiple outflows + GEM zone = High probability accumulation</li>
+                    <li><strong>Case 2:</strong> Large inflow at resistance = Distribution warning</li>
+                    <li><strong>Case 3:</strong> Single alert without confluence = Potential false signal</li>
+                </ul>
+            </div>
+
+            <p>Pattern rõ ràng từ 3 cases:</p>
+            <ol>
+                <li><strong>High confluence (4-5/5)</strong> → Proceed with trade</li>
+                <li><strong>Medium (3/5)</strong> → Wait for more confirmation</li>
+                <li><strong>Low (1-2/5)</strong> → Skip, không đủ evidence</li>
+            </ol>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/8B5CF6?text=3+Case+Studies+Summary" alt="Tổng Kết 3 Cases">
+                <p class="image-caption">Infographic tổng kết 3 case studies whale tracking</p>
+            </div>
+        </section>
+
+        <section class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul>
+                <li><strong>Multiple whale outflows</strong> tại support = Accumulation signal mạnh</li>
+                <li><strong>Large inflows</strong> tại resistance = Distribution warning</li>
+                <li><strong>Single alert</strong> mà không có confluence = Potential trap</li>
+                <li><strong>Luôn verify</strong> wallet source (exchange internal vs real whale)</li>
+                <li><strong>Confluence 4-5/5</strong> mới đủ để trade với confidence</li>
+            </ul>
+        </section>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">1. Trong Case Study #1, yếu tố nào cho thấy đây là accumulation phase?</p>
+                <button class="quiz-option" data-index="0">Một whale alert duy nhất</button>
+                <button class="quiz-option" data-index="1">Nhiều whale outflows từ nhiều sàn cùng lúc</button>
+                <button class="quiz-option" data-index="2">Giá đang tăng mạnh</button>
+                <button class="quiz-option" data-index="3">Volume thấp bất thường</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">2. Trong Case Study #3, whale alert gây hiểu lầm vì lý do gì?</p>
+                <button class="quiz-option" data-index="0">Whale Alert bot bị lỗi</button>
+                <button class="quiz-option" data-index="1">Số lượng SOL quá nhỏ</button>
+                <button class="quiz-option" data-index="2">Đây là exchange internal transfer, không phải whale thực</button>
+                <button class="quiz-option" data-index="3">Market đang sideway</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="question-text">3. Bài học quan trọng nhất từ Case Study #2 là gì?</p>
+                <button class="quiz-option" data-index="0">Whale inflow lớn tại resistance là warning signal</button>
+                <button class="quiz-option" data-index="1">Luôn follow retail sentiment</button>
+                <button class="quiz-option" data-index="2">ETH không bao giờ dump</button>
+                <button class="quiz-option" data-index="3">Whale alert không quan trọng</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="quiz-score-text">Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi!</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 3 Elite</p>
+            <p>© 2024 GEM Trading. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(q => {
+            const ci = parseInt(q.dataset.correct);
+            const opts = q.querySelectorAll('.quiz-option');
+            const res = q.querySelector('.quiz-result');
+            opts.forEach(o => {
+                o.addEventListener('click', function() {
+                    if (q.classList.contains('answered')) return;
+                    q.classList.add('answered');
+                    answeredCount++;
+                    const si = parseInt(this.dataset.index);
+                    if (si === ci) {
+                        this.classList.add('correct');
+                        res.textContent = '✓ Chính xác!';
+                        res.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        opts[ci].classList.add('correct');
+                        res.textContent = '✗ Chưa đúng. Hãy xem lại case study.';
+                        res.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

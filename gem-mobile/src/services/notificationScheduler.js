@@ -25,14 +25,11 @@ import notificationPersonalizer from './notificationPersonalizer';
 const WIDGET_NOTIFICATION_SETTINGS_KEY = '@gem_widget_notification_settings';
 const PUSH_TOKEN_KEY = '@gem_push_token';
 
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// NOTE: DO NOT configure notification handler here!
+// The global notification handler is configured in InAppNotificationContext.js
+// That handler properly suppresses system banners for incoming calls
+// while showing alerts for other notification types.
+// Having multiple setNotificationHandler calls causes unpredictable behavior.
 
 class NotificationScheduler {
   constructor() {
@@ -88,6 +85,19 @@ class NotificationScheduler {
       const token = await this.registerForPushNotifications();
       if (token) {
         await this.savePushToken(userId, token);
+      }
+
+      // Register VoIP push token for iOS (enables CallKit fullscreen incoming call UI)
+      // NOTE: Requires rebuild with EAS to include native VoIP module
+      if (Platform.OS === 'ios') {
+        try {
+          console.log('[NotificationScheduler] Registering VoIP push for iOS...');
+          const { default: PUSH_TOKEN_SERVICE } = await import('./pushTokenService');
+          const voipToken = await PUSH_TOKEN_SERVICE.registerVoIPPush();
+          console.log('[NotificationScheduler] VoIP token:', voipToken ? 'registered' : 'not available');
+        } catch (err) {
+          console.log('[NotificationScheduler] VoIP registration failed (expected if native module not linked):', err?.message);
+        }
       }
 
       // Load user settings

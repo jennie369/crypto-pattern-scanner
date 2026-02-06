@@ -15,9 +15,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Home } from 'lucide-react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTabBar } from '../../contexts/TabBarContext';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
 import SponsorBanner from '../../components/SponsorBanner';
 import { UpgradeBanner } from '../../components/upgrade';
@@ -29,6 +31,25 @@ export default function HomeScreen({ navigation }) {
   const { user, profile } = useAuth();
 
   const [refreshing, setRefreshing] = useState(false);
+
+  // Get tab bar context for ensuring visibility
+  let forceShowTabBar = null;
+  try {
+    const tabBarContext = useTabBar();
+    forceShowTabBar = tabBarContext.forceShowTabBar;
+  } catch (e) {
+    // TabBar context not available
+  }
+
+  // Ensure tab bar is visible when Home screen is focused
+  // This acts as a recovery mechanism for stuck tab bar states
+  useFocusEffect(
+    React.useCallback(() => {
+      if (forceShowTabBar) {
+        forceShowTabBar();
+      }
+    }, [forceShowTabBar])
+  );
 
   // Trading Leads Pro Scanner benefit check
   const {

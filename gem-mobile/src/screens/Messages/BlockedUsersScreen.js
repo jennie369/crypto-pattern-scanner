@@ -1,12 +1,12 @@
 /**
  * Gemral - Blocked Users Screen
- * Manage blocked users list
+ * Quản lý danh sách người dùng bị chặn
  *
- * Features:
- * - View blocked users
- * - Unblock users
- * - Empty state
- * - Glass-morphism UI
+ * Tính năng:
+ * - Xem người dùng bị chặn
+ * - Bỏ chặn người dùng
+ * - Trạng thái trống
+ * - Giao diện Glass-morphism
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -59,7 +59,7 @@ export default function BlockedUsersScreen({ navigation }) {
         const data = await messagingService.getBlockedUsers();
         setBlockedUsers(data);
       } catch (error) {
-        console.error('Error fetching blocked users:', error);
+        console.error('Lỗi khi tải danh sách người bị chặn:', error);
       } finally {
         setLoading(false);
       }
@@ -72,12 +72,12 @@ export default function BlockedUsersScreen({ navigation }) {
   const handleUnblock = useCallback((blockedUser) => {
     alert({
       type: 'warning',
-      title: 'Unblock User',
-      message: `Are you sure you want to unblock ${blockedUser.display_name || 'this user'}?`,
+      title: 'Bỏ chặn người dùng',
+      message: `Bạn có chắc muốn bỏ chặn ${blockedUser.display_name || 'người dùng này'}?`,
       buttons: [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Unblock',
+          text: 'Bỏ chặn',
           onPress: async () => {
             try {
               setUnblocking(blockedUser.id);
@@ -89,9 +89,9 @@ export default function BlockedUsersScreen({ navigation }) {
               setBlockedUsers(prev => prev.filter(u => u.id !== blockedUser.id));
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             } catch (error) {
-              console.error('Error unblocking user:', error);
+              console.error('Lỗi khi bỏ chặn:', error);
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              alert({ type: 'error', title: 'Error', message: 'Failed to unblock user' });
+              alert({ type: 'error', title: 'Lỗi', message: 'Không thể bỏ chặn người dùng' });
             } finally {
               setUnblocking(null);
             }
@@ -115,9 +115,9 @@ export default function BlockedUsersScreen({ navigation }) {
   const formatBlockedDate = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
+    return date.toLocaleDateString('vi-VN', {
       day: 'numeric',
+      month: 'short',
       year: 'numeric',
     });
   };
@@ -146,9 +146,9 @@ export default function BlockedUsersScreen({ navigation }) {
 
         {/* Info */}
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>{item.display_name || 'Unknown User'}</Text>
+          <Text style={styles.userName}>{item.display_name || 'Người dùng ẩn danh'}</Text>
           <Text style={styles.blockedDate}>
-            Blocked {formatBlockedDate(item.blocked_at)}
+            Đã chặn {formatBlockedDate(item.blocked_at)}
           </Text>
         </View>
 
@@ -162,7 +162,7 @@ export default function BlockedUsersScreen({ navigation }) {
           {isUnblocking ? (
             <ActivityIndicator size="small" color={COLORS.gold} />
           ) : (
-            <Text style={styles.unblockText}>Unblock</Text>
+            <Text style={styles.unblockText}>Bỏ chặn</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -175,9 +175,9 @@ export default function BlockedUsersScreen({ navigation }) {
       <View style={styles.emptyIconContainer}>
         <Ionicons name="shield-checkmark-outline" size={64} color={COLORS.textMuted} />
       </View>
-      <Text style={styles.emptyTitle}>No Blocked Users</Text>
+      <Text style={styles.emptyTitle}>Không có người bị chặn</Text>
       <Text style={styles.emptySubtitle}>
-        Users you block won't be able to message you or see your online status
+        Những người bạn chặn sẽ không thể nhắn tin cho bạn hoặc xem trạng thái trực tuyến của bạn
       </Text>
     </View>
   );
@@ -197,7 +197,7 @@ export default function BlockedUsersScreen({ navigation }) {
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Blocked Users</Text>
+        <Text style={styles.title}>Người dùng bị chặn</Text>
 
         <View style={styles.placeholder} />
       </View>
@@ -206,7 +206,7 @@ export default function BlockedUsersScreen({ navigation }) {
       <View style={styles.infoBanner}>
         <Ionicons name="information-circle" size={20} color={COLORS.purple} />
         <Text style={styles.infoText}>
-          Blocked users cannot send you messages or see when you're online.
+          Người bị chặn không thể gửi tin nhắn cho bạn hoặc xem khi bạn đang trực tuyến.
         </Text>
       </View>
 

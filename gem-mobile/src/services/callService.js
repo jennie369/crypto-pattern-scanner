@@ -66,20 +66,47 @@ class CallService {
       console.log('[CallService] Current user (người gọi):', user.id);
       console.log('[CallService] ========================================');
 
-      // 1. Check if already in a call
+      // 1. Check if already in a call - but first try to clear stale state
       if (this.currentCallId) {
-        return { success: false, error: 'Bạn đang trong cuộc gọi khác' };
+        // Check if the "current call" actually still exists and is active
+        const { data: existingCall } = await supabase
+          .from('calls')
+          .select('id, status')
+          .eq('id', this.currentCallId)
+          .maybeSingle();
+
+        const activeStatuses = [CALL_STATUS.INITIATING, CALL_STATUS.RINGING, CALL_STATUS.CONNECTING, CALL_STATUS.CONNECTED];
+        if (!existingCall || !activeStatuses.includes(existingCall.status)) {
+          // Call doesn't exist or is already ended - clear stale state
+          console.log('[CallService] Clearing stale currentCallId:', this.currentCallId, 'status:', existingCall?.status);
+          this.currentCallId = null;
+        } else {
+          // Actually in an active call
+          return { success: false, error: 'Bạn đang trong cuộc gọi khác' };
+        }
       }
 
+      // 1.5. Clean up any stale participant records for BOTH caller and callee
+      // This fixes false "busy" errors from orphaned records of failed calls
+      await this._cleanupStaleParticipants(user.id); // Clean caller's own records
+      await this._cleanupStaleParticipants(calleeId);
+
       // 2. Check if callee is already in a call
+      // Must check BOTH participant status AND call status to avoid false "busy" errors
+      // from stale records where call ended but participant status wasn't updated
+      // Also add time filter: only consider calls from the last 5 minutes as potentially active
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       const { data: activeCall } = await supabase
         .from('call_participants')
-        .select('call_id, calls!inner(status)')
+        .select('call_id, calls!inner(status, created_at)')
         .eq('user_id', calleeId)
         .in('status', [PARTICIPANT_STATUS.CONNECTED, PARTICIPANT_STATUS.RINGING])
-        .single();
+        .in('calls.status', [CALL_STATUS.INITIATING, CALL_STATUS.RINGING, CALL_STATUS.CONNECTING, CALL_STATUS.CONNECTED])
+        .gte('calls.created_at', fiveMinutesAgo)
+        .maybeSingle();
 
       if (activeCall) {
+        console.log('[CallService] Callee is busy - active call:', activeCall.call_id, 'status:', activeCall.calls?.status);
         return { success: false, error: 'Người nhận đang bận' };
       }
 
@@ -177,9 +204,52 @@ class CallService {
 
       console.log('[CallService] Call initiated successfully:', call.id);
 
+      // Add participants to call object so caller has access to callee info
+      call.participants = [
+        {
+          user_id: user.id,
+          role: PARTICIPANT_ROLE.CALLER,
+          status: PARTICIPANT_STATUS.CONNECTING,
+        },
+        {
+          user_id: calleeId,
+          role: PARTICIPANT_ROLE.CALLEE,
+          status: PARTICIPANT_STATUS.RINGING,
+        },
+      ];
+
       return { success: true, call };
     } catch (error) {
       console.error('[CallService] initiateCall error:', error);
+
+      // Clean up any database records that were created before the error
+      if (this.currentCallId) {
+        try {
+          // Mark call as failed
+          await supabase
+            .from('calls')
+            .update({
+              status: CALL_STATUS.FAILED,
+              ended_at: new Date().toISOString(),
+              end_reason: END_REASON.ERROR,
+            })
+            .eq('id', this.currentCallId);
+
+          // Mark all participants as left
+          await supabase
+            .from('call_participants')
+            .update({
+              status: PARTICIPANT_STATUS.LEFT,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('call_id', this.currentCallId);
+
+          console.log('[CallService] Cleaned up failed call records');
+        } catch (cleanupError) {
+          console.error('[CallService] Cleanup error:', cleanupError);
+        }
+      }
+
       this.currentCallId = null;
       return { success: false, error: error.message };
     }
@@ -310,6 +380,13 @@ class CallService {
 
       console.log('[CallService] Declining call:', callId);
 
+      // CRITICAL: Clear local state IMMEDIATELY before any async operations
+      const wasCurrentCall = this.currentCallId === callId;
+      if (wasCurrentCall) {
+        this.currentCallId = null;
+        console.log('[CallService] Cleared currentCallId immediately');
+      }
+
       // End call in CallKeep (dismiss native UI)
       if (callKeepService.available) {
         callKeepService.endCall(callId);
@@ -346,8 +423,17 @@ class CallService {
         .eq('call_id', callId)
         .eq('role', PARTICIPANT_ROLE.CALLER);
 
-      // Send end signal
-      await callSignalingService.sendEnd(END_REASON.DECLINED);
+      // Send end signal - need to subscribe to channel first if not already subscribed
+      try {
+        // Subscribe to signaling channel to send END signal
+        await callSignalingService.subscribe(callId, user.id);
+        await callSignalingService.sendEnd(END_REASON.DECLINED);
+        // Cleanup signaling
+        await callSignalingService.cleanup();
+      } catch (sigError) {
+        console.log('[CallService] Could not send decline signal:', sigError.message);
+        // Non-critical - database update is enough, caller will timeout
+      }
 
       // Log event
       await this._logEvent(callId, CALL_EVENT_TYPE.CALL_DECLINED, {});
@@ -373,6 +459,14 @@ class CallService {
   async endCall(callId, reason = END_REASON.NORMAL) {
     try {
       console.log('[CallService] Ending call:', callId, reason);
+
+      // CRITICAL: Clear local state IMMEDIATELY before any async operations
+      // This prevents "already in a call" error when user quickly makes another call
+      const wasCurrentCall = this.currentCallId === callId;
+      if (wasCurrentCall) {
+        this.currentCallId = null;
+        console.log('[CallService] Cleared currentCallId immediately');
+      }
 
       // End call in CallKeep (dismiss native UI)
       if (callKeepService.available) {
@@ -414,6 +508,14 @@ class CallService {
   async cancelCall(callId) {
     try {
       console.log('[CallService] Cancelling call:', callId);
+
+      // CRITICAL: Clear local state IMMEDIATELY before any async operations
+      // This prevents "already in a call" error when user quickly makes another call
+      const wasCurrentCall = this.currentCallId === callId;
+      if (wasCurrentCall) {
+        this.currentCallId = null;
+        console.log('[CallService] Cleared currentCallId immediately');
+      }
 
       // End call in CallKeep (dismiss native UI)
       if (callKeepService.available) {
@@ -789,7 +891,8 @@ class CallService {
 
             // EARLY SUBSCRIPTION: Subscribe to signaling channel immediately to catch offers
             // This helps when the caller sends offer before IncomingCallScreen mounts
-            this._startEarlySignaling(payload.new.call_id, userId);
+            // IMPORTANT: Wait for subscription to be ready before continuing
+            await this._startEarlySignaling(payload.new.call_id, userId);
 
             // Fetch full call info
             const { call } = await this.getCall(payload.new.call_id);
@@ -1086,9 +1189,10 @@ class CallService {
    * Start early signaling subscription to catch offers before IncomingCallScreen mounts
    * @param {string} callId - Call ID
    * @param {string} userId - Current user ID
+   * @returns {Promise<void>} Resolves when channel is subscribed
    * @private
    */
-  _startEarlySignaling(callId, userId) {
+  async _startEarlySignaling(callId, userId) {
     // Don't start if already subscribed
     if (this.earlySignalingChannel) {
       console.log('[CallService] Early signaling already active');
@@ -1100,33 +1204,44 @@ class CallService {
 
     this.pendingOffer = null;
 
-    // Use the same channel name as regular signaling to receive offers
-    this.earlySignalingChannel = supabase
-      .channel(channelName, {
-        config: {
-          broadcast: {
-            self: false,
+    // Use promise to wait for subscription to be ready
+    return new Promise((resolve) => {
+      // Timeout after 5 seconds - don't block forever
+      const timeout = setTimeout(() => {
+        console.log('[CallService] *** Early signaling subscription timeout, continuing anyway');
+        resolve();
+      }, 5000);
+
+      // Use the same channel name as regular signaling to receive offers
+      this.earlySignalingChannel = supabase
+        .channel(channelName, {
+          config: {
+            broadcast: {
+              self: false,
+            },
           },
-        },
-      })
-      .on('broadcast', { event: 'signal' }, ({ payload }) => {
-        console.log('[CallService] *** Early signaling received signal:', payload.type, 'from:', payload.senderId);
-        // Only capture offers - other signals will be handled by useCall
-        if (payload.type === SIGNAL_TYPE.OFFER && payload.senderId !== userId) {
-          console.log('[CallService] *** CAPTURED OFFER! ***');
-          this.pendingOffer = {
-            offer: payload.offer,
-            senderId: payload.senderId,
-            timestamp: Date.now(),
-          };
-        }
-      })
-      .subscribe((status) => {
-        console.log('[CallService] *** Early signaling status:', status);
-        if (status === 'SUBSCRIBED') {
-          console.log('[CallService] *** Early signaling READY to receive offers');
-        }
-      });
+        })
+        .on('broadcast', { event: 'signal' }, ({ payload }) => {
+          console.log('[CallService] *** Early signaling received signal:', payload.type, 'from:', payload.senderId);
+          // Only capture offers - other signals will be handled by useCall
+          if (payload.type === SIGNAL_TYPE.OFFER && payload.senderId !== userId) {
+            console.log('[CallService] *** CAPTURED OFFER! ***');
+            this.pendingOffer = {
+              offer: payload.offer,
+              senderId: payload.senderId,
+              timestamp: Date.now(),
+            };
+          }
+        })
+        .subscribe((status) => {
+          console.log('[CallService] *** Early signaling status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('[CallService] *** Early signaling READY to receive offers');
+            clearTimeout(timeout);
+            resolve();
+          }
+        });
+    });
   }
 
   /**
@@ -1207,10 +1322,126 @@ class CallService {
   /**
    * Public method to clear call state
    * Use this when call ends via signaling or external events
+   * @param {string} callId - Optional call ID to cleanup in database
    */
-  clearState() {
-    console.log('[CallService] Clearing call state');
+  async clearState(callId = null) {
+    console.log('[CallService] Clearing call state, callId:', callId || this.currentCallId);
+
+    const idToCleanup = callId || this.currentCallId;
+
+    // Clear local state FIRST
     this._cleanup();
+
+    // Also cleanup participant records in database to prevent "busy" errors
+    if (idToCleanup) {
+      try {
+        // Update all participants of this call to LEFT status
+        await supabase
+          .from('call_participants')
+          .update({
+            status: PARTICIPANT_STATUS.LEFT,
+            left_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('call_id', idToCleanup)
+          .in('status', [
+            PARTICIPANT_STATUS.RINGING,
+            PARTICIPANT_STATUS.CONNECTING,
+            PARTICIPANT_STATUS.CONNECTED,
+            PARTICIPANT_STATUS.INVITED,
+          ]);
+
+        console.log('[CallService] Cleaned up participant records for call:', idToCleanup);
+      } catch (err) {
+        console.log('[CallService] Participant cleanup error (non-critical):', err.message);
+      }
+    }
+
+    // Also cleanup any stale records for current user
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await this._cleanupStaleParticipants(user.id);
+      }
+    } catch (err) {
+      console.log('[CallService] User cleanup error (non-critical):', err.message);
+    }
+  }
+
+  /**
+   * Clean up stale call participant records for a user
+   * This fixes "busy" errors caused by orphaned records from failed calls
+   * @param {string} userId - User ID to clean up
+   * @private
+   */
+  async _cleanupStaleParticipants(userId) {
+    try {
+      // Method 1: Find participant records where the call has already ended
+      const { data: staleRecords } = await supabase
+        .from('call_participants')
+        .select('id, call_id, status, calls!inner(id, status)')
+        .eq('user_id', userId)
+        .in('status', [PARTICIPANT_STATUS.RINGING, PARTICIPANT_STATUS.CONNECTED, PARTICIPANT_STATUS.CONNECTING, PARTICIPANT_STATUS.INVITED])
+        .in('calls.status', [CALL_STATUS.ENDED, CALL_STATUS.MISSED, CALL_STATUS.DECLINED, CALL_STATUS.CANCELLED, CALL_STATUS.FAILED]);
+
+      if (staleRecords && staleRecords.length > 0) {
+        console.log('[CallService] Found', staleRecords.length, 'stale participant records (call ended), cleaning up...');
+
+        for (const record of staleRecords) {
+          await supabase
+            .from('call_participants')
+            .update({
+              status: PARTICIPANT_STATUS.LEFT,
+              left_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', record.id);
+        }
+      }
+
+      // Method 2: Also clean up old records that are stuck in active status
+      // If a participant record is in RINGING/CONNECTING for more than 2 minutes, it's stale
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      const { data: oldStaleRecords } = await supabase
+        .from('call_participants')
+        .select('id, call_id, status, created_at')
+        .eq('user_id', userId)
+        .in('status', [PARTICIPANT_STATUS.RINGING, PARTICIPANT_STATUS.CONNECTING, PARTICIPANT_STATUS.INVITED])
+        .lt('created_at', twoMinutesAgo);
+
+      if (oldStaleRecords && oldStaleRecords.length > 0) {
+        console.log('[CallService] Found', oldStaleRecords.length, 'old stale participant records (>2min), cleaning up...');
+
+        for (const record of oldStaleRecords) {
+          await supabase
+            .from('call_participants')
+            .update({
+              status: PARTICIPANT_STATUS.LEFT,
+              left_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', record.id);
+
+          // Also update the call if it's still in active status
+          await supabase
+            .from('calls')
+            .update({
+              status: CALL_STATUS.FAILED,
+              ended_at: new Date().toISOString(),
+              end_reason: END_REASON.ERROR,
+            })
+            .eq('id', record.call_id)
+            .in('status', [CALL_STATUS.INITIATING, CALL_STATUS.RINGING, CALL_STATUS.CONNECTING]);
+        }
+      }
+
+      if ((staleRecords?.length || 0) + (oldStaleRecords?.length || 0) > 0) {
+        console.log('[CallService] Cleaned up stale participant records');
+      }
+    } catch (error) {
+      // Non-critical, just log
+      console.log('[CallService] Cleanup stale participants error:', error.message);
+    }
   }
 
   /**
@@ -1251,6 +1482,35 @@ class CallService {
    */
   isCallsAvailable() {
     return webrtcService.isAvailable;
+  }
+
+  /**
+   * Check if incoming call subscription is still active
+   * @returns {boolean}
+   */
+  isSubscriptionActive() {
+    return this.incomingCallSubscription !== null;
+  }
+
+  /**
+   * Refresh incoming call subscription
+   * Call this when app comes back from background to ensure subscription is active
+   * @param {string} userId - User ID
+   * @param {Function} onIncomingCall - Callback for incoming calls
+   * @param {Function} onStatusChange - Optional status change callback
+   * @returns {Function} New unsubscribe function
+   */
+  refreshSubscription(userId, onIncomingCall, onStatusChange = null) {
+    console.log('[CallService] Refreshing incoming call subscription for:', userId);
+
+    // Unsubscribe from old channel if exists
+    if (this.incomingCallSubscription) {
+      supabase.removeChannel(this.incomingCallSubscription);
+      this.incomingCallSubscription = null;
+    }
+
+    // Create fresh subscription
+    return this.subscribeToIncomingCalls(userId, onIncomingCall, onStatusChange);
   }
 }
 

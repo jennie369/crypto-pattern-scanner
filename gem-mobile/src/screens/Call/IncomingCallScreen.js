@@ -3,14 +3,15 @@
  * Shows when receiving an incoming call
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, BackHandler } from 'react-native';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, BackHandler, Vibration } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Phone, Video, PhoneOff } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { CALL_TYPE } from '../../constants/callConstants';
 import { useCall } from '../../hooks/useCall';
+import { callService } from '../../services/callService';
 import { CallAvatar, CallControls } from '../../components/Call';
 import { TouchableOpacity } from 'react-native';
 
@@ -25,6 +26,10 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IncomingCallScreen = ({ route, navigation }) => {
   const { call, caller } = route.params || {};
   const isVideoCall = call?.call_type === CALL_TYPE.VIDEO;
+
+  // Track if user has pressed Accept button
+  const [hasAccepted, setHasAccepted] = useState(false);
+  const hasNavigatedRef = useRef(false);
 
   // Debug: Log params on mount
   console.log('[IncomingCallScreen] ========================================');
@@ -43,6 +48,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
   } = useCall({
     call,
     isCaller: false,
+    autoInitialize: false, // DON'T auto-init, wait for user to press Accept
     onCallEnded: (reason) => {
       navigation.replace('CallEnded', { call, caller, duration: 0, reason });
     },
@@ -60,13 +66,63 @@ const IncomingCallScreen = ({ route, navigation }) => {
     return () => backHandler.remove();
   }, []);
 
-  // Navigate to InCall or VideoCall when connected
+  // Check if call is already ended (e.g., caller hung up before we showed screen)
+  // This prevents showing a screen with non-working buttons
   useEffect(() => {
-    if (isConnected) {
+    const endedStatuses = ['ended', 'declined', 'cancelled', 'missed', 'failed'];
+    if (call?.status && endedStatuses.includes(call.status)) {
+      console.log('[IncomingCallScreen] Call already ended:', call.status, '- going back');
+      Vibration.cancel();
+      navigation.goBack();
+    }
+  }, [call?.status, navigation]);
+
+  // On mount, verify call is still valid by checking database
+  useEffect(() => {
+    const checkCallStatus = async () => {
+      if (!call?.id) return;
+
+      try {
+        const result = await callService.getCall(call.id);
+        if (!result.success || !result.call) {
+          console.log('[IncomingCallScreen] Call not found in database - going back');
+          Vibration.cancel();
+          navigation.goBack();
+          return;
+        }
+
+        const dbStatus = result.call.status;
+        const endedStatuses = ['ended', 'declined', 'cancelled', 'missed', 'failed'];
+        if (endedStatuses.includes(dbStatus)) {
+          console.log('[IncomingCallScreen] Call ended in database:', dbStatus, '- going back');
+          Vibration.cancel();
+          navigation.goBack();
+        }
+      } catch (err) {
+        console.log('[IncomingCallScreen] Error checking call status:', err.message);
+      }
+    };
+
+    // Check on mount
+    checkCallStatus();
+
+    // Also poll every 2 seconds to detect if caller hangs up
+    const interval = setInterval(checkCallStatus, 2000);
+    return () => clearInterval(interval);
+  }, [call?.id, navigation]);
+
+  // Navigate to InCall or VideoCall when connected AND user has accepted
+  useEffect(() => {
+    console.log('[IncomingCallScreen] Navigation check - hasAccepted:', hasAccepted, 'isConnected:', isConnected, 'hasNavigated:', hasNavigatedRef.current);
+
+    // Only navigate if user pressed Accept AND connection is established
+    if (hasAccepted && isConnected && !hasNavigatedRef.current) {
+      hasNavigatedRef.current = true;
       const screenName = isVideoCall ? 'VideoCall' : 'InCall';
+      console.log('[IncomingCallScreen] Navigating to', screenName);
       navigation.replace(screenName, { call, caller, isCaller: false });
     }
-  }, [isConnected, navigation, call, caller, isVideoCall]);
+  }, [hasAccepted, isConnected, navigation, call, caller, isVideoCall]);
 
   // ========== HANDLERS ==========
 
@@ -77,6 +133,12 @@ const IncomingCallScreen = ({ route, navigation }) => {
     console.log('[IncomingCallScreen] isConnecting:', isConnecting);
     console.log('[IncomingCallScreen] ========================================');
 
+    // CRITICAL: Stop vibration immediately when user accepts
+    Vibration.cancel();
+
+    // Mark that user has accepted - this enables navigation when connected
+    setHasAccepted(true);
+
     try {
       await answerCall();
       console.log('[IncomingCallScreen] answerCall completed');
@@ -86,6 +148,8 @@ const IncomingCallScreen = ({ route, navigation }) => {
   }, [answerCall, call?.id, isConnecting]);
 
   const handleDecline = useCallback(async () => {
+    // CRITICAL: Stop vibration immediately when user declines
+    Vibration.cancel();
     await declineCall();
     navigation.goBack();
   }, [declineCall, navigation]);
@@ -145,12 +209,17 @@ const IncomingCallScreen = ({ route, navigation }) => {
           {/* Accept Button */}
           <View style={styles.actionWrapper}>
             <TouchableOpacity
-              style={[styles.actionButton, styles.acceptButton, isConnecting && { opacity: 0.5 }]}
+              style={[styles.actionButton, styles.acceptButton, (isConnecting || hasAccepted) && { opacity: 0.5 }]}
               onPress={() => {
+                if (hasAccepted || isConnecting) {
+                  console.log('[IncomingCallScreen] Button disabled - already accepting');
+                  return;
+                }
                 console.log('[IncomingCallScreen] TouchableOpacity onPress triggered');
                 handleAccept();
               }}
               activeOpacity={0.8}
+              disabled={hasAccepted || isConnecting}
             >
               {isVideoCall ? (
                 <Video size={32} color={COLORS.textPrimary} />

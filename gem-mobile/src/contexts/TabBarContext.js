@@ -51,14 +51,25 @@ export const TabBarProvider = ({ children }) => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   // Track if keyboard auto-hide is enabled (default: true)
   const [keyboardAutoHideEnabled, setKeyboardAutoHideEnabled] = useState(true);
+  // Track if app has finished initial startup (prevents race conditions on iOS)
+  const hasStartedRef = useRef(false);
+  // Track pending visibility change to apply after animation completes
+  const pendingVisibilityRef = useRef(null);
 
   // Keyboard event listeners for auto-hide
   useEffect(() => {
+    // Delay keyboard listener activation to avoid race conditions on iOS app startup
+    // iOS sometimes fires keyboardWillShow briefly during app launch
+    const startupTimer = setTimeout(() => {
+      hasStartedRef.current = true;
+    }, 500);
+
     const keyboardWillShowListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
       () => {
         setKeyboardVisible(true);
-        if (keyboardAutoHideEnabled) {
+        // Skip keyboard hiding during startup to avoid race conditions
+        if (keyboardAutoHideEnabled && hasStartedRef.current) {
           hideTabBarInternal(true);
         }
       }
@@ -68,21 +79,43 @@ export const TabBarProvider = ({ children }) => {
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
       () => {
         setKeyboardVisible(false);
-        if (keyboardAutoHideEnabled) {
-          showTabBarInternal(true);
+        if (keyboardAutoHideEnabled && hasStartedRef.current) {
+          // If animation is in progress, queue the show for after it completes
+          if (isAnimating.current) {
+            pendingVisibilityRef.current = 'show';
+          } else {
+            showTabBarInternal(true);
+          }
         }
       }
     );
 
     return () => {
+      clearTimeout(startupTimer);
       keyboardWillShowListener.remove();
       keyboardWillHideListener.remove();
     };
   }, [keyboardAutoHideEnabled]);
 
+  // Process any pending visibility changes after animation completes
+  const processPendingVisibility = useCallback(() => {
+    const pending = pendingVisibilityRef.current;
+    pendingVisibilityRef.current = null;
+
+    if (pending === 'show') {
+      // Defer to next tick to avoid calling during current animation callback
+      setTimeout(() => showTabBarInternal(true), 0);
+    } else if (pending === 'hide') {
+      setTimeout(() => hideTabBarInternal(true), 0);
+    }
+  }, []);
+
   // Internal hide function (doesn't check keyboard state)
   const hideTabBarInternal = useCallback((animated = true) => {
-    if (isAnimating.current) return;
+    if (isAnimating.current) {
+      pendingVisibilityRef.current = 'hide';
+      return;
+    }
 
     isAnimating.current = true;
     setIsVisible(false);
@@ -101,17 +134,22 @@ export const TabBarProvider = ({ children }) => {
         }),
       ]).start(() => {
         isAnimating.current = false;
+        processPendingVisibility();
       });
     } else {
       translateY.setValue(120);
       bottomPadding.setValue(0);
       isAnimating.current = false;
+      processPendingVisibility();
     }
-  }, [translateY, bottomPadding]);
+  }, [translateY, bottomPadding, processPendingVisibility]);
 
   // Internal show function (doesn't check keyboard state)
   const showTabBarInternal = useCallback((animated = true) => {
-    if (isAnimating.current) return;
+    if (isAnimating.current) {
+      pendingVisibilityRef.current = 'show';
+      return;
+    }
 
     isAnimating.current = true;
     setIsVisible(true);
@@ -130,16 +168,23 @@ export const TabBarProvider = ({ children }) => {
         }),
       ]).start(() => {
         isAnimating.current = false;
+        processPendingVisibility();
       });
     } else {
       translateY.setValue(0);
       bottomPadding.setValue(TAB_BAR_HEIGHT);
       isAnimating.current = false;
+      processPendingVisibility();
     }
-  }, [translateY, bottomPadding]);
+  }, [translateY, bottomPadding, processPendingVisibility]);
 
   const hideTabBar = useCallback((animated = true) => {
-    if (!isVisible || isAnimating.current) return;
+    if (!isVisible) return;
+
+    if (isAnimating.current) {
+      pendingVisibilityRef.current = 'hide';
+      return;
+    }
 
     isAnimating.current = true;
     setIsVisible(false);
@@ -158,16 +203,23 @@ export const TabBarProvider = ({ children }) => {
         }),
       ]).start(() => {
         isAnimating.current = false;
+        processPendingVisibility();
       });
     } else {
       translateY.setValue(120);
       bottomPadding.setValue(0);
       isAnimating.current = false;
+      processPendingVisibility();
     }
-  }, [isVisible, translateY, bottomPadding]);
+  }, [isVisible, translateY, bottomPadding, processPendingVisibility]);
 
   const showTabBar = useCallback((animated = true) => {
-    if (isVisible || isAnimating.current) return;
+    if (isVisible) return;
+
+    if (isAnimating.current) {
+      pendingVisibilityRef.current = 'show';
+      return;
+    }
 
     isAnimating.current = true;
     setIsVisible(true);
@@ -186,13 +238,31 @@ export const TabBarProvider = ({ children }) => {
         }),
       ]).start(() => {
         isAnimating.current = false;
+        processPendingVisibility();
       });
     } else {
       translateY.setValue(0);
       bottomPadding.setValue(TAB_BAR_HEIGHT);
       isAnimating.current = false;
+      processPendingVisibility();
     }
-  }, [isVisible, translateY, bottomPadding]);
+  }, [isVisible, translateY, bottomPadding, processPendingVisibility]);
+
+  // Force show tab bar - bypasses all guards, for recovery from stuck states
+  const forceShowTabBar = useCallback(() => {
+    // Stop any running animations
+    translateY.stopAnimation();
+    bottomPadding.stopAnimation();
+
+    // Reset all state
+    isAnimating.current = false;
+    pendingVisibilityRef.current = null;
+
+    // Force visible state
+    translateY.setValue(0);
+    bottomPadding.setValue(TAB_BAR_HEIGHT);
+    setIsVisible(true);
+  }, [translateY, bottomPadding]);
 
   // Handle scroll for auto-hide (general use)
   const handleScroll = useCallback((event) => {
@@ -253,10 +323,11 @@ export const TabBarProvider = ({ children }) => {
   }, [hideTabBar, showTabBar]);
 
   // Reset tab bar visibility (useful when navigating)
+  // Uses forceShowTabBar to ensure it always works regardless of animation state
   const resetTabBar = useCallback(() => {
     lastScrollY.current = 0;
-    showTabBar();
-  }, [showTabBar]);
+    forceShowTabBar();
+  }, [forceShowTabBar]);
 
   // Enable auto-hide mode for specific screens
   const enableAutoHide = useCallback(() => {
@@ -311,6 +382,7 @@ export const TabBarProvider = ({ children }) => {
         handleChatScroll,
         hideTabBar,
         showTabBar,
+        forceShowTabBar,
         resetTabBar,
         enableAutoHide,
         disableAutoHide,

@@ -1,0 +1,1797 @@
+
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 1.2: Nguyên Lý Cốt Lõi - Mất Cân Bằng Cung Cầu | GEM Trading Academy</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Noto+Sans+Display:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       Full-width cards, text-only padding
+       ========================================== */
+    :root {
+      /* Colors */
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      
+      /* Backgrounds */
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      
+      /* Borders */
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      
+      /* V5.3: Text padding only */
+      --text-padding: 16px;
+      
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      
+      /* Border Radius - Mobile: 0, Desktop: normal */
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      
+      /* Shadows */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      
+      /* Glassmorphism */
+      --glass-blur: blur(40px);
+    }
+    
+    /* Desktop (600px+) */
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+    
+    /* ==========================================
+       🔄 RESET & BASE
+       ========================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+    
+    @media (min-width: 600px) {
+      body {
+        font-size: 16px;
+        line-height: 1.7;
+      }
+    }
+    
+    /* Background Bokeh */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    /* ==========================================
+       📐 LAYOUT - V5.3 No container padding
+       ========================================== */
+    .lesson-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0; /* NO padding on mobile */
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-container {
+        padding: 16px;
+      }
+    }
+    
+    /* ==========================================
+       🏷️ HEADER - Full width on mobile
+       ========================================== */
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+    
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+    
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+      color: var(--color-navy);
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-badge {
+        font-size: 13px;
+        padding: 6px 16px;
+      }
+    }
+    
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-white);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+    }
+    
+    .lesson-subtitle {
+      font-size: 0.95rem;
+      color: var(--color-gold);
+      font-weight: 500;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-subtitle {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+    
+    @media (min-width: 600px) {
+      .meta-item {
+        font-size: 14px;
+      }
+    }
+    
+    .meta-icon {
+      color: var(--color-cyan);
+    }
+    
+    /* ==========================================
+       📝 CONTENT - No wrapper padding on mobile
+       ========================================== */
+    .lesson-content {
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
+      backdrop-filter: none;
+      border: none;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+    
+    /* ==========================================
+       📝 SECTION - Full width mobile
+       ========================================== */
+    .section {
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: var(--space-lg) 0;
+      margin-bottom: 0;
+      backdrop-filter: var(--glass-blur);
+    }
+    
+    @media (min-width: 600px) {
+      .section {
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        padding: var(--space-xl);
+        margin-bottom: var(--space-lg);
+      }
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      padding: 0 var(--text-padding);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    @media (min-width: 600px) {
+      .section-header {
+        padding: 0;
+        padding-bottom: var(--space-sm);
+      }
+    }
+    
+    .section-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      box-shadow: var(--shadow-glow-gold);
+      flex-shrink: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .section-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+      }
+    }
+    
+    .section-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+    
+    @media (min-width: 600px) {
+      .section-title {
+        font-size: 1.5rem;
+      }
+    }
+    
+    /* ==========================================
+       📝 TEXT ELEMENTS - Have padding on mobile
+       ========================================== */
+    .section p,
+    .section h3,
+    .section > ul:not(.checklist):not(.summary-list) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .section p,
+      .section h3,
+      .section > ul:not(.checklist):not(.summary-list) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-gold);
+      margin: var(--space-lg) 0 var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      h3 {
+        font-size: 1.2rem;
+      }
+    }
+    
+    p {
+      margin-bottom: var(--space-md);
+    }
+    
+    strong {
+      color: var(--color-gold);
+      font-weight: 600;
+    }
+    
+    /* ==========================================
+       ✅ CHECKLIST - Full width mobile
+       ========================================== */
+    .checklist {
+      list-style: none;
+      margin: var(--space-md) 0;
+      padding: 0;
+    }
+    
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--text-padding);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+      background: rgba(17, 34, 80, 0.3);
+    }
+    
+    @media (min-width: 600px) {
+      .checklist li {
+        font-size: 1rem;
+        padding: var(--space-md) 0;
+        background: transparent;
+        border-radius: 0;
+      }
+    }
+    
+    .checklist li:last-child {
+      border-bottom: none;
+    }
+    
+    .checklist-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(135deg, var(--color-green), var(--color-cyan));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: var(--color-navy);
+    }
+    
+    @media (min-width: 600px) {
+      .checklist-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+      }
+    }
+    
+    /* ==========================================
+       💡 INSIGHT BOX - Full width mobile
+       ========================================== */
+    .insight-box {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      position: relative;
+    }
+    
+    @media (min-width: 600px) {
+      .insight-box {
+        border: 2px solid var(--color-gold);
+        border-radius: var(--radius-md);
+        padding: var(--space-xl);
+      }
+    }
+    
+    .insight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .insight-title::before {
+      content: '💡';
+    }
+    
+    .insight-text {
+      font-size: 0.95rem;
+      color: var(--color-white);
+      font-style: italic;
+    }
+    
+    @media (min-width: 600px) {
+      .insight-text {
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* ==========================================
+       📊 CONCEPT BOX - Full width mobile
+       ========================================== */
+    .concept-box {
+      background: linear-gradient(135deg, rgba(17, 34, 80, 0.8), rgba(10, 15, 26, 0.9));
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid var(--color-gold);
+      position: relative;
+    }
+    
+    @media (min-width: 600px) {
+      .concept-box {
+        border-radius: var(--radius-md);
+        padding: var(--space-xl);
+      }
+    }
+    
+    .concept-box.cyan { border-left-color: var(--color-cyan); }
+    .concept-box.green { border-left-color: var(--color-green); }
+    .concept-box.red { border-left-color: var(--color-red); }
+    .concept-box.purple { border-left-color: var(--color-purple); }
+    
+    .concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--color-white);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .concept-title {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .concept-box p {
+      padding: 0 !important;
+    }
+    
+    /* ==========================================
+       ⚖️ BALANCE VISUAL - Full width mobile
+       ========================================== */
+    .balance-visual {
+      background: linear-gradient(135deg, rgba(17, 34, 80, 0.9), rgba(10, 15, 26, 0.95));
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+      text-align: center;
+      border-left: 4px solid var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .balance-visual {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-gold);
+        border-left: 1px solid var(--border-gold);
+        padding: var(--space-xl);
+      }
+    }
+    
+    .balance-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .balance-title {
+        font-size: 1.3rem;
+      }
+    }
+    
+    .scale-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-md);
+    }
+    
+    .scale-side {
+      flex: 1;
+      min-width: 100px;
+      max-width: 150px;
+      padding: var(--space-sm);
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    @media (min-width: 600px) {
+      .scale-side {
+        min-width: 150px;
+        max-width: 200px;
+        padding: var(--space-lg);
+      }
+    }
+    
+    .scale-side.buy {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+      border: 2px solid var(--color-green);
+    }
+    
+    .scale-side.sell {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+      border: 2px solid var(--color-red);
+    }
+    
+    .scale-icon {
+      font-size: 1.8rem;
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .scale-icon {
+        font-size: 2.5rem;
+        margin-bottom: var(--space-sm);
+      }
+    }
+    
+    .scale-label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--color-white);
+    }
+    
+    @media (min-width: 600px) {
+      .scale-label {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .scale-fulcrum {
+      font-size: 2rem;
+      color: var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .scale-fulcrum {
+        font-size: 3rem;
+      }
+    }
+    
+    /* ==========================================
+       📊 SCENARIOS GRID - Full width mobile
+       ========================================== */
+    .scenarios-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (min-width: 500px) {
+      .scenarios-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    @media (min-width: 600px) {
+      .scenarios-grid {
+        gap: var(--space-sm);
+        background: transparent;
+      }
+    }
+    
+    .scenario-card {
+      background: linear-gradient(135deg, rgba(17, 34, 80, 0.8), rgba(10, 15, 26, 0.9));
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      text-align: center;
+      border: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-card {
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        padding: var(--space-xl);
+      }
+      
+      .scenario-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        background: var(--bg-card-hover);
+      }
+    }
+    
+    .scenario-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+    
+    .scenario-card.bullish::before {
+      background: linear-gradient(90deg, var(--color-green), var(--color-cyan));
+    }
+    
+    .scenario-card.bearish::before {
+      background: linear-gradient(90deg, var(--color-red), var(--color-burgundy));
+    }
+    
+    .scenario-card.neutral::before {
+      background: linear-gradient(90deg, var(--color-gold), var(--color-purple));
+    }
+    
+    .scenario-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--color-white);
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-title {
+        font-size: 1.2rem;
+      }
+    }
+    
+    .scenario-formula {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 8px;
+      margin-bottom: var(--space-sm);
+      display: inline-block;
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-formula {
+        font-size: 1rem;
+        padding: var(--space-sm) var(--space-md);
+      }
+    }
+    
+    .scenario-card.bullish .scenario-formula {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--color-green);
+    }
+    
+    .scenario-card.bearish .scenario-formula {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--color-red);
+    }
+    
+    .scenario-card.neutral .scenario-formula {
+      background: rgba(255, 189, 89, 0.2);
+      color: var(--color-gold);
+    }
+    
+    .scenario-desc {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-desc {
+        font-size: 0.95rem;
+      }
+    }
+    
+    .scenario-image {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: var(--space-sm);
+    }
+    
+    /* ==========================================
+       🖼️ IMAGES - Full width (Facebook style)
+       ========================================== */
+    .lesson-image {
+      margin: var(--space-md) 0;
+      text-align: center;
+      overflow: hidden;
+      border-radius: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-image {
+        border-radius: var(--radius-md);
+        margin: var(--space-lg) 0;
+      }
+    }
+    
+    .lesson-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-image img {
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+    
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 12px;
+      margin-top: var(--space-sm);
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .image-caption {
+        font-size: 14px;
+        padding: 0;
+      }
+    }
+    
+    /* ==========================================
+       📈 EXAMPLE SECTION - Full width mobile
+       ========================================== */
+    .example-section {
+      background: rgba(17, 34, 80, 0.4);
+      border-radius: 0;
+      padding: var(--space-lg) 0;
+      margin: var(--space-md) 0;
+      border-left: 4px solid var(--color-cyan);
+    }
+    
+    @media (min-width: 600px) {
+      .example-section {
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        border-left: 4px solid var(--color-cyan);
+        padding: var(--space-xl);
+      }
+    }
+    
+    .example-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      flex-wrap: wrap;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .example-header {
+        padding: 0;
+      }
+    }
+    
+    .example-badge {
+      background: var(--color-cyan);
+      color: var(--color-navy);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
+    
+    @media (min-width: 600px) {
+      .example-badge {
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-md);
+      }
+    }
+    
+    .example-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-white);
+      font-size: 0.95rem;
+    }
+    
+    @media (min-width: 600px) {
+      .example-title {
+        font-size: 1.2rem;
+      }
+    }
+    
+    .example-section p {
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .example-section p {
+        padding: 0;
+      }
+    }
+    
+    .example-section .checklist li {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    /* ==========================================
+       📋 COMPARISON TABLE - Full width mobile
+       ========================================== */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: var(--space-md) 0;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      min-width: 400px;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      border-radius: 0;
+      overflow: hidden;
+      font-size: 0.75rem;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table {
+        font-size: 0.9rem;
+        border-radius: var(--radius-md);
+      }
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: var(--space-sm);
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .comparison-table th {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(255, 189, 89, 0.1));
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      color: var(--color-gold);
+      white-space: nowrap;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table th {
+        font-size: 0.85rem;
+        padding: var(--space-md);
+      }
+      
+      .comparison-table td {
+        padding: var(--space-md);
+      }
+    }
+    
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .comparison-table tr:hover td {
+      background: var(--bg-card-hover);
+    }
+    
+    /* ==========================================
+       📚 SUMMARY BOX - Full width mobile
+       ========================================== */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+      border: none;
+      border-left: 4px solid var(--color-cyan);
+      border-radius: 0;
+      padding: var(--space-lg) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-box {
+        border: 2px solid var(--color-cyan);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+    
+    .summary-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .summary-header {
+        padding: 0;
+      }
+    }
+    
+    .summary-icon {
+      font-size: 1.5rem;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-icon {
+        font-size: 2rem;
+      }
+    }
+    
+    .summary-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-cyan);
+    }
+    
+    @media (min-width: 600px) {
+      .summary-title {
+        font-size: 1.4rem;
+      }
+    }
+    
+    .summary-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .summary-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--text-padding);
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+    }
+    
+    @media (min-width: 600px) {
+      .summary-list li {
+        font-size: 1rem;
+        padding: var(--space-md) 0;
+      }
+    }
+    
+    .summary-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .summary-list li::before {
+      content: '✓';
+      color: var(--color-cyan);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    
+    /* ==========================================
+       ❓ QUIZ SECTION - Full width mobile
+       ========================================== */
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--space-lg) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+    
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-header {
+        padding: 0;
+      }
+    }
+    
+    .quiz-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--color-purple), #8B7BFF);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.8rem;
+      }
+    }
+    
+    .quiz-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-title {
+        font-size: 1.5rem;
+      }
+    }
+    
+    .quiz-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-subtitle {
+        font-size: 0.95rem;
+      }
+    }
+    
+    .quiz-question {
+      background: rgba(17, 34, 80, 0.4);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: 1px;
+      border: none;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-question {
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-md);
+        padding: var(--space-xl);
+      }
+    }
+    
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--color-purple);
+      color: white;
+      border-radius: 50%;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      margin-right: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .question-number {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+        margin-right: var(--space-md);
+      }
+    }
+    
+    .question-text {
+      font-weight: 500;
+      color: var(--color-white);
+      font-size: 0.9rem;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .question-text {
+        font-size: 1.05rem;
+      }
+    }
+    
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-options {
+        gap: var(--space-xs);
+        background: transparent;
+      }
+    }
+    
+    .quiz-option {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      background: rgba(17, 34, 80, 0.6);
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option {
+        font-size: 0.9rem;
+        padding: var(--space-md) var(--space-lg);
+        gap: var(--space-md);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+      }
+    }
+    
+    .quiz-option:hover {
+      background: rgba(106, 91, 255, 0.2);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option:hover {
+        border-color: var(--color-purple);
+      }
+    }
+    
+    .quiz-option input[type="radio"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--color-purple);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .quiz-option label {
+      cursor: pointer;
+      flex: 1;
+    }
+    
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--color-green);
+    }
+    
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--color-red);
+    }
+    
+    .quiz-feedback {
+      margin-top: var(--space-sm);
+      padding: var(--space-md);
+      border-radius: 8px;
+      display: none;
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-feedback {
+        font-size: 0.9rem;
+        padding: var(--space-md);
+      }
+    }
+    
+    .quiz-feedback.show {
+      display: block;
+    }
+    
+    .quiz-feedback.correct {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--color-green);
+      color: var(--color-green);
+    }
+    
+    .quiz-feedback.incorrect {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--color-red);
+      color: var(--color-red);
+    }
+    
+    .btn-check-answer {
+      background: linear-gradient(135deg, var(--color-purple), #8B7BFF);
+      color: white;
+      border: none;
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: var(--space-md);
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    
+    @media (min-width: 600px) {
+      .btn-check-answer {
+        font-size: 0.9rem;
+        padding: var(--space-md) var(--space-xl);
+        width: auto;
+      }
+      
+      .btn-check-answer:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+    }
+    
+    /* ==========================================
+       📱 FOOTER - Full width
+       ========================================== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-footer {
+        background: transparent;
+        padding: var(--space-xl) 0;
+      }
+    }
+    
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+    
+    .footer-link {
+      color: var(--color-text-muted);
+      font-size: 13px;
+    }
+    
+    .footer-link a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+    
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+
+
+
+  <div class="lesson-container">
+    
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <div class="lesson-badge">
+        <span>📚</span>
+        <span>TIER 1 • Chapter 1 • Bài 1.2</span>
+      </div>
+      <h1 class="lesson-title">Nguyên Lý Cốt Lõi<br>Mất Cân Bằng Cung Cầu</h1>
+      <p class="lesson-subtitle">Hiểu bản chất mọi biến động giá trên thị trường</p>
+      
+      <div class="lesson-meta">
+        <div class="meta-item">
+          <span class="meta-icon">⏱️</span>
+          <span>10-12 phút đọc</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📝</span>
+          <span>3 câu quiz</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">🎯</span>
+          <span>Độ khó: Cơ bản</span>
+        </div>
+      </div>
+    </header>
+    
+    <!-- MỤC TIÊU BÀI HỌC -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">🎯</div>
+        <h2 class="section-title">Mục Tiêu Bài Học</h2>
+      </div>
+      
+      <p>Sau khi hoàn thành bài học này, bạn sẽ:</p>
+      
+      <ul class="checklist">
+        <li>
+          <span class="checklist-icon">✓</span>
+          <span>Hiểu <strong>nguyên lý cốt lõi</strong> khiến giá di chuyển trên thị trường</span>
+        </li>
+        <li>
+          <span class="checklist-icon">✓</span>
+          <span>Phân biệt được <strong>3 trạng thái</strong> của thị trường: Tăng, Giảm, và Đi ngang</span>
+        </li>
+        <li>
+          <span class="checklist-icon">✓</span>
+          <span>Nhận ra <strong>mối quan hệ</strong> giữa lực Mua và lực Bán trong mỗi biến động giá</span>
+        </li>
+        <li>
+          <span class="checklist-icon">✓</span>
+          <span>Áp dụng tư duy <strong>"ai đang kiểm soát thị trường"</strong> vào phân tích chart</span>
+        </li>
+      </ul>
+    </section>
+    
+    <!-- NGUYÊN LÝ CỐT LÕI -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">⚖️</div>
+        <h2 class="section-title">Nguyên Lý Cốt Lõi</h2>
+      </div>
+      
+      <div class="insight-box">
+        <h4 class="insight-title">Quy Luật Bất Biến Của Thị Trường</h4>
+        <p class="insight-text">"Mọi biến động giá đều xuất phát từ sự MẤT CÂN BẰNG giữa lực BÁN và lực MUA tại một mức giá cụ thể."</p>
+      </div>
+      
+      <p>Đây là nguyên lý đơn giản nhưng cực kỳ quan trọng mà nhiều trader bỏ qua. Thay vì tìm kiếm các chỉ báo phức tạp, hãy quay về với câu hỏi cơ bản nhất:</p>
+      
+      <div class="concept-box cyan">
+        <div class="concept-title">💬 Câu Hỏi Cần Đặt Ra</div>
+        <p><strong>"Ai đang kiểm soát thị trường tại thời điểm này - Người MUA hay Người BÁN?"</strong></p>
+        <p style="margin-top: var(--space-sm); color: var(--color-text-muted);">Khi bạn trả lời được câu hỏi này, bạn đã hiểu 80% về phương pháp GEM Frequency Trading.</p>
+      </div>
+      
+      <div class="balance-visual">
+        <h3 class="balance-title">⚖️ Cân Bằng Lực Thị Trường</h3>
+        <div class="lesson-image">
+          <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjl73zon-mbys1f-img1.webp" alt="gemini-generated-image-dqaq4adqaq4a-osa7">
+        </div>
+        <div class="scale-container">
+          <div class="scale-side buy">
+            <div class="scale-icon">🟢</div>
+            <div class="scale-label">LỰC MUA</div>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: var(--space-xs);">Buyers • Demand</p>
+          </div>
+          <div class="scale-fulcrum">⚖️</div>
+          <div class="scale-side sell">
+            <div class="scale-icon">🔴</div>
+            <div class="scale-label">LỰC BÁN</div>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: var(--space-xs);">Sellers • Supply</p>
+          </div>
+        </div>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem;">Khi hai lực này mất cân bằng → Giá sẽ di chuyển</p>
+      </div>
+    </section>
+    
+    <!-- BA KỊCH BẢN CỦA THỊ TRƯỜNG -->
+    <section class="section">
+      
+      
+      <p>Dựa trên nguyên lý cân bằng cung cầu, thị trường chỉ có thể ở một trong <strong>3 trạng thái</strong>:</p>
+      
+      <div class="scenarios-grid">
+        <!-- Bullish -->
+        <div class="scenario-card bullish">
+          <h3 class="scenario-title">GIÁ TĂNG</h3>
+          <img class="scenario-image" src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjl73zon-mbys1f-img2.webp" alt="Giá tăng">
+          <div class="scenario-formula">Lực Mua &gt; Lực Bán</div>
+          <p class="scenario-desc">Người mua <strong>nhiều hơn</strong> người bán → Cầu vượt cung → Giá bị đẩy lên</p>
+        </div>
+        
+        <!-- Bearish -->
+        <div class="scenario-card bearish">
+          <h3 class="scenario-title">GIÁ GIẢM</h3>
+          <img class="scenario-image" src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjl73zon-mbys1f-img3.webp" alt="Giá giảm">
+          <div class="scenario-formula">Lực Bán &gt; Lực Mua</div>
+          <p class="scenario-desc">Người bán <strong>nhiều hơn</strong> người mua → Cung vượt cầu → Giá bị kéo xuống</p>
+        </div>
+        
+        <!-- Neutral -->
+        <div class="scenario-card neutral">
+          <h3 class="scenario-title">GIÁ ĐI NGANG</h3>
+          
+          <div class="scenario-formula"><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjl73zon-mbys1f-img4.webp" alt="gemini-generated-image-jjwjuqjjwjuq-c30d">Lực Mua ≈ Lực Bán</div>
+          <p class="scenario-desc">Hai lực <strong>cân bằng</strong> → Không bên nào thắng → Giá dao động trong vùng hẹp</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- VÍ DỤ THỰC TẾ -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">📈</div>
+        <h2 class="section-title">Ví Dụ Thực Tế Trên Chart</h2>
+      </div>
+      
+      <div class="example-section">
+        <div class="example-header">
+          <span class="example-badge">VÍ DỤ 1</span>
+          <h3 class="example-title">Bitcoin tăng từ $60,000 lên $70,000</h3>
+        </div>
+        
+        <p><strong>Phân tích:</strong></p>
+        <ul class="checklist">
+          <li>
+            <span class="checklist-icon">📌</span>
+            <span>Tại $60,000: Có rất nhiều người muốn <strong>MUA</strong> Bitcoin</span>
+          </li>
+          <li>
+            <span class="checklist-icon">📌</span>
+            <span>Lượng người muốn mua <strong>vượt trội</strong> so với lượng người muốn bán</span>
+          </li>
+          <li>
+            <span class="checklist-icon">📌</span>
+            <span>Kết quả: Giá bị <strong>đẩy lên</strong> đến khi đạt mức cân bằng mới</span>
+          </li>
+        </ul>
+        <div class="lesson-image">
+          <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjl73zon-mbys1f-img5.webp" alt="gemini-generated-image-wn9corwn9cor-gzdt">
+        </div>
+      </div>
+      
+      <div class="example-section">
+        <div class="example-header">
+          <span class="example-badge">VÍ DỤ 2</span>
+          <h3 class="example-title">Ethereum giảm từ $4,000 xuống $3,000</h3>
+        </div>
+        
+        <p><strong>Phân tích:</strong></p>
+        <ul class="checklist">
+          <li>
+            <span class="checklist-icon">📌</span>
+            <span>Tại $4,000: Có rất nhiều người muốn <strong>BÁN</strong> Ethereum</span>
+          </li>
+          <li>
+            <span class="checklist-icon">📌</span>
+            <span>Lượng người muốn bán <strong>vượt trội</strong> so với lượng người muốn mua</span>
+          </li>
+          <li>
+            <span class="checklist-icon">📌</span>
+            <span>Kết quả: Giá bị <strong>kéo xuống</strong> đến khi tìm được người mua mới</span>
+          </li>
+        </ul>
+        <div class="lesson-image">
+          <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjl73zon-mbys1f-img6.webp" alt="gemini-generated-image-egojjlegojjl-pvi5">
+        </div>
+      </div>
+    </section>
+    
+    <!-- ỨNG DỤNG VÀO GEM METHOD -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">💎</div>
+        <h2 class="section-title">Ứng Dụng Vào GEM Frequency Method</h2>
+      </div>
+      
+      <p>Hiểu nguyên lý cung cầu là <strong>nền tảng quan trọng nhất</strong> để học phương pháp GEM. Đây là cách chúng ta áp dụng:</p>
+      
+      <div class="concept-box green">
+        <div class="concept-title">🟢 LFZ - Low Frequency Zone (Vùng Mua)</div>
+        <p>Vùng giá nơi <strong>lực MUA tập trung mạnh</strong>. Khi giá quay lại vùng này → có xác suất cao sẽ <strong>TĂNG</strong> trở lại.</p>
+        <p style="margin-top: var(--space-sm); color: var(--color-green); font-weight: 600;">→ Chiến lược: Đợi giá về LFZ → Vào lệnh LONG (Mua)</p>
+      </div>
+      
+      <div class="concept-box red">
+        <div class="concept-title">🔴 HFZ - High Frequency Zone (Vùng Bán)</div>
+        <p>Vùng giá nơi <strong>lực BÁN tập trung mạnh</strong>. Khi giá quay lại vùng này → có xác suất cao sẽ <strong>GIẢM</strong> trở lại.</p>
+        <p style="margin-top: var(--space-sm); color: var(--color-red); font-weight: 600;">→ Chiến lược: Đợi giá về HFZ → Vào lệnh SHORT (Bán)</p>
+      </div>
+      
+      <div class="insight-box">
+        <h4 class="insight-title">Tại Sao Gọi Là "Frequency Zone"?</h4>
+        <p class="insight-text">Vì tại các vùng này, <strong>tần suất</strong> (frequency) xuất hiện lệnh mua/bán rất cao. Smart Money đã đặt lệnh chờ ở đây, và khi giá quay lại, các lệnh này sẽ được kích hoạt.</p>
+      </div>
+      
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjl73zon-mbys1f-img7.webp" alt="gemini-generated-image-tx99o5tx99o5-xoqf">
+      </div>
+      
+    </section>
+    
+    <!-- SO SÁNH TƯ DUY -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">🔄</div>
+        <h2 class="section-title">So Sánh: Tư Duy Cũ vs Tư Duy Mới</h2>
+      </div>
+      
+      <div class="table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Tiêu Chí</th>
+              <th>❌ Tư Duy Cũ</th>
+              <th>✅ Tư Duy GEM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Câu hỏi đặt ra</strong></td>
+              <td>Giá sẽ đi đâu?</td>
+              <td>Ai đang kiểm soát thị trường?</td>
+            </tr>
+            <tr>
+              <td><strong>Cách phân tích</strong></td>
+              <td>Dựa vào chỉ báo</td>
+              <td>Dựa vào cân bằng cung/cầu</td>
+            </tr>
+            <tr>
+              <td><strong>Entry point</strong></td>
+              <td>Khi có tín hiệu indicator</td>
+              <td>Khi giá về vùng mất cân bằng</td>
+            </tr>
+            <tr>
+              <td><strong>Độ chính xác</strong></td>
+              <td>Phụ thuộc indicator</td>
+              <td>Dựa trên logic thị trường</td>
+            </tr>
+            <tr>
+              <td><strong>Hiểu thị trường</strong></td>
+              <td>Bề mặt</td>
+              <td>Bản chất cốt lõi</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- TÓM TẮT BÀI HỌC -->
+    <div class="summary-box">
+      <div class="summary-header">
+        <span class="summary-icon">📋</span>
+        <h2 class="summary-title">Tóm Tắt Bài Học</h2>
+      </div>
+      
+      <ul class="summary-list">
+        <li><strong>Nguyên lý cốt lõi:</strong> Mọi biến động giá đều do mất cân bằng giữa lực Mua và lực Bán</li>
+        <li><strong>Giá tăng:</strong> Khi lực Mua vượt trội hơn lực Bán (Cầu &gt; Cung)</li>
+        <li><strong>Giá giảm:</strong> Khi lực Bán vượt trội hơn lực Mua (Cung &gt; Cầu)</li>
+        <li><strong>Giá đi ngang:</strong> Khi hai lực cân bằng, không bên nào thắng</li>
+        <li><strong>GEM Method:</strong> Tìm các vùng mất cân bằng (HFZ, LFZ) để giao dịch với xác suất cao</li>
+        <li><strong>Tư duy quan trọng:</strong> Luôn hỏi "Ai đang kiểm soát thị trường?"</li>
+      </ul>
+    </div>
+    
+    <!-- QUIZ SECTION -->
+    <section class="quiz-section">
+      <div class="quiz-header">
+        <div class="quiz-icon">❓</div>
+        <div>
+          <h2 class="quiz-title">Kiểm Tra Kiến Thức</h2>
+          <p class="quiz-subtitle">Trả lời 3 câu hỏi để củng cố bài học</p>
+        </div>
+      </div>
+      
+      <!-- Quiz 1 -->
+      <div class="quiz-question" id="q1">
+        <p class="question-text">
+          <span class="question-number">1</span>
+          Theo nguyên lý GEM, khi nào giá sẽ TĂNG?
+        </p>
+        <div class="quiz-options">
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q1" id="q1a" value="a">
+            <label for="q1a">A. Khi có nhiều người bán hơn người mua</label>
+          </div>
+          <div class="quiz-option" data-correct="true">
+            <input type="radio" name="q1" id="q1b" value="b">
+            <label for="q1b">B. Khi lực Mua vượt trội hơn lực Bán</label>
+          </div>
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q1" id="q1c" value="c">
+            <label for="q1c">C. Khi hai lực cân bằng nhau</label>
+          </div>
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q1" id="q1d" value="d">
+            <label for="q1d">D. Khi chỉ báo RSI vượt ngưỡng 70</label>
+          </div>
+        </div>
+        <div class="quiz-feedback correct" id="q1-correct">
+          ✅ Chính xác! Giá tăng khi lực Mua (Demand) vượt trội hơn lực Bán (Supply). Đây là nguyên lý cơ bản nhất của thị trường.
+        </div>
+        <div class="quiz-feedback incorrect" id="q1-incorrect">
+          ❌ Chưa đúng. Giá tăng khi lực Mua vượt trội hơn lực Bán, không phải dựa vào chỉ báo kỹ thuật.
+        </div>
+        <button class="btn-check-answer" onclick="checkAnswer('q1', 'b')">Kiểm tra đáp án</button>
+      </div>
+      
+      <!-- Quiz 2 -->
+      <div class="quiz-question" id="q2">
+        <p class="question-text">
+          <span class="question-number">2</span>
+          LFZ (Low Frequency Zone) là vùng giá có đặc điểm gì?
+        </p>
+        <div class="quiz-options">
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q2" id="q2a" value="a">
+            <label for="q2a">A. Vùng có lực BÁN tập trung mạnh</label>
+          </div>
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q2" id="q2b" value="b">
+            <label for="q2b">B. Vùng giá đi ngang không có biến động</label>
+          </div>
+          <div class="quiz-option" data-correct="true">
+            <input type="radio" name="q2" id="q2c" value="c">
+            <label for="q2c">C. Vùng có lực MUA tập trung mạnh</label>
+          </div>
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q2" id="q2d" value="d">
+            <label for="q2d">D. Vùng có ít giao dịch xảy ra</label>
+          </div>
+        </div>
+        <div class="quiz-feedback correct" id="q2-correct">
+          ✅ Chính xác! LFZ (Low Frequency Zone) hay "Vùng Mua" là nơi lực MUA tập trung mạnh. Khi giá về vùng này, có xác suất cao sẽ tăng trở lại.
+        </div>
+        <div class="quiz-feedback incorrect" id="q2-incorrect">
+          ❌ Chưa đúng. LFZ là vùng có lực MUA tập trung mạnh (không phải lực Bán). Đây là vùng demand zone.
+        </div>
+        <button class="btn-check-answer" onclick="checkAnswer('q2', 'c')">Kiểm tra đáp án</button>
+      </div>
+      
+      <!-- Quiz 3 -->
+      <div class="quiz-question" id="q3">
+        <p class="question-text">
+          <span class="question-number">3</span>
+          Câu hỏi quan trọng nhất cần đặt ra khi phân tích chart theo GEM Method là gì?
+        </p>
+        <div class="quiz-options">
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q3" id="q3a" value="a">
+            <label for="q3a">A. Chỉ báo RSI đang ở mức bao nhiêu?</label>
+          </div>
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q3" id="q3b" value="b">
+            <label for="q3b">B. Giá sẽ đạt bao nhiêu trong tuần tới?</label>
+          </div>
+          <div class="quiz-option" data-correct="false">
+            <input type="radio" name="q3" id="q3c" value="c">
+            <label for="q3c">C. Có bao nhiêu người đang giao dịch?</label>
+          </div>
+          <div class="quiz-option" data-correct="true">
+            <input type="radio" name="q3" id="q3d" value="d">
+            <label for="q3d">D. Ai đang kiểm soát thị trường - Người Mua hay Người Bán?</label>
+          </div>
+        </div>
+        <div class="quiz-feedback correct" id="q3-correct">
+          ✅ Xuất sắc! "Ai đang kiểm soát thị trường?" là câu hỏi cốt lõi của GEM Method. Khi trả lời được câu này, bạn sẽ biết nên mua hay bán.
+        </div>
+        <div class="quiz-feedback incorrect" id="q3-incorrect">
+          ❌ Chưa đúng. Câu hỏi quan trọng nhất là "Ai đang kiểm soát thị trường - Người Mua hay Người Bán?" - đây là nền tảng của GEM Method.
+        </div>
+        <button class="btn-check-answer" onclick="checkAnswer('q3', 'd')">Kiểm tra đáp án</button>
+      </div>
+    </section>
+    
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+    
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    function checkAnswer(questionId, correctAnswer) {
+      const question = document.getElementById(questionId);
+      const options = question.querySelectorAll('.quiz-option');
+      const selected = question.querySelector('input[type="radio"]:checked');
+      const correctFeedback = document.getElementById(questionId + '-correct');
+      const incorrectFeedback = document.getElementById(questionId + '-incorrect');
+      
+      // Reset previous styling
+      options.forEach(opt => {
+        opt.classList.remove('correct', 'incorrect');
+      });
+      correctFeedback.classList.remove('show');
+      incorrectFeedback.classList.remove('show');
+      
+      if (!selected) {
+        alert('Vui lòng chọn một đáp án!');
+        return;
+      }
+      
+      const userAnswer = selected.value;
+      
+      // Show correct answer
+      options.forEach(opt => {
+        const input = opt.querySelector('input');
+        if (input.value === correctAnswer) {
+          opt.classList.add('correct');
+        } else if (input.value === userAnswer && userAnswer !== correctAnswer) {
+          opt.classList.add('incorrect');
+        }
+      });
+      
+      // Show feedback
+      if (userAnswer === correctAnswer) {
+        correctFeedback.classList.add('show');
+      } else {
+        incorrectFeedback.classList.add('show');
+      }
+    }
+  </script>
+
+

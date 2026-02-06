@@ -140,6 +140,7 @@ const UpgradeModal = ({
         title: 'Tìm hiểu thêm',
         productName: 'GEM Chatbot',
         returnScreen: 'Home',
+        isLandingPage: true, // Skip cancel confirmation for landing pages
       },
     });
   }, [navigation, onClose]);

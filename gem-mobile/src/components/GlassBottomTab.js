@@ -53,13 +53,14 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
 
   // Calculate bottom padding based on platform:
-  // - iOS: Use insets.bottom (handles notch/home indicator)
+  // - iOS: Position just above home indicator without floating too high
   // - Android: Use insets.bottom, but add extra padding for 3-button nav
   //   when insets.bottom is 0 (system nav bar not detected as safe area)
   const getBottomPadding = () => {
     if (Platform.OS === 'ios') {
-      // iOS: Trust safe area insets (handles notch, home indicator)
-      return Math.max(insets.bottom, 8);
+      // iOS: Position tab bar just above home indicator with small gap
+      // 6px gives enough clearance from the white home indicator bar
+      return 6;
     } else {
       // Android: Safe area might not detect 3-button navigation bar
       // If insets.bottom is 0, add default padding for nav bar (~48dp)

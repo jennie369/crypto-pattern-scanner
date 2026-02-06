@@ -462,15 +462,13 @@ const JournalEntryScreen = () => {
 
   // Navigate back to the source screen
   const navigateBack = () => {
-    // If we came from Calendar or VisionBoard, navigate back properly
+    // If we came from Calendar, navigate with params to reopen
     if (sourceScreen === 'Calendar') {
       navigation.navigate('Calendar', { selectedDate: returnDate, refreshData: true });
     } else if (sourceScreen === 'VisionBoard') {
-      navigation.navigate('VisionBoard', {
-        openCalendarDate: returnDate,
-        showDayDetail: true,
-        refreshData: true,
-      });
+      // Use goBack() for instant return - VisionBoard's pendingModalReopen ref
+      // will handle reopening the modal with fresh data
+      navigation.goBack();
     } else {
       navigation.goBack();
     }

@@ -3,7 +3,7 @@
  * Active call screen with controls
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,7 +18,6 @@ import {
   CallStatusBadge,
   CallQualityIndicator,
 } from '../../components/Call';
-import { CustomAlert } from '../../components/Common';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -30,11 +29,13 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
  * @param {boolean} props.route.params.isCaller - Whether current user is caller
  */
 const InCallScreen = ({ route, navigation }) => {
-  const { call, callee, caller, isCaller } = route.params || {};
+  const { call, callee, caller, isCaller, answeredFromCallKeep } = route.params || {};
   const otherUser = isCaller ? callee : caller;
   const isVideoCall = call?.call_type === CALL_TYPE.VIDEO;
 
-  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  // If answered from CallKeep (native iOS CallKit), auto-initialize
+  // since user already pressed Accept in native UI
+  const shouldAutoInit = isCaller || answeredFromCallKeep;
 
   // ========== HOOKS ==========
   const {
@@ -52,6 +53,7 @@ const InCallScreen = ({ route, navigation }) => {
   } = useCall({
     call,
     isCaller,
+    autoInitialize: shouldAutoInit, // Auto-init for caller or when answered from CallKeep
     onCallEnded: (reason) => {
       navigation.replace('CallEnded', {
         call,
@@ -76,27 +78,22 @@ const InCallScreen = ({ route, navigation }) => {
   // Call duration timer - only count when connected
   const { formattedDuration, duration } = useCallTimer(isConnected);
 
-  // ========== EFFECTS ==========
-
-  // Handle back button - show confirmation
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      setShowEndConfirm(true);
-      return true;
-    });
-
-    return () => backHandler.remove();
-  }, []);
-
   // ========== HANDLERS ==========
 
   const handleEndCall = useCallback(async () => {
     await endCall();
   }, [endCall]);
 
-  const confirmEndCall = useCallback(() => {
-    setShowEndConfirm(false);
-    handleEndCall();
+  // ========== EFFECTS ==========
+
+  // Handle back button - end call directly without confirmation
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleEndCall();
+      return true;
+    });
+
+    return () => backHandler.remove();
   }, [handleEndCall]);
 
   // ========== RENDER ==========
@@ -148,29 +145,9 @@ const InCallScreen = ({ route, navigation }) => {
             onToggleMute={toggleMute}
             onToggleSpeaker={toggleSpeaker}
             onToggleVideo={isVideoCall ? toggleVideo : handleUpgradeToVideo}
-            onEndCall={() => setShowEndConfirm(true)}
+            onEndCall={handleEndCall}
           />
         </View>
-
-        {/* End Call Confirmation */}
-        <CustomAlert
-          visible={showEndConfirm}
-          title="Kết thúc cuộc gọi?"
-          message="Bạn có chắc muốn kết thúc cuộc gọi này?"
-          buttons={[
-            {
-              text: 'Hủy',
-              style: 'cancel',
-              onPress: () => setShowEndConfirm(false),
-            },
-            {
-              text: 'Kết thúc',
-              style: 'destructive',
-              onPress: confirmEndCall,
-            },
-          ]}
-          onClose={() => setShowEndConfirm(false)}
-        />
       </SafeAreaView>
     </LinearGradient>
   );

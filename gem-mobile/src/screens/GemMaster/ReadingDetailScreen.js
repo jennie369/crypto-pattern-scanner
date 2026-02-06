@@ -183,7 +183,7 @@ const ReadingDetailScreen = () => {
       if (!updateResult.error) {
         setReading((prev) => ({ ...prev, notes }));
         setIsEditingNotes(false);
-        Alert.alert('Đã lưu', 'Ghi chú đã được cập nhật.');
+        // Removed alert popup - just close the editing mode silently
       } else {
         console.error('[ReadingDetailScreen] Save notes error:', updateResult.error);
         Alert.alert('Lỗi', 'Không thể lưu ghi chú.');
@@ -214,9 +214,10 @@ const ReadingDetailScreen = () => {
         }
       } else {
         const hexagram = reading?.present_hexagram;
+        const hexagramName = hexagram?.primaryHexagram?.name || hexagram?.primaryHexagram?.nameVi || hexagram?.name_vi || hexagram?.name || 'Unknown';
         shareText = `Kết quả Kinh Dịch\n\n`;
         shareText += `Câu hỏi: ${reading?.question || 'Không có'}\n\n`;
-        shareText += `Quẻ: ${hexagram?.name_vi || 'Unknown'}\n`;
+        shareText += `Quẻ: ${hexagramName}\n`;
         if (reading?.interpretations?.summary) {
           shareText += `\nGiải quẻ:\n${reading.interpretations.summary}\n`;
         }
@@ -411,13 +412,13 @@ const ReadingDetailScreen = () => {
               <Text style={styles.hexagramNumber}>Quẻ #{hexagramNumber}</Text>
             )}
             <Text style={styles.hexagramName}>
-              {hexagram?.name_vi || hexagram?.name_en || 'Unknown'}
+              {hexagram?.primaryHexagram?.name || hexagram?.primaryHexagram?.nameVi || hexagram?.name_vi || hexagram?.name_en || hexagram?.name || 'Unknown'}
             </Text>
-            {hexagram?.chinese_name && (
-              <Text style={styles.hexagramChinese}>{hexagram.chinese_name}</Text>
+            {(hexagram?.primaryHexagram?.chineseName || hexagram?.chinese_name) && (
+              <Text style={styles.hexagramChinese}>{hexagram?.primaryHexagram?.chineseName || hexagram?.chinese_name}</Text>
             )}
-            {hexagram?.description_vi && (
-              <Text style={styles.hexagramDesc}>{hexagram.description_vi}</Text>
+            {(hexagram?.primaryHexagram?.description || hexagram?.description_vi) && (
+              <Text style={styles.hexagramDesc}>{hexagram?.primaryHexagram?.description || hexagram?.description_vi}</Text>
             )}
           </View>
         </View>
@@ -709,7 +710,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.md,
-    paddingBottom: SPACING.huge,
+    paddingBottom: 120, // Extra padding for bottom tab bar visibility
   },
   metaContainer: {
     flexDirection: 'row',

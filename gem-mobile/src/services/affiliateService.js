@@ -35,8 +35,8 @@ import {
 // CONSTANTS & CONFIGURATION
 // ========================================
 
-// Base URL for referral links
-const REFERRAL_BASE_URL = 'https://link.gemral.app';
+// Base URL for referral links (Shopify domain)
+const REFERRAL_BASE_URL = 'https://gemral.com';
 
 // App scheme for deep links
 const APP_SCHEME = 'gem';
@@ -326,13 +326,14 @@ class AffiliateService {
 
   /**
    * Generate referral link
+   * Format: https://gemral.com/?ref={code}&product={type}
    */
   async generateReferralLink(productType = null) {
     try {
       const code = await this.getReferralCode();
       if (!code) return null;
 
-      let link = `${REFERRAL_BASE_URL}/?ref=${code.code}`;
+      let link = `${REFERRAL_BASE_URL}?ref=${code.code}`;
       if (productType) {
         link += `&product=${productType}`;
       }
@@ -739,15 +740,21 @@ class AffiliateService {
 
   /**
    * Generate product URL from short code and affiliate code
-   * New format: https://link.gemral.app/p/{shortCode}?ref={affiliateCode}&pid={productId}&handle={productHandle}
+   * New format: https://gemral.com/products/{productHandle}?ref={affiliateCode}&pid={productId}
+   * Fallback: https://gemral.com/?ref={affiliateCode}&pid={productId} if no handle
    */
   generateProductUrl(shortCode, affiliateCode, productId = null, productHandle = null) {
-    let url = `${REFERRAL_BASE_URL}/p/${shortCode}?ref=${affiliateCode}`;
+    // Use Shopify's product URL structure when handle is available
+    let url;
+    if (productHandle) {
+      url = `${REFERRAL_BASE_URL}/products/${encodeURIComponent(productHandle)}?ref=${affiliateCode}`;
+    } else {
+      // Fallback to short code path if no handle
+      url = `${REFERRAL_BASE_URL}/p/${shortCode}?ref=${affiliateCode}`;
+    }
+
     if (productId) {
       url += `&pid=${encodeURIComponent(productId)}`;
-    }
-    if (productHandle) {
-      url += `&handle=${encodeURIComponent(productHandle)}`;
     }
     return url;
   }
@@ -812,55 +819,73 @@ class AffiliateService {
    * Check if user has an approved partnership
    * Returns: { isApproved: boolean, affiliateCode: string|null, role: string|null, ctvTier: string|null }
    */
+  // ═══════════════════════════════════════════════════════════════
+  // CACHING for faster link generation
+  // ═══════════════════════════════════════════════════════════════
+  _partnershipCache = new Map(); // userId -> { data, timestamp }
+  _userCodeCache = new Map();    // userId -> { code, timestamp }
+  _CACHE_TTL = 5 * 60 * 1000;    // 5 minutes cache
+
+  _isCacheValid(cache, userId) {
+    const cached = cache.get(userId);
+    if (!cached) return false;
+    return Date.now() - cached.timestamp < this._CACHE_TTL;
+  }
+
   async checkPartnershipApproval(userId) {
+    // Check cache first for instant response
+    if (this._isCacheValid(this._partnershipCache, userId)) {
+      console.log('[Affiliate] Partnership check from cache');
+      return this._partnershipCache.get(userId).data;
+    }
+
     try {
-      // First check partnership_applications for approved status
-      const { data: application, error: appError } = await supabase
-        .from('partnership_applications')
-        .select('status, application_type, approved_at')
-        .eq('user_id', userId)
-        .eq('status', 'approved')
-        .order('approved_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (appError) {
-        console.log('[Affiliate] Error checking partnership_applications:', appError.message);
-      }
-
-      // If has approved application, check for affiliate code in profiles
-      if (application?.status === 'approved') {
-        const { data: profile } = await supabase
+      // OPTIMIZED: Run both queries in PARALLEL instead of sequential
+      const [applicationResult, profileResult] = await Promise.all([
+        supabase
+          .from('partnership_applications')
+          .select('status, application_type, approved_at')
+          .eq('user_id', userId)
+          .eq('status', 'approved')
+          .order('approved_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
           .from('profiles')
           .select('affiliate_code, partnership_role, ctv_tier')
           .eq('id', userId)
-          .single();
+          .single(),
+      ]);
 
-        return {
+      const application = applicationResult.data;
+      const profile = profileResult.data;
+
+      let result;
+
+      // Check if has approved application
+      if (application?.status === 'approved') {
+        result = {
           isApproved: true,
           affiliateCode: profile?.affiliate_code || null,
-          role: profile?.partnership_role || application.application_type || 'ctv',  // v3.0
-          ctvTier: profile?.ctv_tier || 'bronze',  // v3.0: 'bronze' default
+          role: profile?.partnership_role || application.application_type || 'ctv',
+          ctvTier: profile?.ctv_tier || 'bronze',
         };
       }
-
       // Check if user has affiliate_code in profiles (legacy or direct assignment)
-      const { data: profileCheck } = await supabase
-        .from('profiles')
-        .select('affiliate_code, partnership_role, ctv_tier')
-        .eq('id', userId)
-        .single();
-
-      if (profileCheck?.affiliate_code && profileCheck?.partnership_role) {
-        return {
+      else if (profile?.affiliate_code && profile?.partnership_role) {
+        result = {
           isApproved: true,
-          affiliateCode: profileCheck.affiliate_code,
-          role: profileCheck.partnership_role,
-          ctvTier: profileCheck.ctv_tier || 'bronze',  // v3.0: 'bronze' default
+          affiliateCode: profile.affiliate_code,
+          role: profile.partnership_role,
+          ctvTier: profile.ctv_tier || 'bronze',
         };
+      } else {
+        result = { isApproved: false, affiliateCode: null, role: null, ctvTier: null };
       }
 
-      return { isApproved: false, affiliateCode: null, role: null, ctvTier: null };
+      // Cache the result
+      this._partnershipCache.set(userId, { data: result, timestamp: Date.now() });
+      return result;
     } catch (error) {
       console.error('[Affiliate] checkPartnershipApproval error:', error);
       return { isApproved: false, affiliateCode: null, role: null, ctvTier: null };
@@ -922,38 +947,82 @@ class AffiliateService {
 
       console.log('[Affiliate] Using profile:', profile);
 
-      // Check if product link already exists for this user
-      // Use text comparison since product_id could be string or UUID
-      const { data: existingLink } = await supabase
-        .from('affiliate_codes')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('product_id', productIdStr)
-        .eq('is_active', true)
-        .single();
+      // ═══════════════════════════════════════════════════════════════
+      // OPTIMIZED: Run multiple queries in PARALLEL for faster link generation
+      // ═══════════════════════════════════════════════════════════════
 
+      // Check userCode cache first
+      let userCode = null;
+      if (this._isCacheValid(this._userCodeCache, user.id)) {
+        userCode = this._userCodeCache.get(user.id).data;
+        console.log('[Affiliate] UserCode from cache:', userCode?.code);
+      }
+
+      // Build parallel queries
+      const parallelQueries = [
+        // Query 1: Check existing product link
+        supabase
+          .from('affiliate_codes')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('product_id', productIdStr)
+          .eq('is_active', true)
+          .maybeSingle(),
+      ];
+
+      // Query 2: Get user's main referral code (only if not cached)
+      if (!userCode) {
+        parallelQueries.push(
+          supabase
+            .from('affiliate_codes')
+            .select('code')
+            .eq('user_id', user.id)
+            .is('product_id', null)
+            .eq('is_active', true)
+            .maybeSingle()
+        );
+      }
+
+      // Execute parallel queries
+      const results = await Promise.all(parallelQueries);
+      const existingLink = results[0]?.data;
+      if (!userCode && results[1]) {
+        userCode = results[1].data;
+        // Cache it for next time
+        if (userCode) {
+          this._userCodeCache.set(user.id, { data: userCode, timestamp: Date.now() });
+        }
+      }
+
+      // If existing link found, return immediately (FAST PATH)
       if (existingLink) {
+        const baseCode = userCode?.code || existingLink.code?.split('_')[0] || partnershipCheck.affiliateCode;
         const url = this.generateProductUrl(
           existingLink.short_code,
-          userCode?.code || existingLink.code.split('_')[0], // Get base affiliate code
+          baseCode,
           productIdStr,
           existingLink.product_handle
         );
         const commissionRate = this.getProductCommissionRate(productType, profile);
         const estimatedCommission = (existingLink.product_price || 0) * commissionRate;
 
+        console.log('[Affiliate] Returning existing link (fast path)');
         return {
           success: true,
           link: existingLink,
           url,
-          deepLink: this.generateAppDeepLink(existingLink.short_code, userCode?.code || existingLink.code.split('_')[0], productIdStr),
+          deepLink: this.generateAppDeepLink(existingLink.short_code, baseCode, productIdStr),
           commissionRate: (commissionRate * 100).toFixed(1),
           estimatedCommission,
           isExisting: true,
         };
       }
 
-      // Get product details if not provided
+      // ═══════════════════════════════════════════════════════════════
+      // No existing link - need to create new one
+      // ═══════════════════════════════════════════════════════════════
+
+      // Get product details if not provided (use provided data to skip query)
       let product = productData;
       if (!product) {
         const table = productType === 'crystal' ? 'shopify_crystals' :
@@ -981,15 +1050,7 @@ class AffiliateService {
         };
       }
 
-      // Get or create user's main referral code
-      let { data: userCode } = await supabase
-        .from('affiliate_codes')
-        .select('code')
-        .eq('user_id', user.id)
-        .is('product_id', null)
-        .eq('is_active', true)
-        .single();
-
+      // Create user's main referral code if doesn't exist
       if (!userCode) {
         // Create main referral code
         const { data: userProfile } = await supabase
@@ -1014,6 +1075,8 @@ class AffiliateService {
 
         if (createError) throw createError;
         userCode = createdCode;
+        // Cache the new code
+        this._userCodeCache.set(user.id, { data: userCode, timestamp: Date.now() });
       }
 
       // Generate short code for product

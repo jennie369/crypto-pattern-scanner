@@ -1,12 +1,12 @@
 /**
  * Gemral - Message Requests Screen
- * TikTok-style message requests inbox
+ * Hộp thư yêu cầu tin nhắn kiểu TikTok
  *
- * Features:
- * - View pending message requests
- * - Accept/Decline requests
- * - Block users
- * - Preview messages
+ * Tính năng:
+ * - Xem yêu cầu tin nhắn đang chờ
+ * - Chấp nhận/Từ chối yêu cầu
+ * - Chặn người dùng
+ * - Xem trước tin nhắn
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -61,7 +61,7 @@ export default function MessageRequestsScreen({ navigation }) {
         setRequests(result.requests);
       }
     } catch (error) {
-      console.error('Error fetching message requests:', error);
+      console.error('Lỗi khi tải yêu cầu tin nhắn:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -73,7 +73,7 @@ export default function MessageRequestsScreen({ navigation }) {
 
     // Subscribe to real-time updates
     const unsubscribe = messageRequestService.subscribeToMessageRequests((payload) => {
-      console.log('[MessageRequests] Realtime update:', payload);
+      console.log('[MessageRequests] Cập nhật realtime:', payload);
       fetchRequests();
     });
 
@@ -106,12 +106,12 @@ export default function MessageRequestsScreen({ navigation }) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         alert({
           type: 'error',
-          title: 'Error',
-          message: result.error || 'Failed to accept request',
+          title: 'Lỗi',
+          message: result.error || 'Không thể chấp nhận yêu cầu',
         });
       }
     } catch (error) {
-      console.error('Error accepting request:', error);
+      console.error('Lỗi khi chấp nhận yêu cầu:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setProcessingId(null);
@@ -120,16 +120,16 @@ export default function MessageRequestsScreen({ navigation }) {
 
   // Decline request
   const handleDecline = useCallback((request) => {
-    const requesterName = request.requester?.display_name || request.requester?.full_name || 'this person';
+    const requesterName = request.requester?.display_name || request.requester?.full_name || 'người này';
 
     alert({
       type: 'warning',
-      title: 'Decline Request',
-      message: `Decline message from ${requesterName}?`,
+      title: 'Từ chối yêu cầu',
+      message: `Từ chối tin nhắn từ ${requesterName}?`,
       buttons: [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Decline',
+          text: 'Từ chối',
           onPress: async () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             setProcessingId(request.id);
@@ -142,14 +142,14 @@ export default function MessageRequestsScreen({ navigation }) {
                 setRequests(prev => prev.filter(r => r.id !== request.id));
               }
             } catch (error) {
-              console.error('Error declining request:', error);
+              console.error('Lỗi khi từ chối yêu cầu:', error);
             } finally {
               setProcessingId(null);
             }
           },
         },
         {
-          text: 'Decline & Block',
+          text: 'Từ chối & Chặn',
           style: 'destructive',
           onPress: async () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -163,7 +163,7 @@ export default function MessageRequestsScreen({ navigation }) {
                 setRequests(prev => prev.filter(r => r.id !== request.id));
               }
             } catch (error) {
-              console.error('Error blocking request:', error);
+              console.error('Lỗi khi chặn yêu cầu:', error);
             } finally {
               setProcessingId(null);
             }
@@ -192,20 +192,20 @@ export default function MessageRequestsScreen({ navigation }) {
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return date.toLocaleTimeString('vi-VN', { hour: 'numeric', minute: '2-digit' });
     } else if (diffDays === 1) {
-      return 'Yesterday';
+      return 'Hôm qua';
     } else if (diffDays < 7) {
-      return date.toLocaleDateString('en-US', { weekday: 'short' });
+      return date.toLocaleDateString('vi-VN', { weekday: 'short' });
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' });
     }
   };
 
   // Render request item
   const renderRequestItem = ({ item }) => {
     const requester = item.requester || {};
-    const requesterName = requester.display_name || requester.full_name || requester.username || 'Unknown';
+    const requesterName = requester.display_name || requester.full_name || requester.username || 'Người lạ';
     const isProcessing = processingId === item.id;
 
     return (
@@ -236,12 +236,12 @@ export default function MessageRequestsScreen({ navigation }) {
           </View>
 
           <Text style={styles.messagePreview} numberOfLines={2}>
-            {item.message_preview || 'Sent a message'}
+            {item.message_preview || 'Đã gửi tin nhắn'}
           </Text>
 
           {item.messages_count > 1 && (
             <Text style={styles.messageCount}>
-              +{item.messages_count - 1} more message{item.messages_count > 2 ? 's' : ''}
+              +{item.messages_count - 1} tin nhắn khác
             </Text>
           )}
 
@@ -255,7 +255,7 @@ export default function MessageRequestsScreen({ navigation }) {
               {isProcessing ? (
                 <ActivityIndicator size="small" color={COLORS.textMuted} />
               ) : (
-                <Text style={styles.declineText}>Decline</Text>
+                <Text style={styles.declineText}>Từ chối</Text>
               )}
             </TouchableOpacity>
 
@@ -267,7 +267,7 @@ export default function MessageRequestsScreen({ navigation }) {
               {isProcessing ? (
                 <ActivityIndicator size="small" color={COLORS.textPrimary} />
               ) : (
-                <Text style={styles.acceptText}>Accept</Text>
+                <Text style={styles.acceptText}>Chấp nhận</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -282,9 +282,9 @@ export default function MessageRequestsScreen({ navigation }) {
       <View style={styles.emptyIconContainer}>
         <Ionicons name="mail-open-outline" size={64} color={COLORS.textMuted} />
       </View>
-      <Text style={styles.emptyTitle}>No Message Requests</Text>
+      <Text style={styles.emptyTitle}>Không có yêu cầu tin nhắn</Text>
       <Text style={styles.emptySubtitle}>
-        Message requests from people you haven't chatted with will appear here
+        Yêu cầu tin nhắn từ những người bạn chưa từng trò chuyện sẽ xuất hiện ở đây
       </Text>
     </View>
   );
@@ -304,7 +304,7 @@ export default function MessageRequestsScreen({ navigation }) {
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Message Requests</Text>
+        <Text style={styles.title}>Yêu cầu tin nhắn</Text>
 
         <View style={styles.placeholder}>
           {requests.length > 0 && (
@@ -319,7 +319,7 @@ export default function MessageRequestsScreen({ navigation }) {
       <View style={styles.infoBanner}>
         <Ionicons name="information-circle" size={20} color={COLORS.gold} />
         <Text style={styles.infoText}>
-          These are messages from people you haven't chatted with before. Accept to start a conversation.
+          Đây là tin nhắn từ những người bạn chưa từng trò chuyện. Chấp nhận để bắt đầu cuộc trò chuyện.
         </Text>
       </View>
 

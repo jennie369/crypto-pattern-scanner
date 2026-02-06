@@ -563,11 +563,9 @@ const TradingJournalScreen = () => {
     if (sourceScreen === 'Calendar') {
       navigation.navigate('Calendar', { selectedDate: returnDate, refreshData: true });
     } else if (sourceScreen === 'VisionBoard') {
-      navigation.navigate('VisionBoard', {
-        openCalendarDate: returnDate,
-        showDayDetail: true,
-        refreshData: true,
-      });
+      // Use goBack() for instant return - VisionBoard's pendingModalReopen ref
+      // will handle reopening the modal with fresh data
+      navigation.goBack();
     } else {
       navigation.goBack();
     }

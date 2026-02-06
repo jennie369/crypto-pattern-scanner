@@ -22,6 +22,8 @@ import PinnedMessagesScreen from '../screens/Messages/PinnedMessagesScreen';
 import ScheduledMessagesScreen from '../screens/Messages/ScheduledMessagesScreen';
 import StarredMessagesScreen from '../screens/Messages/StarredMessagesScreen';
 import ArchivedChatsScreen from '../screens/Messages/ArchivedChatsScreen';
+import CallHistoryScreen from '../screens/Call/CallHistoryScreen';
+import ProfileFullScreen from '../screens/tabs/ProfileFullScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -160,6 +162,24 @@ export default function MessagesStack() {
       <Stack.Screen
         name="ArchivedChats"
         component={ArchivedChatsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Call History */}
+      <Stack.Screen
+        name="CallHistory"
+        component={CallHistoryScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Profile Full (for viewing user profiles) */}
+      <Stack.Screen
+        name="ProfileFull"
+        component={ProfileFullScreen}
         options={{
           animation: 'slide_from_right',
         }}

@@ -280,7 +280,7 @@ export default function AppNavigator() {
             if (upgradeState.tierType === 'course' || upgradeState.tierType === 'bundle') {
               navigationRef.current?.navigate('Courses');
             } else if (upgradeState.tierType === 'scanner') {
-              navigationRef.current?.navigate('Scanner');
+              navigationRef.current?.navigate('Trading');
             } else if (upgradeState.tierType === 'chatbot') {
               navigationRef.current?.navigate('Home');
             }

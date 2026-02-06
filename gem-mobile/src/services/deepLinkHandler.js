@@ -66,12 +66,14 @@ const WEB_URL_PATTERNS = [
 
 // ========== AFFILIATE URL PATTERNS ==========
 const AFFILIATE_URL_PATTERNS = {
-  // https://link.gemral.app/p/{shortCode}?ref={code}&pid={productId}
-  linkGemralApp: /^https?:\/\/link\.gemral\.app\/p\/([^/?]+)\??(.*)$/i,
+  // https://gemral.com/products/{handle}?ref={code}&pid={productId}
+  gemralProducts: /^https?:\/\/(www\.)?gemral\.com\/products\/([^/?]+)\??(.*)$/i,
   // https://yinyangmasters.com/products/{handle}?ref={code}
   yinyangMasters: /^https?:\/\/yinyangmasters\.com\/products\/([^/?]+)\??(.*)$/i,
   // gem://product/{shortCode}?ref={code}&pid={productId}
   appScheme: /^gem:\/\/product\/([^/?]+)\??(.*)$/i,
+  // Legacy: https://gemral.com/p/{shortCode}?ref={code} (fallback)
+  gemralShortCode: /^https?:\/\/(www\.)?gemral\.com\/p\/([^/?]+)\??(.*)$/i,
 };
 
 // ========== DEEP LINK ROUTES ==========
@@ -162,17 +164,31 @@ class DeepLinkHandler {
     if (!url) return null;
 
     try {
-      // Try link.gemral.app pattern
-      let match = url.match(AFFILIATE_URL_PATTERNS.linkGemralApp);
+      // Try gemral.com/products/{handle} pattern (primary)
+      let match = url.match(AFFILIATE_URL_PATTERNS.gemralProducts);
       if (match) {
-        const shortCode = match[1];
-        const params = this.parseQueryString(match[2]);
+        const handle = match[2]; // Group 1 is www., Group 2 is handle
+        const params = this.parseQueryString(match[3]);
+        return {
+          shortCode: null,
+          affiliateCode: params.ref || params.aff,
+          productId: params.pid,
+          productHandle: handle,
+          source: 'gemral.com',
+        };
+      }
+
+      // Try gemral.com/p/{shortCode} pattern (legacy/fallback)
+      match = url.match(AFFILIATE_URL_PATTERNS.gemralShortCode);
+      if (match) {
+        const shortCode = match[2];
+        const params = this.parseQueryString(match[3]);
         return {
           shortCode,
           affiliateCode: params.ref || params.aff,
           productId: params.pid,
           productHandle: params.handle,
-          source: 'link.gemral.app',
+          source: 'gemral.com',
         };
       }
 

@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { AppState, Vibration } from 'react-native';
+import { AppState, Platform, Vibration } from 'react-native';
 import { Audio } from 'expo-av';
 
 import { useAuth } from './AuthContext';
@@ -57,6 +57,10 @@ export function CallProvider({ children }) {
   const subscriptionRef = useRef(null);
   const appStateRef = useRef(AppState.currentState);
   const pendingCallKeepAnswerRef = useRef(null);
+  // Track call IDs that have been navigated to - prevent duplicate navigation
+  const navigatedCallIdsRef = useRef(new Set());
+  // Track last navigation timestamp to debounce
+  const lastNavigationTimeRef = useRef(0);
 
   // ========== RINGTONE MANAGEMENT ==========
 
@@ -112,7 +116,29 @@ export function CallProvider({ children }) {
   // Helper function to navigate to call screen
   // IMPORTANT: Must be defined BEFORE handleIncomingCall which depends on it
   const navigateToCallScreen = useCallback((call, caller) => {
-    console.log('[CallProvider] Navigating to call screen:', call?.id);
+    const callId = call?.id;
+    console.log('[CallProvider] navigateToCallScreen called:', callId);
+
+    // GUARD 1: Check if already navigated to this call (but allow retry if it's been a while)
+    if (navigatedCallIdsRef.current.has(callId)) {
+      const timeSinceLastNav = Date.now() - lastNavigationTimeRef.current;
+      // Only skip if navigation happened very recently (within 1 second)
+      if (timeSinceLastNav < 1000) {
+        console.log('[CallProvider] Already navigated to call', callId, timeSinceLastNav, 'ms ago - SKIPPING');
+        return false;
+      }
+      // Otherwise clear and allow retry
+      console.log('[CallProvider] Clearing stale navigation entry for', callId);
+      navigatedCallIdsRef.current.delete(callId);
+    }
+
+    // GUARD 2: Debounce - prevent rapid duplicate navigations (within 1 second, not 2)
+    const now = Date.now();
+    if (now - lastNavigationTimeRef.current < 1000) {
+      console.log('[CallProvider] Navigation debounce active (' + (now - lastNavigationTimeRef.current) + 'ms) - SKIPPING');
+      return false;
+    }
+
     const navReady = navigationRef.current &&
       (typeof navigationRef.current.isReady === 'function'
         ? navigationRef.current.isReady()
@@ -121,6 +147,19 @@ export function CallProvider({ children }) {
     console.log('[CallProvider] Navigation ready:', navReady);
 
     if (navReady) {
+      // Mark this call as navigated BEFORE navigating
+      navigatedCallIdsRef.current.add(callId);
+      lastNavigationTimeRef.current = now;
+
+      // CRITICAL: Dismiss CallKeep native banner before showing our IncomingCallScreen
+      // This prevents duplicate UI (native banner + our fullscreen overlapping)
+      if (callKeepService.available && callKeepService.getCurrentCallUUID() === callId) {
+        console.log('[CallProvider] Dismissing CallKeep banner to show our IncomingCallScreen');
+        // Report end to CallKeep so it dismisses the banner, but DON'T actually end the call
+        callKeepService.reportEndCall(callId);
+      }
+
+      console.log('[CallProvider] >>> NAVIGATING to IncomingCall screen for:', callId);
       navigationRef.current.navigate('Call', {
         screen: 'IncomingCall',
         params: {
@@ -128,31 +167,48 @@ export function CallProvider({ children }) {
           caller,
         },
       });
-      console.log('[CallProvider] Navigation triggered');
+      console.log('[CallProvider] Navigation triggered successfully');
+      return true;
     } else {
       console.error('[CallProvider] Navigation not ready');
+      return false;
     }
   }, []);
 
   // ========== INCOMING CALL HANDLERS ==========
 
   const handleIncomingCall = useCallback((call) => {
+    const callId = call?.id;
     console.log('[CallProvider] *** handleIncomingCall called ***');
     console.log('[CallProvider] Call data:', JSON.stringify({
-      id: call?.id,
+      id: callId,
       status: call?.status,
       call_type: call?.call_type,
       caller_id: call?.caller_id,
     }));
 
-    // Don't show if already handling a call
-    if (incomingCall) {
-      console.log('[CallProvider] Already handling a call, ignoring');
+    // GUARD 1: Check if already navigated to this call
+    // But only if the navigation actually happened recently (within 10 seconds)
+    if (navigatedCallIdsRef.current.has(callId)) {
+      const timeSinceLastNav = Date.now() - lastNavigationTimeRef.current;
+      if (timeSinceLastNav < 10000) {
+        console.log('[CallProvider] Call', callId, 'already handled', timeSinceLastNav, 'ms ago - SKIPPING');
+        return;
+      } else {
+        // Clear stale entry
+        console.log('[CallProvider] Clearing stale navigation tracking for', callId);
+        navigatedCallIdsRef.current.delete(callId);
+      }
+    }
+
+    // GUARD 2: Don't show if already handling a DIFFERENT call
+    if (incomingCall && incomingCall.id !== callId) {
+      console.log('[CallProvider] Already handling different call', incomingCall.id, '- SKIPPING');
       return;
     }
 
     // Check if CallKeep already answered this call (user answered from native UI)
-    if (pendingCallKeepAnswerRef.current === call.id) {
+    if (pendingCallKeepAnswerRef.current === callId) {
       console.log('[CallProvider] Call already answered via CallKeep');
       pendingCallKeepAnswerRef.current = null;
 
@@ -169,7 +225,14 @@ export function CallProvider({ children }) {
     // Play ringtone and vibrate
     playRingtone();
 
-    // Navigate directly to IncomingCall screen
+    // NOTE: We ALWAYS navigate to IncomingCallScreen as the in-app UI
+    // - On iOS background: CallKit shows native fullscreen, user answers there -> callback handles it
+    // - On iOS foreground: CallKit may NOT show fullscreen (iOS 14+), so we need IncomingCallScreen
+    // - On Android: ConnectionService doesn't show native UI, so we need IncomingCallScreen
+    // If user answers from CallKit, the onAnswerCallback will handle direct navigation to InCall/VideoCall
+    console.log('[CallProvider] Will navigate to IncomingCallScreen (works for both foreground and as fallback)');
+
+    // Navigate directly to IncomingCall screen (Android or when CallKeep not available)
     // This is more reliable than showing a Modal overlay
     const caller = call.caller || {
       id: call.caller_id,
@@ -178,12 +241,27 @@ export function CallProvider({ children }) {
 
     console.log('[CallProvider] Navigating to IncomingCall screen...');
     console.log('[CallProvider] Caller:', caller?.display_name);
-    navigateToCallScreen(call, caller);
-    console.log('[CallProvider] Navigation triggered');
-  }, [incomingCall, playRingtone, navigateToCallScreen]);
+    const navigated = navigateToCallScreen(call, caller);
+    console.log('[CallProvider] Navigation result:', navigated ? 'SUCCESS' : 'SKIPPED');
+
+    // If navigation failed, try again after a short delay (navigation might not be ready)
+    if (!navigated) {
+      console.log('[CallProvider] Navigation failed, retrying in 500ms...');
+      setTimeout(() => {
+        console.log('[CallProvider] Retry navigation...');
+        navigateToCallScreen(call, caller);
+      }, 500);
+    }
+  }, [incomingCall, playRingtone, navigateToCallScreen, callKeepReady]);
 
   const handleCallEnded = useCallback((call) => {
-    console.log('[CallProvider] Call ended:', call);
+    console.log('[CallProvider] Call ended:', call?.id);
+
+    // Clear navigation tracking for this call so user can receive new calls
+    if (call?.id) {
+      navigatedCallIdsRef.current.delete(call.id);
+      console.log('[CallProvider] Cleared navigation tracking for call:', call.id);
+    }
 
     // If this is the incoming call we're showing, hide overlay
     if (incomingCall?.id === call?.id) {
@@ -258,33 +336,64 @@ export function CallProvider({ children }) {
         }
 
         // Handle answer from native CallKeep UI
+        // IMPORTANT: When user answers from CallKit (iOS), navigate DIRECTLY to InCall/VideoCall
+        // Skip IncomingCallScreen since user already accepted from native UI
         callKeepService.setOnAnswerCallback(async (callUUID, callInfo) => {
           console.log('[CallProvider] CallKeep answer callback:', callUUID);
+          console.log('[CallProvider] User answered from NATIVE CallKit UI');
 
-          // Stop ringtone
+          // Stop ringtone and vibration
           await stopRingtone();
 
-          // If we already have the call info, navigate to call screen
-          if (incomingCall && incomingCall.id === callUUID) {
-            const caller = incomingCall.caller || incomingCall.call_participants?.find(
-              p => p.user_id !== user?.id
-            )?.profiles;
+          // Mark as navigated to prevent IncomingCallScreen from showing
+          navigatedCallIdsRef.current.add(callUUID);
 
-            navigateToCallScreen(incomingCall, caller);
-            setShowOverlay(false);
-            setIncomingCall(null);
-          } else {
-            // We got answer from native UI before realtime subscription
-            // Store the call UUID and handle when we get call data
-            pendingCallKeepAnswerRef.current = callUUID;
+          let callToUse = incomingCall;
+          let callerToUse = null;
 
-            // Try to fetch the call
+          // If we don't have call info yet, fetch it
+          if (!callToUse || callToUse.id !== callUUID) {
+            console.log('[CallProvider] Fetching call info for CallKeep answer...');
             const { call } = await callService.getCall(callUUID);
             if (call) {
-              const caller = call.caller;
-              navigateToCallScreen(call, caller);
+              callToUse = call;
+            } else {
+              console.error('[CallProvider] Could not fetch call for CallKeep answer');
+              return;
             }
           }
+
+          // Get caller info
+          callerToUse = callToUse.caller || callToUse.call_participants?.find(
+            p => p.user_id !== user?.id
+          )?.profiles || { id: callToUse.caller_id, display_name: 'Người gọi' };
+
+          // Determine screen based on call type - SKIP IncomingCallScreen
+          const isVideoCall = callToUse.call_type === 'video';
+          const screenName = isVideoCall ? 'VideoCall' : 'InCall';
+
+          console.log('[CallProvider] CallKeep navigating directly to:', screenName);
+
+          // Navigate directly to InCall/VideoCall since user already answered
+          const navReady = navigationRef.current &&
+            (typeof navigationRef.current.isReady === 'function'
+              ? navigationRef.current.isReady()
+              : true);
+
+          if (navReady) {
+            navigationRef.current.navigate('Call', {
+              screen: screenName,
+              params: {
+                call: callToUse,
+                caller: callerToUse,
+                isCaller: false,
+                answeredFromCallKeep: true, // Flag to auto-initialize
+              },
+            });
+          }
+
+          setShowOverlay(false);
+          setIncomingCall(null);
         });
 
         // Handle end/decline from native CallKeep UI
@@ -387,6 +496,9 @@ export function CallProvider({ children }) {
 
   // ========== APP STATE HANDLING ==========
 
+  // Track time when app goes to background for subscription refresh
+  const backgroundTimeRef = useRef(null);
+
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       // When app goes to background during incoming call
@@ -401,16 +513,62 @@ export function CallProvider({ children }) {
         }
       }
 
-      // When app comes to foreground with incoming call
+      // Track when app goes to background
+      if (
+        appStateRef.current === 'active' &&
+        nextAppState.match(/inactive|background/)
+      ) {
+        backgroundTimeRef.current = Date.now();
+        console.log('[CallProvider] App going to background');
+      }
+
+      // When app comes to foreground
       if (
         appStateRef.current.match(/inactive|background/) &&
-        nextAppState === 'active' &&
-        incomingCall
+        nextAppState === 'active'
       ) {
-        // Resume ringtone
-        if (ringtoneRef.current) {
+        console.log('[CallProvider] App coming to foreground');
+
+        // Resume ringtone if incoming call
+        if (incomingCall && ringtoneRef.current) {
           await ringtoneRef.current.playAsync();
         }
+
+        // CRITICAL: Refresh subscription if app was in background for more than 5 seconds
+        // This fixes one-sided connection issue after app is idle
+        // Reduced from 30s to 5s because Supabase Realtime can become stale quickly
+        const backgroundDuration = backgroundTimeRef.current
+          ? Date.now() - backgroundTimeRef.current
+          : 0;
+
+        if (backgroundDuration > 5000 && user?.id && subscriptionRef.current) {
+          console.log('[CallProvider] App was in background for', Math.round(backgroundDuration / 1000), 's - refreshing subscription');
+
+          // Unsubscribe old channel
+          if (typeof subscriptionRef.current === 'function') {
+            subscriptionRef.current();
+          }
+          subscriptionRef.current = null;
+
+          // Re-subscribe with fresh channel
+          const newUnsubscribe = callService.subscribeToIncomingCalls(
+            user.id,
+            (call) => handleIncomingCall(call),
+            (info) => {
+              if (info.type === 'subscription') {
+                setDebugInfo(prev => ({
+                  ...prev,
+                  subscriptionStatus: info.status,
+                  lastStatusTime: info.timestamp,
+                }));
+              }
+            }
+          );
+          subscriptionRef.current = newUnsubscribe;
+          console.log('[CallProvider] Subscription refreshed successfully');
+        }
+
+        backgroundTimeRef.current = null;
       }
 
       appStateRef.current = nextAppState;
@@ -419,7 +577,50 @@ export function CallProvider({ children }) {
     return () => {
       subscription?.remove();
     };
-  }, [incomingCall]);
+  }, [incomingCall, user?.id, handleIncomingCall]);
+
+  // ========== MONITOR INCOMING CALL STATUS ==========
+  // Check if call still exists in database (handles cleanup/delete)
+
+  useEffect(() => {
+    if (!incomingCall) return;
+
+    const checkCallStatus = async () => {
+      try {
+        const { call } = await callService.getCall(incomingCall.id);
+
+        // Call no longer exists (was cleaned up or deleted)
+        if (!call) {
+          console.log('[CallProvider] Call no longer exists, stopping ringtone');
+          await stopRingtone();
+          setShowOverlay(false);
+          setIncomingCall(null);
+          return;
+        }
+
+        // Call ended or was declined/cancelled
+        if (['ended', 'declined', 'cancelled', 'missed'].includes(call.status)) {
+          console.log('[CallProvider] Call ended/cancelled:', call.status);
+          await stopRingtone();
+          setShowOverlay(false);
+          setIncomingCall(null);
+        }
+      } catch (error) {
+        console.log('[CallProvider] Error checking call, stopping ringtone:', error);
+        await stopRingtone();
+        setShowOverlay(false);
+        setIncomingCall(null);
+      }
+    };
+
+    // Check immediately and then every 2 seconds
+    checkCallStatus();
+    const interval = setInterval(checkCallStatus, 2000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [incomingCall, stopRingtone]);
 
   // ========== CLEANUP ON UNMOUNT ==========
 
@@ -434,24 +635,50 @@ export function CallProvider({ children }) {
   const triggerIncomingCall = useCallback(async (callId) => {
     console.log('[CallProvider] Manually triggering incoming call:', callId);
     try {
-      // Fetch call info
-      const result = await callService.getCall(callId);
+      // Fetch call info with timeout
+      console.log('[CallProvider] Fetching call info...');
+
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('getCall timeout after 10s')), 10000)
+      );
+
+      const result = await Promise.race([
+        callService.getCall(callId),
+        timeoutPromise
+      ]);
+
       console.log('[CallProvider] getCall result:', result.success, result.call?.id, result.call?.status);
 
       if (!result.success || !result.call) {
         console.error('[CallProvider] Failed to get call:', result.error);
+        // Try to navigate anyway with minimal info
+        console.log('[CallProvider] Attempting navigation with minimal call info...');
+        const minimalCall = { id: callId, status: 'ringing', call_type: 'video' };
+        handleIncomingCall(minimalCall);
         return;
       }
 
       const call = result.call;
-      if (call.status === 'ringing' || call.status === 'initiating' || call.status === 'connecting') {
-        console.log('[CallProvider] Call is valid, showing overlay');
+      // Show incoming call screen for any active call status
+      // Don't be too strict - let the UI handle ended/declined calls gracefully
+      const endedStatuses = ['ended', 'declined', 'cancelled', 'missed', 'failed'];
+      if (!endedStatuses.includes(call.status)) {
+        console.log('[CallProvider] Call is valid (status:', call.status, '), showing overlay');
         handleIncomingCall(call);
       } else {
-        console.log('[CallProvider] Call not in ringing state:', call.status);
+        console.log('[CallProvider] Call already ended:', call.status, '- not showing incoming screen');
       }
     } catch (error) {
       console.error('[CallProvider] Error triggering incoming call:', error);
+      // Try to navigate anyway with minimal info
+      console.log('[CallProvider] Fallback: attempting navigation with minimal call info...');
+      try {
+        const minimalCall = { id: callId, status: 'ringing', call_type: 'video' };
+        handleIncomingCall(minimalCall);
+      } catch (navError) {
+        console.error('[CallProvider] Fallback navigation also failed:', navError);
+      }
     }
   }, [handleIncomingCall]);
 

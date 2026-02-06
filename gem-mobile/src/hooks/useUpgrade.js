@@ -77,6 +77,7 @@ export const useUpgrade = () => {
 
   /**
    * Navigate to upgrade screen
+   * UpgradeScreen is in AccountStack, so we need to navigate through Account tab
    */
   const navigateToUpgrade = useCallback((options = {}) => {
     const {
@@ -85,10 +86,14 @@ export const useUpgrade = () => {
       source = 'unknown',
     } = options;
 
-    navigation.navigate('UpgradeScreen', {
-      tierType,
-      requiredLevel,
-      source,
+    // Navigate to Account tab -> UpgradeScreen (nested navigator)
+    navigation.navigate('Account', {
+      screen: 'UpgradeScreen',
+      params: {
+        tierType,
+        requiredLevel,
+        source,
+      },
     });
   }, [navigation]);
 

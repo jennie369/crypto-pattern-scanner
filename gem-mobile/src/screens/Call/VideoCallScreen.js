@@ -25,7 +25,6 @@ import {
   VideoControls,
   MinimizedCallView,
 } from '../../components/Call';
-import { CustomAlert } from '../../components/Common';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CONTROLS_HIDE_DELAY = 4000; // Auto-hide controls after 4 seconds
@@ -39,12 +38,15 @@ const CONTROLS_HIDE_DELAY = 4000; // Auto-hide controls after 4 seconds
  * @param {boolean} props.route.params.isCaller - Whether current user is caller
  */
 const VideoCallScreen = ({ route, navigation }) => {
-  const { call, callee, caller, isCaller } = route.params || {};
+  const { call, callee, caller, isCaller, answeredFromCallKeep } = route.params || {};
   const otherUser = isCaller ? callee : caller;
+
+  // If answered from CallKeep (native iOS CallKit), auto-initialize
+  // since user already pressed Accept in native UI
+  const shouldAutoInit = isCaller || answeredFromCallKeep;
 
   // ========== STATE ==========
   const [showControls, setShowControls] = useState(true);
-  const [showEndConfirm, setShowEndConfirm] = useState(false);
   const controlsTimeoutRef = useRef(null);
 
   // ========== HOOKS ==========
@@ -72,6 +74,7 @@ const VideoCallScreen = ({ route, navigation }) => {
   } = useVideoCall({
     call,
     isCaller,
+    autoInitialize: shouldAutoInit, // Auto-init for caller or when answered from CallKeep
     onCallEnded: (reason) => {
       navigation.replace('CallEnded', {
         call,
@@ -96,19 +99,19 @@ const VideoCallScreen = ({ route, navigation }) => {
     return () => StatusBar.setHidden(false);
   }, []);
 
-  // Handle back button
+  // Handle back button - end call directly without confirmation
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       if (isMinimized) {
         maximize();
         return true;
       }
-      setShowEndConfirm(true);
+      handleEndCall();
       return true;
     });
 
     return () => backHandler.remove();
-  }, [isMinimized, maximize]);
+  }, [isMinimized, maximize, handleEndCall]);
 
   // Auto-hide controls
   useEffect(() => {
@@ -144,11 +147,6 @@ const VideoCallScreen = ({ route, navigation }) => {
   const handleEndCall = useCallback(async () => {
     await endCall();
   }, [endCall]);
-
-  const confirmEndCall = useCallback(() => {
-    setShowEndConfirm(false);
-    handleEndCall();
-  }, [handleEndCall]);
 
   const handleMinimize = useCallback(() => {
     minimize();
@@ -209,7 +207,7 @@ const VideoCallScreen = ({ route, navigation }) => {
           onToggleVideo={toggleLocalVideo}
           onToggleSpeaker={toggleSpeaker}
           onSwitchCamera={isLocalVideoEnabled ? switchCamera : undefined}
-          onEndCall={() => setShowEndConfirm(true)}
+          onEndCall={handleEndCall}
           onMinimize={handleMinimize}
           visible={showControls}
         />
@@ -222,26 +220,6 @@ const VideoCallScreen = ({ route, navigation }) => {
             </View>
           </View>
         )}
-
-        {/* End Call Confirmation */}
-        <CustomAlert
-          visible={showEndConfirm}
-          title="Kết thúc cuộc gọi?"
-          message="Bạn có chắc muốn kết thúc cuộc gọi video này?"
-          buttons={[
-            {
-              text: 'Hủy',
-              style: 'cancel',
-              onPress: () => setShowEndConfirm(false),
-            },
-            {
-              text: 'Kết thúc',
-              style: 'destructive',
-              onPress: confirmEndCall,
-            },
-          ]}
-          onClose={() => setShowEndConfirm(false)}
-        />
       </View>
     </TouchableWithoutFeedback>
   );
