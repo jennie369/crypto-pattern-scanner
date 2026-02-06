@@ -249,7 +249,7 @@ export const partnershipService = {
           applicant_id: userId,
           screen: 'AdminApplications',
         }),
-        read: false,
+        is_read: false, // forum_notifications uses is_read, not read
       }));
 
       // Insert into forum_notifications (same table used by NotificationsScreen)
