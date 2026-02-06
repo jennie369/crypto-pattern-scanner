@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "dev:watch": "node scripts/watch-and-fix.js",
-    "build": "vite build",
+    "build": "vite build && cp dist/index.html dist/200.html",
     "lint": "eslint .",
     "preview": "vite preview"
   },
