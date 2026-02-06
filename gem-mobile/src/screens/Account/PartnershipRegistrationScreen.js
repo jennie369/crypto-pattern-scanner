@@ -11,37 +11,23 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, HelpCircle, Clock, Info } from 'lucide-react-native';
+import { ArrowLeft, HelpCircle, Clock } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../services/supabase';
 import partnershipService from '../../services/partnershipService';
 import kolVerificationService from '../../services/kolVerificationService';
+import DarkAlertModal from '../../components/Common/DarkAlertModal';
 
 import {
   PartnershipTypeSelector,
   CTVRegistrationForm,
   KOLRegistrationForm,
 } from '../../components/Partnership';
-
-/**
- * Format time remaining until auto-approve
- */
-const formatTimeRemaining = (autoApproveAt) => {
-  if (!autoApproveAt) return '3 ngày';
-  const remaining = new Date(autoApproveAt) - new Date();
-  if (remaining <= 0) return 'sắp được duyệt';
-  const hours = Math.floor(remaining / (1000 * 60 * 60));
-  if (hours < 1) return 'dưới 1 giờ';
-  if (hours < 24) return `${hours} giờ`;
-  const days = Math.floor(hours / 24);
-  return `${days} ngày ${hours % 24} giờ`;
-};
 
 export default function PartnershipRegistrationScreen({ route, navigation }) {
   const { type: preSelectedType, fromGemMaster = false } = route.params || {};
@@ -54,6 +40,23 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
   const [isCTV, setIsCTV] = useState(false);
   const [ctvTier, setCtvTier] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+
+  // Alert modal state
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    type: 'success',
+    title: '',
+    message: '',
+    buttons: [],
+  });
+
+  const showAlert = useCallback((type, title, message, buttons = [{ text: 'OK' }]) => {
+    setAlertConfig({ visible: true, type, title, message, buttons });
+  }, []);
+
+  const hideAlert = useCallback(() => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  }, []);
 
   // Load initial data
   useEffect(() => {
@@ -93,7 +96,7 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
       }
     } catch (err) {
       console.error('Load error:', err);
-      Alert.alert('Lỗi', 'Không thể tải dữ liệu');
+      showAlert('error', 'Lỗi', 'Không thể tải dữ liệu');
     } finally {
       setLoading(false);
     }
@@ -122,8 +125,9 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
       console.log('[Partnership] CTV submit result:', result);
 
       if (result.success) {
-        Alert.alert(
-          '🎉 Đăng ký thành công!',
+        showAlert(
+          'success',
+          'Đăng ký thành công!',
           'Đơn đăng ký CTV của bạn sẽ được xem xét trong vòng 3 ngày.',
           [
             {
@@ -139,14 +143,13 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
           ]
         );
       } else {
-        // Show error in alert if submit fails
-        Alert.alert('Lỗi', result.error || 'Không thể gửi đơn đăng ký. Vui lòng thử lại.');
+        showAlert('error', 'Lỗi', result.error || 'Không thể gửi đơn đăng ký. Vui lòng thử lại.');
       }
 
       return result;
     } catch (err) {
       console.error('[Partnership] CTV submit error:', err);
-      Alert.alert('Lỗi', err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+      showAlert('error', 'Lỗi', err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
       return { success: false, error: err.message };
     }
   };
@@ -159,8 +162,9 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
       console.log('[Partnership] KOL submit result:', result);
 
       if (result.success) {
-        Alert.alert(
-          '📝 Đã gửi đơn đăng ký',
+        showAlert(
+          'success',
+          'Đã gửi đơn đăng ký',
           'Đơn đăng ký KOL của bạn đang được xem xét. Chúng tôi sẽ thông báo khi có kết quả.',
           [
             {
@@ -176,14 +180,13 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
           ]
         );
       } else {
-        // Show error in alert if submit fails
-        Alert.alert('Lỗi', result.error || 'Không thể gửi đơn đăng ký. Vui lòng thử lại.');
+        showAlert('error', 'Lỗi', result.error || 'Không thể gửi đơn đăng ký. Vui lòng thử lại.');
       }
 
       return result;
     } catch (err) {
       console.error('[Partnership] KOL submit error:', err);
-      Alert.alert('Lỗi', err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+      showAlert('error', 'Lỗi', err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
       return { success: false, error: err.message };
     }
   };
@@ -241,18 +244,11 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
               Loại: {existingApplication.application_type === 'ctv' ? 'CTV Đối Tác Phát Triển' : 'KOL Affiliate'}
             </Text>
 
-            {existingApplication.application_type === 'ctv' ? (
-              <View style={styles.autoApproveBox}>
-                <Info size={20} color={COLORS.gold} />
-                <Text style={styles.autoApproveText}>
-                  Tự động duyệt sau: {formatTimeRemaining(existingApplication.auto_approve_at)}
-                </Text>
-              </View>
-            ) : (
-              <Text style={styles.pendingMessage}>
-                Đơn đăng ký KOL đang được Admin xem xét. Bạn sẽ nhận thông báo khi có kết quả.
-              </Text>
-            )}
+            <Text style={styles.pendingMessage}>
+              {existingApplication.application_type === 'ctv'
+                ? 'Đơn đăng ký CTV đang được xem xét. Bạn sẽ nhận thông báo khi có kết quả.'
+                : 'Đơn đăng ký KOL đang được xem xét. Bạn sẽ nhận thông báo khi có kết quả.'}
+            </Text>
 
             <TouchableOpacity
               style={styles.viewStatusButton}
@@ -306,6 +302,16 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
             onSubmit={handleKOLSubmit}
           />
         )}
+
+        {/* Dark Theme Alert Modal */}
+        <DarkAlertModal
+          visible={alertConfig.visible}
+          onClose={hideAlert}
+          type={alertConfig.type}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          buttons={alertConfig.buttons}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -388,20 +394,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: SPACING.lg,
     lineHeight: 22,
-  },
-  autoApproveBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    padding: SPACING.md,
-    borderRadius: 12,
-    marginBottom: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  autoApproveText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.gold,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
   viewStatusButton: {
     backgroundColor: COLORS.gold,
