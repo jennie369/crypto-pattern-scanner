@@ -656,7 +656,7 @@ export const partnershipService = {
         email: data.email,
         phone: data.phone,
         application_type: 'ctv',
-        referred_by_code: data.referral_code || null,
+        marketing_channels: data.referral_code || null, // Store referral code in marketing_channels
         reason_for_joining: data.reason || null,
         status: 'pending',
         // auto_approve_at will be set by database trigger
