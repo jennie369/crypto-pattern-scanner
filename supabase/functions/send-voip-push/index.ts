@@ -444,11 +444,17 @@ async function sendFCMHighPriority(
         const projectId = serviceAccount.project_id;
 
         // FCM v1 API with fullscreen intent for calls
+        // IMPORTANT: Must have notification block at root level for system notification
+        // when app is killed/background. android.notification is just for Android-specific options.
         const fcmMessage = {
           message: {
             token: token,
-            // Data-only message for calls (no notification block)
-            // This ensures the app handles it and shows fullscreen call UI
+            // Notification block - shows system notification when app is background/killed
+            notification: {
+              title: 'Cuộc gọi đến',
+              body: `${payload.callerName} đang gọi cho bạn`,
+            },
+            // Data block - for app to handle when in foreground
             data: {
               type: 'incoming_call',
               callId: payload.callId,
@@ -458,22 +464,21 @@ async function sendFCMHighPriority(
               conversationId: payload.conversationId || '',
               callerAvatar: payload.callerAvatar || '',
               timestamp: Date.now().toString(),
-              // Flag to show fullscreen UI
               fullscreen: 'true',
             },
             android: {
               priority: 'HIGH',
               ttl: '60s',
-              // Direct boot aware - delivered before first unlock
               direct_boot_ok: true,
-              // IMPORTANT: For fullscreen call UI on Android
+              // Android-specific notification OPTIONS (not content)
               notification: {
                 channel_id: 'incoming_call',
                 sound: 'ringtone',
-                // Default visibility shows on lock screen
                 visibility: 'PUBLIC',
-                // Use call category for special handling
                 notification_priority: 'PRIORITY_MAX',
+                // Show as fullscreen intent on lock screen
+                default_vibrate_timings: false,
+                vibrate_timings: ['0s', '0.5s', '0.2s', '0.5s'],
               },
             },
           },
@@ -513,11 +518,19 @@ async function sendFCMHighPriority(
       return sendExpoPush(token, payload);
     }
 
-    // Legacy FCM API
+    // Legacy FCM API - include notification block for background/killed app
     const fcmPayload = {
       to: token,
       priority: 'high',
       time_to_live: 60,
+      // Notification shows when app is background/killed
+      notification: {
+        title: 'Cuộc gọi đến',
+        body: `${payload.callerName} đang gọi cho bạn`,
+        sound: 'default',
+        android_channel_id: 'incoming_call',
+      },
+      // Data for app to handle in foreground
       data: {
         type: 'incoming_call',
         callId: payload.callId,

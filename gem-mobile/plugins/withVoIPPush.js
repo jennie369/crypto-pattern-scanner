@@ -133,29 +133,12 @@ function withVoIPPush(config) {
         }
       }
 
-      // Add VoIP registration in didFinishLaunchingWithOptions if not present
-      if (!contents.includes('PKPushRegistry') || !contents.includes('voipRegistry')) {
-        const didFinishRegex =
-          /(-\s*\(BOOL\)application:.*didFinishLaunchingWithOptions:.*\{)/;
-        const match = contents.match(didFinishRegex);
-
-        if (match) {
-          const insertPosition = match.index + match[0].length;
-          const voipRegistration = `
-  // Register for VoIP push notifications
-  PKPushRegistry *voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
-  voipRegistry.delegate = self;
-  voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
-`;
-          // Only add if not already present
-          if (!contents.includes('voipRegistry')) {
-            contents =
-              contents.slice(0, insertPosition) +
-              voipRegistration +
-              contents.slice(insertPosition);
-          }
-        }
-      }
+      // NOTE: Do NOT register PKPushRegistry here in AppDelegate!
+      // The JS module (react-native-voip-push-notification) will create PKPushRegistry
+      // when registerVoipToken() is called. Creating it here causes double registration
+      // and the token may be received before JS listeners are ready.
+      // The delegate methods above will still be called because the JS module
+      // sets AppDelegate as the delegate when it creates PKPushRegistry.
     }
     // Swift support would go here if needed
 

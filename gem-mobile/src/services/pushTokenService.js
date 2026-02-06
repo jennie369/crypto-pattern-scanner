@@ -75,14 +75,31 @@ const PUSH_TOKEN_SERVICE = {
       }
 
       // Get push token
-      const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
+      // For Android: Use native FCM token so we can send via FCM V1 API directly
+      // For iOS: Use Expo token (VoIP uses PushKit separately)
+      let token;
 
-      const tokenData = await Notifications.getExpoPushTokenAsync({
-        projectId,
-      });
-
-      const token = tokenData.data;
-      console.log('[PushToken] Token obtained:', token?.substring(0, 30) + '...');
+      if (Platform.OS === 'android') {
+        // Get native FCM token for Android
+        // This allows our Edge Function to use FCM V1 API directly (bypassing Expo Push)
+        try {
+          const deviceToken = await Notifications.getDevicePushTokenAsync();
+          token = deviceToken.data;
+          console.log('[PushToken] Android native FCM token obtained:', token?.substring(0, 30) + '...');
+        } catch (fcmErr) {
+          console.log('[PushToken] Failed to get native FCM token, falling back to Expo:', fcmErr?.message);
+          // Fallback to Expo token
+          const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
+          const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+          token = tokenData.data;
+        }
+      } else {
+        // iOS - use Expo token for regular push
+        const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
+        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+        token = tokenData.data;
+        console.log('[PushToken] iOS Expo token obtained:', token?.substring(0, 30) + '...');
+      }
 
       // Save to database
       await this.savePushToken(token);
