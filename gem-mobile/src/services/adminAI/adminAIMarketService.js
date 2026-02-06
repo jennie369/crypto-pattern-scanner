@@ -36,6 +36,12 @@ class AdminAIMarketService {
     this.wsSubscriptions = new Map();
     this.priceCache = new Map();
     this.lastUpdate = null;
+
+    // API response caching to reduce API calls
+    this.tickerCache = new Map();
+    this.candleCache = new Map();
+    this.TICKER_CACHE_DURATION = 30000; // 30 seconds
+    this.CANDLE_CACHE_DURATION = 60000; // 60 seconds
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -50,33 +56,47 @@ class AdminAIMarketService {
    */
   async getMarketSnapshot(symbol, timeframe = '4h') {
     try {
-      // Get 24h ticker data
-      const ticker = await this._fetch24hTicker(symbol);
+      // Get 24h ticker data and candles in parallel
+      const [ticker, candles] = await Promise.all([
+        this._fetch24hTicker(symbol).catch((err) => {
+          // Only log once per 30 seconds to reduce spam
+          if (!this._lastTickerError || Date.now() - this._lastTickerError > 30000) {
+            console.warn('[AdminAIMarket] Ticker unavailable:', err.message);
+            this._lastTickerError = Date.now();
+          }
+          return null;
+        }),
+        this.getRecentCandles(symbol, timeframe, 50),
+      ]);
 
-      // Get recent candles for trend analysis
-      const candles = await this.getRecentCandles(symbol, timeframe, 50);
-
-      // Calculate trend
+      // Calculate trend from candles (even if ticker failed)
       const trend = this._calculateTrend(candles);
 
       // Calculate basic indicators
       const indicators = this.calculateIndicators(candles);
 
-      return {
+      // Build snapshot with available data
+      const snapshot = {
         symbol,
         timeframe,
-        price: parseFloat(ticker.lastPrice),
-        change24h: parseFloat(ticker.priceChangePercent),
-        high24h: parseFloat(ticker.highPrice),
-        low24h: parseFloat(ticker.lowPrice),
-        volume24h: parseFloat(ticker.volume),
-        quoteVolume24h: parseFloat(ticker.quoteVolume),
+        price: ticker ? parseFloat(ticker.lastPrice) : (candles.length > 0 ? candles[candles.length - 1].close : null),
+        change24h: ticker ? parseFloat(ticker.priceChangePercent) : null,
+        high24h: ticker ? parseFloat(ticker.highPrice) : null,
+        low24h: ticker ? parseFloat(ticker.lowPrice) : null,
+        volume24h: ticker ? parseFloat(ticker.volume) : null,
+        quoteVolume24h: ticker ? parseFloat(ticker.quoteVolume) : null,
         trend,
         indicators,
         timestamp: Date.now(),
       };
+
+      return snapshot;
     } catch (error) {
-      console.error('[AdminAIMarket] getMarketSnapshot error:', error);
+      // Only log once per 30 seconds
+      if (!this._lastSnapshotError || Date.now() - this._lastSnapshotError > 30000) {
+        console.warn('[AdminAIMarket] getMarketSnapshot error:', error.message);
+        this._lastSnapshotError = Date.now();
+      }
       return {
         symbol,
         timeframe,
@@ -90,13 +110,40 @@ class AdminAIMarketService {
   }
 
   /**
-   * Fetch 24h ticker data from Binance
+   * Fetch 24h ticker data from Binance with caching
    * @private
    */
   async _fetch24hTicker(symbol) {
-    const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`);
-    if (!response.ok) throw new Error('Failed to fetch ticker');
-    return response.json();
+    // Check cache first
+    const cacheKey = `ticker_${symbol}`;
+    const cached = this.tickerCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.TICKER_CACHE_DURATION) {
+      return cached.data;
+    }
+
+    try {
+      const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`, {
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ticker API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Cache the result
+      this.tickerCache.set(cacheKey, { data, timestamp: Date.now() });
+
+      return data;
+    } catch (error) {
+      // Return cached data if available (even if expired)
+      if (cached) {
+        console.log('[AdminAIMarket] Using stale ticker cache due to error');
+        return cached.data;
+      }
+      throw error;
+    }
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -104,23 +151,33 @@ class AdminAIMarketService {
   // ═══════════════════════════════════════════════════════════
 
   /**
-   * Get recent candles for analysis
+   * Get recent candles for analysis with caching
    * @param {string} symbol - Trading pair
    * @param {string} timeframe - Candle timeframe
    * @param {number} count - Number of candles
    * @returns {Promise<Array>} Array of candle objects
    */
   async getRecentCandles(symbol, timeframe = '4h', count = 20) {
+    // Check cache first
+    const cacheKey = `candles_${symbol}_${timeframe}_${count}`;
+    const cached = this.candleCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CANDLE_CACHE_DURATION) {
+      return cached.data;
+    }
+
     try {
       const response = await fetch(
-        `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${timeframe}&limit=${count}`
+        `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${timeframe}&limit=${count}`,
+        { headers: { 'Accept': 'application/json' } }
       );
 
-      if (!response.ok) throw new Error('Failed to fetch candles');
+      if (!response.ok) {
+        throw new Error(`Candles API error: ${response.status}`);
+      }
 
       const data = await response.json();
 
-      return data.map((candle) => ({
+      const candles = data.map((candle) => ({
         time: candle[0],
         open: parseFloat(candle[1]),
         high: parseFloat(candle[2]),
@@ -131,7 +188,17 @@ class AdminAIMarketService {
         quoteVolume: parseFloat(candle[7]),
         trades: candle[8],
       }));
+
+      // Cache the result
+      this.candleCache.set(cacheKey, { data: candles, timestamp: Date.now() });
+
+      return candles;
     } catch (error) {
+      // Return cached data if available (even if expired)
+      if (cached) {
+        console.log('[AdminAIMarket] Using stale candle cache due to error');
+        return cached.data;
+      }
       console.error('[AdminAIMarket] getRecentCandles error:', error);
       return [];
     }
@@ -506,7 +573,7 @@ class AdminAIMarketService {
   }
 
   /**
-   * Cleanup all subscriptions
+   * Cleanup all subscriptions and caches
    */
   cleanup() {
     for (const [symbol, ws] of this.wsSubscriptions) {
@@ -516,6 +583,29 @@ class AdminAIMarketService {
     }
     this.wsSubscriptions.clear();
     this.priceCache.clear();
+    this.tickerCache.clear();
+    this.candleCache.clear();
+  }
+
+  /**
+   * Clear expired cache entries to prevent memory buildup
+   */
+  clearExpiredCache() {
+    const now = Date.now();
+
+    // Clear expired ticker cache
+    for (const [key, value] of this.tickerCache) {
+      if (now - value.timestamp > this.TICKER_CACHE_DURATION * 2) {
+        this.tickerCache.delete(key);
+      }
+    }
+
+    // Clear expired candle cache
+    for (const [key, value] of this.candleCache) {
+      if (now - value.timestamp > this.CANDLE_CACHE_DURATION * 2) {
+        this.candleCache.delete(key);
+      }
+    }
   }
 }
 
