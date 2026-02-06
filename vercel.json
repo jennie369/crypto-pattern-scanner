@@ -1,23 +1,17 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "cd frontend && npm install --legacy-peer-deps",
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/scanner-v2", "destination": "/index.html" },
-    { "source": "/admin", "destination": "/index.html" },
-    { "source": "/admin/(.*)", "destination": "/index.html" },
-    { "source": "/courses", "destination": "/index.html" },
-    { "source": "/courses/(.*)", "destination": "/index.html" },
-    { "source": "/pricing", "destination": "/index.html" },
-    { "source": "/login", "destination": "/index.html" },
-    { "source": "/signup", "destination": "/index.html" },
-    { "source": "/forgot-password", "destination": "/index.html" },
-    { "source": "/reset-password", "destination": "/index.html" },
-    { "source": "/shop", "destination": "/index.html" },
-    { "source": "/shop/(.*)", "destination": "/index.html" },
-    { "source": "/checkout/(.*)", "destination": "/index.html" },
-    { "source": "/dashboard/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/images/(.*)", "dest": "/images/$1" },
+    { "src": "/(.*)\\.js", "dest": "/$1.js" },
+    { "src": "/(.*)\\.css", "dest": "/$1.css" },
+    { "src": "/(.*)\\.svg", "dest": "/$1.svg" },
+    { "src": "/(.*)\\.png", "dest": "/$1.png" },
+    { "src": "/(.*)\\.jpg", "dest": "/$1.jpg" },
+    { "src": "/(.*)\\.ico", "dest": "/$1.ico" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
