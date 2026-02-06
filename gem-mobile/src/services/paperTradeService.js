@@ -808,8 +808,12 @@ class PaperTradeService {
         zone_low: pattern.zone_low || pattern.zoneLow,
         zoneHigh: pattern.zoneHigh || pattern.zone_high,
         zoneLow: pattern.zoneLow || pattern.zone_low,
-        start_time: pattern.start_time || pattern.startTime,
+        start_time: pattern.start_time || pattern.startTime || pattern.formation_time || pattern.formationTime,
+        startTime: pattern.startTime || pattern.start_time || pattern.formationTime || pattern.formation_time,
+        formation_time: pattern.formation_time || pattern.formationTime || pattern.start_time || pattern.startTime,
+        formationTime: pattern.formationTime || pattern.formation_time || pattern.startTime || pattern.start_time,
         end_time: pattern.end_time || pattern.endTime,
+        endTime: pattern.endTime || pattern.end_time,
         // Pattern ID for linking
         pattern_id: pattern.pattern_id || pattern.id,
         // Chart data for labels/lines

@@ -841,8 +841,13 @@ const ScannerScreen = ({ navigation }) => {
           zone_low: matchingZone.zone_low,
           zoneHigh: matchingZone.zone_high,
           zoneLow: matchingZone.zone_low,
-          start_time: matchingZone.start_time,
-          end_time: matchingZone.end_time,
+          // ✅ FIX: Add ALL time variants for zone positioning
+          start_time: matchingZone.start_time || matchingZone.startTime,
+          startTime: matchingZone.startTime || matchingZone.start_time,
+          end_time: matchingZone.end_time || matchingZone.endTime,
+          endTime: matchingZone.endTime || matchingZone.end_time,
+          formation_time: matchingZone.formation_time || matchingZone.formationTime || matchingZone.start_time,
+          formationTime: matchingZone.formationTime || matchingZone.formation_time || matchingZone.startTime,
           // Also ensure entry/SL/TP from zone are available
           entry_price: matchingZone.entry_price || enrichedPattern.entry,
           stop_loss: matchingZone.stop_loss || enrichedPattern.stopLoss,
@@ -883,11 +888,26 @@ const ScannerScreen = ({ navigation }) => {
       }
     }
 
+    // ✅ FIX: Ensure all time variants exist for zone positioning in chart
+    // Even if no matching zone, preserve original pattern's timestamps
+    const patternStartTime = enrichedPattern.start_time || enrichedPattern.startTime ||
+                             enrichedPattern.formation_time || enrichedPattern.formationTime ||
+                             pattern.start_time || pattern.startTime ||
+                             pattern.formation_time || pattern.formationTime;
+    if (patternStartTime) {
+      enrichedPattern.start_time = patternStartTime;
+      enrichedPattern.startTime = patternStartTime;
+      enrichedPattern.formation_time = patternStartTime;
+      enrichedPattern.formationTime = patternStartTime;
+    }
+
     console.log('[PaperTrade] Enriched pattern zone data:', {
       zone_high: enrichedPattern.zone_high,
       zone_low: enrichedPattern.zone_low,
       start_time: enrichedPattern.start_time,
+      formation_time: enrichedPattern.formation_time,
       end_time: enrichedPattern.end_time,
+      timeframe: enrichedPattern.timeframe,
     });
 
     setSelectedPattern(enrichedPattern);
@@ -1490,19 +1510,28 @@ const ScannerScreen = ({ navigation }) => {
                 refreshTrigger={positionsRefreshTrigger}
                 onViewAllPress={handleViewOpenPositions}
                 onViewChart={(symbol, position) => {
+                  const pd = position?.patternData || {};
+                  // Get pattern's original timeframe to ensure chart shows correct data range
+                  const patternTimeframe = pd.timeframe || position?.timeframe || selectedTimeframe;
                   console.log('[ZONE] onViewChart called:', {
                     symbol,
                     positionId: position?.id,
                     entryPrice: position?.entryPrice,
                     stopLoss: position?.stopLoss,
                     direction: position?.direction,
-                    patternDataKeys: position?.patternData ? Object.keys(position.patternData) : [],
+                    patternTimeframe,
+                    patternDataKeys: pd ? Object.keys(pd) : [],
                   });
                   // Set all states together - React will batch them
                   setSelectedCoins([symbol]);
                   setSelectedPosition(position || null);
                   setShowPositionZone(true); // Auto-show zone when position selected
                   setZoneViewSource('position'); // Mark source as position
+                  // ✅ FIX: Set timeframe to pattern's original timeframe
+                  // This ensures chart loads correct data range containing formation_time
+                  if (patternTimeframe) {
+                    setSelectedTimeframe(patternTimeframe);
+                  }
                 }}
                 onPositionClose={() => {
                   setPositionsRefreshTrigger(prev => prev + 1);
@@ -1558,19 +1587,28 @@ const ScannerScreen = ({ navigation }) => {
                 refreshTrigger={positionsRefreshTrigger}
                 onViewAllPress={handleViewOpenPositions}
                 onViewChart={(symbol, position) => {
+                  const pd = position?.patternData || {};
+                  // Get pattern's original timeframe to ensure chart shows correct data range
+                  const patternTimeframe = pd.timeframe || position?.timeframe || selectedTimeframe;
                   console.log('[ZONE] onViewChart called:', {
                     symbol,
                     positionId: position?.id,
                     entryPrice: position?.entryPrice,
                     stopLoss: position?.stopLoss,
                     direction: position?.direction,
-                    patternDataKeys: position?.patternData ? Object.keys(position.patternData) : [],
+                    patternTimeframe,
+                    patternDataKeys: pd ? Object.keys(pd) : [],
                   });
                   // Set all states together - React will batch them
                   setSelectedCoins([symbol]);
                   setSelectedPosition(position || null);
                   setShowPositionZone(true); // Auto-show zone when position selected
                   setZoneViewSource('position'); // Mark source as position
+                  // ✅ FIX: Set timeframe to pattern's original timeframe
+                  // This ensures chart loads correct data range containing formation_time
+                  if (patternTimeframe) {
+                    setSelectedTimeframe(patternTimeframe);
+                  }
                 }}
                 onPositionClose={() => {
                   setPositionsRefreshTrigger(prev => prev + 1);
