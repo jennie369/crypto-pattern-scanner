@@ -51,6 +51,7 @@ const ChatHistoryScreen = ({ navigation, route }) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
+  const [hasCachedData, setHasCachedData] = useState(false);
 
   // Filter & Search state
   const [activeTab, setActiveTab] = useState('all');
@@ -59,13 +60,26 @@ const ChatHistoryScreen = ({ navigation, route }) => {
 
   const searchTimeoutRef = useRef(null);
 
-  // Get current user
+  // Get current user AND load cached data immediately
   useEffect(() => {
-    const getCurrentUser = async () => {
+    const initializeScreen = async () => {
+      // Get user first
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       setUser(currentUser);
+
+      if (currentUser) {
+        // Try to load cached data immediately (no search, first page)
+        const cached = await chatHistoryService.getCachedConversations(currentUser.id, false);
+        if (cached?.data?.conversations?.length > 0) {
+          setConversations(cached.data.conversations);
+          setHasMore(cached.data.hasMore);
+          setHasCachedData(true);
+          setIsLoading(false); // Hide loading immediately since we have cached data
+          console.log('[ChatHistory] Loaded from cache:', cached.data.conversations.length);
+        }
+      }
     };
-    getCurrentUser();
+    initializeScreen();
   }, []);
 
   // Debounce search
@@ -85,14 +99,17 @@ const ChatHistoryScreen = ({ navigation, route }) => {
     };
   }, [searchQuery]);
 
-  // Fetch conversations
-  const fetchConversations = useCallback(async (reset = false) => {
+  // Fetch conversations - supports background refresh without clearing existing data
+  const fetchConversations = useCallback(async (reset = false, silent = false) => {
     if (!user) return;
 
     const currentPage = reset ? 0 : page;
-    if (reset) {
-      setIsLoading(true);
-      setConversations([]);
+    if (reset && !silent) {
+      // Only show loading if we don't have cached data
+      if (!hasCachedData) {
+        setIsLoading(true);
+        setConversations([]);
+      }
       setPage(0);
     }
 
@@ -117,20 +134,43 @@ const ChatHistoryScreen = ({ navigation, route }) => {
         setConversations(prev => [...prev, ...result.conversations]);
       }
       setHasMore(result.hasMore);
+      setHasCachedData(false); // Fresh data loaded
     } catch (error) {
       console.error('[ChatHistory] Fetch error:', error);
-      alertService.error('Lỗi', 'Không thể tải lịch sử chat. Vui lòng thử lại.');
+      // Only show error if we don't have any data to display
+      if (conversations.length === 0) {
+        alertService.error('Lỗi', 'Không thể tải lịch sử chat. Vui lòng thử lại.');
+      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
       setIsLoadingMore(false);
     }
-  }, [user, page, activeTab, debouncedSearch]);
+  }, [user, page, activeTab, debouncedSearch, hasCachedData, conversations.length]);
 
-  // Initial load and when filters change
+  // Load cached data when switching tabs (before fetch)
+  useEffect(() => {
+    const loadCachedForTab = async () => {
+      if (!user || debouncedSearch) return;
+
+      const isArchived = activeTab === 'archived';
+      const cached = await chatHistoryService.getCachedConversations(user.id, isArchived);
+      if (cached?.data?.conversations?.length > 0) {
+        setConversations(cached.data.conversations);
+        setHasMore(cached.data.hasMore);
+        setHasCachedData(true);
+        setIsLoading(false);
+      }
+    };
+    loadCachedForTab();
+  }, [user, activeTab]);
+
+  // Fetch fresh data (after cached data is shown)
   useEffect(() => {
     if (user) {
-      fetchConversations(true);
+      // If we have cached data, do silent refresh in background
+      const shouldBeSilent = hasCachedData && !debouncedSearch;
+      fetchConversations(true, shouldBeSilent);
     }
   }, [user, activeTab, debouncedSearch]);
 
@@ -171,6 +211,8 @@ const ChatHistoryScreen = ({ navigation, route }) => {
     try {
       await chatHistoryService.deleteConversation(conversationId, user.id);
       setConversations(prev => prev.filter(c => c.id !== conversationId));
+      // Clear cache so next open gets fresh data
+      chatHistoryService.clearCache(user.id);
     } catch (error) {
       console.error('[ChatHistory] Delete error:', error);
       alertService.error('Lỗi', 'Không thể xóa cuộc trò chuyện. Vui lòng thử lại.');
@@ -189,6 +231,8 @@ const ChatHistoryScreen = ({ navigation, route }) => {
       }
       // Remove from current list
       setConversations(prev => prev.filter(c => c.id !== conversationId));
+      // Clear cache so next open gets fresh data
+      chatHistoryService.clearCache(user.id);
     } catch (error) {
       console.error('[ChatHistory] Archive error:', error);
       alertService.error('Lỗi', 'Không thể thực hiện. Vui lòng thử lại.');

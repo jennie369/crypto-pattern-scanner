@@ -5,12 +5,82 @@
  * - Create, save, load, delete conversations
  * - Auto-generate titles and previews
  * - Pagination support for history listing
+ * - Local caching with AsyncStorage for instant display
  */
 
 import { supabase } from './supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TABLE_NAME = 'chatbot_conversations';
 const PAGE_SIZE = 20;
+
+// Cache keys
+const CACHE_KEY_CONVERSATIONS = 'chat_history_conversations';
+const CACHE_KEY_ARCHIVED = 'chat_history_archived';
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
+// ═══════════════════════════════════════════════════════════
+// CACHE HELPERS
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Get cached conversations from AsyncStorage
+ * @param {string} userId - User ID
+ * @param {boolean} archived - Get archived cache
+ * @returns {Object|null} - Cached data or null
+ */
+const getCachedConversations = async (userId, archived = false) => {
+  try {
+    const key = archived ? `${CACHE_KEY_ARCHIVED}_${userId}` : `${CACHE_KEY_CONVERSATIONS}_${userId}`;
+    const cached = await AsyncStorage.getItem(key);
+    if (!cached) return null;
+
+    const { data, timestamp } = JSON.parse(cached);
+    // Check if cache is still valid
+    if (Date.now() - timestamp > CACHE_EXPIRY) {
+      // Cache expired, but still return it for instant display
+      // The caller will refresh in background
+      return { data, expired: true };
+    }
+    return { data, expired: false };
+  } catch (error) {
+    console.warn('[ChatHistory] Cache read error:', error);
+    return null;
+  }
+};
+
+/**
+ * Save conversations to AsyncStorage cache
+ * @param {string} userId - User ID
+ * @param {Object} data - Data to cache
+ * @param {boolean} archived - Save to archived cache
+ */
+const setCachedConversations = async (userId, data, archived = false) => {
+  try {
+    const key = archived ? `${CACHE_KEY_ARCHIVED}_${userId}` : `${CACHE_KEY_CONVERSATIONS}_${userId}`;
+    await AsyncStorage.setItem(key, JSON.stringify({
+      data,
+      timestamp: Date.now(),
+    }));
+  } catch (error) {
+    console.warn('[ChatHistory] Cache write error:', error);
+  }
+};
+
+/**
+ * Clear conversation cache for a user
+ * @param {string} userId - User ID
+ */
+const clearCache = async (userId) => {
+  try {
+    await AsyncStorage.multiRemove([
+      `${CACHE_KEY_CONVERSATIONS}_${userId}`,
+      `${CACHE_KEY_ARCHIVED}_${userId}`,
+    ]);
+  } catch (error) {
+    console.warn('[ChatHistory] Cache clear error:', error);
+  }
+};
 
 /**
  * Generate title from first user message
@@ -241,12 +311,19 @@ const getConversations = async (userId, options = {}) => {
 
     if (error) throw error;
 
-    console.log('[ChatHistory] Got conversations:', data?.length, 'total:', count);
-    return {
+    const result = {
       conversations: data || [],
       hasMore: (page + 1) * limit < (count || 0),
       totalCount: count || 0,
     };
+
+    // Cache first page results (no search query, not archived)
+    if (page === 0 && !searchQuery && !includeArchived) {
+      setCachedConversations(userId, result, false);
+    }
+
+    console.log('[ChatHistory] Got conversations:', data?.length, 'total:', count);
+    return result;
   } catch (error) {
     console.error('[ChatHistory] Get conversations error:', error);
     throw error;
@@ -261,9 +338,9 @@ const getConversations = async (userId, options = {}) => {
  */
 const getArchivedConversations = async (userId, options = {}) => {
   try {
-    const { page = 0, limit = PAGE_SIZE } = options;
+    const { page = 0, limit = PAGE_SIZE, searchQuery = '' } = options;
 
-    const { data, error, count } = await supabase
+    let query = supabase
       .from(TABLE_NAME)
       .select('id, title, preview, message_count, last_message_at, is_archived, started_at', { count: 'exact' })
       .eq('user_id', userId)
@@ -271,13 +348,28 @@ const getArchivedConversations = async (userId, options = {}) => {
       .order('last_message_at', { ascending: false })
       .range(page * limit, (page + 1) * limit - 1);
 
+    // Search in title and preview
+    if (searchQuery && searchQuery.trim()) {
+      const search = searchQuery.trim();
+      query = query.or(`title.ilike.%${search}%,preview.ilike.%${search}%`);
+    }
+
+    const { data, error, count } = await query;
+
     if (error) throw error;
 
-    return {
+    const result = {
       conversations: data || [],
       hasMore: (page + 1) * limit < (count || 0),
       totalCount: count || 0,
     };
+
+    // Cache first page results (no search query)
+    if (page === 0 && !searchQuery) {
+      setCachedConversations(userId, result, true);
+    }
+
+    return result;
   } catch (error) {
     console.error('[ChatHistory] Get archived error:', error);
     throw error;
@@ -436,4 +528,8 @@ export default {
   deleteAllConversations,
   generateTitle,
   generatePreview,
+  // Cache functions
+  getCachedConversations,
+  setCachedConversations,
+  clearCache,
 };
