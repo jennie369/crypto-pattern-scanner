@@ -179,7 +179,26 @@ export default function ChatScreen({ route, navigation }) {
         // Prepend older messages
         setMessages(prev => [...result.messages, ...prev]);
       } else {
-        setMessages(result.messages);
+        // CRITICAL FIX: Merge fetched messages with any real-time messages received during fetch
+        // This prevents race condition where optimistic/real-time messages get overwritten
+        setMessages(prev => {
+          // Get IDs of fetched messages
+          const fetchedIds = new Set(result.messages.map(m => m.id));
+
+          // Keep any messages that are:
+          // 1. Optimistic (temp-) messages not yet confirmed
+          // 2. Real-time messages not in fetched results (newer than fetch)
+          const newMessages = prev.filter(m =>
+            m.id.startsWith('temp-') || !fetchedIds.has(m.id)
+          );
+
+          // Merge: fetched messages + newer messages
+          // Sort by created_at to maintain order
+          const merged = [...result.messages, ...newMessages];
+          merged.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+          return merged;
+        });
       }
 
       setHasMore(result.hasMore);

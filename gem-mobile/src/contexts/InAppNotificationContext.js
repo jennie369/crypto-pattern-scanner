@@ -26,6 +26,9 @@ import { triggerIncomingCallFromPush } from './CallContext';
 
 const InAppNotificationContext = createContext(null);
 
+// Track call IDs that have been processed to prevent duplicate handling
+const processedCallIdsRef = { current: new Set() };
+
 export const useInAppNotification = () => {
   const context = useContext(InAppNotificationContext);
   if (!context) {
@@ -154,7 +157,12 @@ export const InAppNotificationProvider = ({ children }) => {
 
   // Handle notification press
   const handleNotificationPress = useCallback((notif) => {
-    if (!notif) return;
+    console.log('[InAppNotification] Toast pressed:', notif?.type, notif?.data);
+
+    if (!notif) {
+      console.warn('[InAppNotification] No notification data');
+      return;
+    }
 
     // Check if navigation ref exists and is ready
     const navReady = navigationRef.current &&
@@ -170,10 +178,25 @@ export const InAppNotificationProvider = ({ children }) => {
     try {
       switch (notif.type) {
         case NOTIFICATION_TYPES.MESSAGE:
-          if (notif.data?.conversationId) {
+          const conversationId = notif.data?.conversationId;
+          console.log('[InAppNotification] Navigating to conversation:', conversationId);
+
+          if (conversationId) {
+            // Use reset to ensure clean navigation to Chat screen
             navigationRef.current.navigate('Messages', {
               screen: 'Chat',
-              params: { conversationId: notif.data.conversationId },
+              params: {
+                conversationId: conversationId,
+                // Include any available data for better UX
+                fromNotification: true,
+              },
+            });
+            console.log('[InAppNotification] Navigation dispatched successfully');
+          } else {
+            // Fallback: navigate to conversations list
+            console.warn('[InAppNotification] No conversationId, navigating to list');
+            navigationRef.current.navigate('Messages', {
+              screen: 'ConversationsList',
             });
           }
           break;
@@ -190,9 +213,12 @@ export const InAppNotificationProvider = ({ children }) => {
         case NOTIFICATION_TYPES.INCOMING_CALL:
           // Handled by onAccept/onDecline callbacks
           break;
+
+        default:
+          console.warn('[InAppNotification] Unknown notification type:', notif.type);
       }
     } catch (error) {
-      console.warn('[InAppNotification] Navigation error:', error.message);
+      console.error('[InAppNotification] Navigation error:', error);
     }
   }, []);
 
@@ -226,11 +252,16 @@ export const InAppNotificationProvider = ({ children }) => {
         console.log('[InAppNotification] callId:', callId);
         console.log('[InAppNotification] callerId (người gọi):', data.callerId);
         console.log('[InAppNotification] callerName:', data.callerName);
-        console.log('[InAppNotification] Full data:', JSON.stringify(data));
         console.log('[InAppNotification] ========================================');
 
         if (!callId) {
           console.error('[InAppNotification] No callId in push data:', data);
+          return;
+        }
+
+        // GUARD: Check if this call ID has already been processed
+        if (processedCallIdsRef.current.has(callId)) {
+          console.log('[InAppNotification] Call', callId, 'already processed - SKIPPING');
           return;
         }
 
@@ -241,82 +272,33 @@ export const InAppNotificationProvider = ({ children }) => {
           return;
         }
 
+        // Mark as processed BEFORE triggering to prevent duplicates
+        processedCallIdsRef.current.add(callId);
+        console.log('[InAppNotification] Marked call', callId, 'as processed');
+
+        // Clear processed ID after 30 seconds to allow receiving new calls
+        // (reduced from 60s - call should be handled within 30 seconds)
+        setTimeout(() => {
+          processedCallIdsRef.current.delete(callId);
+          console.log('[InAppNotification] Cleared processed call', callId);
+        }, 30000);
+
         // IMPORTANT: Trigger the full-screen overlay via CallContext
         // This ensures the proper incoming call UI shows even if realtime subscription fails
+        // CallContext has its own guards against duplicate navigation
         console.log('[InAppNotification] Triggering full-screen overlay via CallContext');
         triggerIncomingCallFromPush(callId).catch(err => {
           console.error('[InAppNotification] Failed to trigger full-screen overlay:', err);
         });
 
-        // Create handlers that actually work
-        const handleAcceptFromToast = async () => {
-          console.log('[InAppNotification] Accept from toast, callId:', callId);
-          try {
-            // Fetch call info
-            const result = await callService.getCall(callId);
-            console.log('[InAppNotification] getCall result:', result.success, result.call?.id);
-
-            if (!result.success || !result.call) {
-              console.error('[InAppNotification] Failed to get call:', result.error);
-              return;
-            }
-
-            const call = result.call;
-
-            // Navigate to incoming call screen
-            const navReady = navigationRef.current &&
-              (typeof navigationRef.current.isReady === 'function'
-                ? navigationRef.current.isReady()
-                : true);
-
-            console.log('[InAppNotification] Navigation ready:', navReady);
-
-            if (navReady) {
-              console.log('[InAppNotification] Navigating to IncomingCall screen...');
-              navigationRef.current.navigate('Call', {
-                screen: 'IncomingCall',
-                params: {
-                  call,
-                  caller: call.caller || {
-                    id: data.callerId,
-                    display_name: data.callerName || 'Người gọi',
-                    avatar_url: data.callerAvatar
-                  },
-                },
-              });
-              console.log('[InAppNotification] Navigation triggered');
-            } else {
-              console.error('[InAppNotification] Navigation not ready');
-            }
-          } catch (error) {
-            console.error('[InAppNotification] Error accepting call from toast:', error);
-          }
-        };
-
-        const handleDeclineFromToast = async () => {
-          console.log('[InAppNotification] Decline from toast, callId:', callId);
-          try {
-            await callService.declineCall(callId);
-            console.log('[InAppNotification] Call declined successfully');
-          } catch (error) {
-            console.error('[InAppNotification] Error declining call from toast:', error);
-          }
-        };
-
-        showNotification({
-          type: NOTIFICATION_TYPES.INCOMING_CALL,
-          title: notification.request.content.title || 'Cuộc gọi đến',
-          body: notification.request.content.body || `${data.callerName || 'Ai đó'} đang gọi cho bạn`,
-          avatar: data.callerAvatar,
-          data,
-          onAccept: handleAcceptFromToast,
-          onDecline: handleDeclineFromToast,
-        });
+        // DON'T show toast notification for incoming calls - we already have full screen UI
+        // This prevents duplicate UI (both toast and full screen showing at the same time)
+        console.log('[InAppNotification] Skipping toast for incoming call - full screen UI will show');
       }
     });
 
     return () => subscription.remove();
-  }, [showNotification]);
+  }, [showNotification, user?.id]);
 
   // Subscribe to real-time messages for global in-app notifications
   // This provides notifications even without backend push notification infrastructure
