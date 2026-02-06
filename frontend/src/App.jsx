@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 
 // Custom error handler for development
 if (import.meta.env.DEV) {
@@ -14,7 +14,22 @@ if (import.meta.env.DEV) {
   });
 }
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+
+// Handle redirect from serverless function fallback
+function RedirectHandler() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const redirectPath = sessionStorage.getItem('redirect_path');
+    if (redirectPath && redirectPath !== '/') {
+      sessionStorage.removeItem('redirect_path');
+      navigate(redirectPath, { replace: true });
+    }
+  }, [navigate]);
+
+  return null;
+}
 import TopNavBar from './components/TopNavBar';
 import AuthenticatedLayout from './components/AuthenticatedLayout';
 import Landing from './pages/Landing';
@@ -119,6 +134,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <RedirectHandler />
       <TradingModeProvider>
         <div className="app dark">
           <Routes>
