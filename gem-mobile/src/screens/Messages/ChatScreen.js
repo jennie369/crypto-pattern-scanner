@@ -90,6 +90,32 @@ export default function ChatScreen({ route, navigation }) {
 
   // State
   const [conversation, setConversation] = useState(initialConversation);
+
+  // Fetch conversation details if not provided (e.g., navigating from toast notification)
+  useEffect(() => {
+    const fetchConversationDetails = async () => {
+      if (!conversationId) return;
+
+      // If we already have conversation data with participant info, skip fetch
+      if (initialConversation?.other_participant || initialConversation?.conversation_participants) {
+        console.log('[ChatScreen] Already have conversation data, skipping fetch');
+        return;
+      }
+
+      console.log('[ChatScreen] Fetching conversation details for:', conversationId);
+      try {
+        const conversationData = await messagingService.getConversationById(conversationId);
+        if (conversationData) {
+          console.log('[ChatScreen] Fetched conversation:', conversationData.other_participant?.display_name);
+          setConversation(conversationData);
+        }
+      } catch (error) {
+        console.error('[ChatScreen] Error fetching conversation details:', error);
+      }
+    };
+
+    fetchConversationDetails();
+  }, [conversationId, initialConversation]);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);

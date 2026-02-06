@@ -116,6 +116,64 @@ class MessagingService {
   }
 
   /**
+   * Get a single conversation by ID with full participant details
+   * Used when navigating to chat from notification (no conversation object available)
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<Object>} Conversation with participants and profiles
+   */
+  async getConversationById(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Fetch conversation with participants
+      const { data, error } = await supabase
+        .from('conversations')
+        .select(`
+          *,
+          conversation_participants(
+            unread_count,
+            last_read_at,
+            user_id,
+            profiles(
+              id,
+              display_name,
+              full_name,
+              username,
+              avatar_url,
+              online_status
+            )
+          )
+        `)
+        .eq('id', conversationId)
+        .single();
+
+      if (error) throw error;
+      if (!data) return null;
+
+      // Find other participant for 1-1 conversations
+      const otherParticipantRecord = data.conversation_participants
+        ?.find(p => p.user_id !== user.id);
+
+      const otherProfile = otherParticipantRecord?.profiles;
+      if (otherProfile) {
+        // Normalize display_name with fallback
+        otherProfile.display_name = otherProfile.full_name || otherProfile.display_name || otherProfile.username || 'User';
+      }
+
+      return {
+        ...data,
+        other_participant: otherProfile || null,
+        my_unread_count: data.conversation_participants
+          ?.find(p => p.user_id === user.id)?.unread_count || 0,
+      };
+    } catch (error) {
+      console.error('[MessagingService] getConversationById error:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get messages for a specific conversation with cursor-based pagination
    * @param {string} conversationId - Conversation ID
    * @param {string} cursor - Message ID to fetch before (for pagination)
