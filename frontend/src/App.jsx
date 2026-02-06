@@ -125,7 +125,7 @@ function App() {
           {/* Public Landing Page - Homepage */}
           <Route
             path="/"
-            element={user ? <Navigate to="/scanner-v2" /> : <Landing />}
+            element={<Landing />}
           />
 
           {/* Home Page v2 - AIDA Conversion Funnel (Week 3, Day 15-17) */}
