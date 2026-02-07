@@ -38,8 +38,16 @@ function withVoIPPush(config) {
             contents.slice(0, lastImportIndex) +
             '#import <PushKit/PushKit.h>\n' +
             '#import <CallKit/CallKit.h>\n' +
-            '#import <RNVoipPushNotification.h>\n' +
-            '#import <RNCallKeep.h>\n' +
+            '#if __has_include(<RNVoipPushNotification/RNVoipPushNotification.h>)\n' +
+            '#import <RNVoipPushNotification/RNVoipPushNotification.h>\n' +
+            '#elif __has_include("RNVoipPushNotification.h")\n' +
+            '#import "RNVoipPushNotification.h"\n' +
+            '#endif\n' +
+            '#if __has_include(<RNCallKeep/RNCallKeep.h>)\n' +
+            '#import <RNCallKeep/RNCallKeep.h>\n' +
+            '#elif __has_include("RNCallKeep.h")\n' +
+            '#import "RNCallKeep.h"\n' +
+            '#endif\n' +
             contents.slice(lastImportIndex);
         }
       }
@@ -71,7 +79,17 @@ function withVoIPPush(config) {
 #pragma mark - PushKit (VoIP Push)
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(PKPushType)type {
-  [RNVoipPushNotification didUpdatePushCredentials:credentials forType:(NSString *)type];
+  @try {
+    Class voipClass = NSClassFromString(@"RNVoipPushNotification");
+    if (voipClass && [voipClass respondsToSelector:@selector(didUpdatePushCredentials:forType:)]) {
+      [voipClass didUpdatePushCredentials:credentials forType:(NSString *)type];
+      NSLog(@"[VoIPPush] Credentials updated successfully");
+    } else {
+      NSLog(@"[VoIPPush] RNVoipPushNotification not available");
+    }
+  } @catch (NSException *exception) {
+    NSLog(@"[VoIPPush] Error updating credentials: %@", exception);
+  }
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(PKPushType)type {
@@ -82,44 +100,62 @@ function withVoIPPush(config) {
   // CRITICAL: iOS 13+ requires reporting call to CallKit IMMEDIATELY
   // Failure to do so will cause iOS to terminate the app
 
-  NSDictionary *payloadDict = payload.dictionaryPayload;
-  NSString *callId = payloadDict[@"callId"];
-  NSString *callerName = payloadDict[@"callerName"] ?: @"Cuộc gọi đến";
-  NSString *callerId = payloadDict[@"callerId"] ?: @"";
-  NSString *callType = payloadDict[@"callType"] ?: @"audio";
-  NSString *callerAvatar = payloadDict[@"callerAvatar"] ?: @"";
-  BOOL hasVideo = [callType isEqualToString:@"video"];
+  @try {
+    NSDictionary *payloadDict = payload.dictionaryPayload;
+    NSString *callId = payloadDict[@"callId"];
+    NSString *callerName = payloadDict[@"callerName"] ?: @"Cuộc gọi đến";
+    NSString *callerId = payloadDict[@"callerId"] ?: @"";
+    NSString *callType = payloadDict[@"callType"] ?: @"audio";
+    BOOL hasVideo = [callType isEqualToString:@"video"];
 
-  // Generate UUID for CallKit if not provided
-  NSUUID *callUUID;
-  if (callId && callId.length > 0) {
-    callUUID = [[NSUUID alloc] initWithUUIDString:callId] ?: [NSUUID UUID];
-  } else {
-    callUUID = [NSUUID UUID];
-    callId = [callUUID UUIDString];
+    // Generate UUID for CallKit if not provided
+    NSUUID *callUUID;
+    if (callId && callId.length > 0) {
+      callUUID = [[NSUUID alloc] initWithUUIDString:callId] ?: [NSUUID UUID];
+    } else {
+      callUUID = [NSUUID UUID];
+      callId = [callUUID UUIDString];
+    }
+
+    NSLog(@"[VoIPPush] Received incoming call: %@, caller: %@, video: %d", callId, callerName, hasVideo);
+
+    // IMMEDIATELY report to CallKit to show native fullscreen incoming call UI
+    @try {
+      Class callKeepClass = NSClassFromString(@"RNCallKeep");
+      if (callKeepClass) {
+        [callKeepClass reportNewIncomingCall:callUUID.UUIDString
+                                      handle:callerId
+                                  handleType:@"generic"
+                                    hasVideo:hasVideo
+                         localizedCallerName:callerName
+                             supportsHolding:YES
+                                supportsDTMF:YES
+                            supportsGrouping:NO
+                          supportsUngrouping:NO
+                                 fromPushKit:YES
+                                     payload:payloadDict
+                       withCompletionHandler:^{
+          NSLog(@"[VoIPPush] CallKit reported successfully");
+        }];
+      } else {
+        NSLog(@"[VoIPPush] RNCallKeep not available");
+      }
+    } @catch (NSException *callKitException) {
+      NSLog(@"[VoIPPush] CallKit error: %@", callKitException);
+    }
+
+    // Also notify RNVoipPushNotification for JS handling
+    @try {
+      Class voipClass = NSClassFromString(@"RNVoipPushNotification");
+      if (voipClass) {
+        [voipClass didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];
+      }
+    } @catch (NSException *voipException) {
+      NSLog(@"[VoIPPush] VoIP notification error: %@", voipException);
+    }
+  } @catch (NSException *exception) {
+    NSLog(@"[VoIPPush] Error handling incoming push: %@", exception);
   }
-
-  NSLog(@"[VoIPPush] Received incoming call: %@, caller: %@, video: %d", callId, callerName, hasVideo);
-
-  // IMMEDIATELY report to CallKit to show native fullscreen incoming call UI
-  // This MUST happen before the completion handler is called
-  [RNCallKeep reportNewIncomingCall:callUUID.UUIDString
-                             handle:callerId
-                         handleType:@"generic"
-                           hasVideo:hasVideo
-                localizedCallerName:callerName
-                    supportsHolding:YES
-                       supportsDTMF:YES
-                   supportsGrouping:NO
-                 supportsUngrouping:NO
-                        fromPushKit:YES
-                            payload:payloadDict
-              withCompletionHandler:^{
-    NSLog(@"[VoIPPush] CallKit reported successfully");
-  }];
-
-  // Also notify RNVoipPushNotification for JS handling
-  [RNVoipPushNotification didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];
 
   // Must call completion handler
   completion();
@@ -133,12 +169,33 @@ function withVoIPPush(config) {
         }
       }
 
-      // NOTE: Do NOT register PKPushRegistry here in AppDelegate!
-      // The JS module (react-native-voip-push-notification) will create PKPushRegistry
-      // when registerVoipToken() is called. Creating it here causes double registration
-      // and the token may be received before JS listeners are ready.
-      // The delegate methods above will still be called because the JS module
-      // sets AppDelegate as the delegate when it creates PKPushRegistry.
+      // Register for VoIP push in didFinishLaunchingWithOptions
+      // This ensures VoIP is registered early, before JS loads
+      if (!contents.includes('voipRegistry')) {
+        const didFinishRegex =
+          /(-\s*\(BOOL\)application:.*didFinishLaunchingWithOptions:.*\{)/;
+        const match = contents.match(didFinishRegex);
+
+        if (match) {
+          const insertPosition = match.index + match[0].length;
+          const voipRegistration = `
+  // Register for VoIP push notifications (PushKit)
+  // Token will be sent to JS via RNVoipPushNotification
+  @try {
+    PKPushRegistry *voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
+    voipRegistry.delegate = self;
+    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+    NSLog(@"[VoIPPush] PKPushRegistry initialized");
+  } @catch (NSException *exception) {
+    NSLog(@"[VoIPPush] Failed to initialize PKPushRegistry: %@", exception);
+  }
+`;
+          contents =
+            contents.slice(0, insertPosition) +
+            voipRegistration +
+            contents.slice(insertPosition);
+        }
+      }
     }
     // Swift support would go here if needed
 

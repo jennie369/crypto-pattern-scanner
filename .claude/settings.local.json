@@ -144,7 +144,8 @@
       "Bash(git revert:*)",
       "Bash(del \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\\\\frontend\\\\vercel.json\")",
       "Bash(git fetch:*)",
-      "Bash(git update-index:*)"
+      "Bash(git update-index:*)",
+      "Bash(npx vercel:*)"
     ],
     "deny": [],
     "ask": []
