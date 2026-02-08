@@ -153,10 +153,24 @@ export const detectBearishQM = (candles, options = {}) => {
 
     const config = getAdvancedPatternConfig('QUASIMODO_BEARISH');
 
+    // ✅ FIX: Extract timestamps for zone positioning on chart
+    // QML zone starts at hl1 (the higher low before head)
+    let startTime = hl1.timestamp || candles[hl1.index]?.time;
+    let endTime = head.timestamp || candles[head.index]?.time;
+    if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+    if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
     return {
       pattern: 'QUASIMODO_BEARISH',
       patternType: 'QUASIMODO_BEARISH',
       config,
+
+      // ✅ FIX: Time fields for zone chart positioning
+      startTime,
+      endTime,
+      formationTime: startTime,
+      startCandleIndex: hl1.index,
+      endCandleIndex: head.index,
 
       // Key levels
       qmlPrice,
@@ -367,10 +381,24 @@ export const detectBullishQM = (candles, options = {}) => {
 
     const config = getAdvancedPatternConfig('QUASIMODO_BULLISH');
 
+    // ✅ FIX: Extract timestamps for zone positioning on chart
+    // QML zone starts at lh1 (the lower high before head)
+    let startTime = lh1.timestamp || candles[lh1.index]?.time;
+    let endTime = head.timestamp || candles[head.index]?.time;
+    if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+    if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
     return {
       pattern: 'QUASIMODO_BULLISH',
       patternType: 'QUASIMODO_BULLISH',
       config,
+
+      // ✅ FIX: Time fields for zone chart positioning
+      startTime,
+      endTime,
+      formationTime: startTime,
+      startCandleIndex: lh1.index,
+      endCandleIndex: head.index,
 
       qmlPrice,
       mplPrice,

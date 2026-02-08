@@ -83,6 +83,13 @@ export const detectBullishFlagLimit = (candles, options = {}) => {
       const zone = calculateZoneBoundaries(pauseCandles, 'LFZ', currentPrice);
       if (!zone) continue;
 
+      // ✅ FIX: Extract timestamps for zone positioning on chart
+      // Get time from pause candles (convert ms to seconds if needed)
+      let startTime = candles[pauseStart]?.time || candles[pauseStart]?.timestamp;
+      let endTime = candles[pauseEnd]?.time || candles[pauseEnd]?.timestamp;
+      if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+      if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
       results.push({
         pattern: 'FLAG_LIMIT_BULLISH',
         patternCategory: 'flag_limit',
@@ -103,6 +110,13 @@ export const detectBullishFlagLimit = (candles, options = {}) => {
         // Movement info
         upMoveBeforePause: parseFloat(upMovePercent.toFixed(2)),
         continuationAfterPause: parseFloat(continuationPercent.toFixed(2)),
+
+        // ✅ FIX: Add time fields for zone chart positioning
+        startTime,
+        endTime,
+        formationTime: startTime,
+        startCandleIndex: pauseStart,
+        endCandleIndex: pauseEnd,
 
         // Structure
         structure: {
@@ -194,6 +208,12 @@ export const detectBearishFlagLimit = (candles, options = {}) => {
       const zone = calculateZoneBoundaries(pauseCandles, 'HFZ', currentPrice);
       if (!zone) continue;
 
+      // ✅ FIX: Extract timestamps for zone positioning on chart
+      let startTime = candles[pauseStart]?.time || candles[pauseStart]?.timestamp;
+      let endTime = candles[pauseEnd]?.time || candles[pauseEnd]?.timestamp;
+      if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+      if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
       results.push({
         pattern: 'FLAG_LIMIT_BEARISH',
         patternCategory: 'flag_limit',
@@ -211,6 +231,13 @@ export const detectBearishFlagLimit = (candles, options = {}) => {
 
         downMoveBeforePause: parseFloat(downMovePercent.toFixed(2)),
         continuationAfterPause: parseFloat(continuationPercent.toFixed(2)),
+
+        // ✅ FIX: Add time fields for zone chart positioning
+        startTime,
+        endTime,
+        formationTime: startTime,
+        startCandleIndex: pauseStart,
+        endCandleIndex: pauseEnd,
 
         structure: {
           downMoveStart,

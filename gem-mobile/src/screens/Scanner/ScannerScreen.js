@@ -1389,8 +1389,12 @@ const ScannerScreen = ({ navigation }) => {
                 displayCoin,
               });
               if (showZones && zoneDisplayMode !== 'hidden' && zoneViewSource !== 'position') {
-                const coinZones = zones.filter(z => z.symbol === displayCoin);
-                console.log('[ZONE] coinZones filtered:', coinZones.length, 'from', zones.length);
+                // ✅ FIX: Filter by BOTH symbol AND timeframe to prevent cross-TF zone mixing
+                const coinZones = zones.filter(z =>
+                  z.symbol === displayCoin &&
+                  z.timeframe === selectedTimeframe
+                );
+                console.log('[ZONE] coinZones filtered:', coinZones.length, 'from', zones.length, 'for TF:', selectedTimeframe);
 
                 // Debug: Log pattern_ids of all coinZones
                 if (coinZones.length > 0) {

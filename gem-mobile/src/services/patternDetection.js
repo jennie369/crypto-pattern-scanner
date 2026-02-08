@@ -1519,6 +1519,18 @@ class PatternDetectionService {
     const signal = PATTERN_SIGNALS.DPD;
     const { pause, zoneHigh, zoneLow } = gemPattern;
 
+    // ✅ FIX: Check zone freshness - skip if zone is broken
+    const candlesAfterZone = candles.slice(gemPattern.pause.endIdx + 1);
+    const zoneValidity = this.checkZoneValidity(
+      { zoneHigh, zoneLow },
+      candlesAfterZone,
+      'SHORT' // DPD creates SHORT/HFZ zone
+    );
+    if (zoneValidity.broken) {
+      console.log(`[DPD] Zone broken - skipping pattern for ${symbol} ${timeframe}`);
+      return null;
+    }
+
     // Calculate odds enhancers score
     const oddsScore = this.calculateOddsEnhancers(gemPattern, candles, currentPrice);
 
@@ -1574,6 +1586,10 @@ class PatternDetectionService {
       formationTime: startTime,
       startCandleIndex: gemPattern.move1.startIdx,
       endCandleIndex: gemPattern.pause.endIdx,
+      // ✅ Zone freshness status
+      zoneFresh: zoneValidity.fresh,
+      zoneTested: zoneValidity.tested,
+      zoneStatus: zoneValidity.fresh ? 'FRESH' : (zoneValidity.tested ? 'TESTED' : 'VALID'),
     };
   }
 
@@ -1592,6 +1608,18 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPU;
     const { pause, zoneHigh, zoneLow } = gemPattern;
+
+    // ✅ FIX: Check zone freshness - skip if zone is broken
+    const candlesAfterZone = candles.slice(gemPattern.pause.endIdx + 1);
+    const zoneValidity = this.checkZoneValidity(
+      { zoneHigh, zoneLow },
+      candlesAfterZone,
+      'LONG' // UPU creates LONG/LFZ zone
+    );
+    if (zoneValidity.broken) {
+      console.log(`[UPU] Zone broken - skipping pattern for ${symbol} ${timeframe}`);
+      return null;
+    }
 
     const oddsScore = this.calculateOddsEnhancers(gemPattern, candles, currentPrice);
 
@@ -1626,6 +1654,10 @@ class PatternDetectionService {
       pauseHigh: zoneHigh, pauseLow: zoneLow,
       startTime, endTime, formationTime: startTime,
       startCandleIndex: gemPattern.move1.startIdx, endCandleIndex: gemPattern.pause.endIdx,
+      // ✅ Zone freshness status
+      zoneFresh: zoneValidity.fresh,
+      zoneTested: zoneValidity.tested,
+      zoneStatus: zoneValidity.fresh ? 'FRESH' : (zoneValidity.tested ? 'TESTED' : 'VALID'),
     };
   }
 
@@ -1644,6 +1676,18 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.DPU;
     const { pause, zoneHigh, zoneLow } = gemPattern;
+
+    // ✅ FIX: Check zone freshness - skip if zone is broken
+    const candlesAfterZone = candles.slice(gemPattern.pause.endIdx + 1);
+    const zoneValidity = this.checkZoneValidity(
+      { zoneHigh, zoneLow },
+      candlesAfterZone,
+      'LONG' // DPU creates LONG/LFZ zone
+    );
+    if (zoneValidity.broken) {
+      console.log(`[DPU] Zone broken - skipping pattern for ${symbol} ${timeframe}`);
+      return null;
+    }
 
     const oddsScore = this.calculateOddsEnhancers(gemPattern, candles, currentPrice);
 
@@ -1679,6 +1723,10 @@ class PatternDetectionService {
       pauseHigh: zoneHigh, pauseLow: zoneLow,
       startTime, endTime, formationTime: startTime,
       startCandleIndex: gemPattern.move1.startIdx, endCandleIndex: gemPattern.pause.endIdx,
+      // ✅ Zone freshness status
+      zoneFresh: zoneValidity.fresh,
+      zoneTested: zoneValidity.tested,
+      zoneStatus: zoneValidity.fresh ? 'FRESH' : (zoneValidity.tested ? 'TESTED' : 'VALID'),
     };
   }
 
@@ -1697,6 +1745,18 @@ class PatternDetectionService {
     const currentPrice = candles[candles.length - 1].close;
     const signal = PATTERN_SIGNALS.UPD;
     const { pause, zoneHigh, zoneLow } = gemPattern;
+
+    // ✅ FIX: Check zone freshness - skip if zone is broken
+    const candlesAfterZone = candles.slice(gemPattern.pause.endIdx + 1);
+    const zoneValidity = this.checkZoneValidity(
+      { zoneHigh, zoneLow },
+      candlesAfterZone,
+      'SHORT' // UPD creates SHORT/HFZ zone
+    );
+    if (zoneValidity.broken) {
+      console.log(`[UPD] Zone broken - skipping pattern for ${symbol} ${timeframe}`);
+      return null;
+    }
 
     const oddsScore = this.calculateOddsEnhancers(gemPattern, candles, currentPrice);
 
@@ -1732,6 +1792,10 @@ class PatternDetectionService {
       pauseHigh: zoneHigh, pauseLow: zoneLow,
       startTime, endTime, formationTime: startTime,
       startCandleIndex: gemPattern.move1.startIdx, endCandleIndex: gemPattern.pause.endIdx,
+      // ✅ Zone freshness status
+      zoneFresh: zoneValidity.fresh,
+      zoneTested: zoneValidity.tested,
+      zoneStatus: zoneValidity.fresh ? 'FRESH' : (zoneValidity.tested ? 'TESTED' : 'VALID'),
     };
   }
 

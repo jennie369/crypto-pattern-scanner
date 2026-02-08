@@ -64,6 +64,12 @@ const findBullishDP = (candles, startIndex, options) => {
     const zone = calculateZoneBoundaries(pauseCandles, 'LFZ', currentPrice);
     if (!zone) continue;
 
+    // ✅ FIX: Extract timestamps for zone positioning on chart
+    let startTime = candles[pauseStart]?.time || candles[pauseStart]?.timestamp;
+    let endTime = candles[startIndex]?.time || candles[startIndex]?.timestamp;
+    if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+    if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
     return {
       pattern: 'DECISION_POINT_BULLISH',
       patternCategory: 'decision_point',
@@ -79,6 +85,13 @@ const findBullishDP = (candles, startIndex, options) => {
       dpMovePercent: parseFloat(movePercent.toFixed(2)),
       dpMoveMultiple: parseFloat((moveSize / pauseRange).toFixed(1)),
       originCandleCount: pauseLength,
+
+      // ✅ FIX: Add time fields for zone chart positioning
+      startTime,
+      endTime,
+      formationTime: startTime,
+      startCandleIndex: pauseStart,
+      endCandleIndex: startIndex,
 
       // Structure
       structure: {
@@ -145,6 +158,12 @@ const findBearishDP = (candles, startIndex, options) => {
     const zone = calculateZoneBoundaries(pauseCandles, 'HFZ', currentPrice);
     if (!zone) continue;
 
+    // ✅ FIX: Extract timestamps for zone positioning on chart
+    let startTime = candles[pauseStart]?.time || candles[pauseStart]?.timestamp;
+    let endTime = candles[startIndex]?.time || candles[startIndex]?.timestamp;
+    if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+    if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
     return {
       pattern: 'DECISION_POINT_BEARISH',
       patternCategory: 'decision_point',
@@ -159,6 +178,13 @@ const findBearishDP = (candles, startIndex, options) => {
       dpMovePercent: parseFloat(movePercent.toFixed(2)),
       dpMoveMultiple: parseFloat((moveSize / pauseRange).toFixed(1)),
       originCandleCount: pauseLength,
+
+      // ✅ FIX: Add time fields for zone chart positioning
+      startTime,
+      endTime,
+      formationTime: startTime,
+      startCandleIndex: pauseStart,
+      endCandleIndex: startIndex,
 
       structure: {
         originStartIndex: pauseStart,

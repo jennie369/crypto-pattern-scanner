@@ -123,12 +123,25 @@ export const detectBullishFTR = (candles, options = {}) => {
 
       const config = getAdvancedPatternConfig('FTR_BULLISH');
 
+      // ✅ FIX: Extract timestamps for zone positioning on chart
+      let startTime = candles[baseStartIndex]?.time || candles[baseStartIndex]?.timestamp;
+      let endTime = candles[baseEndIndex]?.time || candles[baseEndIndex]?.timestamp;
+      if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+      if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
       return {
         pattern: 'FTR_BULLISH',
         patternType: 'FTR_BULLISH',
         config,
         isFTR: true,
         category: 'ftr',
+
+        // ✅ FIX: Time fields for zone chart positioning
+        startTime,
+        endTime,
+        formationTime: startTime,
+        startCandleIndex: baseStartIndex,
+        endCandleIndex: baseEndIndex,
 
         // Zone info (compatible with Phase 1A)
         ...zone,
@@ -312,12 +325,25 @@ export const detectBearishFTR = (candles, options = {}) => {
 
       const config = getAdvancedPatternConfig('FTR_BEARISH');
 
+      // ✅ FIX: Extract timestamps for zone positioning on chart
+      let startTime = candles[baseStartIndex]?.time || candles[baseStartIndex]?.timestamp;
+      let endTime = candles[baseEndIndex]?.time || candles[baseEndIndex]?.timestamp;
+      if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+      if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
+
       return {
         pattern: 'FTR_BEARISH',
         patternType: 'FTR_BEARISH',
         config,
         isFTR: true,
         category: 'ftr',
+
+        // ✅ FIX: Time fields for zone chart positioning
+        startTime,
+        endTime,
+        formationTime: startTime,
+        startCandleIndex: baseStartIndex,
+        endCandleIndex: baseEndIndex,
 
         ...zone,
         zone: {
