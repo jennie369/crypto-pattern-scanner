@@ -46,7 +46,10 @@ import { CallProvider } from '../contexts/CallContext';
 // Upgrade Success Modal (shows after purchase)
 import UpgradeSuccessModal from '../components/upgrade/UpgradeSuccessModal';
 
-// Tokens
+// Settings context for theming
+import { useSettings } from '../contexts/SettingsContext';
+
+// Tokens (fallback only)
 import { COLORS } from '../utils/tokens';
 
 // Navigation ref (imported from separate file to avoid circular deps)
@@ -55,11 +58,20 @@ export { navigationRef };
 
 const Stack = createNativeStackNavigator();
 
-// Loading screen
+// Loading screen - uses context when available
 function LoadingScreen() {
+  // Try to get themed colors, fallback to COLORS if context not available
+  let colors = COLORS;
+  try {
+    const settings = useSettings();
+    colors = settings.colors;
+  } catch (e) {
+    // Context not available during early initialization
+  }
+
   return (
-    <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color={COLORS.gold} />
+    <View style={[styles.loadingContainer, { backgroundColor: colors.bgDarkest }]}>
+      <ActivityIndicator size="large" color={colors.gold} />
     </View>
   );
 }
@@ -294,7 +306,6 @@ export default function AppNavigator() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: COLORS.bgDarkest,
     alignItems: 'center',
     justifyContent: 'center',
   },

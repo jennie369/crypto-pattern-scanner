@@ -98,11 +98,27 @@
   },
 
   "tabs": {
-    "home": "Trang chủ",
+    "home": "Home",
+    "shop": "Shop",
+    "trading": "Giao Dịch",
+    "gemMaster": "Gem Mast...",
+    "notifications": "Thông Báo",
+    "account": "Tài Sản",
     "forum": "Cộng đồng",
-    "scanner": "Scanner",
-    "shop": "Cửa hàng",
-    "account": "Tài khoản"
+    "scanner": "Scanner"
+  },
+
+  "home": {
+    "title": "News Feed",
+    "subtitle": "Thảo luận cộng đồng",
+    "placeholder": "Trang chủ",
+    "comingSoon": "Tính năng diễn đàn sắp ra mắt"
+  },
+
+  "upgrade": {
+    "unlockAll": "Nâng cấp để mở khóa tất cả",
+    "accessFeatures": "Truy cập Scanner, Courses và AI Chatbot",
+    "viewPlans": "Xem các gói"
   },
 
   "assets": {

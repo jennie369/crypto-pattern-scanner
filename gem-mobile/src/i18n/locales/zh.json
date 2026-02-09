@@ -99,10 +99,26 @@
 
   "tabs": {
     "home": "首页",
-    "forum": "社区",
-    "scanner": "扫描器",
     "shop": "商店",
-    "account": "账户"
+    "trading": "交易",
+    "gemMaster": "Gem大师",
+    "notifications": "通知",
+    "account": "资产",
+    "forum": "社区",
+    "scanner": "扫描器"
+  },
+
+  "home": {
+    "title": "动态",
+    "subtitle": "社区讨论",
+    "placeholder": "首页",
+    "comingSoon": "论坛和社区功能即将推出"
+  },
+
+  "upgrade": {
+    "unlockAll": "升级以解锁所有功能",
+    "accessFeatures": "访问扫描器、课程和AI聊天机器人",
+    "viewPlans": "查看套餐"
   },
 
   "assets": {

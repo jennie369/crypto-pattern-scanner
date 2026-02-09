@@ -1,6 +1,6 @@
 /**
  * GEM Mobile - Home Screen (News Feed)
- * Dark theme by default (matches other pages)
+ * Theme-aware (supports Light/Dark mode)
  * Now with Sponsor Banner support
  */
 
@@ -16,9 +16,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Home } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import { useTabBar } from '../../contexts/TabBarContext';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
 import SponsorBanner from '../../components/SponsorBanner';
@@ -29,6 +29,7 @@ import { ProScannerBenefitModal } from '../../components/Scanner';
 
 export default function HomeScreen({ navigation }) {
   const { user, profile } = useAuth();
+  const { colors, gradients, glass, SPACING, TYPOGRAPHY, settings, t } = useSettings();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -77,122 +78,139 @@ export default function HomeScreen({ navigation }) {
     setRefreshing(false);
   };
 
+  // Theme-aware styles - defined inside component to react to theme changes
+  const styles = StyleSheet.create({
+    gradient: {
+      flex: 1,
+    },
+    lightContainer: {
+      flex: 1,
+      backgroundColor: colors.bgDarkest,
+    },
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollViewContent: {
+      paddingBottom: CONTENT_BOTTOM_PADDING,
+    },
+    header: {
+      padding: SPACING.lg,
+      backgroundColor: settings.theme === 'light' ? colors.glassBg : glass.backgroundColor,
+      borderBottomWidth: 1,
+      borderBottomColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.2)',
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xxxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.xs,
+    },
+    subtitle: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textSecondary,
+    },
+    placeholder: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: SPACING.huge,
+      marginTop: SPACING.huge,
+    },
+    placeholderText: {
+      marginTop: SPACING.lg,
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.sm,
+    },
+    placeholderDesc: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+  });
+
+  // Render different background based on theme
+  const renderContent = () => (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.gold} />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{t('home.title', 'News Feed')}</Text>
+          <Text style={styles.subtitle}>{t('home.subtitle', 'Community discussions')}</Text>
+        </View>
+
+        {/* Upgrade Banner for free users */}
+        <UpgradeBanner
+          banner={{
+            title: t('upgrade.unlockAll', 'Nâng cấp để mở khóa tất cả'),
+            subtitle: t('upgrade.accessFeatures', 'Truy cập Scanner, Courses và AI Chatbot'),
+            cta_text: t('upgrade.viewPlans', 'Xem các gói'),
+            icon_name: 'sparkles',
+            trigger_screen: 'home_screen',
+          }}
+          tierType="scanner"
+          variant="prominent"
+          style={{ marginHorizontal: SPACING.md, marginTop: SPACING.md }}
+        />
+
+        {/* Sponsor Banners - distributed */}
+        {sponsorBanners.map((banner) => (
+          <SponsorBanner
+            key={banner.id}
+            banner={banner}
+            navigation={navigation}
+            userId={sponsorUserId}
+            onDismiss={dismissBanner}
+          />
+        ))}
+
+        {/* Placeholder Content */}
+        <View style={styles.placeholder}>
+          <Home size={64} color={colors.textMuted} strokeWidth={1.5} />
+          <Text style={styles.placeholderText}>{t('home.placeholder', 'Home Screen')}</Text>
+          <Text style={styles.placeholderDesc}>{t('home.comingSoon', 'Forum & Community features coming soon')}</Text>
+        </View>
+      </ScrollView>
+
+      {/* Pro Scanner Benefit Modal - Trading Leads */}
+      <ProScannerBenefitModal
+        visible={showBenefitModal}
+        onClose={closeBenefitModal}
+        onActivated={onBenefitActivated}
+        benefitInfo={benefitInfo}
+        userEmail={userEmail}
+        userId={tradingLeadsUserId}
+      />
+    </SafeAreaView>
+  );
+
+  // Light theme uses solid background, Dark theme uses gradient
+  if (settings.theme === 'light') {
+    return (
+      <View style={styles.lightContainer}>
+        {renderContent()}
+      </View>
+    );
+  }
+
   return (
     <LinearGradient
-      colors={GRADIENTS.background}
-      locations={GRADIENTS.backgroundLocations}
+      colors={gradients.background}
+      locations={gradients.backgroundLocations}
       style={styles.gradient}
     >
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollViewContent}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.gold} />
-          }
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>News Feed</Text>
-            <Text style={styles.subtitle}>Community discussions</Text>
-          </View>
-
-          {/* Upgrade Banner for free users */}
-          <UpgradeBanner
-            banner={{
-              title: 'Nâng cấp để mở khóa tất cả',
-              subtitle: 'Truy cập Scanner, Courses và AI Chatbot',
-              cta_text: 'Xem các gói',
-              icon_name: 'sparkles',
-              trigger_screen: 'home_screen',
-            }}
-            tierType="scanner"
-            variant="prominent"
-            style={{ marginHorizontal: SPACING.md, marginTop: SPACING.md }}
-          />
-
-          {/* Sponsor Banners - distributed */}
-          {sponsorBanners.map((banner) => (
-            <SponsorBanner
-              key={banner.id}
-              banner={banner}
-              navigation={navigation}
-              userId={sponsorUserId}
-              onDismiss={dismissBanner}
-            />
-          ))}
-
-          {/* Placeholder Content */}
-          <View style={styles.placeholder}>
-            <Home size={64} color={COLORS.textMuted} strokeWidth={1.5} />
-            <Text style={styles.placeholderText}>Home Screen</Text>
-            <Text style={styles.placeholderDesc}>Forum & Community features coming soon</Text>
-          </View>
-        </ScrollView>
-
-        {/* Pro Scanner Benefit Modal - Trading Leads */}
-        <ProScannerBenefitModal
-          visible={showBenefitModal}
-          onClose={closeBenefitModal}
-          onActivated={onBenefitActivated}
-          benefitInfo={benefitInfo}
-          userEmail={userEmail}
-          userId={tradingLeadsUserId}
-        />
-      </SafeAreaView>
+      {renderContent()}
     </LinearGradient>
   );
 }
-
-const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollViewContent: {
-    paddingBottom: CONTENT_BOTTOM_PADDING,
-  },
-  header: {
-    padding: SPACING.lg,
-    backgroundColor: GLASS.background,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
-  },
-  subtitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textSecondary,
-  },
-
-  // Placeholder
-  placeholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: SPACING.huge,
-    marginTop: SPACING.huge,
-  },
-  placeholderText: {
-    marginTop: SPACING.lg,
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.sm,
-  },
-  placeholderDesc: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
-});

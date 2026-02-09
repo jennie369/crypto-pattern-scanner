@@ -45,11 +45,12 @@ export const LIGHT_COLORS = {
   infoText: '#004085',            // Dark blue text
 
   // === TEXT COLORS (BLACK on WHITE) ===
-  textPrimary: '#000000',
-  textSecondary: 'rgba(0, 0, 0, 0.7)',
-  textMuted: 'rgba(0, 0, 0, 0.5)',
-  textSubtle: 'rgba(0, 0, 0, 0.4)',
-  textDisabled: 'rgba(0, 0, 0, 0.3)',
+  // WCAG AA requires 4.5:1 contrast ratio for normal text
+  textPrimary: '#000000',                   // 21:1 contrast - highest
+  textSecondary: 'rgba(0, 0, 0, 0.75)',     // ~7:1 contrast - good
+  textMuted: 'rgba(0, 0, 0, 0.6)',          // ~5.3:1 contrast - meets AA
+  textSubtle: 'rgba(0, 0, 0, 0.55)',        // ~4.7:1 contrast - meets AA
+  textDisabled: 'rgba(0, 0, 0, 0.4)',       // ~3.0:1 - acceptable for disabled
 
   // === GLASS/CARD (LIGHT VERSION) ===
   glassBg: '#FFFFFF',
@@ -82,10 +83,19 @@ export const LIGHT_COLORS = {
   shadowColor: '#000000',
   shadowOpacity: 0.15,
 
-  // === LEGACY ALIASES (for compatibility) ===
+  // === LEGACY ALIASES (for compatibility with dark theme) ===
   bgCard: '#FFFFFF',
   bgDark: '#FFFFFF',
   textLight: '#000000',
+
+  // Additional aliases for components expecting dark theme color names
+  primary: '#9C0612',                       // Burgundy as primary
+  secondary: '#0066CC',                     // Blue as secondary
+
+  // Icon specific (high contrast versions for light mode)
+  iconPrimary: '#1A1A1A',                   // Near-black for icons
+  iconSecondary: '#4A4A4A',                 // Dark gray for secondary icons
+  iconMuted: '#6B6B6B',                     // Medium gray for muted icons
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -186,11 +196,12 @@ export const LIGHT_THEME = {
     burgundy: LIGHT_COLORS.burgundy,
   },
 
-  // === ICON COLORS ===
+  // === ICON COLORS (high contrast for accessibility) ===
   icon: {
-    primary: LIGHT_COLORS.textPrimary,    // #000000
-    accent: LIGHT_COLORS.burgundy,        // #9C0612
-    gold: LIGHT_COLORS.gold,
+    primary: '#1A1A1A',                     // Near-black for best contrast
+    secondary: '#4A4A4A',                   // Dark gray for secondary icons
+    accent: LIGHT_COLORS.burgundy,          // #9C0612
+    gold: '#CC8800',                        // Darker gold for better contrast
     success: LIGHT_COLORS.successText,
     warning: LIGHT_COLORS.warningText,
     error: LIGHT_COLORS.errorText,

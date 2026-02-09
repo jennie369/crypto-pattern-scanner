@@ -42,7 +42,7 @@ import TooltipProvider from './src/components/Common/TooltipProvider';
 import { UpgradeProvider } from './src/contexts/UpgradeContext';
 
 // Settings Provider (Language, Currency, Theme)
-import { SettingsProvider } from './src/contexts/SettingsContext';
+import { SettingsProvider, useSettings } from './src/contexts/SettingsContext';
 
 // Initialize i18n
 import './src/i18n';
@@ -84,6 +84,9 @@ LogBox.ignoreLogs([
 function AppContent() {
   // Get current user for pending orders
   const { user } = useAuth();
+
+  // Get settings for dynamic StatusBar theming
+  const { settings } = useSettings();
 
   // Initialize Zone Price Monitor for real-time zone alerts
   useEffect(() => {
@@ -138,6 +141,9 @@ function AppContent() {
   // Check pending orders periodically (Paper Trading)
   usePendingOrdersChecker(user?.id, !!user?.id);
 
+  // Dynamic status bar style based on theme
+  const statusBarStyle = settings.theme === 'light' ? 'dark' : 'light';
+
   return (
     <CartProvider>
       <CourseProvider>
@@ -149,7 +155,7 @@ function AppContent() {
                   <UpgradeProvider>
                     <CallProvider>
                       <TabBarProvider>
-                        <StatusBar style="light" />
+                        <StatusBar style={statusBarStyle} />
                         <AppNavigator />
                       </TabBarProvider>
                     </CallProvider>

@@ -99,10 +99,26 @@
 
   "tabs": {
     "home": "Home",
-    "forum": "Community",
-    "scanner": "Scanner",
     "shop": "Shop",
-    "account": "Account"
+    "trading": "Trading",
+    "gemMaster": "Gem Mast...",
+    "notifications": "Alerts",
+    "account": "Assets",
+    "forum": "Community",
+    "scanner": "Scanner"
+  },
+
+  "home": {
+    "title": "News Feed",
+    "subtitle": "Community discussions",
+    "placeholder": "Home Screen",
+    "comingSoon": "Forum & Community features coming soon"
+  },
+
+  "upgrade": {
+    "unlockAll": "Upgrade to unlock everything",
+    "accessFeatures": "Access Scanner, Courses and AI Chatbot",
+    "viewPlans": "View Plans"
   },
 
   "assets": {

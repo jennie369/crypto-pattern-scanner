@@ -19,3 +19,6 @@ export { default as useRitualHaptics } from './useRitualHaptics';
 // Template System (Centralized Templates)
 export { useTemplate, useTemplateIntent } from './useTemplate';
 export { useTemplateSettings, useTemplateUsageStats } from './useTemplateSettings';
+
+// Theming - Create theme-reactive styles
+export { useThemedStyles, useThemedValues, createThemedComponent } from './useThemedStyles';

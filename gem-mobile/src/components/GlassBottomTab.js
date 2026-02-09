@@ -5,7 +5,7 @@
  * Dynamic notification badge count
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Animated, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -14,6 +14,7 @@ import { Home, ShoppingCart, BarChart2, Star, Bell, Box } from 'lucide-react-nat
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabBar } from '../contexts/TabBarContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { forumService } from '../services/forumService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -21,34 +22,68 @@ const DOUBLE_TAP_DELAY = 300; // ms between taps to count as double-tap
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-// Design tokens - matching header dark blue color
-const Tokens = {
+// Theme-specific design tokens
+const getDarkTokens = () => ({
   colors: {
-    bg: '#041027',                         // very deep navy
-    barTint: 'rgba(17, 34, 80, 0.85)',     // match header GLASS.background
-    rimDark: 'rgba(106, 91, 255, 0.2)',    // purple tint like header border
+    bg: '#041027',
+    barTint: 'rgba(17, 34, 80, 0.85)',
+    rimDark: 'rgba(106, 91, 255, 0.2)',
     rimLight: 'rgba(106, 91, 255, 0.1)',
     icon: 'rgba(255,255,255,0.92)',
     iconInactive: 'rgba(255,255,255,0.48)',
-    activeBg: 'rgba(17, 34, 80, 0.95)',    // same dark blue as header
-    activeRim: 'rgba(106, 91, 255, 0.3)',  // purple border like header
+    activeBg: 'rgba(17, 34, 80, 0.95)',
+    activeRim: 'rgba(106, 91, 255, 0.3)',
     innerShadow: 'rgba(0,0,0,0.55)',
-    glassAccent: '#112250'                 // header navy color
+    glassAccent: '#112250',
+    // Gradient colors
+    gradientColors: ['rgba(15, 16, 48, 0.65)', 'rgba(106, 91, 255, 0.12)', 'rgba(15, 16, 48, 0.75)'],
+    sheenColors: ['rgba(255,255,255,0.06)', 'rgba(255,255,255,0)'],
+    borderGlow: 'rgba(106, 91, 255, 0.25)',
+    badgeBorder: 'rgba(17, 34, 80, 0.9)',
   },
+  blurTint: 'dark',
+  blurIntensity: 90,
+});
+
+const getLightTokens = () => ({
+  colors: {
+    bg: '#FFFFFF',
+    barTint: 'rgba(255, 255, 255, 0.92)',
+    rimDark: 'rgba(0, 0, 0, 0.08)',
+    rimLight: 'rgba(0, 0, 0, 0.04)',
+    icon: 'rgba(0, 0, 0, 0.85)',
+    iconInactive: 'rgba(0, 0, 0, 0.45)',
+    activeBg: 'rgba(255, 255, 255, 0.98)',
+    activeRim: 'rgba(156, 6, 18, 0.2)',  // burgundy accent
+    innerShadow: 'rgba(0,0,0,0.08)',
+    glassAccent: '#F5F5F5',
+    // Gradient colors
+    gradientColors: ['rgba(255, 255, 255, 0.95)', 'rgba(240, 240, 240, 0.9)', 'rgba(255, 255, 255, 0.95)'],
+    sheenColors: ['rgba(255,255,255,0.5)', 'rgba(255,255,255,0)'],
+    borderGlow: 'rgba(0, 0, 0, 0.1)',
+    badgeBorder: 'rgba(255, 255, 255, 0.9)',
+  },
+  blurTint: 'light',
+  blurIntensity: 80,
+});
+
+// Static design tokens
+const BaseTokens = {
   spacing: { page: 20 },
   radius: { bar: 40, pill: 32 },
   sizes: { barHeight: 76, icon: 20, activeIcon: 22 },
   z: { base: 0, tabBar: 100 },
   touch: { minSize: 44 },
-  glass: {
-    blurIntensity: 90,    // stronger frosted look
-    rimAlpha: 0.95,
-    glowAlpha: 0.22,
-    sheenAlpha: 0.06
-  }
 };
 
 export default function GlassBottomTab({ state, descriptors, navigation }) {
+  // Get theme settings for dynamic theming
+  const { settings, t } = useSettings();
+  const Tokens = useMemo(() => ({
+    ...BaseTokens,
+    ...(settings.theme === 'light' ? getLightTokens() : getDarkTokens()),
+  }), [settings.theme]);
+
   // Get safe area insets for navigation bar
   const insets = useSafeAreaInsets();
 
@@ -139,13 +174,16 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   }, [state.index, fetchUnreadCount]);
 
   const items = [
-    { key: 'Home', label: 'Home', Icon: Home },
-    { key: 'Shop', label: 'Shop', Icon: ShoppingCart },
-    { key: 'Trading', label: 'Giao Dịch', Icon: BarChart2 },
-    { key: 'GemMaster', label: 'Gem Master', Icon: Star },
-    { key: 'Notifications', label: 'Thông Báo', Icon: Bell, badge: unreadCount },
-    { key: 'Account', label: 'Tài Sản', Icon: Box },
+    { key: 'Home', label: t('tabs.home', 'Home'), Icon: Home },
+    { key: 'Shop', label: t('tabs.shop', 'Shop'), Icon: ShoppingCart },
+    { key: 'Trading', label: t('tabs.trading', 'Giao Dịch'), Icon: BarChart2 },
+    { key: 'GemMaster', label: t('tabs.gemMaster', 'Gem Mast...'), Icon: Star },
+    { key: 'Notifications', label: t('tabs.notifications', 'Thông Báo'), Icon: Bell, badge: unreadCount },
+    { key: 'Account', label: t('tabs.account', 'Tài Sản'), Icon: Box },
   ];
+
+  // Create themed styles
+  const styles = useMemo(() => createStyles(Tokens), [Tokens]);
 
   const pillWidth = SCREEN_WIDTH * 0.92;
   const itemWidth = pillWidth / items.length;
@@ -236,17 +274,13 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
         radius={Tokens.radius.bar}
       >
         <BlurView
-          intensity={Tokens.glass.blurIntensity}
-          tint="dark"
+          intensity={Tokens.blurIntensity}
+          tint={Tokens.blurTint}
           style={[styles.blur, { width: pillWidth, borderRadius: Tokens.radius.bar }]}
         >
           {/* Glass Morphism Liquid Overlay */}
           <LinearGradient
-            colors={[
-              'rgba(15, 16, 48, 0.65)',
-              'rgba(106, 91, 255, 0.12)',
-              'rgba(15, 16, 48, 0.75)',
-            ]}
+            colors={Tokens.colors.gradientColors}
             locations={[0, 0.5, 1]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -254,7 +288,7 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
           />
           {/* Top Sheen for Liquid Effect */}
           <LinearGradient
-            colors={['rgba(255,255,255,0.06)', 'rgba(255,255,255,0)']}
+            colors={Tokens.colors.sheenColors}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={styles.topSheen}
@@ -311,87 +345,88 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    // bottom is now dynamic via inline style (useSafeAreaInsets)
-    alignItems: 'center',
-    zIndex: Tokens.z.tabBar,
-  },
-  shadowWrap: {
-    alignSelf: 'center',
-  },
-  blur: {
-    overflow: 'hidden',
-    backgroundColor: Tokens.colors.barTint,
-    alignSelf: 'center',
-  },
-  pill: {
-    height: Tokens.sizes.barHeight,
-    borderRadius: Tokens.radius.bar,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'visible',
-    paddingHorizontal: 6,
-  },
-  iconRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 6,
-    minHeight: Tokens.touch.minSize,
-  },
-  iconContainer: {
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    top: -6,
-    right: -10,
-    backgroundColor: '#DC2626',
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: 'rgba(17, 34, 80, 0.9)',
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  tabLabel: {
-    fontSize: 10,
-    marginTop: 4,
-    letterSpacing: 0.2,
-    fontWeight: '600',
-  },
-  // Glass morphism liquid styles
-  topSheen: {
-    position: 'absolute',
-    top: 0,
-    left: 20,
-    right: 20,
-    height: 20,
-    borderRadius: 20,
-  },
-  borderGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: Tokens.radius.bar,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.25)',
-  },
-});
+// Styles are now created dynamically inside the component using createStyles function
+function createStyles(Tokens) {
+  return StyleSheet.create({
+    container: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      zIndex: Tokens.z.tabBar,
+    },
+    shadowWrap: {
+      alignSelf: 'center',
+    },
+    blur: {
+      overflow: 'hidden',
+      backgroundColor: Tokens.colors.barTint,
+      alignSelf: 'center',
+    },
+    pill: {
+      height: Tokens.sizes.barHeight,
+      borderRadius: Tokens.radius.bar,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'visible',
+      paddingHorizontal: 6,
+    },
+    iconRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    tabItem: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 6,
+      minHeight: Tokens.touch.minSize,
+    },
+    iconContainer: {
+      position: 'relative',
+    },
+    badge: {
+      position: 'absolute',
+      top: -6,
+      right: -10,
+      backgroundColor: '#DC2626',
+      borderRadius: 10,
+      minWidth: 18,
+      height: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 4,
+      borderWidth: 2,
+      borderColor: Tokens.colors.badgeBorder,
+    },
+    badgeText: {
+      color: '#FFFFFF',
+      fontSize: 10,
+      fontWeight: '700',
+    },
+    tabLabel: {
+      fontSize: 10,
+      marginTop: 4,
+      letterSpacing: 0.2,
+      fontWeight: '600',
+    },
+    topSheen: {
+      position: 'absolute',
+      top: 0,
+      left: 20,
+      right: 20,
+      height: 20,
+      borderRadius: 20,
+    },
+    borderGlow: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderRadius: Tokens.radius.bar,
+      borderWidth: 1,
+      borderColor: Tokens.colors.borderGlow,
+    },
+  });
+}
