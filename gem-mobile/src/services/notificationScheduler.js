@@ -89,12 +89,18 @@ class NotificationScheduler {
 
       // Register VoIP push token for iOS (enables CallKit fullscreen incoming call UI)
       // NOTE: Requires rebuild with EAS to include native VoIP module
+      // Safety flag: Set @gem_disable_voip to 'true' in AsyncStorage to disable if crashes occur
       if (Platform.OS === 'ios') {
         try {
-          console.log('[NotificationScheduler] Registering VoIP push for iOS...');
-          const { default: PUSH_TOKEN_SERVICE } = await import('./pushTokenService');
-          const voipToken = await PUSH_TOKEN_SERVICE.registerVoIPPush();
-          console.log('[NotificationScheduler] VoIP token:', voipToken ? 'registered' : 'not available');
+          const disableVoIP = await AsyncStorage.getItem('@gem_disable_voip');
+          if (disableVoIP === 'true') {
+            console.log('[NotificationScheduler] VoIP disabled via safety flag');
+          } else {
+            console.log('[NotificationScheduler] Registering VoIP push for iOS...');
+            const { default: PUSH_TOKEN_SERVICE } = await import('./pushTokenService');
+            const voipToken = await PUSH_TOKEN_SERVICE.registerVoIPPush();
+            console.log('[NotificationScheduler] VoIP token:', voipToken ? 'registered' : 'not available');
+          }
         } catch (err) {
           console.log('[NotificationScheduler] VoIP registration failed (expected if native module not linked):', err?.message);
         }
