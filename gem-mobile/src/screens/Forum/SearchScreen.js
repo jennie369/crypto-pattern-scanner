@@ -412,8 +412,15 @@ const SearchScreen = ({ navigation }) => {
 
   // Render user card for user results
   const renderUserCard = (user) => {
-    const displayName = user.full_name || user.email?.split('@')[0] || 'User';
-    const username = user.email?.split('@')[0] || '';
+    // PRIVACY: Use display_name, full_name, or username only - NEVER email
+    const displayName = user.display_name || user.full_name || user.username;
+    const username = user.username;
+
+    // PRIVACY: Skip rendering users without proper name data
+    if (!displayName) {
+      console.error('[SearchScreen] User has no display name - skipping render', user.id);
+      return null;
+    }
 
     return (
       <TouchableOpacity
@@ -427,7 +434,7 @@ const SearchScreen = ({ navigation }) => {
         />
         <View style={styles.userInfo}>
           <Text style={styles.userName} numberOfLines={1}>{displayName}</Text>
-          <Text style={styles.userHandle} numberOfLines={1}>@{username}</Text>
+          {username && <Text style={styles.userHandle} numberOfLines={1}>@{username}</Text>}
         </View>
         <TouchableOpacity
           style={styles.viewProfileButton}

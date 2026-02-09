@@ -31,8 +31,15 @@ const MentionSuggestionList = memo(({
   // ========== RENDER ==========
   const renderItem = useCallback(
     ({ item }) => {
-      const displayName = item.display_name || 'User';
-      const username = item.username || item.email?.split('@')[0];
+      // PRIVACY: Use display_name, full_name, or username only - NEVER email
+      const displayName = item.display_name || item.full_name || item.username;
+      const username = item.username;
+
+      // PRIVACY: Skip rendering users without proper name data
+      if (!displayName) {
+        console.error('[MentionSuggestionList] User has no display name - skipping render', item.id);
+        return null;
+      }
 
       return (
         <TouchableOpacity

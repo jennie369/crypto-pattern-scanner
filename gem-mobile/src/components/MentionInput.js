@@ -129,10 +129,17 @@ const MentionInput = ({
   const handleSelectUser = (user) => {
     if (mentionStartIndex < 0) return;
 
-    const username = user.full_name || user.email?.split('@')[0] || 'user';
+    // PRIVACY: Use display_name, full_name, or username only - NEVER email
+    const displayName = user.display_name || user.full_name || user.username;
+    if (!displayName) {
+      console.error('[MentionInput] User has no display name, username, or full_name - cannot create mention');
+      closeSuggestions();
+      return;
+    }
+
     const beforeMention = value.slice(0, mentionStartIndex);
     const afterMention = value.slice(mentionStartIndex + mentionQuery.length + 1);
-    const newText = `${beforeMention}@${username} ${afterMention}`;
+    const newText = `${beforeMention}@${displayName} ${afterMention}`;
 
     onChangeText?.(newText);
     closeSuggestions();
@@ -140,7 +147,7 @@ const MentionInput = ({
     // Move cursor after mention
     setTimeout(() => {
       if (inputRef.current) {
-        const newCursorPos = mentionStartIndex + username.length + 2;
+        const newCursorPos = mentionStartIndex + displayName.length + 2;
         inputRef.current.setNativeProps({
           selection: { start: newCursorPos, end: newCursorPos },
         });
@@ -207,7 +214,16 @@ const MentionInput = ({
             nestedScrollEnabled={true}
           >
             {suggestions.map((item) => {
-              const displayName = item.full_name || item.email?.split('@')[0] || 'User';
+              // PRIVACY: Use display_name, full_name, or username only - NEVER email
+              const displayName = item.display_name || item.full_name || item.username;
+              const username = item.username;
+
+              // PRIVACY: Skip rendering users without proper name data
+              if (!displayName) {
+                console.error('[MentionInput] User has no display name - skipping render', item.id);
+                return null;
+              }
+
               const avatarUrl = item.avatar_url ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6A5BFF&color=fff`;
 
@@ -221,8 +237,8 @@ const MentionInput = ({
                   <Image source={{ uri: avatarUrl }} style={styles.suggestionAvatar} />
                   <View style={styles.suggestionInfo}>
                     <Text style={styles.suggestionName}>{displayName}</Text>
-                    {item.email && (
-                      <Text style={styles.suggestionEmail}>@{item.email.split('@')[0]}</Text>
+                    {username && (
+                      <Text style={styles.suggestionUsername}>@{username}</Text>
                     )}
                   </View>
                 </TouchableOpacity>
@@ -369,7 +385,7 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.medium,
     color: COLORS.textPrimary,
   },
-  suggestionEmail: {
+  suggestionUsername: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textMuted,
   },

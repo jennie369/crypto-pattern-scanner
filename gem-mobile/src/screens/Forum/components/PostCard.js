@@ -17,6 +17,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import AuthGate from '../../../components/AuthGate';
 import { forumService } from '../../../services/forumService';
 import { blockService } from '../../../services/blockService';
+import { commentService } from '../../../services/commentService';
 import { trackView } from '../../../services/engagementService';
 import { UserBadges } from '../../../components/UserBadge';
 import PostImageCarousel from '../../../components/PostImageCarousel';
@@ -409,12 +410,31 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
     try {
       const comments = await forumService.getCommentsWithReplies(post.id, 1, 2); // Get latest 2 comments
       setInlineComments(comments || []);
+
+      // Check which comments are liked by current user
+      if (user?.id && comments?.length > 0) {
+        const likedIds = [];
+        for (const comment of comments) {
+          const isLiked = await commentService.isCommentLiked(comment.id, user.id);
+          if (isLiked) likedIds.push(comment.id);
+          // Also check replies
+          if (comment.replies?.length > 0) {
+            for (const reply of comment.replies) {
+              const replyLiked = await commentService.isCommentLiked(reply.id, user.id);
+              if (replyLiked) likedIds.push(reply.id);
+            }
+          }
+        }
+        if (likedIds.length > 0) {
+          setLikedCommentIds(prev => [...new Set([...prev, ...likedIds])]);
+        }
+      }
     } catch (error) {
       console.error('[PostCard] Load comments error:', error);
     } finally {
       setCommentsLoading(false);
     }
-  }, [post.id, commentsLoading]);
+  }, [post.id, commentsLoading, user?.id]);
 
   // Toggle inline comments visibility
   const toggleComments = useCallback(() => {
@@ -490,29 +510,84 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
 
   // Like comment in sheet
   const handleSheetLikeComment = useCallback(async (commentId) => {
-    if (!isAuthenticated) return;
-    const isLiked = likedCommentIds.includes(commentId);
+    if (!isAuthenticated || !user?.id) return;
+    const wasLiked = likedCommentIds.includes(commentId);
     // Optimistic update
-    if (isLiked) {
+    if (wasLiked) {
       setLikedCommentIds(prev => prev.filter(id => id !== commentId));
+      setSheetComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, likes_count: Math.max(0, (c.likes_count || 0) - 1) } : c
+      ));
     } else {
       setLikedCommentIds(prev => [...prev, commentId]);
+      setSheetComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, likes_count: (c.likes_count || 0) + 1 } : c
+      ));
     }
     try {
-      if (isLiked) {
-        await forumService.unlikeComment(commentId);
-      } else {
-        await forumService.likeComment(commentId);
-      }
+      await commentService.toggleCommentLike(commentId, user.id);
     } catch (error) {
       // Revert on error
-      if (isLiked) {
+      console.error('[PostCard] Like comment error:', error);
+      if (wasLiked) {
         setLikedCommentIds(prev => [...prev, commentId]);
+        setSheetComments(prev => prev.map(c =>
+          c.id === commentId ? { ...c, likes_count: (c.likes_count || 0) + 1 } : c
+        ));
       } else {
         setLikedCommentIds(prev => prev.filter(id => id !== commentId));
+        setSheetComments(prev => prev.map(c =>
+          c.id === commentId ? { ...c, likes_count: Math.max(0, (c.likes_count || 0) - 1) } : c
+        ));
       }
     }
-  }, [isAuthenticated, likedCommentIds]);
+  }, [isAuthenticated, user?.id, likedCommentIds]);
+
+  // Like comment inline (Facebook-style - does NOT navigate)
+  const handleInlineCommentLike = useCallback(async (commentId) => {
+    if (!isAuthenticated || !user?.id) {
+      alert({
+        type: 'warning',
+        title: 'Đăng Nhập Cần Thiết',
+        message: 'Bạn cần đăng nhập để thích bình luận',
+        buttons: [
+          { text: 'Để sau', style: 'cancel' },
+          { text: 'Đăng nhập', onPress: () => navigation.navigate('Auth') },
+        ],
+      });
+      return;
+    }
+    const wasLiked = likedCommentIds.includes(commentId);
+    // Optimistic update for inline comments
+    if (wasLiked) {
+      setLikedCommentIds(prev => prev.filter(id => id !== commentId));
+      setInlineComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, likes_count: Math.max(0, (c.likes_count || 0) - 1) } : c
+      ));
+    } else {
+      setLikedCommentIds(prev => [...prev, commentId]);
+      setInlineComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, likes_count: (c.likes_count || 0) + 1 } : c
+      ));
+    }
+    try {
+      await commentService.toggleCommentLike(commentId, user.id);
+    } catch (error) {
+      // Revert on error
+      console.error('[PostCard] Like inline comment error:', error);
+      if (wasLiked) {
+        setLikedCommentIds(prev => [...prev, commentId]);
+        setInlineComments(prev => prev.map(c =>
+          c.id === commentId ? { ...c, likes_count: (c.likes_count || 0) + 1 } : c
+        ));
+      } else {
+        setLikedCommentIds(prev => prev.filter(id => id !== commentId));
+        setInlineComments(prev => prev.map(c =>
+          c.id === commentId ? { ...c, likes_count: Math.max(0, (c.likes_count || 0) - 1) } : c
+        ));
+      }
+    }
+  }, [isAuthenticated, user?.id, likedCommentIds, alert, navigation]);
 
   // Handle comment button press - now toggles inline comments
   const handleComment = () => {
@@ -1378,12 +1453,23 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
                 <View style={styles.inlineCommentMeta}>
                   <Text style={styles.inlineCommentTime}>{formatCommentTime(comment.created_at)}</Text>
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('PostDetail', { postId: post.id, focusComment: true, highlightCommentId: comment.id })}
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      handleInlineCommentLike(comment.id);
+                    }}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Text style={styles.inlineCommentAction}>Thích</Text>
+                    <Text style={[
+                      styles.inlineCommentAction,
+                      likedCommentIds.includes(comment.id) && styles.inlineCommentActionLiked
+                    ]}>
+                      {likedCommentIds.includes(comment.id) ? 'Đã thích' : 'Thích'}
+                      {(comment.likes_count > 0) && ` · ${comment.likes_count}`}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => navigation.navigate('PostDetail', { postId: post.id, focusComment: true, replyToCommentId: comment.id })}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
                     <Text style={styles.inlineCommentAction}>Trả lời</Text>
                   </TouchableOpacity>
@@ -2087,6 +2173,9 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  inlineCommentActionLiked: {
+    color: COLORS.error, // Red color for liked state
   },
   inlineReply: {
     flexDirection: 'row',

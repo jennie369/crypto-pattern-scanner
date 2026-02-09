@@ -109,7 +109,7 @@ export const searchService = {
             .from('forum_posts')
             .select(`
               *,
-              author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
+              author:profiles(id, username, display_name, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
               category:forum_categories(id, name, color),
               likes:forum_likes(user_id),
               saved:forum_saved(user_id)
@@ -126,10 +126,11 @@ export const searchService = {
         })(),
 
         // 2. Search users matching query (for author-based results)
+        // PRIVACY: Do NOT select email, do NOT search by email
         supabase
           .from('profiles')
-          .select('id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role')
-          .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+          .select('id, username, display_name, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role')
+          .or(`full_name.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`)
           .limit(10)
       ]);
 
@@ -150,7 +151,7 @@ export const searchService = {
           .from('forum_posts')
           .select(`
             *,
-            author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
+            author:profiles(id, username, display_name, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
             category:forum_categories(id, name, color),
             likes:forum_likes(user_id),
             saved:forum_saved(user_id)
@@ -174,11 +175,14 @@ export const searchService = {
       }
 
       // Sort results: author name matches first, then title matches, then content
+      // PRIVACY: Do NOT match by email - only by name/username
       const sortedData = allPosts.sort((a, b) => {
         const aAuthorMatch = a.author?.full_name?.toLowerCase().includes(searchTerm) ||
-                            a.author?.email?.toLowerCase().includes(searchTerm);
+                            a.author?.display_name?.toLowerCase().includes(searchTerm) ||
+                            a.author?.username?.toLowerCase().includes(searchTerm);
         const bAuthorMatch = b.author?.full_name?.toLowerCase().includes(searchTerm) ||
-                            b.author?.email?.toLowerCase().includes(searchTerm);
+                            b.author?.display_name?.toLowerCase().includes(searchTerm) ||
+                            b.author?.username?.toLowerCase().includes(searchTerm);
         const aInTitle = a.title?.toLowerCase().includes(searchTerm);
         const bInTitle = b.title?.toLowerCase().includes(searchTerm);
 
@@ -205,6 +209,7 @@ export const searchService = {
 
   /**
    * Search users for mentions or tagging
+   * PRIVACY: Does NOT expose email - only returns sanitized profile data
    * @param {string} query - Username search query
    * @param {number} limit - Max results
    */
@@ -215,11 +220,12 @@ export const searchService = {
 
       let queryBuilder = supabase
         .from('profiles')
-        .select('id, email, full_name, avatar_url')
+        .select('id, username, display_name, full_name, avatar_url')
         .limit(limit);
 
       if (searchTerm.length > 0) {
-        queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+        // PRIVACY: Search by name/username only - NEVER by email
+        queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`);
       } else {
         // If no query, return recent/popular users
         queryBuilder = queryBuilder.order('created_at', { ascending: false });
@@ -238,6 +244,7 @@ export const searchService = {
   /**
    * Search ONLY mutual followers for @mention tagging (privacy-safe)
    * Only returns users where: current user follows them AND they follow current user
+   * PRIVACY: Does NOT expose email - only returns sanitized profile data
    * @param {string} query - Username search query
    * @param {number} limit - Max results
    */
@@ -275,16 +282,18 @@ export const searchService = {
       const mutualIds = mutualFollows.map(f => f.follower_id);
 
       // Step 3: Get profile info for mutual followers
+      // PRIVACY: Only select whitelisted fields - NEVER include email
       const searchTerm = (query || '').trim().toLowerCase();
 
       let queryBuilder = supabase
         .from('profiles')
-        .select('id, email, full_name, avatar_url')
+        .select('id, username, display_name, full_name, avatar_url')
         .in('id', mutualIds)
         .limit(limit);
 
       if (searchTerm.length > 0) {
-        queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+        // PRIVACY: Search by name/username only - NEVER by email
+        queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`);
       }
 
       const { data, error } = await queryBuilder;
@@ -298,8 +307,9 @@ export const searchService = {
   },
 
   /**
-   * Search users that current user follows (for tagging)
-   * Returns all followed users, not just mutual followers
+   * Search users for @mention tagging - MUTUAL FOLLOWERS ONLY
+   * PRIVACY REQUIREMENT: Only returns users who follow current user AND current user follows them
+   * PRIVACY: Does NOT expose email - only returns sanitized profile data
    * @param {string} query - Username search query
    * @param {number} limit - Max results
    */
@@ -311,42 +321,47 @@ export const searchService = {
         return [];
       }
 
-      // Get users I follow
+      // Step 1: Get users I follow
       const { data: myFollowing } = await supabase
         .from('user_follows')
         .select('following_id')
         .eq('follower_id', currentUser.id);
 
       if (!myFollowing || myFollowing.length === 0) {
-        // Fallback: search all users if not following anyone
-        const searchTerm = (query || '').trim().toLowerCase();
-        let queryBuilder = supabase
-          .from('profiles')
-          .select('id, email, full_name, avatar_url')
-          .neq('id', currentUser.id)
-          .limit(limit);
-
-        if (searchTerm.length > 0) {
-          queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
-        }
-
-        const { data } = await queryBuilder;
-        return data || [];
+        // PRIVACY: If not following anyone, return empty (no fallback to all users)
+        console.log('[SearchService] User not following anyone, returning empty for tagging');
+        return [];
       }
 
-      const followingIds = myFollowing.map(f => f.following_id);
+      const myFollowingIds = myFollowing.map(f => f.following_id);
 
-      // Get profile info for followed users
+      // Step 2: Get users who ALSO follow me (mutual followers only)
+      const { data: mutualFollows } = await supabase
+        .from('user_follows')
+        .select('follower_id')
+        .eq('following_id', currentUser.id)
+        .in('follower_id', myFollowingIds);
+
+      if (!mutualFollows || mutualFollows.length === 0) {
+        // No mutual followers
+        return [];
+      }
+
+      const mutualIds = mutualFollows.map(f => f.follower_id);
+
+      // Step 3: Get profile info for mutual followers only
+      // PRIVACY: Only select whitelisted fields - NEVER include email
       const searchTerm = (query || '').trim().toLowerCase();
 
       let queryBuilder = supabase
         .from('profiles')
-        .select('id, email, full_name, avatar_url')
-        .in('id', followingIds)
+        .select('id, username, display_name, full_name, avatar_url')
+        .in('id', mutualIds)
         .limit(limit);
 
       if (searchTerm.length > 0) {
-        queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+        // PRIVACY: Search by name/username only - NEVER by email
+        queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`);
       }
 
       const { data, error } = await queryBuilder;
@@ -376,7 +391,7 @@ export const searchService = {
         .from('forum_posts')
         .select(`
           *,
-          author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
+          author:profiles(id, username, display_name, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color),
           likes:forum_likes(user_id),
           saved:forum_saved(user_id)

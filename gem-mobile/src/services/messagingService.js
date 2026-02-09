@@ -360,6 +360,63 @@ class MessagingService {
   }
 
   /**
+   * Create a call event message to display in chat timeline
+   * This creates a message record with message_type='call' so calls appear inline with messages
+   * @param {string} conversationId - Conversation ID
+   * @param {Object} callData - Call data object
+   * @param {string} callData.callId - Call ID
+   * @param {string} callData.callType - 'audio' or 'video'
+   * @param {string} callData.callStatus - 'ended', 'missed', 'declined', 'cancelled'
+   * @param {string} callData.callerId - User who initiated the call
+   * @param {number} callData.duration - Call duration in seconds (0 for missed/declined)
+   * @param {string} callData.endReason - Reason call ended
+   * @returns {Promise<Object>} Created message
+   */
+  async createCallEventMessage(conversationId, callData) {
+    try {
+      const { callId, callType, callStatus, callerId, duration = 0, endReason = null } = callData;
+
+      // Store call info as JSON in content
+      const callContent = JSON.stringify({
+        call_id: callId,
+        call_type: callType,
+        call_status: callStatus,
+        duration: duration,
+        end_reason: endReason,
+      });
+
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: callerId,
+          content: callContent,
+          message_type: 'call',
+        })
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('[messagingService] createCallEventMessage error:', error);
+        throw error;
+      }
+
+      // Update conversation timestamp
+      await supabase
+        .from('conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', conversationId);
+
+      console.log('[messagingService] Call event message created:', data.id, 'status:', callStatus);
+      return data;
+    } catch (error) {
+      console.error('[messagingService] createCallEventMessage error:', error);
+      // Don't throw - call event message is non-critical
+      return null;
+    }
+  }
+
+  /**
    * Send push notification for a new message
    * @private
    */
@@ -925,7 +982,8 @@ class MessagingService {
   // =====================================================
 
   /**
-   * Search users by display name or email
+   * Search users by display name or username
+   * PRIVACY: Does NOT expose email - only returns sanitized profile data
    * @param {string} query - Search query
    * @returns {Promise<Array>} List of users
    */
@@ -935,19 +993,162 @@ class MessagingService {
 
       const { data: { user } } = await supabase.auth.getUser();
 
+      // PRIVACY: Only select whitelisted fields - NEVER include email
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url, email, online_status')
-        .or(`display_name.ilike.%${query}%,email.ilike.%${query}%`)
+        .select('id, username, display_name, full_name, avatar_url, online_status')
+        .or(`display_name.ilike.%${query}%,full_name.ilike.%${query}%,username.ilike.%${query}%`)
         .neq('id', user?.id) // Exclude current user
         .limit(10);
 
       if (error) throw error;
 
-      return data;
+      return (data || []).map(profile => ({
+        ...profile,
+        display_name: profile.full_name || profile.display_name || profile.username || 'User'
+      }));
     } catch (error) {
       console.error('Error searching users:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Search users who mutually follow the current user
+   * Only returns users where both parties follow each other
+   * @param {string} query - Search query (min 2 chars)
+   * @param {number} limit - Max results (default 10)
+   * @returns {Promise<Array>} Mutual follow users matching query
+   */
+  async searchMutualFollowUsers(query, limit = 10) {
+    if (!query || query.length < 2) return [];
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // Step 1: Get users current user follows
+      const { data: following } = await supabase
+        .from('user_follows')
+        .select('following_id')
+        .eq('follower_id', user.id);
+
+      if (!following || following.length === 0) return [];
+      const followingIds = following.map(f => f.following_id);
+
+      // Step 2: Filter to only those who follow back (mutual)
+      const { data: mutualFollows } = await supabase
+        .from('user_follows')
+        .select('follower_id')
+        .eq('following_id', user.id)
+        .in('follower_id', followingIds);
+
+      if (!mutualFollows || mutualFollows.length === 0) return [];
+      const mutualIds = mutualFollows.map(f => f.follower_id);
+
+      // Step 3: Search profiles within mutual follows
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, username, avatar_url, online_status')
+        .in('id', mutualIds)
+        .or(`display_name.ilike.%${query}%,full_name.ilike.%${query}%,username.ilike.%${query}%`)
+        .limit(limit);
+
+      if (error) throw error;
+
+      return (data || []).map(profile => ({
+        ...profile,
+        display_name: profile.full_name || profile.display_name || profile.username || 'User'
+      }));
+    } catch (error) {
+      console.error('Error searching mutual follow users:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Search users eligible for group chat
+   * - Normal users: contacts (messaged before) OR mutual follows
+   * - Admins: can search anyone (but still NO email exposed)
+   * @param {string} query - Search query
+   * @param {number} limit - Max results (default 10)
+   * @param {boolean} isAdmin - If true, bypass contact/follow restrictions
+   * @returns {Promise<Array>} Eligible users
+   */
+  async searchGroupChatEligibleUsers(query, limit = 10, isAdmin = false) {
+    if (!query || query.length < 2) return [];
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // ADMIN: Can search anyone (but still NO EMAIL)
+      if (isAdmin) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, display_name, full_name, username, avatar_url, online_status')
+          .neq('id', user.id)
+          .or(`display_name.ilike.%${query}%,full_name.ilike.%${query}%,username.ilike.%${query}%`)
+          .limit(limit);
+
+        if (error) throw error;
+
+        return (data || []).map(profile => ({
+          ...profile,
+          display_name: profile.full_name || profile.display_name || profile.username || 'User'
+        }));
+      }
+
+      // NON-ADMIN: Only contacts OR mutual follows
+      // Get contacts (users we've messaged before)
+      const { data: contacts } = await supabase
+        .from('user_contacts')
+        .select('contact_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+
+      const contactIds = contacts?.map(c => c.contact_id) || [];
+
+      // Get mutual follows
+      const { data: following } = await supabase
+        .from('user_follows')
+        .select('following_id')
+        .eq('follower_id', user.id);
+
+      const followingIds = following?.map(f => f.following_id) || [];
+
+      let mutualIds = [];
+      if (followingIds.length > 0) {
+        const { data: mutualFollows } = await supabase
+          .from('user_follows')
+          .select('follower_id')
+          .eq('following_id', user.id)
+          .in('follower_id', followingIds);
+
+        mutualIds = mutualFollows?.map(f => f.follower_id) || [];
+      }
+
+      // Combine: contacts + mutual follows (unique)
+      const eligibleIds = [...new Set([...contactIds, ...mutualIds])];
+
+      if (eligibleIds.length === 0) return [];
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, username, avatar_url, online_status')
+        .in('id', eligibleIds)
+        .or(`display_name.ilike.%${query}%,full_name.ilike.%${query}%,username.ilike.%${query}%`)
+        .limit(limit);
+
+      if (error) throw error;
+
+      return (data || []).map(profile => ({
+        ...profile,
+        display_name: profile.full_name || profile.display_name || profile.username || 'User'
+      }));
+    } catch (error) {
+      console.error('Error searching group chat eligible users:', error);
+      return [];
     }
   }
 
@@ -2128,7 +2329,7 @@ class MessagingService {
           conversation_id: conversationId,
           user_id: user.id,
           is_archived: true,
-          archived_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         }, {
           onConflict: 'conversation_id,user_id',
         });
@@ -2156,7 +2357,7 @@ class MessagingService {
         .from('conversation_settings')
         .update({
           is_archived: false,
-          archived_at: null,
+          updated_at: new Date().toISOString(),
         })
         .eq('conversation_id', conversationId)
         .eq('user_id', user.id);
@@ -2182,10 +2383,10 @@ class MessagingService {
       // Get archived conversation IDs
       const { data: archivedSettings, error: settingsError } = await supabase
         .from('conversation_settings')
-        .select('conversation_id, archived_at')
+        .select('conversation_id, updated_at')
         .eq('user_id', user.id)
         .eq('is_archived', true)
-        .order('archived_at', { ascending: false });
+        .order('updated_at', { ascending: false });
 
       if (settingsError) throw settingsError;
 
@@ -2265,7 +2466,7 @@ class MessagingService {
           other_participant: otherParticipant,
           my_unread_count: conv.conversation_participants
             .find(p => p.user_id === user.id)?.unread_count || 0,
-          archived_at: archivedInfo?.archived_at,
+          archived_at: archivedInfo?.updated_at,
           messages: undefined
         };
       });
@@ -2315,7 +2516,7 @@ class MessagingService {
         .from('conversation_settings')
         .update({
           is_archived: false,
-          archived_at: null,
+          updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.id)
         .in('conversation_id', conversationIds);
@@ -2462,22 +2663,53 @@ class MessagingService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Chưa đăng nhập');
 
-      // Remove user from participants
-      const { error } = await supabase
+      console.log('[messagingService] Deleting conversation:', conversationId, 'for user:', user.id);
+
+      // Step 1: Delete from conversation_participants table FIRST
+      // This is the most reliable way to remove user from conversation
+      const { error: participantError } = await supabase
         .from('conversation_participants')
         .delete()
         .eq('conversation_id', conversationId)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (participantError) {
+        console.error('[messagingService] Error deleting participant:', participantError);
+        throw participantError;
+      }
 
-      // Clean up settings
+      // Step 2: Get current participant_ids and update
+      const { data: conversation, error: fetchError } = await supabase
+        .from('conversations')
+        .select('participant_ids')
+        .eq('id', conversationId)
+        .single();
+
+      if (!fetchError && conversation?.participant_ids) {
+        const newParticipants = conversation.participant_ids.filter(id => id !== user.id);
+
+        // Only update if there's a change
+        if (newParticipants.length !== conversation.participant_ids.length) {
+          const { error: updateError } = await supabase
+            .from('conversations')
+            .update({ participant_ids: newParticipants })
+            .eq('id', conversationId);
+
+          if (updateError) {
+            console.warn('[messagingService] Error updating participant_ids (non-critical):', updateError);
+            // Non-critical - conversation_participants deletion is what matters for the query
+          }
+        }
+      }
+
+      // Step 3: Clean up settings
       await supabase
         .from('conversation_settings')
         .delete()
         .eq('conversation_id', conversationId)
         .eq('user_id', user.id);
 
+      console.log('[messagingService] Conversation deleted successfully:', conversationId);
       return { success: true };
     } catch (error) {
       console.error('[messagingService] deleteConversation error:', error);
