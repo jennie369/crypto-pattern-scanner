@@ -89,8 +89,7 @@ class NotificationScheduler {
 
       // Register VoIP push token for iOS (enables CallKit fullscreen incoming call UI)
       // NOTE: Requires rebuild with EAS to include native VoIP module
-      // TEMPORARILY DISABLED until next EAS build - set ENABLE_VOIP_PUSH = true after rebuild
-      const ENABLE_VOIP_PUSH = false; // <-- Change to true after EAS rebuild
+      const ENABLE_VOIP_PUSH = true;
       if (Platform.OS === 'ios' && ENABLE_VOIP_PUSH) {
         try {
           const disableVoIP = await AsyncStorage.getItem('@gem_disable_voip');
