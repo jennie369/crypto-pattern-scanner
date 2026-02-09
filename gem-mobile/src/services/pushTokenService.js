@@ -19,25 +19,48 @@ import callKeepService from './callKeepService';
 
 // VoIP push module - loaded lazily to prevent crash if not properly linked
 // IMPORTANT: Don't load at module initialization - load only when needed
+import { NativeModules } from 'react-native';
+
 let VoipPushNotification = null;
 let voipModuleLoaded = false;
+let voipModuleError = false;
 
 function getVoipModule() {
+  // If we already tried and failed, don't try again
+  if (voipModuleError) return null;
   if (voipModuleLoaded) return VoipPushNotification;
-  voipModuleLoaded = true;
 
   if (Platform.OS !== 'ios') {
+    voipModuleLoaded = true;
+    return null;
+  }
+
+  // Check if native module is linked BEFORE trying to require JS module
+  console.log('[PushToken] Checking NativeModules.RNVoipPushNotification:', !!NativeModules.RNVoipPushNotification);
+  console.log('[PushToken] Available NativeModules:', Object.keys(NativeModules).filter(k => k.includes('Voip') || k.includes('Push') || k.includes('Call')));
+
+  if (!NativeModules.RNVoipPushNotification) {
+    console.log('[PushToken] VoIP native module not linked in this build - skipping');
+    voipModuleLoaded = true;
+    voipModuleError = true;
     return null;
   }
 
   try {
+    // IMPORTANT: This require() only works AFTER EAS rebuild with native modules
+    // Metro bundles this statically, so if native module isn't linked, app crashes
+    // The NativeModules check above prevents reaching here if not linked
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const voipModule = require('react-native-voip-push-notification');
     VoipPushNotification = voipModule?.default || voipModule;
+    voipModuleLoaded = true;
     console.log('[PushToken] VoIP module loaded successfully');
     return VoipPushNotification;
   } catch (e) {
     console.log('[PushToken] VoIP push not available:', e?.message || 'unknown error');
     VoipPushNotification = null;
+    voipModuleLoaded = true;
+    voipModuleError = true;
     return null;
   }
 }
@@ -191,8 +214,27 @@ const PUSH_TOKEN_SERVICE = {
       return null;
     }
 
+    // Early check: Is native module linked? This must happen BEFORE require()
+    try {
+      const { NativeModules } = require('react-native');
+      if (!NativeModules.RNVoipPushNotification) {
+        console.log('[PushToken] VoIP native module not linked in this build - skipping registration');
+        return null;
+      }
+    } catch (nativeCheckErr) {
+      console.log('[PushToken] Error checking native module:', nativeCheckErr?.message);
+      return null;
+    }
+
     // Load VoIP module lazily
-    const voipModule = getVoipModule();
+    let voipModule;
+    try {
+      voipModule = getVoipModule();
+    } catch (loadErr) {
+      console.log('[PushToken] Error loading VoIP module:', loadErr?.message);
+      return null;
+    }
+
     if (!voipModule) {
       console.log('[PushToken] VoIP push module not available - check if react-native-voip-push-notification is installed and linked');
       return null;
