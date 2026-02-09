@@ -52,6 +52,7 @@ import { COLORS, GRADIENTS, SPACING, GLASS, TYPOGRAPHY } from '../../utils/token
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../services/supabase';
 import notificationScheduler from '../../services/notificationScheduler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DEFAULT_SETTINGS = {
   push_enabled: true,
@@ -111,6 +112,7 @@ export default function NotificationSettingsScreen({ navigation }) {
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [widgetSettings, setWidgetSettings] = useState(DEFAULT_WIDGET_SETTINGS);
+  const [voipDisabled, setVoipDisabled] = useState(false);
 
   // Time picker state
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -120,7 +122,37 @@ export default function NotificationSettingsScreen({ navigation }) {
   useEffect(() => {
     loadSettings();
     loadWidgetSettings();
+    loadVoipSetting();
   }, []);
+
+  const loadVoipSetting = async () => {
+    try {
+      const disabled = await AsyncStorage.getItem('@gem_disable_voip');
+      setVoipDisabled(disabled === 'true');
+    } catch (e) {
+      console.log('[NotificationSettings] Error loading VoIP setting:', e);
+    }
+  };
+
+  const toggleVoipDisabled = async (value) => {
+    try {
+      if (value) {
+        await AsyncStorage.setItem('@gem_disable_voip', 'true');
+      } else {
+        await AsyncStorage.removeItem('@gem_disable_voip');
+      }
+      setVoipDisabled(value);
+      alert({
+        type: value ? 'warning' : 'success',
+        title: value ? 'VoIP Disabled' : 'VoIP Enabled',
+        message: value
+          ? 'VoIP push đã tắt. Incoming call sẽ dùng regular push.'
+          : 'VoIP push đã bật. Cần logout/login lại để apply.',
+      });
+    } catch (e) {
+      console.log('[NotificationSettings] Error toggling VoIP:', e);
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -779,6 +811,32 @@ export default function NotificationSettingsScreen({ navigation }) {
               )}
             </View>
           </View>
+
+          {/* Developer Options (iOS only) */}
+          {Platform.OS === 'ios' && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Developer</Text>
+              <View style={styles.sectionCard}>
+                <View style={styles.settingItem}>
+                  <View style={[styles.settingIcon, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
+                    <AlertTriangle size={20} color={COLORS.error} />
+                  </View>
+                  <View style={styles.settingContent}>
+                    <Text style={styles.settingLabel}>Disable VoIP Push</Text>
+                    <Text style={styles.settingDesc}>
+                      Tắt nếu app crash khi nhận call. Dùng regular push thay thế.
+                    </Text>
+                  </View>
+                  <Switch
+                    value={voipDisabled}
+                    onValueChange={toggleVoipDisabled}
+                    trackColor={{ false: 'rgba(255,255,255,0.1)', true: `${COLORS.error}50` }}
+                    thumbColor={voipDisabled ? COLORS.error : COLORS.textMuted}
+                  />
+                </View>
+              </View>
+            </View>
+          )}
 
           <View style={{ height: 100 }} />
         </ScrollView>
