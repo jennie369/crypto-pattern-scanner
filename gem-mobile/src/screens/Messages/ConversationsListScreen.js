@@ -72,15 +72,19 @@ export default function ConversationsListScreen({ navigation }) {
     if (!user?.id) return false;
 
     try {
-      const [cachedConvos, cachedPinned, cachedArchived] = await Promise.all([
+      const [cachedConvos, cachedPinned, cachedArchived, deletedSet] = await Promise.all([
         cacheService.getForUser('CONVERSATIONS', user.id),
         cacheService.getForUser('PINNED_CONVERSATIONS', user.id),
         cacheService.getForUser('ARCHIVED_CONVERSATIONS', user.id),
+        messagingService.getAllDeletedConversationIds(user.id), // Merged: local + server for cross-device sync
       ]);
 
       if (cachedConvos && cachedConvos.length > 0) {
-        console.log('[ConversationsList] Loaded from cache:', cachedConvos.length);
-        setConversations(cachedConvos);
+        // Filter out deleted conversations from cache (deletedSet is already a Set)
+        const filteredConvos = cachedConvos.filter(c => !deletedSet.has(c.id));
+
+        console.log('[ConversationsList] Loaded from cache:', filteredConvos.length, '(filtered from', cachedConvos.length, ')');
+        setConversations(filteredConvos);
         setPinnedIds(cachedPinned || []);
         setArchivedIds(cachedArchived || []);
         setLoading(false); // Show cached data immediately
@@ -96,6 +100,7 @@ export default function ConversationsListScreen({ navigation }) {
   const fetchConversations = useCallback(async (isBackgroundRefresh = false) => {
     try {
       // Fetch conversations, pinned IDs, archived IDs, and message requests count in parallel
+      // Note: getConversations() filters out deleted conversations (merged: local + server-side)
       const [data, pinnedData, archivedData, requestsCount] = await Promise.all([
         messagingService.getConversations(),
         messagingService.getPinnedConversationIds(),
@@ -206,12 +211,28 @@ export default function ConversationsListScreen({ navigation }) {
 
   const handleDelete = useCallback(async (conversationId) => {
     try {
-      await messagingService.deleteConversation(conversationId);
+      // Optimistically remove from UI immediately
       setConversations(prev => prev.filter(c => c.id !== conversationId));
+
+      // Also remove from cache immediately
+      if (user?.id) {
+        const cachedConvos = await cacheService.getForUser('CONVERSATIONS', user.id);
+        if (cachedConvos) {
+          const filtered = cachedConvos.filter(c => c.id !== conversationId);
+          await cacheService.setForUser('CONVERSATIONS', user.id, filtered);
+        }
+      }
+
+      // Delete from server (also saves to persistent deleted list in AsyncStorage)
+      const result = await messagingService.deleteConversation(conversationId);
+      if (!result.success) {
+        console.error('Delete failed:', result.error);
+        // Conversation is still hidden because it's in the persistent deleted list
+      }
     } catch (error) {
       console.error('Error deleting conversation:', error);
     }
-  }, []);
+  }, [user?.id]);
 
   const handleMute = useCallback(async (conversationId) => {
     try {

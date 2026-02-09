@@ -17,10 +17,130 @@
 import { supabase } from './supabase';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Key for storing deleted conversation IDs permanently
+const DELETED_CONVERSATIONS_KEY = '@gem_deleted_conversations';
 
 class MessagingService {
   // Expose supabase instance for presence channels (same as web)
   supabase = supabase;
+
+  // =====================================================
+  // DELETED CONVERSATIONS MANAGEMENT (Local Storage)
+  // =====================================================
+
+  /**
+   * Get list of locally deleted conversation IDs
+   * @param {string} userId - User ID
+   * @returns {Promise<string[]>} Array of deleted conversation IDs
+   */
+  async getDeletedConversationIds(userId) {
+    try {
+      const key = `${DELETED_CONVERSATIONS_KEY}_${userId}`;
+      const data = await AsyncStorage.getItem(key);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('[messagingService] Error getting deleted IDs:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Add a conversation ID to the deleted list
+   * @param {string} userId - User ID
+   * @param {string} conversationId - Conversation ID to mark as deleted
+   */
+  async addDeletedConversationId(userId, conversationId) {
+    try {
+      const key = `${DELETED_CONVERSATIONS_KEY}_${userId}`;
+      const existing = await this.getDeletedConversationIds(userId);
+      if (!existing.includes(conversationId)) {
+        existing.push(conversationId);
+        await AsyncStorage.setItem(key, JSON.stringify(existing));
+        console.log('[messagingService] Added to deleted list:', conversationId);
+      }
+    } catch (error) {
+      console.error('[messagingService] Error adding deleted ID:', error);
+    }
+  }
+
+  /**
+   * Remove a conversation ID from the deleted list (for undo)
+   * @param {string} userId - User ID
+   * @param {string} conversationId - Conversation ID to restore
+   */
+  async removeDeletedConversationId(userId, conversationId) {
+    try {
+      const key = `${DELETED_CONVERSATIONS_KEY}_${userId}`;
+      const existing = await this.getDeletedConversationIds(userId);
+      const filtered = existing.filter(id => id !== conversationId);
+      await AsyncStorage.setItem(key, JSON.stringify(filtered));
+    } catch (error) {
+      console.error('[messagingService] Error removing deleted ID:', error);
+    }
+  }
+
+  /**
+   * Get server-side deleted conversation IDs from conversation_settings
+   * @returns {Promise<string[]>} Array of deleted conversation IDs
+   */
+  async getServerDeletedConversationIds() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('conversation_settings')
+        .select('conversation_id')
+        .eq('user_id', user.id)
+        .eq('is_deleted', true);
+
+      if (error) {
+        console.error('[messagingService] Error fetching server deleted IDs:', error);
+        return [];
+      }
+
+      return data?.map(d => d.conversation_id) || [];
+    } catch (error) {
+      console.error('[messagingService] Error in getServerDeletedConversationIds:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get combined deleted conversation IDs (local + server)
+   * @param {string} userId - User ID
+   * @returns {Promise<Set<string>>} Set of all deleted conversation IDs
+   */
+  async getAllDeletedConversationIds(userId) {
+    try {
+      // Fetch both local and server deleted IDs in parallel
+      const [localIds, serverIds] = await Promise.all([
+        this.getDeletedConversationIds(userId),
+        this.getServerDeletedConversationIds(),
+      ]);
+
+      // Merge into a Set for deduplication
+      const allDeletedIds = new Set([...localIds, ...serverIds]);
+
+      // Sync server IDs to local storage for offline access
+      if (serverIds.length > 0) {
+        for (const id of serverIds) {
+          if (!localIds.includes(id)) {
+            await this.addDeletedConversationId(userId, id);
+          }
+        }
+      }
+
+      return allDeletedIds;
+    } catch (error) {
+      console.error('[messagingService] Error in getAllDeletedConversationIds:', error);
+      // Fall back to local only
+      const localIds = await this.getDeletedConversationIds(userId);
+      return new Set(localIds);
+    }
+  }
 
   // =====================================================
   // CONVERSATIONS
@@ -35,12 +155,39 @@ class MessagingService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Step 1: Fetch conversations with participants
+      // Step 1: Get conversation IDs where current user is a participant
+      // This query uses conversation_participants table as the source of truth
+      const { data: myParticipantRecords, error: participantError } = await supabase
+        .from('conversation_participants')
+        .select('conversation_id, unread_count, last_read_at')
+        .eq('user_id', user.id);
+
+      if (participantError) throw participantError;
+      if (!myParticipantRecords || myParticipantRecords.length === 0) {
+        return [];
+      }
+
+      // Get ALL deleted conversation IDs (merged: local + server for cross-device sync)
+      const deletedSet = await this.getAllDeletedConversationIds(user.id);
+
+      // Filter out deleted conversations
+      const filteredRecords = myParticipantRecords.filter(r => !deletedSet.has(r.conversation_id));
+      if (filteredRecords.length === 0) {
+        return [];
+      }
+
+      const conversationIds = filteredRecords.map(r => r.conversation_id);
+      const myUnreadMap = {};
+      filteredRecords.forEach(r => {
+        myUnreadMap[r.conversation_id] = r.unread_count || 0;
+      });
+
+      // Step 2: Fetch full conversation details for those IDs
       const { data, error } = await supabase
         .from('conversations')
         .select(`
           *,
-          conversation_participants!inner(
+          conversation_participants(
             unread_count,
             last_read_at,
             user_id
@@ -53,12 +200,12 @@ class MessagingService {
             is_deleted
           )
         `)
-        .contains('participant_ids', [user.id])
+        .in('id', conversationIds)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
 
-      // Step 2: Collect all unique participant user_ids (excluding current user)
+      // Step 3: Collect all unique participant user_ids (excluding current user)
       const otherUserIds = new Set();
       data.forEach(conv => {
         conv.conversation_participants.forEach(p => {
@@ -68,7 +215,7 @@ class MessagingService {
         });
       });
 
-      // Step 3: Fetch profiles for all other participants
+      // Step 4: Fetch profiles for all other participants
       let profilesMap = {};
       if (otherUserIds.size > 0) {
         const { data: profiles, error: profilesError } = await supabase
@@ -85,7 +232,7 @@ class MessagingService {
         }
       }
 
-      // Step 4: Map conversations with profile data
+      // Step 5: Map conversations with profile data
       const conversationsWithLatest = data.map(conv => {
         const sortedMessages = conv.messages
           .filter(m => !m.is_deleted)
@@ -102,8 +249,8 @@ class MessagingService {
           ...conv,
           latest_message: sortedMessages[0] || null,
           other_participant: otherParticipant,
-          my_unread_count: conv.conversation_participants
-            .find(p => p.user_id === user.id)?.unread_count || 0,
+          // Use the pre-fetched unread count from Step 1
+          my_unread_count: myUnreadMap[conv.id] || 0,
           messages: undefined
         };
       });
@@ -2665,8 +2812,32 @@ class MessagingService {
 
       console.log('[messagingService] Deleting conversation:', conversationId, 'for user:', user.id);
 
-      // Step 1: Delete from conversation_participants table FIRST
-      // This is the most reliable way to remove user from conversation
+      // STEP 1: Save to local deleted list FIRST (immediate UX)
+      // This ensures the conversation stays hidden even if server delete fails
+      await this.addDeletedConversationId(user.id, conversationId);
+
+      // STEP 2: Persist to server via conversation_settings (cross-device sync)
+      // Use upsert with is_deleted flag - this table has full RLS access for users
+      const { error: settingsError } = await supabase
+        .from('conversation_settings')
+        .upsert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          is_deleted: true,
+          deleted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'conversation_id,user_id',
+        });
+
+      if (settingsError) {
+        console.error('[messagingService] Error setting is_deleted in conversation_settings:', settingsError);
+        // Non-critical - local delete still works
+      } else {
+        console.log('[messagingService] Server-side soft delete succeeded (conversation_settings.is_deleted = true)');
+      }
+
+      // STEP 3: Try to delete from conversation_participants (may fail due to RLS, that's OK)
       const { error: participantError } = await supabase
         .from('conversation_participants')
         .delete()
@@ -2674,40 +2845,9 @@ class MessagingService {
         .eq('user_id', user.id);
 
       if (participantError) {
-        console.error('[messagingService] Error deleting participant:', participantError);
-        throw participantError;
+        console.warn('[messagingService] conversation_participants delete failed (expected - no RLS policy):', participantError.message);
+        // Expected to fail - conversation_participants has no DELETE RLS policy
       }
-
-      // Step 2: Get current participant_ids and update
-      const { data: conversation, error: fetchError } = await supabase
-        .from('conversations')
-        .select('participant_ids')
-        .eq('id', conversationId)
-        .single();
-
-      if (!fetchError && conversation?.participant_ids) {
-        const newParticipants = conversation.participant_ids.filter(id => id !== user.id);
-
-        // Only update if there's a change
-        if (newParticipants.length !== conversation.participant_ids.length) {
-          const { error: updateError } = await supabase
-            .from('conversations')
-            .update({ participant_ids: newParticipants })
-            .eq('id', conversationId);
-
-          if (updateError) {
-            console.warn('[messagingService] Error updating participant_ids (non-critical):', updateError);
-            // Non-critical - conversation_participants deletion is what matters for the query
-          }
-        }
-      }
-
-      // Step 3: Clean up settings
-      await supabase
-        .from('conversation_settings')
-        .delete()
-        .eq('conversation_id', conversationId)
-        .eq('user_id', user.id);
 
       console.log('[messagingService] Conversation deleted successfully:', conversationId);
       return { success: true };
