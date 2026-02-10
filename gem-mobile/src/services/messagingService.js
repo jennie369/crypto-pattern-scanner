@@ -524,11 +524,17 @@ class MessagingService {
     try {
       const { callId, callType, callStatus, callerId, duration = 0, endReason = null } = callData;
 
-      // Store call info as JSON in content
+      // RLS yêu cầu sender_id = auth.uid(), nên dùng user hiện tại
+      const { data: { user } } = await supabase.auth.getUser();
+      const senderId = user?.id;
+      if (!senderId) return null;
+
+      // Store call info as JSON in content (giữ caller_id gốc trong data)
       const callContent = JSON.stringify({
         call_id: callId,
         call_type: callType,
         call_status: callStatus,
+        caller_id: callerId,
         duration: duration,
         end_reason: endReason,
       });
@@ -537,7 +543,7 @@ class MessagingService {
         .from('messages')
         .insert({
           conversation_id: conversationId,
-          sender_id: callerId,
+          sender_id: senderId,
           content: callContent,
           message_type: 'call',
         })
