@@ -39,6 +39,7 @@ import { useSponsorBanners } from '../../components/SponsorBannerSection';
 import SponsorBanner from '../../components/SponsorBanner';
 import { injectBannersIntoFeed } from '../../utils/bannerDistribution';
 import { forumService } from '../../services/forumService';
+import { hashtagService } from '../../services/hashtagService';
 import { forumRecommendationService } from '../../services/forumRecommendationService';
 import { generateFeed, getNextFeedPage, resetAllImpressions, getImpressionStats, trackVisibleImpressions, invalidateFeedCache } from '../../services/feedService';
 import boostService from '../../services/boostService';
@@ -47,7 +48,7 @@ import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
-import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
+import { FORCE_REFRESH_EVENT, RESET_LOADING_EVENT, registerLoadingReset } from '../../utils/loadingStateManager';
 
 // Global forum cache - persists data between tab switches
 const forumCache = {
@@ -85,6 +86,18 @@ const FLATLIST_CONFIG = {
 const MAX_CACHE_SIZE = 300;
 const MAX_TRACKED_POSTS = 500;
 
+// Feed loading timeout - prevents infinite spinner
+const FEED_LOAD_TIMEOUT = 10000; // 10 seconds
+
+// Helper: wrap a promise with timeout
+const withTimeout = (promise, ms, label = 'operation') => {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(`[FeedTimeout] ${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+};
+
 const ForumScreen = ({ navigation }) => {
   const { user } = useAuth();
   const { alert, AlertComponent } = useCustomAlert();
@@ -112,6 +125,7 @@ const ForumScreen = ({ navigation }) => {
   const SCROLL_TO_TOP_THRESHOLD = 800; // Show button after scrolling this many pixels
   const lastPostIdRef = useRef(null);
   const lastCreatedAtRef = useRef(null); // Track last post created_at for pagination
+  const loadMoreStartTimeRef = useRef(null); // Track when loadMore started for stuck detection
 
   // Request ID for cancelling stale requests when user switches tabs quickly
   const currentRequestIdRef = useRef(0);
@@ -151,6 +165,11 @@ const ForumScreen = ({ navigation }) => {
   const [editFeedsModalOpen, setEditFeedsModalOpen] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
 
+  // Trending hashtags - prefetched for instant SideMenu display
+  const [trendingHashtags, setTrendingHashtags] = useState([]);
+  const trendingLastFetchRef = useRef(0);
+  const TRENDING_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
   // Viewability tracking - track impressions only when posts become visible
   const trackedPostIds = useRef(new Set());
 
@@ -186,6 +205,32 @@ const ForumScreen = ({ navigation }) => {
       if (trackedPostIds.current) {
         trackedPostIds.current.clear();
       }
+    };
+  }, []);
+
+  // ============================================================
+  // SELF-HEALING: Register with global loading state manager
+  // Ensures stuck loading states are cleared on app resume
+  // ============================================================
+  useEffect(() => {
+    const unregister = registerLoadingReset('ForumScreen', () => {
+      console.log('[ForumScreen] Global loading state reset triggered');
+      setLoadingMore(false);
+      setLoading(false);
+      setRefreshing(false);
+    });
+
+    // Also listen for RESET_LOADING_EVENT directly as a safety net
+    const resetListener = DeviceEventEmitter.addListener(RESET_LOADING_EVENT, () => {
+      console.log('[ForumScreen] RESET_LOADING_EVENT received - clearing stuck states');
+      setLoadingMore(false);
+      setLoading(false);
+      setRefreshing(false);
+    });
+
+    return () => {
+      unregister();
+      resetListener.remove();
     };
   }, []);
 
@@ -452,14 +497,33 @@ const ForumScreen = ({ navigation }) => {
   );
 
   // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  // CRITICAL: Reset ALL stuck states BEFORE attempting to reload
   useEffect(() => {
     const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
-      console.log('[ForumScreen] Force refresh event received');
-      forumCache.lastFetch = 0; // Invalidate cache
+      console.log('[ForumScreen] Force refresh event received - resetting all states');
+
+      // CRITICAL: Reset stuck loading states FIRST
+      setLoadingMore(false);
+      setLoading(false);
+      setRefreshing(false);
+
+      // Reset pagination to allow fresh fetch
+      setHasMore(true);
+      setPage(1);
+      lastPostIdRef.current = null;
+      lastCreatedAtRef.current = null;
+
+      // Invalidate caches
+      forumCache.lastFetch = 0;
+      if (user?.id) {
+        invalidateFeedCache(user.id);
+      }
+
+      // Now reload with clean state
       loadPosts(true);
     });
     return () => listener.remove();
-  }, [selectedFeed, selectedTopic]);
+  }, [selectedFeed, selectedTopic, user?.id]);
 
   // Load posts using hybrid feed algorithm or legacy method
   // INFINITE SCROLL: Always try to load more, never set hasMore to false permanently
@@ -576,6 +640,7 @@ const ForumScreen = ({ navigation }) => {
       if (requestId === currentRequestIdRef.current) {
         setLoading(false);
         setLoadingMore(false);
+        loadMoreStartTimeRef.current = null;
       }
     }
   };
@@ -591,8 +656,12 @@ const ForumScreen = ({ navigation }) => {
       console.log('[ForumScreen] Loading hybrid feed...', reset ? 'RESET' : `page after ${lastPostIdRef.current}`, `requestId: ${requestId}`);
 
       if (reset) {
-        // Generate new feed with new session - OPTIMIZED: reduced limit for faster initial load
-        const result = await generateFeed(user.id, null, 15, false, true);
+        // Generate new feed with new session - with timeout to prevent infinite hang
+        const result = await withTimeout(
+          generateFeed(user.id, null, 15, false, true),
+          FEED_LOAD_TIMEOUT,
+          'generateFeed'
+        );
 
         // RACE CONDITION FIX: Check if this request is still current
         if (requestId !== currentRequestIdRef.current) {
@@ -634,7 +703,11 @@ const ForumScreen = ({ navigation }) => {
           return;
         }
 
-        const result = await getNextFeedPage(user.id, sessionId, lastPostIdRef.current, 20);
+        const result = await withTimeout(
+          getNextFeedPage(user.id, sessionId, lastPostIdRef.current, 20),
+          FEED_LOAD_TIMEOUT,
+          'getNextFeedPage'
+        );
 
         // RACE CONDITION FIX: Check if this request is still current
         if (requestId !== currentRequestIdRef.current) {
@@ -684,7 +757,8 @@ const ForumScreen = ({ navigation }) => {
         console.log('[ForumScreen] Next page loaded:', result.feed.length, 'items, new:', newItemsCount);
       }
     } catch (error) {
-      console.error('[ForumScreen] Error loading hybrid feed:', error);
+      const isTimeout = error?.message?.includes('FeedTimeout');
+      console.error('[ForumScreen] Error loading hybrid feed:', isTimeout ? 'TIMEOUT' : error?.message);
 
       // RACE CONDITION FIX: Check if this request is still current before fallback
       if (requestId !== currentRequestIdRef.current) {
@@ -692,15 +766,28 @@ const ForumScreen = ({ navigation }) => {
         return;
       }
 
+      // On timeout: keep existing posts visible, allow retry on next scroll
+      if (isTimeout) {
+        console.log('[ForumScreen] Timeout - keeping cached data, allowing retry');
+        setHasMore(true); // Allow retry
+        setLoadingMore(false);
+        setLoading(false);
+        return;
+      }
+
       // Fallback to legacy loading with new return format
       setUseHybridFeed(false);
       const currentPage = reset ? 1 : page;
-      const result = await forumService.getPosts({
-        feed: selectedFeed,
-        topic: selectedTopic,
-        page: currentPage,
-        limit: 20,
-      });
+      const result = await withTimeout(
+        forumService.getPosts({
+          feed: selectedFeed,
+          topic: selectedTopic,
+          page: currentPage,
+          limit: 20,
+        }),
+        FEED_LOAD_TIMEOUT,
+        'forumService.getPosts fallback'
+      );
 
       // Check again after fallback fetch
       if (requestId !== currentRequestIdRef.current) {
@@ -747,6 +834,7 @@ const ForumScreen = ({ navigation }) => {
       if (requestId === currentRequestIdRef.current) {
         setLoading(false);
         setLoadingMore(false);
+        loadMoreStartTimeRef.current = null;
       }
     }
   };
@@ -772,6 +860,9 @@ const ForumScreen = ({ navigation }) => {
     if (user?.id) {
       invalidateFeedCache(user.id);
     }
+
+    // Silently refresh trending hashtags
+    loadTrendingHashtags();
 
     // DON'T clear existing data - keep showing old content while loading
     // New data will replace old data when loadPosts completes with reset=true
@@ -835,10 +926,23 @@ const ForumScreen = ({ navigation }) => {
   }, [user?.id, loadPosts]);
 
   // INFINITE SCROLL: Trigger when user scrolls near bottom
+  // SELF-HEALING: Auto-recover if loadingMore has been stuck for >15 seconds
   const onEndReached = useCallback(() => {
-    console.log(`[ForumScreen] onEndReached - loading: ${loading}, loadingMore: ${loadingMore}, hasMore: ${hasMore}`);
+    // Detect stuck loadingMore state
+    if (loadingMore && loadMoreStartTimeRef.current) {
+      const elapsed = Date.now() - loadMoreStartTimeRef.current;
+      if (elapsed > 15000) {
+        console.warn(`[ForumScreen] loadingMore stuck for ${Math.round(elapsed / 1000)}s - force resetting`);
+        setLoadingMore(false);
+        loadMoreStartTimeRef.current = null;
+        // Allow the next onEndReached call to trigger loadPosts
+        return;
+      }
+    }
+
     if (!loading && !loadingMore && hasMore) {
       console.log('[ForumScreen] Triggering loadPosts for infinite scroll');
+      loadMoreStartTimeRef.current = Date.now();
       loadPosts(false);
     }
   }, [loading, loadingMore, hasMore, selectedFeed, selectedTopic, page]);
@@ -1027,14 +1131,28 @@ const ForumScreen = ({ navigation }) => {
     }
   }, [headerTranslateY]);
 
-  // Load custom feeds on mount
+  // Load custom feeds and trending hashtags on mount
   useEffect(() => {
     loadCustomFeeds();
+    loadTrendingHashtags();
   }, []);
 
   const loadCustomFeeds = async () => {
     const feeds = await forumService.getCustomFeeds();
     setCustomFeeds(feeds);
+  };
+
+  // Non-blocking trending hashtag prefetch with cache
+  const loadTrendingHashtags = async () => {
+    const now = Date.now();
+    if (now - trendingLastFetchRef.current < TRENDING_CACHE_TTL) return;
+    try {
+      const trending = await hashtagService.getTrending(5);
+      setTrendingHashtags(trending);
+      trendingLastFetchRef.current = Date.now();
+    } catch (error) {
+      console.error('[ForumScreen] Load trending error:', error);
+    }
   };
 
   // Custom Feed Handlers
@@ -1166,7 +1284,11 @@ const ForumScreen = ({ navigation }) => {
       'liked': 'Đã Thích',
       'saved': 'Đã Lưu',
     };
-    return titles[selectedFeed] || 'Bảng Tin';
+    if (titles[selectedFeed]) return titles[selectedFeed];
+    // Check if selectedFeed is a custom feed UUID
+    const customFeed = customFeeds.find(f => f.id === selectedFeed);
+    if (customFeed) return customFeed.name;
+    return 'Bảng Tin';
   };
 
   // Handle tab change from CategoryTabs - scroll to top and refresh
@@ -1417,6 +1539,7 @@ const ForumScreen = ({ navigation }) => {
           onCreateFeed={() => setCreateFeedModalOpen(true)}
           onEditFeeds={() => setEditFeedsModalOpen(true)}
           customFeeds={customFeeds}
+          trendingHashtags={trendingHashtags}
         />
 
         {/* Create Feed Modal */}

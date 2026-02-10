@@ -122,6 +122,15 @@ async function fetchSeedPosts(limit = 20, feedType = null, page = 1) {
           seed_persona,
           tier,
           is_premium_seed
+        ),
+        seed_post_products (
+          id,
+          product_id,
+          product_title,
+          product_price,
+          product_image,
+          product_handle,
+          position
         )
       `, { count: 'exact' })
       .eq('status', 'published');
@@ -189,6 +198,10 @@ async function fetchSeedPosts(limit = 20, feedType = null, page = 1) {
         avatar_url: post.seed_users.avatar_url,
         role: post.seed_users.is_premium_seed ? 'premium_user' : 'user',
       } : null,
+      // Map seed_post_products to tagged_products for PostCard compatibility
+      tagged_products: post.seed_post_products?.length > 0
+        ? post.seed_post_products.sort((a, b) => a.position - b.position)
+        : [],
       category: null,
       likes: [],
       saved: [],
@@ -519,6 +532,12 @@ export const forumService = {
       // Get current user for personalized feeds
       const { data: { user } } = await supabase.auth.getUser();
       const currentUserId = user?.id;
+
+      // Detect custom feed UUIDs and delegate to getCustomFeedPosts
+      const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(str);
+      if (isUUID(feed)) {
+        return await this.getCustomFeedPosts(feed, page, limit, currentUserId);
+      }
 
       // OPTIMIZED: Don't fetch ALL likes/saved/reactions for each post
       // Instead, we'll batch-query current user's interactions separately
@@ -2394,6 +2413,15 @@ export const forumService = {
           reaction_counts,
           author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color),
+          tagged_products:post_products(
+            id,
+            product_id,
+            product_title,
+            product_price,
+            product_image,
+            product_handle,
+            position
+          ),
           likes:forum_likes(user_id),
           saved:forum_saved(user_id),
           reactions:post_reactions(user_id, reaction_type)
@@ -2434,6 +2462,15 @@ export const forumService = {
             seed_persona,
             tier,
             is_premium_seed
+          ),
+          seed_post_products (
+            id,
+            product_id,
+            product_title,
+            product_price,
+            product_image,
+            product_handle,
+            position
           )
         `)
         .eq('user_id', userId)
@@ -2451,6 +2488,10 @@ export const forumService = {
       return (seedPosts || []).map((post) => ({
         ...post,
         is_seed_post: true,
+        // Map seed_post_products to tagged_products for PostCard compatibility
+        tagged_products: post.seed_post_products?.length > 0
+          ? post.seed_post_products.sort((a, b) => a.position - b.position)
+          : [],
         // Map seed_users to author format
         author: post.seed_users ? {
           id: post.seed_users.id,
@@ -3089,7 +3130,7 @@ export const forumService = {
   /**
    * Get posts for a custom feed (by topics and profiles)
    */
-  async getCustomFeedPosts(feedId, page = 1, limit = 20) {
+  async getCustomFeedPosts(feedId, page = 1, limit = 20, currentUserId = null) {
     try {
       // Get feed details
       const { data: feed, error: feedError } = await supabase
@@ -3107,19 +3148,29 @@ export const forumService = {
       const topics = feed.topics?.map(t => t.topic) || [];
       const profileIds = feed.profiles?.map(p => p.profile_id) || [];
 
-      // Build query for posts
+      // Build query for posts (including tagged_products and reaction_counts)
       let query = supabase
         .from('forum_posts')
         .select(`
           *,
+          reaction_counts,
           author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
-          category:forum_categories(id, name, color)
+          category:forum_categories(id, name, color),
+          tagged_products:post_products(
+            id,
+            product_id,
+            product_title,
+            product_price,
+            product_image,
+            product_handle,
+            position
+          )
         `)
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .range((page - 1) * limit, page * limit - 1);
 
-      // Filter by topics (search in content/title) or profiles
+      // Filter by topics and/or profiles (combined OR, not mutually exclusive)
       if (topics.length > 0 || profileIds.length > 0) {
         const filters = [];
 
@@ -3129,10 +3180,12 @@ export const forumService = {
           filters.push(`content.ilike.%${topic}%`);
         });
 
-        // Profile filters
+        // Profile filters (add as OR condition alongside topics)
         if (profileIds.length > 0) {
-          query = query.in('user_id', profileIds);
-        } else if (filters.length > 0) {
+          filters.push(...profileIds.map(id => `user_id.eq.${id}`));
+        }
+
+        if (filters.length > 0) {
           query = query.or(filters.join(','));
         }
       }
@@ -3140,10 +3193,50 @@ export const forumService = {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data || [];
+
+      const posts = data || [];
+
+      // Enrich with user interaction data (liked/saved/reaction)
+      let userLikedSet = new Set();
+      let userSavedSet = new Set();
+      let userReactionsMap = new Map();
+
+      if (currentUserId && posts.length > 0) {
+        const postIds = posts.map(p => p.id);
+
+        const [likesResult, savedResult, reactionsResult] = await Promise.all([
+          supabase.from('forum_likes').select('post_id').eq('user_id', currentUserId).in('post_id', postIds),
+          supabase.from('forum_saved').select('post_id').eq('user_id', currentUserId).in('post_id', postIds),
+          supabase.from('post_reactions').select('post_id, reaction_type').eq('user_id', currentUserId).in('post_id', postIds),
+        ]);
+
+        (likesResult.data || []).forEach(l => userLikedSet.add(l.post_id));
+        (savedResult.data || []).forEach(s => userSavedSet.add(s.post_id));
+        (reactionsResult.data || []).forEach(r => userReactionsMap.set(r.post_id, r.reaction_type));
+      }
+
+      // Transform to enriched posts
+      const transformedPosts = posts.map(post => ({
+        ...post,
+        user_liked: userLikedSet.has(post.id),
+        user_saved: userSavedSet.has(post.id),
+        user_reaction: userReactionsMap.get(post.id) || null,
+        reaction_counts: post.reaction_counts || null,
+        likes_count: post.likes_count || 0,
+        is_own_post: currentUserId && post.user_id === currentUserId,
+      }));
+
+      // Return unified format matching getPosts return shape
+      const sessionId = generateUUID();
+      return {
+        posts: transformedPosts.map(p => ({ type: 'post', data: p })),
+        sessionId,
+        hasMore: posts.length >= limit,
+        totalPosts: transformedPosts.length,
+      };
     } catch (error) {
       console.error('Error fetching custom feed posts:', error);
-      return [];
+      return { posts: [], sessionId: null, hasMore: false, totalPosts: 0 };
     }
   },
 };

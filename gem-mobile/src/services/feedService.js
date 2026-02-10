@@ -51,6 +51,7 @@ const POST_SELECT_QUERY = `
 `;
 
 // FAST query - minimal joins for speed (no likes/saved joins)
+// FIXED: Added tagged_products so product attachments show in Home Feed
 const POST_SELECT_FAST = `
   id,
   user_id,
@@ -77,6 +78,15 @@ const POST_SELECT_FAST = `
     role,
     verified_seller,
     verified_trader
+  ),
+  tagged_products:post_products (
+    id,
+    product_id,
+    product_title,
+    product_price,
+    product_image,
+    product_handle,
+    position
   )
 `;
 

@@ -13,7 +13,6 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
-  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { BlurView } from 'expo-blur';
@@ -40,7 +39,6 @@ import {
   Rss
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
-import { hashtagService } from '../../../services/hashtagService';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -52,14 +50,35 @@ const SideMenu = ({
   onQuickAction,
   onCreateFeed,
   onEditFeeds,
-  customFeeds = []
+  customFeeds = [],
+  trendingHashtags = [],
 }) => {
   const navigation = useNavigation();
   const slideAnim = useRef(new Animated.Value(-280)).current;
 
-  // Trending hashtags state
-  const [trendingHashtags, setTrendingHashtags] = useState([]);
-  const [loadingTrending, setLoadingTrending] = useState(false);
+  // Tooltip state
+  const [tooltipText, setTooltipText] = useState('');
+  const tooltipOpacity = useRef(new Animated.Value(0)).current;
+  const tooltipTimer = useRef(null);
+
+  const showTooltip = (text) => {
+    // Clear any existing timer
+    if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
+    setTooltipText(text);
+    tooltipOpacity.setValue(0);
+    Animated.timing(tooltipOpacity, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+    tooltipTimer.current = setTimeout(() => {
+      Animated.timing(tooltipOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setTooltipText(''));
+    }, 2500);
+  };
 
   useEffect(() => {
     Animated.spring(slideAnim, {
@@ -68,24 +87,14 @@ const SideMenu = ({
       tension: 65,
       friction: 11,
     }).start();
-
-    // Load trending hashtags when menu opens
-    if (isOpen && trendingHashtags.length === 0) {
-      loadTrendingHashtags();
-    }
   }, [isOpen]);
 
-  const loadTrendingHashtags = async () => {
-    setLoadingTrending(true);
-    try {
-      const trending = await hashtagService.getTrending(5);
-      setTrendingHashtags(trending);
-    } catch (error) {
-      console.error('[SideMenu] Load trending error:', error);
-    } finally {
-      setLoadingTrending(false);
-    }
-  };
+  // Cleanup tooltip timer on unmount
+  useEffect(() => {
+    return () => {
+      if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
+    };
+  }, []);
 
   const handleHashtagPress = (hashtag) => {
     onClose();
@@ -203,8 +212,10 @@ const SideMenu = ({
                       onClose();
                       onCreateFeed?.();
                     }}
+                    onLongPress={() => showTooltip('Tạo feed mới – Tùy chỉnh nguồn tin theo chủ đề bạn quan tâm')}
                   >
                     <Plus size={20} color={COLORS.gold} strokeWidth={2.5} />
+                    <Text style={styles.iconLabel}>Tạo</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -213,8 +224,10 @@ const SideMenu = ({
                       onClose();
                       onEditFeeds?.();
                     }}
+                    onLongPress={() => showTooltip('Chỉnh sửa feed – Sắp xếp, đổi tên hoặc xóa feed')}
                   >
                     <Edit3 size={20} color={COLORS.gold} strokeWidth={2.5} />
+                    <Text style={styles.iconLabel}>Sửa</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -225,6 +238,13 @@ const SideMenu = ({
                   </TouchableOpacity>
                 </View>
               </View>
+
+              {/* Tooltip bubble */}
+              {tooltipText !== '' && (
+                <Animated.View style={[styles.tooltipBubble, { opacity: tooltipOpacity }]}>
+                  <Text style={styles.tooltipText}>{tooltipText}</Text>
+                </Animated.View>
+              )}
 
               {/* Quick Actions */}
               <View style={styles.quickActions}>
@@ -386,33 +406,27 @@ const SideMenu = ({
             )}
 
             {/* Trending Hashtags Section */}
-            {(trendingHashtags.length > 0 || loadingTrending) && (
+            {trendingHashtags.length > 0 && (
               <View style={styles.feedSection}>
                 <View style={styles.sectionHeader}>
                   <Hash size={12} color={COLORS.textMuted} strokeWidth={2} />
                   <Text style={styles.sectionTitle}>XU HUONG</Text>
                 </View>
 
-                {loadingTrending ? (
-                  <View style={styles.trendingLoading}>
-                    <ActivityIndicator size="small" color={COLORS.gold} />
-                  </View>
-                ) : (
-                  trendingHashtags.map((item, index) => (
-                    <TouchableOpacity
-                      key={`trending-${index}`}
-                      style={styles.trendingItem}
-                      onPress={() => handleHashtagPress(item.hashtag)}
-                      activeOpacity={0.7}
-                    >
-                      <Hash size={16} color={COLORS.cyan} style={styles.feedIcon} />
-                      <View style={styles.feedItemText}>
-                        <Text style={styles.hashtagText}>#{item.hashtag}</Text>
-                        <Text style={styles.feedItemSubtitle}>{item.count} bai viet</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))
-                )}
+                {trendingHashtags.map((item, index) => (
+                  <TouchableOpacity
+                    key={`trending-${index}`}
+                    style={styles.trendingItem}
+                    onPress={() => handleHashtagPress(item.hashtag)}
+                    activeOpacity={0.7}
+                  >
+                    <Hash size={16} color={COLORS.cyan} style={styles.feedIcon} />
+                    <View style={styles.feedItemText}>
+                      <Text style={styles.hashtagText}>#{item.hashtag}</Text>
+                      <Text style={styles.feedItemSubtitle}>{item.count} bai viet</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
               </View>
             )}
 
@@ -671,11 +685,31 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
 
-  // Trending Hashtags styles
-  trendingLoading: {
-    paddingVertical: SPACING.lg,
-    alignItems: 'center',
+  // Icon labels under action buttons
+  iconLabel: {
+    fontSize: 9,
+    color: COLORS.gold,
+    marginTop: 2,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
+
+  // Tooltip bubble
+  tooltipBubble: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderRadius: 10,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  tooltipText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    lineHeight: 18,
+  },
+
+  // Trending Hashtags styles
   trendingItem: {
     flexDirection: 'row',
     alignItems: 'center',
