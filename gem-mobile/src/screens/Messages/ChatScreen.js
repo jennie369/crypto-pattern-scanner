@@ -49,6 +49,7 @@ import { useInAppNotification } from '../../contexts/InAppNotificationContext';
 
 // Components
 import MessageBubble from './components/MessageBubble';
+import CallMessageBubble from './components/CallMessageBubble';
 import ChatInput from './components/ChatInput';
 import TypingIndicator from './components/TypingIndicator';
 import PinnedMessagesBar from './components/PinnedMessagesBar';
@@ -722,6 +723,27 @@ export default function ChatScreen({ route, navigation }) {
       index === messages.length - 1 ||
       messages[index + 1]?.sender_id !== item.sender_id
     );
+
+    // Call event messages get a special centered bubble (like Messenger)
+    if (item.message_type === 'call') {
+      return (
+        <CallMessageBubble
+          message={item}
+          isOwn={isOwn}
+          currentUserId={user?.id}
+          onCallBack={(callType) => {
+            // Navigate to initiate a return call
+            navigation.navigate('Call', {
+              screen: callType === 'video' ? 'VideoCall' : 'InCall',
+              params: {
+                callee: item.users || otherParticipant,
+                isCaller: true,
+              },
+            });
+          }}
+        />
+      );
+    }
 
     return (
       <MessageBubble

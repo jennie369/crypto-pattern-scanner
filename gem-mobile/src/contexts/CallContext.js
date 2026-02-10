@@ -4,8 +4,9 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { AppState, Platform, Vibration } from 'react-native';
+import { AppState, Platform, Vibration, TouchableOpacity, Text, View, StyleSheet as RNStyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
+import { Phone, Video, ChevronRight } from 'lucide-react-native';
 
 import { useAuth } from './AuthContext';
 import { callService } from '../services/callService';
@@ -13,6 +14,7 @@ import callKeepService from '../services/callKeepService';
 import { CALL_STATUS, VIBRATION_PATTERNS } from '../constants/callConstants';
 import { IncomingCallOverlay } from '../components/Call';
 import { navigationRef } from '../navigation/navigationRef';
+import { COLORS, SPACING, TYPOGRAPHY } from '../utils/tokens';
 
 const CallContext = createContext({});
 
@@ -43,6 +45,8 @@ export function CallProvider({ children }) {
   const [incomingCall, setIncomingCall] = useState(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [callKeepReady, setCallKeepReady] = useState(false);
+  // Active call tracking for global floating indicator
+  const [activeCall, setActiveCallState] = useState(null); // { call, otherUser, isCaller, screenName }
 
   // Debug state - shows subscription status without console
   const [debugInfo, setDebugInfo] = useState({
@@ -64,12 +68,20 @@ export function CallProvider({ children }) {
 
   // ========== RINGTONE MANAGEMENT ==========
 
+  // Interval ref for ringtone repetition
+  const ringtoneIntervalRef = useRef(null);
+
   const playRingtone = useCallback(async () => {
     try {
       // Stop any existing ringtone
       if (ringtoneRef.current) {
         await ringtoneRef.current.stopAsync();
         await ringtoneRef.current.unloadAsync();
+        ringtoneRef.current = null;
+      }
+      if (ringtoneIntervalRef.current) {
+        clearInterval(ringtoneIntervalRef.current);
+        ringtoneIntervalRef.current = null;
       }
 
       // Set audio mode for ringtone
@@ -80,14 +92,42 @@ export function CallProvider({ children }) {
         shouldDuckAndroid: false,
       });
 
-      // Ringtone playback
-      // Note: To add custom ringtone, create assets/sounds/ringtone.mp3
-      // and update the RINGTONE_SOURCE constant below
-      // For now, using vibration only as fallback
-      console.log('[CallProvider] Playing call notification (vibration)');
+      // Play level-up sound as ringtone (more musical/recognizable than plain vibration)
+      const playOnce = async () => {
+        try {
+          const { sound } = await Audio.Sound.createAsync(
+            require('../../assets/sounds/Ritual_sounds/level-up.mp3'),
+            {
+              shouldPlay: true,
+              isLooping: false,
+              volume: 0.7,
+            }
+          );
+          ringtoneRef.current = sound;
+
+          sound.setOnPlaybackStatusUpdate((status) => {
+            if (status.didJustFinish) {
+              sound.unloadAsync().catch(() => {});
+              if (ringtoneRef.current === sound) {
+                ringtoneRef.current = null;
+              }
+            }
+          });
+        } catch (e) {
+          // Sound play failed, vibration is still active
+        }
+      };
+
+      console.log('[CallProvider] Playing incoming call ringtone + vibration');
 
       // Start vibration
       Vibration.vibrate(VIBRATION_PATTERNS.INCOMING_CALL, true);
+
+      // Play ringtone sound immediately
+      await playOnce();
+
+      // Repeat every 3.5 seconds
+      ringtoneIntervalRef.current = setInterval(playOnce, 3500);
     } catch (error) {
       console.error('[CallProvider] Error playing ringtone:', error);
       // Still vibrate even if audio fails
@@ -99,6 +139,12 @@ export function CallProvider({ children }) {
     try {
       // Stop vibration
       Vibration.cancel();
+
+      // Clear ringtone repeat interval
+      if (ringtoneIntervalRef.current) {
+        clearInterval(ringtoneIntervalRef.current);
+        ringtoneIntervalRef.current = null;
+      }
 
       // Stop and unload ringtone
       if (ringtoneRef.current) {
@@ -701,6 +747,40 @@ export function CallProvider({ children }) {
     console.log('[CallProvider] caller:', incomingCall?.caller?.display_name);
   }, [showOverlay, incomingCall]);
 
+  // ========== ACTIVE CALL MANAGEMENT ==========
+
+  const setActiveCall = useCallback((callInfo) => {
+    console.log('[CallProvider] Setting active call:', callInfo?.call?.id);
+    setActiveCallState(callInfo);
+  }, []);
+
+  const clearActiveCall = useCallback(() => {
+    console.log('[CallProvider] Clearing active call');
+    setActiveCallState(null);
+  }, []);
+
+  const returnToActiveCall = useCallback(() => {
+    if (!activeCall) return;
+    const { call, otherUser, isCaller, screenName } = activeCall;
+    const navReady = navigationRef.current &&
+      (typeof navigationRef.current.isReady === 'function'
+        ? navigationRef.current.isReady()
+        : true);
+
+    if (navReady) {
+      console.log('[CallProvider] Returning to active call:', screenName);
+      navigationRef.current.navigate('Call', {
+        screen: screenName,
+        params: {
+          call,
+          caller: isCaller ? undefined : otherUser,
+          callee: isCaller ? otherUser : undefined,
+          isCaller,
+        },
+      });
+    }
+  }, [activeCall]);
+
   // ========== CONTEXT VALUE ==========
 
   const contextValue = {
@@ -714,6 +794,11 @@ export function CallProvider({ children }) {
     debugInfo,
     // Manual trigger for push notification fallback
     triggerIncomingCall,
+    // Active call management (for global floating indicator)
+    activeCall,
+    setActiveCall,
+    clearActiveCall,
+    returnToActiveCall,
   };
 
   return (
@@ -727,8 +812,96 @@ export function CallProvider({ children }) {
         onAccept={handleAccept}
         onDecline={handleDecline}
       />
+
+      {/* Global Active Call Banner - shows when user navigated away from call screen */}
+      {activeCall && (
+        <ActiveCallBanner
+          activeCall={activeCall}
+          onPress={returnToActiveCall}
+          onEndCall={() => {
+            clearActiveCall();
+          }}
+        />
+      )}
     </CallContext.Provider>
   );
 }
+
+/**
+ * ActiveCallBanner - Floating banner shown when an active call is minimized
+ * Tap to return to call screen
+ */
+const ActiveCallBanner = ({ activeCall, onPress, onEndCall }) => {
+  const { call, otherUser } = activeCall;
+  const isVideo = call?.call_type === 'video';
+
+  return (
+    <TouchableOpacity
+      style={bannerStyles.container}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View style={bannerStyles.iconContainer}>
+        {isVideo ? (
+          <Video size={16} color="#fff" />
+        ) : (
+          <Phone size={16} color="#fff" />
+        )}
+      </View>
+      <Text style={bannerStyles.text} numberOfLines={1}>
+        {otherUser?.display_name || 'Cuộc gọi đang diễn ra'}
+      </Text>
+      <View style={bannerStyles.tapHint}>
+        <Text style={bannerStyles.tapText}>Quay lại</Text>
+        <ChevronRight size={14} color={COLORS.textPrimary} />
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const bannerStyles = RNStyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 54,
+    left: SPACING.md,
+    right: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(76, 175, 80, 0.95)',
+    borderRadius: 12,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    zIndex: 9999,
+  },
+  iconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: '#fff',
+  },
+  tapHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  tapText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.85)',
+  },
+});
 
 export default CallContext;

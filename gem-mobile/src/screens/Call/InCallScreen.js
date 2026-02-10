@@ -11,6 +11,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { CALL_TYPE } from '../../constants/callConstants';
 import { useCall } from '../../hooks/useCall';
 import { useCallTimer } from '../../hooks/useCallTimer';
+import { useCallContext } from '../../contexts/CallContext';
 import {
   CallAvatar,
   CallTimer,
@@ -37,6 +38,9 @@ const InCallScreen = ({ route, navigation }) => {
   // since user already pressed Accept in native UI
   const shouldAutoInit = isCaller || answeredFromCallKeep;
 
+  // ========== CONTEXT ==========
+  const { clearActiveCall } = useCallContext();
+
   // ========== HOOKS ==========
   const {
     callState,
@@ -55,6 +59,7 @@ const InCallScreen = ({ route, navigation }) => {
     isCaller,
     autoInitialize: shouldAutoInit, // Auto-init for caller or when answered from CallKeep
     onCallEnded: (reason) => {
+      clearActiveCall();
       navigation.replace('CallEnded', {
         call,
         otherUser,
@@ -85,6 +90,14 @@ const InCallScreen = ({ route, navigation }) => {
   }, [endCall]);
 
   // ========== EFFECTS ==========
+
+  // Clear active call banner when this screen is focused
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      clearActiveCall();
+    });
+    return unsubscribe;
+  }, [navigation, clearActiveCall]);
 
   // Handle back button - end call directly without confirmation
   useEffect(() => {

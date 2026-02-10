@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Vibration, AppState } from 'react-native';
+import { Vibration, AppState, Platform } from 'react-native';
 import { Audio } from 'expo-av';
 import { callSignalingService } from '../services/callSignalingService';
 import { callService } from '../services/callService';
@@ -62,18 +62,17 @@ export const useCall = ({ call, isCaller = false, autoInitialize, onCallEnded })
 
   // ========== RINGBACK TONE ==========
 
+  // Interval ref for ringback repetition
+  const ringbackIntervalRef = useRef(null);
+
   /**
    * Play ringback tone for caller while waiting for answer
-   * Uses chime.mp3 as a placeholder ringback tone
+   * Plays a short chime, pauses 3 seconds, then repeats (like a standard ringback)
    */
   const playRingbackTone = useCallback(async () => {
     try {
       // Stop any existing ringback
-      if (ringbackSoundRef.current) {
-        await ringbackSoundRef.current.stopAsync();
-        await ringbackSoundRef.current.unloadAsync();
-        ringbackSoundRef.current = null;
-      }
+      await stopRingbackTone();
 
       // Configure audio for ringback
       await Audio.setAudioModeAsync({
@@ -83,19 +82,41 @@ export const useCall = ({ call, isCaller = false, autoInitialize, onCallEnded })
         shouldDuckAndroid: false,
       });
 
-      // Use chime.mp3 as ringback tone (loops every ~2 seconds)
-      // For a proper ringback, replace with a ringback.mp3 file
-      const { sound } = await Audio.Sound.createAsync(
-        require('../../assets/sounds/Ritual_sounds/chime.mp3'),
-        {
-          shouldPlay: true,
-          isLooping: true,
-          volume: 0.4,
-        }
-      );
+      // Play a single chime then schedule repeats with pauses
+      const playOnce = async () => {
+        try {
+          // Create fresh sound each time for clean playback
+          const { sound } = await Audio.Sound.createAsync(
+            require('../../assets/sounds/Ritual_sounds/chime.mp3'),
+            {
+              shouldPlay: true,
+              isLooping: false,
+              volume: 0.3,
+            }
+          );
+          ringbackSoundRef.current = sound;
 
-      ringbackSoundRef.current = sound;
-      console.log('[useCall] Ringback tone started (using chime)');
+          // Auto-cleanup when done playing
+          sound.setOnPlaybackStatusUpdate((status) => {
+            if (status.didJustFinish) {
+              sound.unloadAsync().catch(() => {});
+              if (ringbackSoundRef.current === sound) {
+                ringbackSoundRef.current = null;
+              }
+            }
+          });
+        } catch (e) {
+          // Sound play failed, continue silently
+        }
+      };
+
+      // Play immediately
+      await playOnce();
+
+      // Then repeat every 4 seconds (chime ~1s + 3s pause)
+      ringbackIntervalRef.current = setInterval(playOnce, 4000);
+
+      console.log('[useCall] Ringback tone started (interval-based)');
     } catch (err) {
       // No ringback sound available, that's OK - caller will wait silently
       console.log('[useCall] Could not play ringback tone:', err.message);
@@ -107,6 +128,12 @@ export const useCall = ({ call, isCaller = false, autoInitialize, onCallEnded })
    */
   const stopRingbackTone = useCallback(async () => {
     try {
+      // Clear the repeat interval
+      if (ringbackIntervalRef.current) {
+        clearInterval(ringbackIntervalRef.current);
+        ringbackIntervalRef.current = null;
+      }
+
       if (ringbackSoundRef.current) {
         await ringbackSoundRef.current.stopAsync();
         await ringbackSoundRef.current.unloadAsync();
@@ -821,6 +848,53 @@ export const useCall = ({ call, isCaller = false, autoInitialize, onCallEnded })
       stopRingbackTone();
     };
   }, [isCaller, callState, playRingbackTone, stopRingbackTone]);
+
+  // ANDROID FIX: Fallback for delayed/missing WebRTC connectionState callbacks
+  // When remote stream arrives but callState hasn't transitioned to CONNECTED,
+  // force transition after a timeout. Android WebRTC sometimes doesn't fire
+  // 'connected' connectionStateChange reliably.
+  useEffect(() => {
+    if (!remoteStream) return;
+    if (callState === CALL_STATUS.CONNECTED || callState === CALL_STATUS.ENDED) return;
+
+    const timeoutMs = Platform.OS === 'android' ? 3000 : 5000;
+    console.log('[useCall] Remote stream received but state is', callState, '- starting fallback timer (' + timeoutMs + 'ms)');
+
+    const timer = setTimeout(() => {
+      // Double-check: only force if still not connected
+      if (callState !== CALL_STATUS.CONNECTED && callState !== CALL_STATUS.ENDED) {
+        // Also check actual WebRTC state as extra verification
+        const iceState = webrtcService.peerConnection?.iceConnectionState;
+        const connState = webrtcService.peerConnection?.connectionState;
+        console.log('[useCall] Fallback timer fired - iceState:', iceState, 'connState:', connState, 'callState:', callState);
+
+        if (iceState === 'connected' || iceState === 'completed' || connState === 'connected') {
+          console.log('[useCall] ANDROID FALLBACK: Forcing CONNECTED state (WebRTC is actually connected)');
+          setCallState(CALL_STATUS.CONNECTED);
+          Vibration.cancel();
+          Vibration.vibrate(VIBRATION_PATTERNS.CALL_CONNECTED);
+          callService.markConnected(call?.id);
+          if (readyRetryInterval.current) {
+            clearInterval(readyRetryInterval.current);
+            readyRetryInterval.current = null;
+          }
+        } else if (remoteStream && remoteStream.getTracks().length > 0) {
+          // We have tracks flowing even if connectionState didn't update
+          console.log('[useCall] ANDROID FALLBACK: Forcing CONNECTED (remote tracks flowing)');
+          setCallState(CALL_STATUS.CONNECTED);
+          Vibration.cancel();
+          Vibration.vibrate(VIBRATION_PATTERNS.CALL_CONNECTED);
+          callService.markConnected(call?.id);
+          if (readyRetryInterval.current) {
+            clearInterval(readyRetryInterval.current);
+            readyRetryInterval.current = null;
+          }
+        }
+      }
+    }, timeoutMs);
+
+    return () => clearTimeout(timer);
+  }, [remoteStream, callState, call?.id]);
 
   // CRITICAL: Handle app state changes to fix one-sided connection after idle
   // When app comes back from background, check if we need to re-establish signaling

@@ -16,6 +16,7 @@ import { COLORS } from '../../utils/tokens';
 import { useVideoCall } from '../../hooks/useVideoCall';
 import { useCallTimer } from '../../hooks/useCallTimer';
 import { usePictureInPicture } from '../../hooks/usePictureInPicture';
+import { useCallContext } from '../../contexts/CallContext';
 import {
   CallStatusBadge,
   CallQualityIndicator,
@@ -44,6 +45,9 @@ const VideoCallScreen = ({ route, navigation }) => {
   // If answered from CallKeep (native iOS CallKit), auto-initialize
   // since user already pressed Accept in native UI
   const shouldAutoInit = isCaller || answeredFromCallKeep;
+
+  // ========== CONTEXT ==========
+  const { setActiveCall, clearActiveCall } = useCallContext();
 
   // ========== STATE ==========
   const [showControls, setShowControls] = useState(true);
@@ -76,6 +80,7 @@ const VideoCallScreen = ({ route, navigation }) => {
     isCaller,
     autoInitialize: shouldAutoInit, // Auto-init for caller or when answered from CallKeep
     onCallEnded: (reason) => {
+      clearActiveCall();
       navigation.replace('CallEnded', {
         call,
         otherUser,
@@ -92,6 +97,14 @@ const VideoCallScreen = ({ route, navigation }) => {
   const { isPiPSupported, isPiPActive, enterPiP, exitPiP } = usePictureInPicture(isConnected);
 
   // ========== EFFECTS ==========
+
+  // Clear active call banner when this screen is focused (user returned)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      clearActiveCall();
+    });
+    return unsubscribe;
+  }, [navigation, clearActiveCall]);
 
   // Hide status bar for immersive experience
   useEffect(() => {
@@ -150,9 +163,16 @@ const VideoCallScreen = ({ route, navigation }) => {
 
   const handleMinimize = useCallback(() => {
     minimize();
+    // Store call info in context so global banner can show
+    setActiveCall({
+      call,
+      otherUser,
+      isCaller,
+      screenName: 'VideoCall',
+    });
     // Navigate back to previous screen but keep call running
     navigation.goBack();
-  }, [minimize, navigation]);
+  }, [minimize, navigation, setActiveCall, call, otherUser, isCaller]);
 
   // ========== RENDER ==========
 

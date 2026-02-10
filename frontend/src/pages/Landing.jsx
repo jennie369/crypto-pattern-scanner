@@ -7,8 +7,9 @@ import {
   BarChart3, Layers, Activity, Timer, Bell, History, FileText, Gamepad2,
   Compass, Quote, Play, UserPlus, Mic, GraduationCap, Facebook, Youtube,
   Instagram, MessageCircle, ChevronRight, X, User, ArrowUp, TrendingUp,
-  CircleX, ShoppingBag, Award, Briefcase, Globe, Info, Smile
+  CircleX, ShoppingBag, Award, Briefcase, Globe, Info, Smile, LogIn, Menu
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import './Landing.css';
 
 // Supabase image URLs
@@ -58,6 +59,7 @@ const notificationActions = [
 const timeAgoTexts = ['Vừa xong', '1 phút trước', '2 phút trước', '3 phút trước', '5 phút trước'];
 
 export default function Landing() {
+  const { user } = useAuth();
   // === STATE ===
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [spotsRemaining, setSpotsRemaining] = useState(47);
@@ -66,6 +68,7 @@ export default function Landing() {
   const [showToast, setShowToast] = useState(false);
   const [currentToast, setCurrentToast] = useState(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -243,6 +246,58 @@ export default function Landing() {
           <Sparkles size={16} className="fomo-tet-icon" />
         </div>
       </div>
+
+      {/* ========== MAIN NAVIGATION BAR ========== */}
+      <nav className="landing-nav">
+        <div className="landing-nav-inner">
+          <Link to="/" className="landing-nav-logo">
+            <Sparkles size={20} />
+            <span>GEMRAL</span>
+          </Link>
+
+          <div className={`landing-nav-links ${mobileMenuOpen ? 'open' : ''}`}>
+            <Link to="/courses" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <GraduationCap size={16} /> Khóa Học
+            </Link>
+            <Link to="/shop" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <ShoppingBag size={16} /> Cửa Hàng
+            </Link>
+            <Link to="/pricing" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <CreditCard size={16} /> Bảng Giá
+            </Link>
+            <Link to="/forum" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <MessageCircle size={16} /> Cộng Đồng
+            </Link>
+
+            {user ? (
+              <>
+                <Link to="/scanner-v2" className="landing-nav-link highlight" onClick={() => setMobileMenuOpen(false)}>
+                  <BarChart3 size={16} /> Scanner
+                </Link>
+                <Link to="/chatbot" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                  <Compass size={16} /> GEM Master
+                </Link>
+                <Link to="/scanner-v2" className="landing-nav-btn primary" onClick={() => setMobileMenuOpen(false)}>
+                  <Activity size={16} /> Vào App
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="landing-nav-btn secondary" onClick={() => setMobileMenuOpen(false)}>
+                  <LogIn size={16} /> Đăng Nhập
+                </Link>
+                <Link to="/signup" className="landing-nav-btn primary" onClick={() => setMobileMenuOpen(false)}>
+                  <UserPlus size={16} /> Đăng Ký
+                </Link>
+              </>
+            )}
+          </div>
+
+          <button className="landing-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </nav>
 
       {/* ========== FOMO WIDGET STICKY ========== */}
       <div className="fomo-widget">
