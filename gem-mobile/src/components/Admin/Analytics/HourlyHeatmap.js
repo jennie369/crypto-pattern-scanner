@@ -18,7 +18,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { useSettings } from '../../../contexts/SettingsContext';
+import { COLORS, SPACING, GLASS } from '../../../utils/tokens';
 
 const DAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -30,111 +30,7 @@ const HourlyHeatmap = ({
   onCellPress,
   style,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [selectedCell, setSelectedCell] = useState(null);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-      padding: SPACING.md,
-    },
-    title: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginBottom: SPACING.md,
-    },
-
-    gridContainer: {
-      marginBottom: SPACING.sm,
-    },
-
-    hourLabelsRow: {
-      flexDirection: 'row',
-      marginBottom: 4,
-    },
-    cornerCell: {
-      width: 28,
-      height: 16,
-    },
-    hourLabelCell: {
-      width: 36, // 3 cells * 12px each
-      alignItems: 'flex-start',
-    },
-    hourLabel: {
-      fontSize: 9,
-      color: colors.textMuted,
-    },
-
-    gridRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    dayLabelCell: {
-      width: 28,
-      paddingRight: 4,
-    },
-    dayLabel: {
-      fontSize: 10,
-      color: colors.textMuted,
-      textAlign: 'right',
-    },
-
-    cell: {
-      width: 12,
-      height: 12,
-      borderRadius: 2,
-      marginRight: 1,
-      marginBottom: 1,
-    },
-    cellSelected: {
-      borderWidth: 1,
-      borderColor: colors.gold,
-    },
-
-    legend: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: SPACING.sm,
-      gap: SPACING.xs,
-    },
-    legendText: {
-      fontSize: 10,
-      color: colors.textMuted,
-    },
-    legendScale: {
-      flexDirection: 'row',
-      gap: 2,
-    },
-    legendCell: {
-      width: 14,
-      height: 10,
-      borderRadius: 2,
-    },
-
-    selectedInfo: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: SPACING.sm,
-      paddingTop: SPACING.sm,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(106, 91, 255, 0.1)',
-    },
-    selectedInfoText: {
-      fontSize: 12,
-      color: colors.textSecondary,
-    },
-    selectedInfoValue: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.purple,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Process data into a 7x24 grid
   const { grid, maxValue } = useMemo(() => {
@@ -247,6 +143,7 @@ const HourlyHeatmap = ({
           <Text style={styles.selectedInfoText}>
             {DAYS[selectedCell.day]} {selectedCell.hour}:00 - {selectedCell.hour + 1}:00
           </Text>
+        )}
           <Text style={styles.selectedInfoValue}>
             {selectedCell.value.toLocaleString('vi-VN')} {valueLabel}
           </Text>
@@ -255,5 +152,108 @@ const HourlyHeatmap = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: GLASS.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+    padding: SPACING.md,
+  },
+  title: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+  },
+
+  gridContainer: {
+    marginBottom: SPACING.sm,
+  },
+
+  hourLabelsRow: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  cornerCell: {
+    width: 28,
+    height: 16,
+  },
+  hourLabelCell: {
+    width: 36, // 3 cells * 12px each
+    alignItems: 'flex-start',
+  },
+  hourLabel: {
+    fontSize: 9,
+    color: COLORS.textMuted,
+  },
+
+  gridRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dayLabelCell: {
+    width: 28,
+    paddingRight: 4,
+  },
+  dayLabel: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    textAlign: 'right',
+  },
+
+  cell: {
+    width: 12,
+    height: 12,
+    borderRadius: 2,
+    marginRight: 1,
+    marginBottom: 1,
+  },
+  cellSelected: {
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+
+  legend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.sm,
+    gap: SPACING.xs,
+  },
+  legendText: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+  },
+  legendScale: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  legendCell: {
+    width: 14,
+    height: 10,
+    borderRadius: 2,
+  },
+
+  selectedInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(106, 91, 255, 0.1)',
+  },
+  selectedInfoText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  selectedInfoValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.purple,
+  },
+});
 
 export default HourlyHeatmap;

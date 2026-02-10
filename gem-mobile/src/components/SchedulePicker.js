@@ -4,7 +4,7 @@
  * Uses dark glass theme from DESIGN_TOKENS
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import {
   Check,
 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS, BUTTON } from '../utils/tokens';
 
 const SchedulePicker = ({
   visible,
@@ -32,187 +32,11 @@ const SchedulePicker = ({
   initialDate = null,
   minDate = new Date(),
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const [selectedDate, setSelectedDate] = useState(initialDate || new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedHour, setSelectedHour] = useState(12);
   const [selectedMinute, setSelectedMinute] = useState(0);
   const [step, setStep] = useState('date'); // 'date' | 'time'
-
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    container: {
-      width: '90%',
-      maxWidth: 360,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 16,
-      padding: SPACING.lg,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.3)',
-    },
-    // Header
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: SPACING.lg,
-    },
-    closeButton: {
-      padding: SPACING.xs,
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    headerRight: {
-      width: 32,
-    },
-    backButton: {
-      padding: SPACING.xs,
-    },
-    // Month Navigation
-    monthNav: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: SPACING.md,
-    },
-    navButton: {
-      padding: SPACING.sm,
-    },
-    monthText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      color: colors.textPrimary,
-    },
-    // Weekdays
-    weekdayRow: {
-      flexDirection: 'row',
-      marginBottom: SPACING.sm,
-    },
-    weekdayText: {
-      flex: 1,
-      textAlign: 'center',
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      color: colors.textMuted,
-    },
-    // Calendar Grid
-    calendarGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-    },
-    dayCell: {
-      width: '14.28%',
-      aspectRatio: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 8,
-    },
-    dayCellToday: {
-      borderWidth: 1,
-      borderColor: colors.cyan,
-    },
-    dayCellSelected: {
-      backgroundColor: colors.purple,
-    },
-    dayCellPast: {
-      opacity: 0.3,
-    },
-    dayText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textPrimary,
-    },
-    dayTextToday: {
-      color: colors.cyan,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    dayTextSelected: {
-      color: colors.textPrimary,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    dayTextPast: {
-      color: colors.textMuted,
-    },
-    // Time Picker
-    timeContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginVertical: SPACING.lg,
-    },
-    timeColumn: {
-      alignItems: 'center',
-    },
-    timeLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      marginBottom: SPACING.sm,
-    },
-    timeScroll: {
-      height: 150,
-      width: 80,
-    },
-    timeItem: {
-      paddingVertical: SPACING.md,
-      alignItems: 'center',
-      borderRadius: 8,
-      marginVertical: 2,
-    },
-    timeItemSelected: {
-      backgroundColor: colors.purple,
-    },
-    timeItemText: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      color: colors.textSecondary,
-    },
-    timeItemTextSelected: {
-      color: colors.textPrimary,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    timeSeparator: {
-      fontSize: TYPOGRAPHY.fontSize['2xl'],
-      color: colors.textPrimary,
-      marginHorizontal: SPACING.md,
-    },
-    // Preview
-    previewContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: SPACING.sm,
-      padding: SPACING.md,
-      backgroundColor: 'rgba(0, 212, 255, 0.1)',
-      borderRadius: 10,
-      marginBottom: SPACING.lg,
-    },
-    previewText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.cyan,
-    },
-    // Confirm Button
-    confirmButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: SPACING.sm,
-      backgroundColor: colors.purple,
-      paddingVertical: SPACING.md,
-      borderRadius: 12,
-    },
-    confirmButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (initialDate) {
@@ -331,7 +155,7 @@ const SchedulePicker = ({
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={24} color={colors.textPrimary} />
+              <X size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
             <Text style={styles.title}>
               {step === 'date' ? 'Chon ngay' : 'Chon gio'}
@@ -342,7 +166,7 @@ const SchedulePicker = ({
                   onPress={() => setStep('date')}
                   style={styles.backButton}
                 >
-                  <Calendar size={20} color={colors.cyan} />
+                  <Calendar size={20} color={COLORS.cyan} />
                 </TouchableOpacity>
               )}
             </View>
@@ -353,11 +177,11 @@ const SchedulePicker = ({
               {/* Month Navigation */}
               <View style={styles.monthNav}>
                 <TouchableOpacity onPress={handlePrevMonth} style={styles.navButton}>
-                  <ChevronLeft size={24} color={colors.textPrimary} />
+                  <ChevronLeft size={24} color={COLORS.textPrimary} />
                 </TouchableOpacity>
                 <Text style={styles.monthText}>{formatMonthYear(currentMonth)}</Text>
                 <TouchableOpacity onPress={handleNextMonth} style={styles.navButton}>
-                  <ChevronRight size={24} color={colors.textPrimary} />
+                  <ChevronRight size={24} color={COLORS.textPrimary} />
                 </TouchableOpacity>
               </View>
 
@@ -465,7 +289,7 @@ const SchedulePicker = ({
 
               {/* Selected DateTime Preview */}
               <View style={styles.previewContainer}>
-                <Clock size={16} color={colors.cyan} />
+                <Clock size={16} color={COLORS.cyan} />
                 <Text style={styles.previewText}>
                   {selectedDate.toLocaleDateString('vi-VN')} luc{' '}
                   {selectedHour.toString().padStart(2, '0')}:
@@ -478,7 +302,7 @@ const SchedulePicker = ({
                 style={styles.confirmButton}
                 onPress={handleConfirm}
               >
-                <Check size={20} color={colors.textPrimary} />
+                <Check size={20} color={COLORS.textPrimary} />
                 <Text style={styles.confirmButtonText}>Xac nhan lich hen</Text>
               </TouchableOpacity>
             </>
@@ -488,5 +312,179 @@ const SchedulePicker = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  container: {
+    width: '90%',
+    maxWidth: 360,
+    backgroundColor: GLASS.background,
+    borderRadius: 16,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+  },
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.lg,
+  },
+  closeButton: {
+    padding: SPACING.xs,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  headerRight: {
+    width: 32,
+  },
+  backButton: {
+    padding: SPACING.xs,
+  },
+  // Month Navigation
+  monthNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.md,
+  },
+  navButton: {
+    padding: SPACING.sm,
+  },
+  monthText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textPrimary,
+  },
+  // Weekdays
+  weekdayRow: {
+    flexDirection: 'row',
+    marginBottom: SPACING.sm,
+  },
+  weekdayText: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textMuted,
+  },
+  // Calendar Grid
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  dayCell: {
+    width: '14.28%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  dayCellToday: {
+    borderWidth: 1,
+    borderColor: COLORS.cyan,
+  },
+  dayCellSelected: {
+    backgroundColor: COLORS.purple,
+  },
+  dayCellPast: {
+    opacity: 0.3,
+  },
+  dayText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+  },
+  dayTextToday: {
+    color: COLORS.cyan,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  dayTextSelected: {
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  dayTextPast: {
+    color: COLORS.textMuted,
+  },
+  // Time Picker
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: SPACING.lg,
+  },
+  timeColumn: {
+    alignItems: 'center',
+  },
+  timeLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+  },
+  timeScroll: {
+    height: 150,
+    width: 80,
+  },
+  timeItem: {
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    borderRadius: 8,
+    marginVertical: 2,
+  },
+  timeItemSelected: {
+    backgroundColor: COLORS.purple,
+  },
+  timeItemText: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    color: COLORS.textSecondary,
+  },
+  timeItemTextSelected: {
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  timeSeparator: {
+    fontSize: TYPOGRAPHY.fontSize['2xl'],
+    color: COLORS.textPrimary,
+    marginHorizontal: SPACING.md,
+  },
+  // Preview
+  previewContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    padding: SPACING.md,
+    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+    borderRadius: 10,
+    marginBottom: SPACING.lg,
+  },
+  previewText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.cyan,
+  },
+  // Confirm Button
+  confirmButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.purple,
+    paddingVertical: SPACING.md,
+    borderRadius: BUTTON.borderRadius,
+  },
+  confirmButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+});
 
 export default SchedulePicker;

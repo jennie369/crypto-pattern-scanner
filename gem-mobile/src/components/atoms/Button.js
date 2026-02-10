@@ -3,11 +3,10 @@
  * Reusable button with primary/secondary variants
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSettings } from '../../contexts/SettingsContext';
-import { BUTTON } from '../../utils/tokens';
+import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, BUTTON } from '../../utils/tokens';
 
 export default function Button({
   title,
@@ -17,43 +16,6 @@ export default function Button({
   loading = false,
   style,
 }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    primaryButton: {
-      height: 48,
-      paddingHorizontal: SPACING.xl,
-      borderRadius: BUTTON.primary.borderRadius,
-      borderWidth: 1,
-      borderColor: colors.gold,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    primaryText: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    secondaryButton: {
-      height: 48,
-      paddingHorizontal: SPACING.xl,
-      borderRadius: BUTTON.primary.borderRadius,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 189, 89, 0.5)',
-      backgroundColor: 'transparent',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    secondaryText: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.gold,
-    },
-    disabled: {
-      opacity: 0.5,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (variant === 'primary') {
     return (
       <TouchableOpacity
@@ -63,11 +25,11 @@ export default function Button({
         activeOpacity={0.8}
       >
         <LinearGradient
-          colors={gradients.primaryButton}
+          colors={GRADIENTS.primaryButton}
           style={styles.primaryButton}
         >
           {loading ? (
-            <ActivityIndicator color={colors.textPrimary} />
+            <ActivityIndicator color={COLORS.textPrimary} />
           ) : (
             <Text style={styles.primaryText}>{title}</Text>
           )}
@@ -85,10 +47,45 @@ export default function Button({
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator color={colors.gold} />
+        <ActivityIndicator color={COLORS.gold} />
       ) : (
         <Text style={styles.secondaryText}>{title}</Text>
       )}
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  primaryButton: {
+    height: 48,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: BUTTON.primary.borderRadius,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  primaryText: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  secondaryButton: {
+    height: 48,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: BUTTON.primary.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.5)',
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  secondaryText: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+});

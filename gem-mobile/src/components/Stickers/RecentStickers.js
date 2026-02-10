@@ -3,7 +3,7 @@
  * Displays recently used stickers/GIFs in a horizontal scroll
  */
 
-import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import {
   Image,
 } from 'react-native';
 import { Clock, Sticker } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import stickerService from '../../services/stickerService';
 import LottieSticker from './LottieSticker';
 
@@ -25,59 +25,8 @@ const RecentStickers = memo(({
   onSelect,
   limit = 20,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const [recentItems, setRecentItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginBottom: SPACING.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-      paddingBottom: SPACING.sm,
-    },
-    loadingContainer: {
-      height: RECENT_ITEM_SIZE + SPACING.lg,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      paddingHorizontal: SPACING.md,
-      marginBottom: SPACING.xs,
-    },
-    headerText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      textTransform: 'uppercase',
-    },
-    scrollContent: {
-      paddingHorizontal: SPACING.md,
-      gap: SPACING.xs,
-    },
-    itemContainer: {
-      width: RECENT_ITEM_SIZE,
-      height: RECENT_ITEM_SIZE,
-      borderRadius: 8,
-      overflow: 'hidden',
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-    },
-    itemImage: {
-      width: '100%',
-      height: '100%',
-    },
-    placeholder: {
-      width: '100%',
-      height: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     loadRecentItems();
@@ -108,7 +57,7 @@ const RecentStickers = memo(({
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator color={colors.gold} size="small" />
+        <ActivityIndicator color={COLORS.gold} size="small" />
       </View>
     );
   }
@@ -120,7 +69,7 @@ const RecentStickers = memo(({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Clock size={14} color={colors.textMuted} />
+        <Clock size={14} color={COLORS.textMuted} />
         <Text style={styles.headerText}>Gan day</Text>
       </View>
 
@@ -156,7 +105,7 @@ const RecentStickers = memo(({
                 />
               ) : (
                 <View style={styles.placeholder}>
-                  <Sticker size={24} color={colors.textMuted} />
+                  <Sticker size={24} color={COLORS.textMuted} />
                 </View>
               )}
             </TouchableOpacity>
@@ -165,6 +114,55 @@ const RecentStickers = memo(({
       </ScrollView>
     </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    paddingBottom: SPACING.sm,
+  },
+  loadingContainer: {
+    height: RECENT_ITEM_SIZE + SPACING.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.xs,
+  },
+  headerText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    textTransform: 'uppercase',
+  },
+  scrollContent: {
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.xs,
+  },
+  itemContainer: {
+    width: RECENT_ITEM_SIZE,
+    height: RECENT_ITEM_SIZE,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  itemImage: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
 });
 
 export default RecentStickers;

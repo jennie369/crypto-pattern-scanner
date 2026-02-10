@@ -5,7 +5,7 @@
  * Shows star rating, optional comment, and prompts App Store review for high ratings
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { X, Star, MessageSquare, ThumbsUp, Send } from 'lucide-react-native';
 
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import feedbackService from '../../services/feedbackService';
 
 const FeedbackModal = ({
@@ -30,7 +30,6 @@ const FeedbackModal = ({
   title = 'Bạn thấy Gemral thế nào?',
   subtitle = 'Đánh giá của bạn giúp chúng tôi cải thiện!',
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [step, setStep] = useState('rating'); // 'rating', 'comment', 'thanks'
@@ -117,153 +116,6 @@ const FeedbackModal = ({
     onClose();
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    },
-    keyboardView: {
-      flex: 1,
-    },
-    backdrop: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: SPACING.lg,
-    },
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 24,
-      padding: SPACING.xl,
-      width: '100%',
-      maxWidth: 360,
-      ...glass,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 189, 89, 0.2)',
-    },
-    closeButton: {
-      position: 'absolute',
-      top: SPACING.sm,
-      right: SPACING.sm,
-      padding: 8,
-      zIndex: 10,
-    },
-    content: {
-      alignItems: 'center',
-      paddingTop: SPACING.lg,
-    },
-    iconContainer: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: SPACING.lg,
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-      textAlign: 'center',
-      marginBottom: SPACING.sm,
-    },
-    subtitle: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 22,
-      marginBottom: SPACING.xl,
-    },
-    starsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: SPACING.sm,
-      marginBottom: SPACING.md,
-    },
-    starButton: {
-      padding: 4,
-    },
-    labelsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      width: '100%',
-      paddingHorizontal: SPACING.md,
-      marginBottom: SPACING.xl,
-    },
-    ratingLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-    },
-    textInput: {
-      width: '100%',
-      minHeight: 100,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderRadius: 12,
-      padding: SPACING.md,
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.md,
-      marginBottom: SPACING.xl,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    actions: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: SPACING.md,
-      width: '100%',
-    },
-    laterButton: {
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.lg,
-    },
-    laterText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textMuted,
-    },
-    skipButton: {
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.lg,
-      borderRadius: 12,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    },
-    skipText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textSecondary,
-    },
-    submitButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xl,
-      borderRadius: 12,
-      backgroundColor: colors.gold,
-      flex: 1,
-      maxWidth: 160,
-    },
-    submitButtonDisabled: {
-      opacity: 0.5,
-    },
-    submitText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.bgDarkest,
-    },
-    doneButton: {
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.huge,
-      borderRadius: 12,
-      backgroundColor: colors.gold,
-    },
-    doneText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.bgDarkest,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!visible) return null;
 
   return (
@@ -287,7 +139,7 @@ const FeedbackModal = ({
               <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
                 {/* Close button */}
                 <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-                  <X size={20} color={colors.textMuted} />
+                  <X size={20} color={COLORS.textMuted} />
                 </TouchableOpacity>
 
                 {/* Rating Step */}
@@ -307,8 +159,8 @@ const FeedbackModal = ({
                         >
                           <Star
                             size={40}
-                            color={starValue <= rating ? colors.gold : colors.textMuted}
-                            fill={starValue <= rating ? colors.gold : 'transparent'}
+                            color={starValue <= rating ? COLORS.gold : COLORS.textMuted}
+                            fill={starValue <= rating ? COLORS.gold : 'transparent'}
                           />
                         </TouchableOpacity>
                       ))}
@@ -341,7 +193,7 @@ const FeedbackModal = ({
                 {step === 'comment' && (
                   <View style={styles.content}>
                     <View style={styles.iconContainer}>
-                      <MessageSquare size={32} color={colors.gold} />
+                      <MessageSquare size={32} color={COLORS.gold} />
                     </View>
                     <Text style={styles.title}>Giúp chúng tôi cải thiện</Text>
                     <Text style={styles.subtitle}>
@@ -351,7 +203,7 @@ const FeedbackModal = ({
                     <TextInput
                       style={styles.textInput}
                       placeholder="Bạn muốn chúng tôi cải thiện điều gì?..."
-                      placeholderTextColor={colors.textMuted}
+                      placeholderTextColor={COLORS.textMuted}
                       value={comment}
                       onChangeText={setComment}
                       multiline
@@ -373,7 +225,7 @@ const FeedbackModal = ({
                         onPress={handleSubmit}
                         disabled={submitting}
                       >
-                        <Send size={18} color={colors.bgDarkest} />
+                        <Send size={18} color={COLORS.bgDarkest} />
                         <Text style={styles.submitText}>Gửi</Text>
                       </TouchableOpacity>
                     </View>
@@ -384,7 +236,7 @@ const FeedbackModal = ({
                 {step === 'thanks' && (
                   <View style={styles.content}>
                     <View style={styles.iconContainer}>
-                      <ThumbsUp size={32} color={colors.gold} />
+                      <ThumbsUp size={32} color={COLORS.gold} />
                     </View>
                     <Text style={styles.title}>Cảm ơn bạn!</Text>
                     <Text style={styles.subtitle}>
@@ -406,5 +258,152 @@ const FeedbackModal = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  backdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  container: {
+    backgroundColor: COLORS.bgMid,
+    borderRadius: 24,
+    padding: SPACING.xl,
+    width: '100%',
+    maxWidth: 360,
+    ...GLASS,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.2)',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+    padding: 8,
+    zIndex: 10,
+  },
+  content: {
+    alignItems: 'center',
+    paddingTop: SPACING.lg,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
+  subtitle: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: SPACING.xl,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  starButton: {
+    padding: 4,
+  },
+  labelsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.xl,
+  },
+  ratingLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  textInput: {
+    width: '100%',
+    minHeight: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    marginBottom: SPACING.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.md,
+    width: '100%',
+  },
+  laterButton: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+  },
+  laterText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+  },
+  skipButton: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  skipText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+  },
+  submitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: 12,
+    backgroundColor: COLORS.gold,
+    flex: 1,
+    maxWidth: 160,
+  },
+  submitButtonDisabled: {
+    opacity: 0.5,
+  },
+  submitText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.bgDarkest,
+  },
+  doneButton: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.huge,
+    borderRadius: 12,
+    backgroundColor: COLORS.gold,
+  },
+  doneText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.bgDarkest,
+  },
+});
 
 export default FeedbackModal;

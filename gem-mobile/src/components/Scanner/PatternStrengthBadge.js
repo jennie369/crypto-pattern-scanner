@@ -7,10 +7,10 @@
  * - Continuation patterns (DPD/UPU): 3 stars = 56-58% win rate
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Star, TrendingUp, TrendingDown, RefreshCw, ArrowRight } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS, BORDER_RADIUS } from '../../utils/tokens';
 import { getPatternConfig } from '../../constants/patternConfig';
 
 const PatternStrengthBadge = memo(({
@@ -22,7 +22,6 @@ const PatternStrengthBadge = memo(({
   compact = false,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const config = getPatternConfig(pattern);
 
   const {
@@ -69,115 +68,6 @@ const PatternStrengthBadge = memo(({
 
   const currentSize = sizeConfig[size] || sizeConfig.medium;
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      gap: SPACING.xs,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    patternBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.xxs,
-      borderRadius: 8,
-    },
-    patternName: {
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    starsRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    strengthText: {
-      marginLeft: SPACING.xs,
-      color: colors.textSecondary,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    contextRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    contextBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.xxs,
-      borderRadius: 8,
-    },
-    contextText: {
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    winRateBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    winRateLabel: {
-      color: colors.textMuted,
-    },
-    winRateValue: {
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    fullName: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-      marginTop: SPACING.xxs,
-    },
-
-    // Compact styles
-    compactContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    compactBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      paddingHorizontal: SPACING.xs,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    compactName: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    compactStars: {
-      flexDirection: 'row',
-      gap: 1,
-    },
-    compactWinRate: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-    },
-
-    // Standalone styles
-    starsOnlyContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 2,
-    },
-    starsOnlyLabel: {
-      marginLeft: SPACING.xxs,
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-    },
-    winRateBadgeStandalone: {
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.xxs,
-      borderRadius: 8,
-    },
-    winRateValueStandalone: {
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // Render stars
   const renderStars = () => {
     const starElements = [];
@@ -187,8 +77,8 @@ const PatternStrengthBadge = memo(({
         <Star
           key={i}
           size={currentSize.starSize}
-          color={isFilled ? colors.gold : colors.textMuted + '40'}
-          fill={isFilled ? colors.gold : 'transparent'}
+          color={isFilled ? COLORS.gold : COLORS.textMuted + '40'}
+          fill={isFilled ? COLORS.gold : 'transparent'}
         />
       );
     }
@@ -222,7 +112,7 @@ const PatternStrengthBadge = memo(({
           <Text style={[styles.compactName, { color }]}>{name}</Text>
           <View style={styles.compactStars}>
             {Array.from({ length: stars }).map((_, i) => (
-              <Star key={i} size={8} color={colors.gold} fill={colors.gold} />
+              <Star key={i} size={8} color={COLORS.gold} fill={COLORS.gold} />
             ))}
           </View>
         </View>
@@ -260,15 +150,15 @@ const PatternStrengthBadge = memo(({
         <View style={styles.contextRow}>
           <View style={[
             styles.contextBadge,
-            { backgroundColor: isReversal ? colors.purple + '20' : colors.info + '20' }
+            { backgroundColor: isReversal ? COLORS.purple + '20' : COLORS.info + '20' }
           ]}>
             <contextInfo.Icon
               size={currentSize.iconSize - 4}
-              color={isReversal ? colors.purple : colors.info}
+              color={isReversal ? COLORS.purple : COLORS.info}
             />
             <Text style={[
               styles.contextText,
-              { color: isReversal ? colors.purple : colors.info, fontSize: currentSize.labelFontSize }
+              { color: isReversal ? COLORS.purple : COLORS.info, fontSize: currentSize.labelFontSize }
             ]}>
               {contextInfo.text}
             </Text>
@@ -284,7 +174,7 @@ const PatternStrengthBadge = memo(({
                 styles.winRateValue,
                 {
                   fontSize: currentSize.fontSize,
-                  color: winRate >= 0.65 ? colors.success : winRate >= 0.55 ? colors.warning : colors.error
+                  color: winRate >= 0.65 ? COLORS.success : winRate >= 0.55 ? COLORS.warning : COLORS.error
                 }
               ]}>
                 {(winRate * 100).toFixed(0)}%
@@ -304,29 +194,14 @@ const PatternStrengthBadge = memo(({
 
 // Standalone stars component for simple usage
 export const StrengthStars = memo(({ strength, size = 12, showLabel = false }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    starsOnlyContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 2,
-    },
-    starsOnlyLabel: {
-      marginLeft: SPACING.xxs,
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <View style={styles.starsOnlyContainer}>
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
           size={size}
-          color={i < strength ? colors.gold : colors.textMuted + '40'}
-          fill={i < strength ? colors.gold : 'transparent'}
+          color={i < strength ? COLORS.gold : COLORS.textMuted + '40'}
+          fill={i < strength ? COLORS.gold : 'transparent'}
         />
       ))}
       {showLabel && (
@@ -340,30 +215,14 @@ export const StrengthStars = memo(({ strength, size = 12, showLabel = false }) =
 
 // Standalone context badge
 export const ContextBadge = memo(({ context, size = 'small' }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const isReversal = context === 'reversal';
   const Icon = isReversal ? RefreshCw : ArrowRight;
   const text = isReversal ? 'Đảo chiều' : 'Tiếp diễn';
-  const bgColor = isReversal ? colors.purple + '20' : colors.info + '20';
-  const textColor = isReversal ? colors.purple : colors.info;
+  const bgColor = isReversal ? COLORS.purple + '20' : COLORS.info + '20';
+  const textColor = isReversal ? COLORS.purple : COLORS.info;
 
   const iconSize = size === 'small' ? 12 : size === 'medium' ? 14 : 16;
   const fontSize = size === 'small' ? TYPOGRAPHY.fontSize.xs : TYPOGRAPHY.fontSize.sm;
-
-  const styles = useMemo(() => StyleSheet.create({
-    contextBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.xxs,
-      borderRadius: 8,
-    },
-    contextText: {
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View style={[styles.contextBadge, { backgroundColor: bgColor }]}>
@@ -377,21 +236,8 @@ export const ContextBadge = memo(({ context, size = 'small' }) => {
 
 // Win rate badge
 export const WinRateBadge = memo(({ winRate, size = 'small' }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const color = winRate >= 0.65 ? colors.success : winRate >= 0.55 ? colors.warning : colors.error;
+  const color = winRate >= 0.65 ? COLORS.success : winRate >= 0.55 ? COLORS.warning : COLORS.error;
   const fontSize = size === 'small' ? TYPOGRAPHY.fontSize.xs : TYPOGRAPHY.fontSize.sm;
-
-  const styles = useMemo(() => StyleSheet.create({
-    winRateBadgeStandalone: {
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.xxs,
-      borderRadius: 8,
-    },
-    winRateValueStandalone: {
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View style={[styles.winRateBadgeStandalone, { backgroundColor: color + '20' }]}>
@@ -400,6 +246,115 @@ export const WinRateBadge = memo(({ winRate, size = 'small' }) => {
       </Text>
     </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    gap: SPACING.xs,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  patternBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xxs,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  patternName: {
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  starsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  strengthText: {
+    marginLeft: SPACING.xs,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  contextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  contextBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xxs,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  contextText: {
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  winRateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  winRateLabel: {
+    color: COLORS.textMuted,
+  },
+  winRateValue: {
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  fullName: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    marginTop: SPACING.xxs,
+  },
+
+  // Compact styles
+  compactContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  compactBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.xs,
+  },
+  compactName: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  compactStars: {
+    flexDirection: 'row',
+    gap: 1,
+  },
+  compactWinRate: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+
+  // Standalone styles
+  starsOnlyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  starsOnlyLabel: {
+    marginLeft: SPACING.xxs,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+  winRateBadgeStandalone: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xxs,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  winRateValueStandalone: {
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
 });
 
 PatternStrengthBadge.displayName = 'PatternStrengthBadge';

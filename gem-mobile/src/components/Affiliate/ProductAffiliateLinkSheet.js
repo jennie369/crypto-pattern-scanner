@@ -4,7 +4,7 @@
  * Uses design tokens from tokens.js
  */
 
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -31,7 +31,7 @@ import {
   ExternalLink,
 } from 'lucide-react-native';
 
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, BUTTON, SHADOWS } from '../../utils/tokens';
 import affiliateService from '../../services/affiliateService';
 import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
@@ -52,7 +52,6 @@ export default function ProductAffiliateLinkSheet({
   productType = 'crystal',
   onNavigateToPartnership, // Optional callback to navigate to partnership registration
 }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
   const [loading, setLoading] = useState(false);
@@ -212,247 +211,6 @@ export default function ProductAffiliateLinkSheet({
     });
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    backdrop: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    },
-    backdropInner: {
-      flex: 1,
-    },
-    sheet: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: SHEET_HEIGHT,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      overflow: 'hidden',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 10,
-    },
-    sheetContainer: {
-      flex: 1,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-    borderGradient: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 1,
-      backgroundColor: 'rgba(255, 189, 89, 0.3)',
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: SPACING.lg,
-    },
-    scrollContent: {
-      flexGrow: 1,
-      paddingBottom: SPACING.md,
-    },
-    handleContainer: {
-      alignItems: 'center',
-      paddingVertical: SPACING.md,
-    },
-    handle: {
-      width: 36,
-      height: 4,
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      borderRadius: 2,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: SPACING.lg,
-    },
-    headerTitleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    headerTitle: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: 'rgba(255, 255, 255, 0.9)',
-    },
-
-    // Loading
-    loadingContainer: {
-      paddingVertical: SPACING.huge,
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: SPACING.md,
-    },
-    loadingText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textSecondary,
-    },
-
-    // Error
-    errorContainer: {
-      paddingVertical: SPACING.huge,
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: SPACING.md,
-    },
-    errorText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.error,
-      textAlign: 'center',
-    },
-    retryButton: {
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.lg,
-      backgroundColor: colors.glassBg,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.gold,
-    },
-    retryText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.gold,
-    },
-
-    // Product Card
-    productCard: {
-      backgroundColor: 'rgba(15, 16, 48, 0.8)',
-      padding: SPACING.lg,
-      borderRadius: 12,
-      marginBottom: SPACING.md,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 189, 89, 0.2)',
-    },
-    productName: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: 'rgba(255, 255, 255, 0.9)',
-      marginBottom: SPACING.xs,
-    },
-    productPrice: {
-      fontSize: TYPOGRAPHY.fontSize.xxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: '#FFBD59', // App gold color
-    },
-
-    // Commission Card
-    commissionCard: {
-      backgroundColor: 'rgba(15, 16, 48, 0.6)',
-      padding: SPACING.lg,
-      borderRadius: 12,
-      marginBottom: SPACING.lg,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    commissionRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: SPACING.xs,
-    },
-    commissionLabel: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: 'rgba(255, 255, 255, 0.6)',
-    },
-    commissionRate: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: '#FFBD59', // App gold color
-    },
-    commissionAmount: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: '#22C55E',
-    },
-
-    // Link Section
-    linkSection: {
-      marginBottom: SPACING.lg,
-    },
-    linkLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: 'rgba(255, 255, 255, 0.5)',
-      marginBottom: SPACING.sm,
-    },
-    linkBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(15, 16, 48, 0.8)',
-      padding: SPACING.md,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.15)',
-    },
-    linkText: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: 'rgba(255, 255, 255, 0.8)',
-      marginRight: SPACING.md,
-    },
-
-    // Actions
-    actions: {
-      flexDirection: 'row',
-      gap: SPACING.md,
-      marginBottom: SPACING.lg,
-    },
-    actionButton: {
-      flex: 1,
-      borderRadius: 12,
-      overflow: 'hidden',
-    },
-    copyButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'rgba(15, 16, 48, 0.8)',
-      padding: SPACING.md,
-      gap: SPACING.sm,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      borderRadius: 10,
-    },
-    shareButton: {
-      overflow: 'hidden',
-    },
-    shareGradient: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: SPACING.md,
-      gap: SPACING.sm,
-      borderRadius: 10,
-      backgroundColor: '#9C0612',
-    },
-    actionText: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: '#FFFFFF',
-    },
-
-    // Tip
-    tipContainer: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      backgroundColor: 'rgba(255, 189, 89, 0.08)',
-      padding: SPACING.md,
-      borderRadius: 8,
-      gap: SPACING.sm,
-    },
-    tipText: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: 'rgba(255, 255, 255, 0.5)',
-      lineHeight: TYPOGRAPHY.fontSize.sm * TYPOGRAPHY.lineHeight.relaxed,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!visible) return null;
 
   return (
@@ -487,14 +245,14 @@ export default function ProductAffiliateLinkSheet({
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.headerTitleRow}>
-                <Link size={20} color={colors.gold} />
+                <Link size={20} color={COLORS.gold} />
                 <Text style={styles.headerTitle}>Link Affiliate</Text>
               </View>
               <TouchableOpacity
                 onPress={handleClose}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <X size={24} color={colors.textMuted} />
+                <X size={24} color={COLORS.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -506,7 +264,7 @@ export default function ProductAffiliateLinkSheet({
               {/* Loading State */}
               {loading && (
                 <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color={colors.gold} />
+                  <ActivityIndicator size="large" color={COLORS.gold} />
                   <Text style={styles.loadingText}>Đang tạo link...</Text>
                 </View>
               )}
@@ -572,9 +330,9 @@ export default function ProductAffiliateLinkSheet({
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                       >
                         {copied ? (
-                          <Check size={20} color={colors.success} />
+                          <Check size={20} color={COLORS.success} />
                         ) : (
-                          <Copy size={20} color={colors.gold} />
+                          <Copy size={20} color={COLORS.gold} />
                         )}
                       </TouchableOpacity>
                     </View>
@@ -587,7 +345,7 @@ export default function ProductAffiliateLinkSheet({
                       onPress={handleCopy}
                       activeOpacity={0.8}
                     >
-                      <Copy size={18} color={colors.textPrimary} />
+                      <Copy size={18} color={COLORS.textPrimary} />
                       <Text style={styles.actionText}>
                         {copied ? 'Đã sao chép!' : 'Sao chép'}
                       </Text>
@@ -607,7 +365,7 @@ export default function ProductAffiliateLinkSheet({
 
                   {/* Tip */}
                   <View style={styles.tipContainer}>
-                    <Lightbulb size={16} color={colors.gold} />
+                    <Lightbulb size={16} color={COLORS.gold} />
                     <Text style={styles.tipText}>
                       Chia sẻ link trên mạng xã hội để tăng thu nhập!
                     </Text>
@@ -622,3 +380,240 @@ export default function ProductAffiliateLinkSheet({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  backdropInner: {
+    flex: 1,
+  },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: SHEET_HEIGHT,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+    ...SHADOWS.glass,
+  },
+  sheetContainer: {
+    flex: 1,
+    backgroundColor: '#0F1030', // Dark blue consistent with app theme
+  },
+  borderGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'rgba(255, 189, 89, 0.3)',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: SPACING.md,
+  },
+  handleContainer: {
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  headerTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+
+  // Loading
+  loadingContainer: {
+    paddingVertical: SPACING.huge,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  loadingText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textSecondary,
+  },
+
+  // Error
+  errorContainer: {
+    paddingVertical: SPACING.huge,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  errorText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.error,
+    textAlign: 'center',
+  },
+  retryButton: {
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BUTTON.primary.borderRadius,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+  retryText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+  },
+
+  // Product Card
+  productCard: {
+    backgroundColor: 'rgba(15, 16, 48, 0.8)',
+    padding: SPACING.lg,
+    borderRadius: 12,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.2)',
+  },
+  productName: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: SPACING.xs,
+  },
+  productPrice: {
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#FFBD59', // App gold color
+  },
+
+  // Commission Card
+  commissionCard: {
+    backgroundColor: 'rgba(15, 16, 48, 0.6)',
+    padding: SPACING.lg,
+    borderRadius: 12,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  commissionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  commissionLabel: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  commissionRate: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#FFBD59', // App gold color
+  },
+  commissionAmount: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#22C55E',
+  },
+
+  // Link Section
+  linkSection: {
+    marginBottom: SPACING.lg,
+  },
+  linkLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginBottom: SPACING.sm,
+  },
+  linkBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 16, 48, 0.8)',
+    padding: SPACING.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  linkText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginRight: SPACING.md,
+  },
+
+  // Actions
+  actions: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  actionButton: {
+    flex: 1,
+    borderRadius: BUTTON.primary.borderRadius,
+    overflow: 'hidden',
+  },
+  copyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(15, 16, 48, 0.8)',
+    padding: SPACING.md,
+    gap: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 10,
+  },
+  shareButton: {
+    overflow: 'hidden',
+  },
+  shareGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.md,
+    gap: SPACING.sm,
+    borderRadius: 10,
+    backgroundColor: '#9C0612',
+  },
+  actionText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: '#FFFFFF',
+  },
+
+  // Tip
+  tipContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(255, 189, 89, 0.08)',
+    padding: SPACING.md,
+    borderRadius: 8,
+    gap: SPACING.sm,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.5)',
+    lineHeight: TYPOGRAPHY.fontSize.sm * TYPOGRAPHY.lineHeight.relaxed,
+  },
+});

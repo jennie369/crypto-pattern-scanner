@@ -4,7 +4,7 @@
  * Phase 3: Comment Threading (30/12/2024)
  */
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -20,7 +20,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import CommentItem from './CommentItem';
 import ThreadLine from './ThreadLine';
 import LoadMoreReplies from './LoadMoreReplies';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 
 const INITIAL_REPLIES_SHOWN = 5;
 
@@ -49,7 +49,6 @@ const CommentThread = ({
   onUserPress,
   onMentionPress,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [loadingMore, setLoadingMore] = useState(false);
 
   // Calculate remaining replies
@@ -75,55 +74,6 @@ const CommentThread = ({
     }
   }, [comment?.id, loadedReplies, loadingMore, onLoadMore]);
 
-  // Memoized styles
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginBottom: SPACING.sm,
-    },
-    viewRepliesButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.md,
-      marginLeft: 56, // Avatar + spacing
-    },
-    viewRepliesText: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.gold,
-      marginLeft: 4,
-    },
-    repliesContainer: {
-      position: 'relative',
-      marginTop: SPACING.xs,
-    },
-    collapseButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.md,
-      marginLeft: 56,
-    },
-    collapseText: {
-      fontSize: 12,
-      color: colors.textMuted,
-      marginLeft: 4,
-    },
-    threadLineContainer: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      left: 0,
-    },
-    replyWrapper: {
-      position: 'relative',
-    },
-    loadingContainer: {
-      paddingVertical: SPACING.md,
-      alignItems: 'center',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!comment) return null;
 
   return (
@@ -141,7 +91,7 @@ const CommentThread = ({
       {/* View Replies Button (collapsed state) */}
       {totalReplies > 0 && !isExpanded && (
         <Pressable style={styles.viewRepliesButton} onPress={handleToggle}>
-          <ChevronDown size={16} color={colors.gold} />
+          <ChevronDown size={16} color={COLORS.gold} />
           <Text style={styles.viewRepliesText}>
             Xem {totalReplies} tra loi
           </Text>
@@ -157,7 +107,7 @@ const CommentThread = ({
         >
           {/* Collapse button */}
           <Pressable style={styles.collapseButton} onPress={handleToggle}>
-            <ChevronUp size={16} color={colors.textMuted} />
+            <ChevronUp size={16} color={COLORS.textMuted} />
             <Text style={styles.collapseText}>An tra loi</Text>
           </Pressable>
 
@@ -192,7 +142,7 @@ const CommentThread = ({
           {/* Loading indicator */}
           {loadingMore && (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={colors.gold} />
+              <ActivityIndicator size="small" color={COLORS.gold} />
             </View>
           )}
         </Animated.View>
@@ -200,5 +150,53 @@ const CommentThread = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: SPACING.sm,
+  },
+  viewRepliesButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    marginLeft: 56, // Avatar + spacing
+  },
+  viewRepliesText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.gold,
+    marginLeft: 4,
+  },
+  repliesContainer: {
+    position: 'relative',
+    marginTop: SPACING.xs,
+  },
+  collapseButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    marginLeft: 56,
+  },
+  collapseText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginLeft: 4,
+  },
+  threadLineContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+  },
+  replyWrapper: {
+    position: 'relative',
+  },
+  loadingContainer: {
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+  },
+});
 
 export default memo(CommentThread);

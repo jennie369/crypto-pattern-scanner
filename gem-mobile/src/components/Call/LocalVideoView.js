@@ -3,7 +3,7 @@
  * Displays local camera preview (draggable)
  */
 
-import React, { memo, useState, useRef, useMemo } from 'react';
+import React, { memo, useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,7 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { RotateCcw } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, BORDER_RADIUS } from '../../utils/tokens';
 
 // Try to import RTCView - may not be available
 let RTCView = null;
@@ -29,7 +29,7 @@ const VIEW_SIZE = { width: 120, height: 160 };
 
 /**
  * LocalVideoView Component
- * Hien thi camera local (draggable)
+ * Hiển thị camera local (draggable)
  * @param {Object} props
  * @param {MediaStream} props.stream - Local media stream
  * @param {boolean} props.isMirrored - Whether to mirror the video
@@ -42,47 +42,8 @@ const LocalVideoView = memo(({
   onSwitchCamera,
   style,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
   const [position] = useState(new Animated.ValueXY(INITIAL_POSITION));
   const isDragging = useRef(false);
-
-  const styles = useMemo(() => {
-    // Get BORDER_RADIUS from settings or use defaults
-    const BORDER_RADIUS = { lg: 16 };
-
-    return StyleSheet.create({
-      container: {
-        position: 'absolute',
-        width: VIEW_SIZE.width,
-        height: VIEW_SIZE.height,
-        borderRadius: BORDER_RADIUS.lg,
-        overflow: 'hidden',
-        backgroundColor: colors.bgCard,
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        borderWidth: 2,
-        borderColor: colors.glassBorder,
-      },
-      video: {
-        width: '100%',
-        height: '100%',
-      },
-      switchButton: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-    });
-  }, [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Pan responder for dragging
   const panResponder = useRef(
@@ -161,11 +122,44 @@ const LocalVideoView = memo(({
           activeOpacity={0.7}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <RotateCcw size={16} color={colors.textPrimary} />
+          <RotateCcw size={16} color={COLORS.textPrimary} />
         </TouchableOpacity>
       )}
     </Animated.View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    width: VIEW_SIZE.width,
+    height: VIEW_SIZE.height,
+    borderRadius: BORDER_RADIUS.lg,
+    overflow: 'hidden',
+    backgroundColor: COLORS.bgCard,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    borderWidth: 2,
+    borderColor: COLORS.glassBorder,
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+  },
+  switchButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 LocalVideoView.displayName = 'LocalVideoView';

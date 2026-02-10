@@ -3,7 +3,7 @@
  * Control buttons for in-call actions (mute, speaker, video, end)
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import {
   Mic,
@@ -15,8 +15,51 @@ import {
   PhoneOff,
   Camera,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { CALL_UI, CALL_TOOLTIPS } from '../../constants/callConstants';
+
+/**
+ * Control button with icon and label
+ */
+const ControlButton = ({
+  icon: Icon,
+  label,
+  onPress,
+  isActive = false,
+  isEnd = false,
+  disabled = false,
+}) => {
+  const buttonSize = isEnd ? CALL_UI.END_BUTTON_SIZE : CALL_UI.CONTROL_BUTTON_SIZE;
+
+  return (
+    <View style={styles.controlWrapper}>
+      <TouchableOpacity
+        style={[
+          styles.controlButton,
+          {
+            width: buttonSize,
+            height: buttonSize,
+            borderRadius: buttonSize / 2,
+          },
+          isEnd && styles.endButton,
+          isActive && !isEnd && styles.activeButton,
+          disabled && styles.disabledButton,
+        ]}
+        onPress={onPress}
+        disabled={disabled}
+        activeOpacity={0.7}
+      >
+        <Icon
+          size={isEnd ? 32 : 28}
+          color={isEnd ? COLORS.textPrimary : COLORS.textPrimary}
+        />
+      </TouchableOpacity>
+      {label && (
+        <Text style={styles.controlLabel}>{label}</Text>
+      )}
+    </View>
+  );
+};
 
 /**
  * CallControls - Main controls component
@@ -44,98 +87,6 @@ const CallControls = ({
   onSwitchCamera,
   onEndCall,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      width: '100%',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.xl,
-    },
-    controlsRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-      flexWrap: 'wrap',
-      marginBottom: SPACING.xxxl,
-    },
-    endCallRow: {
-      alignItems: 'center',
-    },
-    controlWrapper: {
-      alignItems: 'center',
-      marginHorizontal: SPACING.md,
-      marginBottom: SPACING.md,
-    },
-    controlButton: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.inputBorder,
-    },
-    activeButton: {
-      backgroundColor: colors.gold + '40',
-      borderColor: colors.gold,
-    },
-    endButton: {
-      backgroundColor: colors.error,
-      borderWidth: 0,
-    },
-    disabledButton: {
-      opacity: 0.5,
-    },
-    controlLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textSecondary,
-      marginTop: SPACING.xs,
-      textAlign: 'center',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
-  /**
-   * Control button with icon and label
-   */
-  const ControlButton = ({
-    icon: Icon,
-    label,
-    onPress,
-    isActive = false,
-    isEnd = false,
-    disabled = false,
-  }) => {
-    const buttonSize = isEnd ? CALL_UI.END_BUTTON_SIZE : CALL_UI.CONTROL_BUTTON_SIZE;
-
-    return (
-      <View style={styles.controlWrapper}>
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            {
-              width: buttonSize,
-              height: buttonSize,
-              borderRadius: buttonSize / 2,
-            },
-            isEnd && styles.endButton,
-            isActive && !isEnd && styles.activeButton,
-            disabled && styles.disabledButton,
-          ]}
-          onPress={onPress}
-          disabled={disabled}
-          activeOpacity={0.7}
-        >
-          <Icon
-            size={isEnd ? 32 : 28}
-            color={isEnd ? colors.textPrimary : colors.textPrimary}
-          />
-        </TouchableOpacity>
-        {label && (
-          <Text style={styles.controlLabel}>{label}</Text>
-        )}
-      </View>
-    );
-  };
-
   return (
     <View style={styles.container}>
       {/* Top row: Media controls */}
@@ -143,7 +94,7 @@ const CallControls = ({
         {/* Mute button */}
         <ControlButton
           icon={isMuted ? MicOff : Mic}
-          label={isMuted ? 'Bat mic' : 'Tat mic'}
+          label={isMuted ? 'Bật mic' : 'Tắt mic'}
           onPress={onToggleMute}
           isActive={isMuted}
         />
@@ -151,7 +102,7 @@ const CallControls = ({
         {/* Speaker button */}
         <ControlButton
           icon={isSpeakerOn ? Volume2 : VolumeX}
-          label={isSpeakerOn ? 'Loa ngoai' : 'Loa trong'}
+          label={isSpeakerOn ? 'Loa ngoài' : 'Loa trong'}
           onPress={onToggleSpeaker}
           isActive={isSpeakerOn}
         />
@@ -160,7 +111,7 @@ const CallControls = ({
         {showVideo && (
           <ControlButton
             icon={isVideoEnabled ? Video : VideoOff}
-            label={isVideoEnabled ? 'Tat video' : 'Bat video'}
+            label={isVideoEnabled ? 'Tắt video' : 'Bật video'}
             onPress={onToggleVideo}
             isActive={isVideoEnabled}
           />
@@ -170,7 +121,7 @@ const CallControls = ({
         {showCameraSwitch && isVideoEnabled && (
           <ControlButton
             icon={Camera}
-            label="Doi camera"
+            label="Đổi camera"
             onPress={onSwitchCamera}
           />
         )}
@@ -180,7 +131,7 @@ const CallControls = ({
       <View style={styles.endCallRow}>
         <ControlButton
           icon={PhoneOff}
-          label="Ket thuc"
+          label="Kết thúc"
           onPress={onEndCall}
           isEnd
         />
@@ -188,5 +139,52 @@ const CallControls = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    marginBottom: SPACING.xxxl,
+  },
+  endCallRow: {
+    alignItems: 'center',
+  },
+  controlWrapper: {
+    alignItems: 'center',
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  controlButton: {
+    backgroundColor: COLORS.glassBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.inputBorder,
+  },
+  activeButton: {
+    backgroundColor: COLORS.gold + '40',
+    borderColor: COLORS.gold,
+  },
+  endButton: {
+    backgroundColor: COLORS.error,
+    borderWidth: 0,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  controlLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
+    textAlign: 'center',
+  },
+});
 
 export default CallControls;

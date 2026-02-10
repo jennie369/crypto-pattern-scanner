@@ -1,10 +1,10 @@
 /**
  * SponsorBannerPost - Post-style Sponsor Banner
  * Renders a sponsor banner that looks exactly like a regular forum post
- * for seamless integration into the feed. Only "Tai tro" label distinguishes it.
+ * for seamless integration into the feed. Only "Tài trợ" label distinguishes it.
  */
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ import {
   X,
   ChevronRight,
 } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 import { sponsorBannerService } from '../services/sponsorBannerService';
 import deepLinkHandler from '../services/deepLinkHandler';
 import { navigateToScreen } from '../utils/navigationHelper';
@@ -43,7 +43,6 @@ export default function SponsorBannerPost({
   onDismiss,
   showActions = true, // Hide actions in non-forum contexts (e.g., GemMaster chat)
 }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -178,185 +177,7 @@ export default function SponsorBannerPost({
 
   // Get sponsor avatar or use default
   const sponsorAvatar = banner.sponsor_avatar || banner.image_url;
-  const sponsorName = banner.sponsor_name || 'Nha tai tro';
-
-  const styles = useMemo(() => StyleSheet.create({
-    card: {
-      backgroundColor: colors.glassBg,
-      marginBottom: SPACING.sm,
-      paddingTop: SPACING.md,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-    },
-
-    // Header styles (matches PostCard)
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      marginBottom: SPACING.sm,
-    },
-    avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      marginRight: SPACING.sm,
-    },
-    avatarPlaceholder: {
-      backgroundColor: colors.purple,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    avatarText: {
-      color: colors.textPrimary,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    headerText: {
-      flex: 1,
-    },
-    authorRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    authorName: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-    sponsoredBadge: {
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    sponsoredText: {
-      fontSize: 10,
-      color: colors.gold,
-      fontWeight: '500',
-    },
-    timestamp: {
-      fontSize: 12,
-      color: colors.textMuted,
-      marginTop: 2,
-    },
-    moreButton: {
-      padding: SPACING.xs,
-    },
-
-    // Content styles (matches PostCard)
-    content: {
-      fontSize: 14,
-      color: colors.textPrimary,
-      lineHeight: 20,
-      paddingHorizontal: SPACING.md,
-      marginBottom: SPACING.sm,
-    },
-    titleBold: {
-      fontWeight: '600',
-      fontSize: 15,
-    },
-
-    // Media container (matches PostCard - full bleed)
-    mediaContainer: {
-      width: SCREEN_WIDTH,
-      marginBottom: SPACING.sm,
-      position: 'relative',
-    },
-    postImage: {
-      width: SCREEN_WIDTH,
-      height: SCREEN_WIDTH * 0.75, // 4:3 aspect ratio for better image display
-      backgroundColor: colors.bgMid,
-    },
-
-    // Pagination dots for image carousel
-    paginationContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'absolute',
-      bottom: 12,
-      left: 0,
-      right: 0,
-      gap: 6,
-    },
-    paginationDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    },
-    paginationDotActive: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: colors.gold,
-    },
-
-    // Image counter badge
-    imageCountBadge: {
-      position: 'absolute',
-      top: 12,
-      right: 12,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 12,
-    },
-    imageCountText: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-
-    // CTA Button
-    ctaButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginHorizontal: SPACING.md,
-      marginBottom: SPACING.sm,
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      backgroundColor: 'rgba(255, 189, 89, 0.1)',
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 189, 89, 0.3)',
-    },
-    ctaText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.gold,
-      marginRight: SPACING.xs,
-    },
-
-    // Action bar (matches PostCard)
-    actionBar: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(255, 255, 255, 0.05)',
-    },
-    actionBarLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.lg,
-    },
-    actionBarRight: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.md,
-    },
-    actionBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: SPACING.xs,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+  const sponsorName = banner.sponsor_name || 'Nhà tài trợ';
 
   return (
     <View style={styles.card}>
@@ -383,10 +204,10 @@ export default function SponsorBannerPost({
             <Text style={styles.authorName}>{sponsorName}</Text>
             {/* Sponsored Badge */}
             <View style={styles.sponsoredBadge}>
-              <Text style={styles.sponsoredText}>Tai tro</Text>
+              <Text style={styles.sponsoredText}>Tài trợ</Text>
             </View>
           </View>
-          <Text style={styles.timestamp}>Duoc tai tro</Text>
+          <Text style={styles.timestamp}>Được tài trợ</Text>
         </TouchableOpacity>
 
         {/* Dismiss Button */}
@@ -396,7 +217,7 @@ export default function SponsorBannerPost({
             onPress={handleDismiss}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <X size={18} color={colors.textMuted} />
+            <X size={18} color={COLORS.textMuted} />
           </TouchableOpacity>
         )}
       </View>
@@ -469,7 +290,7 @@ export default function SponsorBannerPost({
           activeOpacity={0.8}
         >
           <Text style={styles.ctaText}>{banner.action_label}</Text>
-          <ChevronRight size={16} color={colors.gold} />
+          <ChevronRight size={16} color={COLORS.gold} />
         </TouchableOpacity>
       )}
 
@@ -481,7 +302,7 @@ export default function SponsorBannerPost({
             <TouchableOpacity style={styles.actionBtn} onPress={handleLike} activeOpacity={0.7}>
               <Heart
                 size={22}
-                color={isLiked ? '#FF6B6B' : colors.textMuted}
+                color={isLiked ? '#FF6B6B' : COLORS.textMuted}
                 fill={isLiked ? '#FF6B6B' : 'transparent'}
                 strokeWidth={2}
               />
@@ -489,12 +310,12 @@ export default function SponsorBannerPost({
 
             {/* Comment Button (navigates to banner action) */}
             <TouchableOpacity style={styles.actionBtn} onPress={handleBannerClick} activeOpacity={0.7}>
-              <MessageCircle size={22} color={colors.textMuted} />
+              <MessageCircle size={22} color={COLORS.textMuted} />
             </TouchableOpacity>
 
             {/* Share Button */}
             <TouchableOpacity style={styles.actionBtn} onPress={handleBannerClick} activeOpacity={0.7}>
-              <Send size={20} color={colors.textMuted} />
+              <Send size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -503,8 +324,8 @@ export default function SponsorBannerPost({
             <TouchableOpacity style={styles.actionBtn} onPress={handleSave}>
               <Bookmark
                 size={20}
-                color={isSaved ? colors.gold : colors.textMuted}
-                fill={isSaved ? colors.gold : 'transparent'}
+                color={isSaved ? COLORS.gold : COLORS.textMuted}
+                fill={isSaved ? COLORS.gold : 'transparent'}
               />
             </TouchableOpacity>
           </View>
@@ -513,3 +334,181 @@ export default function SponsorBannerPost({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: COLORS.glassBg,
+    marginBottom: SPACING.sm,
+    paddingTop: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+
+  // Header styles (matches PostCard)
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: SPACING.sm,
+  },
+  avatarPlaceholder: {
+    backgroundColor: COLORS.purple,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  headerText: {
+    flex: 1,
+  },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  authorName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  sponsoredBadge: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  sponsoredText: {
+    fontSize: 10,
+    color: COLORS.gold,
+    fontWeight: '500',
+  },
+  timestamp: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  moreButton: {
+    padding: SPACING.xs,
+  },
+
+  // Content styles (matches PostCard)
+  content: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  titleBold: {
+    fontWeight: '600',
+    fontSize: 15,
+  },
+
+  // Media container (matches PostCard - full bleed)
+  mediaContainer: {
+    width: SCREEN_WIDTH,
+    marginBottom: SPACING.sm,
+    position: 'relative',
+  },
+  postImage: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_WIDTH * 0.75, // 4:3 aspect ratio for better image display
+    backgroundColor: COLORS.bgMid,
+  },
+
+  // Pagination dots for image carousel
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 12,
+    left: 0,
+    right: 0,
+    gap: 6,
+  },
+  paginationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  paginationDotActive: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.gold,
+  },
+
+  // Image counter badge
+  imageCountBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  imageCountText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+
+  // CTA Button
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+  },
+  ctaText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.gold,
+    marginRight: SPACING.xs,
+  },
+
+  // Action bar (matches PostCard)
+  actionBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  actionBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.lg,
+  },
+  actionBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.xs,
+  },
+});

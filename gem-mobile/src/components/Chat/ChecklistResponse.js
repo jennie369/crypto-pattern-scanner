@@ -4,10 +4,10 @@
 // Interactive checklist for exercises/tasks
 // ============================================================
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Check, Circle, Award } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 
 const ChecklistResponse = memo(({
   title,
@@ -19,8 +19,6 @@ const ChecklistResponse = memo(({
   onItemToggle,
   onComplete,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const [checkedItems, setCheckedItems] = useState(
     items.map(item => item?.done || false)
   );
@@ -36,144 +34,6 @@ const ChecklistResponse = memo(({
 
   const completedCount = checkedItems.filter(Boolean).length;
   const allCompleted = completedCount === items.length && items.length > 0;
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 16,
-      padding: SPACING.md,
-      marginVertical: SPACING.sm,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: SPACING.sm,
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    duration: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.gold,
-    },
-    summary: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textSecondary,
-      lineHeight: 22,
-      marginBottom: SPACING.md,
-      fontStyle: 'italic',
-    },
-    rootCauseContainer: {
-      backgroundColor: 'rgba(255,255,255,0.03)',
-      padding: SPACING.sm,
-      borderRadius: 8,
-      marginBottom: SPACING.md,
-      borderLeftWidth: 3,
-      borderLeftColor: colors.gold,
-    },
-    rootCauseLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.gold,
-      marginBottom: SPACING.xs,
-    },
-    rootCauseText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textSecondary,
-      lineHeight: 20,
-    },
-    crystalContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: SPACING.md,
-      paddingTop: SPACING.sm,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(255,255,255,0.1)',
-    },
-    crystalLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      marginRight: SPACING.xs,
-    },
-    crystalText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.purple,
-    },
-    progressContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.md,
-    },
-    progressBar: {
-      flex: 1,
-      height: 4,
-      backgroundColor: 'rgba(255,255,255,0.1)',
-      borderRadius: 2,
-      marginRight: SPACING.sm,
-    },
-    progressFill: {
-      height: '100%',
-      backgroundColor: colors.gold,
-      borderRadius: 2,
-    },
-    progressText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      minWidth: 40,
-      textAlign: 'right',
-    },
-    itemsContainer: {
-      gap: SPACING.sm,
-    },
-    itemRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      paddingVertical: SPACING.xs,
-    },
-    checkbox: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      borderWidth: 2,
-      borderColor: colors.textMuted,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: SPACING.sm,
-    },
-    checkboxChecked: {
-      backgroundColor: colors.gold,
-      borderColor: colors.gold,
-    },
-    itemText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textPrimary,
-      flex: 1,
-    },
-    itemTextChecked: {
-      color: colors.textMuted,
-      textDecorationLine: 'line-through',
-    },
-    completeButton: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: colors.gold,
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderRadius: 12,
-      marginTop: SPACING.md,
-      gap: SPACING.xs,
-    },
-    completeButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.bgDark,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View style={styles.container}>
@@ -227,9 +87,9 @@ const ChecklistResponse = memo(({
               checkedItems[index] && styles.checkboxChecked
             ]}>
               {checkedItems[index] ? (
-                <Check size={14} color={colors.bgDark} />
+                <Check size={14} color={COLORS.bgDark} />
               ) : (
-                <Circle size={14} color={colors.textMuted} />
+                <Circle size={14} color={COLORS.textMuted} />
               )}
             </View>
             <Text style={[
@@ -256,12 +116,150 @@ const ChecklistResponse = memo(({
           style={styles.completeButton}
           onPress={onComplete}
         >
-          <Award size={18} color={colors.bgDark} />
+          <Award size={18} color={COLORS.bgDark} />
           <Text style={styles.completeButtonText}>Hoàn thành!</Text>
         </TouchableOpacity>
       )}
     </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: SPACING.md,
+    marginVertical: SPACING.sm,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  duration: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+  },
+  summary: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+    marginBottom: SPACING.md,
+    fontStyle: 'italic',
+  },
+  rootCauseContainer: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    padding: SPACING.sm,
+    borderRadius: 8,
+    marginBottom: SPACING.md,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.gold,
+  },
+  rootCauseLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+    marginBottom: SPACING.xs,
+  },
+  rootCauseText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  crystalContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  crystalLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginRight: SPACING.xs,
+  },
+  crystalText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.purple,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  progressBar: {
+    flex: 1,
+    height: 4,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 2,
+    marginRight: SPACING.sm,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.gold,
+    borderRadius: 2,
+  },
+  progressText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    minWidth: 40,
+    textAlign: 'right',
+  },
+  itemsContainer: {
+    gap: SPACING.sm,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: SPACING.xs,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.gold,
+    borderColor: COLORS.gold,
+  },
+  itemText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textPrimary,
+    flex: 1,
+  },
+  itemTextChecked: {
+    color: COLORS.textMuted,
+    textDecorationLine: 'line-through',
+  },
+  completeButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.gold,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 12,
+    marginTop: SPACING.md,
+    gap: SPACING.xs,
+  },
+  completeButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.bgDark,
+  },
 });
 
 ChecklistResponse.displayName = 'ChecklistResponse';

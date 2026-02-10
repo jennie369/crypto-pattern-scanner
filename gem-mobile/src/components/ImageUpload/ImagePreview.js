@@ -3,10 +3,10 @@
  * Show selected image with info before upload
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Image, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
 import { X } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { calculateAspectRatio, getClosestFormat, formatFileSize } from '../../utils/imageUtils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -19,46 +19,6 @@ const ImagePreview = ({
   onRemove,
   showInfo = true
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginBottom: SPACING.md
-    },
-    imageContainer: {
-      width: '100%',
-      backgroundColor: colors.glassBg,
-      borderRadius: 12,
-      overflow: 'hidden',
-      position: 'relative'
-    },
-    image: {
-      width: '100%',
-      height: '100%'
-    },
-    removeButton: {
-      position: 'absolute',
-      top: SPACING.sm,
-      right: SPACING.sm,
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    info: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingHorizontal: SPACING.xs,
-      paddingTop: SPACING.sm
-    },
-    infoText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted
-    }
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   const ratio = calculateAspectRatio(width, height);
   const format = getClosestFormat(ratio);
 
@@ -86,7 +46,7 @@ const ImagePreview = ({
           onPress={onRemove}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <X size={18} color={colors.textPrimary} />
+          <X size={18} color={COLORS.textPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -108,5 +68,43 @@ const ImagePreview = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: SPACING.md
+  },
+  imageContainer: {
+    width: '100%',
+    backgroundColor: COLORS.glassBg,
+    borderRadius: 12,
+    overflow: 'hidden',
+    position: 'relative'
+  },
+  image: {
+    width: '100%',
+    height: '100%'
+  },
+  removeButton: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  info: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.xs,
+    paddingTop: SPACING.sm
+  },
+  infoText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted
+  }
+});
 
 export default ImagePreview;

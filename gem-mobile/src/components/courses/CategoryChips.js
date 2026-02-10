@@ -3,7 +3,7 @@
  * Horizontal scrollable category filter chips
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -23,8 +23,7 @@ import {
   Star,
   Zap,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
-import { BORDER_RADIUS } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 
 // Default category icons
 const CATEGORY_ICONS = {
@@ -44,47 +43,9 @@ const CategoryChip = ({
   isSelected,
   onPress,
   showIcon = true,
-  colors,
-  SPACING,
-  TYPOGRAPHY,
 }) => {
   const { id, name, icon } = category;
   const IconComponent = CATEGORY_ICONS[icon] || CATEGORY_ICONS[id] || BookOpen;
-
-  const styles = useMemo(() => StyleSheet.create({
-    chipWrapper: {
-      marginRight: SPACING.sm,
-    },
-    chip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderRadius: BORDER_RADIUS.full,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    chipSelected: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderRadius: BORDER_RADIUS.full,
-    },
-    chipText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textSecondary,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      marginLeft: SPACING.xs,
-    },
-    chipTextSelected: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.bgDarkest,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      marginLeft: SPACING.xs,
-    },
-  }), [colors, SPACING, TYPOGRAPHY]);
 
   if (isSelected) {
     return (
@@ -94,13 +55,13 @@ const CategoryChip = ({
         style={styles.chipWrapper}
       >
         <LinearGradient
-          colors={[colors.gold, '#FFD700']}
+          colors={[COLORS.gold, '#FFD700']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.chipSelected}
         >
           {showIcon && (
-            <IconComponent size={14} color={colors.bgDarkest} strokeWidth={2.5} />
+            <IconComponent size={14} color={COLORS.bgDarkest} strokeWidth={2.5} />
           )}
           <Text style={styles.chipTextSelected}>{name}</Text>
         </LinearGradient>
@@ -115,7 +76,7 @@ const CategoryChip = ({
       style={[styles.chipWrapper, styles.chip]}
     >
       {showIcon && (
-        <IconComponent size={14} color={colors.textMuted} strokeWidth={2} />
+        <IconComponent size={14} color={COLORS.textMuted} strokeWidth={2} />
       )}
       <Text style={styles.chipText}>{name}</Text>
     </TouchableOpacity>
@@ -131,18 +92,6 @@ const CategoryChips = ({
   showIcons = true,
   style = {},
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginVertical: SPACING.md,
-    },
-    scrollContent: {
-      paddingHorizontal: SPACING.lg,
-      gap: SPACING.sm,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // Build categories list with "All" option
   const allCategories = showAllOption
     ? [{ id: 'all', name: allLabel, icon: 'all' }, ...categories]
@@ -175,14 +124,53 @@ const CategoryChips = ({
             isSelected={isSelected(category)}
             onPress={handleSelect}
             showIcon={showIcons}
-            colors={colors}
-            SPACING={SPACING}
-            TYPOGRAPHY={TYPOGRAPHY}
           />
         ))}
       </ScrollView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: SPACING.md,
+  },
+  scrollContent: {
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  chipWrapper: {
+    marginRight: SPACING.sm,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  chipSelected: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  chipText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    marginLeft: SPACING.xs,
+  },
+  chipTextSelected: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.bgDarkest,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    marginLeft: SPACING.xs,
+  },
+});
 
 export default CategoryChips;

@@ -4,7 +4,7 @@
  * OPTIMIZED: Fixed height to prevent layout shift
  */
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -18,12 +18,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSettings } from '../../contexts/SettingsContext';
-import { BORDER_RADIUS } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import { getPromoBanners } from '../../services/promoBannerService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const BANNER_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
 const BANNER_HEIGHT = 160;
+const TOTAL_HEIGHT = BANNER_HEIGHT + SPACING.md + 20; // Banner + pagination + margin
 const AUTO_SLIDE_INTERVAL = 5000;
 const LOAD_TIMEOUT = 3000; // 3 second timeout for loading
 
@@ -47,7 +48,7 @@ const isCacheValid = () => {
 };
 
 // Skeleton placeholder for loading state
-const SkeletonBanner = React.memo(({ SPACING, BANNER_WIDTH }) => {
+const SkeletonBanner = React.memo(() => {
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -66,36 +67,6 @@ const SkeletonBanner = React.memo(({ SPACING, BANNER_WIDTH }) => {
     inputRange: [0, 1],
     outputRange: [-BANNER_WIDTH, BANNER_WIDTH],
   });
-
-  const styles = useMemo(() => StyleSheet.create({
-    skeletonContainer: {
-      paddingHorizontal: SPACING.lg,
-    },
-    skeletonBanner: {
-      height: BANNER_HEIGHT,
-      borderRadius: BORDER_RADIUS.xl,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      overflow: 'hidden',
-    },
-    shimmer: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    },
-    skeletonPagination: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: SPACING.md,
-    },
-    skeletonDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      marginHorizontal: SPACING.xxs,
-    },
-  }), [SPACING, BANNER_WIDTH]);
 
   return (
     <View style={styles.skeletonContainer}>
@@ -119,11 +90,6 @@ const SkeletonBanner = React.memo(({ SPACING, BANNER_WIDTH }) => {
 
 const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
   const navigation = useNavigation();
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
-
-  const BANNER_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
-  const TOTAL_HEIGHT = BANNER_HEIGHT + SPACING.md + 20; // Banner + pagination + margin
-
   const flatListRef = useRef(null);
   // Initialize from cache if available - prevents loading flash
   const [banners, setBanners] = useState(() => cachedBanners || []);
@@ -132,90 +98,6 @@ const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
   const autoSlideTimer = useRef(null);
   const loadTimeoutRef = useRef(null);
   const fadeAnim = useRef(new Animated.Value(isCacheValid() ? 1 : 0)).current;
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginTop: SPACING.md,
-    },
-    fixedContainer: {
-      minHeight: TOTAL_HEIGHT,
-      marginTop: SPACING.md,
-    },
-    loadingContainer: {
-      height: BANNER_HEIGHT,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginHorizontal: SPACING.lg,
-    },
-    listContent: {
-      paddingHorizontal: SPACING.lg,
-    },
-    bannerContainer: {
-      width: BANNER_WIDTH,
-      marginRight: SPACING.md,
-    },
-    banner: {
-      height: BANNER_HEIGHT,
-      borderRadius: BORDER_RADIUS.xl,
-      overflow: 'hidden',
-      position: 'relative',
-    },
-    bannerImage: {
-      ...StyleSheet.absoluteFillObject,
-      width: '100%',
-      height: '100%',
-    },
-    gradientOverlay: {
-      ...StyleSheet.absoluteFillObject,
-    },
-    bannerContent: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      padding: SPACING.lg,
-    },
-    bannerTitle: {
-      fontSize: TYPOGRAPHY.fontSize.xxxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      marginBottom: SPACING.xxs,
-    },
-    bannerSubtitle: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      marginBottom: SPACING.md,
-    },
-    ctaButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      alignSelf: 'flex-start',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderRadius: BORDER_RADIUS.full,
-    },
-    ctaText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.bgDarkest,
-      marginRight: SPACING.xxs,
-    },
-    pagination: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: SPACING.md,
-    },
-    paginationDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-      marginHorizontal: SPACING.xxs,
-    },
-    paginationDotActive: {
-      width: 20,
-      backgroundColor: colors.gold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY, BANNER_WIDTH, TOTAL_HEIGHT]);
 
   // Load banners
   useEffect(() => {
@@ -359,11 +241,11 @@ const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
           <View
             style={[
               styles.ctaButton,
-              { backgroundColor: banner.cta_color || colors.gold },
+              { backgroundColor: banner.cta_color || COLORS.gold },
             ]}
           >
             <Text style={styles.ctaText}>{banner.cta_text || 'Xem ngay'}</Text>
-            <ChevronRight size={14} color={colors.bgDarkest} strokeWidth={3} />
+            <ChevronRight size={14} color={COLORS.bgDarkest} strokeWidth={3} />
           </View>
         </View>
       </View>
@@ -375,7 +257,7 @@ const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
   if (loading && banners.length === 0) {
     return (
       <View style={[styles.fixedContainer, style]}>
-        <SkeletonBanner SPACING={SPACING} BANNER_WIDTH={BANNER_WIDTH} />
+        <SkeletonBanner />
       </View>
     );
   }
@@ -423,6 +305,118 @@ const HeroBannerCarousel = React.memo(({ userTier = null, style = {} }) => {
       )}
     </Animated.View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: SPACING.md,
+  },
+  fixedContainer: {
+    minHeight: TOTAL_HEIGHT,
+    marginTop: SPACING.md,
+  },
+  // Skeleton styles
+  skeletonContainer: {
+    paddingHorizontal: SPACING.lg,
+  },
+  skeletonBanner: {
+    height: BANNER_HEIGHT,
+    borderRadius: BORDER_RADIUS.xl,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    overflow: 'hidden',
+  },
+  shimmer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  skeletonPagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  skeletonDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: SPACING.xxs,
+  },
+  loadingContainer: {
+    height: BANNER_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: SPACING.lg,
+  },
+  listContent: {
+    paddingHorizontal: SPACING.lg,
+  },
+  bannerContainer: {
+    width: BANNER_WIDTH,
+    marginRight: SPACING.md,
+  },
+  banner: {
+    height: BANNER_HEIGHT,
+    borderRadius: BORDER_RADIUS.xl,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  bannerImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  bannerContent: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: SPACING.lg,
+  },
+  bannerTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xxxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    marginBottom: SPACING.xxs,
+  },
+  bannerSubtitle: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    marginBottom: SPACING.md,
+  },
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  ctaText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.bgDarkest,
+    marginRight: SPACING.xxs,
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  paginationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    marginHorizontal: SPACING.xxs,
+  },
+  paginationDotActive: {
+    width: 20,
+    backgroundColor: COLORS.gold,
+  },
 });
 
 SkeletonBanner.displayName = 'SkeletonBanner';

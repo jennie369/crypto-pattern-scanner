@@ -6,7 +6,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,8 +25,7 @@ import {
   Target,
   X,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
-import { BORDER_RADIUS, POPUP } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, GRADIENTS, POPUP } from '../../utils/tokens';
 
 const ONBOARDING_KEY = '@gem_insights_onboarding_seen';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -65,7 +64,6 @@ const FEATURES = [
  * @param {Function} props.onDismiss - Called when modal is dismissed
  */
 const InsightsOnboarding = ({ visible: forcedVisible, onDismiss }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [visible, setVisible] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
 
@@ -110,125 +108,6 @@ const InsightsOnboarding = ({ visible: forcedVisible, onDismiss }) => {
     handleDismiss();
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    blurContainer: {
-      flex: 1,
-    },
-    overlay: {
-      flex: 1,
-      backgroundColor: POPUP.overlay.backgroundColor,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: SPACING.lg,
-    },
-    modalContainer: {
-      width: SCREEN_WIDTH - SPACING.lg * 2,
-      maxWidth: 340,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: POPUP.glassCard.borderRadius,
-      borderWidth: POPUP.glassCard.borderWidth,
-      borderColor: POPUP.glassCard.borderColor,
-      padding: SPACING.xl,
-      alignItems: 'center',
-    },
-
-    // Close button
-    closeButton: {
-      position: 'absolute',
-      top: SPACING.md,
-      right: SPACING.md,
-      zIndex: 1,
-    },
-
-    // Header
-    headerGradient: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: SPACING.lg,
-    },
-    headerEmoji: {
-      fontSize: 28,
-    },
-
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.display,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-      textAlign: 'center',
-      marginBottom: SPACING.xs,
-    },
-    subtitle: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      marginBottom: SPACING.xl,
-    },
-
-    // Features
-    featuresContainer: {
-      width: '100%',
-      marginBottom: SPACING.xl,
-    },
-    featureItem: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      marginBottom: SPACING.md,
-    },
-    featureIcon: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: SPACING.md,
-    },
-    featureContent: {
-      flex: 1,
-    },
-    featureTitle: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-      marginBottom: 2,
-    },
-    featureDescription: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      lineHeight: 18,
-    },
-
-    // CTA Button
-    ctaButton: {
-      width: '100%',
-      marginBottom: SPACING.sm,
-    },
-    ctaGradient: {
-      paddingVertical: SPACING.md,
-      borderRadius: BORDER_RADIUS.md,
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.gold,
-    },
-    ctaText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-
-    // Skip
-    skipButton: {
-      paddingVertical: SPACING.sm,
-    },
-    skipText: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!hasChecked || !visible) {
     return null;
   }
@@ -253,12 +132,12 @@ const InsightsOnboarding = ({ visible: forcedVisible, onDismiss }) => {
               onPress={handleSkip}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <X size={24} color={colors.textMuted} />
+              <X size={24} color={COLORS.textMuted} />
             </TouchableOpacity>
 
             {/* Header */}
             <LinearGradient
-              colors={gradients.gold}
+              colors={GRADIENTS.gold}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.headerGradient}
@@ -278,7 +157,7 @@ const InsightsOnboarding = ({ visible: forcedVisible, onDismiss }) => {
                   <View style={styles.featureIcon}>
                     <feature.icon
                       size={20}
-                      color={colors.gold}
+                      color={COLORS.gold}
                       strokeWidth={2}
                     />
                   </View>
@@ -299,7 +178,7 @@ const InsightsOnboarding = ({ visible: forcedVisible, onDismiss }) => {
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={gradients.primaryButton}
+                colors={GRADIENTS.primaryButton}
                 style={styles.ctaGradient}
               >
                 <Text style={styles.ctaText}>Bắt đầu khám phá</Text>
@@ -358,5 +237,124 @@ export const useInsightsOnboarding = () => {
 
   return { hasSeen, markAsSeen, reset };
 };
+
+const styles = StyleSheet.create({
+  blurContainer: {
+    flex: 1,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: POPUP.overlay.backgroundColor,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  modalContainer: {
+    width: SCREEN_WIDTH - SPACING.lg * 2,
+    maxWidth: 340,
+    backgroundColor: POPUP.glassCard.backgroundColor,
+    borderRadius: POPUP.glassCard.borderRadius,
+    borderWidth: POPUP.glassCard.borderWidth,
+    borderColor: POPUP.glassCard.borderColor,
+    padding: SPACING.xl,
+    alignItems: 'center',
+  },
+
+  // Close button
+  closeButton: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    zIndex: 1,
+  },
+
+  // Header
+  headerGradient: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.lg,
+  },
+  headerEmoji: {
+    fontSize: 28,
+  },
+
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.display,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    marginBottom: SPACING.xs,
+  },
+  subtitle: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
+  },
+
+  // Features
+  featuresContainer: {
+    width: '100%',
+    marginBottom: SPACING.xl,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.md,
+  },
+  featureIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  featureContent: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginBottom: 2,
+  },
+  featureDescription: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    lineHeight: 18,
+  },
+
+  // CTA Button
+  ctaButton: {
+    width: '100%',
+    marginBottom: SPACING.sm,
+  },
+  ctaGradient: {
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+  ctaText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+
+  // Skip
+  skipButton: {
+    paddingVertical: SPACING.sm,
+  },
+  skipText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textMuted,
+  },
+});
 
 export default InsightsOnboarding;

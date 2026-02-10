@@ -3,7 +3,7 @@
  * Bottom navigation bar for switching between sticker packs (Zalo-style)
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   View,
   ScrollView,
@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { Clock, Star, Plus } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 
 const PACK_ICON_SIZE = 36;
 
@@ -25,71 +25,6 @@ const StickerPackSelector = memo(({
   showAdd = false,
   onAddPress,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      borderTopWidth: 1,
-      borderTopColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      paddingBottom: 34, // Safe area for bottom
-    },
-    scrollContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      gap: SPACING.xs,
-    },
-    packButton: {
-      width: 44,
-      height: 44,
-      borderRadius: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-      overflow: 'hidden',
-    },
-    packButtonActive: {
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      borderWidth: 2,
-      borderColor: colors.gold,
-    },
-    packIcon: {
-      width: PACK_ICON_SIZE,
-      height: PACK_ICON_SIZE,
-      borderRadius: 8,
-    },
-    packIconActive: {
-      // Active state styling handled by parent
-    },
-    packPlaceholder: {
-      width: PACK_ICON_SIZE,
-      height: PACK_ICON_SIZE,
-      borderRadius: 8,
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    divider: {
-      width: 1,
-      height: 30,
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-      marginHorizontal: SPACING.xs,
-    },
-    addButton: {
-      width: 44,
-      height: 44,
-      borderRadius: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-      borderWidth: 1,
-      borderColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.2)',
-      borderStyle: 'dashed',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   const handleRecentPress = () => {
     onSelect?.('recent');
   };
@@ -122,7 +57,7 @@ const StickerPackSelector = memo(({
           >
             <Clock
               size={22}
-              color={(!selectedPackId || selectedPackId === 'recent') ? colors.gold : colors.textMuted}
+              color={(!selectedPackId || selectedPackId === 'recent') ? COLORS.gold : COLORS.textMuted}
             />
           </TouchableOpacity>
         )}
@@ -139,8 +74,8 @@ const StickerPackSelector = memo(({
           >
             <Star
               size={22}
-              color={selectedPackId === 'favorites' ? colors.gold : colors.textMuted}
-              fill={selectedPackId === 'favorites' ? colors.gold : 'transparent'}
+              color={selectedPackId === 'favorites' ? COLORS.gold : COLORS.textMuted}
+              fill={selectedPackId === 'favorites' ? COLORS.gold : 'transparent'}
             />
           </TouchableOpacity>
         )}
@@ -175,7 +110,7 @@ const StickerPackSelector = memo(({
                 />
               ) : (
                 <View style={[styles.packPlaceholder, isSelected && styles.packIconActive]}>
-                  <Star size={18} color={isSelected ? colors.gold : colors.textMuted} />
+                  <Star size={18} color={isSelected ? COLORS.gold : COLORS.textMuted} />
                 </View>
               )}
             </TouchableOpacity>
@@ -189,12 +124,75 @@ const StickerPackSelector = memo(({
             onPress={onAddPress}
             activeOpacity={0.7}
           >
-            <Plus size={22} color={colors.textMuted} />
+            <Plus size={22} color={COLORS.textMuted} />
           </TouchableOpacity>
         )}
       </ScrollView>
     </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    paddingBottom: 34, // Safe area for bottom
+  },
+  scrollContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.xs,
+  },
+  packButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    overflow: 'hidden',
+  },
+  packButtonActive: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+  },
+  packIcon: {
+    width: PACK_ICON_SIZE,
+    height: PACK_ICON_SIZE,
+    borderRadius: 8,
+  },
+  packIconActive: {
+    // Active state styling handled by parent
+  },
+  packPlaceholder: {
+    width: PACK_ICON_SIZE,
+    height: PACK_ICON_SIZE,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  divider: {
+    width: 1,
+    height: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: SPACING.xs,
+  },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderStyle: 'dashed',
+  },
 });
 
 export default StickerPackSelector;

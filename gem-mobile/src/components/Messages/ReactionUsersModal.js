@@ -18,7 +18,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -37,134 +37,8 @@ const ReactionUsersModal = memo(({
   onClose,
   onUserPress,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // ========== STATE ==========
   const [selectedTab, setSelectedTab] = useState('all');
-
-  // ========== STYLES ==========
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'flex-end',
-    },
-    modalContainer: {
-      maxHeight: SCREEN_HEIGHT * 0.6,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      overflow: 'hidden',
-    },
-    blurContainer: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      paddingBottom: SPACING.huge,
-    },
-    handleBar: {
-      width: 40,
-      height: 4,
-      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-      borderRadius: 2,
-      alignSelf: 'center',
-      marginTop: SPACING.sm,
-      marginBottom: SPACING.xs,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.md,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    closeButton: {
-      padding: SPACING.xs,
-    },
-    tabsContainer: {
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    tabsList: {
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      gap: SPACING.sm,
-    },
-    tab: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      borderRadius: 20,
-      backgroundColor: 'rgba(106, 91, 255, 0.1)',
-      marginRight: SPACING.sm,
-    },
-    tabSelected: {
-      backgroundColor: colors.gold + '30',
-    },
-    tabLabel: {
-      fontSize: 16,
-      color: colors.textPrimary,
-    },
-    tabCount: {
-      fontSize: 13,
-      color: colors.textMuted,
-      marginLeft: 4,
-    },
-    tabCountSelected: {
-      color: colors.gold,
-      fontWeight: '600',
-    },
-    usersList: {
-      paddingHorizontal: SPACING.lg,
-      paddingTop: SPACING.md,
-      paddingBottom: SPACING.lg,
-    },
-    userRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.sm,
-    },
-    avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: colors.glassBg,
-    },
-    avatarFallback: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    avatarInitials: {
-      fontSize: 16,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    userName: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textPrimary,
-      marginLeft: SPACING.md,
-    },
-    userEmoji: {
-      fontSize: 22,
-    },
-    emptyContainer: {
-      paddingVertical: SPACING.xl,
-      alignItems: 'center',
-    },
-    emptyText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // ========== COMPUTED ==========
   const tabs = useMemo(() => {
@@ -214,7 +88,7 @@ const ReactionUsersModal = memo(({
         </Text>
       </TouchableOpacity>
     );
-  }, [selectedTab, styles]);
+  }, [selectedTab]);
 
   const renderUserItem = useCallback(({ item }) => {
     const user = item.user;
@@ -231,7 +105,7 @@ const ReactionUsersModal = memo(({
           <Image source={{ uri: avatarUrl }} style={styles.avatar} />
         ) : (
           <LinearGradient
-            colors={gradients.avatar}
+            colors={GRADIENTS.avatar}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.avatarFallback}
@@ -247,7 +121,7 @@ const ReactionUsersModal = memo(({
         <Text style={styles.userEmoji}>{item.emoji}</Text>
       </TouchableOpacity>
     );
-  }, [handleUserPress, styles, gradients]);
+  }, [handleUserPress]);
 
   if (!visible) return null;
 
@@ -275,7 +149,7 @@ const ReactionUsersModal = memo(({
                 onPress={onClose}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <X size={24} color={colors.textMuted} />
+                <X size={24} color={COLORS.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -314,3 +188,126 @@ const ReactionUsersModal = memo(({
 ReactionUsersModal.displayName = 'ReactionUsersModal';
 
 export default ReactionUsersModal;
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    maxHeight: SCREEN_HEIGHT * 0.6,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+  },
+  blurContainer: {
+    backgroundColor: 'rgba(15, 16, 48, 0.95)',
+    paddingBottom: SPACING.huge,
+  },
+  handleBar: {
+    width: 40,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  closeButton: {
+    padding: SPACING.xs,
+  },
+  tabsContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  tabsList: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  tab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    marginRight: SPACING.sm,
+  },
+  tabSelected: {
+    backgroundColor: COLORS.gold + '30',
+  },
+  tabLabel: {
+    fontSize: 16,
+    color: COLORS.textPrimary,
+  },
+  tabCount: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginLeft: 4,
+  },
+  tabCountSelected: {
+    color: COLORS.gold,
+    fontWeight: '600',
+  },
+  usersList: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.lg,
+  },
+  userRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.glassBg,
+  },
+  avatarFallback: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitials: {
+    fontSize: 16,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  userName: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    marginLeft: SPACING.md,
+  },
+  userEmoji: {
+    fontSize: 22,
+  },
+  emptyContainer: {
+    paddingVertical: SPACING.xl,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+  },
+});

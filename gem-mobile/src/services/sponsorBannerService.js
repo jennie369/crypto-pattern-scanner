@@ -4,7 +4,6 @@
  */
 
 import { supabase } from './supabase';
-import { formatError } from '../utils/errorUtils';
 
 class SponsorBannerService {
   constructor() {
@@ -72,7 +71,7 @@ class SponsorBannerService {
       const { data: allActiveBanners, error } = await query;
 
       if (error) {
-        console.error('[SponsorBanner] Query error:', formatError(error));
+        console.error('[SponsorBanner] Query error:', error);
         return [];
       }
 
@@ -131,7 +130,7 @@ class SponsorBannerService {
           .eq('user_id', userId);
 
         if (dismissError) {
-          console.error('[SponsorBanner] Error fetching dismissed banners:', formatError(dismissError));
+          console.error('[SponsorBanner] ❌ Error fetching dismissed banners:', dismissError);
         }
 
         console.log('[SponsorBanner] Dismissed banners count:', dismissed?.length || 0);

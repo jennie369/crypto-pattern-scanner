@@ -22,7 +22,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Flame, Award, Snowflake, ChevronRight } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 const StreakBanner = memo(({
   currentStreak = 0,

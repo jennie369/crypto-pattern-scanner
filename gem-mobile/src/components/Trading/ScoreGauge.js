@@ -14,7 +14,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import Svg, { Circle, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { SCORE_COLORS, SCORE_THRESHOLDS } from '../../services/mindsetAdvisorService';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -42,8 +42,6 @@ const ScoreGauge = ({
   animated = true,
   duration = 1000,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // Animation values
   const animatedScore = useRef(new Animated.Value(0)).current;
   const animatedProgress = useRef(new Animated.Value(0)).current;
@@ -73,63 +71,6 @@ const ScoreGauge = ({
     if (score >= SCORE_THRESHOLDS.CAUTION) return 'Cẩn Thận';
     return 'Dừng Lại';
   }, [score]);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-
-    centerContent: {
-      position: 'absolute',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-
-    scoreText: {
-      fontSize: 48,
-      fontWeight: '800',
-      letterSpacing: -2,
-    },
-
-    statusText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      marginTop: 2,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-    },
-
-    breakdownMini: {
-      flexDirection: 'row',
-      marginTop: SPACING.sm,
-      gap: SPACING.md,
-    },
-
-    breakdownItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 3,
-    },
-
-    breakdownDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-    },
-
-    breakdownLabel: {
-      fontSize: 9,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textMuted,
-    },
-
-    breakdownValue: {
-      fontSize: 10,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textSecondary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Animation effect
   useEffect(() => {
@@ -288,5 +229,62 @@ const ScoreGauge = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  centerContent: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  scoreText: {
+    fontSize: 48,
+    fontWeight: '800',
+    letterSpacing: -2,
+  },
+
+  statusText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    marginTop: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+
+  breakdownMini: {
+    flexDirection: 'row',
+    marginTop: SPACING.sm,
+    gap: SPACING.md,
+  },
+
+  breakdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+
+  breakdownDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+
+  breakdownLabel: {
+    fontSize: 9,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textMuted,
+  },
+
+  breakdownValue: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textSecondary,
+  },
+});
 
 export default ScoreGauge;

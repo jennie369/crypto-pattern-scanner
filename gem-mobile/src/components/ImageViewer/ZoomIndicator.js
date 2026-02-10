@@ -4,7 +4,7 @@
  * Phase 2: Image Viewer Enhancement (30/12/2024)
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,7 +15,7 @@ import Animated, {
   withTiming,
   withDelay,
 } from 'react-native-reanimated';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS } from '../../utils/tokens';
 
 /**
  * ZoomIndicator - Display zoom level
@@ -25,8 +25,6 @@ import { useSettings } from '../../contexts/SettingsContext';
  * @param {boolean} props.visible - Force visibility
  */
 const ZoomIndicator = ({ scale, visible }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const opacity = useSharedValue(0);
 
   // Show indicator when scale changes
@@ -56,32 +54,32 @@ const ZoomIndicator = ({ scale, visible }) => {
   // Format percentage
   const percentage = Math.round(scale * 100);
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      marginTop: -20,
-      marginLeft: -30,
-      width: 60,
-      height: 40,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 8,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    text: {
-      color: colors.textPrimary,
-      fontSize: 14,
-      fontWeight: '600',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
       <Text style={styles.text}>{percentage}%</Text>
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -20,
+    marginLeft: -30,
+    width: 60,
+    height: 40,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+});
 
 export default memo(ZoomIndicator);

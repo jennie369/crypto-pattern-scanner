@@ -349,10 +349,9 @@ class ZoneManager {
       return false;
     }
 
-    // Zone too thick (>50%) - lenient for crypto volatility
-    // QM zones span QML→MPL, Rounding Bottom spans bottom→entry
-    // In crypto, these can easily reach 30-40% on volatile altcoins
-    if (thickness > 0.50) {
+    // Zone too thick (>25%) - more lenient for patterns with wide stop losses
+    // Some patterns like DPD, UPD, wedges can have wider zones
+    if (thickness > 0.25) {
       console.warn('[ZoneManager] Zone too thick:', thickness, zone.pattern_type);
       return false;
     }

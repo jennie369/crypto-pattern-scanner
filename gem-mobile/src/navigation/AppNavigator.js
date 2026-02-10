@@ -49,15 +49,25 @@ import UpgradeSuccessModal from '../components/upgrade/UpgradeSuccessModal';
 // Settings context for theming
 import { useSettings } from '../contexts/SettingsContext';
 
+// Tokens (fallback only)
+import { COLORS } from '../utils/tokens';
+
 // Navigation ref (imported from separate file to avoid circular deps)
 import { navigationRef } from './navigationRef';
 export { navigationRef };
 
 const Stack = createNativeStackNavigator();
 
-// Loading screen - uses themed colors from context
+// Loading screen - uses context when available
 function LoadingScreen() {
-  const { colors } = useSettings();
+  // Try to get themed colors, fallback to COLORS if context not available
+  let colors = COLORS;
+  try {
+    const settings = useSettings();
+    colors = settings.colors;
+  } catch (e) {
+    // Context not available during early initialization
+  }
 
   return (
     <View style={[styles.loadingContainer, { backgroundColor: colors.bgDarkest }]}>

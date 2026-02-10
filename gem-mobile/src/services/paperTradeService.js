@@ -6,7 +6,6 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
-import { formatError } from '../utils/errorUtils';
 import 'react-native-get-random-values'; // Required for uuid
 import { v4 as uuidv4 } from 'uuid';
 import { calculateLiquidationPrice } from './tradingCalculations';
@@ -2045,7 +2044,12 @@ class PaperTradeService {
       }
 
       if (error) {
-        console.error('[PaperTrade] Supabase sync FAILED:', `action=${action}, ${formatError(error)}`);
+        console.error('[PaperTrade] ❌ Supabase sync FAILED:', {
+          action,
+          error: error.message,
+          code: error.code,
+          details: error.details,
+        });
         return { success: false, error: error.message };
       }
 

@@ -7,14 +7,25 @@
  * Created: January 30, 2026
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
 } from 'react-native';
 import Svg, { G, Path, Circle } from 'react-native-svg';
-import { useSettings } from '../../../contexts/SettingsContext';
+import { COLORS, SPACING, GLASS } from '../../../utils/tokens';
+
+const DEFAULT_COLORS = [
+  COLORS.purple,
+  COLORS.cyan,
+  COLORS.gold,
+  COLORS.success,
+  COLORS.error,
+  '#FF6B9D',
+  '#00BCD4',
+  '#9C27B0',
+];
 
 const PieChart = ({
   title,
@@ -25,106 +36,9 @@ const PieChart = ({
   showLabels = false,
   showTotal = true,
   totalLabel = 'Tổng',
-  colors: customColors,
+  colors = DEFAULT_COLORS,
   style,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const DEFAULT_COLORS = useMemo(() => [
-    colors.purple,
-    colors.cyan,
-    colors.gold,
-    colors.success,
-    colors.error,
-    '#FF6B9D',
-    '#00BCD4',
-    '#9C27B0',
-  ], [colors]);
-
-  const chartColors = customColors || DEFAULT_COLORS;
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 16,
-      padding: SPACING.md,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    title: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginBottom: SPACING.md,
-    },
-    emptyText: {
-      fontSize: 13,
-      color: colors.textMuted,
-      textAlign: 'center',
-      paddingVertical: SPACING.lg,
-    },
-
-    chartContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    chartWrapper: {
-      position: 'relative',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    centerLabel: {
-      position: 'absolute',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    totalValue: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: colors.textPrimary,
-    },
-    totalLabel: {
-      fontSize: 10,
-      color: colors.textMuted,
-      marginTop: 2,
-    },
-
-    legend: {
-      flex: 1,
-      marginLeft: SPACING.md,
-    },
-    legendItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.sm,
-    },
-    legendDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      marginRight: SPACING.sm,
-    },
-    legendContent: {
-      flex: 1,
-    },
-    legendLabel: {
-      fontSize: 12,
-      color: colors.textSecondary,
-    },
-    legendValue: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-    legendPercent: {
-      fontSize: 11,
-      fontWeight: '400',
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
-  const centerFillColor = settings.theme === 'light' ? colors.bgDarkest : '#1A1B3D';
-
   if (!data || data.length === 0) {
     return (
       <View style={[styles.container, style]}>
@@ -152,7 +66,7 @@ const PieChart = ({
       percentage,
       startAngle,
       endAngle,
-      color: item.color || chartColors[index % chartColors.length],
+      color: item.color || colors[index % colors.length],
     };
   });
 
@@ -204,7 +118,7 @@ const PieChart = ({
                           cx={center}
                           cy={center}
                           r={innerR}
-                          fill={centerFillColor}
+                          fill="#1A1B3D"
                         />
                       )}
                     </G>
@@ -219,7 +133,7 @@ const PieChart = ({
                     key={index}
                     d={createArc(segment.startAngle, segment.endAngle, radius - 2, innerR)}
                     fill={segment.color}
-                    stroke={centerFillColor}
+                    stroke="#1A1B3D"
                     strokeWidth={1}
                   />
                 );
@@ -231,6 +145,7 @@ const PieChart = ({
           {innerRadius > 0 && showTotal && (
             <View style={[styles.centerLabel, { width: innerR * 1.4, height: innerR * 1.4 }]}>
               <Text style={styles.totalValue}>{total.toLocaleString()}</Text>
+            )}
               <Text style={styles.totalLabel}>{totalLabel}</Text>
             </View>
           )}
@@ -246,6 +161,7 @@ const PieChart = ({
                   <Text style={styles.legendLabel} numberOfLines={1}>
                     {segment.label}
                   </Text>
+                )}
                   <Text style={styles.legendValue}>
                     {segment.value.toLocaleString()}
                     <Text style={styles.legendPercent}> ({segment.percentage.toFixed(1)}%)</Text>
@@ -259,5 +175,85 @@ const PieChart = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: GLASS.card,
+    borderRadius: 16,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  title: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    paddingVertical: SPACING.lg,
+  },
+
+  chartContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chartWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerLabel: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  totalValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  totalLabel: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+
+  legend: {
+    flex: 1,
+    marginLeft: SPACING.md,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: SPACING.sm,
+  },
+  legendContent: {
+    flex: 1,
+  },
+  legendLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  legendValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  legendPercent: {
+    fontSize: 11,
+    fontWeight: '400',
+    color: COLORS.textMuted,
+  },
+});
 
 export default PieChart;

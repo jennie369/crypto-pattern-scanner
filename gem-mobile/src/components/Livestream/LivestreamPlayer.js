@@ -9,7 +9,7 @@
  * - Error handling
  */
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -22,7 +22,7 @@ import {
 import { Video, ResizeMode } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSettings } from '../../contexts/SettingsContext';
+import tokens, { COLORS } from '../../utils/tokens';
 
 // Avatar placeholder images
 // TODO: Add actual avatar images to src/assets/avatars/
@@ -51,7 +51,6 @@ const LivestreamPlayer = ({
   onError,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const videoRef = useRef(null);
   const [status, setStatus] = useState({
     isLoaded: false,
@@ -64,109 +63,6 @@ const LivestreamPlayer = ({
   // Get avatar image with fallback
   const avatarImage = AVATAR_IMAGES[avatarId] || AVATAR_IMAGES.default;
   const avatarName = AVATAR_NAMES[avatarId] || AVATAR_NAMES.default;
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      width: '100%',
-      aspectRatio: 9 / 16,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: SPACING.lg,
-      overflow: 'hidden',
-    },
-    video: {
-      width: '100%',
-      height: '100%',
-    },
-    avatarContainer: {
-      width: '100%',
-      height: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: colors.surfaceDark,
-    },
-    avatarImage: {
-      width: '100%',
-      height: '100%',
-      resizeMode: 'cover',
-    },
-    avatarPlaceholder: {
-      width: '100%',
-      height: '100%',
-    },
-    avatarGradient: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    avatarInitials: {
-      fontSize: 80,
-      fontWeight: '700',
-      color: colors.white,
-      opacity: 0.9,
-    },
-    avatarLabel: {
-      marginTop: SPACING.md,
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      color: colors.white,
-      opacity: 0.7,
-    },
-    loadingOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0,0,0,0.4)',
-    },
-    errorContainer: {
-      width: '100%',
-      height: '100%',
-    },
-    errorOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0,0,0,0.7)',
-    },
-    errorText: {
-      color: colors.white,
-      fontSize: TYPOGRAPHY.fontSize.md,
-      marginTop: SPACING.sm,
-      textAlign: 'center',
-    },
-    retryButton: {
-      marginTop: SPACING.md,
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.lg,
-      backgroundColor: colors.primary,
-      borderRadius: SPACING.md,
-    },
-    retryText: {
-      color: colors.white,
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: '600',
-    },
-    bottomGradient: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 100,
-    },
-    controls: {
-      position: 'absolute',
-      bottom: SPACING.md,
-      right: SPACING.md,
-      flexDirection: 'row',
-      gap: SPACING.sm,
-    },
-    controlButton: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Handle video status update
   const handleStatusUpdate = (newStatus) => {
@@ -212,10 +108,10 @@ const LivestreamPlayer = ({
           {avatarImage ? (
             <Image source={avatarImage} style={styles.avatarImage} />
           ) : (
-            <View style={[styles.avatarPlaceholder, { backgroundColor: colors.surfaceDark }]} />
+            <View style={[styles.avatarPlaceholder, { backgroundColor: tokens.colors.surfaceDark }]} />
           )}
           <View style={styles.errorOverlay}>
-            <Ionicons name="alert-circle" size={40} color={colors.error} />
+            <Ionicons name="alert-circle" size={40} color={COLORS.error} />
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={retry}>
               <Text style={styles.retryText}>Thử lại</Text>
@@ -249,7 +145,7 @@ const LivestreamPlayer = ({
         ) : (
           <View style={styles.avatarPlaceholder}>
             <LinearGradient
-              colors={[colors.primary, colors.primaryDark]}
+              colors={[tokens.colors.primary, tokens.colors.primaryDark]}
               style={styles.avatarGradient}
             >
               <Text style={styles.avatarInitials}>
@@ -280,7 +176,7 @@ const LivestreamPlayer = ({
       {/* Loading overlay */}
       {status.isBuffering && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={tokens.colors.primary} />
         </View>
       )}
 
@@ -296,12 +192,115 @@ const LivestreamPlayer = ({
           <Ionicons
             name={isMuted ? 'volume-mute' : 'volume-high'}
             size={24}
-            color={colors.white}
+            color={tokens.colors.white}
           />
         </TouchableOpacity>
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    aspectRatio: 9 / 16,
+    backgroundColor: tokens.colors.background,
+    borderRadius: tokens.radius.lg,
+    overflow: 'hidden',
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: tokens.colors.surfaceDark,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitials: {
+    fontSize: 80,
+    fontWeight: '700',
+    color: tokens.colors.white,
+    opacity: 0.9,
+  },
+  avatarLabel: {
+    marginTop: tokens.spacing.md,
+    fontSize: tokens.fontSize.xl,
+    color: tokens.colors.white,
+    opacity: 0.7,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  errorContainer: {
+    width: '100%',
+    height: '100%',
+  },
+  errorOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+  },
+  errorText: {
+    color: tokens.colors.white,
+    fontSize: tokens.fontSize.md,
+    marginTop: tokens.spacing.sm,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: tokens.spacing.md,
+    paddingVertical: tokens.spacing.sm,
+    paddingHorizontal: tokens.spacing.lg,
+    backgroundColor: tokens.colors.primary,
+    borderRadius: tokens.radius.md,
+  },
+  retryText: {
+    color: tokens.colors.white,
+    fontSize: tokens.fontSize.md,
+    fontWeight: '600',
+  },
+  bottomGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+  },
+  controls: {
+    position: 'absolute',
+    bottom: tokens.spacing.md,
+    right: tokens.spacing.md,
+    flexDirection: 'row',
+    gap: tokens.spacing.sm,
+  },
+  controlButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default LivestreamPlayer;

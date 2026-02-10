@@ -11,7 +11,7 @@
  * - "Đang giới thiệu" live label
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSettings } from '../../contexts/SettingsContext';
+import tokens, { COLORS } from '../../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -59,158 +59,10 @@ const ProductOverlay = ({
   showLiveLabel = true,
   animationDuration = 300,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const slideAnim = useRef(new Animated.Value(100)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      position: 'absolute',
-      zIndex: 100,
-    },
-    card: {
-      borderRadius: 16,
-      overflow: 'hidden',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    dismissButton: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: 'rgba(0, 0, 0, 0.4)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 10,
-    },
-    liveLabel: {
-      position: 'absolute',
-      top: -8,
-      left: 12,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: colors.error,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 8,
-    },
-    liveDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: colors.textLight,
-    },
-    liveLabelText: {
-      color: colors.textLight,
-      fontSize: 10,
-      fontWeight: '700',
-    },
-    productContent: {
-      flexDirection: 'row',
-      gap: 12,
-      marginTop: 8,
-    },
-    imageContainer: {
-      position: 'relative',
-    },
-    productImage: {
-      borderRadius: 12,
-      backgroundColor: colors.surfaceDark,
-    },
-    discountBadge: {
-      position: 'absolute',
-      top: -4,
-      right: -4,
-      backgroundColor: colors.error,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 6,
-    },
-    discountText: {
-      color: colors.textLight,
-      fontSize: 10,
-      fontWeight: '700',
-    },
-    infoContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      gap: 4,
-    },
-    productTitle: {
-      color: colors.textLight,
-      fontWeight: '600',
-      lineHeight: 20,
-    },
-    priceContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-    },
-    price: {
-      color: colors.gold,
-      fontWeight: '700',
-    },
-    comparePrice: {
-      color: colors.textMuted,
-      fontSize: 12,
-      textDecorationLine: 'line-through',
-    },
-    benefitTag: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-      alignSelf: 'flex-start',
-    },
-    benefitText: {
-      color: colors.gold,
-      fontSize: 10,
-    },
-    actionsContainer: {
-      flexDirection: 'row',
-      gap: 8,
-      marginTop: 12,
-    },
-    addToCartButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      backgroundColor: colors.gold,
-      paddingVertical: 10,
-      borderRadius: 10,
-    },
-    addToCartText: {
-      color: colors.background,
-      fontSize: 13,
-      fontWeight: '700',
-    },
-    detailsButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 4,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.gold,
-    },
-    detailsText: {
-      color: colors.gold,
-      fontSize: 13,
-      fontWeight: '600',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (isVisible && product) {
@@ -311,7 +163,7 @@ const ProductOverlay = ({
       ]}
     >
       <LinearGradient
-        colors={settings.theme === 'light' ? [colors.bgDarkest, colors.bgDarkest] : ['rgba(30, 30, 40, 0.95)', 'rgba(20, 20, 30, 0.98)']}
+        colors={['rgba(30, 30, 40, 0.95)', 'rgba(20, 20, 30, 0.98)']}
         style={[styles.card, { padding: config.padding }]}
       >
         {/* Dismiss Button */}
@@ -320,7 +172,7 @@ const ProductOverlay = ({
           onPress={onDismiss}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="close" size={16} color={colors.textMuted} />
+          <Ionicons name="close" size={16} color={tokens.colors.textMuted} />
         </TouchableOpacity>
 
         {/* Live Label */}
@@ -378,7 +230,7 @@ const ProductOverlay = ({
             {/* Crystal benefit tag */}
             {product.benefit && (
               <View style={styles.benefitTag}>
-                <Ionicons name="sparkles" size={10} color={colors.gold} />
+                <Ionicons name="sparkles" size={10} color={tokens.colors.gold} />
                 <Text style={styles.benefitText} numberOfLines={1}>
                   {product.benefit}
                 </Text>
@@ -396,7 +248,7 @@ const ProductOverlay = ({
               onPress={() => onAddToCart?.(product)}
               activeOpacity={0.8}
             >
-              <Ionicons name="cart" size={16} color={colors.background} />
+              <Ionicons name="cart" size={16} color={tokens.colors.background} />
               <Text style={styles.addToCartText}>Thêm giỏ</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -407,12 +259,159 @@ const ProductOverlay = ({
             onPress={() => onPress?.(product)}
           >
             <Text style={styles.detailsText}>Chi tiết</Text>
-            <Ionicons name="chevron-forward" size={14} color={colors.gold} />
+            <Ionicons name="chevron-forward" size={14} color={tokens.colors.gold} />
           </TouchableOpacity>
         </View>
       </LinearGradient>
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    zIndex: 100,
+  },
+  card: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  dismissButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  liveLabel: {
+    position: 'absolute',
+    top: -8,
+    left: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.error,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: tokens.colors.textLight,
+  },
+  liveLabelText: {
+    color: tokens.colors.textLight,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  productContent: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  imageContainer: {
+    position: 'relative',
+  },
+  productImage: {
+    borderRadius: 12,
+    backgroundColor: tokens.colors.surfaceDark,
+  },
+  discountBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: COLORS.error,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  discountText: {
+    color: tokens.colors.textLight,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  infoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 4,
+  },
+  productTitle: {
+    color: tokens.colors.textLight,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  price: {
+    color: tokens.colors.gold,
+    fontWeight: '700',
+  },
+  comparePrice: {
+    color: tokens.colors.textMuted,
+    fontSize: 12,
+    textDecorationLine: 'line-through',
+  },
+  benefitTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  benefitText: {
+    color: tokens.colors.gold,
+    fontSize: 10,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+  },
+  addToCartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: tokens.colors.gold,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  addToCartText: {
+    color: tokens.colors.background,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  detailsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: tokens.colors.gold,
+  },
+  detailsText: {
+    color: tokens.colors.gold,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+});
 
 export default ProductOverlay;

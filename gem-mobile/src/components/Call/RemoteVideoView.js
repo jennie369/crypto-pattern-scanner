@@ -3,7 +3,7 @@
  * Displays remote video stream (full screen)
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { VideoOff, User } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 
 // Try to import RTCView - may not be available
 let RTCView = null;
@@ -39,64 +39,6 @@ const RemoteVideoView = memo(({
   userName,
   userAvatar,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-    video: {
-      width: SCREEN_WIDTH,
-      height: SCREEN_HEIGHT,
-    },
-    placeholder: {
-      flex: 1,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    avatarContainer: {
-      marginBottom: SPACING.lg,
-    },
-    avatar: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      borderWidth: 3,
-      borderColor: colors.glassBorder,
-    },
-    avatarPlaceholder: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      backgroundColor: colors.bgCard,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 3,
-      borderColor: colors.glassBorder,
-    },
-    videoOffBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      borderRadius: 20,
-      marginBottom: SPACING.md,
-    },
-    videoOffText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textSecondary,
-      marginLeft: SPACING.xs,
-    },
-    userName: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // No stream or video disabled - show placeholder
   if (!stream || !isVideoEnabled || !RTCView) {
     return (
@@ -109,14 +51,14 @@ const RemoteVideoView = memo(({
             />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <User size={60} color={colors.textMuted} />
+              <User size={60} color={COLORS.textMuted} />
             </View>
           )}
         </View>
 
         {!isVideoEnabled && (
           <View style={styles.videoOffBadge}>
-            <VideoOff size={16} color={colors.textSecondary} />
+            <VideoOff size={16} color={COLORS.textSecondary} />
             <Text style={styles.videoOffText}>
               Camera đã tắt
             </Text>
@@ -140,6 +82,62 @@ const RemoteVideoView = memo(({
       />
     </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.bgDarkest,
+  },
+  video: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+  },
+  placeholder: {
+    flex: 1,
+    backgroundColor: COLORS.bgDarkest,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    marginBottom: SPACING.lg,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: COLORS.glassBorder,
+  },
+  avatarPlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: COLORS.bgCard,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: COLORS.glassBorder,
+  },
+  videoOffBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+    marginBottom: SPACING.md,
+  },
+  videoOffText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    marginLeft: SPACING.xs,
+  },
+  userName: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
 });
 
 RemoteVideoView.displayName = 'RemoteVideoView';

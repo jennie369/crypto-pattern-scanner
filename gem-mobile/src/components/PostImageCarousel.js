@@ -9,7 +9,7 @@
  * - 5+ images: 2x2 grid with "+N" overlay on last image
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Image,
@@ -18,7 +18,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING } from '../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_GAP = 2; // Small gap between images like Facebook
@@ -29,47 +29,7 @@ const PostImageCarousel = ({
   onImagePress,
   containerWidth,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const width = containerWidth || SCREEN_WIDTH;
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      overflow: 'hidden',
-      backgroundColor: colors.glassBg,
-    },
-    gridContainer: {
-      flexDirection: 'row',
-      gap: IMAGE_GAP,
-    },
-    gridRow: {
-      flexDirection: 'row',
-      gap: IMAGE_GAP,
-    },
-    rightColumn: {
-      gap: IMAGE_GAP,
-    },
-    singleImage: {
-      // Full width single image
-    },
-    gridImage: {
-      backgroundColor: colors.glassBg,
-    },
-    // "+N" overlay for 5+ images
-    overlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    overlayText: {
-      color: '#FFFFFF',
-      fontSize: 32,
-      fontWeight: '600',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   if (!images || images.length === 0) {
     return null;
@@ -233,5 +193,43 @@ const PostImageCarousel = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    overflow: 'hidden',
+    backgroundColor: COLORS.glassBg,
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    gap: IMAGE_GAP,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    gap: IMAGE_GAP,
+  },
+  rightColumn: {
+    gap: IMAGE_GAP,
+  },
+  singleImage: {
+    // Full width single image
+  },
+  gridImage: {
+    backgroundColor: COLORS.glassBg,
+  },
+  // "+N" overlay for 5+ images
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlayText: {
+    color: '#FFFFFF',
+    fontSize: 32,
+    fontWeight: '600',
+  },
+});
 
 export default PostImageCarousel;

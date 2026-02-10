@@ -1,10 +1,9 @@
 /**
  * Gemral - Enhanced Notifications Screen
  * Features: Category tabs, swipe to delete, trading alerts
- * Theme-aware with i18n support
  */
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -46,8 +45,8 @@ import {
 } from '../../services/notificationService';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSettings } from '../../contexts/SettingsContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import useScrollToTop from '../../hooks/useScrollToTop';
 
@@ -108,61 +107,57 @@ const saveLocalDeletedIds = async () => {
 loadLocalReadIds();
 loadLocalDeletedIds();
 
-// Helper function to get notification config with theme colors
-const getNotificationConfig = (colors) => ({
+// Notification type configurations
+const NOTIFICATION_CONFIG = {
   // Social
   like: { icon: Heart, color: '#FF6B6B', fill: '#FF6B6B' },
   forum_like: { icon: Heart, color: '#FF6B6B', fill: '#FF6B6B' },
   reaction: { icon: Heart, color: '#FF6B6B', fill: '#FF6B6B' },
-  comment: { icon: MessageCircle, color: colors.cyan, fill: 'transparent' },
-  forum_comment: { icon: MessageCircle, color: colors.cyan, fill: 'transparent' },
-  reply: { icon: MessageCircle, color: colors.gold, fill: 'transparent' },
-  forum_reply: { icon: MessageCircle, color: colors.gold, fill: 'transparent' },
-  follow: { icon: UserPlus, color: colors.green || colors.success, fill: 'transparent' },
-  forum_follow: { icon: UserPlus, color: colors.green || colors.success, fill: 'transparent' },
-  mention: { icon: MessageCircle, color: colors.purple || colors.burgundy, fill: 'transparent' },
+  comment: { icon: MessageCircle, color: COLORS.cyan, fill: 'transparent' },
+  forum_comment: { icon: MessageCircle, color: COLORS.cyan, fill: 'transparent' },
+  reply: { icon: MessageCircle, color: COLORS.gold, fill: 'transparent' },
+  forum_reply: { icon: MessageCircle, color: COLORS.gold, fill: 'transparent' },
+  follow: { icon: UserPlus, color: COLORS.green, fill: 'transparent' },
+  forum_follow: { icon: UserPlus, color: COLORS.green, fill: 'transparent' },
+  mention: { icon: MessageCircle, color: COLORS.purple, fill: 'transparent' },
   // Gift
-  gift_received: { icon: Gift, color: colors.gold, fill: colors.gold },
-  gift_sent: { icon: Gift, color: colors.purple || colors.burgundy, fill: 'transparent' },
+  gift_received: { icon: Gift, color: COLORS.gold, fill: COLORS.gold },
+  gift_sent: { icon: Gift, color: COLORS.purple, fill: 'transparent' },
   // Trading
-  pattern_detected: { icon: ChartLine, color: colors.gold, fill: 'transparent' },
-  price_alert: { icon: Target, color: colors.gold, fill: 'transparent' },
-  trade_executed: { icon: Zap, color: colors.green || colors.success, fill: 'transparent' },
+  pattern_detected: { icon: ChartLine, color: COLORS.gold, fill: 'transparent' },
+  price_alert: { icon: Target, color: COLORS.gold, fill: 'transparent' },
+  trade_executed: { icon: Zap, color: COLORS.green, fill: 'transparent' },
   market_alert: { icon: AlertTriangle, color: '#FF9500', fill: 'transparent' },
-  breakout: { icon: TrendingUp, color: colors.green || colors.success, fill: 'transparent' },
+  breakout: { icon: TrendingUp, color: COLORS.green, fill: 'transparent' },
   stop_loss: { icon: TrendingDown, color: '#F6465D', fill: 'transparent' },
-  take_profit: { icon: Target, color: colors.green || colors.success, fill: '#0ECB81' },
+  take_profit: { icon: Target, color: COLORS.green, fill: '#0ECB81' },
   // System
-  order: { icon: ShoppingBag, color: colors.purple || colors.burgundy, fill: 'transparent' },
-  promotion: { icon: Bell, color: colors.gold, fill: 'transparent' },
-  system: { icon: Bell, color: colors.textMuted, fill: 'transparent' },
-  default: { icon: Bell, color: colors.textMuted, fill: 'transparent' },
+  order: { icon: ShoppingBag, color: COLORS.purple, fill: 'transparent' },
+  promotion: { icon: Bell, color: COLORS.gold, fill: 'transparent' },
+  system: { icon: Bell, color: COLORS.textMuted, fill: 'transparent' },
+  default: { icon: Bell, color: COLORS.textMuted, fill: 'transparent' },
   // Partnership/Affiliate
-  partnership_approved: { icon: Zap, color: colors.gold, fill: colors.gold },
+  partnership_approved: { icon: Zap, color: COLORS.gold, fill: COLORS.gold },
   partnership_rejected: { icon: AlertTriangle, color: '#F6465D', fill: 'transparent' },
-  partnership_pending: { icon: Bell, color: colors.purple || colors.burgundy, fill: 'transparent' },
-  affiliate_commission: { icon: TrendingUp, color: colors.green || colors.success, fill: 'transparent' },
+  partnership_pending: { icon: Bell, color: COLORS.purple, fill: 'transparent' },
+  affiliate_commission: { icon: TrendingUp, color: COLORS.green, fill: 'transparent' },
   // Admin notifications
-  admin_partnership_application: { icon: UserPlus, color: colors.gold, fill: colors.gold },
-  admin_withdraw_request: { icon: TrendingDown, color: colors.gold, fill: 'transparent' },
-});
+  admin_partnership_application: { icon: UserPlus, color: COLORS.gold, fill: COLORS.gold },
+  admin_withdraw_request: { icon: TrendingDown, color: COLORS.gold, fill: 'transparent' },
+};
+
+// Category tabs data
+const CATEGORY_TABS = [
+  { id: 'all', label: 'Tất cả', icon: Bell },
+  { id: 'trading', label: 'Giao dịch', icon: ChartLine },
+  { id: 'social', label: 'Cộng đồng', icon: Heart },
+  { id: 'system', label: 'Hệ thống', icon: AlertTriangle },
+];
 
 export default function NotificationsScreen() {
   const navigation = useNavigation();
   const { isAuthenticated, user } = useAuth();
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const swipeableRefs = useRef({});
-
-  // Get notification config with current theme colors
-  const NOTIFICATION_CONFIG = useMemo(() => getNotificationConfig(colors), [colors]);
-
-  // Category tabs data with i18n
-  const CATEGORY_TABS = useMemo(() => [
-    { id: 'all', label: t('notifications.tabs.all', 'Tất cả'), icon: Bell },
-    { id: 'trading', label: t('notifications.tabs.trading', 'Giao dịch'), icon: ChartLine },
-    { id: 'social', label: t('notifications.tabs.social', 'Cộng đồng'), icon: Heart },
-    { id: 'system', label: t('notifications.tabs.system', 'Hệ thống'), icon: AlertTriangle },
-  ], [t]);
 
   // State - initialize from global cache for instant display
   const [notifications, setNotifications] = useState(() => notificationsCache.data || []);
@@ -850,7 +845,7 @@ export default function NotificationsScreen() {
           >
             <TabIcon
               size={18}
-              color={isActive ? colors.gold : colors.textMuted}
+              color={isActive ? COLORS.gold : COLORS.textMuted}
             />
             <Text style={[styles.tabLabel, isActive && styles.activeTabLabel]}>
               {tab.label}
@@ -869,20 +864,20 @@ export default function NotificationsScreen() {
   // Render empty state
   const renderEmpty = () => (
     <View style={styles.emptyState}>
-      <Bell size={64} color={colors.textMuted} />
+      <Bell size={64} color={COLORS.textMuted} />
       <Text style={styles.emptyTitle}>
         {activeCategory === 'all'
-          ? t('notifications.empty.all', 'Chưa có thông báo')
-          : t('notifications.empty.category', { category: CATEGORY_LABELS[activeCategory]?.toLowerCase() || '' })}
+          ? 'Chưa có thông báo'
+          : `Không có thông báo ${CATEGORY_LABELS[activeCategory].toLowerCase()}`}
       </Text>
       <Text style={styles.emptySubtitle}>
         {activeCategory === 'trading'
-          ? t('notifications.empty.tradingHint', 'Cảnh báo giao dịch và pattern sẽ hiển thị ở đây')
+          ? 'Cảnh báo giao dịch và pattern sẽ hiển thị ở đây'
           : activeCategory === 'social'
-          ? t('notifications.empty.socialHint', 'Likes, comments và follows sẽ hiển thị ở đây')
+          ? 'Likes, comments và follows sẽ hiển thị ở đây'
           : activeCategory === 'system'
-          ? t('notifications.empty.systemHint', 'Thông báo hệ thống sẽ hiển thị ở đây')
-          : t('notifications.empty.refreshHint', 'Kéo xuống để làm mới')}
+          ? 'Thông báo hệ thống sẽ hiển thị ở đây'
+          : 'Kéo xuống để làm mới'}
       </Text>
     </View>
   );
@@ -890,13 +885,13 @@ export default function NotificationsScreen() {
   // Render login prompt
   const renderLoginPrompt = () => (
     <View style={styles.emptyState}>
-      <Bell size={64} color={colors.textMuted} />
-      <Text style={styles.emptyTitle}>{t('notifications.loginPrompt', 'Đăng nhập để xem thông báo')}</Text>
+      <Bell size={64} color={COLORS.textMuted} />
+      <Text style={styles.emptyTitle}>Đăng nhập để xem thông báo</Text>
       <TouchableOpacity
         style={styles.loginButton}
         onPress={() => navigation.navigate('Auth')}
       >
-        <Text style={styles.loginButtonText}>{t('common.login', 'Đăng nhập')}</Text>
+        <Text style={styles.loginButtonText}>Đăng nhập</Text>
       </TouchableOpacity>
     </View>
   );
@@ -904,268 +899,12 @@ export default function NotificationsScreen() {
   // Count unread
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // i18n labels
-  const titleLabel = t('notifications.title', 'Thông Báo');
-  const unreadLabel = t('notifications.unread', '{{count}} chưa đọc', { count: unreadCount });
-  const markAllLabel = t('notifications.markAllRead', 'Đọc hết');
-
-  // Theme-aware styles
-  const styles = useMemo(() => StyleSheet.create({
-    gradient: { flex: 1 },
-    container: { flex: 1 },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-
-    // Header
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: SPACING.lg,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderBottomWidth: 1,
-      borderBottomColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.2)',
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.xxxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    unreadLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.gold,
-      marginTop: 2,
-    },
-    markAllBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      padding: SPACING.sm,
-    },
-    markAllText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.gold,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-
-    // Category Tabs
-    tabsContainer: {
-      flexDirection: 'row',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.15)',
-    },
-    tab: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.xs,
-      borderRadius: 8,
-    },
-    activeTab: {
-      backgroundColor: settings.theme === 'light' ? 'rgba(255, 189, 89, 0.2)' : 'rgba(255, 189, 89, 0.15)',
-      borderWidth: 1,
-      borderColor: settings.theme === 'light' ? colors.gold : 'rgba(255, 189, 89, 0.3)',
-    },
-    tabLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    activeTabLabel: {
-      color: colors.gold,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    tabBadge: {
-      backgroundColor: colors.burgundy || colors.error,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 10,
-      minWidth: 20,
-      alignItems: 'center',
-    },
-    tabBadgeText: {
-      fontSize: 10,
-      color: '#FFFFFF',
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-
-    // List
-    listContent: {
-      paddingBottom: CONTENT_BOTTOM_PADDING,
-    },
-    emptyListContent: {
-      flex: 1,
-    },
-
-    // Notification Row - Facebook style (no card, just divider)
-    notificationCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderBottomWidth: 1,
-      borderBottomColor: settings.theme === 'light' ? colors.border : 'rgba(255, 255, 255, 0.08)',
-    },
-    unreadCard: {
-      backgroundColor: settings.theme === 'light' ? 'rgba(106, 91, 255, 0.05)' : 'rgba(106, 91, 255, 0.08)',
-    },
-    deletingCard: {
-      opacity: 0.5,
-    },
-    avatarContainer: {
-      position: 'relative',
-      marginRight: SPACING.sm,
-    },
-    avatar: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: colors.glassBg,
-    },
-    iconAvatar: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    iconBadge: {
-      position: 'absolute',
-      bottom: -2,
-      right: -2,
-      width: 18,
-      height: 18,
-      borderRadius: 9,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: colors.bgDarkest,
-    },
-    contentContainer: {
-      flex: 1,
-    },
-    notificationText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textSecondary,
-      lineHeight: 20,
-    },
-    userName: {
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    actionText: {
-      color: colors.textSecondary,
-    },
-    metaRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      marginTop: 2,
-    },
-    timeText: {
-      fontSize: 12,
-      color: colors.textMuted,
-      marginTop: 2,
-    },
-    newBadge: {
-      backgroundColor: colors.gold,
-      paddingHorizontal: 6,
-      paddingVertical: 1,
-      borderRadius: 8,
-    },
-    newBadgeText: {
-      fontSize: 9,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.bgDarkest,
-    },
-    categoryBadge: {
-      paddingHorizontal: 6,
-      paddingVertical: 1,
-      borderRadius: 4,
-    },
-    categoryText: {
-      fontSize: 9,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      textTransform: 'uppercase',
-    },
-    unreadDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: colors.gold,
-      marginLeft: SPACING.xs,
-    },
-
-    // Delete Action
-    deleteAction: {
-      backgroundColor: '#F6465D',
-      justifyContent: 'center',
-      alignItems: 'flex-end',
-      width: 80,
-    },
-    deleteButton: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: 100,
-      height: '100%',
-      paddingHorizontal: SPACING.md,
-    },
-    deleteText: {
-      color: '#FFFFFF',
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      marginTop: 4,
-    },
-
-    // Empty State
-    emptyState: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: SPACING.xxl,
-    },
-    emptyTitle: {
-      fontSize: TYPOGRAPHY.fontSize.xxl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-      marginTop: SPACING.lg,
-      marginBottom: SPACING.sm,
-      textAlign: 'center',
-    },
-    emptySubtitle: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-    loginButton: {
-      marginTop: SPACING.lg,
-      backgroundColor: colors.burgundy || colors.purple,
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xxl,
-      borderRadius: 25,
-    },
-    loginButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!isAuthenticated) {
     return (
-      <LinearGradient colors={gradients.background} locations={gradients.backgroundLocations} style={styles.gradient}>
+      <LinearGradient colors={GRADIENTS.background} locations={GRADIENTS.backgroundLocations} style={styles.gradient}>
         <SafeAreaView style={styles.container} edges={['top']}>
           <View style={styles.header}>
-            <Text style={styles.title}>{titleLabel}</Text>
+            <Text style={styles.title}>Thông Báo</Text>
           </View>
           {renderLoginPrompt()}
         </SafeAreaView>
@@ -1175,23 +914,23 @@ export default function NotificationsScreen() {
 
   return (
     <LinearGradient
-      colors={gradients.background}
-      locations={gradients.backgroundLocations}
+      colors={GRADIENTS.background}
+      locations={GRADIENTS.backgroundLocations}
       style={styles.gradient}
     >
       <SafeAreaView style={styles.container} edges={['top']}>
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>{titleLabel}</Text>
+            <Text style={styles.title}>Thông Báo</Text>
             {unreadCount > 0 && (
-              <Text style={styles.unreadLabel}>{unreadLabel}</Text>
+              <Text style={styles.unreadLabel}>{unreadCount} chưa đọc</Text>
             )}
           </View>
           {unreadCount > 0 && (
             <TouchableOpacity style={styles.markAllBtn} onPress={handleMarkAllAsRead}>
-              <CheckCheck size={20} color={colors.gold} />
-              <Text style={styles.markAllText}>{markAllLabel}</Text>
+              <CheckCheck size={20} color={COLORS.gold} />
+              <Text style={styles.markAllText}>Đọc hết</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1202,7 +941,7 @@ export default function NotificationsScreen() {
         {/* Notifications List */}
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.gold} />
+            <ActivityIndicator size="large" color={COLORS.gold} />
           </View>
         ) : (
           <FlatList
@@ -1220,7 +959,7 @@ export default function NotificationsScreen() {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor={colors.gold}
+                tintColor={COLORS.gold}
               />
             }
           />
@@ -1230,3 +969,252 @@ export default function NotificationsScreen() {
   );
 }
 
+const styles = StyleSheet.create({
+  gradient: { flex: 1 },
+  container: { flex: 1 },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    backgroundColor: GLASS.background,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.xxxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  unreadLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    marginTop: 2,
+  },
+  markAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: SPACING.sm,
+  },
+  markAllText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+
+  // Category Tabs
+  tabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: GLASS.background,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.15)',
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
+    borderRadius: 8,
+  },
+  activeTab: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+  },
+  tabLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  activeTabLabel: {
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  tabBadge: {
+    backgroundColor: COLORS.burgundy,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    minWidth: 20,
+    alignItems: 'center',
+  },
+  tabBadgeText: {
+    fontSize: 10,
+    color: '#FFFFFF',
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+
+  // List
+  listContent: {
+    paddingBottom: CONTENT_BOTTOM_PADDING,
+  },
+  emptyListContent: {
+    flex: 1,
+  },
+
+  // Notification Row - Facebook style (no card, just divider)
+  notificationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  unreadCard: {
+    backgroundColor: 'rgba(106, 91, 255, 0.08)',
+  },
+  deletingCard: {
+    opacity: 0.5,
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginRight: SPACING.sm,
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.glassBg,
+  },
+  iconAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.bgDarkest,
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  notificationText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  userName: {
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  actionText: {
+    color: COLORS.textSecondary,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2,
+  },
+  timeText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  newBadge: {
+    backgroundColor: COLORS.gold,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 8,
+  },
+  newBadgeText: {
+    fontSize: 9,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.bgDarkest,
+  },
+  categoryBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  categoryText: {
+    fontSize: 9,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    textTransform: 'uppercase',
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.gold,
+    marginLeft: SPACING.xs,
+  },
+
+  // Delete Action
+  deleteAction: {
+    backgroundColor: '#F6465D',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    width: 80,
+  },
+  deleteButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+    height: '100%',
+    paddingHorizontal: SPACING.md,
+  },
+  deleteText: {
+    color: '#FFFFFF',
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    marginTop: 4,
+  },
+
+  // Empty State
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xxl,
+  },
+  emptyTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  loginButton: {
+    marginTop: SPACING.lg,
+    backgroundColor: COLORS.burgundy,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: 25,
+  },
+  loginButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+});

@@ -10,7 +10,7 @@
  * - CTA button
  */
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -29,7 +29,7 @@ import {
   Bell,
   Heart,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 
 const TOAST_DURATION = 8000; // 8 seconds
 const ANIMATION_DURATION = 300;
@@ -40,115 +40,12 @@ const ProactiveEngagementToast = ({
   onDismiss,
   autoHide = true,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // ========== STATE & REFS ==========
   const [visible, setVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-150)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(1)).current;
   const hideTimeout = useRef(null);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      borderBottomLeftRadius: 16,
-      borderBottomRightRadius: 16,
-      borderWidth: 1,
-      overflow: 'hidden',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 10,
-      zIndex: 1000,
-    },
-    bgDefault: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-    bgUrgency: {
-      backgroundColor: 'rgba(156, 6, 18, 0.95)',
-    },
-    bgAlert: {
-      backgroundColor: 'rgba(60, 40, 10, 0.95)',
-    },
-    bgWelcome: {
-      backgroundColor: 'rgba(40, 20, 60, 0.95)',
-    },
-    progressContainer: {
-      height: 3,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    progressBar: {
-      height: '100%',
-      backgroundColor: colors.gold || '#FFBD59',
-    },
-    content: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: SPACING?.md || 12,
-      paddingTop: 40, // Account for status bar
-    },
-    iconContainer: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: SPACING?.sm || 8,
-    },
-    messageContainer: {
-      flex: 1,
-      marginRight: SPACING?.sm || 8,
-    },
-    message: {
-      fontSize: 13,
-      fontWeight: '500',
-      color: colors.textLight || '#FFFFFF',
-      lineHeight: 18,
-    },
-    productPreview: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: SPACING?.xs || 4,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      borderRadius: 8,
-      padding: 6,
-    },
-    productImage: {
-      width: 28,
-      height: 28,
-      borderRadius: 4,
-      marginRight: 6,
-    },
-    productTitle: {
-      fontSize: 11,
-      color: colors.textSecondary || '#CCCCCC',
-      flex: 1,
-    },
-    actions: {
-      alignItems: 'flex-end',
-      gap: 8,
-    },
-    dismissButton: {
-      padding: 4,
-    },
-    ctaButton: {
-      backgroundColor: colors.gold || '#FFBD59',
-      paddingVertical: 6,
-      paddingHorizontal: 14,
-      borderRadius: 14,
-    },
-    ctaText: {
-      fontSize: 12,
-      color: colors.bgDarkest || '#1A1A2E',
-      fontWeight: '600',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // ========== EFFECTS ==========
   useEffect(() => {
@@ -234,13 +131,13 @@ const ProactiveEngagementToast = ({
 
   // ========== RENDER HELPERS ==========
   const getIcon = () => {
-    const iconProps = { size: 22, color: colors.gold || '#FFBD59' };
+    const iconProps = { size: 22, color: COLORS?.gold || '#FFBD59' };
 
     switch (engagement?.subtype) {
       case 'cart_abandonment':
         return <ShoppingCart {...iconProps} />;
       case 'low_stock':
-        return <AlertTriangle {...iconProps} color={colors.error || '#FF6B6B'} />;
+        return <AlertTriangle {...iconProps} color="#FF6B6B" />;
       case 'price_drop':
         return <Gift {...iconProps} color="#4ECDC4" />;
       case 'idle_viewer':
@@ -270,9 +167,9 @@ const ProactiveEngagementToast = ({
   const getBorderColor = () => {
     switch (engagement?.type) {
       case 'urgency':
-        return colors.error || '#FF6B6B';
+        return '#FF6B6B';
       case 'alert':
-        return colors.gold || '#FFBD59';
+        return COLORS?.gold || '#FFBD59';
       case 'welcome':
         return '#FF6B9D';
       default:
@@ -349,7 +246,7 @@ const ProactiveEngagementToast = ({
             onPress={handleDismiss}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <X size={16} color={colors.textMuted || '#888888'} />
+            <X size={16} color="#888888" />
           </TouchableOpacity>
 
           {/* CTA Button */}
@@ -363,5 +260,106 @@ const ProactiveEngagementToast = ({
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    borderWidth: 1,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+    zIndex: 1000,
+  },
+  bgDefault: {
+    backgroundColor: 'rgba(26, 26, 46, 0.98)',
+  },
+  bgUrgency: {
+    backgroundColor: 'rgba(156, 6, 18, 0.95)',
+  },
+  bgAlert: {
+    backgroundColor: 'rgba(60, 40, 10, 0.95)',
+  },
+  bgWelcome: {
+    backgroundColor: 'rgba(40, 20, 60, 0.95)',
+  },
+  progressContainer: {
+    height: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: COLORS?.gold || '#FFBD59',
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING?.md || 12,
+    paddingTop: 40, // Account for status bar
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING?.sm || 8,
+  },
+  messageContainer: {
+    flex: 1,
+    marginRight: SPACING?.sm || 8,
+  },
+  message: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    lineHeight: 18,
+  },
+  productPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING?.xs || 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+    padding: 6,
+  },
+  productImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  productTitle: {
+    fontSize: 11,
+    color: '#CCCCCC',
+    flex: 1,
+  },
+  actions: {
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  dismissButton: {
+    padding: 4,
+  },
+  ctaButton: {
+    backgroundColor: COLORS?.gold || '#FFBD59',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+  },
+  ctaText: {
+    fontSize: 12,
+    color: '#1A1A2E',
+    fontWeight: '600',
+  },
+});
 
 export default ProactiveEngagementToast;

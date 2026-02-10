@@ -4,7 +4,7 @@
  * Fetches active flash sale config from Supabase
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { Zap, ChevronRight } from 'lucide-react-native';
 import { supabase } from '../../services/supabase';
 import { fetchProductsByIds } from '../../services/shopifyService';
 import { useCart } from '../../contexts/CartContext';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import CountdownTimer from './CountdownTimer';
 import FlashSaleCard from './FlashSaleCard';
 import { prefetchImages } from '../Common/OptimizedImage';
@@ -31,9 +31,6 @@ const flashSaleCache = {
 };
 
 const FlashSaleSection = ({ style }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-  const BORDER_RADIUS = { lg: 16 };
-
   const navigation = useNavigation();
   const { addToCart } = useCart();
 
@@ -153,50 +150,6 @@ const FlashSaleSection = ({ style }) => {
     />
   );
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginBottom: SPACING.xl,
-      backgroundColor: 'rgba(156, 6, 18, 0.1)',
-      paddingVertical: SPACING.lg,
-      borderRadius: BORDER_RADIUS.lg,
-      marginHorizontal: SPACING.lg,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      marginBottom: SPACING.md,
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.md,
-    },
-    titleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    title: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.xxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    seeAllButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    seeAllText: {
-      color: colors.burgundy,
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    productList: {
-      paddingHorizontal: SPACING.md,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // Don't show loading spinner - section will appear when data is ready
   // This prevents the perpetual loading spinner when no flash sale exists
   if (loading || !flashSale || isExpired || products.length === 0) {
@@ -209,7 +162,7 @@ const FlashSaleSection = ({ style }) => {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.titleContainer}>
-            <Zap size={20} color={colors.burgundy} fill={colors.burgundy} />
+            <Zap size={20} color={COLORS.burgundy} fill={COLORS.burgundy} />
             <Text style={styles.title}>{flashSale.title || 'Flash Sale'}</Text>
           </View>
           <CountdownTimer
@@ -226,7 +179,7 @@ const FlashSaleSection = ({ style }) => {
           activeOpacity={0.7}
         >
           <Text style={styles.seeAllText}>Xem tất cả</Text>
-          <ChevronRight size={16} color={colors.burgundy} />
+          <ChevronRight size={16} color={COLORS.burgundy} />
         </TouchableOpacity>
       </View>
 
@@ -242,5 +195,49 @@ const FlashSaleSection = ({ style }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: SPACING.xl,
+    backgroundColor: 'rgba(156, 6, 18, 0.1)',
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    marginHorizontal: SPACING.lg,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  title: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  seeAllText: {
+    color: COLORS.burgundy,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  productList: {
+    paddingHorizontal: SPACING.md,
+  },
+});
 
 export default FlashSaleSection;

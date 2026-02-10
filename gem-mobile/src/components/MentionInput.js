@@ -4,7 +4,7 @@
  * Uses dark glass theme from DESIGN_TOKENS
  */
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   TextInput,
@@ -16,13 +16,13 @@ import {
   Keyboard,
 } from 'react-native';
 import { AtSign, User } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS, INPUT } from '../utils/tokens';
 import { searchService } from '../services/searchService';
 
 const MentionInput = ({
   value,
   onChangeText,
-  placeholder = 'Viet noi dung...',
+  placeholder = 'Viết nội dung...',
   style,
   multiline = true,
   numberOfLines = 4,
@@ -33,7 +33,6 @@ const MentionInput = ({
   triggerMention = false, // External trigger to insert @ and show suggestions
   onTriggerMentionHandled, // Callback when trigger is handled
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [mentionQuery, setMentionQuery] = useState('');
@@ -182,88 +181,6 @@ const MentionInput = ({
     };
   }, []);
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      position: 'relative',
-    },
-    input: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: glass.border || 'rgba(255, 255, 255, 0.1)',
-      padding: SPACING.md,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textPrimary,
-      minHeight: 100,
-    },
-    // Suggestions - Position below the input instead of above to avoid overflow issues
-    suggestionsContainer: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      top: '100%',
-      marginTop: SPACING.xs,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : 'rgba(20, 20, 35, 0.98)',
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.3)',
-      overflow: 'hidden',
-      maxHeight: 200,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.4,
-      shadowRadius: 8,
-      elevation: 10,
-      zIndex: 9999,
-    },
-    suggestionsHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: SPACING.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-      gap: SPACING.xs,
-    },
-    suggestionsTitle: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-    },
-    suggestionsList: {
-      maxHeight: 160,
-    },
-    suggestionItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: SPACING.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-    },
-    suggestionAvatar: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: colors.glassBg,
-      marginRight: SPACING.sm,
-    },
-    suggestionInfo: {
-      flex: 1,
-    },
-    suggestionName: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      color: colors.textPrimary,
-    },
-    suggestionUsername: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-    },
-    // Mention text style
-    mentionText: {
-      color: colors.cyan,
-      fontWeight: '600',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <View style={styles.container}>
       <TextInput
@@ -275,12 +192,12 @@ const MentionInput = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={COLORS.textMuted}
         multiline={multiline}
         numberOfLines={numberOfLines}
         maxLength={maxLength}
         autoFocus={autoFocus}
-        selectionColor={colors.purple}
+        selectionColor={COLORS.purple}
         textAlignVertical="top"
       />
 
@@ -288,8 +205,8 @@ const MentionInput = ({
       {showSuggestions && suggestions.length > 0 && (
         <View style={styles.suggestionsContainer}>
           <View style={styles.suggestionsHeader}>
-            <AtSign size={14} color={colors.cyan} />
-            <Text style={styles.suggestionsTitle}>Goi y nguoi dung</Text>
+            <AtSign size={14} color={COLORS.cyan} />
+            <Text style={styles.suggestionsTitle}>Gợi ý người dùng</Text>
           </View>
           <ScrollView
             style={styles.suggestionsList}
@@ -337,7 +254,7 @@ const MentionInput = ({
 /**
  * Utility function to render text with clickable mentions
  */
-export const renderTextWithMentions = (text, onMentionPress, textStyle, mentionStyle) => {
+export const renderTextWithMentions = (text, onMentionPress, textStyle) => {
   if (!text) return null;
 
   // Match @username patterns
@@ -384,7 +301,7 @@ export const renderTextWithMentions = (text, onMentionPress, textStyle, mentionS
           return (
             <Text
               key={`mention-${index}`}
-              style={mentionStyle || { color: '#00D9FF', fontWeight: '600' }}
+              style={styles.mentionText}
               onPress={() => onMentionPress?.(part.username)}
             >
               {part.content}
@@ -396,5 +313,87 @@ export const renderTextWithMentions = (text, onMentionPress, textStyle, mentionS
     </Text>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+  input: {
+    backgroundColor: INPUT.background,
+    borderRadius: INPUT.borderRadius,
+    borderWidth: 1,
+    borderColor: INPUT.borderColor,
+    padding: SPACING.md,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textPrimary,
+    minHeight: 100,
+  },
+  // Suggestions - Position below the input instead of above to avoid overflow issues
+  suggestionsContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: '100%',
+    marginTop: SPACING.xs,
+    backgroundColor: 'rgba(20, 20, 35, 0.98)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+    overflow: 'hidden',
+    maxHeight: 200,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 10,
+    zIndex: 9999,
+  },
+  suggestionsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    gap: SPACING.xs,
+  },
+  suggestionsTitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  suggestionsList: {
+    maxHeight: 160,
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  suggestionAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.glassBg,
+    marginRight: SPACING.sm,
+  },
+  suggestionInfo: {
+    flex: 1,
+  },
+  suggestionName: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textPrimary,
+  },
+  suggestionUsername: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  // Mention text style
+  mentionText: {
+    color: COLORS.cyan,
+    fontWeight: '600',
+  },
+});
 
 export default MentionInput;

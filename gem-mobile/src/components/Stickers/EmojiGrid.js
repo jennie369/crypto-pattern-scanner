@@ -25,11 +25,13 @@ import {
   Car,
   Lightbulb,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { EMOJI_DATA, EMOJI_CATEGORIES } from '../../data/emojis';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NUM_COLUMNS = 8;
+const GRID_PADDING = SPACING.md;
+const EMOJI_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2) / NUM_COLUMNS;
 
 // Category icons mapping
 const CATEGORY_ICONS = {
@@ -51,78 +53,7 @@ const EmojiGrid = memo(({
   searchQuery,
   onSelect,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const GRID_PADDING = SPACING.md;
-  const EMOJI_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2) / NUM_COLUMNS;
-
   const [selectedCategory, setSelectedCategory] = useState('smileys');
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    categoriesScroll: {
-      borderBottomWidth: 1,
-      borderBottomColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-    },
-    categoriesContainer: {
-      flexDirection: 'row',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      gap: SPACING.xs,
-    },
-    categoryTab: {
-      width: 40,
-      height: 40,
-      borderRadius: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-    },
-    categoryTabActive: {
-      backgroundColor: 'rgba(255, 189, 89, 0.2)',
-    },
-    categoryTabDisabled: {
-      opacity: 0.4,
-    },
-    categoryLabelContainer: {
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-    },
-    categoryLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-    },
-    gridContent: {
-      paddingHorizontal: GRID_PADDING,
-      paddingBottom: SPACING.xl,
-      flexGrow: 1,
-    },
-    emojiItem: {
-      width: EMOJI_SIZE,
-      height: EMOJI_SIZE,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    emojiText: {
-      fontSize: 28,
-    },
-    emptyContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingVertical: SPACING.xxl,
-      gap: SPACING.md,
-    },
-    emptyText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY, GRID_PADDING, EMOJI_SIZE]);
 
   // Filter emojis based on search
   const filteredEmojis = useMemo(() => {
@@ -200,7 +131,7 @@ const EmojiGrid = memo(({
       >
         <IconComponent
           size={20}
-          color={isActive ? colors.gold : isDisabled ? colors.textMuted : colors.textSecondary}
+          color={isActive ? COLORS.gold : isDisabled ? COLORS.textMuted : COLORS.textSecondary}
         />
       </TouchableOpacity>
     );
@@ -208,7 +139,7 @@ const EmojiGrid = memo(({
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Smile size={48} color={colors.textMuted} />
+      <Smile size={48} color={COLORS.textMuted} />
       <Text style={styles.emptyText}>
         {searchQuery ? 'Khong tim thay emoji' : 'Chua co emoji'}
       </Text>
@@ -266,6 +197,72 @@ const EmojiGrid = memo(({
       />
     </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  categoriesScroll: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  categoriesContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.xs,
+  },
+  categoryTab: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  categoryTabActive: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+  },
+  categoryTabDisabled: {
+    opacity: 0.4,
+  },
+  categoryLabelContainer: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  categoryLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+  },
+  gridContent: {
+    paddingHorizontal: GRID_PADDING,
+    paddingBottom: SPACING.xl,
+    flexGrow: 1,
+  },
+  emojiItem: {
+    width: EMOJI_SIZE,
+    height: EMOJI_SIZE,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emojiText: {
+    fontSize: 28,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: SPACING.xxl,
+    gap: SPACING.md,
+  },
+  emptyText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
 });
 
 export default EmojiGrid;

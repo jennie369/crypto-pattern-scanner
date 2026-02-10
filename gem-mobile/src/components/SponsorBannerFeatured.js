@@ -4,7 +4,7 @@
  * Features gradient overlay, large typography, and premium feel
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ import {
   Sparkles,
   ArrowRight,
 } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../utils/tokens';
 import { sponsorBannerService } from '../services/sponsorBannerService';
 import deepLinkHandler from '../services/deepLinkHandler';
 import { navigateToScreen } from '../utils/navigationHelper';
@@ -38,156 +38,6 @@ export default function SponsorBannerFeatured({
   userId,
   onDismiss,
 }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginHorizontal: SPACING.md,
-      marginVertical: SPACING.sm,
-    },
-    touchable: {
-      borderRadius: 16,
-      overflow: 'hidden',
-    },
-
-    // With Image Background
-    imageBackground: {
-      width: '100%',
-      minHeight: 220,
-    },
-    backgroundImage: {
-      borderRadius: 16,
-    },
-    gradientOverlay: {
-      flex: 1,
-      minHeight: 220,
-      borderRadius: 16,
-      padding: SPACING.md,
-      justifyContent: 'space-between',
-    },
-
-    // Top Row
-    topRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-    },
-    sponsoredBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderRadius: 20,
-    },
-    sponsoredText: {
-      fontSize: 11,
-      fontWeight: '600',
-    },
-    dismissButton: {
-      padding: SPACING.xs,
-      backgroundColor: 'rgba(0,0,0,0.3)',
-      borderRadius: 20,
-    },
-
-    // Content
-    contentContainer: {
-      paddingTop: SPACING.lg,
-    },
-    title: {
-      fontSize: 22,
-      fontWeight: '700',
-      color: colors.textPrimary,
-      lineHeight: 28,
-      marginBottom: SPACING.xs,
-      textShadowColor: 'rgba(0,0,0,0.5)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 4,
-    },
-    subtitle: {
-      fontSize: 14,
-      color: 'rgba(255,255,255,0.85)',
-      lineHeight: 20,
-      marginBottom: SPACING.md,
-    },
-
-    // CTA Button (with image)
-    ctaButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      alignSelf: 'flex-start',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderRadius: 25,
-      borderWidth: 1.5,
-      backgroundColor: 'rgba(0,0,0,0.4)',
-      gap: SPACING.xs,
-    },
-    ctaText: {
-      fontSize: 14,
-      fontWeight: '600',
-    },
-
-    // Without Image Background
-    gradientCard: {
-      borderRadius: 16,
-      padding: SPACING.lg,
-      minHeight: 180,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    accentLine: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 3,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-    },
-    topRowNoImage: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: SPACING.md,
-    },
-    contentContainerNoImage: {
-      flex: 1,
-      justifyContent: 'center',
-    },
-    titleNoImage: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: colors.textPrimary,
-      lineHeight: 26,
-      marginBottom: SPACING.xs,
-    },
-    subtitleNoImage: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      lineHeight: 20,
-      marginBottom: SPACING.md,
-    },
-
-    // CTA Button Solid (without image)
-    ctaButtonSolid: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      alignSelf: 'flex-start',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.lg,
-      borderRadius: 25,
-      gap: SPACING.xs,
-    },
-    ctaTextSolid: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: colors.bgDarkest,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!banner) return null;
 
   // Handle banner click - same logic as SponsorBannerCard
@@ -281,7 +131,7 @@ export default function SponsorBannerFeatured({
   };
 
   // Get accent color or use default gold
-  const accentColor = banner.accent_color || colors.gold;
+  const accentColor = banner.accent_color || COLORS.gold;
 
   // Render with background image
   if (banner.image_url) {
@@ -363,7 +213,7 @@ export default function SponsorBannerFeatured({
         style={styles.touchable}
       >
         <LinearGradient
-          colors={[colors.bgMid, colors.bgDarkest]}
+          colors={[COLORS.bgMid, COLORS.bgDarkest]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.gradientCard}
@@ -384,7 +234,7 @@ export default function SponsorBannerFeatured({
                 onPress={handleDismiss}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <X size={18} color={colors.textMuted} />
+                <X size={18} color={COLORS.textMuted} />
               </TouchableOpacity>
             )}
           </View>
@@ -407,7 +257,7 @@ export default function SponsorBannerFeatured({
                 onPress={handleBannerClick}
               >
                 <Text style={styles.ctaTextSolid}>{banner.action_label}</Text>
-                <ChevronRight size={18} color={colors.bgDarkest} />
+                <ChevronRight size={18} color={COLORS.bgDarkest} />
               </TouchableOpacity>
             )}
           </View>
@@ -416,3 +266,151 @@ export default function SponsorBannerFeatured({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginHorizontal: SPACING.md,
+    marginVertical: SPACING.sm,
+  },
+  touchable: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+
+  // With Image Background
+  imageBackground: {
+    width: '100%',
+    minHeight: 220,
+  },
+  backgroundImage: {
+    borderRadius: 16,
+  },
+  gradientOverlay: {
+    flex: 1,
+    minHeight: 220,
+    borderRadius: 16,
+    padding: SPACING.md,
+    justifyContent: 'space-between',
+  },
+
+  // Top Row
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  sponsoredBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  sponsoredText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  dismissButton: {
+    padding: SPACING.xs,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 20,
+  },
+
+  // Content
+  contentContainer: {
+    paddingTop: SPACING.lg,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    lineHeight: 28,
+    marginBottom: SPACING.xs,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.85)',
+    lineHeight: 20,
+    marginBottom: SPACING.md,
+  },
+
+  // CTA Button (with image)
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 25,
+    borderWidth: 1.5,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    gap: SPACING.xs,
+  },
+  ctaText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  // Without Image Background
+  gradientCard: {
+    borderRadius: 16,
+    padding: SPACING.lg,
+    minHeight: 180,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  accentLine: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  topRowNoImage: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  contentContainerNoImage: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  titleNoImage: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    lineHeight: 26,
+    marginBottom: SPACING.xs,
+  },
+  subtitleNoImage: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+    marginBottom: SPACING.md,
+  },
+
+  // CTA Button Solid (without image)
+  ctaButtonSolid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 25,
+    gap: SPACING.xs,
+  },
+  ctaTextSolid: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.bgDarkest,
+  },
+});

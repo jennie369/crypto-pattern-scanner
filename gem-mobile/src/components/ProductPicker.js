@@ -1,11 +1,11 @@
 /**
  * Gemral - Product Picker Modal
- * Modal de chon san pham gan vao bai viet
+ * Modal để chọn sản phẩm gắn vào bài viết
  * Loads REAL products from Shopify store
  * Supports multi-select mode
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -30,7 +30,7 @@ import {
   Minus,
 } from 'lucide-react-native';
 
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 import shopifyService from '../services/shopifyService';
 
 /**
@@ -50,8 +50,6 @@ const ProductPicker = ({
   multiSelect = false,
   maxSelect = 10,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const [searchQuery, setSearchQuery] = useState('');
   const [allProducts, setAllProducts] = useState([]); // All products from Shopify
   const [products, setProducts] = useState([]); // Filtered products to display
@@ -62,300 +60,6 @@ const ProductPicker = ({
   const [selectedProduct, setSelectedProduct] = useState(null);
   // For multi-select mode
   const [selectedProducts, setSelectedProducts] = useState([]);
-
-  const styles = useMemo(() => StyleSheet.create({
-    gradient: {
-      flex: 1,
-    },
-    container: {
-      flex: 1,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.md,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    closeButton: {
-      width: 40,
-      height: 40,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    headerTitle: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    confirmButton: {
-      backgroundColor: colors.gold,
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.sm,
-      borderRadius: 20,
-    },
-    confirmButtonDisabled: {
-      backgroundColor: colors.textMuted,
-      opacity: 0.5,
-    },
-    confirmText: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: '#112250',
-    },
-    confirmTextDisabled: {
-      color: colors.textPrimary,
-    },
-    // Selected bar for multi-select
-    selectedBar: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 189, 89, 0.1)',
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-      paddingVertical: SPACING.sm,
-      paddingRight: SPACING.md,
-    },
-    selectedBarContent: {
-      paddingHorizontal: SPACING.md,
-      gap: SPACING.sm,
-    },
-    selectedChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 20,
-      paddingVertical: 4,
-      paddingLeft: 4,
-      paddingRight: SPACING.sm,
-      borderWidth: 1,
-      borderColor: colors.gold,
-      maxWidth: 150,
-    },
-    selectedChipImage: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-    },
-    selectedChipImagePlaceholder: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: 'rgba(106, 91, 255, 0.2)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    selectedChipText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textPrimary,
-      marginLeft: SPACING.xs,
-      flex: 1,
-    },
-    selectedChipRemove: {
-      marginLeft: SPACING.xs,
-      padding: 2,
-    },
-    selectedCount: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.gold,
-      marginLeft: SPACING.sm,
-    },
-    // Hint
-    hintContainer: {
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.sm,
-      backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    },
-    hintText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-    searchContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.md,
-      gap: SPACING.sm,
-    },
-    searchInputContainer: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-      paddingHorizontal: SPACING.md,
-      gap: SPACING.sm,
-    },
-    refreshButton: {
-      width: 44,
-      height: 44,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: colors.textPrimary,
-      paddingVertical: SPACING.md,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    loadingText: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: colors.textMuted,
-      marginTop: SPACING.md,
-    },
-    emptyContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.xl,
-    },
-    emptyTitle: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-      marginTop: SPACING.lg,
-    },
-    emptyText: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: colors.textMuted,
-      marginTop: SPACING.sm,
-      textAlign: 'center',
-    },
-    retryButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.sm,
-      borderRadius: 20,
-      marginTop: SPACING.lg,
-      gap: SPACING.sm,
-    },
-    retryText: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.gold,
-    },
-    listContent: {
-      paddingHorizontal: SPACING.lg,
-      paddingBottom: 100,
-    },
-    productCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-      padding: SPACING.md,
-      marginBottom: SPACING.sm,
-    },
-    productCardSelected: {
-      borderColor: colors.gold,
-      backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    },
-    productImageContainer: {
-      width: 60,
-      height: 60,
-      borderRadius: 8,
-      overflow: 'hidden',
-      marginRight: SPACING.md,
-    },
-    productImage: {
-      width: '100%',
-      height: '100%',
-    },
-    productImagePlaceholder: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(106, 91, 255, 0.1)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    productInfo: {
-      flex: 1,
-    },
-    productTitle: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-      marginBottom: 4,
-    },
-    productPrice: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.gold,
-      marginBottom: 4,
-    },
-    productTypeBadge: {
-      alignSelf: 'flex-start',
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    digitalBadge: {
-      backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    physicalBadge: {
-      backgroundColor: 'rgba(58, 247, 166, 0.2)',
-    },
-    gemsBadge: {
-      backgroundColor: 'rgba(255, 189, 89, 0.2)',
-    },
-    productTypeText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textSecondary,
-    },
-    selectedIndicator: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: 'rgba(255, 189, 89, 0.2)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    selectionNumber: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.gold,
-    },
-    selectedSummary: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(106, 91, 255, 0.2)',
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.md,
-      gap: SPACING.sm,
-    },
-    selectedText: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: colors.textPrimary,
-    },
-    selectedPrice: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.gold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (visible) {
@@ -435,11 +139,11 @@ const ProductPicker = ({
       } else {
         setAllProducts([]);
         setProducts([]);
-        setError('Khong co san pham nao trong cua hang');
+        setError('Không có sản phẩm nào trong cửa hàng');
       }
     } catch (err) {
       console.error('[ProductPicker] Load error:', err);
-      setError('Khong the tai san pham. Vui long thu lai.');
+      setError('Không thể tải sản phẩm. Vui lòng thử lại.');
       setAllProducts([]);
       setProducts([]);
     } finally {
@@ -462,7 +166,7 @@ const ProductPicker = ({
     if (
       tags.includes('digital') ||
       tags.includes('course') ||
-      tags.includes('khoa hoc') ||
+      tags.includes('khóa học') ||
       tags.includes('ebook') ||
       tags.includes('subscription') ||
       productType.includes('digital') ||
@@ -484,9 +188,9 @@ const ProductPicker = ({
    * Format price to Vietnamese format
    */
   const formatPrice = (price) => {
-    if (!price) return '0d';
+    if (!price) return '0đ';
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-    return new Intl.NumberFormat('vi-VN').format(numPrice) + 'd';
+    return new Intl.NumberFormat('vi-VN').format(numPrice) + 'đ';
   };
 
   /**
@@ -605,7 +309,7 @@ const ProductPicker = ({
             <Image source={{ uri: item.image }} style={styles.productImage} />
           ) : (
             <View style={styles.productImagePlaceholder}>
-              <Package size={24} color={colors.textMuted} />
+              <Package size={24} color={COLORS.textMuted} />
             </View>
           )}
         </View>
@@ -613,7 +317,7 @@ const ProductPicker = ({
           <Text style={styles.productTitle} numberOfLines={2}>
             {item.title || ''}
           </Text>
-          <Text style={styles.productPrice}>{item.price || '0d'}</Text>
+          <Text style={styles.productPrice}>{item.price || '0đ'}</Text>
           <View style={[
             styles.productTypeBadge,
             item.type === 'digital' ? styles.digitalBadge :
@@ -630,7 +334,7 @@ const ProductPicker = ({
             {multiSelect ? (
               <Text style={styles.selectionNumber}>{selectionIndex}</Text>
             ) : (
-              <Check size={20} color={colors.gold} />
+              <Check size={20} color={COLORS.gold} />
             )}
           </View>
         ) : null}
@@ -657,7 +361,7 @@ const ProductPicker = ({
                 <Image source={{ uri: product.image }} style={styles.selectedChipImage} />
               ) : (
                 <View style={styles.selectedChipImagePlaceholder}>
-                  <Package size={12} color={colors.textMuted} />
+                  <Package size={12} color={COLORS.textMuted} />
                 </View>
               )}
               <Text style={styles.selectedChipText} numberOfLines={1}>
@@ -667,7 +371,7 @@ const ProductPicker = ({
                 onPress={() => handleRemoveProduct(product.id)}
                 style={styles.selectedChipRemove}
               >
-                <X size={14} color={colors.textMuted} />
+                <X size={14} color={COLORS.textMuted} />
               </TouchableOpacity>
             </View>
           ))}
@@ -687,18 +391,18 @@ const ProductPicker = ({
       onRequestClose={onClose}
     >
       <LinearGradient
-        colors={gradients.background}
-        locations={gradients.backgroundLocations}
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
         style={styles.gradient}
       >
         <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={24} color={colors.textPrimary} />
+              <X size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>
-              {multiSelect ? 'Chon San Pham' : 'Chon San Pham'}
+              {multiSelect ? 'Chọn Sản Phẩm' : 'Chọn Sản Phẩm'}
             </Text>
             <TouchableOpacity
               onPress={handleConfirm}
@@ -722,11 +426,11 @@ const ProductPicker = ({
           {/* Search */}
           <View style={styles.searchContainer}>
             <View style={styles.searchInputContainer}>
-              <Search size={20} color={colors.textMuted} />
+              <Search size={20} color={COLORS.textMuted} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Tim san pham..."
-                placeholderTextColor={colors.textMuted}
+                placeholder="Tìm sản phẩm..."
+                placeholderTextColor={COLORS.textMuted}
                 value={searchQuery}
                 onChangeText={handleSearch}
                 returnKeyType="search"
@@ -734,7 +438,7 @@ const ProductPicker = ({
               />
               {searchQuery.length > 0 && (
                 <TouchableOpacity onPress={() => handleSearch('')}>
-                  <X size={18} color={colors.textMuted} />
+                  <X size={18} color={COLORS.textMuted} />
                 </TouchableOpacity>
               )}
             </View>
@@ -746,7 +450,7 @@ const ProductPicker = ({
             >
               <RefreshCw
                 size={20}
-                color={loading ? colors.textMuted : colors.gold}
+                color={loading ? COLORS.textMuted : COLORS.gold}
               />
             </TouchableOpacity>
           </View>
@@ -755,7 +459,7 @@ const ProductPicker = ({
           {multiSelect && (
             <View style={styles.hintContainer}>
               <Text style={styles.hintText}>
-                Chon toi da {maxSelect} san pham. Nhan vao san pham de chon/bo chon.
+                Chọn tối đa {maxSelect} sản phẩm. Nhấn vào sản phẩm để chọn/bỏ chọn.
               </Text>
             </View>
           )}
@@ -763,29 +467,29 @@ const ProductPicker = ({
           {/* Products List */}
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.gold} />
-              <Text style={styles.loadingText}>Dang tai san pham tu Shopify...</Text>
+              <ActivityIndicator size="large" color={COLORS.gold} />
+              <Text style={styles.loadingText}>Đang tải sản phẩm từ Shopify...</Text>
             </View>
           ) : error ? (
             <View style={styles.emptyContainer}>
-              <ShoppingBag size={48} color={colors.textMuted} />
-              <Text style={styles.emptyTitle}>Khong the tai san pham</Text>
+              <ShoppingBag size={48} color={COLORS.textMuted} />
+              <Text style={styles.emptyTitle}>Không thể tải sản phẩm</Text>
               <Text style={styles.emptyText}>{error || ''}</Text>
               <TouchableOpacity style={styles.retryButton} onPress={loadProducts}>
-                <RefreshCw size={16} color={colors.gold} />
-                <Text style={styles.retryText}>Thu lai</Text>
+                <RefreshCw size={16} color={COLORS.gold} />
+                <Text style={styles.retryText}>Thử lại</Text>
               </TouchableOpacity>
             </View>
           ) : filteredProducts.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <ShoppingBag size={48} color={colors.textMuted} />
-              <Text style={styles.emptyTitle}>Khong tim thay san pham</Text>
+              <ShoppingBag size={48} color={COLORS.textMuted} />
+              <Text style={styles.emptyTitle}>Không tìm thấy sản phẩm</Text>
               <Text style={styles.emptyText}>
-                {searchQuery ? 'Thu tim kiem voi tu khoa khac' : 'Chua co san pham trong cua hang'}
+                {searchQuery ? 'Thử tìm kiếm với từ khóa khác' : 'Chưa có sản phẩm trong cửa hàng'}
               </Text>
               {searchQuery ? (
                 <TouchableOpacity style={styles.retryButton} onPress={() => handleSearch('')}>
-                  <Text style={styles.retryText}>Xem tat ca san pham</Text>
+                  <Text style={styles.retryText}>Xem tất cả sản phẩm</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -802,7 +506,7 @@ const ProductPicker = ({
           {/* Selected Product Summary (single select mode only) */}
           {!multiSelect && selectedProduct && (
             <View style={styles.selectedSummary}>
-              <ShoppingBag size={18} color={colors.gold} />
+              <ShoppingBag size={18} color={COLORS.gold} />
               <Text style={styles.selectedText} numberOfLines={1}>
                 {selectedProduct.title}
               </Text>
@@ -814,5 +518,299 @@ const ProductPicker = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  confirmButton: {
+    backgroundColor: COLORS.gold,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+  },
+  confirmButtonDisabled: {
+    backgroundColor: COLORS.textMuted,
+    opacity: 0.5,
+  },
+  confirmText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#112250',
+  },
+  confirmTextDisabled: {
+    color: COLORS.textPrimary,
+  },
+  // Selected bar for multi-select
+  selectedBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+    paddingVertical: SPACING.sm,
+    paddingRight: SPACING.md,
+  },
+  selectedBarContent: {
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
+  },
+  selectedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: GLASS.background,
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingLeft: 4,
+    paddingRight: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    maxWidth: 150,
+  },
+  selectedChipImage: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+  },
+  selectedChipImagePlaceholder: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedChipText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textPrimary,
+    marginLeft: SPACING.xs,
+    flex: 1,
+  },
+  selectedChipRemove: {
+    marginLeft: SPACING.xs,
+    padding: 2,
+  },
+  selectedCount: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+    marginLeft: SPACING.sm,
+  },
+  // Hint
+  hintContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+  },
+  hintText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    gap: SPACING.sm,
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
+  },
+  refreshButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textPrimary,
+    paddingVertical: SPACING.md,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textMuted,
+    marginTop: SPACING.md,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+  },
+  emptyTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.lg,
+  },
+  emptyText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textMuted,
+    marginTop: SPACING.sm,
+    textAlign: 'center',
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+    marginTop: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  retryText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+  },
+  listContent: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: 100,
+  },
+  productCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  productCardSelected: {
+    borderColor: COLORS.gold,
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+  },
+  productImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginRight: SPACING.md,
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+  },
+  productImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productTitle: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginBottom: 4,
+  },
+  productPrice: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+    marginBottom: 4,
+  },
+  productTypeBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  digitalBadge: {
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  physicalBadge: {
+    backgroundColor: 'rgba(58, 247, 166, 0.2)',
+  },
+  gemsBadge: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+  },
+  productTypeText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textSecondary,
+  },
+  selectedIndicator: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectionNumber: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+  },
+  selectedSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: GLASS.background,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(106, 91, 255, 0.2)',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    gap: SPACING.sm,
+  },
+  selectedText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textPrimary,
+  },
+  selectedPrice: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+  },
+});
 
 export default ProductPicker;

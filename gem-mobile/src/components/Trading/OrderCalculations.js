@@ -19,7 +19,7 @@ import {
   ChevronUp,
   HelpCircle,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 import {
   calculateOrderDetails,
   formatUSDT,
@@ -40,199 +40,6 @@ const OrderCalculations = ({
   onToggleExpand,
   showLiquidationWarning = true,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(255, 255, 255, 0.02)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.05)',
-      overflow: 'hidden',
-    },
-    emptyText: {
-      padding: SPACING.md,
-      fontSize: 12,
-      color: colors.textMuted,
-      textAlign: 'center',
-      fontStyle: 'italic',
-    },
-    // Header
-    headerRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: SPACING.md,
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    headerTitle: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-    headerRight: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    marginSummary: {
-      fontSize: 12,
-      fontWeight: '700',
-      color: colors.gold,
-    },
-    // Summary Row (Collapsed)
-    summaryRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      paddingBottom: SPACING.md,
-    },
-    summaryItem: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    summaryLabel: {
-      fontSize: 10,
-      color: colors.textMuted,
-      marginBottom: 2,
-    },
-    summaryValue: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-    summaryDivider: {
-      width: 1,
-      height: 24,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    // Details Container (Expanded)
-    detailsContainer: {
-      padding: SPACING.md,
-      paddingTop: 0,
-    },
-    detailRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: SPACING.sm,
-    },
-    detailLabel: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    detailLabelText: {
-      fontSize: 12,
-      color: colors.textMuted,
-    },
-    helpIcon: {
-      padding: 2,
-    },
-    detailValue: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-    detailValueSmall: {
-      fontSize: 11,
-      color: colors.textMuted,
-    },
-    detailValueHighlight: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: colors.textPrimary,
-    },
-    detailValueColumn: {
-      alignItems: 'flex-end',
-    },
-    // Value colors
-    valueSuccess: {
-      color: colors.success,
-    },
-    valueWarning: {
-      color: colors.warning,
-    },
-    valueDanger: {
-      color: colors.error,
-    },
-    // Fee Type Badge
-    feeTypeBadge: {
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-      marginLeft: 6,
-    },
-    feeTypeText: {
-      fontSize: 9,
-      fontWeight: '700',
-      color: colors.gold,
-    },
-    // Divider
-    divider: {
-      height: 1,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      marginVertical: SPACING.sm,
-    },
-    // Warning Box
-    warningBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-      padding: SPACING.sm,
-      borderRadius: 8,
-      marginTop: SPACING.xs,
-    },
-    warningBoxDanger: {
-      backgroundColor: 'rgba(255, 107, 107, 0.15)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 107, 107, 0.3)',
-    },
-    warningBoxWarning: {
-      backgroundColor: 'rgba(255, 184, 0, 0.15)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 184, 0, 0.3)',
-    },
-    warningText: {
-      flex: 1,
-      fontSize: 11,
-      fontWeight: '500',
-    },
-    warningTextDanger: {
-      color: colors.error,
-    },
-    warningTextWarning: {
-      color: colors.warning,
-    },
-    // Risk:Reward
-    riskRewardContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    riskRewardValue: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: colors.gold,
-    },
-    goodBadge: {
-      backgroundColor: colors.success,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    goodBadgeText: {
-      fontSize: 9,
-      fontWeight: '700',
-      color: '#000',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // Calculate all order details
   const calculations = useMemo(() => {
     if (!entryPrice || !quantity) return null;
@@ -285,7 +92,7 @@ const OrderCalculations = ({
         activeOpacity={0.7}
       >
         <View style={styles.headerLeft}>
-          <Calculator size={16} color={colors.textSecondary} />
+          <Calculator size={16} color={COLORS.textSecondary} />
           <Text style={styles.headerTitle}>Chi tiết lệnh</Text>
         </View>
         <View style={styles.headerRight}>
@@ -293,9 +100,9 @@ const OrderCalculations = ({
             Margin: {formatUSDT(calculations.initialMargin)}
           </Text>
           {expanded ? (
-            <ChevronUp size={18} color={colors.textMuted} />
+            <ChevronUp size={18} color={COLORS.textMuted} />
           ) : (
-            <ChevronDown size={18} color={colors.textMuted} />
+            <ChevronDown size={18} color={COLORS.textMuted} />
           )}
         </View>
       </TouchableOpacity>
@@ -338,7 +145,7 @@ const OrderCalculations = ({
           {/* Position Value */}
           <View style={styles.detailRow}>
             <View style={styles.detailLabel}>
-              <DollarSign size={14} color={colors.textMuted} />
+              <DollarSign size={14} color={COLORS.textMuted} />
               <Text style={styles.detailLabelText}>Giá trị vị thế</Text>
             </View>
             <Text style={styles.detailValue}>
@@ -349,10 +156,10 @@ const OrderCalculations = ({
           {/* Initial Margin */}
           <View style={styles.detailRow}>
             <View style={styles.detailLabel}>
-              <Percent size={14} color={colors.textMuted} />
+              <Percent size={14} color={COLORS.textMuted} />
               <Text style={styles.detailLabelText}>Margin ban đầu</Text>
               <TouchableOpacity style={styles.helpIcon}>
-                <HelpCircle size={12} color={colors.textDisabled} />
+                <HelpCircle size={12} color={COLORS.textDisabled} />
               </TouchableOpacity>
             </View>
             <Text style={styles.detailValue}>
@@ -405,15 +212,15 @@ const OrderCalculations = ({
                 size={14}
                 color={
                   liquidationWarning === 'danger'
-                    ? colors.error
+                    ? COLORS.error
                     : liquidationWarning === 'warning'
-                    ? colors.warning
-                    : colors.textMuted
+                    ? COLORS.warning
+                    : COLORS.textMuted
                 }
               />
               <Text style={styles.detailLabelText}>Giá thanh lý</Text>
               <TouchableOpacity style={styles.helpIcon}>
-                <HelpCircle size={12} color={colors.textDisabled} />
+                <HelpCircle size={12} color={COLORS.textDisabled} />
               </TouchableOpacity>
             </View>
             <Text
@@ -439,7 +246,7 @@ const OrderCalculations = ({
             >
               <AlertTriangle
                 size={14}
-                color={liquidationWarning === 'danger' ? colors.error : colors.warning}
+                color={liquidationWarning === 'danger' ? COLORS.error : COLORS.warning}
               />
               <Text
                 style={[
@@ -464,7 +271,7 @@ const OrderCalculations = ({
               {calculations.takeProfit.price && (
                 <View style={styles.detailRow}>
                   <View style={styles.detailLabel}>
-                    <Text style={[styles.detailLabelText, { color: colors.success }]}>
+                    <Text style={[styles.detailLabelText, { color: COLORS.success }]}>
                       TP P&L
                     </Text>
                   </View>
@@ -482,7 +289,7 @@ const OrderCalculations = ({
               {calculations.stopLoss.price && (
                 <View style={styles.detailRow}>
                   <View style={styles.detailLabel}>
-                    <Text style={[styles.detailLabelText, { color: colors.error }]}>
+                    <Text style={[styles.detailLabelText, { color: COLORS.error }]}>
                       SL P&L
                     </Text>
                   </View>
@@ -520,5 +327,196 @@ const OrderCalculations = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    overflow: 'hidden',
+  },
+  emptyText: {
+    padding: SPACING.md,
+    fontSize: 12,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  // Header
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  headerTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  marginSummary: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
+  // Summary Row (Collapsed)
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.md,
+  },
+  summaryItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginBottom: 2,
+  },
+  summaryValue: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  summaryDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  // Details Container (Expanded)
+  detailsContainer: {
+    padding: SPACING.md,
+    paddingTop: 0,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: SPACING.sm,
+  },
+  detailLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  detailLabelText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+  },
+  helpIcon: {
+    padding: 2,
+  },
+  detailValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  detailValueSmall: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  detailValueHighlight: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  detailValueColumn: {
+    alignItems: 'flex-end',
+  },
+  // Value colors
+  valueSuccess: {
+    color: COLORS.success,
+  },
+  valueWarning: {
+    color: COLORS.warning,
+  },
+  valueDanger: {
+    color: COLORS.error,
+  },
+  // Fee Type Badge
+  feeTypeBadge: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 6,
+  },
+  feeTypeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
+  // Divider
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    marginVertical: SPACING.sm,
+  },
+  // Warning Box
+  warningBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    padding: SPACING.sm,
+    borderRadius: 8,
+    marginTop: SPACING.xs,
+  },
+  warningBoxDanger: {
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.3)',
+  },
+  warningBoxWarning: {
+    backgroundColor: 'rgba(255, 184, 0, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 184, 0, 0.3)',
+  },
+  warningText: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  warningTextDanger: {
+    color: COLORS.error,
+  },
+  warningTextWarning: {
+    color: COLORS.warning,
+  },
+  // Risk:Reward
+  riskRewardContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  riskRewardValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
+  goodBadge: {
+    backgroundColor: COLORS.success,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  goodBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#000',
+  },
+});
 
 export default memo(OrderCalculations);

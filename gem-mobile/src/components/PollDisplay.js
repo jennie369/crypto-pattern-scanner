@@ -4,7 +4,7 @@
  * Uses dark glass theme from DESIGN_TOKENS
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
   Animated,
 } from 'react-native';
 import { BarChart3, Check, Clock, Users } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 import { useAuth } from '../contexts/AuthContext';
 
 const PollDisplay = ({
@@ -21,7 +21,6 @@ const PollDisplay = ({
   onVote,
   loading = false,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const { user, isAuthenticated } = useAuth();
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [hasVoted, setHasVoted] = useState(false);
@@ -29,154 +28,6 @@ const PollDisplay = ({
 
   // Animation for vote bars
   const barAnimations = poll?.options?.map(() => new Animated.Value(0)) || [];
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      padding: SPACING.md,
-      marginVertical: SPACING.sm,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    // Question
-    questionContainer: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      marginBottom: SPACING.md,
-      gap: SPACING.sm,
-    },
-    question: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-      lineHeight: 22,
-    },
-    // Options
-    optionsContainer: {
-      gap: SPACING.sm,
-    },
-    optionItem: {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderRadius: 10,
-      overflow: 'hidden',
-      borderWidth: 1,
-      borderColor: 'transparent',
-    },
-    optionItemSelected: {
-      borderColor: colors.purple,
-      backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    },
-    optionItemVoted: {
-      backgroundColor: 'transparent',
-    },
-    optionBar: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(106, 91, 255, 0.2)',
-      borderRadius: 10,
-    },
-    optionBarSelected: {
-      backgroundColor: 'rgba(106, 91, 255, 0.3)',
-    },
-    optionContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: SPACING.md,
-    },
-    optionLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-      gap: SPACING.sm,
-    },
-    optionIndicator: {
-      width: 20,
-      height: 20,
-      borderWidth: 2,
-      borderColor: colors.textMuted,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    optionCheckbox: {
-      borderRadius: 4,
-    },
-    optionRadio: {
-      borderRadius: 10,
-    },
-    optionIndicatorSelected: {
-      borderColor: colors.purple,
-      backgroundColor: colors.purple,
-    },
-    votedCheck: {
-      marginRight: SPACING.xs,
-    },
-    optionText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textPrimary,
-      flex: 1,
-    },
-    optionRight: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    optionPercentage: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    optionVotes: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-    },
-    // Submit button
-    submitButton: {
-      backgroundColor: colors.purple,
-      borderRadius: 10,
-      paddingVertical: SPACING.md,
-      alignItems: 'center',
-      marginTop: SPACING.md,
-    },
-    submitButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    // Footer
-    footer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: SPACING.md,
-      paddingTop: SPACING.sm,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    footerItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    footerText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-    },
-    footerTextExpired: {
-      color: colors.error,
-    },
-    // Creator placeholder
-    creatorContainer: {
-      padding: SPACING.lg,
-    },
-    creatorPlaceholder: {
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (poll?.userVotes?.length > 0) {
@@ -267,7 +118,7 @@ const PollDisplay = ({
     <View style={styles.container}>
       {/* Question */}
       <View style={styles.questionContainer}>
-        <BarChart3 size={18} color={colors.purple} />
+        <BarChart3 size={18} color={COLORS.purple} />
         <Text style={styles.question}>{poll.question}</Text>
       </View>
 
@@ -316,11 +167,11 @@ const PollDisplay = ({
                       poll.allowMultiple ? styles.optionCheckbox : styles.optionRadio,
                       isSelected && styles.optionIndicatorSelected,
                     ]}>
-                      {isSelected && <Check size={12} color={colors.textPrimary} />}
+                      {isSelected && <Check size={12} color={COLORS.textPrimary} />}
                     </View>
                   )}
                   {showResults && isSelected && (
-                    <Check size={16} color={colors.success} style={styles.votedCheck} />
+                    <Check size={16} color={COLORS.success} style={styles.votedCheck} />
                   )}
                   <Text style={styles.optionText}>{option.text}</Text>
                 </View>
@@ -358,13 +209,13 @@ const PollDisplay = ({
       {/* Footer info */}
       <View style={styles.footer}>
         <View style={styles.footerItem}>
-          <Users size={14} color={colors.textMuted} />
+          <Users size={14} color={COLORS.textMuted} />
           <Text style={styles.footerText}>{poll.totalVotes || 0} phieu</Text>
         </View>
 
         {poll.endsAt && (
           <View style={styles.footerItem}>
-            <Clock size={14} color={isExpired ? colors.error : colors.textMuted} />
+            <Clock size={14} color={isExpired ? COLORS.error : COLORS.textMuted} />
             <Text style={[styles.footerText, isExpired && styles.footerTextExpired]}>
               {formatTimeRemaining()}
             </Text>
@@ -382,23 +233,11 @@ export const PollCreator = ({
   onPollChange,
   initialPoll = null,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const [question, setQuestion] = useState(initialPoll?.question || '');
   const [options, setOptions] = useState(initialPoll?.options || ['', '']);
   const [allowMultiple, setAllowMultiple] = useState(initialPoll?.allowMultiple || false);
   const [hasEndTime, setHasEndTime] = useState(false);
   const [endDays, setEndDays] = useState(1);
-
-  const styles = useMemo(() => StyleSheet.create({
-    creatorContainer: {
-      padding: SPACING.lg,
-    },
-    creatorPlaceholder: {
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (question && options.filter(o => o.trim()).length >= 2) {
@@ -447,5 +286,153 @@ export const PollCreator = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginVertical: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  // Question
+  questionContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+  },
+  question: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    lineHeight: 22,
+  },
+  // Options
+  optionsContainer: {
+    gap: SPACING.sm,
+  },
+  optionItem: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  optionItemSelected: {
+    borderColor: COLORS.purple,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+  },
+  optionItemVoted: {
+    backgroundColor: 'transparent',
+  },
+  optionBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    borderRadius: 10,
+  },
+  optionBarSelected: {
+    backgroundColor: 'rgba(106, 91, 255, 0.3)',
+  },
+  optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+  },
+  optionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: SPACING.sm,
+  },
+  optionIndicator: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionCheckbox: {
+    borderRadius: 4,
+  },
+  optionRadio: {
+    borderRadius: 10,
+  },
+  optionIndicatorSelected: {
+    borderColor: COLORS.purple,
+    backgroundColor: COLORS.purple,
+  },
+  votedCheck: {
+    marginRight: SPACING.xs,
+  },
+  optionText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    flex: 1,
+  },
+  optionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  optionPercentage: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  optionVotes: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  // Submit button
+  submitButton: {
+    backgroundColor: COLORS.purple,
+    borderRadius: 10,
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  submitButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  // Footer
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  footerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  footerText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  footerTextExpired: {
+    color: COLORS.error,
+  },
+  // Creator placeholder
+  creatorContainer: {
+    padding: SPACING.lg,
+  },
+  creatorPlaceholder: {
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+});
 
 export default PollDisplay;

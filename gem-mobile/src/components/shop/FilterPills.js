@@ -4,7 +4,7 @@
  * Shows applied filters with remove capability
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { X } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 
 const FilterPills = ({
   filters = {},
@@ -21,9 +21,6 @@ const FilterPills = ({
   onClearAll,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-  const BORDER_RADIUS = { full: 9999 };
-
   // Convert filters object to array of pills
   const getFilterPills = () => {
     const pills = [];
@@ -86,44 +83,6 @@ const FilterPills = ({
 
   const pills = getFilterPills();
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginBottom: SPACING.md,
-    },
-    scrollContent: {
-      paddingHorizontal: SPACING.lg,
-      gap: SPACING.sm,
-    },
-    pill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(156, 6, 18, 0.15)',
-      paddingVertical: SPACING.xs,
-      paddingLeft: SPACING.md,
-      paddingRight: SPACING.sm,
-      borderRadius: BORDER_RADIUS.full,
-      borderWidth: 1,
-      borderColor: 'rgba(156, 6, 18, 0.3)',
-      gap: SPACING.xs,
-    },
-    pillText: {
-      color: colors.burgundy,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    clearAllButton: {
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.md,
-      borderRadius: BORDER_RADIUS.full,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    clearAllText: {
-      color: colors.textMuted,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (pills.length === 0) {
     return null;
   }
@@ -143,7 +102,7 @@ const FilterPills = ({
             activeOpacity={0.7}
           >
             <Text style={styles.pillText}>{pill.label}</Text>
-            <X size={12} color={colors.burgundy} />
+            <X size={12} color={COLORS.burgundy} />
           </TouchableOpacity>
         ))}
 
@@ -161,5 +120,43 @@ const FilterPills = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: SPACING.md,
+  },
+  scrollContent: {
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(156, 6, 18, 0.15)',
+    paddingVertical: SPACING.xs,
+    paddingLeft: SPACING.md,
+    paddingRight: SPACING.sm,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(156, 6, 18, 0.3)',
+    gap: SPACING.xs,
+  },
+  pillText: {
+    color: COLORS.burgundy,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  clearAllButton: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  clearAllText: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+});
 
 export default FilterPills;

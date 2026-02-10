@@ -4,10 +4,10 @@
  * Renders price level indicators as overlay on TradingView chart
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TrendingUp, TrendingDown, Target, Shield, Crosshair } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, TYPOGRAPHY, SPACING } from '../../utils/tokens';
 import { formatPrice } from '../../utils/formatters';
 
 /**
@@ -20,138 +20,6 @@ const PriceLines = ({
   priceRange, // { min, max }
   showLabels = true,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      ...StyleSheet.absoluteFillObject,
-      zIndex: 10,
-    },
-
-    lineContainer: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      height: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-
-    line: {
-      flex: 1,
-      height: 2,
-    },
-
-    entryLine: {
-      backgroundColor: '#3B82F6',
-    },
-
-    slLine: {
-      backgroundColor: '#EF4444',
-    },
-
-    tpLine: {
-      backgroundColor: '#22C55E',
-    },
-
-    labelContainer: {
-      position: 'absolute',
-      right: 8,
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 6,
-      paddingVertical: 3,
-      borderRadius: 4,
-      gap: 4,
-    },
-
-    entryLabelContainer: {
-      backgroundColor: 'rgba(59, 130, 246, 0.2)',
-    },
-
-    slLabelContainer: {
-      backgroundColor: 'rgba(239, 68, 68, 0.2)',
-    },
-
-    tpLabelContainer: {
-      backgroundColor: 'rgba(34, 197, 94, 0.2)',
-    },
-
-    label: {
-      fontSize: 10,
-      fontWeight: '600',
-    },
-
-    entryLabel: {
-      color: '#3B82F6',
-    },
-
-    slLabel: {
-      color: '#EF4444',
-    },
-
-    tpLabel: {
-      color: '#22C55E',
-    },
-
-    directionBadge: {
-      position: 'absolute',
-      top: 8,
-      left: 8,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      borderRadius: 8,
-    },
-
-    longBadge: {
-      backgroundColor: 'rgba(34, 197, 94, 0.2)',
-    },
-
-    shortBadge: {
-      backgroundColor: 'rgba(239, 68, 68, 0.2)',
-    },
-
-    directionText: {
-      fontSize: 12,
-      fontWeight: '700',
-    },
-
-    longText: {
-      color: '#22C55E',
-    },
-
-    shortText: {
-      color: '#EF4444',
-    },
-
-    rrBadge: {
-      position: 'absolute',
-      bottom: 8,
-      right: 8,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      borderRadius: 8,
-    },
-
-    rrLabel: {
-      fontSize: 10,
-      color: colors.textMuted,
-    },
-
-    rrValue: {
-      fontSize: 12,
-      fontWeight: '700',
-      color: '#22C55E',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!pattern || !priceRange) return null;
 
   const { entry, stopLoss, direction } = pattern;
@@ -270,86 +138,6 @@ const calculateRR = (pattern) => {
  * Use when overlay on chart is not possible
  */
 export const PriceLevelsBadge = ({ pattern }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const badgeStyles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(0,0,0,0.4)'),
-      borderRadius: 12,
-      padding: SPACING.md,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-    },
-
-    directionBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      alignSelf: 'flex-start',
-      gap: 4,
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 6,
-      marginBottom: SPACING.sm,
-    },
-
-    longBadge: {
-      backgroundColor: 'rgba(34, 197, 94, 0.15)',
-    },
-
-    shortBadge: {
-      backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    },
-
-    directionText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-
-    longText: {
-      color: '#22C55E',
-    },
-
-    shortText: {
-      color: '#EF4444',
-    },
-
-    pricesRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-    },
-
-    priceItem: {
-      alignItems: 'center',
-      gap: 2,
-    },
-
-    priceLabel: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-    },
-
-    priceValue: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-
-    blueText: {
-      color: '#3B82F6',
-    },
-
-    greenText: {
-      color: '#22C55E',
-    },
-
-    redText: {
-      color: '#EF4444',
-    },
-
-    yellowText: {
-      color: '#FFD700',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!pattern) return null;
 
   const { entry, stopLoss, direction } = pattern;
@@ -416,5 +204,213 @@ export const PriceLevelsBadge = ({ pattern }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+  },
+
+  lineContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  line: {
+    flex: 1,
+    height: 2,
+  },
+
+  entryLine: {
+    backgroundColor: '#3B82F6',
+  },
+
+  slLine: {
+    backgroundColor: '#EF4444',
+  },
+
+  tpLine: {
+    backgroundColor: '#22C55E',
+  },
+
+  labelContainer: {
+    position: 'absolute',
+    right: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    gap: 4,
+  },
+
+  entryLabelContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+  },
+
+  slLabelContainer: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+  },
+
+  tpLabelContainer: {
+    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+  },
+
+  label: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+
+  entryLabel: {
+    color: '#3B82F6',
+  },
+
+  slLabel: {
+    color: '#EF4444',
+  },
+
+  tpLabel: {
+    color: '#22C55E',
+  },
+
+  directionBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+
+  longBadge: {
+    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+  },
+
+  shortBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+  },
+
+  directionText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  longText: {
+    color: '#22C55E',
+  },
+
+  shortText: {
+    color: '#EF4444',
+  },
+
+  rrBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+
+  rrLabel: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+  },
+
+  rrValue: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#22C55E',
+  },
+});
+
+const badgeStyles = StyleSheet.create({
+  container: {
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+
+  directionBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: SPACING.sm,
+  },
+
+  longBadge: {
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+  },
+
+  shortBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+  },
+
+  directionText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+
+  longText: {
+    color: '#22C55E',
+  },
+
+  shortText: {
+    color: '#EF4444',
+  },
+
+  pricesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  priceItem: {
+    alignItems: 'center',
+    gap: 2,
+  },
+
+  priceLabel: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+
+  priceValue: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+
+  blueText: {
+    color: '#3B82F6',
+  },
+
+  greenText: {
+    color: '#22C55E',
+  },
+
+  redText: {
+    color: '#EF4444',
+  },
+
+  yellowText: {
+    color: '#FFD700',
+  },
+});
 
 export default PriceLines;

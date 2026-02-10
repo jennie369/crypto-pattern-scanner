@@ -6,7 +6,7 @@
  * Uses DESIGN_TOKENS v3.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { UserPlus, UserCheck, ChevronDown, Users } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
 import { followService } from '../../services/followService';
 import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
@@ -41,118 +41,10 @@ const FollowButton = ({
   showDropdownIcon = true,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(true);
   const { alert, AlertComponent } = useCustomAlert();
-
-  const styles = useMemo(() => StyleSheet.create({
-    // Main Container
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: SPACING.xs,
-    },
-
-    // Size variants
-    containerSmall: {
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.md,
-      borderRadius: 8,
-      minWidth: 80,
-    },
-    containerMedium: {
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.lg,
-      borderRadius: 10,
-      minWidth: 100,
-    },
-    containerLarge: {
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xl,
-      borderRadius: 12,
-      minWidth: 120,
-    },
-
-    // Follow state (primary)
-    followContainer: {
-      borderWidth: 1,
-      borderColor: colors.gold,
-    },
-
-    // Following state (secondary)
-    followingContainer: {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-
-    // Loading container
-    loadingContainer: {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-
-    // Text styles
-    text: {
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    textSmall: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-    },
-    textMedium: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-    },
-    textLarge: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-    },
-    followText: {
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-
-    // Mini button
-    miniContainer: {
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.md,
-      borderRadius: 6,
-      minWidth: 90,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    miniFollow: {
-      backgroundColor: colors.purple,
-    },
-    miniFollowing: {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    miniText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    miniFollowText: {
-      color: colors.textPrimary,
-    },
-    miniFollowingText: {
-      color: colors.textSecondary,
-    },
-
-    // Mutual followers
-    mutualContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      paddingVertical: SPACING.xs,
-    },
-    mutualText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      flex: 1,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Check initial follow status
   useEffect(() => {
@@ -269,7 +161,7 @@ const FollowButton = ({
     return (
       <>
         <View style={[styles.container, currentSize.container, styles.loadingContainer, style]}>
-          <ActivityIndicator size="small" color={colors.textPrimary} />
+          <ActivityIndicator size="small" color={COLORS.textPrimary} />
         </View>
         {AlertComponent}
       </>
@@ -287,13 +179,13 @@ const FollowButton = ({
           activeOpacity={0.7}
         >
           {loading ? (
-            <ActivityIndicator size="small" color={colors.textPrimary} />
+            <ActivityIndicator size="small" color={COLORS.textPrimary} />
           ) : (
             <>
-              <UserCheck size={currentSize.icon} color={colors.textPrimary} />
+              <UserCheck size={currentSize.icon} color={COLORS.textPrimary} />
               <Text style={[styles.text, currentSize.text]}>Đang theo dõi</Text>
               {showDropdownIcon && (
-                <ChevronDown size={14} color={colors.textMuted} />
+                <ChevronDown size={14} color={COLORS.textMuted} />
               )}
             </>
           )}
@@ -312,14 +204,14 @@ const FollowButton = ({
       activeOpacity={0.8}
     >
       <LinearGradient
-        colors={gradients.primaryButton}
+        colors={GRADIENTS.primaryButton}
         style={[styles.container, currentSize.container, styles.followContainer]}
       >
         {loading ? (
-          <ActivityIndicator size="small" color={colors.textPrimary} />
+          <ActivityIndicator size="small" color={COLORS.textPrimary} />
         ) : (
           <>
-            <UserPlus size={currentSize.icon} color={colors.textPrimary} />
+            <UserPlus size={currentSize.icon} color={COLORS.textPrimary} />
             <Text style={[styles.text, currentSize.text, styles.followText]}>
               Theo dõi
             </Text>
@@ -339,39 +231,8 @@ export const FollowButtonMini = ({
   initialIsFollowing = false,
   onFollowChange,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [loading, setLoading] = useState(false);
-
-  const styles = useMemo(() => StyleSheet.create({
-    // Mini button
-    miniContainer: {
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.md,
-      borderRadius: 6,
-      minWidth: 90,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    miniFollow: {
-      backgroundColor: colors.purple,
-    },
-    miniFollowing: {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    miniText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    miniFollowText: {
-      color: colors.textPrimary,
-    },
-    miniFollowingText: {
-      color: colors.textSecondary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handlePress = async () => {
     if (loading || !userId) return;
@@ -411,7 +272,7 @@ export const FollowButtonMini = ({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={isFollowing ? colors.textPrimary : colors.textPrimary}
+          color={isFollowing ? COLORS.textPrimary : COLORS.textPrimary}
         />
       ) : (
         <Text style={[
@@ -433,23 +294,6 @@ export const MutualFollowersIndicator = ({
   names = [],
   onPress,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    // Mutual followers
-    mutualContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      paddingVertical: SPACING.xs,
-    },
-    mutualText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      flex: 1,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (count === 0) return null;
 
   const displayText = names.length > 0
@@ -462,12 +306,119 @@ export const MutualFollowersIndicator = ({
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <Users size={12} color={colors.textMuted} />
+      <Users size={12} color={COLORS.textMuted} />
       <Text style={styles.mutualText} numberOfLines={1}>
         {displayText}
       </Text>
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  // Main Container
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+  },
+
+  // Size variants
+  containerSmall: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 8,
+    minWidth: 80,
+  },
+  containerMedium: {
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 10,
+    minWidth: 100,
+  },
+  containerLarge: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: 12,
+    minWidth: 120,
+  },
+
+  // Follow state (primary)
+  followContainer: {
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+
+  // Following state (secondary)
+  followingContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+
+  // Loading container
+  loadingContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+
+  // Text styles
+  text: {
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  textSmall: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+  },
+  textMedium: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+  },
+  textLarge: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+  },
+  followText: {
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+
+  // Mini button
+  miniContainer: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 6,
+    minWidth: 90,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  miniFollow: {
+    backgroundColor: COLORS.purple,
+  },
+  miniFollowing: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  miniText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  miniFollowText: {
+    color: COLORS.textPrimary,
+  },
+  miniFollowingText: {
+    color: COLORS.textSecondary,
+  },
+
+  // Mutual followers
+  mutualContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
+  },
+  mutualText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    flex: 1,
+  },
+});
 
 export default FollowButton;

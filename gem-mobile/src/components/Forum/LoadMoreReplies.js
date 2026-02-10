@@ -4,7 +4,7 @@
  * Phase 3: Comment Threading (30/12/2024)
  */
 
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState } from 'react';
 import {
   StyleSheet,
   Pressable,
@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { ChevronDown } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 
 /**
  * LoadMoreReplies - Load more button for replies
@@ -28,7 +28,6 @@ const LoadMoreReplies = ({
   onPress,
   depth = 1,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [loading, setLoading] = useState(false);
 
   const handlePress = async () => {
@@ -44,22 +43,6 @@ const LoadMoreReplies = ({
 
   const indent = depth * 48;
 
-  // Memoized styles
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-    },
-    text: {
-      fontSize: 13,
-      color: colors.gold,
-      fontWeight: '500',
-      marginLeft: 4,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (remaining <= 0) return null;
 
   return (
@@ -69,10 +52,10 @@ const LoadMoreReplies = ({
       disabled={loading}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={colors.gold} />
+        <ActivityIndicator size="small" color={COLORS.gold} />
       ) : (
         <>
-          <ChevronDown size={16} color={colors.gold} />
+          <ChevronDown size={16} color={COLORS.gold} />
           <Text style={styles.text}>
             Xem them {remaining} tra loi
           </Text>
@@ -81,5 +64,20 @@ const LoadMoreReplies = ({
     </Pressable>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+  },
+  text: {
+    fontSize: 13,
+    color: COLORS.gold,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+});
 
 export default memo(LoadMoreReplies);

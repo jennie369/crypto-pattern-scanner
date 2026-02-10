@@ -4,7 +4,7 @@
  * Shows discount badge, progress bar, and quick add button
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Zap } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import ProgressBar from './ProgressBar';
 import OptimizedImage from '../Common/OptimizedImage';
 
@@ -24,9 +24,6 @@ const FlashSaleCard = ({
   totalStock = 100,
   onAddToCart,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-  const BORDER_RADIUS = { md: 12, xs: 4 };
-
   const navigation = useNavigation();
 
   // Extract product data with fallbacks
@@ -61,91 +58,6 @@ const FlashSaleCard = ({
     }
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      width: 140,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: BORDER_RADIUS.md,
-      overflow: 'hidden',
-      marginRight: SPACING.md,
-    },
-    imageContainer: {
-      width: '100%',
-      height: 120,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      position: 'relative',
-    },
-    image: {
-      width: '100%',
-      height: '100%',
-    },
-    imagePlaceholder: {
-      width: '100%',
-      height: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    discountBadge: {
-      position: 'absolute',
-      top: SPACING.xs,
-      left: SPACING.xs,
-      backgroundColor: colors.burgundy,
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: 2,
-      borderRadius: BORDER_RADIUS.xs,
-    },
-    discountText: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    infoContainer: {
-      padding: SPACING.sm,
-    },
-    title: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      lineHeight: 16,
-      marginBottom: SPACING.xs,
-      height: 32,
-    },
-    priceContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      marginBottom: SPACING.xs,
-    },
-    salePrice: {
-      color: colors.burgundy,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      marginRight: SPACING.xs,
-    },
-    originalPrice: {
-      color: colors.textMuted,
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      textDecorationLine: 'line-through',
-    },
-    progressBar: {
-      marginBottom: SPACING.xxs,
-    },
-    soldText: {
-      color: colors.textMuted,
-      fontSize: 9,
-      marginBottom: SPACING.xs,
-    },
-    addButton: {
-      backgroundColor: colors.burgundy,
-      paddingVertical: SPACING.sm,
-      alignItems: 'center',
-    },
-    addButtonText: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <TouchableOpacity
       style={styles.container}
@@ -163,7 +75,7 @@ const FlashSaleCard = ({
           />
         ) : (
           <View style={styles.imagePlaceholder}>
-            <Zap size={24} color={colors.textMuted} />
+            <Zap size={24} color={COLORS.textMuted} />
           </View>
         )}
 
@@ -211,5 +123,90 @@ const FlashSaleCard = ({
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: 140,
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BORDER_RADIUS.md,
+    overflow: 'hidden',
+    marginRight: SPACING.md,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 120,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    position: 'relative',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  imagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  discountBadge: {
+    position: 'absolute',
+    top: SPACING.xs,
+    left: SPACING.xs,
+    backgroundColor: COLORS.burgundy,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.xs,
+  },
+  discountText: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  infoContainer: {
+    padding: SPACING.sm,
+  },
+  title: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    lineHeight: 16,
+    marginBottom: SPACING.xs,
+    height: 32,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginBottom: SPACING.xs,
+  },
+  salePrice: {
+    color: COLORS.burgundy,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    marginRight: SPACING.xs,
+  },
+  originalPrice: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    textDecorationLine: 'line-through',
+  },
+  progressBar: {
+    marginBottom: SPACING.xxs,
+  },
+  soldText: {
+    color: COLORS.textMuted,
+    fontSize: 9,
+    marginBottom: SPACING.xs,
+  },
+  addButton: {
+    backgroundColor: COLORS.burgundy,
+    paddingVertical: SPACING.sm,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+});
 
 export default FlashSaleCard;

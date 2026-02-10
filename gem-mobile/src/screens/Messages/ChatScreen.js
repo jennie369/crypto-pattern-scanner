@@ -681,22 +681,6 @@ export default function ChatScreen({ route, navigation }) {
     });
   }, [navigation, conversationId, otherParticipant]);
 
-  // Handle call back from missed call message
-  const handleCallBack = useCallback((callType) => {
-    if (!otherParticipant) return;
-
-    navigation.navigate('Call', {
-      screen: 'OutgoingCall',
-      params: {
-        call: {
-          call_type: callType === 'video' ? CALL_TYPE.VIDEO : CALL_TYPE.AUDIO,
-          conversation_id: conversationId,
-        },
-        callee: otherParticipant,
-      },
-    });
-  }, [navigation, conversationId, otherParticipant]);
-
   // =====================================================
   // SCROLL TO MESSAGE (for reply quotes)
   // =====================================================
@@ -764,7 +748,6 @@ export default function ChatScreen({ route, navigation }) {
         totalParticipants={totalParticipants}
         onScrollToMessage={scrollToMessage}
         isHighlighted={highlightedMessageId === item.id}
-        onCallBack={!conversation?.is_group ? handleCallBack : null}
       />
     );
   };

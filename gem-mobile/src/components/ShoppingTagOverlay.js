@@ -4,7 +4,7 @@
  * Shows product tags on post images
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
   Linking,
 } from 'react-native';
 import { ShoppingBag, ExternalLink, X } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 import shoppingTagService from '../services/shoppingTagService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -29,143 +29,9 @@ const ShoppingTagOverlay = ({
   onTagPress,
   showIndicator = true,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-    },
-    tagDot: {
-      position: 'absolute',
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 4,
-    },
-    tagDotActive: {
-      backgroundColor: colors.purple,
-      transform: [{ scale: 1.2 }],
-    },
-    tagDotEditable: {
-      backgroundColor: colors.purple,
-      borderWidth: 2,
-      borderColor: colors.textPrimary,
-    },
-    indicator: {
-      position: 'absolute',
-      bottom: SPACING.sm,
-      left: SPACING.sm,
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: 4,
-      borderRadius: 12,
-      gap: 4,
-    },
-    indicatorText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textPrimary,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    tagCard: {
-      position: 'absolute',
-      bottom: SPACING.lg,
-      left: SPACING.md,
-      right: SPACING.md,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      padding: SPACING.sm,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    closeCardButton: {
-      position: 'absolute',
-      top: SPACING.xs,
-      right: SPACING.xs,
-      padding: SPACING.xs,
-      zIndex: 1,
-    },
-    tagCardContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.md,
-    },
-    productImage: {
-      width: 50,
-      height: 50,
-      borderRadius: 8,
-      backgroundColor: colors.glassBg,
-    },
-    productInfo: {
-      flex: 1,
-    },
-    productName: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      color: colors.textPrimary,
-      lineHeight: 18,
-    },
-    productPrice: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.success,
-      marginTop: 2,
-    },
-    sourceBadge: {
-      alignSelf: 'flex-start',
-      backgroundColor: 'rgba(106, 91, 255, 0.2)',
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: 2,
-      borderRadius: 8,
-      marginTop: SPACING.xs,
-    },
-    sourceText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.purple,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    editInstructions: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: [{ translateX: -60 }, { translateY: -20 }],
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    editText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-    tagCountBadge: {
-      position: 'absolute',
-      bottom: SPACING.sm,
-      right: SPACING.sm,
-      backgroundColor: colors.purple,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.xs,
-      borderRadius: 12,
-    },
-    tagCountText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textPrimary,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (postId) {
@@ -228,7 +94,7 @@ const ShoppingTagOverlay = ({
         >
           <ShoppingBag
             size={14}
-            color={selectedTag?.id === tag.id ? colors.textPrimary : colors.purple}
+            color={selectedTag?.id === tag.id ? COLORS.textPrimary : COLORS.purple}
           />
         </TouchableOpacity>
       ))}
@@ -236,7 +102,7 @@ const ShoppingTagOverlay = ({
       {/* Shopping Indicator */}
       {showIndicator && (
         <View style={styles.indicator}>
-          <ShoppingBag size={12} color={colors.textPrimary} />
+          <ShoppingBag size={12} color={COLORS.textPrimary} />
           <Text style={styles.indicatorText}>{tags.length}</Text>
         </View>
       )}
@@ -248,7 +114,7 @@ const ShoppingTagOverlay = ({
             style={styles.closeCardButton}
             onPress={() => setSelectedTag(null)}
           >
-            <X size={16} color={colors.textMuted} />
+            <X size={16} color={COLORS.textMuted} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -278,7 +144,7 @@ const ShoppingTagOverlay = ({
                 </Text>
               </View>
             </View>
-            <ExternalLink size={16} color={colors.cyan} />
+            <ExternalLink size={16} color={COLORS.cyan} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -298,62 +164,7 @@ export const ShoppingTagEditor = ({
   onUpdatePosition,
   editable = true,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [draggingTag, setDraggingTag] = useState(null);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-    },
-    tagDot: {
-      position: 'absolute',
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 4,
-    },
-    tagDotEditable: {
-      backgroundColor: colors.purple,
-      borderWidth: 2,
-      borderColor: colors.textPrimary,
-    },
-    editInstructions: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: [{ translateX: -60 }, { translateY: -20 }],
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    editText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-    tagCountBadge: {
-      position: 'absolute',
-      bottom: SPACING.sm,
-      right: SPACING.sm,
-      backgroundColor: colors.purple,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.xs,
-      borderRadius: 12,
-    },
-    tagCountText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textPrimary,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handleImagePress = (event) => {
     if (!editable) return;
@@ -379,7 +190,7 @@ export const ShoppingTagEditor = ({
       {/* Edit Mode Instructions */}
       {editable && tags.length === 0 && (
         <View style={styles.editInstructions}>
-          <ShoppingBag size={24} color={colors.textMuted} />
+          <ShoppingBag size={24} color={COLORS.textMuted} />
           <Text style={styles.editText}>Cham de them san pham</Text>
         </View>
       )}
@@ -399,7 +210,7 @@ export const ShoppingTagEditor = ({
           onLongPress={() => handleTagLongPress(tag)}
           activeOpacity={0.7}
         >
-          <ShoppingBag size={14} color={colors.textPrimary} />
+          <ShoppingBag size={14} color={COLORS.textPrimary} />
         </TouchableOpacity>
       ))}
 
@@ -412,5 +223,137 @@ export const ShoppingTagEditor = ({
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  tagDot: {
+    position: 'absolute',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  tagDotActive: {
+    backgroundColor: COLORS.purple,
+    transform: [{ scale: 1.2 }],
+  },
+  tagDotEditable: {
+    backgroundColor: COLORS.purple,
+    borderWidth: 2,
+    borderColor: COLORS.textPrimary,
+  },
+  indicator: {
+    position: 'absolute',
+    bottom: SPACING.sm,
+    left: SPACING.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  indicatorText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  tagCard: {
+    position: 'absolute',
+    bottom: SPACING.lg,
+    left: SPACING.md,
+    right: SPACING.md,
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    padding: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  closeCardButton: {
+    position: 'absolute',
+    top: SPACING.xs,
+    right: SPACING.xs,
+    padding: SPACING.xs,
+    zIndex: 1,
+  },
+  tagCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  productImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: COLORS.glassBg,
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textPrimary,
+    lineHeight: 18,
+  },
+  productPrice: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.success,
+    marginTop: 2,
+  },
+  sourceBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginTop: SPACING.xs,
+  },
+  sourceText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.purple,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  editInstructions: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -60 }, { translateY: -20 }],
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  editText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  tagCountBadge: {
+    position: 'absolute',
+    bottom: SPACING.sm,
+    right: SPACING.sm,
+    backgroundColor: COLORS.purple,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: 12,
+  },
+  tagCountText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+});
 
 export default ShoppingTagOverlay;

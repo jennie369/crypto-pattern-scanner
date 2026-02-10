@@ -345,46 +345,45 @@ const GemMasterScreen = ({ navigation, route }) => {
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisInfo, setCrisisInfo] = useState(null);
 
-  // Reusable function to fetch user, tier, quota, and voice quota
-  const fetchUserAndTier = useCallback(async ({ showLoading = true } = {}) => {
-    try {
-      if (showLoading) setIsLoadingTier(true);
-
-      // Get current user - this also re-validates the auth session
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      setUser(currentUser);
-
-      if (currentUser) {
-        // Get user tier
-        const tier = await TierService.getUserTier(currentUser.id);
-        setUserTier(tier);
-
-        // Get quota
-        const quotaData = await QuotaService.checkQuota(currentUser.id, tier);
-        setQuota(quotaData);
-
-        // Get voice quota (Day 11-12)
-        const voiceQuotaData = await voiceService.getVoiceQuotaInfo(currentUser.id, tier);
-        setVoiceQuota(voiceQuotaData);
-
-        console.log('[GemMaster] User tier:', tier, 'Quota:', quotaData, 'Voice:', voiceQuotaData);
-      } else {
-        // Not logged in - use default
-        setUserTier('FREE');
-        setQuota(QuotaService.getDefaultQuota());
-        setVoiceQuota(TierService.getVoiceQuotaInfo('FREE', 0));
-      }
-    } catch (error) {
-      console.error('[GemMaster] Error fetching user/tier:', error);
-      setQuota(QuotaService.getDefaultQuota());
-    } finally {
-      if (showLoading) setIsLoadingTier(false);
-    }
-  }, []);
-
   // Fetch user and tier on mount
   useEffect(() => {
-    fetchUserAndTier({ showLoading: true });
+    const fetchUserAndTier = async () => {
+      try {
+        setIsLoadingTier(true);
+
+        // Get current user
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        setUser(currentUser);
+
+        if (currentUser) {
+          // Get user tier
+          const tier = await TierService.getUserTier(currentUser.id);
+          setUserTier(tier);
+
+          // Get quota
+          const quotaData = await QuotaService.checkQuota(currentUser.id, tier);
+          setQuota(quotaData);
+
+          // Get voice quota (Day 11-12)
+          const voiceQuotaData = await voiceService.getVoiceQuotaInfo(currentUser.id, tier);
+          setVoiceQuota(voiceQuotaData);
+
+          console.log('[GemMaster] User tier:', tier, 'Quota:', quotaData, 'Voice:', voiceQuotaData);
+        } else {
+          // Not logged in - use default
+          setUserTier('FREE');
+          setQuota(QuotaService.getDefaultQuota());
+          setVoiceQuota(TierService.getVoiceQuotaInfo('FREE', 0));
+        }
+      } catch (error) {
+        console.error('[GemMaster] Error fetching user/tier:', error);
+        setQuota(QuotaService.getDefaultQuota());
+      } finally {
+        setIsLoadingTier(false);
+      }
+    };
+
+    fetchUserAndTier();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -404,16 +403,7 @@ const GemMasterScreen = ({ navigation, route }) => {
     return () => {
       subscription?.unsubscribe();
     };
-  }, [fetchUserAndTier]);
-
-  // Re-validate user/tier/quota on screen focus (silent refresh, no loading state)
-  // Fixes: stale auth, role not recognized, quota not updated after app idle/background
-  useFocusEffect(
-    useCallback(() => {
-      console.log('[GemMaster] Screen focused - refreshing user/tier/quota silently');
-      fetchUserAndTier({ showLoading: false });
-    }, [fetchUserAndTier])
-  );
+  }, []);
 
   // ===== CHATBOT UPGRADE: Load Personalized Data =====
   useEffect(() => {

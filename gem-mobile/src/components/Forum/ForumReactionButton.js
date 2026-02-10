@@ -9,7 +9,7 @@
  * - Haptic feedback
  */
 
-import React, { useState, useCallback, useRef, memo, useMemo } from 'react';
+import React, { useState, useCallback, useRef, memo } from 'react';
 import {
   StyleSheet,
   View,
@@ -28,7 +28,7 @@ import Animated, {
 import { ThumbsUp, Heart } from 'lucide-react-native';
 import ReactionIcon from './ReactionIcon';
 import { REACTION_CONFIG, REACTION_ORDER } from '../../constants/reactions';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 import reactionService from '../../services/reactionService';
 
 // Safe haptics import
@@ -60,8 +60,6 @@ const ForumReactionButton = ({
   showLabel = true,
   size = 'medium',
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // State
   const [showPicker, setShowPicker] = useState(false);
   const [pickerPosition, setPickerPosition] = useState({ x: 0, y: 0 });
@@ -375,106 +373,6 @@ const ForumReactionButton = ({
   // Format count
   const formattedCount = reactionService.formatCount(totalCount);
 
-  // Memoized styles
-  const styles = useMemo(() => StyleSheet.create({
-    wrapper: {
-      position: 'relative',
-      overflow: 'visible', // Allow picker to overflow above
-      zIndex: 1,
-    },
-    container: {
-      position: 'relative',
-      overflow: 'visible',
-    },
-    button: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'transparent',
-    },
-    buttonDisabled: {
-      opacity: 0.5,
-    },
-    iconContainer: {
-      width: 22,
-      height: 22,
-      justifyContent: 'center',
-      alignItems: 'center',
-      overflow: 'visible',
-    },
-    label: {
-      fontWeight: '500',
-      color: colors.textMuted,
-    },
-    count: {
-      color: colors.textMuted,
-      marginLeft: SPACING.xs,
-    },
-    bigHeart: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      marginTop: -40,
-      marginLeft: -40,
-      zIndex: 100,
-    },
-    // Picker styles
-    picker: {
-      position: 'absolute',
-      width: PICKER_WIDTH,
-      height: PICKER_HEIGHT,
-      zIndex: 9999,
-      elevation: 999,
-    },
-    pickerContent: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-evenly',
-      backgroundColor: Platform.OS === 'ios' ? (settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(30, 30, 50, 0.95)')) : (settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(20, 20, 40, 0.98)')),
-      borderRadius: 24,
-      paddingHorizontal: 8,
-      // Shadow
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 10,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    reactionItem: {
-      width: REACTION_SIZE,
-      height: REACTION_SIZE,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    reactionItemSelected: {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      borderRadius: 18,
-    },
-    reactionEmoji: {
-      fontSize: 24,
-      textAlign: 'center',
-      includeFontPadding: false,
-    },
-    reactionLabel: {
-      position: 'absolute',
-      top: -24,
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      paddingHorizontal: 6,
-      paddingVertical: 3,
-      borderRadius: 10,
-      minWidth: 40,
-      alignItems: 'center',
-    },
-    reactionLabelText: {
-      color: '#fff',
-      fontSize: 10,
-      fontWeight: '600',
-      textAlign: 'center',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <View style={styles.wrapper}>
       {/* Main Button */}
@@ -500,7 +398,7 @@ const ForumReactionButton = ({
               ) : (
                 <ThumbsUp
                   size={dimensions.icon}
-                  color={colors.textMuted}
+                  color={COLORS.textMuted}
                   strokeWidth={2}
                 />
               )}
@@ -512,7 +410,7 @@ const ForumReactionButton = ({
                 style={[
                   styles.label,
                   { fontSize: dimensions.font },
-                  userReaction && { color: currentConfig?.color || colors.textPrimary },
+                  userReaction && { color: currentConfig?.color || COLORS.textPrimary },
                 ]}
               >
                 {userReaction ? currentConfig?.label || 'Thích' : 'Thích'}
@@ -585,56 +483,121 @@ const ReactionItemAnimated = memo(({ type, config, scale, isHovered, isSelected 
     ],
   }));
 
-  const itemStyles = useMemo(() => StyleSheet.create({
-    reactionItem: {
-      width: REACTION_SIZE,
-      height: REACTION_SIZE,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    reactionItemSelected: {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      borderRadius: 18,
-    },
-    reactionEmoji: {
-      fontSize: 24,
-      textAlign: 'center',
-      includeFontPadding: false,
-    },
-    reactionLabel: {
-      position: 'absolute',
-      top: -24,
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      paddingHorizontal: 6,
-      paddingVertical: 3,
-      borderRadius: 10,
-      minWidth: 40,
-      alignItems: 'center',
-    },
-    reactionLabelText: {
-      color: '#fff',
-      fontSize: 10,
-      fontWeight: '600',
-      textAlign: 'center',
-    },
-  }), []);
-
   return (
     <Animated.View
       style={[
-        itemStyles.reactionItem,
-        isSelected && itemStyles.reactionItemSelected,
+        styles.reactionItem,
+        isSelected && styles.reactionItemSelected,
         animatedStyle,
       ]}
     >
-      <Text style={itemStyles.reactionEmoji}>{config.emoji}</Text>
+      <Text style={styles.reactionEmoji}>{config.emoji}</Text>
       {isHovered && (
-        <View style={itemStyles.reactionLabel}>
-          <Text style={itemStyles.reactionLabelText} numberOfLines={1}>{config.label}</Text>
+        <View style={styles.reactionLabel}>
+          <Text style={styles.reactionLabelText} numberOfLines={1}>{config.label}</Text>
         </View>
       )}
     </Animated.View>
   );
+});
+
+const styles = StyleSheet.create({
+  wrapper: {
+    position: 'relative',
+    overflow: 'visible', // Allow picker to overflow above
+    zIndex: 1,
+  },
+  container: {
+    position: 'relative',
+    overflow: 'visible',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  iconContainer: {
+    width: 22,
+    height: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'visible',
+  },
+  label: {
+    fontWeight: '500',
+    color: COLORS.textMuted,
+  },
+  count: {
+    color: COLORS.textMuted,
+    marginLeft: SPACING.xs,
+  },
+  bigHeart: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -40,
+    marginLeft: -40,
+    zIndex: 100,
+  },
+  // Picker styles
+  picker: {
+    position: 'absolute',
+    width: PICKER_WIDTH,
+    height: PICKER_HEIGHT,
+    zIndex: 9999,
+    elevation: 999,
+  },
+  pickerContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    backgroundColor: Platform.OS === 'ios' ? 'rgba(30, 30, 50, 0.95)' : 'rgba(20, 20, 40, 0.98)',
+    borderRadius: 24,
+    paddingHorizontal: 8,
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  reactionItem: {
+    width: REACTION_SIZE,
+    height: REACTION_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reactionItemSelected: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 18,
+  },
+  reactionEmoji: {
+    fontSize: 24,
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
+  reactionLabel: {
+    position: 'absolute',
+    top: -24,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 10,
+    minWidth: 40,
+    alignItems: 'center',
+  },
+  reactionLabelText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
 });
 
 export default memo(ForumReactionButton);

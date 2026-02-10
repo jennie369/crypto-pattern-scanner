@@ -4,7 +4,7 @@
  * Phase 2: Image Viewer Enhancement (30/12/2024)
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   StyleSheet,
   View,
@@ -24,7 +24,7 @@ import {
   Download,
   MoreHorizontal,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 
 /**
  * ImageViewerControls - UI controls for image viewer
@@ -47,65 +47,6 @@ const ImageViewerControls = ({
   onDownload,
   onMore,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      ...StyleSheet.absoluteFillObject,
-      justifyContent: 'space-between',
-    },
-    topBar: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-    },
-    topBarContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-    bottomBar: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-    bottomBarContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-around',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.md,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-    iconButton: {
-      width: 44,
-      height: 44,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    counter: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-    actionButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-    },
-    actionText: {
-      marginLeft: SPACING.xs,
-      fontSize: 14,
-      color: colors.textPrimary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!visible) return null;
 
   return (
@@ -124,7 +65,7 @@ const ImageViewerControls = ({
             onPress={onClose}
             hitSlop={10}
           >
-            <X size={24} color={colors.textPrimary} />
+            <X size={24} color={COLORS.textPrimary} />
           </Pressable>
 
           {/* Counter */}
@@ -138,7 +79,7 @@ const ImageViewerControls = ({
             onPress={onMore}
             hitSlop={10}
           >
-            <MoreHorizontal size={24} color={colors.textPrimary} />
+            <MoreHorizontal size={24} color={COLORS.textPrimary} />
           </Pressable>
         </View>
       </SafeAreaView>
@@ -151,7 +92,7 @@ const ImageViewerControls = ({
             style={styles.actionButton}
             onPress={onShare}
           >
-            <Share2 size={22} color={colors.textPrimary} />
+            <Share2 size={22} color={COLORS.textPrimary} />
             <Text style={styles.actionText}>Chia sẻ</Text>
           </Pressable>
 
@@ -160,7 +101,7 @@ const ImageViewerControls = ({
             style={styles.actionButton}
             onPress={onDownload}
           >
-            <Download size={22} color={colors.textPrimary} />
+            <Download size={22} color={COLORS.textPrimary} />
             <Text style={styles.actionText}>Tải về</Text>
           </Pressable>
         </View>
@@ -168,5 +109,62 @@ const ImageViewerControls = ({
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'space-between',
+  },
+  topBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  topBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  bottomBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  counter: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  actionText: {
+    marginLeft: SPACING.xs,
+    fontSize: 14,
+    color: COLORS.textPrimary,
+  },
+});
 
 export default memo(ImageViewerControls);

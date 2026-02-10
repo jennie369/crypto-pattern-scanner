@@ -4,7 +4,7 @@
  * Displayed below "Dành Cho Bạn" section in Shop tab
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -25,11 +25,12 @@ import {
   Tag,
   Gift,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import shopBannerService from '../../services/shopBannerService';
 import InAppBrowser from '../Common/InAppBrowser';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SECTION_PADDING = SPACING.lg;
 
 /**
  * Format price in Vietnamese format
@@ -61,9 +62,6 @@ const getBadgeIcon = (badgeText) => {
 };
 
 const FeaturedProductSection = ({ style }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-  const SECTION_PADDING = SPACING.lg;
-
   const navigation = useNavigation();
   const [featured, setFeatured] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -143,192 +141,11 @@ const FeaturedProductSection = ({ style }) => {
     }
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      paddingHorizontal: SECTION_PADDING,
-      marginBottom: SPACING.xl,
-    },
-    loadingContainer: {
-      height: 200,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    // Header
-    sectionHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: SPACING.md,
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    sectionTitle: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    // Card
-    cardWrapper: {
-      borderRadius: 20,
-      overflow: 'hidden',
-      shadowColor: colors.gold,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 12,
-      elevation: 8,
-    },
-    card: {
-      position: 'relative',
-      borderRadius: 20,
-      overflow: 'hidden',
-      minHeight: 200,
-    },
-    // Background Pattern
-    bgPattern: {
-      ...StyleSheet.absoluteFillObject,
-      overflow: 'hidden',
-    },
-    bgCircle: {
-      position: 'absolute',
-      borderRadius: 999,
-      backgroundColor: 'rgba(255, 215, 0, 0.05)',
-    },
-    bgCircle1: {
-      width: 200,
-      height: 200,
-      top: -50,
-      right: -50,
-    },
-    bgCircle2: {
-      width: 150,
-      height: 150,
-      bottom: -30,
-      left: -30,
-      backgroundColor: 'rgba(106, 91, 255, 0.08)',
-    },
-    // Badge
-    badge: {
-      position: 'absolute',
-      top: 12,
-      left: 12,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderRadius: 12,
-      zIndex: 10,
-    },
-    badgeText: {
-      fontSize: 11,
-      fontWeight: '700',
-      color: '#FFFFFF',
-      textTransform: 'uppercase',
-    },
-    // Content
-    cardContent: {
-      flexDirection: 'row',
-      padding: SPACING.lg,
-      paddingTop: SPACING.xl,
-    },
-    infoSection: {
-      flex: 1,
-      paddingRight: SPACING.md,
-      justifyContent: 'center',
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: '800',
-      lineHeight: 26,
-      marginBottom: 4,
-    },
-    subtitle: {
-      fontSize: 13,
-      fontWeight: '600',
-      marginBottom: 8,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
-    description: {
-      fontSize: 12,
-      lineHeight: 18,
-      marginBottom: 12,
-    },
-    // Price
-    priceRow: {
-      marginBottom: 12,
-    },
-    price: {
-      fontSize: 22,
-      fontWeight: '800',
-    },
-    discountRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginTop: 2,
-    },
-    originalPrice: {
-      fontSize: 13,
-      color: 'rgba(255, 255, 255, 0.5)',
-      textDecorationLine: 'line-through',
-    },
-    discountBadge: {
-      backgroundColor: '#FF4757',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    discountText: {
-      fontSize: 10,
-      fontWeight: '700',
-      color: '#FFFFFF',
-    },
-    // CTA
-    ctaButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 12,
-      alignSelf: 'flex-start',
-      gap: 4,
-    },
-    ctaText: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: '#1a0b2e',
-    },
-    // Image
-    imageSection: {
-      width: 140,
-      height: 140,
-      position: 'relative',
-    },
-    imageGlow: {
-      position: 'absolute',
-      width: '100%',
-      height: '100%',
-      borderRadius: 16,
-      backgroundColor: 'rgba(255, 215, 0, 0.15)',
-      transform: [{ scale: 1.1 }],
-    },
-    productImage: {
-      width: '100%',
-      height: '100%',
-      borderRadius: 16,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // Don't render if loading or no data
   if (loading) {
     return (
       <View style={[styles.loadingContainer, style]}>
-        <ActivityIndicator size="small" color={colors.gold} />
+        <ActivityIndicator size="small" color={COLORS.gold} />
       </View>
     );
   }
@@ -346,7 +163,7 @@ const FeaturedProductSection = ({ style }) => {
         {/* Section Header */}
       <View style={styles.sectionHeader}>
         <View style={styles.headerLeft}>
-          <Sparkles size={20} color={colors.gold} />
+          <Sparkles size={20} color={COLORS.gold} />
           <Text style={styles.sectionTitle}>Sản Phẩm Nổi Bật</Text>
         </View>
       </View>
@@ -398,7 +215,7 @@ const FeaturedProductSection = ({ style }) => {
 
               {featured.subtitle && (
                 <Text
-                  style={[styles.subtitle, { color: featured.accent_color || colors.gold }]}
+                  style={[styles.subtitle, { color: featured.accent_color || COLORS.gold }]}
                   numberOfLines={1}
                 >
                   {featured.subtitle}
@@ -418,7 +235,7 @@ const FeaturedProductSection = ({ style }) => {
               {featured.show_price && featured.price && (
                 <View style={styles.priceRow}>
                   <Text
-                    style={[styles.price, { color: featured.accent_color || colors.gold }]}
+                    style={[styles.price, { color: featured.accent_color || COLORS.gold }]}
                   >
                     {formatPrice(featured.price, featured.currency)}
                   </Text>
@@ -441,7 +258,7 @@ const FeaturedProductSection = ({ style }) => {
               <TouchableOpacity
                 style={[
                   styles.ctaButton,
-                  { backgroundColor: featured.accent_color || colors.gold },
+                  { backgroundColor: featured.accent_color || COLORS.gold },
                 ]}
                 onPress={handlePress}
               >
@@ -474,5 +291,186 @@ const FeaturedProductSection = ({ style }) => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: SECTION_PADDING,
+    marginBottom: SPACING.xl,
+  },
+  loadingContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Header
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.md,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sectionTitle: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  // Card
+  cardWrapper: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  card: {
+    position: 'relative',
+    borderRadius: 20,
+    overflow: 'hidden',
+    minHeight: 200,
+  },
+  // Background Pattern
+  bgPattern: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  bgCircle: {
+    position: 'absolute',
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 215, 0, 0.05)',
+  },
+  bgCircle1: {
+    width: 200,
+    height: 200,
+    top: -50,
+    right: -50,
+  },
+  bgCircle2: {
+    width: 150,
+    height: 150,
+    bottom: -30,
+    left: -30,
+    backgroundColor: 'rgba(106, 91, 255, 0.08)',
+  },
+  // Badge
+  badge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    zIndex: 10,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+  },
+  // Content
+  cardContent: {
+    flexDirection: 'row',
+    padding: SPACING.lg,
+    paddingTop: SPACING.xl,
+  },
+  infoSection: {
+    flex: 1,
+    paddingRight: SPACING.md,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '800',
+    lineHeight: 26,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  description: {
+    fontSize: 12,
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  // Price
+  priceRow: {
+    marginBottom: 12,
+  },
+  price: {
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  discountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 2,
+  },
+  originalPrice: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.5)',
+    textDecorationLine: 'line-through',
+  },
+  discountBadge: {
+    backgroundColor: '#FF4757',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  discountText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  // CTA
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    gap: 4,
+  },
+  ctaText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1a0b2e',
+  },
+  // Image
+  imageSection: {
+    width: 140,
+    height: 140,
+    position: 'relative',
+  },
+  imageGlow: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    transform: [{ scale: 1.1 }],
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+  },
+});
 
 export default FeaturedProductSection;

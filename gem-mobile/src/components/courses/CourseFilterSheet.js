@@ -3,7 +3,7 @@
  * Full filter interface with price range, categories, difficulty, rating
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,8 +15,46 @@ import {
   Switch,
 } from 'react-native';
 import { X, Star, RotateCcw, Filter, SortDesc } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
-import { BORDER_RADIUS } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
+
+// Course category options
+const COURSE_CATEGORIES = [
+  { id: 'trading', name: 'Trading' },
+  { id: 'tarot', name: 'Tarot' },
+  { id: 'astrology', name: 'Chiêm Tinh' },
+  { id: 'meditation', name: 'Thiền' },
+  { id: 'crystals', name: 'Đá Quý' },
+  { id: 'spiritual', name: 'Tâm Thức' },
+  { id: 'analysis', name: 'Phân Tích' },
+];
+
+// Difficulty options
+const DIFFICULTIES = [
+  { id: 'beginner', name: 'Cơ bản', color: COLORS.success },
+  { id: 'intermediate', name: 'Trung cấp', color: COLORS.gold },
+  { id: 'advanced', name: 'Nâng cao', color: COLORS.error },
+];
+
+// Sort options
+const SORT_OPTIONS = [
+  { id: 'newest', name: 'Mới nhất' },
+  { id: 'popular', name: 'Phổ biến nhất' },
+  { id: 'rating', name: 'Đánh giá cao' },
+  { id: 'price_low', name: 'Giá thấp đến cao' },
+  { id: 'price_high', name: 'Giá cao đến thấp' },
+];
+
+// Rating options
+const RATINGS = [5, 4, 3, 2, 1];
+
+// Price range presets (VND)
+const PRICE_PRESETS = [
+  { id: 'free', name: 'Miễn phí', min: 0, max: 0 },
+  { id: 'under_500k', name: 'Dưới 500K', min: 1, max: 500000 },
+  { id: '500k_1m', name: '500K - 1M', min: 500000, max: 1000000 },
+  { id: '1m_5m', name: '1M - 5M', min: 1000000, max: 5000000 },
+  { id: 'over_5m', name: 'Trên 5M', min: 5000000, max: 999999999 },
+];
 
 const CourseFilterSheet = ({
   visible,
@@ -24,47 +62,6 @@ const CourseFilterSheet = ({
   initialFilters = {},
   onApply,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
-
-  // Course category options
-  const COURSE_CATEGORIES = [
-    { id: 'trading', name: 'Trading' },
-    { id: 'tarot', name: 'Tarot' },
-    { id: 'astrology', name: 'Chiêm Tinh' },
-    { id: 'meditation', name: 'Thiền' },
-    { id: 'crystals', name: 'Đá Quý' },
-    { id: 'spiritual', name: 'Tâm Thức' },
-    { id: 'analysis', name: 'Phân Tích' },
-  ];
-
-  // Difficulty options
-  const DIFFICULTIES = [
-    { id: 'beginner', name: 'Cơ bản', color: colors.success },
-    { id: 'intermediate', name: 'Trung cấp', color: colors.gold },
-    { id: 'advanced', name: 'Nâng cao', color: colors.error },
-  ];
-
-  // Sort options
-  const SORT_OPTIONS = [
-    { id: 'newest', name: 'Mới nhất' },
-    { id: 'popular', name: 'Phổ biến nhất' },
-    { id: 'rating', name: 'Đánh giá cao' },
-    { id: 'price_low', name: 'Giá thấp đến cao' },
-    { id: 'price_high', name: 'Giá cao đến thấp' },
-  ];
-
-  // Rating options
-  const RATINGS = [5, 4, 3, 2, 1];
-
-  // Price range presets (VND)
-  const PRICE_PRESETS = [
-    { id: 'free', name: 'Miễn phí', min: 0, max: 0 },
-    { id: 'under_500k', name: 'Dưới 500K', min: 1, max: 500000 },
-    { id: '500k_1m', name: '500K - 1M', min: 500000, max: 1000000 },
-    { id: '1m_5m', name: '1M - 5M', min: 1000000, max: 5000000 },
-    { id: 'over_5m', name: 'Trên 5M', min: 5000000, max: 999999999 },
-  ];
-
   const [filters, setFilters] = useState({
     categories: [],
     difficulties: [],
@@ -76,172 +73,6 @@ const CourseFilterSheet = ({
     hasCertificate: false,
     ...initialFilters,
   });
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    },
-    sheet: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopLeftRadius: BORDER_RADIUS.xl,
-      borderTopRightRadius: BORDER_RADIUS.xl,
-      maxHeight: '85%',
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.lg,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    resetButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    resetText: {
-      color: colors.textMuted,
-      fontSize: TYPOGRAPHY.fontSize.md,
-    },
-    titleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    title: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.xxxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    closeButton: {
-      padding: SPACING.xs,
-    },
-    content: {
-      paddingHorizontal: SPACING.lg,
-    },
-    section: {
-      paddingVertical: SPACING.lg,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      marginBottom: SPACING.md,
-    },
-    sectionTitle: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      marginBottom: SPACING.md,
-    },
-    chipGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: SPACING.sm,
-    },
-    chip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderRadius: BORDER_RADIUS.full,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 1,
-      borderColor: 'transparent',
-      gap: SPACING.xs,
-    },
-    chipActive: {
-      backgroundColor: 'rgba(255, 189, 89, 0.2)',
-      borderColor: colors.gold,
-    },
-    chipText: {
-      color: colors.textSecondary,
-      fontSize: TYPOGRAPHY.fontSize.md,
-    },
-    chipTextActive: {
-      color: colors.gold,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    difficultyDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-    },
-    ratingOptions: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: SPACING.sm,
-    },
-    ratingOption: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderRadius: BORDER_RADIUS.sm,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 1,
-      borderColor: 'transparent',
-      gap: 4,
-    },
-    ratingOptionActive: {
-      backgroundColor: 'rgba(255, 189, 89, 0.2)',
-      borderColor: colors.gold,
-    },
-    ratingText: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    ratingPlus: {
-      color: colors.textMuted,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-    },
-    toggleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: SPACING.md,
-    },
-    toggleLabel: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-    },
-    footer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.lg,
-      paddingBottom: SPACING.huge,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    applyButton: {
-      backgroundColor: colors.gold,
-      paddingVertical: SPACING.lg,
-      borderRadius: BORDER_RADIUS.md,
-      alignItems: 'center',
-    },
-    applyButtonText: {
-      color: colors.bgDarkest,
-      fontSize: TYPOGRAPHY.fontSize.xxl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Reset to initial filters when sheet opens
   useEffect(() => {
@@ -365,12 +196,12 @@ const CourseFilterSheet = ({
               onPress={handleReset}
               activeOpacity={0.7}
             >
-              <RotateCcw size={18} color={colors.textMuted} />
+              <RotateCcw size={18} color={COLORS.textMuted} />
               <Text style={styles.resetText}>Đặt lại</Text>
             </TouchableOpacity>
 
             <View style={styles.titleContainer}>
-              <Filter size={20} color={colors.gold} />
+              <Filter size={20} color={COLORS.gold} />
               <Text style={styles.title}>Bộ lọc</Text>
             </View>
 
@@ -379,7 +210,7 @@ const CourseFilterSheet = ({
               onPress={onClose}
               activeOpacity={0.7}
             >
-              <X size={24} color={colors.textPrimary} />
+              <X size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -391,7 +222,7 @@ const CourseFilterSheet = ({
             {/* Sort Options */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <SortDesc size={18} color={colors.gold} />
+                <SortDesc size={18} color={COLORS.gold} />
                 <Text style={styles.sectionTitle}>Sắp xếp theo</Text>
               </View>
               <View style={styles.chipGrid}>
@@ -529,8 +360,8 @@ const CourseFilterSheet = ({
                     <Text style={styles.ratingText}>{rating}</Text>
                     <Star
                       size={14}
-                      color={colors.gold}
-                      fill={colors.gold}
+                      color={COLORS.gold}
+                      fill={COLORS.gold}
                     />
                     <Text style={styles.ratingPlus}>trở lên</Text>
                   </TouchableOpacity>
@@ -545,8 +376,8 @@ const CourseFilterSheet = ({
                 <Switch
                   value={filters.isFree}
                   onValueChange={(v) => setFilters(prev => ({ ...prev, isFree: v }))}
-                  trackColor={{ false: 'rgba(255,255,255,0.1)', true: colors.gold }}
-                  thumbColor={colors.textPrimary}
+                  trackColor={{ false: 'rgba(255,255,255,0.1)', true: COLORS.gold }}
+                  thumbColor={COLORS.textPrimary}
                 />
               </View>
 
@@ -555,8 +386,8 @@ const CourseFilterSheet = ({
                 <Switch
                   value={filters.hasQuiz}
                   onValueChange={(v) => setFilters(prev => ({ ...prev, hasQuiz: v }))}
-                  trackColor={{ false: 'rgba(255,255,255,0.1)', true: colors.gold }}
-                  thumbColor={colors.textPrimary}
+                  trackColor={{ false: 'rgba(255,255,255,0.1)', true: COLORS.gold }}
+                  thumbColor={COLORS.textPrimary}
                 />
               </View>
 
@@ -565,8 +396,8 @@ const CourseFilterSheet = ({
                 <Switch
                   value={filters.hasCertificate}
                   onValueChange={(v) => setFilters(prev => ({ ...prev, hasCertificate: v }))}
-                  trackColor={{ false: 'rgba(255,255,255,0.1)', true: colors.gold }}
-                  thumbColor={colors.textPrimary}
+                  trackColor={{ false: 'rgba(255,255,255,0.1)', true: COLORS.gold }}
+                  thumbColor={COLORS.textPrimary}
                 />
               </View>
             </View>
@@ -592,5 +423,171 @@ const CourseFilterSheet = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.bgMid,
+    borderTopLeftRadius: BORDER_RADIUS.xl,
+    borderTopRightRadius: BORDER_RADIUS.xl,
+    maxHeight: '85%',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  resetButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  resetText: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.md,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  title: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.xxxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  closeButton: {
+    padding: SPACING.xs,
+  },
+  content: {
+    paddingHorizontal: SPACING.lg,
+  },
+  section: {
+    paddingVertical: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: SPACING.md,
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    marginBottom: SPACING.md,
+  },
+  chipGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    gap: SPACING.xs,
+  },
+  chipActive: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderColor: COLORS.gold,
+  },
+  chipText: {
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.md,
+  },
+  chipTextActive: {
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  difficultyDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  ratingOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  ratingOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    gap: 4,
+  },
+  ratingOptionActive: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderColor: COLORS.gold,
+  },
+  ratingText: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  ratingPlus: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: SPACING.md,
+  },
+  toggleLabel: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    paddingBottom: SPACING.huge,
+    backgroundColor: COLORS.bgMid,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  applyButton: {
+    backgroundColor: COLORS.gold,
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+  },
+  applyButtonText: {
+    color: COLORS.bgDarkest,
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+});
 
 export default CourseFilterSheet;

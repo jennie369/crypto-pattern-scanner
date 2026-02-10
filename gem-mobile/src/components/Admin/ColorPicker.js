@@ -4,7 +4,7 @@
  * Features: Preset colors, HSL wheel, hex input
  */
 
-import React, { useState, useCallback, memo, useMemo } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -19,20 +19,19 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Check, X, Palette, Pipette } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { useSettings } from '../../contexts/SettingsContext';
-import { BORDER_RADIUS } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const WHEEL_SIZE = Math.min(SCREEN_WIDTH - 80, 280);
 
 // Preset color palettes
 const PRESET_COLORS = {
-  'Do & Hong': ['#FF4757', '#FF6B81', '#FF0000', '#DC143C', '#C71585', '#FF1493', '#FF69B4', '#FFB6C1'],
-  'Cam & Vang': ['#FFA502', '#FF9500', '#FFD700', '#FFBD59', '#F9A825', '#FFEB3B', '#FFC107', '#FF8C00'],
-  'Xanh la': ['#2ED573', '#00D68F', '#00C853', '#4CAF50', '#8BC34A', '#CDDC39', '#009688', '#00BFA5'],
-  'Xanh duong': ['#1E90FF', '#3742FA', '#0984E3', '#2196F3', '#03A9F4', '#00BCD4', '#0097A7', '#00ACC1'],
-  'Tim': ['#A855F7', '#9C27B0', '#6A5BFF', '#7C4DFF', '#651FFF', '#8E24AA', '#AB47BC', '#BA68C8'],
-  'Trung tinh': ['#FFFFFF', '#F5F5F5', '#E0E0E0', '#9E9E9E', '#757575', '#424242', '#212121', '#000000'],
+  'Đỏ & Hồng': ['#FF4757', '#FF6B81', '#FF0000', '#DC143C', '#C71585', '#FF1493', '#FF69B4', '#FFB6C1'],
+  'Cam & Vàng': ['#FFA502', '#FF9500', '#FFD700', '#FFBD59', '#F9A825', '#FFEB3B', '#FFC107', '#FF8C00'],
+  'Xanh lá': ['#2ED573', '#00D68F', '#00C853', '#4CAF50', '#8BC34A', '#CDDC39', '#009688', '#00BFA5'],
+  'Xanh dương': ['#1E90FF', '#3742FA', '#0984E3', '#2196F3', '#03A9F4', '#00BCD4', '#0097A7', '#00ACC1'],
+  'Tím': ['#A855F7', '#9C27B0', '#6A5BFF', '#7C4DFF', '#651FFF', '#8E24AA', '#AB47BC', '#BA68C8'],
+  'Trung tính': ['#FFFFFF', '#F5F5F5', '#E0E0E0', '#9E9E9E', '#757575', '#424242', '#212121', '#000000'],
 };
 
 // Convert HSL to Hex
@@ -84,12 +83,10 @@ const isValidHex = (hex) => /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex);
 const ColorPicker = memo(({
   value = '#FF4757',
   onChange,
-  label = 'Mau',
+  label = 'Màu',
   placeholder = '#FFFFFF',
   style,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
-
   const [modalVisible, setModalVisible] = useState(false);
   const [tempColor, setTempColor] = useState(value);
   const [hsl, setHsl] = useState(() => hexToHsl(value));
@@ -178,228 +175,6 @@ const ColorPicker = memo(({
     },
   });
 
-  const styles = useMemo(() => StyleSheet.create({
-    inputContainer: {
-      marginBottom: SPACING.md,
-    },
-    label: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      color: colors.textSecondary,
-      marginBottom: SPACING.xs,
-    },
-    inputRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    colorPreview: {
-      width: 44,
-      height: 44,
-      borderRadius: BORDER_RADIUS.md,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: 'rgba(255,255,255,0.2)',
-    },
-    hexInput: {
-      flex: 1,
-      height: 44,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: BORDER_RADIUS.md,
-      paddingHorizontal: SPACING.md,
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.base,
-      borderWidth: 1,
-      borderColor: colors.inputBorder,
-    },
-    pickerButton: {
-      width: 44,
-      height: 44,
-      borderRadius: BORDER_RADIUS.md,
-      backgroundColor: 'rgba(106, 91, 255, 0.2)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.purple,
-    },
-
-    // Modal styles
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      justifyContent: 'flex-end',
-    },
-    modalContainer: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      maxHeight: '90%',
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.md,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.inputBorder,
-    },
-    headerButton: {
-      padding: SPACING.sm,
-    },
-    modalTitle: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    modalContent: {
-      flex: 1,
-    },
-    modalContentContainer: {
-      padding: SPACING.lg,
-      paddingBottom: 40,
-    },
-
-    // Preview
-    previewSection: {
-      alignItems: 'center',
-      marginBottom: SPACING.xl,
-    },
-    previewBox: {
-      width: WHEEL_SIZE,
-      height: 60,
-      borderRadius: BORDER_RADIUS.lg,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: 'rgba(255,255,255,0.2)',
-    },
-    previewText: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-
-    // Hex input
-    hexInputSection: {
-      marginBottom: SPACING.xl,
-    },
-    sectionLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textSecondary,
-      marginBottom: SPACING.sm,
-    },
-    modalHexInput: {
-      height: 48,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: BORDER_RADIUS.md,
-      paddingHorizontal: SPACING.lg,
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      borderWidth: 1,
-      borderColor: colors.inputBorder,
-      textAlign: 'center',
-    },
-
-    // Hue slider
-    sliderSection: {
-      marginBottom: SPACING.xl,
-    },
-    hueSliderContainer: {
-      width: WHEEL_SIZE - 20,
-      height: 30,
-      alignSelf: 'center',
-      position: 'relative',
-    },
-    hueSlider: {
-      width: '100%',
-      height: 20,
-      borderRadius: 10,
-      marginTop: 5,
-    },
-    hueThumb: {
-      position: 'absolute',
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: '#FFF',
-      borderWidth: 3,
-      borderColor: '#333',
-      top: 3,
-      marginLeft: -2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-
-    // Saturation/Lightness box
-    slBoxContainer: {
-      width: WHEEL_SIZE - 20,
-      height: 120,
-      alignSelf: 'center',
-      position: 'relative',
-      borderRadius: BORDER_RADIUS.md,
-      overflow: 'hidden',
-    },
-    slBox: {
-      width: '100%',
-      height: '100%',
-    },
-    slThumb: {
-      position: 'absolute',
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      backgroundColor: 'transparent',
-      borderWidth: 3,
-      borderColor: '#FFF',
-      marginLeft: -10,
-      marginTop: -10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.5,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-
-    // Presets
-    presetsSection: {
-      marginTop: SPACING.md,
-    },
-    presetCategory: {
-      marginBottom: SPACING.lg,
-    },
-    categoryLabel: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-      marginBottom: SPACING.sm,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-    },
-    presetRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: SPACING.sm,
-    },
-    presetColor: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: 'transparent',
-    },
-    presetColorSelected: {
-      borderColor: colors.gold,
-      transform: [{ scale: 1.1 }],
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <>
       {/* Color Input with Preview */}
@@ -422,7 +197,7 @@ const ColorPicker = memo(({
               }
             }}
             placeholder={placeholder}
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColor={COLORS.textMuted}
             autoCapitalize="characters"
             maxLength={7}
           />
@@ -431,7 +206,7 @@ const ColorPicker = memo(({
             onPress={handleOpen}
             activeOpacity={0.7}
           >
-            <Pipette size={18} color={colors.purple} />
+            <Pipette size={18} color={COLORS.purple} />
           </TouchableOpacity>
         </View>
       </View>
@@ -448,11 +223,11 @@ const ColorPicker = memo(({
             {/* Header */}
             <View style={styles.modalHeader}>
               <TouchableOpacity onPress={handleClose} style={styles.headerButton}>
-                <X size={24} color={colors.textPrimary} />
+                <X size={24} color={COLORS.textPrimary} />
               </TouchableOpacity>
-              <Text style={styles.modalTitle}>Chon mau</Text>
+              <Text style={styles.modalTitle}>Chọn màu</Text>
               <TouchableOpacity onPress={handleConfirm} style={styles.headerButton}>
-                <Check size={24} color={colors.success} />
+                <Check size={24} color={COLORS.success} />
               </TouchableOpacity>
             </View>
 
@@ -472,13 +247,13 @@ const ColorPicker = memo(({
 
               {/* Hex Input */}
               <View style={styles.hexInputSection}>
-                <Text style={styles.sectionLabel}>Ma mau HEX</Text>
+                <Text style={styles.sectionLabel}>Mã màu HEX</Text>
                 <TextInput
                   style={styles.modalHexInput}
                   value={hexInput}
                   onChangeText={handleHexChange}
                   placeholder="#FF4757"
-                  placeholderTextColor={colors.textMuted}
+                  placeholderTextColor={COLORS.textMuted}
                   autoCapitalize="characters"
                   maxLength={7}
                 />
@@ -486,7 +261,7 @@ const ColorPicker = memo(({
 
               {/* Hue Slider */}
               <View style={styles.sliderSection}>
-                <Text style={styles.sectionLabel}>Mau sac (Hue)</Text>
+                <Text style={styles.sectionLabel}>Màu sắc (Hue)</Text>
                 <View style={styles.hueSliderContainer} {...huePanResponder.panHandlers}>
                   <LinearGradient
                     colors={[
@@ -508,7 +283,7 @@ const ColorPicker = memo(({
 
               {/* Saturation/Lightness Box */}
               <View style={styles.sliderSection}>
-                <Text style={styles.sectionLabel}>Do bao hoa & Do sang</Text>
+                <Text style={styles.sectionLabel}>Độ bão hòa & Độ sáng</Text>
                 <View style={styles.slBoxContainer} {...slPanResponder.panHandlers}>
                   <LinearGradient
                     colors={['#FFF', hslToHex(hsl.h, 100, 50)]}
@@ -537,12 +312,12 @@ const ColorPicker = memo(({
 
               {/* Preset Colors */}
               <View style={styles.presetsSection}>
-                <Text style={styles.sectionLabel}>Mau co san</Text>
-                {Object.entries(PRESET_COLORS).map(([category, presetColors]) => (
+                <Text style={styles.sectionLabel}>Màu có sẵn</Text>
+                {Object.entries(PRESET_COLORS).map(([category, colors]) => (
                   <View key={category} style={styles.presetCategory}>
                     <Text style={styles.categoryLabel}>{category}</Text>
                     <View style={styles.presetRow}>
-                      {presetColors.map((color) => (
+                      {colors.map((color) => (
                         <TouchableOpacity
                           key={color}
                           style={[
@@ -571,5 +346,227 @@ const ColorPicker = memo(({
 });
 
 ColorPicker.displayName = 'ColorPicker';
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    marginBottom: SPACING.md,
+  },
+  label: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  colorPreview: {
+    width: 44,
+    height: 44,
+    borderRadius: BORDER_RADIUS.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  hexInput: {
+    flex: 1,
+    height: 44,
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    borderWidth: 1,
+    borderColor: COLORS.inputBorder,
+  },
+  pickerButton: {
+    width: 44,
+    height: 44,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.purple,
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: COLORS.bgDarkest,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '90%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.inputBorder,
+  },
+  headerButton: {
+    padding: SPACING.sm,
+  },
+  modalTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  modalContent: {
+    flex: 1,
+  },
+  modalContentContainer: {
+    padding: SPACING.lg,
+    paddingBottom: 40,
+  },
+
+  // Preview
+  previewSection: {
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+  },
+  previewBox: {
+    width: WHEEL_SIZE,
+    height: 60,
+    borderRadius: BORDER_RADIUS.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  previewText: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+
+  // Hex input
+  hexInputSection: {
+    marginBottom: SPACING.xl,
+  },
+  sectionLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.sm,
+  },
+  modalHexInput: {
+    height: 48,
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.lg,
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    borderWidth: 1,
+    borderColor: COLORS.inputBorder,
+    textAlign: 'center',
+  },
+
+  // Hue slider
+  sliderSection: {
+    marginBottom: SPACING.xl,
+  },
+  hueSliderContainer: {
+    width: WHEEL_SIZE - 20,
+    height: 30,
+    alignSelf: 'center',
+    position: 'relative',
+  },
+  hueSlider: {
+    width: '100%',
+    height: 20,
+    borderRadius: 10,
+    marginTop: 5,
+  },
+  hueThumb: {
+    position: 'absolute',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+    borderWidth: 3,
+    borderColor: '#333',
+    top: 3,
+    marginLeft: -2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
+  // Saturation/Lightness box
+  slBoxContainer: {
+    width: WHEEL_SIZE - 20,
+    height: 120,
+    alignSelf: 'center',
+    position: 'relative',
+    borderRadius: BORDER_RADIUS.md,
+    overflow: 'hidden',
+  },
+  slBox: {
+    width: '100%',
+    height: '100%',
+  },
+  slThumb: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 3,
+    borderColor: '#FFF',
+    marginLeft: -10,
+    marginTop: -10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
+  // Presets
+  presetsSection: {
+    marginTop: SPACING.md,
+  },
+  presetCategory: {
+    marginBottom: SPACING.lg,
+  },
+  categoryLabel: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  presetRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  presetColor: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  presetColorSelected: {
+    borderColor: COLORS.gold,
+    transform: [{ scale: 1.1 }],
+  },
+});
 
 export default ColorPicker;

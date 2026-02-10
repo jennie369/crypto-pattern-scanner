@@ -30,9 +30,6 @@ import * as Haptics from '../../../utils/haptics';
 // Services
 import messagingService from '../../../services/messagingService';
 
-// Auth
-import { useAuth } from '../../../contexts/AuthContext';
-
 // Tokens
 import {
   COLORS,
@@ -47,16 +44,10 @@ const SHEET_HEIGHT = 550;
 const AddParticipantsSheet = memo(({
   visible,
   conversationId,
-  conversation,
   existingParticipantIds = [],
   onClose,
   onAdd,
 }) => {
-  const { user } = useAuth();
-
-  // Check if current user is admin (creator) of the group
-  const isAdmin = conversation?.created_by === user?.id;
-
   // Local state
   const [searchQuery, setSearchQuery] = useState('');
   const [contacts, setContacts] = useState([]);
@@ -94,12 +85,11 @@ const AddParticipantsSheet = memo(({
   ).current;
 
   // Fetch contacts on search
-  // Admins can search anyone, non-admins limited to contacts + mutual follows
   useEffect(() => {
     const fetchContacts = async () => {
       try {
         setLoading(true);
-        const data = await messagingService.searchGroupChatEligibleUsers(searchQuery, 10, isAdmin);
+        const data = await messagingService.searchUsers(searchQuery);
         // Filter out existing participants
         const filtered = data.filter(u => !existingParticipantIds.includes(u.id));
         setContacts(filtered);
@@ -112,7 +102,7 @@ const AddParticipantsSheet = memo(({
 
     const debounce = setTimeout(fetchContacts, 300);
     return () => clearTimeout(debounce);
-  }, [searchQuery, existingParticipantIds, isAdmin]);
+  }, [searchQuery, existingParticipantIds]);
 
   // Open animation
   useEffect(() => {

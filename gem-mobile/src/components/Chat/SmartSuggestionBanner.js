@@ -4,7 +4,7 @@
 // Banner for proactive smart triggers with expandable gesture
 // ============================================================
 
-import React, { memo, useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { memo, useRef, useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import { X, Sparkles, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -38,8 +38,6 @@ const SmartSuggestionBanner = memo(({
   onDismiss,
   onAction,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // Get safe area insets for proper top padding
   let topInset = Platform.OS === 'android' ? ANDROID_STATUS_BAR_HEIGHT : 0;
   try {
@@ -135,107 +133,6 @@ const SmartSuggestionBanner = memo(({
     }
   }, [contentHeight]);
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      zIndex: 100,
-      padding: SPACING.sm,
-    },
-    content: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 16,
-      padding: SPACING.md,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 189, 89, 0.3)',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 5,
-    },
-    contentExpanded: {
-      paddingBottom: SPACING.md,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-    },
-    iconContainer: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: SPACING.sm,
-      flexShrink: 0,
-    },
-    messageContainer: {
-      flex: 1,
-      marginRight: SPACING.sm,
-    },
-    message: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textPrimary,
-      lineHeight: 22,
-    },
-    dismissButton: {
-      padding: SPACING.xs,
-      marginTop: -4,
-      flexShrink: 0,
-    },
-    footerRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: SPACING.sm,
-      paddingLeft: 36 + SPACING.sm, // Align with message text
-    },
-    expandButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      paddingVertical: 4,
-      paddingHorizontal: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-      borderRadius: 12,
-    },
-    expandText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-    },
-    spacer: {
-      flex: 1,
-    },
-    actionButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: colors.gold,
-      paddingVertical: SPACING.xs + 2,
-      paddingHorizontal: SPACING.md,
-      borderRadius: 10,
-    },
-    actionButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.bgDark,
-    },
-    dragIndicator: {
-      alignItems: 'center',
-      paddingTop: SPACING.sm,
-      paddingBottom: 2,
-    },
-    dragBar: {
-      width: 36,
-      height: 4,
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      borderRadius: 2,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!trigger) return null;
 
   // Check if message is long (needs expansion)
@@ -260,7 +157,7 @@ const SmartSuggestionBanner = memo(({
         <View style={styles.headerRow}>
           {/* Icon */}
           <View style={styles.iconContainer}>
-            <Sparkles size={20} color={colors.gold} />
+            <Sparkles size={20} color={COLORS.gold} />
           </View>
 
           {/* Message */}
@@ -279,7 +176,7 @@ const SmartSuggestionBanner = memo(({
             onPress={handleDismiss}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <X size={18} color={colors.textMuted} />
+            <X size={18} color={COLORS.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -294,12 +191,12 @@ const SmartSuggestionBanner = memo(({
             >
               {isExpanded ? (
                 <>
-                  <ChevronUp size={14} color={colors.textMuted} />
+                  <ChevronUp size={14} color={COLORS.textMuted} />
                   <Text style={styles.expandText}>Thu gọn</Text>
                 </>
               ) : (
                 <>
-                  <ChevronDown size={14} color={colors.textMuted} />
+                  <ChevronDown size={14} color={COLORS.textMuted} />
                   <Text style={styles.expandText}>Xem thêm</Text>
                 </>
               )}
@@ -316,7 +213,7 @@ const SmartSuggestionBanner = memo(({
               onPress={handleAction}
             >
               <Text style={styles.actionButtonText}>Khám phá</Text>
-              <ArrowRight size={14} color={colors.bgDark} />
+              <ArrowRight size={14} color={COLORS.bgDark} />
             </TouchableOpacity>
           )}
         </View>
@@ -330,6 +227,107 @@ const SmartSuggestionBanner = memo(({
       </View>
     </Animated.View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    padding: SPACING.sm,
+  },
+  content: {
+    backgroundColor: 'rgba(15, 16, 48, 0.97)',
+    borderRadius: 16,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  contentExpanded: {
+    paddingBottom: SPACING.md,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+    flexShrink: 0,
+  },
+  messageContainer: {
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
+  message: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    lineHeight: 22,
+  },
+  dismissButton: {
+    padding: SPACING.xs,
+    marginTop: -4,
+    flexShrink: 0,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    paddingLeft: 36 + SPACING.sm, // Align with message text
+  },
+  expandButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+  },
+  expandText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+  spacer: {
+    flex: 1,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.gold,
+    paddingVertical: SPACING.xs + 2,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 10,
+  },
+  actionButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.bgDark,
+  },
+  dragIndicator: {
+    alignItems: 'center',
+    paddingTop: SPACING.sm,
+    paddingBottom: 2,
+  },
+  dragBar: {
+    width: 36,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 2,
+  },
 });
 
 SmartSuggestionBanner.displayName = 'SmartSuggestionBanner';

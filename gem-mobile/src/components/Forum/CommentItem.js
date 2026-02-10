@@ -5,7 +5,7 @@
  * Fixed: Vietnamese diacritics, like functionality
  */
 
-import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -24,7 +24,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import MentionText from './MentionText';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 import { commentService } from '../../services/commentService';
 
 const AVATAR_SIZE_ROOT = 40;
@@ -51,7 +51,6 @@ const CommentItem = ({
   onMentionPress,
   isNew = false,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(comment?.likes_count || 0);
@@ -155,81 +154,6 @@ const CommentItem = ({
     );
   }, [isOwn, handleDelete]);
 
-  // Memoized styles
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.md,
-    },
-    avatarContainer: {
-      marginRight: SPACING.sm,
-    },
-    avatar: {
-      borderRadius: 100,
-    },
-    avatarPlaceholder: {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    content: {
-      flex: 1,
-    },
-    bubble: {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderRadius: 16,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-    },
-    authorName: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginBottom: 2,
-    },
-    commentText: {
-      fontSize: 15,
-      color: colors.textPrimary,
-      lineHeight: 20,
-    },
-    actionsRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: 4,
-      paddingLeft: SPACING.sm,
-    },
-    timestamp: {
-      fontSize: 12,
-      color: colors.textMuted,
-      marginRight: SPACING.md,
-    },
-    actionButton: {
-      marginRight: SPACING.md,
-      paddingVertical: 2,
-    },
-    likeContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    actionText: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textMuted,
-    },
-    actionTextLiked: {
-      color: '#FF6B6B',
-    },
-    actionTextActive: {
-      color: colors.gold,
-    },
-    moreButton: {
-      padding: 4,
-      marginLeft: 'auto',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!comment) return null;
 
   return (
@@ -256,7 +180,7 @@ const CommentItem = ({
               { width: avatarSize, height: avatarSize },
             ]}
           >
-            <User size={avatarSize * 0.5} color={colors.textMuted} />
+            <User size={avatarSize * 0.5} color={COLORS.textMuted} />
           </View>
         )}
       </Pressable>
@@ -295,7 +219,7 @@ const CommentItem = ({
             <View style={styles.likeContainer}>
               <Heart
                 size={14}
-                color={liked ? '#FF6B6B' : colors.textMuted}
+                color={liked ? '#FF6B6B' : COLORS.textMuted}
                 fill={liked ? '#FF6B6B' : 'transparent'}
               />
               <Text style={[styles.actionText, liked && styles.actionTextLiked]}>
@@ -317,12 +241,86 @@ const CommentItem = ({
             style={styles.moreButton}
             onPress={handleMore}
           >
-            <MoreHorizontal size={16} color={colors.textMuted} />
+            <MoreHorizontal size={16} color={COLORS.textMuted} />
           </Pressable>
         </View>
       </View>
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+  },
+  avatarContainer: {
+    marginRight: SPACING.sm,
+  },
+  avatar: {
+    borderRadius: 100,
+  },
+  avatarPlaceholder: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    flex: 1,
+  },
+  bubble: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 16,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  authorName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: 2,
+  },
+  commentText: {
+    fontSize: 15,
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    paddingLeft: SPACING.sm,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginRight: SPACING.md,
+  },
+  actionButton: {
+    marginRight: SPACING.md,
+    paddingVertical: 2,
+  },
+  likeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  actionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  actionTextLiked: {
+    color: '#FF6B6B',
+  },
+  actionTextActive: {
+    color: COLORS.gold,
+  },
+  moreButton: {
+    padding: 4,
+    marginLeft: 'auto',
+  },
+});
 
 export default memo(CommentItem);

@@ -5,7 +5,7 @@
  * Updated: Feb 2026 - Added caching for instant display
  */
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import {
 import { X, Copy, ExternalLink } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { supabase } from '../../services/supabase';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import InAppBrowser from '../Common/InAppBrowser';
 
 // =========== GLOBAL CACHE for instant display ===========
@@ -57,8 +57,6 @@ export const preloadPromoBar = async () => {
 };
 
 const PromoBar = ({ style, onDismiss }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // Initialize from cache for instant display
   const [promo, setPromo] = useState(() => promoCache.data);
   const [visible, setVisible] = useState(true);
@@ -196,63 +194,12 @@ const PromoBar = ({ style, onDismiss }) => {
     }
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      overflow: 'hidden',
-    },
-    content: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: SPACING.sm,
-    },
-    message: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    voucherButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: 2,
-      borderRadius: 4,
-      gap: 4,
-    },
-    voucherCode: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    copiedText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      marginLeft: SPACING.xs,
-    },
-    linkButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    linkText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      textDecorationLine: 'underline',
-    },
-    dismissButton: {
-      padding: SPACING.xs,
-      marginLeft: SPACING.sm,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!visible || !promo) {
     return null;
   }
 
-  const backgroundColor = promo.background_color || colors.burgundy;
-  const textColor = promo.text_color || colors.textPrimary;
+  const backgroundColor = promo.background_color || COLORS.burgundy;
+  const textColor = promo.text_color || COLORS.textPrimary;
 
   return (
     <>
@@ -328,5 +275,56 @@ const PromoBar = ({ style, onDismiss }) => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    overflow: 'hidden',
+  },
+  content: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  message: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  voucherButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+    gap: 4,
+  },
+  voucherCode: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  copiedText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    marginLeft: SPACING.xs,
+  },
+  linkButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  linkText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    textDecorationLine: 'underline',
+  },
+  dismissButton: {
+    padding: SPACING.xs,
+    marginLeft: SPACING.sm,
+  },
+});
 
 export default PromoBar;

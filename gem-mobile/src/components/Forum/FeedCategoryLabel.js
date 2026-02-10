@@ -4,11 +4,11 @@
  * Displays category badge on posts (Trading, Wellness, Integration, General)
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { TrendingUp, Sparkles, Infinity, MessageCircle } from 'lucide-react-native';
 
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { CONTENT_CATEGORIES } from '../../services/personalizedFeedService';
 
 const CATEGORY_ICONS = {
@@ -25,8 +25,6 @@ const FeedCategoryLabel = ({
   onPress,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const categoryInfo = CONTENT_CATEGORIES[category] || CONTENT_CATEGORIES.general;
   const Icon = CATEGORY_ICONS[category] || MessageCircle;
 
@@ -37,60 +35,6 @@ const FeedCategoryLabel = ({
   const fontSize = isSmall ? 10 : isMedium ? 12 : 14;
   const padding = isSmall ? 4 : isMedium ? 6 : 8;
   const paddingHorizontal = isSmall ? 6 : isMedium ? 8 : 10;
-
-  // Memoized styles
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      borderRadius: 6,
-      borderWidth: 1,
-    },
-    label: {
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    filterChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderWidth: 1,
-      borderColor: 'transparent',
-    },
-    filterChipSelected: {
-      backgroundColor: 'rgba(255, 189, 89, 0.2)',
-      borderColor: colors.gold,
-    },
-    filterLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    countBadge: {
-      minWidth: 20,
-      height: 20,
-      borderRadius: 10,
-      backgroundColor: colors.textMuted,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 4,
-    },
-    countText: {
-      fontSize: 10,
-      color: colors.bgDarkest,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    filterList: {
-      flexDirection: 'row',
-      gap: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const containerStyle = [
     styles.container,
@@ -144,44 +88,8 @@ export const CategoryFilterChip = ({
   onSelect,
   count,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const categoryInfo = CONTENT_CATEGORIES[category] || CONTENT_CATEGORIES.general;
   const Icon = CATEGORY_ICONS[category] || MessageCircle;
-
-  // Memoized styles
-  const styles = useMemo(() => StyleSheet.create({
-    filterChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderWidth: 1,
-      borderColor: 'transparent',
-    },
-    filterLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    countBadge: {
-      minWidth: 20,
-      height: 20,
-      borderRadius: 10,
-      backgroundColor: colors.textMuted,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 4,
-    },
-    countText: {
-      fontSize: 10,
-      color: colors.bgDarkest,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <TouchableOpacity
@@ -197,7 +105,7 @@ export const CategoryFilterChip = ({
     >
       <Icon
         size={16}
-        color={isSelected ? categoryInfo.color : colors.textMuted}
+        color={isSelected ? categoryInfo.color : COLORS.textMuted}
       />
       <Text
         style={[
@@ -230,41 +138,9 @@ export const CategoryFilterList = ({
   stats = {},
   showAll = true,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const categories = showAll
     ? ['all', 'trading', 'wellness', 'integration', 'general']
     : ['trading', 'wellness', 'integration', 'general'];
-
-  // Memoized styles
-  const styles = useMemo(() => StyleSheet.create({
-    filterChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderWidth: 1,
-      borderColor: 'transparent',
-    },
-    filterChipSelected: {
-      backgroundColor: 'rgba(255, 189, 89, 0.2)',
-      borderColor: colors.gold,
-    },
-    filterLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    filterList: {
-      flexDirection: 'row',
-      gap: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View style={styles.filterList}>
@@ -283,7 +159,7 @@ export const CategoryFilterList = ({
               <Text
                 style={[
                   styles.filterLabel,
-                  selectedCategory === null && { color: colors.gold },
+                  selectedCategory === null && { color: COLORS.gold },
                 ]}
               >
                 Tất cả
@@ -305,5 +181,58 @@ export const CategoryFilterList = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  label: {
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  filterChipSelected: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderColor: COLORS.gold,
+  },
+  filterLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  countBadge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.textMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  countText: {
+    fontSize: 10,
+    color: COLORS.bgDarkest,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  filterList: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+});
 
 export default FeedCategoryLabel;

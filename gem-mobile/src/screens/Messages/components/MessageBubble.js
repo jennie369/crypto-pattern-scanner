@@ -34,7 +34,6 @@ import MessageContextMenu from './MessageContextMenu';
 import ReadReceiptIndicator, { MESSAGE_STATUS } from './ReadReceiptIndicator';
 import LinkPreview, { extractUrls } from './LinkPreview';
 import GroupReadReceipts from './GroupReadReceipts';
-import CallMessageBubble from './CallMessageBubble';
 import { StickerMessage } from '../../../components/Stickers';
 import VoicePlayerEnhanced from '../../../components/Messages/VoicePlayerEnhanced';
 import MentionHighlight from '../../../components/Messages/MentionHighlight';
@@ -77,7 +76,6 @@ const MessageBubble = memo(({
   totalParticipants,
   onScrollToMessage, // Scroll to original quoted message
   isHighlighted = false, // Highlight when scrolled to
-  onCallBack, // Callback to initiate a return call
 }) => {
   // Animation refs
   const heartScale = useRef(new Animated.Value(0)).current;
@@ -300,18 +298,6 @@ const MessageBubble = memo(({
           senderName={sender?.display_name}
         />
       </View>
-    );
-  }
-
-  // If message is a call event, render CallMessageBubble (centered, not left/right aligned)
-  if (message?.message_type === 'call') {
-    return (
-      <CallMessageBubble
-        message={message}
-        isOwn={isOwn}
-        currentUserId={currentUserId}
-        onCallBack={onCallBack}
-      />
     );
   }
 

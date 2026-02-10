@@ -20,9 +20,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, Users, FileText, MessageCircle, Image as ImageIcon, Video } from 'lucide-react-native';
 import { forumService } from '../../services/forumService';
 import messagingService from '../../services/messagingService';
-import { followService } from '../../services/followService';
-import { privacySettingsService } from '../../services/privacySettingsService';
-import { messageRequestService } from '../../services/messageRequestService';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { UserBadges } from '../../components/UserBadge';
@@ -173,7 +170,7 @@ const UserProfileScreen = ({ route, navigation }) => {
     }
   };
 
-  // Handle send message - check mutual follow status, create conversation/message request
+  // Handle send message - create or get conversation, then navigate
   const handleSendMessage = async () => {
     if (!isAuthenticated) {
       navigation.navigate('Auth');
@@ -185,43 +182,16 @@ const UserProfileScreen = ({ route, navigation }) => {
     try {
       setMessageLoading(true);
 
-      // Check mutual follow status and if already contacts
-      const [mutualStatus, areContacts] = await Promise.all([
-        followService.checkMutualFollow(resolvedUserId),
-        privacySettingsService.areUsersContacts(resolvedUserId)
-      ]);
-
       // Create or get existing conversation
       const conversation = await messagingService.createConversation([resolvedUserId]);
 
-      if (!conversation?.id) {
-        console.error('[UserProfile] Failed to create conversation');
-        return;
-      }
-
-      // If mutual follow or already contacts, navigate directly
-      if (mutualStatus.isMutual || areContacts) {
+      if (conversation?.id) {
+        // Navigate to Chat screen through Messages stack
         navigation.navigate('Messages', {
           screen: 'Chat',
           params: {
             conversationId: conversation.id,
             conversation: conversation,
-          },
-        });
-      } else {
-        // Stranger - create message request and navigate with flag
-        await messageRequestService.createMessageRequest(
-          conversation.id,
-          resolvedUserId,
-          '' // Empty preview - user will type message in chat
-        );
-
-        navigation.navigate('Messages', {
-          screen: 'Chat',
-          params: {
-            conversationId: conversation.id,
-            conversation: conversation,
-            isMessageRequest: true,
           },
         });
       }

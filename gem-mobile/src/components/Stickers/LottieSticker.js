@@ -3,9 +3,9 @@
  * Wrapper for lottie-react-native with fallback support
  */
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS } from '../../utils/tokens';
 
 // Try to import Lottie, but handle if not installed
 let LottieView = null;
@@ -26,42 +26,10 @@ const LottieSticker = ({
   onLoad,
   onError,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [lottieData, setLottieData] = useState(null);
   const animationRef = useRef(null);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      overflow: 'hidden',
-    },
-    lottie: {
-      width: '100%',
-      height: '100%',
-    },
-    loadingContainer: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-    },
-    errorContainer: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-    },
-    errorPlaceholder: {
-      width: '50%',
-      height: '50%',
-      borderRadius: 8,
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-    },
-    fallbackImage: {
-      width: '100%',
-      height: '100%',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Fetch Lottie JSON if source is a URI
   useEffect(() => {
@@ -122,7 +90,7 @@ const LottieSticker = ({
   if (loading) {
     return (
       <View style={[styles.container, style, styles.loadingContainer]}>
-        <ActivityIndicator color={colors.gold} size="small" />
+        <ActivityIndicator color={COLORS.gold} size="small" />
       </View>
     );
   }
@@ -177,5 +145,35 @@ const LottieSticker = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    overflow: 'hidden',
+  },
+  lottie: {
+    width: '100%',
+    height: '100%',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  errorContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  errorPlaceholder: {
+    width: '50%',
+    height: '50%',
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  fallbackImage: {
+    width: '100%',
+    height: '100%',
+  },
+});
 
 export default LottieSticker;

@@ -7,7 +7,7 @@
  * Created: January 30, 2026
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import {
   X,
   Check,
 } from 'lucide-react-native';
-import { useSettings } from '../../../contexts/SettingsContext';
+import { COLORS, SPACING, GLASS } from '../../../utils/tokens';
 
 const DATE_RANGES = {
   TODAY: { label: 'Hôm nay', days: 0 },
@@ -41,89 +41,9 @@ const DateRangePicker = ({
   style,
   compact = false,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [showModal, setShowModal] = useState(false);
 
   const currentRange = DATE_RANGES[value] || DATE_RANGES.LAST_7_DAYS;
-
-  const styles = useMemo(() => StyleSheet.create({
-    button: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-      gap: 8,
-    },
-    buttonCompact: {
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: 6,
-      borderRadius: 8,
-      gap: 4,
-    },
-    buttonText: {
-      fontSize: 13,
-      color: colors.textPrimary,
-    },
-    buttonTextCompact: {
-      fontSize: 11,
-    },
-
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: SPACING.lg,
-    },
-    modalContent: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : '#1A1B3D',
-      borderRadius: 20,
-      width: '100%',
-      maxWidth: 320,
-      overflow: 'hidden',
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: SPACING.lg,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    modalTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-
-    optionsList: {
-      padding: SPACING.sm,
-    },
-    option: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.md,
-      borderRadius: 12,
-      marginVertical: 2,
-    },
-    optionSelected: {
-      backgroundColor: 'rgba(106, 91, 255, 0.15)',
-    },
-    optionText: {
-      fontSize: 14,
-      color: colors.textSecondary,
-    },
-    optionTextSelected: {
-      color: colors.purple,
-      fontWeight: '600',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const getDateRange = (rangeKey) => {
     const range = DATE_RANGES[rangeKey];
@@ -185,11 +105,11 @@ const DateRangePicker = ({
         onPress={() => setShowModal(true)}
         activeOpacity={0.7}
       >
-        <Calendar size={compact ? 14 : 16} color={colors.purple} />
+        <Calendar size={compact ? 14 : 16} color={COLORS.purple} />
         <Text style={[styles.buttonText, compact && styles.buttonTextCompact]}>
           {compact ? currentRange.label : formatDateRange()}
         </Text>
-        <ChevronDown size={compact ? 12 : 14} color={colors.textMuted} />
+        <ChevronDown size={compact ? 12 : 14} color={COLORS.textMuted} />
       </TouchableOpacity>
 
       <Modal
@@ -207,7 +127,7 @@ const DateRangePicker = ({
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Chọn khoảng thời gian</Text>
               <TouchableOpacity onPress={() => setShowModal(false)}>
-                <X size={20} color={colors.textPrimary} />
+                <X size={20} color={COLORS.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -230,7 +150,7 @@ const DateRangePicker = ({
                     {range.label}
                   </Text>
                   {value === key && (
-                    <Check size={18} color={colors.purple} />
+                    <Check size={18} color={COLORS.purple} />
                   )}
                 </TouchableOpacity>
               ))}
@@ -241,6 +161,85 @@ const DateRangePicker = ({
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: GLASS.card,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+    gap: 8,
+  },
+  buttonCompact: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+  },
+  buttonText: {
+    fontSize: 13,
+    color: COLORS.textPrimary,
+  },
+  buttonTextCompact: {
+    fontSize: 11,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  modalContent: {
+    backgroundColor: '#1A1B3D',
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 320,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+
+  optionsList: {
+    padding: SPACING.sm,
+  },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 12,
+    marginVertical: 2,
+  },
+  optionSelected: {
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+  },
+  optionText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  optionTextSelected: {
+    color: COLORS.purple,
+    fontWeight: '600',
+  },
+});
 
 export { DATE_RANGES };
 export default DateRangePicker;

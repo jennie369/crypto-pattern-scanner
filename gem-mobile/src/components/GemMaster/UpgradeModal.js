@@ -8,7 +8,7 @@
  * - Navigation to Shopify purchase
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -30,7 +30,7 @@ import {
   AlertCircle
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, GLASS } from '../../utils/tokens';
 import { CHATBOT_PRODUCTS } from '../../constants/productConfig';
 
 /**
@@ -110,231 +110,6 @@ const UpgradeModal = ({
   currentTier = 'FREE'
 }) => {
   const navigation = useNavigation();
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      justifyContent: 'flex-end'
-    },
-    content: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      paddingTop: SPACING.lg,
-      paddingBottom: SPACING.xl,
-      maxHeight: '90%'
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.lg,
-      marginBottom: SPACING.md
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm
-    },
-    alertIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 107, 107, 0.15)',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    title: {
-      color: colors.textPrimary,
-      fontSize: 20,
-      fontWeight: '700'
-    },
-    closeButton: {
-      padding: 4
-    },
-
-    // Status box
-    statusBox: {
-      marginHorizontal: SPACING.lg,
-      padding: SPACING.md,
-      backgroundColor: 'rgba(255, 107, 107, 0.1)',
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 107, 107, 0.2)',
-      marginBottom: SPACING.lg
-    },
-    statusText: {
-      color: colors.textSecondary,
-      fontSize: 14,
-      textAlign: 'center'
-    },
-    statusHighlight: {
-      color: '#FF6B6B',
-      fontWeight: '700'
-    },
-    resetInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      marginTop: SPACING.sm
-    },
-    resetText: {
-      color: colors.textMuted,
-      fontSize: 12
-    },
-
-    // Section
-    sectionTitle: {
-      color: colors.textPrimary,
-      fontSize: 16,
-      fontWeight: '600',
-      paddingHorizontal: SPACING.lg,
-      marginBottom: SPACING.md
-    },
-
-    // Tier list
-    tierList: {
-      paddingHorizontal: SPACING.lg,
-      maxHeight: 400
-    },
-    tierCard: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 16,
-      padding: SPACING.md,
-      marginBottom: SPACING.md,
-      borderWidth: 1,
-      borderColor: glass.border,
-      position: 'relative',
-      overflow: 'hidden'
-    },
-    popularBadge: {
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      backgroundColor: '#6A5BFF',
-      paddingVertical: 4,
-      paddingHorizontal: 10,
-      borderBottomLeftRadius: 12
-    },
-    popularText: {
-      color: '#FFFFFF',
-      fontSize: 9,
-      fontWeight: '700',
-      letterSpacing: 0.5
-    },
-
-    // Tier header
-    tierHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.sm
-    },
-    tierIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    tierInfo: {
-      flex: 1,
-      marginLeft: SPACING.sm
-    },
-    tierName: {
-      fontSize: 16,
-      fontWeight: '700'
-    },
-    tierQueries: {
-      color: colors.textSecondary,
-      fontSize: 12,
-      marginTop: 2
-    },
-    tierPrice: {
-      alignItems: 'flex-end'
-    },
-    priceAmount: {
-      color: colors.textPrimary,
-      fontSize: 18,
-      fontWeight: '700'
-    },
-    pricePeriod: {
-      color: colors.textMuted,
-      fontSize: 11
-    },
-
-    // Features
-    featureList: {
-      marginVertical: SPACING.sm,
-      gap: 6
-    },
-    featureItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8
-    },
-    featureText: {
-      color: colors.textSecondary,
-      fontSize: 12
-    },
-
-    // Button row
-    buttonRow: {
-      flexDirection: 'row',
-      gap: SPACING.sm
-    },
-    learnMoreButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 10,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 189, 89, 0.4)',
-      backgroundColor: 'rgba(255, 189, 89, 0.1)',
-      gap: 4
-    },
-    learnMoreText: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.gold
-    },
-    upgradeButtonContainer: {
-      flex: 2,
-      borderRadius: 12,
-      overflow: 'hidden'
-    },
-    upgradeButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      paddingVertical: 12,
-      borderRadius: 12
-    },
-    upgradeButtonText: {
-      color: '#FFFFFF',
-      fontSize: 14,
-      fontWeight: '700'
-    },
-
-    // Wait button
-    waitButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      paddingVertical: SPACING.md,
-      marginTop: SPACING.sm
-    },
-    waitButtonText: {
-      color: colors.textMuted,
-      fontSize: 14
-    }
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   /**
    * Handle upgrade - Navigate to checkout WebView
@@ -416,7 +191,7 @@ const UpgradeModal = ({
               <Text style={styles.title}>Hết lượt hỏi!</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={24} color={colors.textMuted} />
+              <X size={24} color={COLORS.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -431,7 +206,7 @@ const UpgradeModal = ({
             </Text>
             {resetText && (
               <View style={styles.resetInfo}>
-                <Clock size={14} color={colors.textMuted} />
+                <Clock size={14} color={COLORS.textMuted} />
                 <Text style={styles.resetText}>
                   Reset sau: {resetText}
                 </Text>
@@ -490,7 +265,7 @@ const UpgradeModal = ({
                       onPress={handleLearnMore}
                       activeOpacity={0.7}
                     >
-                      <ExternalLink size={14} color={colors.gold} />
+                      <ExternalLink size={14} color={COLORS.gold} />
                       <Text style={styles.learnMoreText}>Tìm hiểu</Text>
                     </TouchableOpacity>
 
@@ -521,7 +296,7 @@ const UpgradeModal = ({
             onPress={onClose}
             activeOpacity={0.7}
           >
-            <Clock size={16} color={colors.textMuted} />
+            <Clock size={16} color={COLORS.textMuted} />
             <Text style={styles.waitButtonText}>
               Đợi reset lúc 0:00
             </Text>
@@ -531,5 +306,229 @@ const UpgradeModal = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'flex-end'
+  },
+  content: {
+    backgroundColor: COLORS.bgDarkest,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xl,
+    maxHeight: '90%'
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.md
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm
+  },
+  alertIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  title: {
+    color: COLORS.textPrimary,
+    fontSize: 20,
+    fontWeight: '700'
+  },
+  closeButton: {
+    padding: 4
+  },
+
+  // Status box
+  statusBox: {
+    marginHorizontal: SPACING.lg,
+    padding: SPACING.md,
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.2)',
+    marginBottom: SPACING.lg
+  },
+  statusText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    textAlign: 'center'
+  },
+  statusHighlight: {
+    color: '#FF6B6B',
+    fontWeight: '700'
+  },
+  resetInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: SPACING.sm
+  },
+  resetText: {
+    color: COLORS.textMuted,
+    fontSize: 12
+  },
+
+  // Section
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.md
+  },
+
+  // Tier list
+  tierList: {
+    paddingHorizontal: SPACING.lg,
+    maxHeight: 400
+  },
+  tierCard: {
+    backgroundColor: GLASS.background,
+    borderRadius: 16,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: GLASS.border,
+    position: 'relative',
+    overflow: 'hidden'
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#6A5BFF',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderBottomLeftRadius: 12
+  },
+  popularText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5
+  },
+
+  // Tier header
+  tierHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm
+  },
+  tierIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  tierInfo: {
+    flex: 1,
+    marginLeft: SPACING.sm
+  },
+  tierName: {
+    fontSize: 16,
+    fontWeight: '700'
+  },
+  tierQueries: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginTop: 2
+  },
+  tierPrice: {
+    alignItems: 'flex-end'
+  },
+  priceAmount: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '700'
+  },
+  pricePeriod: {
+    color: COLORS.textMuted,
+    fontSize: 11
+  },
+
+  // Features
+  featureList: {
+    marginVertical: SPACING.sm,
+    gap: 6
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
+  },
+  featureText: {
+    color: COLORS.textSecondary,
+    fontSize: 12
+  },
+
+  // Button row
+  buttonRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm
+  },
+  learnMoreButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    gap: 4
+  },
+  learnMoreText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.gold
+  },
+  upgradeButtonContainer: {
+    flex: 2,
+    borderRadius: 12,
+    overflow: 'hidden'
+  },
+  upgradeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12
+  },
+  upgradeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700'
+  },
+
+  // Wait button
+  waitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: SPACING.md,
+    marginTop: SPACING.sm
+  },
+  waitButtonText: {
+    color: COLORS.textMuted,
+    fontSize: 14
+  }
+});
 
 export default UpgradeModal;

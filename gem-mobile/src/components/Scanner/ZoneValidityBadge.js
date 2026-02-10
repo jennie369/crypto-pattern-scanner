@@ -5,7 +5,7 @@
  * Phase 2C: Compression + Inducement + Look Right
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   View,
   Text,
@@ -24,38 +24,38 @@ import {
   Info,
   Target,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, BORDER_RADIUS } from '../../utils/tokens';
 
 // ═══════════════════════════════════════════════════════════
 // STATUS COLORS & ICONS
 // ═══════════════════════════════════════════════════════════
 
-const getStatusConfig = (status, colors) => {
+const getStatusConfig = (status) => {
   switch (status) {
     case 'FRESH':
       return {
-        color: colors.success,
+        color: COLORS.success,
         icon: Check,
         label: 'Còn nguyên',
         description: 'Zone chưa bị test - Tốt nhất để trade',
       };
     case 'TESTED':
       return {
-        color: colors.warning,
+        color: COLORS.warning,
         icon: AlertTriangle,
         label: 'Đã test',
         description: 'Zone đã bị test nhưng vẫn valid',
       };
     case 'BROKEN':
       return {
-        color: colors.error,
+        color: COLORS.error,
         icon: X,
         label: 'Đã phá',
         description: 'Zone đã bị invalidate - KHÔNG trade',
       };
     default:
       return {
-        color: colors.textMuted,
+        color: COLORS.textMuted,
         icon: Eye,
         label: 'Chưa xác định',
         description: 'Cần thêm data để xác định',
@@ -68,33 +68,10 @@ const getStatusConfig = (status, colors) => {
 // ═══════════════════════════════════════════════════════════
 
 export const ValidityBadge = memo(({ validation, onPress }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    badge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 8,
-      borderWidth: 1,
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.xs,
-    },
-    badgeText: {
-      fontSize: 11,
-      fontWeight: '600',
-    },
-    confidenceText: {
-      fontSize: 10,
-      fontWeight: '700',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!validation) return null;
 
   const { status, isValid, confidence } = validation;
-  const config = getStatusConfig(status, colors);
+  const config = getStatusConfig(status);
   const IconComponent = config.icon;
 
   return (
@@ -126,236 +103,7 @@ const ZoneValidityBadge = memo(({
   onInfoPress,
   showDetails = true,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [expanded, setExpanded] = React.useState(false);
-
-  const styles = useMemo(() => StyleSheet.create({
-    // Container
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 16,
-      borderLeftWidth: 3,
-      padding: SPACING.md,
-    },
-
-    // Header
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-      flex: 1,
-    },
-    iconContainer: {
-      width: 36,
-      height: 36,
-      borderRadius: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    titleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    title: {
-      fontSize: 14,
-      color: colors.textPrimary,
-      fontWeight: '600',
-    },
-    statusBadge: {
-      paddingHorizontal: SPACING.xs,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    statusText: {
-      fontSize: 9,
-      color: colors.bgDarkest,
-      fontWeight: '700',
-    },
-    subtitle: {
-      fontSize: 11,
-      color: colors.textSecondary,
-      marginTop: 2,
-    },
-    headerRight: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    infoButton: {
-      padding: 4,
-    },
-
-    // Confidence
-    confidenceContainer: {
-      marginTop: SPACING.md,
-    },
-    confidenceHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: SPACING.xs,
-    },
-    confidenceLabel: {
-      fontSize: 11,
-      color: colors.textMuted,
-    },
-    confidenceValue: {
-      fontSize: 13,
-      fontWeight: '700',
-    },
-    confidenceBar: {
-      height: 6,
-      backgroundColor: colors.bgDarkest,
-      borderRadius: 3,
-      overflow: 'hidden',
-    },
-    confidenceFill: {
-      height: '100%',
-      borderRadius: 3,
-    },
-
-    // Stats
-    statsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      marginTop: SPACING.md,
-      paddingVertical: SPACING.sm,
-      backgroundColor: colors.bgDarkest,
-      borderRadius: 12,
-    },
-    statItem: {
-      alignItems: 'center',
-      flex: 1,
-    },
-    statLabel: {
-      fontSize: 9,
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-    statValue: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginTop: 2,
-    },
-    statDivider: {
-      width: 1,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-
-    // Expanded
-    expandedContainer: {
-      marginTop: SPACING.md,
-      paddingTop: SPACING.sm,
-      borderTopWidth: 1,
-      borderTopColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-    reasonContainer: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: SPACING.xs,
-      marginBottom: SPACING.sm,
-    },
-    reasonText: {
-      fontSize: 12,
-      color: colors.textSecondary,
-      flex: 1,
-      lineHeight: 16,
-    },
-    invalidationContainer: {
-      backgroundColor: colors.bgDarkest,
-      borderRadius: 8,
-      padding: SPACING.sm,
-      marginBottom: SPACING.sm,
-    },
-    invalidationTitle: {
-      fontSize: 11,
-      color: colors.textMuted,
-      marginBottom: SPACING.xs,
-    },
-    invalidationGrid: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-    },
-    invalidationItem: {
-      alignItems: 'center',
-    },
-    invalidationLabel: {
-      fontSize: 9,
-      color: colors.textMuted,
-    },
-    invalidationValue: {
-      fontSize: 11,
-      color: colors.textPrimary,
-      fontWeight: '500',
-    },
-    healthContainer: {
-      marginBottom: SPACING.sm,
-    },
-    healthTitle: {
-      fontSize: 11,
-      color: colors.textMuted,
-      marginBottom: SPACING.xs,
-    },
-    healthRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    healthGrade: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    healthGradeText: {
-      fontSize: 14,
-      color: colors.bgDarkest,
-      fontWeight: '700',
-    },
-    healthScore: {
-      fontSize: 12,
-      color: colors.textPrimary,
-      flex: 1,
-    },
-    healthTradeable: {
-      fontSize: 11,
-      fontWeight: '600',
-    },
-    tipContainer: {
-      borderLeftWidth: 3,
-      paddingLeft: SPACING.sm,
-      paddingVertical: SPACING.xs,
-    },
-    tipText: {
-      fontSize: 11,
-      color: colors.textSecondary,
-      fontStyle: 'italic',
-      lineHeight: 16,
-    },
-
-    // Recommendation
-    recommendationBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      marginTop: SPACING.sm,
-      padding: SPACING.sm,
-      borderRadius: 8,
-    },
-    recommendationText: {
-      fontSize: 12,
-      fontWeight: '600',
-      flex: 1,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   if (!validation) return null;
 
@@ -371,7 +119,7 @@ const ZoneValidityBadge = memo(({
     invalidationCandle,
   } = validation;
 
-  const config = getStatusConfig(status, colors);
+  const config = getStatusConfig(status);
   const IconComponent = config.icon;
 
   const formatPrice = (price) => {
@@ -405,13 +153,13 @@ const ZoneValidityBadge = memo(({
         <View style={styles.headerRight}>
           {onInfoPress && (
             <TouchableOpacity onPress={onInfoPress} style={styles.infoButton}>
-              <Info size={16} color={colors.textMuted} />
+              <Info size={16} color={COLORS.textMuted} />
             </TouchableOpacity>
           )}
           {expanded ? (
-            <ChevronUp size={18} color={colors.textMuted} />
+            <ChevronUp size={18} color={COLORS.textMuted} />
           ) : (
-            <ChevronDown size={18} color={colors.textMuted} />
+            <ChevronDown size={18} color={COLORS.textMuted} />
           )}
         </View>
       </TouchableOpacity>
@@ -444,7 +192,7 @@ const ZoneValidityBadge = memo(({
             <Text style={styles.statLabel}>Closes Beyond</Text>
             <Text style={[
               styles.statValue,
-              { color: closesBeyondZone > 0 ? colors.error : colors.success }
+              { color: closesBeyondZone > 0 ? COLORS.error : COLORS.success }
             ]}>
               {closesBeyondZone}
             </Text>
@@ -454,7 +202,7 @@ const ZoneValidityBadge = memo(({
             <Text style={styles.statLabel}>Wicks Beyond</Text>
             <Text style={[
               styles.statValue,
-              { color: wicksBeyondZone > 2 ? colors.warning : colors.textPrimary }
+              { color: wicksBeyondZone > 2 ? COLORS.warning : COLORS.textPrimary }
             ]}>
               {wicksBeyondZone}
             </Text>
@@ -483,7 +231,7 @@ const ZoneValidityBadge = memo(({
               <View style={styles.invalidationGrid}>
                 <View style={styles.invalidationItem}>
                   <Text style={styles.invalidationLabel}>Close</Text>
-                  <Text style={[styles.invalidationValue, { color: colors.error }]}>
+                  <Text style={[styles.invalidationValue, { color: COLORS.error }]}>
                     {formatPrice(invalidationCandle.close)}
                   </Text>
                 </View>
@@ -516,7 +264,7 @@ const ZoneValidityBadge = memo(({
                 </Text>
                 <Text style={[
                   styles.healthTradeable,
-                  { color: validation.health.tradeable ? colors.success : colors.error }
+                  { color: validation.health.tradeable ? COLORS.success : COLORS.error }
                 ]}>
                   {validation.health.tradeable ? 'Tradeable' : 'Skip'}
                 </Text>
@@ -555,64 +303,14 @@ const ZoneValidityBadge = memo(({
 // ═══════════════════════════════════════════════════════════
 
 export const RealTimeValidityIndicator = memo(({ realTimeCheck, zone }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    realTimeContainer: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      padding: SPACING.md,
-    },
-    realTimeHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      marginBottom: SPACING.sm,
-    },
-    realTimeTitle: {
-      fontSize: 12,
-      fontWeight: '600',
-    },
-    realTimeContent: {
-      gap: SPACING.xs,
-    },
-    realTimeItem: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    realTimeLabel: {
-      fontSize: 11,
-      color: colors.textMuted,
-    },
-    realTimeValue: {
-      fontSize: 12,
-      fontWeight: '600',
-    },
-    alertBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      marginTop: SPACING.sm,
-      padding: SPACING.sm,
-      borderRadius: 8,
-    },
-    alertText: {
-      fontSize: 11,
-      fontWeight: '500',
-      flex: 1,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!realTimeCheck) return null;
 
   const { isBreaking, isBroken, distancePercent, warning, warningLevel } = realTimeCheck;
 
   const getColor = () => {
-    if (warningLevel === 'error') return colors.error;
-    if (warningLevel === 'warning') return colors.warning;
-    return colors.success;
+    if (warningLevel === 'error') return COLORS.error;
+    if (warningLevel === 'warning') return COLORS.warning;
+    return COLORS.success;
   };
 
   const color = getColor();
@@ -655,52 +353,10 @@ export const RealTimeValidityIndicator = memo(({ realTimeCheck, zone }) => {
 // ═══════════════════════════════════════════════════════════
 
 export const ValidityCard = memo(({ validation, onPress }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    card: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      padding: SPACING.sm,
-    },
-    cardIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    cardContent: {
-      flex: 1,
-    },
-    cardHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    cardTitle: {
-      fontSize: 13,
-      color: colors.textPrimary,
-      fontWeight: '600',
-    },
-    cardConfidence: {
-      fontSize: 14,
-      fontWeight: '700',
-    },
-    cardStatus: {
-      fontSize: 11,
-      marginTop: 2,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!validation) return null;
 
   const { status, confidence, isValid } = validation;
-  const config = getStatusConfig(status, colors);
+  const config = getStatusConfig(status);
   const IconComponent = config.icon;
 
   return (
@@ -725,6 +381,344 @@ export const ValidityCard = memo(({ validation, onPress }) => {
       </View>
     </TouchableOpacity>
   );
+});
+
+// ═══════════════════════════════════════════════════════════
+// STYLES
+// ═══════════════════════════════════════════════════════════
+
+const styles = StyleSheet.create({
+  // Badge
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BORDER_RADIUS.sm,
+    borderWidth: 1,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  confidenceText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+
+  // Container
+  container: {
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderLeftWidth: 3,
+    padding: SPACING.md,
+  },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    flex: 1,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  title: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    fontWeight: '600',
+  },
+  statusBadge: {
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.xs,
+  },
+  statusText: {
+    fontSize: 9,
+    color: COLORS.bgDarkest,
+    fontWeight: '700',
+  },
+  subtitle: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  infoButton: {
+    padding: 4,
+  },
+
+  // Confidence
+  confidenceContainer: {
+    marginTop: SPACING.md,
+  },
+  confidenceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  confidenceLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  confidenceValue: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  confidenceBar: {
+    height: 6,
+    backgroundColor: COLORS.bgDarkest,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  confidenceFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+
+  // Stats
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.bgDarkest,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statLabel: {
+    fontSize: 9,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  statValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginTop: 2,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: COLORS.glassBg,
+  },
+
+  // Expanded
+  expandedContainer: {
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.glassBg,
+  },
+  reasonContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  reasonText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    flex: 1,
+    lineHeight: 16,
+  },
+  invalidationContainer: {
+    backgroundColor: COLORS.bgDarkest,
+    borderRadius: BORDER_RADIUS.sm,
+    padding: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  invalidationTitle: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.xs,
+  },
+  invalidationGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  invalidationItem: {
+    alignItems: 'center',
+  },
+  invalidationLabel: {
+    fontSize: 9,
+    color: COLORS.textMuted,
+  },
+  invalidationValue: {
+    fontSize: 11,
+    color: COLORS.textPrimary,
+    fontWeight: '500',
+  },
+  healthContainer: {
+    marginBottom: SPACING.sm,
+  },
+  healthTitle: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.xs,
+  },
+  healthRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  healthGrade: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  healthGradeText: {
+    fontSize: 14,
+    color: COLORS.bgDarkest,
+    fontWeight: '700',
+  },
+  healthScore: {
+    fontSize: 12,
+    color: COLORS.textPrimary,
+    flex: 1,
+  },
+  healthTradeable: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  tipContainer: {
+    borderLeftWidth: 3,
+    paddingLeft: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  tipText: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+
+  // Recommendation
+  recommendationBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.sm,
+    padding: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  recommendationText: {
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
+  },
+
+  // Real-time
+  realTimeContainer: {
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.md,
+  },
+  realTimeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  realTimeTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  realTimeContent: {
+    gap: SPACING.xs,
+  },
+  realTimeItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  realTimeLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  realTimeValue: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  alertBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.sm,
+    padding: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  alertText: {
+    fontSize: 11,
+    fontWeight: '500',
+    flex: 1,
+  },
+
+  // Card
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.sm,
+  },
+  cardIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardContent: {
+    flex: 1,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 13,
+    color: COLORS.textPrimary,
+    fontWeight: '600',
+  },
+  cardConfidence: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  cardStatus: {
+    fontSize: 11,
+    marginTop: 2,
+  },
 });
 
 ZoneValidityBadge.displayName = 'ZoneValidityBadge';

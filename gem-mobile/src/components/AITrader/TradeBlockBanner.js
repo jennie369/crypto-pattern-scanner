@@ -2,12 +2,11 @@
  * TradeBlockBanner - Warning banner when user is blocked from trading
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Lock, AlertTriangle, Clock, X } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
-import { BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
+import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
 
 const TradeBlockBanner = ({
   blockInfo = {},
@@ -16,7 +15,6 @@ const TradeBlockBanner = ({
   showCountdown = true,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -98,90 +96,6 @@ const TradeBlockBanner = ({
     return reasonMap[reason] || reason || 'Vi phạm kỷ luật giao dịch';
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      borderRadius: BORDER_RADIUS.lg,
-      borderWidth: 1,
-      borderColor: 'rgba(220, 38, 38, 0.5)',
-      overflow: 'hidden',
-    },
-    gradient: {
-      padding: SPACING.lg,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: SPACING.md,
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    title: {
-      color: colors.error,
-      fontSize: FONT_SIZES.lg,
-      fontWeight: '700',
-    },
-    closeBtn: {
-      padding: SPACING.xs,
-    },
-    reasonContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-      backgroundColor: 'rgba(255, 184, 0, 0.1)',
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      borderRadius: BORDER_RADIUS.sm,
-      marginBottom: SPACING.md,
-    },
-    reasonText: {
-      color: colors.warning,
-      fontSize: FONT_SIZES.sm,
-      fontWeight: '500',
-      flex: 1,
-    },
-    countdownContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: SPACING.sm,
-      marginBottom: SPACING.md,
-    },
-    countdownLabel: {
-      color: colors.textMuted,
-      fontSize: FONT_SIZES.sm,
-    },
-    countdownTime: {
-      color: colors.textPrimary,
-      fontSize: FONT_SIZES.xl,
-      fontWeight: '700',
-      fontVariant: ['tabular-nums'],
-    },
-    unlockButton: {
-      borderRadius: BORDER_RADIUS.md,
-      overflow: 'hidden',
-    },
-    unlockButtonGradient: {
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xl,
-      alignItems: 'center',
-    },
-    unlockButtonText: {
-      color: colors.textPrimary,
-      fontSize: FONT_SIZES.md,
-      fontWeight: '600',
-    },
-    waitText: {
-      color: colors.textMuted,
-      fontSize: FONT_SIZES.sm,
-      textAlign: 'center',
-      fontStyle: 'italic',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!blocked) return null;
 
   return (
@@ -199,26 +113,26 @@ const TradeBlockBanner = ({
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Lock size={20} color={colors.error} strokeWidth={2} />
+            <Lock size={20} color={COLORS.error} strokeWidth={2} />
             <Text style={styles.title}>Đã khóa giao dịch</Text>
           </View>
           {onDismiss && (
             <TouchableOpacity onPress={onDismiss} style={styles.closeBtn}>
-              <X size={18} color={colors.textMuted} strokeWidth={2} />
+              <X size={18} color={COLORS.textMuted} strokeWidth={2} />
             </TouchableOpacity>
           )}
         </View>
 
         {/* Reason */}
         <View style={styles.reasonContainer}>
-          <AlertTriangle size={16} color={colors.warning} strokeWidth={2} />
+          <AlertTriangle size={16} color={COLORS.warning} strokeWidth={2} />
           <Text style={styles.reasonText}>{getReasonText()}</Text>
         </View>
 
         {/* Countdown */}
         {showCountdown && blocked_until && remainingSeconds > 0 && (
           <View style={styles.countdownContainer}>
-            <Clock size={16} color={colors.textMuted} strokeWidth={2} />
+            <Clock size={16} color={COLORS.textMuted} strokeWidth={2} />
             <Text style={styles.countdownLabel}>Mở khóa sau:</Text>
             <Text style={styles.countdownTime}>{formatTime(remainingSeconds)}</Text>
           </View>
@@ -232,7 +146,7 @@ const TradeBlockBanner = ({
             style={styles.unlockButton}
           >
             <LinearGradient
-              colors={[colors.purple, colors.cyan]}
+              colors={[COLORS.purple, COLORS.cyan]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.unlockButtonGradient}
@@ -252,5 +166,89 @@ const TradeBlockBanner = ({
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(220, 38, 38, 0.5)',
+    overflow: 'hidden',
+  },
+  gradient: {
+    padding: SPACING.lg,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.md,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  title: {
+    color: COLORS.error,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+  },
+  closeBtn: {
+    padding: SPACING.xs,
+  },
+  reasonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    backgroundColor: 'rgba(255, 184, 0, 0.1)',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.sm,
+    marginBottom: SPACING.md,
+  },
+  reasonText: {
+    color: COLORS.warning,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '500',
+    flex: 1,
+  },
+  countdownContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  countdownLabel: {
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZES.sm,
+  },
+  countdownTime: {
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZES.xl,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  unlockButton: {
+    borderRadius: BORDER_RADIUS.md,
+    overflow: 'hidden',
+  },
+  unlockButtonGradient: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    alignItems: 'center',
+  },
+  unlockButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZES.md,
+    fontWeight: '600',
+  },
+  waitText: {
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZES.sm,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+});
 
 export default TradeBlockBanner;

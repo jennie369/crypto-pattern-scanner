@@ -5,7 +5,6 @@
  */
 
 import { supabase } from './supabase';
-import { formatError } from '../utils/errorUtils';
 
 export const boostService = {
   /**
@@ -640,7 +639,7 @@ export const boostService = {
 
       return expiredBoosts.length;
     } catch (error) {
-      console.error('[Boost] checkAndExpireBoosts error:', formatError(error));
+      console.error('[Boost] checkAndExpireBoosts error:', error);
       return 0;
     }
   },

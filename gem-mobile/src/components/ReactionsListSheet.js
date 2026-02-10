@@ -4,7 +4,7 @@
  * Shows all users who reacted to a post with filtering
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -19,10 +19,21 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { X, Heart, ThumbsUp, Star, Flame, Laugh, Frown } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 import { supabase } from '../services/supabase';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Reaction types with icons
+const REACTION_TYPES = [
+  { id: 'all', label: 'Tất cả', icon: null },
+  { id: 'like', label: 'Thích', icon: ThumbsUp, color: COLORS.cyan },
+  { id: 'love', label: 'Yêu', icon: Heart, color: '#FF6B6B' },
+  { id: 'star', label: 'Tuyệt', icon: Star, color: '#FFD700' },
+  { id: 'fire', label: 'Hot', icon: Flame, color: '#FF6B35' },
+  { id: 'laugh', label: 'Haha', icon: Laugh, color: '#FFB800' },
+  { id: 'sad', label: 'Buồn', icon: Frown, color: '#7B8794' },
+];
 
 const ReactionsListSheet = ({
   visible,
@@ -30,159 +41,12 @@ const ReactionsListSheet = ({
   postId,
   onUserPress,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  // Reaction types with icons
-  const REACTION_TYPES = useMemo(() => [
-    { id: 'all', label: 'Tat ca', icon: null },
-    { id: 'like', label: 'Thich', icon: ThumbsUp, color: colors.cyan },
-    { id: 'love', label: 'Yeu', icon: Heart, color: '#FF6B6B' },
-    { id: 'star', label: 'Tuyet', icon: Star, color: '#FFD700' },
-    { id: 'fire', label: 'Hot', icon: Flame, color: '#FF6B35' },
-    { id: 'laugh', label: 'Haha', icon: Laugh, color: '#FFB800' },
-    { id: 'sad', label: 'Buon', icon: Frown, color: '#7B8794' },
-  ], [colors]);
-
   const [loading, setLoading] = useState(true);
   const [reactions, setReactions] = useState([]);
   const [filteredReactions, setFilteredReactions] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [reactionCounts, setReactionCounts] = useState({});
   const [slideAnim] = useState(new Animated.Value(SCREEN_HEIGHT));
-
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      justifyContent: 'flex-end',
-    },
-    backdrop: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    },
-    sheet: {
-      borderTopLeftRadius: glass.borderRadius,
-      borderTopRightRadius: glass.borderRadius,
-      overflow: 'hidden',
-      height: SCREEN_HEIGHT * 0.6,
-    },
-    blurContainer: {
-      flex: 1,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-    header: {
-      alignItems: 'center',
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.lg,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    handle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-      marginBottom: SPACING.sm,
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    closeButton: {
-      position: 'absolute',
-      right: SPACING.lg,
-      top: SPACING.lg,
-      padding: SPACING.xs,
-    },
-    filterContainer: {
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    filterContent: {
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.md,
-      gap: SPACING.sm,
-    },
-    filterTab: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      marginRight: SPACING.sm,
-      gap: SPACING.xs,
-    },
-    filterTabActive: {
-      backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    },
-    filterLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    filterLabelActive: {
-      color: colors.textPrimary,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    listContent: {
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.md,
-      paddingBottom: 50, // Safe area
-    },
-    reactionItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: SPACING.md,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-    },
-    avatar: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      marginRight: SPACING.md,
-    },
-    avatarPlaceholder: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: colors.purple,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: SPACING.md,
-    },
-    avatarText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    userName: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      color: colors.textPrimary,
-    },
-    reactionIcon: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    emptyContainer: {
-      padding: SPACING.xxl,
-      alignItems: 'center',
-    },
-    emptyText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (visible) {
@@ -336,7 +200,7 @@ const ReactionsListSheet = ({
         ...reaction,
         user: userDataMap.get(reaction.user_id) || {
           id: reaction.user_id,
-          full_name: 'Nguoi dung',
+          full_name: 'Người dùng',
           avatar_url: null,
         },
       }));
@@ -384,7 +248,7 @@ const ReactionsListSheet = ({
         {Icon ? (
           <Icon
             size={16}
-            color={isActive ? item.color : colors.textMuted}
+            color={isActive ? item.color : COLORS.textMuted}
           />
         ) : null}
         <Text
@@ -403,7 +267,7 @@ const ReactionsListSheet = ({
     const user = item.user;
     const reactionType = REACTION_TYPES.find(r => r.id === item.reaction_type);
     const Icon = reactionType?.icon || ThumbsUp;
-    const color = reactionType?.color || colors.cyan;
+    const color = reactionType?.color || COLORS.cyan;
 
     return (
       <TouchableOpacity
@@ -438,7 +302,7 @@ const ReactionsListSheet = ({
   const ListEmptyComponent = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyText}>
-        {loading ? 'Dang tai...' : 'Chua co ai tuong tac'}
+        {loading ? 'Đang tải...' : 'Chưa có ai tương tác'}
       </Text>
     </View>
   );
@@ -471,9 +335,9 @@ const ReactionsListSheet = ({
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.handle} />
-              <Text style={styles.title}>Tuong tac</Text>
+              <Text style={styles.title}>Tương tác</Text>
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <X size={20} color={colors.textMuted} />
+                <X size={20} color={COLORS.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -492,7 +356,7 @@ const ReactionsListSheet = ({
             {/* Reactions List */}
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator color={colors.purple} />
+                <ActivityIndicator color={COLORS.purple} />
               </View>
             ) : (
               <FlatList
@@ -510,5 +374,139 @@ const ReactionsListSheet = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  sheet: {
+    borderTopLeftRadius: GLASS.borderRadius,
+    borderTopRightRadius: GLASS.borderRadius,
+    overflow: 'hidden',
+    height: SCREEN_HEIGHT * 0.6,
+  },
+  blurContainer: {
+    flex: 1,
+    backgroundColor: GLASS.background,
+  },
+  header: {
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    marginBottom: SPACING.sm,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  closeButton: {
+    position: 'absolute',
+    right: SPACING.lg,
+    top: SPACING.lg,
+    padding: SPACING.xs,
+  },
+  filterContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  filterContent: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    gap: SPACING.sm,
+  },
+  filterTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    marginRight: SPACING.sm,
+    gap: SPACING.xs,
+  },
+  filterTabActive: {
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  filterLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  filterLabelActive: {
+    color: COLORS.textPrimary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  listContent: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    paddingBottom: 50, // Safe area
+  },
+  reactionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: SPACING.md,
+  },
+  avatarPlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.purple,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  avatarText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  userName: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textPrimary,
+  },
+  reactionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    padding: SPACING.xxl,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+  },
+});
 
 export default ReactionsListSheet;

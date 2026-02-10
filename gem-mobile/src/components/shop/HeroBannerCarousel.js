@@ -16,12 +16,15 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import shopBannerService from '../../services/shopBannerService';
 import OptimizedImage, { prefetchImages } from '../Common/OptimizedImage';
 import InAppBrowser from '../Common/InAppBrowser';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const BANNER_WIDTH = SCREEN_WIDTH - (SPACING.lg * 2);
+const BANNER_HEIGHT = 175;
+const AUTO_SCROLL_INTERVAL = 4000; // 4 seconds
 
 // =========== GLOBAL CACHE for instant display ===========
 const bannerCache = {
@@ -47,15 +50,7 @@ const getInitialBanners = () => {
   return [];
 };
 
-const AUTO_SCROLL_INTERVAL = 4000; // 4 seconds
-
 const HeroBannerCarousel = ({ style }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-  const BORDER_RADIUS = { lg: 16 };
-
-  const BANNER_WIDTH = SCREEN_WIDTH - (SPACING.lg * 2);
-  const BANNER_HEIGHT = 175;
-
   const navigation = useNavigation();
   const flatListRef = useRef(null);
   const autoScrollTimer = useRef(null);
@@ -198,84 +193,6 @@ const HeroBannerCarousel = ({ style }) => {
     setCurrentIndex(index);
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginBottom: SPACING.lg,
-    },
-    flatListContent: {
-      paddingHorizontal: SPACING.lg,
-    },
-    bannerContainer: {
-      width: BANNER_WIDTH,
-      height: BANNER_HEIGHT,
-      marginRight: SPACING.md,
-      borderRadius: BORDER_RADIUS.lg,
-      overflow: 'hidden',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-    bannerImage: {
-      width: '100%',
-      height: '100%',
-    },
-    overlay: {
-      ...StyleSheet.absoluteFillObject,
-      justifyContent: 'flex-end',
-    },
-    textContainer: {
-      padding: SPACING.lg,
-      paddingBottom: SPACING.xl,
-    },
-    bannerTitle: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.xxxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      marginBottom: SPACING.xs,
-      // Stronger text shadow for better readability
-      textShadowColor: 'rgba(0, 0, 0, 1)',
-      textShadowOffset: { width: 0, height: 2 },
-      textShadowRadius: 8,
-    },
-    bannerSubtitle: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      // Stronger text shadow for better readability
-      textShadowColor: 'rgba(0, 0, 0, 1)',
-      textShadowOffset: { width: 0, height: 2 },
-      textShadowRadius: 8,
-    },
-    paginationContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: SPACING.md,
-    },
-    paginationDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-      marginHorizontal: 3,
-    },
-    paginationDotActive: {
-      width: 20,
-      backgroundColor: colors.burgundy,
-    },
-    // Skeleton styles
-    skeletonBanner: {
-      marginHorizontal: SPACING.lg,
-      width: BANNER_WIDTH,
-      height: BANNER_HEIGHT,
-      borderRadius: BORDER_RADIUS.lg,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      overflow: 'hidden',
-    },
-    skeletonShimmer: {
-      flex: 1,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY, BANNER_WIDTH, BANNER_HEIGHT]);
-
   // Render individual banner
   const renderBanner = ({ item }) => (
     <TouchableOpacity
@@ -379,5 +296,83 @@ const HeroBannerCarousel = ({ style }) => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: SPACING.lg,
+  },
+  flatListContent: {
+    paddingHorizontal: SPACING.lg,
+  },
+  bannerContainer: {
+    width: BANNER_WIDTH,
+    height: BANNER_HEIGHT,
+    marginRight: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+    overflow: 'hidden',
+    backgroundColor: COLORS.glassBg,
+  },
+  bannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+  },
+  textContainer: {
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xl,
+  },
+  bannerTitle: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.xxxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    marginBottom: SPACING.xs,
+    // Stronger text shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+  },
+  bannerSubtitle: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    // Stronger text shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  paginationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    marginHorizontal: 3,
+  },
+  paginationDotActive: {
+    width: 20,
+    backgroundColor: COLORS.burgundy,
+  },
+  // Skeleton styles
+  skeletonBanner: {
+    marginHorizontal: SPACING.lg,
+    width: BANNER_WIDTH,
+    height: BANNER_HEIGHT,
+    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: COLORS.glassBg,
+    overflow: 'hidden',
+  },
+  skeletonShimmer: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+});
 
 export default HeroBannerCarousel;

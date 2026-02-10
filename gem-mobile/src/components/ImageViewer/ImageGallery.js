@@ -4,7 +4,7 @@
  * Phase 2: Image Viewer Enhancement (30/12/2024)
  */
 
-import React, { useState, useCallback, useRef, memo, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useRef, memo, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -35,7 +35,7 @@ import ImageViewerControls from './ImageViewerControls';
 import PaginationDots from './PaginationDots';
 import ZoomIndicator from './ZoomIndicator';
 import ImageViewerOnboarding from './ImageViewerOnboarding';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, MessageCircle, Send } from 'lucide-react-native';
 
@@ -68,8 +68,6 @@ const PostOverlay = memo(({
   onComment,
   onShare,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // Get safe area insets for bottom padding
   let bottomInset = SAFE_BOTTOM_PADDING;
   try {
@@ -122,127 +120,6 @@ const PostOverlay = memo(({
     height: heightAnim.value,
     opacity: opacityAnim.value,
   }));
-
-  const overlayStyles = useMemo(() => StyleSheet.create({
-    postOverlay: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      overflow: 'hidden',
-    },
-    grabHandleArea: {
-      paddingVertical: 8,
-      alignItems: 'center',
-    },
-    grabHandle: {
-      width: 36,
-      height: 4,
-      backgroundColor: 'rgba(255, 255, 255, 0.4)',
-      borderRadius: 2,
-    },
-    // Collapsed & Expanded shared
-    collapsedContent: {
-      paddingHorizontal: 16,
-      paddingBottom: 12,
-    },
-    expandedContainer: {
-      flex: 1,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: 8,
-    },
-    authorInfo: {
-      flex: 1,
-    },
-    authorName: {
-      fontSize: 15,
-      fontWeight: '700',
-      color: '#FFFFFF',
-    },
-    dateText: {
-      fontSize: 12,
-      color: 'rgba(255, 255, 255, 0.5)',
-      marginTop: 2,
-    },
-    toggleButton: {
-      paddingVertical: 4,
-      paddingHorizontal: 10,
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      borderRadius: 12,
-    },
-    toggleText: {
-      fontSize: 11,
-      color: 'rgba(255, 255, 255, 0.9)',
-      fontWeight: '600',
-    },
-    previewText: {
-      fontSize: 15,
-      color: 'rgba(255, 255, 255, 0.9)',
-      lineHeight: 21,
-    },
-    // Scroll area
-    contentScroll: {
-      flex: 1,
-    },
-    contentContainer: {
-      paddingHorizontal: 16,
-      paddingBottom: 12,
-    },
-    contentText: {
-      fontSize: 15,
-      color: '#FFFFFF',
-      lineHeight: 22,
-    },
-    // Counters row
-    countersRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    counterItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    counterText: {
-      fontSize: 13,
-      color: 'rgba(255, 255, 255, 0.6)',
-    },
-    counterRight: {
-      flexDirection: 'row',
-    },
-    // Action buttons
-    actionsRow: {
-      flexDirection: 'row',
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(255, 255, 255, 0.1)',
-      paddingTop: 6,
-    },
-    actionButton: {
-      flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingVertical: 8,
-      gap: 6,
-    },
-    actionText: {
-      fontSize: 13,
-      color: '#AAA',
-      fontWeight: '500',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <Animated.View style={[overlayStyles.postOverlay, animatedContainerStyle]}>
@@ -299,7 +176,7 @@ const PostOverlay = memo(({
             <View style={overlayStyles.countersRow}>
               {reactionCount > 0 && (
                 <View style={overlayStyles.counterItem}>
-                  <Heart size={14} color={colors.gold} fill={colors.gold} />
+                  <Heart size={14} color={COLORS.gold} fill={COLORS.gold} />
                   <Text style={overlayStyles.counterText}>{formatCount(reactionCount)}</Text>
                 </View>
               )}
@@ -317,8 +194,8 @@ const PostOverlay = memo(({
           {/* Action buttons - same icons as PostCard */}
           <View style={[overlayStyles.actionsRow, { paddingBottom: bottomInset }]}>
             <TouchableOpacity style={overlayStyles.actionButton} onPress={onLike}>
-              <Heart size={20} color={isLiked ? colors.gold : '#AAA'} fill={isLiked ? colors.gold : 'transparent'} />
-              <Text style={[overlayStyles.actionText, isLiked && { color: colors.gold }]}>Thích</Text>
+              <Heart size={20} color={isLiked ? COLORS.gold : '#AAA'} fill={isLiked ? COLORS.gold : 'transparent'} />
+              <Text style={[overlayStyles.actionText, isLiked && { color: COLORS.gold }]}>Thích</Text>
             </TouchableOpacity>
             <TouchableOpacity style={overlayStyles.actionButton} onPress={onComment}>
               <MessageCircle size={20} color="#AAA" />
@@ -333,6 +210,127 @@ const PostOverlay = memo(({
       )}
     </Animated.View>
   );
+});
+
+const overlayStyles = StyleSheet.create({
+  postOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    overflow: 'hidden',
+  },
+  grabHandleArea: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  grabHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 2,
+  },
+  // Collapsed & Expanded shared
+  collapsedContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  expandedContainer: {
+    flex: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  authorInfo: {
+    flex: 1,
+  },
+  authorName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  dateText: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginTop: 2,
+  },
+  toggleButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 12,
+  },
+  toggleText: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
+  },
+  previewText: {
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: 21,
+  },
+  // Scroll area
+  contentScroll: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  contentText: {
+    fontSize: 15,
+    color: '#FFFFFF',
+    lineHeight: 22,
+  },
+  // Counters row
+  countersRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  counterItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  counterText: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  counterRight: {
+    flexDirection: 'row',
+  },
+  // Action buttons
+  actionsRow: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    paddingTop: 6,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 8,
+    gap: 6,
+  },
+  actionText: {
+    fontSize: 13,
+    color: '#AAA',
+    fontWeight: '500',
+  },
 });
 
 /**
@@ -373,8 +371,6 @@ const ImageGallery = ({
   onSharePost,
   showOverlay = true,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // State
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -576,80 +572,6 @@ const ImageGallery = ({
     index,
   }), []);
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: 'transparent',
-    },
-    background: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: '#000',
-    },
-    paginationContainer: {
-      position: 'absolute',
-      bottom: 160, // Above collapsed overlay (140px)
-      left: 0,
-      right: 0,
-    },
-    // Options Modal styles
-    optionsBackdrop: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      justifyContent: 'flex-end',
-    },
-    optionsContainer: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      paddingTop: SPACING?.lg || 20,
-      paddingBottom: SPACING?.xxl || 40,
-      paddingHorizontal: SPACING?.lg || 20,
-    },
-    optionsTitle: {
-      fontSize: TYPOGRAPHY?.fontSize?.lg || 18,
-      fontWeight: TYPOGRAPHY?.fontWeight?.bold || '700',
-      color: '#FFFFFF',
-      textAlign: 'center',
-      marginBottom: SPACING?.lg || 20,
-    },
-    optionItem: {
-      paddingVertical: SPACING?.md || 16,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    optionText: {
-      fontSize: TYPOGRAPHY?.fontSize?.md || 16,
-      color: '#FFFFFF',
-    },
-    cancelOption: {
-      borderBottomWidth: 0,
-      marginTop: SPACING?.sm || 8,
-    },
-    cancelText: {
-      fontSize: TYPOGRAPHY?.fontSize?.md || 16,
-      color: colors?.gold || '#FFD700',
-      textAlign: 'center',
-      fontWeight: '600',
-    },
-    // Toast styles
-    toastContainer: {
-      position: 'absolute',
-      bottom: 200,
-      left: 20,
-      right: 20,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    toastText: {
-      color: '#FFFFFF',
-      fontSize: 14,
-      fontWeight: '500',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!visible || images.length === 0) return null;
 
   return (
@@ -806,5 +728,79 @@ const ImageGallery = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000',
+  },
+  paginationContainer: {
+    position: 'absolute',
+    bottom: 160, // Above collapsed overlay (140px)
+    left: 0,
+    right: 0,
+  },
+  // Options Modal styles
+  optionsBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  optionsContainer: {
+    backgroundColor: COLORS?.surface || '#1A1A2E',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: SPACING?.lg || 20,
+    paddingBottom: SPACING?.xxl || 40,
+    paddingHorizontal: SPACING?.lg || 20,
+  },
+  optionsTitle: {
+    fontSize: TYPOGRAPHY?.fontSize?.lg || 18,
+    fontWeight: TYPOGRAPHY?.fontWeight?.bold || '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: SPACING?.lg || 20,
+  },
+  optionItem: {
+    paddingVertical: SPACING?.md || 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  optionText: {
+    fontSize: TYPOGRAPHY?.fontSize?.md || 16,
+    color: '#FFFFFF',
+  },
+  cancelOption: {
+    borderBottomWidth: 0,
+    marginTop: SPACING?.sm || 8,
+  },
+  cancelText: {
+    fontSize: TYPOGRAPHY?.fontSize?.md || 16,
+    color: COLORS?.gold || '#FFD700',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  // Toast styles
+  toastContainer: {
+    position: 'absolute',
+    bottom: 200,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+});
 
 export default memo(ImageGallery);

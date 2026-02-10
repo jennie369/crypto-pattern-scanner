@@ -2,11 +2,11 @@
  * KarmaLevelBadge - Badge displaying karma level with icon
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { UserX, GraduationCap, Sword, Crown, Shield } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
 import { KARMA_LEVEL_THRESHOLDS } from '../../services/karmaService';
 
 const KarmaLevelBadge = ({
@@ -17,14 +17,13 @@ const KarmaLevelBadge = ({
   karmaPoints = 0,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const levelConfig = KARMA_LEVEL_THRESHOLDS[level] || KARMA_LEVEL_THRESHOLDS.student;
 
   // Size configurations
   const sizes = {
-    small: { container: 28, icon: 14, fontSize: TYPOGRAPHY.sizes.xs, padding: SPACING.xs },
-    medium: { container: 40, icon: 20, fontSize: TYPOGRAPHY.sizes.sm, padding: SPACING.sm },
-    large: { container: 56, icon: 28, fontSize: TYPOGRAPHY.sizes.md, padding: SPACING.md },
+    small: { container: 28, icon: 14, fontSize: FONT_SIZES.xs, padding: SPACING.xs },
+    medium: { container: 40, icon: 20, fontSize: FONT_SIZES.sm, padding: SPACING.sm },
+    large: { container: 56, icon: 28, fontSize: FONT_SIZES.md, padding: SPACING.md },
   };
 
   const sizeConfig = sizes[size] || sizes.medium;
@@ -33,7 +32,7 @@ const KarmaLevelBadge = ({
   const getIcon = () => {
     const iconProps = {
       size: sizeConfig.icon,
-      color: colors.textPrimary,
+      color: COLORS.textPrimary,
       strokeWidth: 2,
     };
 
@@ -70,39 +69,6 @@ const KarmaLevelBadge = ({
         return ['#3B82F6', '#2563EB'];
     }
   };
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      borderRadius: SPACING.lg,
-      overflow: 'hidden',
-      alignSelf: 'flex-start',
-    },
-    gradient: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-    iconOnly: {
-      overflow: 'hidden',
-    },
-    iconGradient: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    iconContainer: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    textContent: {
-      gap: 2,
-    },
-    levelLabel: {
-      fontWeight: '700',
-    },
-    pointsText: {
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Icon only
   if (!showLabel && !showPoints) {
@@ -191,5 +157,38 @@ const KarmaLevelBadge = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: BORDER_RADIUS.lg,
+    overflow: 'hidden',
+    alignSelf: 'flex-start',
+  },
+  gradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  iconOnly: {
+    overflow: 'hidden',
+  },
+  iconGradient: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textContent: {
+    gap: 2,
+  },
+  levelLabel: {
+    fontWeight: '700',
+  },
+  pointsText: {
+    color: COLORS.textMuted,
+  },
+});
 
 export default KarmaLevelBadge;

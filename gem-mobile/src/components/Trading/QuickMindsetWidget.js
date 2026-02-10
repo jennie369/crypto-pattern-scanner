@@ -6,12 +6,12 @@
  * Created: December 13, 2025
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Brain, ChevronRight, AlertCircle } from 'lucide-react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import mindsetAdvisorService, { SCORE_COLORS } from '../../services/mindsetAdvisorService';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 const QuickMindsetWidget = ({
   onPress,
@@ -20,124 +20,8 @@ const QuickMindsetWidget = ({
   style,
 }) => {
   const { user } = useAuth();
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [todayScore, setTodayScore] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 189, 89, 0.2)',
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.md,
-    },
-
-    leftSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-
-    iconContainer: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-
-    labelContainer: {
-      gap: 2,
-    },
-
-    label: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-
-    status: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-
-    statusEmpty: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-    },
-
-    rightSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-    },
-
-    scoreContainer: {
-      paddingHorizontal: SPACING.md,
-      paddingVertical: 6,
-      borderRadius: 10,
-      borderWidth: 1,
-    },
-
-    scoreValue: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-
-    checkContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-
-    checkText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.gold,
-    },
-
-    // Compact styles
-    compactContainer: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-
-    scoreBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 8,
-      borderWidth: 1,
-      gap: 4,
-    },
-
-    scoreText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-
-    emptyBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      gap: 4,
-    },
-
-    emptyText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Load today's score on mount
   useEffect(() => {
@@ -168,8 +52,8 @@ const QuickMindsetWidget = ({
 
   // Get color based on score/recommendation
   const getColor = () => {
-    if (!todayScore) return colors.textMuted;
-    return SCORE_COLORS[todayScore.recommendation] || colors.gold;
+    if (!todayScore) return COLORS.textMuted;
+    return SCORE_COLORS[todayScore.recommendation] || COLORS.gold;
   };
 
   // Compact version (just badge)
@@ -189,7 +73,7 @@ const QuickMindsetWidget = ({
           </View>
         ) : (
           <View style={styles.emptyBadge}>
-            <Brain size={14} color={colors.textMuted} />
+            <Brain size={14} color={COLORS.textMuted} />
             <Text style={styles.emptyText}>?</Text>
           </View>
         )}
@@ -231,11 +115,11 @@ const QuickMindsetWidget = ({
           </View>
         ) : (
           <View style={styles.checkContainer}>
-            <AlertCircle size={16} color={colors.gold} />
+            <AlertCircle size={16} color={COLORS.gold} />
             <Text style={styles.checkText}>Kiem tra</Text>
           </View>
         )}
-        <ChevronRight size={16} color={colors.textMuted} />
+        <ChevronRight size={16} color={COLORS.textMuted} />
       </View>
     </TouchableOpacity>
   );
@@ -256,5 +140,120 @@ const getStatusLabel = (recommendation) => {
       return 'Kiem tra';
   }
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.2)',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+  },
+
+  leftSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  labelContainer: {
+    gap: 2,
+  },
+
+  label: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+
+  status: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+
+  statusEmpty: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+
+  rightSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+
+  scoreContainer: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+
+  scoreValue: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+
+  checkContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+
+  checkText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+  },
+
+  // Compact styles
+  compactContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 4,
+  },
+
+  scoreText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+
+  emptyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    gap: 4,
+  },
+
+  emptyText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textMuted,
+  },
+});
 
 export default QuickMindsetWidget;

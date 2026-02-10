@@ -11,7 +11,7 @@
  * Design: Liquid Glass theme, dark mode
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   View,
   Text,
@@ -34,7 +34,7 @@ import {
   Calendar,
   TrendingUp,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 

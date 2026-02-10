@@ -3,10 +3,10 @@
  * Facebook-style link preview section with domain, title, description, and CTA
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Globe } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING } from '../utils/tokens';
 
 /**
  * Extract domain from URL
@@ -27,58 +27,6 @@ const extractDomain = (url) => {
  * @param {function} onPress - Callback when CTA is pressed
  */
 export default function AdLinkPreview({ ad, onPress }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      backgroundColor: 'rgba(255, 255, 255, 0.03)',
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.md,
-      gap: SPACING.md,
-    },
-    content: {
-      flex: 1,
-      gap: 4,
-    },
-    domainRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    domainText: {
-      fontSize: 11,
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-    },
-    titleText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      lineHeight: 20,
-    },
-    descriptionText: {
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
-    },
-    ctaButton: {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      paddingHorizontal: 14,
-      paddingVertical: 8,
-      borderRadius: 6,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.15)',
-    },
-    ctaText: {
-      fontSize: 13,
-      fontWeight: '500',
-      color: colors.textPrimary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // Use new fields if available, fallback to existing fields
   const domain = ad?.link_domain || extractDomain(ad?.action_value);
   const title = ad?.link_title || ad?.title;
@@ -100,7 +48,7 @@ export default function AdLinkPreview({ ad, onPress }) {
         {/* Domain */}
         {domain && (
           <View style={styles.domainRow}>
-            <Globe size={12} color={colors.textMuted} />
+            <Globe size={12} color="rgba(255, 255, 255, 0.5)" />
             <Text style={styles.domainText}>{domain}</Text>
           </View>
         )}
@@ -131,3 +79,53 @@ export default function AdLinkPreview({ ad, onPress }) {
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.md,
+  },
+  content: {
+    flex: 1,
+    gap: 4,
+  },
+  domainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  domainText: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+  },
+  titleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+  },
+  descriptionText: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  ctaButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  ctaText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: COLORS.textPrimary,
+  },
+});

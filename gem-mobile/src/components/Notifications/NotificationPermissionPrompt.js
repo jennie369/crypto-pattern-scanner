@@ -5,7 +5,7 @@
  * Shows benefits of enabling notifications
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,137 +19,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Bell, Sun, CheckCircle2, Moon, Trophy, X } from 'lucide-react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, TYPOGRAPHY, SPACING, GRADIENTS } from '../../utils/tokens';
 
 const PROMPT_SHOWN_KEY = '@gem_notification_prompt_shown';
 
 const NotificationPermissionPrompt = ({ visible, onClose, onPermissionGranted }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [isRequesting, setIsRequesting] = useState(false);
-
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: SPACING.lg,
-    },
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 24,
-      padding: SPACING.xxl,
-      width: '100%',
-      maxWidth: 400,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 189, 89, 0.2)',
-    },
-    closeButton: {
-      position: 'absolute',
-      top: SPACING.md,
-      right: SPACING.md,
-      padding: SPACING.sm,
-      zIndex: 1,
-    },
-
-    // Header
-    header: {
-      alignItems: 'center',
-      marginBottom: SPACING.xxl,
-    },
-    iconContainer: {
-      marginBottom: SPACING.lg,
-    },
-    iconGradient: {
-      width: 72,
-      height: 72,
-      borderRadius: 36,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: colors.textPrimary,
-      marginBottom: SPACING.sm,
-      textAlign: 'center',
-    },
-    subtitle: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 22,
-    },
-
-    // Benefits
-    benefitsList: {
-      marginBottom: SPACING.xxl,
-    },
-    benefitRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.lg,
-    },
-    benefitIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 189, 89, 0.1)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: SPACING.md,
-    },
-    benefitText: {
-      flex: 1,
-    },
-    benefitTitle: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginBottom: 2,
-    },
-    benefitDescription: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textMuted,
-    },
-
-    // Privacy
-    privacyNote: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      textAlign: 'center',
-      marginBottom: SPACING.xl,
-    },
-
-    // Buttons
-    buttons: {
-      gap: SPACING.md,
-    },
-    enableButton: {
-      borderRadius: 12,
-      overflow: 'hidden',
-    },
-    enableButtonGradient: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: SPACING.sm,
-      paddingVertical: SPACING.lg,
-    },
-    enableButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-    laterButton: {
-      paddingVertical: SPACING.md,
-      alignItems: 'center',
-    },
-    laterButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const benefits = [
     {
@@ -211,17 +86,17 @@ const NotificationPermissionPrompt = ({ visible, onClose, onPermissionGranted })
         <View style={styles.container}>
           {/* Close Button */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X size={24} color={colors.textMuted} />
+            <X size={24} color={COLORS.textMuted} />
           </TouchableOpacity>
 
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconContainer}>
               <LinearGradient
-                colors={gradients.gold}
+                colors={GRADIENTS.gold}
                 style={styles.iconGradient}
               >
-                <Bell size={32} color={colors.bgMid} />
+                <Bell size={32} color={COLORS.bgMid} />
               </LinearGradient>
             </View>
             <Text style={styles.title}>Stay Motivated</Text>
@@ -237,7 +112,7 @@ const NotificationPermissionPrompt = ({ visible, onClose, onPermissionGranted })
               return (
                 <View key={index} style={styles.benefitRow}>
                   <View style={styles.benefitIcon}>
-                    <IconComponent size={20} color={colors.gold} />
+                    <IconComponent size={20} color={COLORS.gold} />
                   </View>
                   <View style={styles.benefitText}>
                     <Text style={styles.benefitTitle}>{benefit.title}</Text>
@@ -264,10 +139,10 @@ const NotificationPermissionPrompt = ({ visible, onClose, onPermissionGranted })
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={gradients.primaryButton}
+                colors={GRADIENTS.primaryButton}
                 style={styles.enableButtonGradient}
               >
-                <Bell size={20} color={colors.textPrimary} />
+                <Bell size={20} color={COLORS.textPrimary} />
                 <Text style={styles.enableButtonText}>
                   {isRequesting ? 'Requesting...' : 'Enable Notifications'}
                 </Text>
@@ -313,5 +188,129 @@ export const shouldShowNotificationPrompt = async () => {
 export const resetNotificationPrompt = async () => {
   await AsyncStorage.removeItem(PROMPT_SHOWN_KEY);
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  container: {
+    backgroundColor: COLORS.bgMid,
+    borderRadius: 24,
+    padding: SPACING.xxl,
+    width: '100%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.2)',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    padding: SPACING.sm,
+    zIndex: 1,
+  },
+
+  // Header
+  header: {
+    alignItems: 'center',
+    marginBottom: SPACING.xxl,
+  },
+  iconContainer: {
+    marginBottom: SPACING.lg,
+  },
+  iconGradient: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+
+  // Benefits
+  benefitsList: {
+    marginBottom: SPACING.xxl,
+  },
+  benefitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  benefitIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  benefitText: {
+    flex: 1,
+  },
+  benefitTitle: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: 2,
+  },
+  benefitDescription: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+  },
+
+  // Privacy
+  privacyNote: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
+  },
+
+  // Buttons
+  buttons: {
+    gap: SPACING.md,
+  },
+  enableButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  enableButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.lg,
+  },
+  enableButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  laterButton: {
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+  },
+  laterButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textMuted,
+  },
+});
 
 export default NotificationPermissionPrompt;

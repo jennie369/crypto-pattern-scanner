@@ -3,7 +3,7 @@
  * Facebook-style reactions picker (long-press popup)
  */
 
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING } from '../utils/tokens';
 
 // All available reactions
 const REACTIONS = [
@@ -40,64 +40,6 @@ export default function AdReactionsBar({
   currentReaction,
   position = { x: 0, y: 0 },
 }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-      justifyContent: 'flex-end',
-    },
-    container: {
-      position: 'absolute',
-      left: 16,
-      right: 16,
-      alignItems: 'center',
-    },
-    reactionsRow: {
-      flexDirection: 'row',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 28,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      gap: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 10,
-    },
-    reactionContainer: {
-      alignItems: 'center',
-    },
-    reactionButton: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'transparent',
-    },
-    reactionButtonActive: {
-      transform: [{ scale: 1.2 }],
-    },
-    reactionEmoji: {
-      fontSize: 28,
-    },
-    labelContainer: {
-      position: 'absolute',
-      top: -24,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 10,
-    },
-    labelText: {
-      fontSize: 10,
-      fontWeight: '600',
-      color: '#FFFFFF',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // Animation refs for each reaction
   const scaleAnims = useRef(
     REACTIONS.map(() => new Animated.Value(0))
@@ -180,3 +122,59 @@ export default function AdReactionsBar({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-end',
+  },
+  container: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    alignItems: 'center',
+  },
+  reactionsRow: {
+    flexDirection: 'row',
+    backgroundColor: '#1C1B23',
+    borderRadius: 28,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    gap: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  reactionContainer: {
+    alignItems: 'center',
+  },
+  reactionButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  reactionButtonActive: {
+    transform: [{ scale: 1.2 }],
+  },
+  reactionEmoji: {
+    fontSize: 28,
+  },
+  labelContainer: {
+    position: 'absolute',
+    top: -24,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  labelText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+});

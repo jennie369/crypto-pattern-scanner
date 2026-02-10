@@ -9,19 +9,6 @@ import { supabase } from './supabase';
 import { addXPToUser, updateDailySummary, XP_REWARDS } from './goalService';
 import TierService from './tierService';
 
-// ============ ERROR LOGGING HELPER ============
-// Supabase errors are objects that don't serialize well in React Native console
-const formatSupabaseError = (error) => {
-  if (!error) return 'Unknown error';
-  if (typeof error === 'string') return error;
-  const parts = [];
-  if (error.message) parts.push(`message: ${error.message}`);
-  if (error.code) parts.push(`code: ${error.code}`);
-  if (error.details) parts.push(`details: ${error.details}`);
-  if (error.hint) parts.push(`hint: ${error.hint}`);
-  return parts.length > 0 ? parts.join(', ') : JSON.stringify(error);
-};
-
 // ============ QUOTA CHECKING ============
 /**
  * Get current count of user's habits for quota checking
@@ -38,7 +25,7 @@ export const getHabitsCount = async (userId) => {
     if (error) throw error;
     return count || 0;
   } catch (err) {
-    console.error('[habitService] getHabitsCount error:', formatSupabaseError(err));
+    console.error('[habitService] getHabitsCount error:', err);
     return 0;
   }
 };
@@ -73,7 +60,7 @@ export const checkHabitQuota = async (userId) => {
       upgradeInfo,
     };
   } catch (err) {
-    console.error('[habitService] checkHabitQuota error:', formatSupabaseError(err));
+    console.error('[habitService] checkHabitQuota error:', err);
     // Default to allowing creation on error
     return {
       canCreate: true,
@@ -105,7 +92,7 @@ export const getHabits = async (userId, options = {}) => {
     if (error) throw error;
     return data || [];
   } catch (err) {
-    console.error('[habitService] getHabits error:', formatSupabaseError(err));
+    console.error('[habitService] getHabits error:', err);
     return [];
   }
 };
@@ -131,7 +118,7 @@ export const getTodayHabits = async (userId) => {
       };
     }));
   } catch (err) {
-    console.error('[habitService] getTodayHabits error:', formatSupabaseError(err));
+    console.error('[habitService] getTodayHabits error:', err);
     return [];
   }
 };
@@ -161,7 +148,7 @@ export const getHabitsSummary = async (userId) => {
       completed: count || 0,
     };
   } catch (err) {
-    console.error('[habitService] getHabitsSummary error:', formatSupabaseError(err));
+    console.error('[habitService] getHabitsSummary error:', err);
     return { total: 0, completed: 0 };
   }
 };
@@ -211,7 +198,7 @@ export const createHabit = async (userId, habitData, options = {}) => {
     if (error) throw error;
     return data;
   } catch (err) {
-    console.error('[habitService] createHabit error:', formatSupabaseError(err));
+    console.error('[habitService] createHabit error:', err);
     throw err;
   }
 };
@@ -229,7 +216,7 @@ export const updateHabit = async (habitId, updates) => {
     if (error) throw error;
     return data;
   } catch (err) {
-    console.error('[habitService] updateHabit error:', formatSupabaseError(err));
+    console.error('[habitService] updateHabit error:', err);
     throw err;
   }
 };
@@ -321,7 +308,7 @@ export const checkHabit = async (habitId, userId) => {
       streakBonus,
     };
   } catch (err) {
-    console.error('[habitService] checkHabit error:', formatSupabaseError(err));
+    console.error('[habitService] checkHabit error:', err);
     throw err;
   }
 };
@@ -355,7 +342,7 @@ export const uncheckHabit = async (habitId, userId) => {
 
     return true;
   } catch (err) {
-    console.error('[habitService] uncheckHabit error:', formatSupabaseError(err));
+    console.error('[habitService] uncheckHabit error:', err);
     throw err;
   }
 };
@@ -377,7 +364,7 @@ export const deleteHabit = async (habitId) => {
 
     return true;
   } catch (err) {
-    console.error('[habitService] deleteHabit error:', formatSupabaseError(err));
+    console.error('[habitService] deleteHabit error:', err);
     throw err;
   }
 };
@@ -394,7 +381,7 @@ export const getHabitById = async (habitId) => {
     if (error) throw error;
     return data;
   } catch (err) {
-    console.error('[habitService] getHabitById error:', formatSupabaseError(err));
+    console.error('[habitService] getHabitById error:', err);
     return null;
   }
 };
@@ -418,7 +405,7 @@ export const toggleHabit = async (habitId, userId) => {
       return await checkHabit(habitId, userId);
     }
   } catch (err) {
-    console.error('[habitService] toggleHabit error:', formatSupabaseError(err));
+    console.error('[habitService] toggleHabit error:', err);
     throw err;
   }
 };
@@ -455,7 +442,7 @@ export const getHabitStreakHistory = async (habitId, days = 30) => {
 
     return history;
   } catch (err) {
-    console.error('[habitService] getHabitStreakHistory error:', formatSupabaseError(err));
+    console.error('[habitService] getHabitStreakHistory error:', err);
     return [];
   }
 };

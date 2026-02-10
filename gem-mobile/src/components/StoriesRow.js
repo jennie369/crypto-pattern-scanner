@@ -4,7 +4,7 @@
  * Uses dark glass theme from DESIGN_TOKENS
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,12 +16,11 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Plus } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 import { storyService } from '../services/storyService';
 import { useAuth } from '../contexts/AuthContext';
 
 const StoriesRow = ({ onStoryPress, onCreatePress, onRefresh }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const { user, isAuthenticated } = useAuth();
   const [stories, setStories] = useState([]);
   const [myStories, setMyStories] = useState([]);
@@ -67,113 +66,10 @@ const StoriesRow = ({ onStoryPress, onCreatePress, onRefresh }) => {
     }
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      paddingVertical: SPACING.md,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    loadingContainer: {
-      height: 90,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    scrollContent: {
-      paddingHorizontal: SPACING.md,
-      gap: SPACING.md,
-    },
-    // Story Item
-    storyItem: {
-      alignItems: 'center',
-      width: 70,
-    },
-    storyAvatarContainer: {
-      marginBottom: SPACING.xs,
-    },
-    storyRing: {
-      width: 66,
-      height: 66,
-      borderRadius: 33,
-      padding: 3,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    storyRingViewed: {
-      width: 66,
-      height: 66,
-      borderRadius: 33,
-      padding: 3,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: colors.textMuted,
-    },
-    storyAvatar: {
-      width: 58,
-      height: 58,
-      borderRadius: 29,
-      borderWidth: 3,
-      borderColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      backgroundColor: colors.glassBg,
-    },
-    storyAvatarDimmed: {
-      width: 58,
-      height: 58,
-      borderRadius: 29,
-      borderWidth: 3,
-      borderColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      backgroundColor: colors.glassBg,
-      opacity: 0.7,
-    },
-    storyName: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      maxWidth: 65,
-    },
-    // Add Story
-    addStoryContainer: {
-      position: 'relative',
-    },
-    addBadge: {
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-      width: 22,
-      height: 22,
-      borderRadius: 11,
-      backgroundColor: colors.purple,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
-  const avatarStyles = useMemo(() => StyleSheet.create({
-    ring: {
-      padding: 3,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    ringViewed: {
-      padding: 3,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: colors.textMuted,
-    },
-    avatar: {
-      borderWidth: 2,
-      borderColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      backgroundColor: colors.glassBg,
-    },
-  }), [colors, settings.theme, glass]);
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color={colors.purple} />
+        <ActivityIndicator size="small" color={COLORS.purple} />
       </View>
     );
   }
@@ -199,7 +95,7 @@ const StoriesRow = ({ onStoryPress, onCreatePress, onRefresh }) => {
             <View style={styles.storyAvatarContainer}>
               {myStories.length > 0 ? (
                 <LinearGradient
-                  colors={[colors.purple, colors.cyan]}
+                  colors={[COLORS.purple, COLORS.cyan]}
                   style={styles.storyRing}
                 >
                   <Image
@@ -214,7 +110,7 @@ const StoriesRow = ({ onStoryPress, onCreatePress, onRefresh }) => {
                     style={styles.storyAvatarDimmed}
                   />
                   <View style={styles.addBadge}>
-                    <Plus size={12} color={colors.textPrimary} />
+                    <Plus size={12} color={COLORS.textPrimary} />
                   </View>
                 </View>
               )}
@@ -239,7 +135,7 @@ const StoriesRow = ({ onStoryPress, onCreatePress, onRefresh }) => {
               <View style={styles.storyAvatarContainer}>
                 {hasUnviewed ? (
                   <LinearGradient
-                    colors={[colors.purple, colors.cyan]}
+                    colors={[COLORS.purple, COLORS.cyan]}
                     style={styles.storyRing}
                   >
                     <Image
@@ -277,8 +173,6 @@ export const StoryAvatar = ({
   size = 'medium',
   onPress,
 }) => {
-  const { colors, glass, settings } = useSettings();
-
   const avatarSize = size === 'small' ? 40 : size === 'large' ? 64 : 52;
   const ringSize = avatarSize + 6;
 
@@ -287,26 +181,6 @@ export const StoryAvatar = ({
     const name = user?.full_name || 'User';
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6A5BFF&color=fff`;
   };
-
-  const avatarStyles = useMemo(() => StyleSheet.create({
-    ring: {
-      padding: 3,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    ringViewed: {
-      padding: 3,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: colors.textMuted,
-    },
-    avatar: {
-      borderWidth: 2,
-      borderColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      backgroundColor: colors.glassBg,
-    },
-  }), [colors, settings.theme, glass]);
 
   if (!hasStory) {
     return (
@@ -323,7 +197,7 @@ export const StoryAvatar = ({
     <TouchableOpacity onPress={onPress} disabled={!onPress}>
       {hasUnviewed ? (
         <LinearGradient
-          colors={[colors.purple, colors.cyan]}
+          colors={[COLORS.purple, COLORS.cyan]}
           style={[
             avatarStyles.ring,
             { width: ringSize, height: ringSize, borderRadius: ringSize / 2 },
@@ -350,5 +224,108 @@ export const StoryAvatar = ({
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  loadingContainer: {
+    height: 90,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollContent: {
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.md,
+  },
+  // Story Item
+  storyItem: {
+    alignItems: 'center',
+    width: 70,
+  },
+  storyAvatarContainer: {
+    marginBottom: SPACING.xs,
+  },
+  storyRing: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    padding: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  storyRingViewed: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    padding: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+  },
+  storyAvatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 3,
+    borderColor: GLASS.background,
+    backgroundColor: COLORS.glassBg,
+  },
+  storyAvatarDimmed: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 3,
+    borderColor: GLASS.background,
+    backgroundColor: COLORS.glassBg,
+    opacity: 0.7,
+  },
+  storyName: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    maxWidth: 65,
+  },
+  // Add Story
+  addStoryContainer: {
+    position: 'relative',
+  },
+  addBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: COLORS.purple,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: GLASS.background,
+  },
+});
+
+const avatarStyles = StyleSheet.create({
+  ring: {
+    padding: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ringViewed: {
+    padding: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+  },
+  avatar: {
+    borderWidth: 2,
+    borderColor: GLASS.background,
+    backgroundColor: COLORS.glassBg,
+  },
+});
 
 export default StoriesRow;

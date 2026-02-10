@@ -6,10 +6,10 @@
  * Part of Vision Board 2.0 Redesign
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, TYPOGRAPHY, SPACING } from '../../utils/tokens';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -17,8 +17,8 @@ const ProgressRing = ({
   size = 120,
   strokeWidth = 10,
   progress = 0, // 0-100
-  color,
-  gradientColors,
+  color = COLORS.gold,
+  gradientColors = [COLORS.gold, COLORS.cyan],
   useGradient = true,
   backgroundColor = 'rgba(255, 255, 255, 0.1)',
   centerContent = null, // Custom center content
@@ -27,29 +27,7 @@ const ProgressRing = ({
   duration = 800,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const animatedValue = useRef(new Animated.Value(0)).current;
-
-  // Use theme colors for defaults
-  const effectiveColor = color || colors.gold;
-  const effectiveGradientColors = gradientColors || [colors.gold, colors.cyan];
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    centerContent: {
-      position: 'absolute',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    percentageText: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.xxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -79,8 +57,8 @@ const ProgressRing = ({
         <Defs>
           {useGradient && (
             <LinearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%" stopColor={effectiveGradientColors[0]} />
-              <Stop offset="100%" stopColor={effectiveGradientColors[1]} />
+              <Stop offset="0%" stopColor={gradientColors[0]} />
+              <Stop offset="100%" stopColor={gradientColors[1]} />
             </LinearGradient>
           )}
         </Defs>
@@ -100,7 +78,7 @@ const ProgressRing = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={useGradient ? `url(#${gradientId})` : effectiveColor}
+          stroke={useGradient ? `url(#${gradientId})` : color}
           strokeWidth={strokeWidth}
           fill="transparent"
           strokeLinecap="round"
@@ -139,44 +117,54 @@ export const ProgressRingLarge = (props) => (
 // Score Ring with label
 export const ScoreRing = ({
   score = 0,
-  label = 'Diem',
+  label = 'Điểm',
   size = 120,
   ...props
-}) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+}) => (
+  <ProgressRing
+    size={size}
+    progress={score}
+    centerContent={
+      <View style={styles.scoreCenterContent}>
+        <Text style={[styles.scoreValue, { fontSize: size * 0.25 }]}>
+          {Math.round(score)}
+        </Text>
+        <Text style={[styles.scoreLabel, { fontSize: size * 0.1 }]}>
+          {label}
+        </Text>
+      </View>
+    }
+    {...props}
+  />
+);
 
-  const styles = useMemo(() => StyleSheet.create({
-    scoreCenterContent: {
-      alignItems: 'center',
-    },
-    scoreValue: {
-      color: colors.textPrimary,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    scoreLabel: {
-      color: colors.textMuted,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      marginTop: SPACING.xxs,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
-  return (
-    <ProgressRing
-      size={size}
-      progress={score}
-      centerContent={
-        <View style={styles.scoreCenterContent}>
-          <Text style={[styles.scoreValue, { fontSize: size * 0.25 }]}>
-            {Math.round(score)}
-          </Text>
-          <Text style={[styles.scoreLabel, { fontSize: size * 0.1 }]}>
-            {label}
-          </Text>
-        </View>
-      }
-      {...props}
-    />
-  );
-};
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerContent: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  percentageText: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  scoreCenterContent: {
+    alignItems: 'center',
+  },
+  scoreValue: {
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  scoreLabel: {
+    color: COLORS.textMuted,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    marginTop: SPACING.xxs,
+  },
+});
 
 export default ProgressRing;

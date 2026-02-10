@@ -3,7 +3,7 @@
  * Floating bubble when video call is minimized
  */
 
-import React, { memo, useState, useRef, useMemo } from 'react';
+import React, { memo, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
   Image,
 } from 'react-native';
 import { Maximize2, PhoneOff, User } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 
 // Try to import RTCView - may not be available
 let RTCView = null;
@@ -48,89 +48,7 @@ const MinimizedCallView = memo(({
   onMaximize,
   onEndCall,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
   const [position] = useState(new Animated.ValueXY(INITIAL_POSITION));
-
-  const styles = useMemo(() => {
-    // Get BORDER_RADIUS from settings or use defaults
-    const BORDER_RADIUS = { lg: 16 };
-
-    return StyleSheet.create({
-      container: {
-        position: 'absolute',
-        width: BUBBLE_SIZE.width,
-        height: BUBBLE_SIZE.height,
-        borderRadius: BORDER_RADIUS.lg,
-        overflow: 'hidden',
-        backgroundColor: colors.bgCard,
-        elevation: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-        borderWidth: 2,
-        borderColor: colors.gold,
-      },
-      video: {
-        width: '100%',
-        height: '100%',
-      },
-      placeholder: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      avatar: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-      },
-      avatarPlaceholder: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: colors.bgCard,
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      durationBadge: {
-        position: 'absolute',
-        top: 8,
-        left: 8,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 4,
-      },
-      durationText: {
-        fontSize: TYPOGRAPHY.fontSize.xs,
-        color: colors.textPrimary,
-        fontWeight: TYPOGRAPHY.fontWeight.medium,
-      },
-      actionsOverlay: {
-        position: 'absolute',
-        bottom: 8,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 8,
-      },
-      actionButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      endButton: {
-        backgroundColor: colors.error,
-      },
-    });
-  }, [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Pan responder for dragging
   const panResponder = useRef(
@@ -191,7 +109,7 @@ const MinimizedCallView = memo(({
           <Image source={{ uri: userAvatar }} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
-            <User size={40} color={colors.textMuted} />
+            <User size={40} color={COLORS.textMuted} />
           </View>
         )}
       </View>
@@ -227,7 +145,7 @@ const MinimizedCallView = memo(({
           onPress={onMaximize}
           activeOpacity={0.7}
         >
-          <Maximize2 size={16} color={colors.textPrimary} />
+          <Maximize2 size={16} color={COLORS.textPrimary} />
         </TouchableOpacity>
 
         {/* End Call */}
@@ -236,11 +154,87 @@ const MinimizedCallView = memo(({
           onPress={onEndCall}
           activeOpacity={0.7}
         >
-          <PhoneOff size={16} color={colors.textPrimary} />
+          <PhoneOff size={16} color={COLORS.textPrimary} />
         </TouchableOpacity>
       </View>
     </Animated.View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    width: BUBBLE_SIZE.width,
+    height: BUBBLE_SIZE.height,
+    borderRadius: BORDER_RADIUS.lg,
+    overflow: 'hidden',
+    backgroundColor: COLORS.bgCard,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: COLORS.bgDarkest,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  avatarPlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.bgCard,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  durationBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  durationText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  actionsOverlay: {
+    position: 'absolute',
+    bottom: 8,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  actionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  endButton: {
+    backgroundColor: COLORS.error,
+  },
 });
 
 MinimizedCallView.displayName = 'MinimizedCallView';

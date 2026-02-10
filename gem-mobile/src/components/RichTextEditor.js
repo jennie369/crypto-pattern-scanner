@@ -4,7 +4,7 @@
  * Uses dark glass theme from DESIGN_TOKENS
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -28,18 +28,17 @@ import {
   AtSign,
   Hash,
 } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS, INPUT } from '../utils/tokens';
 
 const RichTextEditor = ({
   value,
   onChangeText,
-  placeholder = 'Viet noi dung...',
+  placeholder = 'Viết nội dung...',
   minHeight = 150,
   maxHeight = 400,
   onMentionSearch,
   onHashtagSearch,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const [showToolbar, setShowToolbar] = useState(true);
   const inputRef = useRef(null);
@@ -95,17 +94,17 @@ const RichTextEditor = ({
         break;
 
       case 'heading1':
-        newText = `${text.slice(0, start)}# ${selectedText || 'Tieu de'}${text.slice(end)}`;
+        newText = `${text.slice(0, start)}# ${selectedText || 'Tiêu đề'}${text.slice(end)}`;
         newCursorPos = start + 2 + (selectedText.length || 7);
         break;
 
       case 'heading2':
-        newText = `${text.slice(0, start)}## ${selectedText || 'Tieu de'}${text.slice(end)}`;
+        newText = `${text.slice(0, start)}## ${selectedText || 'Tiêu đề'}${text.slice(end)}`;
         newCursorPos = start + 3 + (selectedText.length || 7);
         break;
 
       case 'quote':
-        newText = `${text.slice(0, start)}> ${selectedText || 'Trich dan'}${text.slice(end)}`;
+        newText = `${text.slice(0, start)}> ${selectedText || 'Trích dẫn'}${text.slice(end)}`;
         newCursorPos = start + 2 + (selectedText.length || 9);
         break;
 
@@ -125,12 +124,12 @@ const RichTextEditor = ({
         break;
 
       case 'bullet':
-        newText = `${text.slice(0, start)}\n- ${selectedText || 'Muc'}${text.slice(end)}`;
+        newText = `${text.slice(0, start)}\n- ${selectedText || 'Mục'}${text.slice(end)}`;
         newCursorPos = start + 3 + (selectedText.length || 3);
         break;
 
       case 'numbered':
-        newText = `${text.slice(0, start)}\n1. ${selectedText || 'Muc'}${text.slice(end)}`;
+        newText = `${text.slice(0, start)}\n1. ${selectedText || 'Mục'}${text.slice(end)}`;
         newCursorPos = start + 4 + (selectedText.length || 3);
         break;
 
@@ -139,7 +138,7 @@ const RichTextEditor = ({
           newText = `${text.slice(0, start)}[${selectedText}](url)${text.slice(end)}`;
           newCursorPos = end + 7;
         } else {
-          newText = `${text.slice(0, start)}[ten](url)${text.slice(end)}`;
+          newText = `${text.slice(0, start)}[tên](url)${text.slice(end)}`;
           newCursorPos = start + 5;
         }
         break;
@@ -175,73 +174,24 @@ const RichTextEditor = ({
   };
 
   const toolbarItems = [
-    { icon: Bold, format: 'bold', label: 'Dam' },
-    { icon: Italic, format: 'italic', label: 'Nghieng' },
-    { icon: Underline, format: 'underline', label: 'Gach chan' },
-    { icon: Strikethrough, format: 'strikethrough', label: 'Gach ngang' },
+    { icon: Bold, format: 'bold', label: 'Đậm' },
+    { icon: Italic, format: 'italic', label: 'Nghiêng' },
+    { icon: Underline, format: 'underline', label: 'Gạch chân' },
+    { icon: Strikethrough, format: 'strikethrough', label: 'Gạch ngang' },
     { type: 'separator' },
-    { icon: Heading1, format: 'heading1', label: 'Tieu de 1' },
-    { icon: Heading2, format: 'heading2', label: 'Tieu de 2' },
+    { icon: Heading1, format: 'heading1', label: 'Tiêu đề 1' },
+    { icon: Heading2, format: 'heading2', label: 'Tiêu đề 2' },
     { type: 'separator' },
-    { icon: List, format: 'bullet', label: 'Danh sach' },
-    { icon: ListOrdered, format: 'numbered', label: 'Danh sach so' },
+    { icon: List, format: 'bullet', label: 'Danh sách' },
+    { icon: ListOrdered, format: 'numbered', label: 'Danh sách số' },
     { type: 'separator' },
-    { icon: Quote, format: 'quote', label: 'Trich dan' },
+    { icon: Quote, format: 'quote', label: 'Trích dẫn' },
     { icon: Code, format: 'code', label: 'Code' },
-    { icon: Link, format: 'link', label: 'Lien ket' },
+    { icon: Link, format: 'link', label: 'Liên kết' },
     { type: 'separator' },
-    { icon: AtSign, format: 'mention', label: 'Nhac den' },
+    { icon: AtSign, format: 'mention', label: 'Nhắc đến' },
     { icon: Hash, format: 'hashtag', label: 'Hashtag' },
   ];
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: glass.border || 'rgba(255, 255, 255, 0.1)',
-      overflow: 'hidden',
-    },
-    // Toolbar
-    toolbar: {
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-      backgroundColor: glass.background || 'rgba(15, 16, 48, 0.95)',
-    },
-    toolbarContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.xs,
-    },
-    toolbarButton: {
-      padding: SPACING.sm,
-      borderRadius: 6,
-    },
-    separator: {
-      width: 1,
-      height: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      marginHorizontal: SPACING.xs,
-    },
-    // Input
-    input: {
-      padding: SPACING.md,
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textPrimary,
-      lineHeight: 24,
-    },
-    // Character count
-    charCount: {
-      position: 'absolute',
-      bottom: SPACING.sm,
-      right: SPACING.sm,
-    },
-    charCountText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View style={styles.container}>
@@ -266,7 +216,7 @@ const RichTextEditor = ({
                   onPress={() => applyFormat(item.format)}
                   activeOpacity={0.7}
                 >
-                  <Icon size={18} color={colors.textSecondary} />
+                  <Icon size={18} color={COLORS.textSecondary} />
                 </TouchableOpacity>
               );
             })}
@@ -282,10 +232,10 @@ const RichTextEditor = ({
         onChangeText={onChangeText}
         onSelectionChange={handleSelectionChange}
         placeholder={placeholder}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={COLORS.textMuted}
         multiline
         textAlignVertical="top"
-        selectionColor={colors.purple}
+        selectionColor={COLORS.purple}
         onFocus={() => setShowToolbar(true)}
       />
 
@@ -303,119 +253,6 @@ const RichTextEditor = ({
  * Rich Text Renderer - Renders formatted text with markdown support
  */
 export const RichTextRenderer = ({ content, style }) => {
-  const { colors, glass, SPACING, TYPOGRAPHY } = useSettings();
-
-  const rendererStyles = useMemo(() => StyleSheet.create({
-    container: {
-      gap: 6,
-    },
-    text: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textPrimary,
-      lineHeight: 22,
-    },
-    bold: {
-      fontWeight: 'bold',
-    },
-    italic: {
-      fontStyle: 'italic',
-    },
-    strikethrough: {
-      textDecorationLine: 'line-through',
-    },
-    code: {
-      fontFamily: 'monospace',
-      backgroundColor: 'rgba(106, 91, 255, 0.2)',
-      paddingHorizontal: 4,
-      borderRadius: 4,
-    },
-    heading1: {
-      fontSize: TYPOGRAPHY.fontSize['2xl'] || 24,
-      fontWeight: 'bold',
-      color: colors.textPrimary,
-      marginTop: SPACING.sm,
-      marginBottom: SPACING.xs,
-    },
-    heading2: {
-      fontSize: TYPOGRAPHY.fontSize.xl || 20,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginTop: SPACING.sm,
-      marginBottom: SPACING.xs,
-    },
-    quoteContainer: {
-      borderLeftWidth: 3,
-      borderLeftColor: colors.purple,
-      paddingLeft: SPACING.md,
-      marginVertical: SPACING.xs,
-    },
-    quote: {
-      fontStyle: 'italic',
-      color: colors.textSecondary,
-      fontSize: TYPOGRAPHY.fontSize.md,
-      lineHeight: 22,
-    },
-    link: {
-      color: colors.cyan,
-      textDecorationLine: 'underline',
-    },
-    mention: {
-      color: colors.cyan,
-      fontWeight: '500',
-    },
-    hashtag: {
-      color: colors.purple,
-    },
-    // Checkbox styles
-    checkboxRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      marginVertical: 2,
-    },
-    checkbox: {
-      width: 18,
-      height: 18,
-      borderRadius: 4,
-      borderWidth: 2,
-      borderColor: colors.textMuted,
-      marginRight: SPACING.sm,
-      marginTop: 2,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    checkboxChecked: {
-      backgroundColor: colors.success || '#22c55e',
-      borderColor: colors.success || '#22c55e',
-    },
-    checkmark: {
-      color: '#fff',
-      fontSize: 12,
-      fontWeight: 'bold',
-    },
-    checkboxTextChecked: {
-      color: colors.textPrimary,
-    },
-    // Bullet styles
-    bulletRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      marginVertical: 2,
-    },
-    bullet: {
-      color: colors.purple,
-      fontSize: TYPOGRAPHY.fontSize.md,
-      marginRight: SPACING.sm,
-      marginTop: 0,
-    },
-    bulletText: {
-      flex: 1,
-    },
-    // Empty line
-    emptyLine: {
-      height: 8,
-    },
-  }), [colors, glass, SPACING, TYPOGRAPHY]);
-
   if (!content) return null;
 
   // Parse inline markdown (bold, italic, code, etc.)
@@ -504,14 +341,14 @@ export const RichTextRenderer = ({ content, style }) => {
 
       // Checkbox checked: - [x] text
       if (trimmedLine.match(/^-\s*\[x\]\s*/i)) {
-        const contentText = trimmedLine.replace(/^-\s*\[x\]\s*/i, '');
+        const content = trimmedLine.replace(/^-\s*\[x\]\s*/i, '');
         elements.push(
           <View key={index} style={rendererStyles.checkboxRow}>
             <View style={[rendererStyles.checkbox, rendererStyles.checkboxChecked]}>
-              <Text style={rendererStyles.checkmark}>+</Text>
+              <Text style={rendererStyles.checkmark}>✓</Text>
             </View>
             <Text style={[rendererStyles.text, rendererStyles.checkboxTextChecked, style]}>
-              {parseInlineMarkdown(contentText)}
+              {parseInlineMarkdown(content)}
             </Text>
           </View>
         );
@@ -520,12 +357,12 @@ export const RichTextRenderer = ({ content, style }) => {
 
       // Checkbox unchecked: - [ ] text
       if (trimmedLine.match(/^-\s*\[\s*\]\s*/)) {
-        const contentText = trimmedLine.replace(/^-\s*\[\s*\]\s*/, '');
+        const content = trimmedLine.replace(/^-\s*\[\s*\]\s*/, '');
         elements.push(
           <View key={index} style={rendererStyles.checkboxRow}>
             <View style={rendererStyles.checkbox} />
             <Text style={[rendererStyles.text, style]}>
-              {parseInlineMarkdown(contentText)}
+              {parseInlineMarkdown(content)}
             </Text>
           </View>
         );
@@ -534,12 +371,12 @@ export const RichTextRenderer = ({ content, style }) => {
 
       // Bullet point: - text
       if (trimmedLine.match(/^-\s+/)) {
-        const contentText = trimmedLine.replace(/^-\s+/, '');
+        const content = trimmedLine.replace(/^-\s+/, '');
         elements.push(
           <View key={index} style={rendererStyles.bulletRow}>
-            <Text style={[rendererStyles.bullet, style]}>*</Text>
+            <Text style={[rendererStyles.bullet, style]}>•</Text>
             <Text style={[rendererStyles.text, rendererStyles.bulletText, style]}>
-              {parseInlineMarkdown(contentText)}
+              {parseInlineMarkdown(content)}
             </Text>
           </View>
         );
@@ -548,10 +385,10 @@ export const RichTextRenderer = ({ content, style }) => {
 
       // Heading 1: # text
       if (trimmedLine.match(/^#\s+/)) {
-        const contentText = trimmedLine.replace(/^#\s+/, '');
+        const content = trimmedLine.replace(/^#\s+/, '');
         elements.push(
           <Text key={index} style={[rendererStyles.heading1, style]}>
-            {parseInlineMarkdown(contentText)}
+            {parseInlineMarkdown(content)}
           </Text>
         );
         return;
@@ -559,10 +396,10 @@ export const RichTextRenderer = ({ content, style }) => {
 
       // Heading 2: ## text
       if (trimmedLine.match(/^##\s+/)) {
-        const contentText = trimmedLine.replace(/^##\s+/, '');
+        const content = trimmedLine.replace(/^##\s+/, '');
         elements.push(
           <Text key={index} style={[rendererStyles.heading2, style]}>
-            {parseInlineMarkdown(contentText)}
+            {parseInlineMarkdown(content)}
           </Text>
         );
         return;
@@ -570,11 +407,11 @@ export const RichTextRenderer = ({ content, style }) => {
 
       // Quote: > text
       if (trimmedLine.match(/^>\s*/)) {
-        const contentText = trimmedLine.replace(/^>\s*/, '');
+        const content = trimmedLine.replace(/^>\s*/, '');
         elements.push(
           <View key={index} style={rendererStyles.quoteContainer}>
             <Text style={[rendererStyles.quote, style]}>
-              {parseInlineMarkdown(contentText)}
+              {parseInlineMarkdown(content)}
             </Text>
           </View>
         );
@@ -604,67 +441,225 @@ export const RichTextRenderer = ({ content, style }) => {
  * Format Help Component
  */
 export const FormatHelp = () => {
-  const { colors, glass, SPACING, TYPOGRAPHY } = useSettings();
-
-  const helpStyles = useMemo(() => StyleSheet.create({
-    container: {
-      padding: SPACING.md,
-      backgroundColor: glass.background || 'rgba(15, 16, 48, 0.95)',
-      borderRadius: 12,
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-      marginBottom: SPACING.md,
-    },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.sm,
-    },
-    syntax: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      fontFamily: 'monospace',
-      flex: 1,
-    },
-    arrow: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      marginHorizontal: SPACING.sm,
-    },
-    result: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textPrimary,
-      flex: 1,
-    },
-  }), [colors, glass, SPACING, TYPOGRAPHY]);
-
   const formats = [
-    { syntax: '**dam**', result: 'dam', label: 'In dam' },
-    { syntax: '_nghieng_', result: 'nghieng', label: 'In nghieng' },
-    { syntax: '~~gach~~', result: 'gach', label: 'Gach ngang' },
+    { syntax: '**đậm**', result: 'đậm', label: 'In đậm' },
+    { syntax: '_nghiêng_', result: 'nghiêng', label: 'In nghiêng' },
+    { syntax: '~~gạch~~', result: 'gạch', label: 'Gạch ngang' },
     { syntax: '`code`', result: 'code', label: 'Code' },
-    { syntax: '# Tieu de', result: 'Tieu de', label: 'Tieu de' },
-    { syntax: '> Trich dan', result: 'Trich dan', label: 'Trich dan' },
-    { syntax: '[ten](url)', result: 'lien ket', label: 'Lien ket' },
-    { syntax: '@username', result: '@username', label: 'Nhac den' },
+    { syntax: '# Tiêu đề', result: 'Tiêu đề', label: 'Tiêu đề' },
+    { syntax: '> Trích dẫn', result: 'Trích dẫn', label: 'Trích dẫn' },
+    { syntax: '[tên](url)', result: 'liên kết', label: 'Liên kết' },
+    { syntax: '@username', result: '@username', label: 'Nhắc đến' },
     { syntax: '#hashtag', result: '#hashtag', label: 'Hashtag' },
   ];
 
   return (
     <View style={helpStyles.container}>
-      <Text style={helpStyles.title}>Huong dan dinh dang</Text>
+      <Text style={helpStyles.title}>Hướng dẫn định dạng</Text>
       {formats.map((format, index) => (
         <View key={index} style={helpStyles.row}>
           <Text style={helpStyles.syntax}>{format.syntax}</Text>
-          <Text style={helpStyles.arrow}>-></Text>
+          <Text style={helpStyles.arrow}>→</Text>
           <Text style={helpStyles.result}>{format.result}</Text>
         </View>
       ))}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: INPUT.background,
+    borderRadius: INPUT.borderRadius,
+    borderWidth: 1,
+    borderColor: INPUT.borderColor,
+    overflow: 'hidden',
+  },
+  // Toolbar
+  toolbar: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: GLASS.background,
+  },
+  toolbarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  toolbarButton: {
+    padding: SPACING.sm,
+    borderRadius: 6,
+  },
+  separator: {
+    width: 1,
+    height: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: SPACING.xs,
+  },
+  // Input
+  input: {
+    padding: SPACING.md,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textPrimary,
+    lineHeight: 24,
+  },
+  // Character count
+  charCount: {
+    position: 'absolute',
+    bottom: SPACING.sm,
+    right: SPACING.sm,
+  },
+  charCountText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+});
+
+const rendererStyles = StyleSheet.create({
+  container: {
+    gap: 6,
+  },
+  text: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    lineHeight: 22,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  italic: {
+    fontStyle: 'italic',
+  },
+  strikethrough: {
+    textDecorationLine: 'line-through',
+  },
+  code: {
+    fontFamily: 'monospace',
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    paddingHorizontal: 4,
+    borderRadius: 4,
+  },
+  heading1: {
+    fontSize: TYPOGRAPHY.fontSize['2xl'] || 24,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  heading2: {
+    fontSize: TYPOGRAPHY.fontSize.xl || 20,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  quoteContainer: {
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.purple,
+    paddingLeft: SPACING.md,
+    marginVertical: SPACING.xs,
+  },
+  quote: {
+    fontStyle: 'italic',
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    lineHeight: 22,
+  },
+  link: {
+    color: COLORS.cyan,
+    textDecorationLine: 'underline',
+  },
+  mention: {
+    color: COLORS.cyan,
+    fontWeight: '500',
+  },
+  hashtag: {
+    color: COLORS.purple,
+  },
+  // Checkbox styles
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginVertical: 2,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+    marginRight: SPACING.sm,
+    marginTop: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.success || '#22c55e',
+    borderColor: COLORS.success || '#22c55e',
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  checkboxTextChecked: {
+    color: COLORS.textPrimary,
+  },
+  // Bullet styles
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginVertical: 2,
+  },
+  bullet: {
+    color: COLORS.purple,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    marginRight: SPACING.sm,
+    marginTop: 0,
+  },
+  bulletText: {
+    flex: 1,
+  },
+  // Empty line
+  emptyLine: {
+    height: 8,
+  },
+});
+
+const helpStyles = StyleSheet.create({
+  container: {
+    padding: SPACING.md,
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  syntax: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    fontFamily: 'monospace',
+    flex: 1,
+  },
+  arrow: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginHorizontal: SPACING.sm,
+  },
+  result: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textPrimary,
+    flex: 1,
+  },
+});
 
 export default RichTextEditor;

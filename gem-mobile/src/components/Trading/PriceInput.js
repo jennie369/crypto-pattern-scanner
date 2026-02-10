@@ -3,7 +3,7 @@
  * Price input with +/- buttons, BBO button, and increment controls
  */
 
-import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -12,7 +12,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Plus, Minus, Crosshair, HelpCircle, Lock } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING } from '../../utils/tokens';
 import { formatPrice } from '../../services/tradingCalculations';
 
 const PriceInput = ({
@@ -35,172 +35,7 @@ const PriceInput = ({
   locked = false,  // For Pattern mode - field is locked
   lockedText = null,  // Text to show when locked
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [isFocused, setIsFocused] = useState(false);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginBottom: SPACING.md,
-    },
-    // Label
-    labelRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: SPACING.xs,
-    },
-    labelWithLock: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    },
-    label: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-    lockedBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: 'rgba(255, 215, 0, 0.15)',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    lockedText: {
-      fontSize: 9,
-      fontWeight: '600',
-      color: colors.gold,
-    },
-    helpButton: {
-      marginLeft: SPACING.xs,
-      padding: 2,
-    },
-    // Input Container
-    inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
-      overflow: 'hidden',
-    },
-    inputContainerFocused: {
-      borderColor: colors.gold,
-      backgroundColor: 'rgba(255, 189, 89, 0.05)',
-    },
-    inputContainerError: {
-      borderColor: colors.error,
-      backgroundColor: 'rgba(255, 107, 107, 0.05)',
-    },
-    inputContainerDisabled: {
-      opacity: 0.5,
-    },
-    inputContainerLocked: {
-      borderColor: 'rgba(255, 215, 0, 0.3)',
-      borderStyle: 'dashed',
-      backgroundColor: 'rgba(255, 215, 0, 0.05)',
-    },
-    // Input
-    input: {
-      flex: 1,
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.sm,
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      textAlign: 'center',
-    },
-    // Increment Buttons
-    incrementButton: {
-      padding: SPACING.md,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    },
-    // BBO Button
-    bboButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      paddingVertical: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      backgroundColor: 'rgba(0, 240, 255, 0.1)',
-      borderLeftWidth: 1,
-      borderLeftColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    bboButtonDisabled: {
-      opacity: 0.5,
-    },
-    bboText: {
-      fontSize: 10,
-      fontWeight: '700',
-      color: colors.cyan,
-    },
-    bboTextDisabled: {
-      color: colors.textDisabled,
-    },
-    // Trigger Type
-    triggerTypeRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginTop: SPACING.sm,
-    },
-    triggerTypeLabel: {
-      fontSize: 11,
-      color: colors.textMuted,
-    },
-    triggerTypeButtons: {
-      flexDirection: 'row',
-      gap: SPACING.xs,
-    },
-    triggerTypeButton: {
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.sm,
-      borderRadius: 4,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderWidth: 1,
-      borderColor: 'transparent',
-    },
-    triggerTypeButtonActive: {
-      backgroundColor: 'rgba(0, 240, 255, 0.15)',
-      borderColor: 'rgba(0, 240, 255, 0.4)',
-    },
-    triggerTypeText: {
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.textMuted,
-    },
-    triggerTypeTextActive: {
-      color: colors.cyan,
-    },
-    // Current Price
-    currentPriceText: {
-      fontSize: 11,
-      color: colors.textMuted,
-      marginTop: SPACING.xs,
-      textAlign: 'right',
-    },
-    currentPriceValue: {
-      color: colors.cyan,
-      fontWeight: '600',
-    },
-    // Error & Help
-    errorText: {
-      fontSize: 11,
-      color: colors.error,
-      marginTop: SPACING.xs,
-    },
-    helpText: {
-      fontSize: 11,
-      color: colors.textMuted,
-      marginTop: SPACING.xs,
-      fontStyle: 'italic',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Calculate increment value based on current price
   const getIncrementValue = useCallback(() => {
@@ -262,14 +97,14 @@ const PriceInput = ({
           <Text style={styles.label}>{label}</Text>
           {locked && (
             <View style={styles.lockedBadge}>
-              <Lock size={10} color={colors.gold} />
+              <Lock size={10} color={COLORS.gold} />
               {lockedText && <Text style={styles.lockedText}>{lockedText}</Text>}
             </View>
           )}
         </View>
         {helpText && (
           <TouchableOpacity style={styles.helpButton}>
-            <HelpCircle size={14} color={colors.textMuted} />
+            <HelpCircle size={14} color={COLORS.textMuted} />
           </TouchableOpacity>
         )}
       </View>
@@ -292,7 +127,7 @@ const PriceInput = ({
             disabled={disabled}
             activeOpacity={0.7}
           >
-            <Minus size={16} color={disabled ? colors.textDisabled : colors.textSecondary} />
+            <Minus size={16} color={disabled ? COLORS.textDisabled : COLORS.textSecondary} />
           </TouchableOpacity>
         )}
 
@@ -302,7 +137,7 @@ const PriceInput = ({
           value={value}
           onChangeText={handleChange}
           placeholder={placeholder}
-          placeholderTextColor={colors.textDisabled}
+          placeholderTextColor={COLORS.textDisabled}
           keyboardType="decimal-pad"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -318,7 +153,7 @@ const PriceInput = ({
             disabled={disabled}
             activeOpacity={0.7}
           >
-            <Plus size={16} color={disabled ? colors.textDisabled : colors.textSecondary} />
+            <Plus size={16} color={disabled ? COLORS.textDisabled : COLORS.textSecondary} />
           </TouchableOpacity>
         )}
 
@@ -330,7 +165,7 @@ const PriceInput = ({
             disabled={disabled}
             activeOpacity={0.7}
           >
-            <Crosshair size={14} color={disabled ? colors.textDisabled : colors.cyan} />
+            <Crosshair size={14} color={disabled ? COLORS.textDisabled : COLORS.cyan} />
             <Text style={[styles.bboText, disabled && styles.bboTextDisabled]}>BBO</Text>
           </TouchableOpacity>
         )}
@@ -398,5 +233,169 @@ const PriceInput = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: SPACING.md,
+  },
+  // Label
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.xs,
+  },
+  labelWithLock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  lockedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  lockedText: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: COLORS.gold,
+  },
+  helpButton: {
+    marginLeft: SPACING.xs,
+    padding: 2,
+  },
+  // Input Container
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    overflow: 'hidden',
+  },
+  inputContainerFocused: {
+    borderColor: COLORS.gold,
+    backgroundColor: 'rgba(255, 189, 89, 0.05)',
+  },
+  inputContainerError: {
+    borderColor: COLORS.error,
+    backgroundColor: 'rgba(255, 107, 107, 0.05)',
+  },
+  inputContainerDisabled: {
+    opacity: 0.5,
+  },
+  inputContainerLocked: {
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+    borderStyle: 'dashed',
+    backgroundColor: 'rgba(255, 215, 0, 0.05)',
+  },
+  // Input
+  input: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+  },
+  // Increment Buttons
+  incrementButton: {
+    padding: SPACING.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  // BBO Button
+  bboButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  bboButtonDisabled: {
+    opacity: 0.5,
+  },
+  bboText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.cyan,
+  },
+  bboTextDisabled: {
+    color: COLORS.textDisabled,
+  },
+  // Trigger Type
+  triggerTypeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.sm,
+  },
+  triggerTypeLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  triggerTypeButtons: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+  },
+  triggerTypeButton: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  triggerTypeButtonActive: {
+    backgroundColor: 'rgba(0, 240, 255, 0.15)',
+    borderColor: 'rgba(0, 240, 255, 0.4)',
+  },
+  triggerTypeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  triggerTypeTextActive: {
+    color: COLORS.cyan,
+  },
+  // Current Price
+  currentPriceText: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginTop: SPACING.xs,
+    textAlign: 'right',
+  },
+  currentPriceValue: {
+    color: COLORS.cyan,
+    fontWeight: '600',
+  },
+  // Error & Help
+  errorText: {
+    fontSize: 11,
+    color: COLORS.error,
+    marginTop: SPACING.xs,
+  },
+  helpText: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginTop: SPACING.xs,
+    fontStyle: 'italic',
+  },
+});
 
 export default memo(PriceInput);

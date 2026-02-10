@@ -6,10 +6,10 @@
  * Part of Vision Board 2.0 Redesign
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import * as Icons from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
 
 const QuickStatsRow = ({
   stats = {

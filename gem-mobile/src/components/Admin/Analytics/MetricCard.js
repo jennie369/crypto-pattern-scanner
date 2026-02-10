@@ -12,7 +12,7 @@
  * Created: January 30, 2026
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -25,33 +25,28 @@ import {
   Minus,
   HelpCircle,
 } from 'lucide-react-native';
-import { useSettings } from '../../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 
 const MetricCard = ({
   title,
   value,
   subtitle,
   icon: Icon,
-  iconColor,
+  iconColor = COLORS.purple,
   trend = null, // 'up' | 'down' | 'neutral'
   trendValue = null, // e.g., "+12%"
   trendLabel = null, // e.g., "vs last week"
-  color,
+  color = COLORS.purple,
   size = 'medium', // 'small' | 'medium' | 'large'
   onPress,
   onTooltipPress,
   tooltipText,
   style,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const effectiveIconColor = iconColor || colors.purple;
-  const effectiveColor = color || colors.purple;
-
   const getTrendColor = () => {
-    if (trend === 'up') return colors.success;
-    if (trend === 'down') return colors.error;
-    return colors.textMuted;
+    if (trend === 'up') return COLORS.success;
+    if (trend === 'down') return COLORS.error;
+    return COLORS.textMuted;
   };
 
   const getTrendIcon = () => {
@@ -62,105 +57,6 @@ const MetricCard = ({
 
   const TrendIcon = getTrendIcon();
   const trendColor = getTrendColor();
-
-  const styles = useMemo(() => StyleSheet.create({
-    card: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-      borderLeftWidth: 4,
-      padding: SPACING.md,
-    },
-    cardSmall: {
-      padding: SPACING.sm,
-    },
-    cardMedium: {
-      padding: SPACING.md,
-    },
-    cardLarge: {
-      padding: SPACING.lg,
-    },
-
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: SPACING.sm,
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    iconContainer: {
-      width: 32,
-      height: 32,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: SPACING.sm,
-    },
-    title: {
-      color: colors.textSecondary,
-      flex: 1,
-    },
-    titleSmall: {
-      fontSize: 12,
-    },
-    titleMedium: {
-      fontSize: 13,
-    },
-    titleLarge: {
-      fontSize: 14,
-    },
-
-    value: {
-      color: colors.textPrimary,
-      fontWeight: '700',
-      marginBottom: SPACING.xs,
-    },
-    valueSmall: {
-      fontSize: 20,
-    },
-    valueMedium: {
-      fontSize: 26,
-    },
-    valueLarge: {
-      fontSize: 32,
-    },
-
-    footer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      flexWrap: 'wrap',
-      gap: SPACING.xs,
-    },
-    subtitle: {
-      fontSize: 12,
-      color: colors.textMuted,
-      flex: 1,
-    },
-
-    trendBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 12,
-      gap: 4,
-    },
-    trendValue: {
-      fontSize: 12,
-      fontWeight: '600',
-    },
-    trendLabel: {
-      fontSize: 10,
-      color: colors.textMuted,
-      marginLeft: 2,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const sizeStyles = {
     small: {
@@ -192,7 +88,7 @@ const MetricCard = ({
       style={[
         styles.card,
         currentSize.card,
-        { borderLeftColor: effectiveColor },
+        { borderLeftColor: color },
         style,
       ]}
       onPress={onPress}
@@ -202,8 +98,8 @@ const MetricCard = ({
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           {Icon && (
-            <View style={[styles.iconContainer, { backgroundColor: `${effectiveIconColor}20` }]}>
-              <Icon size={currentSize.icon} color={effectiveIconColor} />
+            <View style={[styles.iconContainer, { backgroundColor: `${iconColor}20` }]}>
+              <Icon size={currentSize.icon} color={iconColor} />
             </View>
           )}
           <Text style={[styles.title, currentSize.title]} numberOfLines={1}>
@@ -212,7 +108,7 @@ const MetricCard = ({
         </View>
         {tooltipText && onTooltipPress && (
           <TouchableOpacity onPress={onTooltipPress} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <HelpCircle size={16} color={colors.textMuted} />
+            <HelpCircle size={16} color={COLORS.textMuted} />
           </TouchableOpacity>
         )}
       </View>
@@ -245,5 +141,104 @@ const MetricCard = ({
     </CardWrapper>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: GLASS.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderLeftWidth: 4,
+    padding: SPACING.md,
+  },
+  cardSmall: {
+    padding: SPACING.sm,
+  },
+  cardMedium: {
+    padding: SPACING.md,
+  },
+  cardLarge: {
+    padding: SPACING.lg,
+  },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.sm,
+  },
+  title: {
+    color: COLORS.textSecondary,
+    flex: 1,
+  },
+  titleSmall: {
+    fontSize: 12,
+  },
+  titleMedium: {
+    fontSize: 13,
+  },
+  titleLarge: {
+    fontSize: 14,
+  },
+
+  value: {
+    color: COLORS.textPrimary,
+    fontWeight: '700',
+    marginBottom: SPACING.xs,
+  },
+  valueSmall: {
+    fontSize: 20,
+  },
+  valueMedium: {
+    fontSize: 26,
+  },
+  valueLarge: {
+    fontSize: 32,
+  },
+
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    flex: 1,
+  },
+
+  trendBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  trendValue: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  trendLabel: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginLeft: 2,
+  },
+});
 
 export default MetricCard;

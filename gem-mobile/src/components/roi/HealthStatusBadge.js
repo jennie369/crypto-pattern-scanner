@@ -6,7 +6,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import {
   ShieldCheck,
@@ -15,8 +15,7 @@ import {
   Flame,
   Skull,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
-import { BORDER_RADIUS } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
 import { HEALTH_CONFIG } from '../../services/accountHealthService';
 
 /**
@@ -75,8 +74,6 @@ const HealthStatusBadge = ({
   outline = false,
   style,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // Get configuration
   const config = HEALTH_CONFIG[status] || HEALTH_CONFIG.healthy;
   const sizeConfig = SIZE_CONFIG[size] || SIZE_CONFIG.md;
@@ -89,17 +86,6 @@ const HealthStatusBadge = ({
   const labelText = showPercentage && formattedPct
     ? formattedPct
     : (showLabel ? config.labelShort : null);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderRadius: BORDER_RADIUS.md,
-    },
-    label: {
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View
@@ -178,48 +164,8 @@ export const HealthStatusCard = ({
   message,
   style,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const config = HEALTH_CONFIG[status] || HEALTH_CONFIG.healthy;
   const IconComponent = HEALTH_ICONS[status] || HEALTH_ICONS.healthy;
-
-  const styles = useMemo(() => StyleSheet.create({
-    // Card styles
-    card: {
-      borderRadius: BORDER_RADIUS.lg,
-      borderWidth: 1,
-      padding: SPACING.lg,
-    },
-    cardHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.sm,
-    },
-    cardIconContainer: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: SPACING.md,
-    },
-    cardTitleContainer: {
-      flex: 1,
-    },
-    cardTitle: {
-      fontSize: TYPOGRAPHY.fontSize.xxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-    },
-    cardPercentage: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textSecondary,
-      marginTop: 2,
-    },
-    cardDescription: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: colors.textMuted,
-      lineHeight: 20,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View
@@ -275,13 +221,6 @@ export const HealthStatusCard = ({
 export const HealthStatusDot = ({ status = 'healthy', size = 8, style }) => {
   const config = HEALTH_CONFIG[status] || HEALTH_CONFIG.healthy;
 
-  const styles = useMemo(() => StyleSheet.create({
-    // Dot styles
-    dot: {
-      // Dimensions set inline
-    },
-  }), []);
-
   return (
     <View
       style={[
@@ -297,5 +236,58 @@ export const HealthStatusDot = ({ status = 'healthy', size = 8, style }) => {
     />
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: BORDER_RADIUS.md,
+  },
+  label: {
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+
+  // Card styles
+  card: {
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  cardIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  cardTitleContainer: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  cardPercentage: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  cardDescription: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textMuted,
+    lineHeight: 20,
+  },
+
+  // Dot styles
+  dot: {
+    // Dimensions set inline
+  },
+});
 
 export default React.memo(HealthStatusBadge);

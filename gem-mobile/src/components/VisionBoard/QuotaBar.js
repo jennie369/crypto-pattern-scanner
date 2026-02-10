@@ -4,10 +4,10 @@
  * Created: December 14, 2025
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ArrowUp, Crown, Infinity } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 /**
  * QuotaBar - Shows current/limit usage with progress bar

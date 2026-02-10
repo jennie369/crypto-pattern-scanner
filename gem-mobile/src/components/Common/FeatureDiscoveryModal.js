@@ -1,7 +1,6 @@
 /**
  * Gemral - Feature Discovery Modal
  * Shows contextual feature tips and upgrade prompts
- * Theme-aware with i18n support
  *
  * Features:
  * - Slide-up animation
@@ -9,9 +8,11 @@
  * - Action button with custom text
  * - "Later" dismiss option
  * - Upgrade prompt variant (gold styling)
+ *
+ * Uses design tokens from utils/tokens.js
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -49,7 +50,7 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
 
 const { height } = Dimensions.get('window');
 
@@ -84,17 +85,12 @@ const FeatureDiscoveryModal = ({
   onDismiss,
   onAction,
 }) => {
-  const { colors, settings, glass, SPACING, TYPOGRAPHY, t } = useSettings();
   const slideAnim = useRef(new Animated.Value(height)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // i18n text
-  const upgradeLabel = t('common.upgrade', 'Nâng cấp');
-  const exploreLabel = t('common.exploreNow', 'Khám phá ngay');
-  const laterLabel = t('common.later', 'Để sau');
-
   useEffect(() => {
     if (visible) {
+      // Slide up and fade in
       Animated.parallel([
         Animated.spring(slideAnim, {
           toValue: 0,
@@ -109,6 +105,7 @@ const FeatureDiscoveryModal = ({
         }),
       ]).start();
     } else {
+      // Slide down and fade out
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: height,
@@ -124,171 +121,11 @@ const FeatureDiscoveryModal = ({
     }
   }, [visible, slideAnim, fadeAnim]);
 
-  // Theme-aware styles
-  const styles = useMemo(() => StyleSheet.create({
-    backdrop: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.6)',
-    },
-    container: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-    blurContainer: {
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      overflow: 'hidden',
-    },
-    content: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      borderWidth: glass.borderWidth || 1,
-      borderBottomWidth: 0,
-      borderColor: settings.theme === 'light' ? colors.border : `${colors.purple}40`,
-      paddingHorizontal: SPACING.xl,
-      paddingTop: SPACING.md,
-      paddingBottom: SPACING.xxxl,
-      alignItems: 'center',
-    },
-    handle: {
-      width: 40,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: colors.textMuted,
-      marginBottom: SPACING.xl,
-    },
-    closeButton: {
-      position: 'absolute',
-      top: SPACING.md,
-      right: SPACING.md,
-      padding: SPACING.sm,
-      zIndex: 10,
-    },
-    iconContainer: {
-      width: 72,
-      height: 72,
-      borderRadius: 36,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: SPACING.lg,
-    },
-    iconContainerUpgrade: {
-      backgroundColor: 'transparent',
-    },
-    iconGradient: {
-      width: 72,
-      height: 72,
-      borderRadius: 36,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    upgradeBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.gold,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.xs,
-      borderRadius: 12,
-      marginBottom: SPACING.md,
-      gap: 4,
-    },
-    upgradeBadgeText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.bgDarkest,
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.xxxl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-      textAlign: 'center',
-      marginBottom: SPACING.sm,
-    },
-    titleUpgrade: {
-      color: colors.gold,
-    },
-    message: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 22,
-      marginBottom: SPACING.xl,
-      paddingHorizontal: SPACING.md,
-    },
-    featuresList: {
-      width: '100%',
-      marginBottom: SPACING.xl,
-    },
-    featureItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.sm,
-    },
-    featureBullet: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: colors.purple || colors.burgundy,
-      marginRight: SPACING.md,
-    },
-    featureText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textPrimary,
-    },
-    actionButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.purple || colors.burgundy,
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xxl,
-      borderRadius: 12,
-      width: '100%',
-      marginBottom: SPACING.md,
-      gap: 8,
-    },
-    actionButtonUpgrade: {
-      backgroundColor: 'transparent',
-      padding: 0,
-      overflow: 'hidden',
-    },
-    actionButtonGradient: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xxl,
-      borderRadius: 12,
-      width: '100%',
-      gap: 8,
-    },
-    actionButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    actionButtonTextUpgrade: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.bgDarkest,
-    },
-    laterButton: {
-      paddingVertical: SPACING.md,
-    },
-    laterButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!discovery) return null;
 
   const isUpgrade = discovery?.type === 'upgrade' || discovery?.isUpgrade;
   const IconComponent = ICON_MAP[discovery?.icon] || Sparkles;
-  const iconColor = isUpgrade ? colors.gold : (discovery?.iconColor || colors.purple || colors.burgundy);
+  const iconColor = isUpgrade ? COLORS.gold : (discovery?.iconColor || COLORS.purple);
 
   const handleAction = () => {
     onAction?.(discovery);
@@ -321,11 +158,7 @@ const FeatureDiscoveryModal = ({
           { transform: [{ translateY: slideAnim }] },
         ]}
       >
-        <BlurView
-          intensity={settings.theme === 'light' ? 40 : 80}
-          tint={settings.theme === 'light' ? 'light' : 'dark'}
-          style={styles.blurContainer}
-        >
+        <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
           <View style={styles.content}>
             {/* Close Button */}
             <TouchableOpacity
@@ -333,7 +166,7 @@ const FeatureDiscoveryModal = ({
               style={styles.closeButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <X size={20} color={colors.textMuted} />
+              <X size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
 
             {/* Handle indicator */}
@@ -349,10 +182,10 @@ const FeatureDiscoveryModal = ({
             >
               {isUpgrade ? (
                 <LinearGradient
-                  colors={[colors.gold, colors.goldBright || '#FFD700']}
+                  colors={[COLORS.gold, COLORS.goldBright]}
                   style={styles.iconGradient}
                 >
-                  <IconComponent size={32} color={colors.bgDarkest} />
+                  <IconComponent size={32} color={COLORS.bgDarkest} />
                 </LinearGradient>
               ) : (
                 <IconComponent size={32} color={iconColor} />
@@ -362,8 +195,8 @@ const FeatureDiscoveryModal = ({
             {/* Badge for Upgrade */}
             {isUpgrade && (
               <View style={styles.upgradeBadge}>
-                <Crown size={12} color={colors.bgDarkest} />
-                <Text style={styles.upgradeBadgeText}>{upgradeLabel}</Text>
+                <Crown size={12} color={COLORS.bgDarkest} />
+                <Text style={styles.upgradeBadgeText}>Nâng cấp</Text>
               </View>
             )}
 
@@ -400,22 +233,22 @@ const FeatureDiscoveryModal = ({
             >
               {isUpgrade ? (
                 <LinearGradient
-                  colors={[colors.gold, colors.goldBright || '#FFD700']}
+                  colors={[COLORS.gold, COLORS.goldBright]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.actionButtonGradient}
                 >
                   <Text style={styles.actionButtonTextUpgrade}>
-                    {discovery?.actionText || exploreLabel}
+                    {discovery?.actionText || 'Khám phá ngay'}
                   </Text>
-                  <ChevronRight size={18} color={colors.bgDarkest} />
+                  <ChevronRight size={18} color={COLORS.bgDarkest} />
                 </LinearGradient>
               ) : (
                 <>
                   <Text style={styles.actionButtonText}>
-                    {discovery?.actionText || exploreLabel}
+                    {discovery?.actionText || 'Khám phá ngay'}
                   </Text>
-                  <ChevronRight size={18} color={colors.textPrimary} />
+                  <ChevronRight size={18} color={COLORS.textPrimary} />
                 </>
               )}
             </TouchableOpacity>
@@ -426,7 +259,7 @@ const FeatureDiscoveryModal = ({
               style={styles.laterButton}
               activeOpacity={0.7}
             >
-              <Text style={styles.laterButtonText}>{laterLabel}</Text>
+              <Text style={styles.laterButtonText}>Để sau</Text>
             </TouchableOpacity>
           </View>
         </BlurView>
@@ -434,5 +267,164 @@ const FeatureDiscoveryModal = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  container: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  blurContainer: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+  },
+  content: {
+    backgroundColor: GLASS.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: GLASS.borderWidth,
+    borderBottomWidth: 0,
+    borderColor: `${COLORS.purple}40`,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.xxxl,
+    alignItems: 'center',
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: COLORS.textMuted,
+    marginBottom: SPACING.xl,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    padding: SPACING.sm,
+    zIndex: 10,
+  },
+  iconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  iconContainerUpgrade: {
+    backgroundColor: 'transparent',
+  },
+  iconGradient: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  upgradeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.gold,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: 12,
+    marginBottom: SPACING.md,
+    gap: 4,
+  },
+  upgradeBadgeText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.bgDarkest,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.xxxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
+  titleUpgrade: {
+    color: COLORS.gold,
+  },
+  message: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: SPACING.xl,
+    paddingHorizontal: SPACING.md,
+  },
+  featuresList: {
+    width: '100%',
+    marginBottom: SPACING.xl,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  featureBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.purple,
+    marginRight: SPACING.md,
+  },
+  featureText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textPrimary,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.purple,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: 12,
+    width: '100%',
+    marginBottom: SPACING.md,
+    gap: 8,
+  },
+  actionButtonUpgrade: {
+    backgroundColor: 'transparent',
+    padding: 0,
+    overflow: 'hidden',
+  },
+  actionButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: 12,
+    width: '100%',
+    gap: 8,
+  },
+  actionButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  actionButtonTextUpgrade: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.bgDarkest,
+  },
+  laterButton: {
+    paddingVertical: SPACING.md,
+  },
+  laterButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textMuted,
+  },
+});
 
 export default FeatureDiscoveryModal;

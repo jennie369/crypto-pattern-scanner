@@ -4,7 +4,7 @@
  * Supports: library, camera, drag preview
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ import {
   AlertCircle,
 } from 'lucide-react-native';
 
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import courseImageService from '../../services/courseImageService';
 import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
@@ -36,7 +36,6 @@ const ImageUploader = ({
   onError,
   disabled = false,
 }) => {
-  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
   const { alert, AlertComponent } = useCustomAlert();
 
   const [uploading, setUploading] = useState(false);
@@ -236,155 +235,12 @@ const ImageUploader = ({
   // ========== RENDER ==========
   const isDisabled = disabled || !lessonId;
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 12,
-      borderWidth: 2,
-      borderColor: glass.border,
-      borderStyle: 'dashed',
-      overflow: 'hidden',
-    },
-    containerDisabled: {
-      opacity: 0.6,
-    },
-    disabledMessage: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: SPACING.md,
-      gap: SPACING.sm,
-      backgroundColor: 'rgba(255, 165, 2, 0.1)',
-    },
-    disabledText: {
-      color: colors.warning,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-    },
-    buttonsContainer: {
-      padding: SPACING.lg,
-    },
-    buttonsRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: SPACING.md,
-      marginBottom: SPACING.md,
-      flexWrap: 'wrap',
-    },
-    uploadBtn: {
-      alignItems: 'center',
-      minWidth: 90,
-      maxWidth: 100,
-    },
-    uploadBtnDisabled: {
-      opacity: 0.5,
-    },
-    iconCircle: {
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: SPACING.xs,
-    },
-    uploadBtnText: {
-      color: colors.textPrimary,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      textAlign: 'center',
-    },
-    uploadBtnHint: {
-      color: colors.textMuted,
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      textAlign: 'center',
-      marginTop: 2,
-    },
-    hint: {
-      color: colors.textMuted,
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      textAlign: 'center',
-    },
-    previewSection: {
-      padding: SPACING.md,
-    },
-    previewContainer: {
-      position: 'relative',
-      marginBottom: SPACING.sm,
-    },
-    preview: {
-      width: '100%',
-      height: 200,
-      borderRadius: 8,
-      resizeMode: 'contain',
-      backgroundColor: '#000',
-    },
-    clearBtn: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    fileInfo: {
-      alignItems: 'center',
-      marginBottom: SPACING.sm,
-    },
-    fileInfoText: {
-      color: colors.textMuted,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-    },
-    uploadConfirmBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.gold,
-      padding: SPACING.md,
-      borderRadius: 8,
-      gap: SPACING.sm,
-    },
-    btnDisabled: {
-      opacity: 0.7,
-    },
-    uploadConfirmText: {
-      color: '#000',
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semiBold,
-    },
-    progressBar: {
-      height: 4,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 2,
-      marginTop: SPACING.sm,
-      overflow: 'hidden',
-    },
-    progressFill: {
-      height: '100%',
-      backgroundColor: colors.success,
-      borderRadius: 2,
-    },
-    errorContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: SPACING.sm,
-      gap: SPACING.xs,
-      backgroundColor: 'rgba(255, 71, 87, 0.1)',
-    },
-    errorText: {
-      color: colors.error,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <View style={[styles.container, isDisabled && styles.containerDisabled]}>
       {/* Disabled Message */}
       {isDisabled && !lessonId && (
         <View style={styles.disabledMessage}>
-          <AlertCircle size={20} color={colors.warning} />
+          <AlertCircle size={20} color={COLORS.warning} />
           <Text style={styles.disabledText}>
             Vui long luu bai hoc truoc khi upload hinh anh
           </Text>
@@ -401,7 +257,7 @@ const ImageUploader = ({
               onPress={clearPreview}
               disabled={uploading}
             >
-              <X size={16} color={colors.textPrimary} />
+              <X size={16} color={COLORS.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -411,7 +267,7 @@ const ImageUploader = ({
               <Text style={styles.fileInfoText}>
                 {selectedFile.width}x{selectedFile.height}
                 {selectedFile.fileSize &&
-                  ` - ${(selectedFile.fileSize / 1024).toFixed(0)}KB`}
+                  ` • ${(selectedFile.fileSize / 1024).toFixed(0)}KB`}
               </Text>
             </View>
           )}
@@ -500,7 +356,7 @@ const ImageUploader = ({
                     { backgroundColor: 'rgba(255, 189, 89, 0.2)' },
                   ]}
                 >
-                  <FolderOpen size={24} color={colors.gold} />
+                  <FolderOpen size={24} color={COLORS.gold} />
                 </View>
                 <Text style={styles.uploadBtnText}>Thu vien chung</Text>
                 <Text style={styles.uploadBtnHint}>Hinh da upload</Text>
@@ -518,7 +374,7 @@ const ImageUploader = ({
       {/* Error Message */}
       {error && (
         <View style={styles.errorContainer}>
-          <AlertCircle size={16} color={colors.error} />
+          <AlertCircle size={16} color={COLORS.error} />
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
@@ -527,5 +383,148 @@ const ImageUploader = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: GLASS.border,
+    borderStyle: 'dashed',
+    overflow: 'hidden',
+  },
+  containerDisabled: {
+    opacity: 0.6,
+  },
+  disabledMessage: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.md,
+    gap: SPACING.sm,
+    backgroundColor: 'rgba(255, 165, 2, 0.1)',
+  },
+  disabledText: {
+    color: COLORS.warning,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+  },
+  buttonsContainer: {
+    padding: SPACING.lg,
+  },
+  buttonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+    flexWrap: 'wrap',
+  },
+  uploadBtn: {
+    alignItems: 'center',
+    minWidth: 90,
+    maxWidth: 100,
+  },
+  uploadBtnDisabled: {
+    opacity: 0.5,
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.xs,
+  },
+  uploadBtnText: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    textAlign: 'center',
+  },
+  uploadBtnHint: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  hint: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    textAlign: 'center',
+  },
+  previewSection: {
+    padding: SPACING.md,
+  },
+  previewContainer: {
+    position: 'relative',
+    marginBottom: SPACING.sm,
+  },
+  preview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    resizeMode: 'contain',
+    backgroundColor: '#000',
+  },
+  clearBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fileInfo: {
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  fileInfoText: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+  },
+  uploadConfirmBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.gold,
+    padding: SPACING.md,
+    borderRadius: 8,
+    gap: SPACING.sm,
+  },
+  btnDisabled: {
+    opacity: 0.7,
+  },
+  uploadConfirmText: {
+    color: '#000',
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: GLASS.background,
+    borderRadius: 2,
+    marginTop: SPACING.sm,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.success,
+    borderRadius: 2,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.sm,
+    gap: SPACING.xs,
+    backgroundColor: 'rgba(255, 71, 87, 0.1)',
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+  },
+});
 
 export default ImageUploader;

@@ -3,7 +3,7 @@
  * Facebook-style report/hide ad dialog
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -22,43 +22,43 @@ import {
   Shield,
   CheckCircle,
 } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING } from '../utils/tokens';
 
 // Report reasons
 const REPORT_REASONS = [
   {
     id: 'not_interested',
     icon: ThumbsDown,
-    title: 'Khong quan tam',
-    description: 'Toi khong muon thay loai quang cao nay',
+    title: 'Không quan tâm',
+    description: 'Tôi không muốn thấy loại quảng cáo này',
     type: 'hide',
   },
   {
     id: 'repetitive',
     icon: EyeOff,
-    title: 'Thay qua nhieu lan',
-    description: 'Quang cao nay hien thi qua thuong xuyen',
+    title: 'Thấy quá nhiều lần',
+    description: 'Quảng cáo này hiển thị quá thường xuyên',
     type: 'hide',
   },
   {
     id: 'misleading',
     icon: AlertTriangle,
-    title: 'Gay hieu lam hoac scam',
-    description: 'Noi dung quang cao khong trung thuc',
+    title: 'Gây hiểu lầm hoặc scam',
+    description: 'Nội dung quảng cáo không trung thực',
     type: 'report',
   },
   {
     id: 'inappropriate',
     icon: Ban,
-    title: 'Noi dung khong phu hop',
-    description: 'Quang cao chua noi dung khong phu hop',
+    title: 'Nội dung không phù hợp',
+    description: 'Quảng cáo chứa nội dung không phù hợp',
     type: 'report',
   },
   {
     id: 'spam',
     icon: Flag,
     title: 'Spam',
-    description: 'Day la spam hoac quang cao lua dao',
+    description: 'Đây là spam hoặc quảng cáo lừa đảo',
     type: 'report',
   },
 ];
@@ -78,117 +78,8 @@ export default function ReportAdModal({
   onReport,
   loading = false,
 }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   const [selectedReason, setSelectedReason] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'flex-end',
-    },
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      paddingBottom: 34, // Safe area
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    headerTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-    closeButton: {
-      padding: 4,
-    },
-    content: {
-      padding: 16,
-    },
-    infoBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 16,
-      gap: 12,
-    },
-    infoText: {
-      flex: 1,
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
-    },
-    optionItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: 12,
-      borderRadius: 12,
-      marginBottom: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      gap: 12,
-    },
-    optionItemSelected: {
-      backgroundColor: 'rgba(255, 215, 0, 0.1)',
-      borderWidth: 1,
-      borderColor: colors.gold,
-    },
-    optionIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    optionIconWarning: {
-      backgroundColor: 'rgba(255, 82, 82, 0.1)',
-    },
-    optionContent: {
-      flex: 1,
-    },
-    optionTitle: {
-      fontSize: 15,
-      fontWeight: '500',
-      color: colors.textPrimary,
-      marginBottom: 2,
-    },
-    optionDescription: {
-      fontSize: 13,
-      color: colors.textMuted,
-    },
-    successContainer: {
-      alignItems: 'center',
-      paddingVertical: 40,
-      paddingHorizontal: 24,
-    },
-    successIcon: {
-      marginBottom: 16,
-    },
-    successTitle: {
-      fontSize: 20,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginBottom: 8,
-    },
-    successDescription: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      textAlign: 'center',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handleReasonSelect = async (reason) => {
     setSelectedReason(reason.id);
@@ -225,14 +116,14 @@ export default function ReportAdModal({
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>
-              {submitted ? 'Cam on phan hoi cua ban' : 'An hoac bao cao quang cao'}
+              {submitted ? 'Cảm ơn phản hồi của bạn' : 'Ẩn hoặc báo cáo quảng cáo'}
             </Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleClose}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <X size={24} color={colors.textMuted} />
+              <X size={24} color={COLORS.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -240,20 +131,20 @@ export default function ReportAdModal({
           {submitted ? (
             <View style={styles.successContainer}>
               <View style={styles.successIcon}>
-                <CheckCircle size={48} color={colors.success} />
+                <CheckCircle size={48} color={COLORS.success} />
               </View>
-              <Text style={styles.successTitle}>Da ghi nhan!</Text>
+              <Text style={styles.successTitle}>Đã ghi nhận!</Text>
               <Text style={styles.successDescription}>
-                Chung toi se cai thien quang cao dua tren phan hoi cua ban.
+                Chúng tôi sẽ cải thiện quảng cáo dựa trên phản hồi của bạn.
               </Text>
             </View>
           ) : (
             <View style={styles.content}>
               {/* Info */}
               <View style={styles.infoBox}>
-                <Shield size={20} color={colors.gold} />
+                <Shield size={20} color={COLORS.gold} />
                 <Text style={styles.infoText}>
-                  Phan hoi cua ban giup chung toi cai thien trai nghiem quang cao
+                  Phản hồi của bạn giúp chúng tôi cải thiện trải nghiệm quảng cáo
                 </Text>
               </View>
 
@@ -279,7 +170,7 @@ export default function ReportAdModal({
                     >
                       <Icon
                         size={20}
-                        color={reason.type === 'report' ? colors.error : colors.textMuted}
+                        color={reason.type === 'report' ? COLORS.error : COLORS.textMuted}
                       />
                     </View>
                     <View style={styles.optionContent}>
@@ -287,7 +178,7 @@ export default function ReportAdModal({
                       <Text style={styles.optionDescription}>{reason.description}</Text>
                     </View>
                     {loading && selectedReason === reason.id && (
-                      <ActivityIndicator size="small" color={colors.gold} />
+                      <ActivityIndicator size="small" color={COLORS.gold} />
                     )}
                   </TouchableOpacity>
                 );
@@ -299,3 +190,110 @@ export default function ReportAdModal({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  container: {
+    backgroundColor: '#1C1B23',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 34, // Safe area
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  content: {
+    padding: 16,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    gap: 12,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.7)',
+    lineHeight: 18,
+  },
+  optionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    gap: 12,
+  },
+  optionItemSelected: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+  optionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionIconWarning: {
+    backgroundColor: 'rgba(255, 82, 82, 0.1)',
+  },
+  optionContent: {
+    flex: 1,
+  },
+  optionTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  optionDescription: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  successContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+  },
+  successIcon: {
+    marginBottom: 16,
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  successDescription: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.6)',
+    textAlign: 'center',
+  },
+});

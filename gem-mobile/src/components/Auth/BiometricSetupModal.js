@@ -3,7 +3,7 @@
  * Modal hướng dẫn và setup biometric authentication
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   View,
@@ -22,7 +22,7 @@ import {
   XCircle,
   X,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS, BUTTON } from '../../utils/tokens';
 import biometricService from '../../services/biometricService';
 
 const { width } = Dimensions.get('window');
@@ -43,8 +43,6 @@ const BiometricSetupModal = ({
   email,
   refreshToken,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // ========== STATE ==========
   const [step, setStep] = useState('intro'); // intro, authenticating, success, error
   const [biometricType, setBiometricType] = useState('Face ID');
@@ -129,111 +127,6 @@ const BiometricSetupModal = ({
     setError(null);
   }, []);
 
-  // ========== STYLES ==========
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    },
-    backdrop: {
-      ...StyleSheet.absoluteFillObject,
-    },
-    modalContainer: {
-      width: width - 48,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: glass.borderRadius,
-      padding: glass.padding,
-      alignItems: 'center',
-      borderWidth: glass.borderWidth,
-      borderColor: 'rgba(106, 91, 255, 0.3)',
-    },
-    closeButton: {
-      position: 'absolute',
-      top: SPACING.lg,
-      right: SPACING.lg,
-      padding: SPACING.xs,
-    },
-    iconContainer: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: 'rgba(255, 189, 89, 0.1)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: SPACING.xxl,
-      marginTop: SPACING.md,
-    },
-    successIcon: {
-      backgroundColor: 'rgba(58, 247, 166, 0.1)',
-    },
-    errorIcon: {
-      backgroundColor: 'rgba(255, 107, 107, 0.1)',
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.display,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-      marginBottom: SPACING.md,
-      textAlign: 'center',
-    },
-    description: {
-      fontSize: TYPOGRAPHY.fontSize.lg,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 20,
-      marginBottom: SPACING.xxl,
-      paddingHorizontal: SPACING.sm,
-    },
-    benefitsList: {
-      width: '100%',
-      gap: SPACING.md,
-      marginBottom: SPACING.xxxl,
-    },
-    benefitItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.md,
-    },
-    benefitText: {
-      fontSize: TYPOGRAPHY.fontSize.base,
-      color: colors.textSecondary,
-    },
-    buttonRow: {
-      flexDirection: 'row',
-      gap: SPACING.md,
-      width: '100%',
-    },
-    secondaryButton: {
-      flex: 1,
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xxl,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      alignItems: 'center',
-    },
-    secondaryButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textMuted,
-    },
-    primaryButton: {
-      flex: 1,
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xxl,
-      borderRadius: 12,
-      backgroundColor: colors.gold,
-      alignItems: 'center',
-    },
-    primaryButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.bgDarkest,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   // ========== RENDER HELPERS ==========
   const IconComponent = biometricType.includes('Face') ||
                         biometricType.includes('khuôn mặt')
@@ -243,7 +136,7 @@ const BiometricSetupModal = ({
   const renderIntro = () => (
     <>
       <View style={styles.iconContainer}>
-        <IconComponent size={48} color={colors.gold} />
+        <IconComponent size={48} color={COLORS.gold} />
       </View>
 
       <Text style={styles.title}>Bật {biometricType}?</Text>
@@ -255,11 +148,11 @@ const BiometricSetupModal = ({
 
       <View style={styles.benefitsList}>
         <View style={styles.benefitItem}>
-          <Shield size={16} color={colors.success} />
+          <Shield size={16} color={COLORS.success} />
           <Text style={styles.benefitText}>Bảo mật cao với mã hoá cục bộ</Text>
         </View>
         <View style={styles.benefitItem}>
-          <CheckCircle size={16} color={colors.success} />
+          <CheckCircle size={16} color={COLORS.success} />
           <Text style={styles.benefitText}>Đăng nhập chỉ với 1 chạm</Text>
         </View>
       </View>
@@ -285,7 +178,7 @@ const BiometricSetupModal = ({
   const renderAuthenticating = () => (
     <>
       <View style={styles.iconContainer}>
-        <ActivityIndicator size="large" color={colors.gold} />
+        <ActivityIndicator size="large" color={COLORS.gold} />
       </View>
 
       <Text style={styles.title}>Đang xác thực...</Text>
@@ -299,7 +192,7 @@ const BiometricSetupModal = ({
   const renderSuccess = () => (
     <>
       <View style={[styles.iconContainer, styles.successIcon]}>
-        <CheckCircle size={48} color={colors.success} />
+        <CheckCircle size={48} color={COLORS.success} />
       </View>
 
       <Text style={styles.title}>Đã bật thành công!</Text>
@@ -313,7 +206,7 @@ const BiometricSetupModal = ({
   const renderError = () => (
     <>
       <View style={[styles.iconContainer, styles.errorIcon]}>
-        <XCircle size={48} color={colors.error} />
+        <XCircle size={48} color={COLORS.error} />
       </View>
 
       <Text style={styles.title}>Không thể bật</Text>
@@ -371,7 +264,7 @@ const BiometricSetupModal = ({
             style={styles.closeButton}
             onPress={handleClose}
           >
-            <X size={20} color={colors.textMuted} />
+            <X size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
 
           {/* Content based on step */}
@@ -384,5 +277,112 @@ const BiometricSetupModal = ({
     </Modal>
   );
 };
+
+// ============================================
+// STYLES
+// ============================================
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalContainer: {
+    width: width - 48,
+    backgroundColor: GLASS.background,
+    borderRadius: GLASS.borderRadius,
+    padding: GLASS.padding,
+    alignItems: 'center',
+    borderWidth: GLASS.borderWidth,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: SPACING.lg,
+    right: SPACING.lg,
+    padding: SPACING.xs,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.xxl,
+    marginTop: SPACING.md,
+  },
+  successIcon: {
+    backgroundColor: 'rgba(58, 247, 166, 0.1)',
+  },
+  errorIcon: {
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.display,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+    textAlign: 'center',
+  },
+  description: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: SPACING.xxl,
+    paddingHorizontal: SPACING.sm,
+  },
+  benefitsList: {
+    width: '100%',
+    gap: SPACING.md,
+    marginBottom: SPACING.xxxl,
+  },
+  benefitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  benefitText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textSecondary,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    width: '100%',
+  },
+  secondaryButton: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: BUTTON.primary.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textMuted,
+  },
+  primaryButton: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: BUTTON.primary.borderRadius,
+    backgroundColor: COLORS.gold,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.bgDarkest,
+  },
+});
 
 export default BiometricSetupModal;

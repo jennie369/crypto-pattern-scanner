@@ -8,7 +8,7 @@
  * - Number formatting (1K, 10K, etc.)
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSettings } from '../../contexts/SettingsContext';
+import tokens from '../../utils/tokens';
 
 // Format number with K, M suffixes
 const formatCount = (count) => {
@@ -36,53 +36,8 @@ const ViewerCount = ({
   animated = true,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const prevCount = useRef(count);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      paddingVertical: SPACING.xs,
-      paddingHorizontal: SPACING.sm,
-      borderRadius: SPACING.md,
-      gap: SPACING.xs,
-    },
-    iconContainer: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: 'rgba(255,255,255,0.1)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    countContainer: {
-      flexDirection: 'row',
-      alignItems: 'baseline',
-      gap: 4,
-    },
-    count: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: '700',
-      color: colors.white,
-    },
-    label: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textSecondary,
-    },
-    compactContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    compactCount: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Animate on count change
   useEffect(() => {
@@ -115,7 +70,7 @@ const ViewerCount = ({
           <Ionicons
             name="eye"
             size={12}
-            color={colors.textSecondary}
+            color={tokens.colors.textSecondary}
           />
         )}
         <Animated.Text
@@ -137,7 +92,7 @@ const ViewerCount = ({
           <Ionicons
             name="eye"
             size={16}
-            color={colors.textSecondary}
+            color={tokens.colors.textSecondary}
           />
         </View>
       )}
@@ -152,11 +107,55 @@ const ViewerCount = ({
           {formattedCount}
         </Animated.Text>
         <Text style={styles.label}>
-          {count === 1 ? 'người xem' : 'người xem'}
+          {count === 1 ? 'ng\u01B0\u1EDDi xem' : 'ng\u01B0\u1EDDi xem'}
         </Text>
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    paddingVertical: tokens.spacing.xs,
+    paddingHorizontal: tokens.spacing.sm,
+    borderRadius: tokens.radius.md,
+    gap: tokens.spacing.xs,
+  },
+  iconContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  countContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
+  },
+  count: {
+    fontSize: tokens.fontSize.md,
+    fontWeight: '700',
+    color: tokens.colors.white,
+  },
+  label: {
+    fontSize: tokens.fontSize.xs,
+    color: tokens.colors.textSecondary,
+  },
+  compactContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  compactCount: {
+    fontSize: tokens.fontSize.sm,
+    fontWeight: '600',
+    color: tokens.colors.textSecondary,
+  },
+});
 
 export default ViewerCount;

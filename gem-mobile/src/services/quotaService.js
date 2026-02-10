@@ -25,7 +25,6 @@
  */
 
 import { supabase } from './supabase';
-import { formatError } from '../utils/errorUtils';
 
 // Cache to avoid excessive DB calls (short TTL)
 const quotaCache = {
@@ -62,7 +61,7 @@ class QuotaService {
       });
 
       if (error) {
-        console.error('[QuotaService] RPC error:', formatError(error));
+        console.error('[QuotaService] RPC error:', error);
         // Fallback to manual check
         return this.checkAllQuotasManual(userId);
       }
@@ -216,7 +215,7 @@ class QuotaService {
       });
 
       if (error) {
-        console.error('[QuotaService] RPC error, using manual:', formatError(error));
+        console.error('[QuotaService] RPC error, using manual:', error);
         return this.decrementQuotaManual(userId, 'chatbot');
       }
 
@@ -257,7 +256,7 @@ class QuotaService {
       });
 
       if (error) {
-        console.error('[QuotaService] RPC error, using manual:', formatError(error));
+        console.error('[QuotaService] RPC error, using manual:', error);
         return this.decrementQuotaManual(userId, 'scanner');
       }
 

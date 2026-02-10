@@ -8,7 +8,7 @@
  * - Navigate to Messages screen
  */
 
-import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import {
   View,
   Text,
@@ -25,16 +25,16 @@ import messagingService from '../services/messagingService';
 // Auth
 import { useAuth } from '../contexts/AuthContext';
 
-// Settings
-import { useSettings } from '../contexts/SettingsContext';
+// Tokens
+import {
+  COLORS,
+  SPACING,
+  TYPOGRAPHY,
+} from '../utils/tokens';
 
-const HeaderMessagesIcon = memo(({ size = 22, color }) => {
+const HeaderMessagesIcon = memo(({ size = 22, color = COLORS.textPrimary }) => {
   const navigation = useNavigation();
   const { user } = useAuth();
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  // Use provided color or default to theme's textPrimary
-  const iconColor = color || colors.textPrimary;
 
   // State
   const [unreadCount, setUnreadCount] = useState(0);
@@ -105,44 +105,13 @@ const HeaderMessagesIcon = memo(({ size = 22, color }) => {
     navigation.navigate('Messages');
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      width: 44,
-      height: 44,
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative',
-    },
-
-    badge: {
-      position: 'absolute',
-      top: 4,
-      right: 4,
-      minWidth: 18,
-      height: 18,
-      borderRadius: 9,
-      backgroundColor: colors.burgundy,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 4,
-      borderWidth: 2,
-      borderColor: colors.bgDarkest,
-    },
-
-    badgeText: {
-      fontSize: 10,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={handlePress}
       activeOpacity={0.7}
     >
-      <MessageCircle size={size} color={iconColor} strokeWidth={2} />
+      <MessageCircle size={size} color={color} strokeWidth={2} />
 
       {/* Unread Badge */}
       {unreadCount > 0 && (
@@ -164,3 +133,34 @@ const HeaderMessagesIcon = memo(({ size = 22, color }) => {
 HeaderMessagesIcon.displayName = 'HeaderMessagesIcon';
 
 export default HeaderMessagesIcon;
+
+const styles = StyleSheet.create({
+  container: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+
+  badge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.burgundy,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: COLORS.bgDarkest,
+  },
+
+  badgeText: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+});

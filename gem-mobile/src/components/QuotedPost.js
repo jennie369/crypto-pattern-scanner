@@ -4,7 +4,7 @@
  * Displays the original post within a repost
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -13,111 +13,13 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Image as ImageIcon, Play, Music } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 
 const QuotedPost = ({
   post,
   onPress,
   showFullContent = false,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: 'rgba(0, 0, 0, 0.2)',
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(106, 91, 255, 0.2)',
-      padding: SPACING.md,
-      marginTop: SPACING.sm,
-    },
-    authorRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.sm,
-    },
-    avatar: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      marginRight: SPACING.sm,
-    },
-    avatarPlaceholder: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: colors.purple,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: SPACING.sm,
-    },
-    avatarText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-    },
-    authorName: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      color: colors.textSecondary,
-    },
-    content: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textPrimary,
-      lineHeight: 18,
-    },
-    mediaPreview: {
-      marginTop: SPACING.sm,
-      borderRadius: 8,
-      overflow: 'hidden',
-      aspectRatio: 16 / 9,
-      maxHeight: 120,
-      position: 'relative',
-    },
-    previewImage: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: colors.glassBg,
-    },
-    mediaCount: {
-      position: 'absolute',
-      bottom: SPACING.xs,
-      right: SPACING.xs,
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: 2,
-      borderRadius: 10,
-      gap: 4,
-    },
-    mediaCountText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textPrimary,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    soundIndicator: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: SPACING.sm,
-      gap: SPACING.xs,
-    },
-    soundText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.purple,
-    },
-    deletedContainer: {
-      padding: SPACING.md,
-      alignItems: 'center',
-    },
-    deletedText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textMuted,
-      fontStyle: 'italic',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!post) return null;
 
   const author = post.author;
@@ -172,7 +74,7 @@ const QuotedPost = ({
           />
           {post.images.length > 1 && (
             <View style={styles.mediaCount}>
-              <ImageIcon size={12} color={colors.textPrimary} />
+              <ImageIcon size={12} color={COLORS.textPrimary} />
               <Text style={styles.mediaCountText}>{post.images.length}</Text>
             </View>
           )}
@@ -182,7 +84,7 @@ const QuotedPost = ({
       {/* Sound Indicator */}
       {hasSound && (
         <View style={styles.soundIndicator}>
-          <Music size={14} color={colors.purple} />
+          <Music size={14} color={COLORS.purple} />
           <Text style={styles.soundText}>Bai dang co am thanh</Text>
         </View>
       )}
@@ -196,5 +98,101 @@ const QuotedPost = ({
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+    padding: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  avatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginRight: SPACING.sm,
+  },
+  avatarPlaceholder: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.purple,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+  },
+  avatarText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  authorName: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textSecondary,
+  },
+  content: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    lineHeight: 18,
+  },
+  mediaPreview: {
+    marginTop: SPACING.sm,
+    borderRadius: 8,
+    overflow: 'hidden',
+    aspectRatio: 16 / 9,
+    maxHeight: 120,
+    position: 'relative',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: COLORS.glassBg,
+  },
+  mediaCount: {
+    position: 'absolute',
+    bottom: SPACING.xs,
+    right: SPACING.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 10,
+    gap: 4,
+  },
+  mediaCountText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  soundIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    gap: SPACING.xs,
+  },
+  soundText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.purple,
+  },
+  deletedContainer: {
+    padding: SPACING.md,
+    alignItems: 'center',
+  },
+  deletedText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+  },
+});
 
 export default QuotedPost;

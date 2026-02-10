@@ -9,7 +9,7 @@
  * - HFZ vs LFZ differences
  */
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -32,538 +32,171 @@ import {
   Lightbulb,
   Zap,
 } from 'lucide-react-native';
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS, BORDER_RADIUS } from '../../utils/tokens';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const ONBOARDING_KEY = '@gem_zone_onboarding_seen';
 
+const STEPS = [
+  {
+    id: 'intro',
+    title: 'Tại sao dùng Zone?',
+    subtitle: 'Thay vì đường line đơn lẻ',
+    icon: Lightbulb,
+    iconColor: COLORS.gold,
+    content: [
+      {
+        type: 'comparison',
+        old: {
+          title: 'Cách cũ: Line đơn',
+          points: [
+            'Chỉ có 1 giá duy nhất',
+            'Khó xác định entry chính xác',
+            'Không biết đặt stop ở đâu',
+          ],
+          color: COLORS.error,
+        },
+        new: {
+          title: 'Cách mới: Zone',
+          points: [
+            'Có Entry + Stop rõ ràng',
+            'Vùng giá thay vì 1 điểm',
+            'Quản lý risk tốt hơn',
+          ],
+          color: COLORS.success,
+        },
+      },
+    ],
+    tip: 'Zone cho phép bạn có kế hoạch giao dịch rõ ràng với entry và stop xác định trước.',
+  },
+  {
+    id: 'entry_stop',
+    title: 'Entry & Stop',
+    subtitle: 'Hai biên của zone',
+    icon: Target,
+    iconColor: COLORS.gold,
+    content: [
+      {
+        type: 'definition',
+        items: [
+          {
+            icon: Target,
+            iconColor: COLORS.gold,
+            title: 'Entry Price (Giá vào lệnh)',
+            description: 'Biên "gần" của zone - nơi giá chạm đầu tiên khi tiến vào vùng.',
+          },
+          {
+            icon: Shield,
+            iconColor: COLORS.textSecondary,
+            title: 'Stop Price (Giá stop loss)',
+            description: 'Biên "xa" của zone - mức giá mà nếu bị phá vỡ, tín hiệu không còn hợp lệ.',
+          },
+        ],
+      },
+    ],
+    tip: '"Gần" và "xa" là tương đối với hướng giá đang di chuyển.',
+  },
+  {
+    id: 'hfz',
+    title: 'Vùng Cung (HFZ)',
+    subtitle: 'High Frequency Zone - Supply',
+    icon: TrendingDown,
+    iconColor: COLORS.error,
+    content: [
+      {
+        type: 'zone_explain',
+        zoneType: 'HFZ',
+        color: COLORS.error,
+        direction: 'Giá đi từ dưới lên',
+        bias: 'SELL',
+        rules: [
+          { label: 'Entry', value: 'LOW của pause', description: 'Biên dưới - giá chạm trước' },
+          { label: 'Stop', value: 'HIGH của pause', description: 'Biên trên - mức invalidation' },
+        ],
+        visual: {
+          topLabel: 'STOP (HIGH)',
+          bottomLabel: 'ENTRY (LOW)',
+          arrow: 'up',
+        },
+      },
+    ],
+    tip: 'HFZ là vùng giá có lực bán mạnh. Kỳ vọng giá sẽ giảm sau khi chạm zone.',
+  },
+  {
+    id: 'lfz',
+    title: 'Vùng Cầu (LFZ)',
+    subtitle: 'Low Frequency Zone - Demand',
+    icon: TrendingUp,
+    iconColor: COLORS.success,
+    content: [
+      {
+        type: 'zone_explain',
+        zoneType: 'LFZ',
+        color: COLORS.success,
+        direction: 'Giá đi từ trên xuống',
+        bias: 'BUY',
+        rules: [
+          { label: 'Entry', value: 'HIGH của pause', description: 'Biên trên - giá chạm trước' },
+          { label: 'Stop', value: 'LOW của pause', description: 'Biên dưới - mức invalidation' },
+        ],
+        visual: {
+          topLabel: 'ENTRY (HIGH)',
+          bottomLabel: 'STOP (LOW)',
+          arrow: 'down',
+        },
+      },
+    ],
+    tip: 'LFZ là vùng giá có lực mua mạnh. Kỳ vọng giá sẽ tăng sau khi chạm zone.',
+  },
+  {
+    id: 'strength',
+    title: 'Độ mạnh Pattern',
+    subtitle: 'Không phải pattern nào cũng như nhau',
+    icon: Zap,
+    iconColor: COLORS.purple,
+    content: [
+      {
+        type: 'strength_ranking',
+        items: [
+          {
+            patterns: ['UPD', 'DPU'],
+            stars: 5,
+            context: 'Đảo chiều',
+            winRate: '70-72%',
+            description: 'Mạnh nhất - Đảo chiều trend',
+            color: COLORS.gold,
+          },
+          {
+            patterns: ['H&S', 'Double Top/Bottom'],
+            stars: 4,
+            context: 'Classic',
+            winRate: '67-72%',
+            description: 'Rất mạnh - Patterns cổ điển',
+            color: COLORS.success,
+          },
+          {
+            patterns: ['DPD', 'UPU'],
+            stars: 3,
+            context: 'Tiếp diễn',
+            winRate: '56-58%',
+            description: 'Trung bình - Tiếp diễn trend',
+            color: COLORS.warning,
+          },
+        ],
+      },
+    ],
+    tip: 'Ưu tiên giao dịch với patterns đảo chiều (5 sao) để có win rate cao nhất.',
+  },
+];
+
 const ZoneConceptOnboarding = memo(({
   visible,
   onClose,
   onComplete,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [currentStep, setCurrentStep] = useState(0);
-
-  const STEPS = useMemo(() => [
-    {
-      id: 'intro',
-      title: 'Tại sao dùng Zone?',
-      subtitle: 'Thay vì đường line đơn lẻ',
-      icon: Lightbulb,
-      iconColor: colors.gold,
-      content: [
-        {
-          type: 'comparison',
-          old: {
-            title: 'Cách cũ: Line đơn',
-            points: [
-              'Chỉ có 1 giá duy nhất',
-              'Khó xác định entry chính xác',
-              'Không biết đặt stop ở đâu',
-            ],
-            color: colors.error,
-          },
-          new: {
-            title: 'Cách mới: Zone',
-            points: [
-              'Có Entry + Stop rõ ràng',
-              'Vùng giá thay vì 1 điểm',
-              'Quản lý risk tốt hơn',
-            ],
-            color: colors.success,
-          },
-        },
-      ],
-      tip: 'Zone cho phép bạn có kế hoạch giao dịch rõ ràng với entry và stop xác định trước.',
-    },
-    {
-      id: 'entry_stop',
-      title: 'Entry & Stop',
-      subtitle: 'Hai biên của zone',
-      icon: Target,
-      iconColor: colors.gold,
-      content: [
-        {
-          type: 'definition',
-          items: [
-            {
-              icon: Target,
-              iconColor: colors.gold,
-              title: 'Entry Price (Giá vào lệnh)',
-              description: 'Biên "gần" của zone - nơi giá chạm đầu tiên khi tiến vào vùng.',
-            },
-            {
-              icon: Shield,
-              iconColor: colors.textSecondary,
-              title: 'Stop Price (Giá stop loss)',
-              description: 'Biên "xa" của zone - mức giá mà nếu bị phá vỡ, tín hiệu không còn hợp lệ.',
-            },
-          ],
-        },
-      ],
-      tip: '"Gần" và "xa" là tương đối với hướng giá đang di chuyển.',
-    },
-    {
-      id: 'hfz',
-      title: 'Vùng Cung (HFZ)',
-      subtitle: 'High Frequency Zone - Supply',
-      icon: TrendingDown,
-      iconColor: colors.error,
-      content: [
-        {
-          type: 'zone_explain',
-          zoneType: 'HFZ',
-          color: colors.error,
-          direction: 'Giá đi từ dưới lên',
-          bias: 'SELL',
-          rules: [
-            { label: 'Entry', value: 'LOW của pause', description: 'Biên dưới - giá chạm trước' },
-            { label: 'Stop', value: 'HIGH của pause', description: 'Biên trên - mức invalidation' },
-          ],
-          visual: {
-            topLabel: 'STOP (HIGH)',
-            bottomLabel: 'ENTRY (LOW)',
-            arrow: 'up',
-          },
-        },
-      ],
-      tip: 'HFZ là vùng giá có lực bán mạnh. Kỳ vọng giá sẽ giảm sau khi chạm zone.',
-    },
-    {
-      id: 'lfz',
-      title: 'Vùng Cầu (LFZ)',
-      subtitle: 'Low Frequency Zone - Demand',
-      icon: TrendingUp,
-      iconColor: colors.success,
-      content: [
-        {
-          type: 'zone_explain',
-          zoneType: 'LFZ',
-          color: colors.success,
-          direction: 'Giá đi từ trên xuống',
-          bias: 'BUY',
-          rules: [
-            { label: 'Entry', value: 'HIGH của pause', description: 'Biên trên - giá chạm trước' },
-            { label: 'Stop', value: 'LOW của pause', description: 'Biên dưới - mức invalidation' },
-          ],
-          visual: {
-            topLabel: 'ENTRY (HIGH)',
-            bottomLabel: 'STOP (LOW)',
-            arrow: 'down',
-          },
-        },
-      ],
-      tip: 'LFZ là vùng giá có lực mua mạnh. Kỳ vọng giá sẽ tăng sau khi chạm zone.',
-    },
-    {
-      id: 'strength',
-      title: 'Độ mạnh Pattern',
-      subtitle: 'Không phải pattern nào cũng như nhau',
-      icon: Zap,
-      iconColor: colors.purple,
-      content: [
-        {
-          type: 'strength_ranking',
-          items: [
-            {
-              patterns: ['UPD', 'DPU'],
-              stars: 5,
-              context: 'Đảo chiều',
-              winRate: '70-72%',
-              description: 'Mạnh nhất - Đảo chiều trend',
-              color: colors.gold,
-            },
-            {
-              patterns: ['H&S', 'Double Top/Bottom'],
-              stars: 4,
-              context: 'Classic',
-              winRate: '67-72%',
-              description: 'Rất mạnh - Patterns cổ điển',
-              color: colors.success,
-            },
-            {
-              patterns: ['DPD', 'UPU'],
-              stars: 3,
-              context: 'Tiếp diễn',
-              winRate: '56-58%',
-              description: 'Trung bình - Tiếp diễn trend',
-              color: colors.warning,
-            },
-          ],
-        },
-      ],
-      tip: 'Ưu tiên giao dịch với patterns đảo chiều (5 sao) để có win rate cao nhất.',
-    },
-  ], [colors]);
-
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: SPACING.md,
-    },
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      borderRadius: 24,
-      width: '100%',
-      maxWidth: 400,
-      maxHeight: '90%',
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: SPACING.md,
-      paddingTop: SPACING.md,
-      paddingBottom: SPACING.sm,
-    },
-    closeButton: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    stepIndicator: {
-      flexDirection: 'row',
-      gap: SPACING.xs,
-    },
-    stepDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: colors.textMuted + '40',
-    },
-    stepDotActive: {
-      backgroundColor: colors.gold,
-      width: 24,
-    },
-    stepDotCompleted: {
-      backgroundColor: colors.success,
-    },
-    skipText: {
-      color: colors.textMuted,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-    },
-
-    scrollContent: {
-      flex: 1,
-    },
-    scrollContentInner: {
-      padding: SPACING.lg,
-      paddingTop: SPACING.md,
-    },
-
-    stepHeader: {
-      alignItems: 'center',
-      marginBottom: SPACING.lg,
-    },
-    stepIconContainer: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: SPACING.md,
-    },
-    stepTitle: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-      textAlign: 'center',
-    },
-    stepSubtitle: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-      textAlign: 'center',
-      marginTop: SPACING.xxs,
-    },
-
-    // Comparison styles
-    comparisonContainer: {
-      gap: SPACING.md,
-    },
-    comparisonBox: {
-      borderWidth: 1,
-      borderRadius: 12,
-      overflow: 'hidden',
-    },
-    comparisonHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      padding: SPACING.sm,
-    },
-    comparisonTitle: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    comparisonPoint: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.sm,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.xs,
-    },
-    pointDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-    },
-    pointText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textSecondary,
-      flex: 1,
-    },
-
-    // Definition styles
-    definitionContainer: {
-      gap: SPACING.md,
-    },
-    definitionItem: {
-      flexDirection: 'row',
-      gap: SPACING.md,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      padding: SPACING.md,
-      borderRadius: 12,
-    },
-    definitionIcon: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    definitionContent: {
-      flex: 1,
-    },
-    definitionTitle: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-      marginBottom: SPACING.xxs,
-    },
-    definitionDesc: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textSecondary,
-      lineHeight: 20,
-    },
-
-    // Zone explain styles
-    zoneExplainContainer: {
-      gap: SPACING.md,
-    },
-    zoneInfoRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: SPACING.xs,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.textMuted + '20',
-    },
-    zoneInfoLabel: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-    },
-    zoneInfoValue: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    zoneVisual: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: SPACING.lg,
-      marginVertical: SPACING.md,
-    },
-    zoneVisualBox: {
-      width: 120,
-      height: 80,
-      borderWidth: 2,
-      borderRadius: 8,
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    zoneVisualFill: {
-      ...StyleSheet.absoluteFillObject,
-    },
-    zoneVisualLabel: {
-      position: 'absolute',
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-      color: colors.textPrimary,
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      paddingHorizontal: 4,
-    },
-    zoneVisualTop: {
-      top: -10,
-      left: 4,
-    },
-    zoneVisualBottom: {
-      bottom: -10,
-      left: 4,
-    },
-    zoneVisualArrow: {
-      opacity: 0.5,
-    },
-    rulesContainer: {
-      gap: SPACING.sm,
-    },
-    ruleRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: SPACING.sm,
-    },
-    ruleLabelBadge: {
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: SPACING.xxs,
-      borderRadius: 8,
-      minWidth: 60,
-      alignItems: 'center',
-    },
-    ruleLabelText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    ruleContent: {
-      flex: 1,
-    },
-    ruleValue: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.textPrimary,
-    },
-    ruleDesc: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-      marginTop: 2,
-    },
-
-    // Strength styles
-    strengthContainer: {
-      gap: SPACING.sm,
-    },
-    strengthItem: {
-      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
-      padding: SPACING.md,
-      borderRadius: 12,
-      borderLeftWidth: 3,
-    },
-    strengthHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: SPACING.xs,
-    },
-    strengthPatterns: {
-      flexDirection: 'row',
-      gap: SPACING.xs,
-      flexWrap: 'wrap',
-      flex: 1,
-    },
-    patternBadge: {
-      paddingHorizontal: SPACING.sm,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    patternBadgeText: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    strengthStars: {
-      flexDirection: 'row',
-    },
-    starEmoji: {
-      fontSize: 12,
-    },
-    strengthMeta: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xs,
-      marginBottom: SPACING.xxs,
-    },
-    strengthContext: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.textMuted,
-    },
-    strengthDot: {
-      color: colors.textMuted,
-    },
-    strengthWinRate: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.success,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    strengthDesc: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textSecondary,
-    },
-
-    // Tip styles
-    tipContainer: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: SPACING.sm,
-      marginTop: SPACING.lg,
-      padding: SPACING.md,
-      backgroundColor: colors.warning + '15',
-      borderRadius: 12,
-    },
-    tipText: {
-      flex: 1,
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textSecondary,
-      lineHeight: 20,
-    },
-
-    // Footer styles
-    footer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: SPACING.md,
-      borderTopWidth: 1,
-      borderTopColor: colors.textMuted + '20',
-    },
-    navButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: SPACING.xxs,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.sm,
-      borderRadius: 12,
-    },
-    navButtonDisabled: {
-      opacity: 0.5,
-    },
-    navButtonPrimary: {
-      backgroundColor: colors.gold,
-    },
-    navButtonText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textPrimary,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    navButtonTextDisabled: {
-      color: colors.textMuted,
-    },
-    navButtonTextPrimary: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.background,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    },
-    stepCounter: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      color: colors.textMuted,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handleNext = useCallback(() => {
     if (currentStep < STEPS.length - 1) {
@@ -571,7 +204,7 @@ const ZoneConceptOnboarding = memo(({
     } else {
       handleComplete();
     }
-  }, [currentStep, STEPS.length]);
+  }, [currentStep]);
 
   const handlePrev = useCallback(() => {
     if (currentStep > 0) {
@@ -685,9 +318,9 @@ const ZoneConceptOnboarding = memo(({
                   </Text>
                 </View>
                 {content.visual.arrow === 'up' ? (
-                  <TrendingUp size={32} color={colors.textMuted} style={styles.zoneVisualArrow} />
+                  <TrendingUp size={32} color={COLORS.textMuted} style={styles.zoneVisualArrow} />
                 ) : (
-                  <TrendingDown size={32} color={colors.textMuted} style={styles.zoneVisualArrow} />
+                  <TrendingDown size={32} color={COLORS.textMuted} style={styles.zoneVisualArrow} />
                 )}
               </View>
 
@@ -696,10 +329,10 @@ const ZoneConceptOnboarding = memo(({
                 {content.rules.map((rule, i) => (
                   <View key={i} style={styles.ruleRow}>
                     <View style={[styles.ruleLabelBadge, {
-                      backgroundColor: rule.label === 'Entry' ? colors.gold + '20' : colors.textSecondary + '20'
+                      backgroundColor: rule.label === 'Entry' ? COLORS.gold + '20' : COLORS.textSecondary + '20'
                     }]}>
                       <Text style={[styles.ruleLabelText, {
-                        color: rule.label === 'Entry' ? colors.gold : colors.textSecondary
+                        color: rule.label === 'Entry' ? COLORS.gold : COLORS.textSecondary
                       }]}>
                         {rule.label}
                       </Text>
@@ -762,7 +395,7 @@ const ZoneConceptOnboarding = memo(({
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={handleSkip} style={styles.closeButton}>
-              <X size={20} color={colors.textMuted} />
+              <X size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
             <View style={styles.stepIndicator}>
               {STEPS.map((_, i) => (
@@ -801,7 +434,7 @@ const ZoneConceptOnboarding = memo(({
 
             {/* Tip */}
             <View style={styles.tipContainer}>
-              <AlertTriangle size={16} color={colors.warning} />
+              <AlertTriangle size={16} color={COLORS.warning} />
               <Text style={styles.tipText}>{step.tip}</Text>
             </View>
           </ScrollView>
@@ -813,7 +446,7 @@ const ZoneConceptOnboarding = memo(({
               style={[styles.navButton, currentStep === 0 && styles.navButtonDisabled]}
               disabled={currentStep === 0}
             >
-              <ChevronLeft size={20} color={currentStep === 0 ? colors.textMuted : colors.textPrimary} />
+              <ChevronLeft size={20} color={currentStep === 0 ? COLORS.textMuted : COLORS.textPrimary} />
               <Text style={[styles.navButtonText, currentStep === 0 && styles.navButtonTextDisabled]}>
                 Trước
               </Text>
@@ -830,7 +463,7 @@ const ZoneConceptOnboarding = memo(({
               <Text style={styles.navButtonTextPrimary}>
                 {currentStep === STEPS.length - 1 ? 'Hoàn tất' : 'Tiếp'}
               </Text>
-              <ChevronRight size={20} color={colors.background} />
+              <ChevronRight size={20} color={COLORS.background} />
             </TouchableOpacity>
           </View>
         </View>
@@ -857,6 +490,372 @@ export const resetZoneOnboarding = async () => {
     console.warn('[ZoneOnboarding] Error resetting:', error);
   }
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.md,
+  },
+  container: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.xl,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '90%',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: GLASS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stepIndicator: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+  },
+  stepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.textMuted + '40',
+  },
+  stepDotActive: {
+    backgroundColor: COLORS.gold,
+    width: 24,
+  },
+  stepDotCompleted: {
+    backgroundColor: COLORS.success,
+  },
+  skipText: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+  },
+
+  scrollContent: {
+    flex: 1,
+  },
+  scrollContentInner: {
+    padding: SPACING.lg,
+    paddingTop: SPACING.md,
+  },
+
+  stepHeader: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  stepIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  stepTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+  },
+  stepSubtitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginTop: SPACING.xxs,
+  },
+
+  // Comparison styles
+  comparisonContainer: {
+    gap: SPACING.md,
+  },
+  comparisonBox: {
+    borderWidth: 1,
+    borderRadius: BORDER_RADIUS.md,
+    overflow: 'hidden',
+  },
+  comparisonHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    padding: SPACING.sm,
+  },
+  comparisonTitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  comparisonPoint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+  },
+  pointDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  pointText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    flex: 1,
+  },
+
+  // Definition styles
+  definitionContainer: {
+    gap: SPACING.md,
+  },
+  definitionItem: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    backgroundColor: GLASS.background,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  definitionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  definitionContent: {
+    flex: 1,
+  },
+  definitionTitle: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xxs,
+  },
+  definitionDesc: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+
+  // Zone explain styles
+  zoneExplainContainer: {
+    gap: SPACING.md,
+  },
+  zoneInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.textMuted + '20',
+  },
+  zoneInfoLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  zoneInfoValue: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  zoneVisual: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.lg,
+    marginVertical: SPACING.md,
+  },
+  zoneVisualBox: {
+    width: 120,
+    height: 80,
+    borderWidth: 2,
+    borderRadius: BORDER_RADIUS.sm,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  zoneVisualFill: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  zoneVisualLabel: {
+    position: 'absolute',
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textPrimary,
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 4,
+  },
+  zoneVisualTop: {
+    top: -10,
+    left: 4,
+  },
+  zoneVisualBottom: {
+    bottom: -10,
+    left: 4,
+  },
+  zoneVisualArrow: {
+    opacity: 0.5,
+  },
+  rulesContainer: {
+    gap: SPACING.sm,
+  },
+  ruleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+  },
+  ruleLabelBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xxs,
+    borderRadius: BORDER_RADIUS.sm,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  ruleLabelText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  ruleContent: {
+    flex: 1,
+  },
+  ruleValue: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  ruleDesc: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+
+  // Strength styles
+  strengthContainer: {
+    gap: SPACING.sm,
+  },
+  strengthItem: {
+    backgroundColor: GLASS.background,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderLeftWidth: 3,
+  },
+  strengthHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  strengthPatterns: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+    flexWrap: 'wrap',
+    flex: 1,
+  },
+  patternBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.xs,
+  },
+  patternBadgeText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  strengthStars: {
+    flexDirection: 'row',
+  },
+  starEmoji: {
+    fontSize: 12,
+  },
+  strengthMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: SPACING.xxs,
+  },
+  strengthContext: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+  strengthDot: {
+    color: COLORS.textMuted,
+  },
+  strengthWinRate: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.success,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  strengthDesc: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+  },
+
+  // Tip styles
+  tipContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+    padding: SPACING.md,
+    backgroundColor: COLORS.warning + '15',
+    borderRadius: BORDER_RADIUS.md,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+
+  // Footer styles
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.textMuted + '20',
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xxs,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  navButtonDisabled: {
+    opacity: 0.5,
+  },
+  navButtonPrimary: {
+    backgroundColor: COLORS.gold,
+  },
+  navButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  navButtonTextDisabled: {
+    color: COLORS.textMuted,
+  },
+  navButtonTextPrimary: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.background,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  stepCounter: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+});
 
 ZoneConceptOnboarding.displayName = 'ZoneConceptOnboarding';
 

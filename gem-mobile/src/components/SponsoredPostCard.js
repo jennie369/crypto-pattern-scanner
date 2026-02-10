@@ -3,7 +3,7 @@
  * Facebook-style sponsored post with reactions, comments, shares
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import {
   Globe,
   CheckCircle,
 } from 'lucide-react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING } from '../utils/tokens';
 import { sponsorBannerService } from '../services/sponsorBannerService';
 import deepLinkHandler from '../services/deepLinkHandler';
 import { navigateToScreen } from '../utils/navigationHelper';
@@ -113,8 +113,6 @@ export default function SponsoredPostCard({
   userTier = 'FREE',
   onDismiss,
 }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
   // State
   const [userReaction, setUserReaction] = useState(null);
   const [showReactions, setShowReactions] = useState(false);
@@ -138,7 +136,7 @@ export default function SponsoredPostCard({
     : primaryText.slice(0, PRIMARY_TEXT_MAX_LENGTH) + '...';
 
   // Advertiser info
-  const advertiserName = ad?.advertiser_name || 'Nha tai tro';
+  const advertiserName = ad?.advertiser_name || 'Nhà tài trợ';
   const advertiserAvatar = ad?.advertiser_avatar || ad?.image_url;
   const isVerified = ad?.advertiser_verified || false;
 
@@ -303,7 +301,7 @@ export default function SponsoredPostCard({
     try {
       const result = await Share.share({
         message: `${ad.title || ''}\n${ad.action_value || ''}`,
-        title: ad.title || 'Chia se tu Gemral',
+        title: ad.title || 'Chia sẻ từ Gemral',
       });
 
       if (result.action === Share.sharedAction) {
@@ -340,94 +338,6 @@ export default function SponsoredPostCard({
     setShowReport(false);
   };
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      backgroundColor: colors.glassBg,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.08)',
-      borderRadius: 12,
-      marginHorizontal: SPACING.md,
-      marginVertical: SPACING.xs,
-      overflow: 'hidden',
-    },
-
-    // Header
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.md,
-      gap: 10,
-    },
-    advertiserAvatar: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    headerContent: {
-      flex: 1,
-    },
-    advertiserNameRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    advertiserName: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-    sponsoredRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      marginTop: 2,
-    },
-    sponsoredLabel: {
-      fontSize: 11,
-      color: colors.textMuted,
-    },
-    dot: {
-      fontSize: 11,
-      color: colors.textMuted,
-    },
-    headerActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-    },
-    headerButton: {
-      padding: 4,
-    },
-
-    // Primary Text
-    primaryTextContainer: {
-      paddingHorizontal: SPACING.md,
-      paddingBottom: SPACING.md,
-    },
-    primaryText: {
-      fontSize: 14,
-      color: colors.textPrimary,
-      lineHeight: 20,
-    },
-    seeMore: {
-      color: colors.textMuted,
-      fontWeight: '500',
-    },
-
-    // Media
-    mediaContainer: {
-      width: '100%',
-      aspectRatio: 1.5,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    },
-    mediaImage: {
-      width: '100%',
-      height: '100%',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   return (
     <View style={styles.container}>
       {/* ===== HEADER ===== */}
@@ -446,8 +356,8 @@ export default function SponsoredPostCard({
             )}
           </View>
           <View style={styles.sponsoredRow}>
-            <Text style={styles.sponsoredLabel}>Duoc tai tro</Text>
-            <Text style={styles.dot}>.</Text>
+            <Text style={styles.sponsoredLabel}>Được tài trợ</Text>
+            <Text style={styles.dot}>·</Text>
             <Globe size={12} color="rgba(255, 255, 255, 0.5)" />
           </View>
         </View>
@@ -457,7 +367,7 @@ export default function SponsoredPostCard({
             onPress={() => setShowWhyThisAd(true)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <MoreHorizontal size={20} color={colors.textMuted} />
+            <MoreHorizontal size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
           {ad.is_dismissible && (
             <TouchableOpacity
@@ -465,7 +375,7 @@ export default function SponsoredPostCard({
               onPress={handleDismiss}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <X size={20} color={colors.textMuted} />
+              <X size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
           )}
         </View>
@@ -481,7 +391,7 @@ export default function SponsoredPostCard({
                 style={styles.seeMore}
                 onPress={() => setPrimaryTextExpanded(true)}
               >
-                {' '}xem them
+                {' '}xem thêm
               </Text>
             )}
           </Text>
@@ -563,3 +473,91 @@ export default function SponsoredPostCard({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: COLORS.glassBg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    marginHorizontal: SPACING.md,
+    marginVertical: SPACING.xs,
+    overflow: 'hidden',
+  },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    gap: 10,
+  },
+  advertiserAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  headerContent: {
+    flex: 1,
+  },
+  advertiserNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  advertiserName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  sponsoredRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  sponsoredLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  dot: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  headerButton: {
+    padding: 4,
+  },
+
+  // Primary Text
+  primaryTextContainer: {
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.md,
+  },
+  primaryText: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+  },
+  seeMore: {
+    color: COLORS.textMuted,
+    fontWeight: '500',
+  },
+
+  // Media
+  mediaContainer: {
+    width: '100%',
+    aspectRatio: 1.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  mediaImage: {
+    width: '100%',
+    height: '100%',
+  },
+});

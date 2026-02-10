@@ -3,9 +3,9 @@
  * Facebook-style engagement stats row showing reactions, comments, shares
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useSettings } from '../contexts/SettingsContext';
+import { COLORS, SPACING } from '../utils/tokens';
 
 // Reaction emojis
 const REACTION_EMOJIS = {
@@ -77,46 +77,6 @@ export default function AdEngagementStats({
   onCommentsPress,
   onSharesPress,
 }) {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    reactionsSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-    },
-    reactionEmojis: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    reactionEmoji: {
-      fontSize: 16,
-      backgroundColor: 'transparent',
-    },
-    countText: {
-      fontSize: 13,
-      color: colors.textMuted,
-    },
-    rightSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    separator: {
-      fontSize: 13,
-      color: colors.textMuted,
-      marginHorizontal: 6,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   const topReactions = getTopReactions(ad);
   const totalReactions = getTotalReactions(ad);
   const commentsCount = ad?.comments_count || 0;
@@ -176,3 +136,41 @@ export default function AdEngagementStats({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  reactionsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  reactionEmojis: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reactionEmoji: {
+    fontSize: 16,
+    backgroundColor: 'transparent',
+  },
+  countText: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  rightSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  separator: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginHorizontal: 6,
+  },
+});

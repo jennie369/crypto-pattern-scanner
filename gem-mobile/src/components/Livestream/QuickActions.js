@@ -9,7 +9,7 @@
  * - Floating hearts animation
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -18,10 +18,10 @@ import {
   Text,
 } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import { useSettings } from '../../contexts/SettingsContext';
+import tokens, { COLORS } from '../../utils/tokens';
 
 // Floating heart component
-const FloatingHeart = ({ onComplete, colors }) => {
+const FloatingHeart = ({ onComplete }) => {
   const translateY = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(1)).current;
@@ -64,10 +64,7 @@ const FloatingHeart = ({ onComplete, colors }) => {
   return (
     <Animated.View
       style={[
-        {
-          position: 'absolute',
-          bottom: 0,
-        },
+        styles.floatingHeart,
         {
           transform: [
             { translateY },
@@ -78,7 +75,7 @@ const FloatingHeart = ({ onComplete, colors }) => {
         },
       ]}
     >
-      <Ionicons name="heart" size={28} color={colors.error} />
+      <Ionicons name="heart" size={28} color={COLORS.error} />
     </Animated.View>
   );
 };
@@ -91,60 +88,9 @@ const QuickActions = ({
   disabled = false,
   style,
 }) => {
-  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [floatingHearts, setFloatingHearts] = useState([]);
   const heartScale = useRef(new Animated.Value(1)).current;
   const heartIdCounter = useRef(0);
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      alignItems: 'flex-end',
-    },
-    floatingContainer: {
-      position: 'absolute',
-      bottom: 60,
-      right: 20,
-      width: 60,
-      height: 200,
-      alignItems: 'center',
-    },
-    floatingHeart: {
-      position: 'absolute',
-      bottom: 0,
-    },
-    buttonsContainer: {
-      alignItems: 'center',
-      gap: SPACING.md,
-    },
-    actionButton: {
-      alignItems: 'center',
-      gap: 4,
-    },
-    iconCircle: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: 'rgba(255,255,255,0.15)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    giftCircle: {
-      backgroundColor: colors.warning + '30',
-    },
-    heartCircle: {
-      backgroundColor: colors.error + '20',
-    },
-    buttonLabel: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.white,
-      fontWeight: '500',
-    },
-    heartCount: {
-      fontSize: TYPOGRAPHY.fontSize.xs,
-      color: colors.white,
-      fontWeight: '600',
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Handle heart press with animation
   const handleHeartPress = useCallback(() => {
@@ -192,7 +138,6 @@ const QuickActions = ({
           <FloatingHeart
             key={heartId}
             onComplete={() => removeHeart(heartId)}
-            colors={colors}
           />
         ))}
       </View>
@@ -210,10 +155,10 @@ const QuickActions = ({
             <Ionicons
               name="share-social"
               size={22}
-              color={disabled ? colors.textDisabled : colors.white}
+              color={disabled ? tokens.colors.textDisabled : tokens.colors.white}
             />
           </View>
-          <Text style={styles.buttonLabel}>Chia sẻ</Text>
+          <Text style={styles.buttonLabel}>Chia s\u1EBB</Text>
         </TouchableOpacity>
 
         {/* Gift button */}
@@ -227,10 +172,10 @@ const QuickActions = ({
             <Ionicons
               name="gift"
               size={22}
-              color={disabled ? colors.textDisabled : colors.white}
+              color={disabled ? tokens.colors.textDisabled : tokens.colors.white}
             />
           </View>
-          <Text style={styles.buttonLabel}>Quà tặng</Text>
+          <Text style={styles.buttonLabel}>Qu\xe0 t\u1EB7ng</Text>
         </TouchableOpacity>
 
         {/* Heart button */}
@@ -250,7 +195,7 @@ const QuickActions = ({
             <Ionicons
               name="heart"
               size={24}
-              color={disabled ? colors.textDisabled : colors.error}
+              color={disabled ? tokens.colors.textDisabled : COLORS.error}
             />
           </Animated.View>
           {heartCount > 0 && (
@@ -261,5 +206,55 @@ const QuickActions = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'flex-end',
+  },
+  floatingContainer: {
+    position: 'absolute',
+    bottom: 60,
+    right: 20,
+    width: 60,
+    height: 200,
+    alignItems: 'center',
+  },
+  floatingHeart: {
+    position: 'absolute',
+    bottom: 0,
+  },
+  buttonsContainer: {
+    alignItems: 'center',
+    gap: tokens.spacing.md,
+  },
+  actionButton: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  iconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  giftCircle: {
+    backgroundColor: COLORS.warning + '30',
+  },
+  heartCircle: {
+    backgroundColor: COLORS.error + '20',
+  },
+  buttonLabel: {
+    fontSize: tokens.fontSize.xs,
+    color: tokens.colors.white,
+    fontWeight: '500',
+  },
+  heartCount: {
+    fontSize: tokens.fontSize.xs,
+    color: tokens.colors.white,
+    fontWeight: '600',
+  },
+});
 
 export default QuickActions;

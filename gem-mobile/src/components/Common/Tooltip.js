@@ -3,10 +3,9 @@
  *
  * Displays feature discovery tooltips and tutorials
  * Animated modal with icon, title, description
- * Theme-aware with i18n support
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -31,7 +30,7 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 
-import { useSettings } from '../../contexts/SettingsContext';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -53,7 +52,7 @@ const Tooltip = ({
   title,
   description,
   icon = 'HelpCircle',
-  ctaText, // Will use i18n default
+  ctaText = 'Đã hiểu!',
   position = 'bottom', // 'top', 'bottom', 'center'
   onDismiss,
   onCTA,
@@ -62,14 +61,8 @@ const Tooltip = ({
   tourStep, // Current tour step (1-based)
   totalSteps, // Total steps in tour
 }) => {
-  const { colors, settings, glass, SPACING, TYPOGRAPHY, t } = useSettings();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
-
-  // i18n text with fallbacks
-  const ctaLabel = ctaText || t('common.understood', 'Đã hiểu!');
-  const skipLabel = t('common.skip', 'Bỏ qua');
-  const stepLabel = t('common.step', 'Bước');
 
   useEffect(() => {
     if (visible) {
@@ -116,123 +109,12 @@ const Tooltip = ({
     }
   };
 
-  // Theme-aware styles
-  const styles = useMemo(() => StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.6)',
-    },
-    backdrop: {
-      flex: 1,
-      paddingHorizontal: SPACING.lg,
-    },
-    container: {
-      backgroundColor: settings.theme === 'light' ? colors.glassBg : colors.bgMid,
-      borderRadius: glass.borderRadius || 20,
-      padding: SPACING.xl,
-      borderWidth: 1,
-      borderColor: settings.theme === 'light' ? colors.border : 'rgba(255, 189, 89, 0.2)',
-      maxWidth: SCREEN_WIDTH - 32,
-      ...(settings.theme === 'light' ? {
-        shadowColor: glass.shadowColor,
-        shadowOffset: glass.shadowOffset,
-        shadowOpacity: glass.shadowOpacity,
-        shadowRadius: glass.shadowRadius,
-        elevation: glass.elevation,
-      } : {}),
-    },
-    closeButton: {
-      position: 'absolute',
-      top: SPACING.sm,
-      right: SPACING.sm,
-      padding: 8,
-      zIndex: 10,
-    },
-    iconContainer: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      alignSelf: 'center',
-      marginBottom: SPACING.lg,
-    },
-    tourProgress: {
-      backgroundColor: 'rgba(255, 189, 89, 0.15)',
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.xs,
-      borderRadius: 12,
-      alignSelf: 'center',
-      marginBottom: SPACING.md,
-    },
-    tourProgressText: {
-      fontSize: TYPOGRAPHY.fontSize.sm,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.gold,
-    },
-    title: {
-      fontSize: TYPOGRAPHY.fontSize.xl,
-      fontWeight: TYPOGRAPHY.fontWeight.bold,
-      color: colors.textPrimary,
-      textAlign: 'center',
-      marginBottom: SPACING.sm,
-    },
-    description: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 22,
-      marginBottom: SPACING.xl,
-    },
-    actions: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: SPACING.md,
-    },
-    skipButton: {
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.lg,
-      borderRadius: 12,
-      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
-    },
-    skipText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      color: colors.textMuted,
-      fontWeight: TYPOGRAPHY.fontWeight.medium,
-    },
-    ctaButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 4,
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xl,
-      borderRadius: 12,
-      backgroundColor: colors.gold,
-      flex: 1,
-      maxWidth: 200,
-    },
-    ctaButtonSmall: {
-      flex: 0,
-    },
-    ctaText: {
-      fontSize: TYPOGRAPHY.fontSize.md,
-      fontWeight: TYPOGRAPHY.fontWeight.semibold,
-      color: colors.bgDarkest,
-    },
-  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
-
   if (!visible) return null;
 
   return (
     <Modal transparent visible={visible} animationType="none" onRequestClose={onDismiss}>
       <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-        <BlurView
-          intensity={settings.theme === 'light' ? 20 : 40}
-          tint={settings.theme === 'light' ? 'light' : 'dark'}
-          style={StyleSheet.absoluteFill}
-        />
+        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
 
         <TouchableOpacity
           style={[styles.backdrop, getPositionStyle()]}
@@ -250,19 +132,19 @@ const Tooltip = ({
             <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
               {/* Close button */}
               <TouchableOpacity style={styles.closeButton} onPress={onDismiss}>
-                <X size={20} color={colors.textMuted} />
+                <X size={20} color={COLORS.textMuted} />
               </TouchableOpacity>
 
               {/* Icon */}
               <View style={styles.iconContainer}>
-                <IconComponent size={32} color={colors.gold} />
+                <IconComponent size={32} color={COLORS.gold} />
               </View>
 
               {/* Tour Progress */}
               {tourStep && totalSteps && (
                 <View style={styles.tourProgress}>
                   <Text style={styles.tourProgressText}>
-                    {stepLabel} {tourStep}/{totalSteps}
+                    Bước {tourStep}/{totalSteps}
                   </Text>
                 </View>
               )}
@@ -275,7 +157,7 @@ const Tooltip = ({
               <View style={styles.actions}>
                 {showSkip && (
                   <TouchableOpacity style={styles.skipButton} onPress={onSkip || onDismiss}>
-                    <Text style={styles.skipText}>{skipLabel}</Text>
+                    <Text style={styles.skipText}>Bỏ qua</Text>
                   </TouchableOpacity>
                 )}
 
@@ -283,8 +165,8 @@ const Tooltip = ({
                   style={[styles.ctaButton, showSkip && styles.ctaButtonSmall]}
                   onPress={onCTA || onDismiss}
                 >
-                  <Text style={styles.ctaText}>{ctaLabel}</Text>
-                  <ChevronRight size={18} color={colors.bgDarkest} />
+                  <Text style={styles.ctaText}>{ctaText}</Text>
+                  <ChevronRight size={18} color={COLORS.bgDarkest} />
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -294,5 +176,105 @@ const Tooltip = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  backdrop: {
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+  },
+  container: {
+    backgroundColor: COLORS.bgMid,
+    borderRadius: 20,
+    padding: SPACING.xl,
+    ...GLASS,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.2)',
+    maxWidth: SCREEN_WIDTH - 32,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+    padding: 8,
+    zIndex: 10,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: SPACING.lg,
+  },
+  tourProgress: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: 12,
+    alignSelf: 'center',
+    marginBottom: SPACING.md,
+  },
+  tourProgressText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
+  description: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: SPACING.xl,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.md,
+  },
+  skipButton: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  skipText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: 12,
+    backgroundColor: COLORS.gold,
+    flex: 1,
+    maxWidth: 200,
+  },
+  ctaButtonSmall: {
+    flex: 0,
+  },
+  ctaText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.bgDarkest,
+  },
+});
 
 export default Tooltip;
