@@ -9,6 +9,7 @@
  */
 
 import { supabase } from './supabase';
+import { formatError } from '../utils/errorUtils';
 import {
   REACTION_TYPES,
   REACTION_ORDER,
@@ -65,13 +66,13 @@ class ReactionService {
       }
 
       if (error) {
-        console.error('[ReactionService] getUserReaction error:', error);
+        console.error('[ReactionService] getUserReaction error:', formatError(error));
         throw error;
       }
 
       return data;
     } catch (err) {
-      console.error('[ReactionService] getUserReaction failed:', err);
+      console.error('[ReactionService] getUserReaction failed:', formatError(err));
       throw err;
     }
   }
@@ -394,7 +395,7 @@ class ReactionService {
         .in('post_id', postIds);
 
       if (forumError) {
-        console.error('[ReactionService] getUserReactionsForPosts forum error:', forumError);
+        console.error('[ReactionService] getUserReactionsForPosts forum error:', formatError(forumError));
       }
 
       // Get reactions by seed_post_id
@@ -405,7 +406,7 @@ class ReactionService {
         .in('seed_post_id', postIds);
 
       if (seedError) {
-        console.error('[ReactionService] getUserReactionsForPosts seed error:', seedError);
+        console.error('[ReactionService] getUserReactionsForPosts seed error:', formatError(seedError));
       }
 
       // Convert to map for easy lookup
@@ -427,7 +428,7 @@ class ReactionService {
 
       return reactionsMap;
     } catch (err) {
-      console.error('[ReactionService] getUserReactionsForPosts failed:', err);
+      console.error('[ReactionService] getUserReactionsForPosts failed:', formatError(err));
       throw err;
     }
   }

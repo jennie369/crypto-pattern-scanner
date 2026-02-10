@@ -280,11 +280,20 @@ class WebSocketPoolService {
       };
 
       this.ws.onerror = (error) => {
-        console.error('[WSPool] Error:', error?.message || error);
+        // WebSocket errors in React Native are Event objects without message property
+        // Extract useful info instead of logging raw Symbol objects
+        const wsState = this.ws?.readyState;
+        const stateNames = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
+        const stateName = stateNames[wsState] || 'UNKNOWN';
+        const errorMsg = error?.message || `Connection ${stateName}`;
+        console.warn('[WSPool] Connection error:', errorMsg, `(state: ${stateName})`);
       };
 
       this.ws.onclose = (event) => {
-        console.log('[WSPool] Closed:', event?.code, event?.reason);
+        // Common close codes: 1000=normal, 1001=going away, 1006=abnormal
+        const code = event?.code || 'unknown';
+        const reason = event?.reason || (code === 1006 ? 'connection lost' : 'closed');
+        console.log(`[WSPool] Disconnected (code: ${code}, reason: ${reason})`);
         this.isConnected = false;
         this.isConnecting = false;
         this.ws = null;

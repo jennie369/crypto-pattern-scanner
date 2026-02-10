@@ -548,11 +548,14 @@ class PatternDetectionService {
       const zoneTypeConfig = getZoneTypeConfig(patternConfig.type);
 
       // Get pause candles for zone calculation
-      // For swing-based patterns, use the area around the peak/trough
-      const pauseStartIndex = pattern.points?.high2?.index ||
-                              pattern.points?.low2?.index ||
-                              pattern.points?.peak?.index ||
-                              pattern.points?.trough?.index ||
+      // ✅ FIX: Prioritize detector's startCandleIndex for DP/FL/QM/FTR patterns
+      // These detectors set startCandleIndex to the actual pause/formation candle
+      // Without this, falls to candles.length-10 (last 10 candles) = wrong zone position
+      const pauseStartIndex = pattern.startCandleIndex ??
+                              pattern.points?.high2?.index ??
+                              pattern.points?.low2?.index ??
+                              pattern.points?.peak?.index ??
+                              pattern.points?.trough?.index ??
                               candles.length - 10;
       const pauseEndIndex = Math.min(pauseStartIndex + 6, candles.length - 1);
       const pauseCandles = candles.slice(
@@ -610,11 +613,11 @@ class PatternDetectionService {
             vietnameseName: zoneTypeConfig.vietnameseName,
             color: zoneTypeConfig.color,
           },
-          // ⚠️ FIX: Use actual pause candle indices for consistency
+          // ✅ FIX: Preserve original time/index from detector if available (DP, FL, FTR)
           startTime,
           endTime,
-          startCandleIndex: Math.max(0, pauseStartIndex - 3),
-          endCandleIndex: pauseEndIndex,
+          startCandleIndex: pattern.startCandleIndex ?? Math.max(0, pauseStartIndex - 3),
+          endCandleIndex: pattern.endCandleIndex ?? pauseEndIndex,
           hasZoneData: false, // Zone boundaries failed, but time data is available
         };
       }
@@ -715,9 +718,10 @@ class PatternDetectionService {
           console.log(`[enrichWithZoneData] ${pattern.patternType} endTime FALLBACK from points: ${et}`);
           return et;
         })(),
-        // ⚠️ FIX: Use actual pause candle indices for consistency
-        startCandleIndex: Math.max(0, pauseStartIndex - 3),
-        endCandleIndex: pauseEndIndex,
+        // ✅ FIX: Preserve original candle indices from detector if available (DP, FL, FTR)
+        // Only fall back to enrichment-calculated indices for patterns without them
+        startCandleIndex: pattern.startCandleIndex ?? Math.max(0, pauseStartIndex - 3),
+        endCandleIndex: pattern.endCandleIndex ?? pauseEndIndex,
         // Flags
         hasZoneData: true,
       };
@@ -922,6 +926,48 @@ class PatternDetectionService {
     if (priceChange > 2) return 'uptrend';
     if (priceChange < -2) return 'downtrend';
     return 'neutral';
+  }
+
+  /**
+   * Clamp take-profit to reasonable historical bounds
+   * Prevents TP from exceeding known market structure by too much
+   *
+   * @param {number} rawTP - Calculated TP from measured move
+   * @param {Array} candles - Historical candles for reference
+   * @param {string} direction - 'LONG' or 'SHORT'
+   * @param {number} entry - Entry price
+   * @param {number} stopLoss - Stop loss price
+   * @returns {number} - Clamped TP value
+   */
+  clampTPToHistoricalBounds(rawTP, candles, direction, entry, stopLoss) {
+    if (!candles || candles.length < 10) return rawTP;
+
+    // Get historical extremes from the candle data
+    const highs = candles.map(c => c.high);
+    const lows = candles.map(c => c.low);
+    const historicalHigh = Math.max(...highs);
+    const historicalLow = Math.min(...lows);
+
+    // Calculate the risk (distance from entry to SL)
+    const risk = Math.abs(entry - stopLoss);
+
+    // Define maximum TP as: min(measured_move, historical_extreme + 10% buffer)
+    // This ensures TP is achievable within known market structure
+    if (direction === 'LONG') {
+      // For LONG: TP should not exceed historical high + 10%
+      const maxAllowedTP = historicalHigh * 1.10;
+      // But ensure at least 2:1 R:R
+      const minTP = entry + (risk * 2);
+      // Use the smaller of rawTP or maxAllowed, but at least minTP
+      return Math.max(minTP, Math.min(rawTP, maxAllowedTP));
+    } else {
+      // For SHORT: TP should not go below historical low - 10%
+      const minAllowedTP = historicalLow * 0.90;
+      // But ensure at least 2:1 R:R
+      const maxTP = entry - (risk * 2);
+      // Use the larger of rawTP or minAllowed, but at most maxTP
+      return Math.min(maxTP, Math.max(rawTP, minAllowedTP));
+    }
   }
 
   /**
@@ -2198,6 +2244,15 @@ class PatternDetectionService {
       const entry = resistance * (1 + entryBuffer);
       const stopLoss = support * (1 - slPercent);
 
+      // FIX: Calculate TP with measured move, then clamp to historical bounds
+      const rawTarget = resistance + (resistance - support);
+      const target = this.clampTPToHistoricalBounds(rawTarget, candles, 'LONG', entry, stopLoss);
+
+      // Calculate actual R:R after clamping
+      const risk = entry - stopLoss;
+      const reward = target - entry;
+      const actualRR = risk > 0 ? parseFloat((reward / risk).toFixed(1)) : 2.2;
+
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const firstPointTime = firstPoint.timestamp > 9999999999 ? Math.floor(firstPoint.timestamp / 1000) : firstPoint.timestamp;
       const lastPointTime = lastPoint.timestamp > 9999999999 ? Math.floor(lastPoint.timestamp / 1000) : lastPoint.timestamp;
@@ -2214,8 +2269,8 @@ class PatternDetectionService {
         description: signal.description,
         entry,
         stopLoss,
-        target: resistance + (resistance - support),
-        riskReward: 2.2,
+        target,
+        riskReward: actualRR,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
@@ -2268,6 +2323,15 @@ class PatternDetectionService {
       const entry = support * (1 - entryBuffer);
       const stopLoss = resistance * (1 + slPercent);
 
+      // FIX: Calculate TP with measured move, then clamp to historical bounds
+      const rawTarget = support - (resistance - support);
+      const target = this.clampTPToHistoricalBounds(rawTarget, candles, 'SHORT', entry, stopLoss);
+
+      // Calculate actual R:R after clamping
+      const risk = stopLoss - entry;
+      const reward = entry - target;
+      const actualRR = risk > 0 ? parseFloat((reward / risk).toFixed(1)) : 2.1;
+
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const firstPointTime = firstPoint.timestamp > 9999999999 ? Math.floor(firstPoint.timestamp / 1000) : firstPoint.timestamp;
       const lastPointTime = lastPoint.timestamp > 9999999999 ? Math.floor(lastPoint.timestamp / 1000) : lastPoint.timestamp;
@@ -2284,8 +2348,8 @@ class PatternDetectionService {
         description: signal.description,
         entry,
         stopLoss,
-        target: support - (resistance - support),
-        riskReward: 2.1,
+        target,
+        riskReward: actualRR,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
@@ -2442,6 +2506,15 @@ class PatternDetectionService {
       const entry = currentPrice * (1 + entryBuffer);
       const stopLoss = bottomPrice * (1 - slPercent);
 
+      // FIX: Calculate TP with measured move, then clamp to historical bounds
+      const rawTarget = currentPrice + (currentPrice - bottomPrice);
+      const target = this.clampTPToHistoricalBounds(rawTarget, candles, 'LONG', entry, stopLoss);
+
+      // Calculate actual R:R after clamping
+      const risk = entry - stopLoss;
+      const reward = target - entry;
+      const actualRR = risk > 0 ? parseFloat((reward / risk).toFixed(1)) : 2.4;
+
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const startTime = startCandle.timestamp > 9999999999 ? Math.floor(startCandle.timestamp / 1000) : startCandle.timestamp;
       const endTime = endCandle.timestamp > 9999999999 ? Math.floor(endCandle.timestamp / 1000) : endCandle.timestamp;
@@ -2458,8 +2531,8 @@ class PatternDetectionService {
         description: signal.description,
         entry,
         stopLoss,
-        target: currentPrice + (currentPrice - bottomPrice),
-        riskReward: 2.4,
+        target,
+        riskReward: actualRR,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
@@ -2516,6 +2589,15 @@ class PatternDetectionService {
       const entry = currentPrice * (1 - entryBuffer);
       const stopLoss = topPrice * (1 + slPercent);
 
+      // FIX: Calculate TP with measured move, then clamp to historical bounds
+      const rawTarget = currentPrice - (topPrice - currentPrice);
+      const target = this.clampTPToHistoricalBounds(rawTarget, candles, 'SHORT', entry, stopLoss);
+
+      // Calculate actual R:R after clamping
+      const risk = stopLoss - entry;
+      const reward = entry - target;
+      const actualRR = risk > 0 ? parseFloat((reward / risk).toFixed(1)) : 2.2;
+
       // FIX: Extract timestamps for zone positioning (convert ms to seconds for lightweight-charts)
       const startTime = startCandle.timestamp > 9999999999 ? Math.floor(startCandle.timestamp / 1000) : startCandle.timestamp;
       const endTime = endCandle.timestamp > 9999999999 ? Math.floor(endCandle.timestamp / 1000) : endCandle.timestamp;
@@ -2532,8 +2614,8 @@ class PatternDetectionService {
         description: signal.description,
         entry,
         stopLoss,
-        target: currentPrice - (topPrice - currentPrice),
-        riskReward: 2.2,
+        target,
+        riskReward: actualRR,
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
@@ -3208,26 +3290,38 @@ class PatternDetectionService {
     const currentPrice = result.currentPrice || 0;
     const entry = result.entryPrice || result.zone?.entryPrice || currentPrice;
     const stopLoss = result.stopLossPrice || result.zone?.stopLossPrice || currentPrice;
-    const target = result.targetPrice || currentPrice;
+    // ✅ FIX: Calculate proper target when detector doesn't set targetPrice
+    // DP and FL detectors don't provide targetPrice → was falling back to currentPrice
+    // causing dynamic R:R that changes with price and mismatches chart TP
+    let target = result.targetPrice || 0;
+    if (!target || target <= 0) {
+      const risk = Math.abs(stopLoss - entry);
+      target = signal.direction === 'SHORT'
+        ? entry - (risk * 2)  // SHORT: TP below entry (1:2 R:R)
+        : entry + (risk * 2); // LONG: TP above entry (1:2 R:R)
+    }
     const riskAmount = Math.abs(stopLoss - entry);
     const rr = riskAmount > 0 ? Math.abs(target - entry) / riskAmount : 2.0;
 
-    // Extract time data
+    // Extract time data from structure points (QM, H&S patterns)
     const getTimestamp = (point) => {
       if (!point) return 0;
       const ts = point.timestamp || 0;
       return ts > 9999999999 ? Math.floor(ts / 1000) : ts;
     };
 
-    // Get structure points for time positioning
+    // Get structure points for time positioning (QM, H&S patterns)
     const structurePoints = result.structure || {};
     const firstPoint = result.leftShoulder || result.head || result.hl1 || result.bos;
     const lastPoint = result.rightShoulder || result.bos || result.hl1;
 
-    const startTime = getTimestamp(firstPoint);
-    const endTime = getTimestamp(lastPoint) || startTime;
-    const startIdx = firstPoint?.index || structurePoints.originStartIndex || 0;
-    const endIdx = lastPoint?.index || structurePoints.originEndIndex || startIdx;
+    // ✅ FIX: Prioritize direct time fields from detector (DP, FL, FTR patterns)
+    // These detectors set startTime/endTime/formationTime directly on the result
+    // Only fall back to structure point timestamps for QM/H&S patterns
+    const startTime = result.startTime || result.formationTime || getTimestamp(firstPoint);
+    const endTime = result.endTime || getTimestamp(lastPoint) || startTime;
+    const startIdx = result.startCandleIndex ?? firstPoint?.index ?? structurePoints.originStartIndex ?? structurePoints.pauseStartIndex ?? 0;
+    const endIdx = result.endCandleIndex ?? lastPoint?.index ?? structurePoints.originEndIndex ?? structurePoints.pauseEndIndex ?? startIdx;
 
     const isSell = signal.direction === 'SHORT';
 

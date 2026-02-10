@@ -35,6 +35,7 @@ const CACHE_KEYS = {
   CONVERSATIONS: '@gem_cache_conversations',
   PINNED_CONVERSATIONS: '@gem_cache_pinned_convos',
   ARCHIVED_CONVERSATIONS: '@gem_cache_archived_convos',
+  DELETED_CONVERSATIONS: '@gem_cache_deleted_convos',
   // GEM Master Chatbot Enhancement keys
   CHATBOT_PROFILE: '@gem_cache_chatbot_profile',
   RECENT_MEMORIES: '@gem_cache_memories',

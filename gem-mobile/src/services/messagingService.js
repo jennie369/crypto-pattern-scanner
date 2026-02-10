@@ -15,6 +15,7 @@
  */
 
 import { supabase } from './supabase';
+import { formatError } from '../utils/errorUtils';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -2062,7 +2063,7 @@ class MessagingService {
 
       return data.reduce((total, p) => total + (p.unread_count || 0), 0);
     } catch (error) {
-      console.error('Error getting total unread count:', error);
+      console.error('Error getting total unread count:', formatError(error));
       return 0;
     }
   }

@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabBar } from '../contexts/TabBarContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { forumService } from '../services/forumService';
+import { notificationService } from '../services/notificationService';
 import { useAuth } from '../contexts/AuthContext';
 
 const DOUBLE_TAP_DELAY = 300; // ms between taps to count as double-tap
@@ -132,9 +133,11 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
 
   // Get auth state
   let isAuthenticated = false;
+  let user = null;
   try {
     const authContext = useAuth();
     isAuthenticated = authContext?.isAuthenticated || false;
+    user = authContext?.user || null;
   } catch (e) {
     // Auth context not available
   }
@@ -142,19 +145,23 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   // Dynamic notification badge count
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Fetch unread notification count
+  // Fetch unread notification count from BOTH tables
   const fetchUnreadCount = useCallback(async () => {
     if (!isAuthenticated) {
       setUnreadCount(0);
       return;
     }
     try {
-      const count = await forumService.getUnreadNotificationCount();
-      setUnreadCount(count || 0);
+      const [forumCount, systemResult] = await Promise.all([
+        forumService.getUnreadNotificationCount(),
+        notificationService.getUnreadCount(user?.id),
+      ]);
+      const total = (forumCount || 0) + (systemResult?.count || 0);
+      setUnreadCount(total);
     } catch (error) {
       console.log('[GlassBottomTab] Error fetching unread count:', error);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.id]);
 
   // Refresh count on tab focus changes
   useEffect(() => {

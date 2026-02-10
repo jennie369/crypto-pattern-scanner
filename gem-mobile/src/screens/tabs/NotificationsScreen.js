@@ -330,15 +330,19 @@ export default function NotificationsScreen() {
       // 2. Save to local read cache (persists even if DB fails)
       if (notification.id) {
         localReadIds.add(notification.id.toString());
-        saveLocalReadIds();
+        await saveLocalReadIds();
       }
 
-      // 3. Try both services to ensure we update the correct table (background)
-      // notificationService for 'notifications' table, forumService for 'forum_notifications' table
-      Promise.all([
-        notificationService.markNotificationAsRead(notification.id, user?.id),
-        forumService.markAsRead(notification.id),
-      ]).catch(err => console.warn('[Notifications] DB mark read failed:', err));
+      // 3. Persist to correct DB table based on source
+      try {
+        if (notification.source === 'forum') {
+          await forumService.markAsRead(notification.id);
+        } else {
+          await notificationService.markNotificationAsRead(notification.id, user?.id);
+        }
+      } catch (err) {
+        console.warn('[Notifications] DB mark read failed:', err);
+      }
     }
 
     // Navigate based on type
@@ -469,15 +473,20 @@ export default function NotificationsScreen() {
       // 2. Save to local deleted cache (persists even if DB fails)
       if (notificationId) {
         localDeletedIds.add(notificationId.toString());
-        saveLocalDeletedIds();
+        await saveLocalDeletedIds();
       }
 
-      // 3. Try to delete from BOTH tables (background)
-      // forumService for 'forum_notifications' table, notificationService for 'notifications' table
-      Promise.all([
-        forumService.deleteNotification(notificationId),
-        notificationService.deleteNotification(notificationId, user?.id),
-      ]).catch(err => console.warn('[Notifications] DB delete failed:', err));
+      // 3. Delete from DB - find matching notification to target correct table
+      const notification = notifications.find(n => n.id === notificationId);
+      try {
+        if (notification?.source === 'forum') {
+          await forumService.deleteNotification(notificationId);
+        } else {
+          await notificationService.deleteNotification(notificationId, user?.id);
+        }
+      } catch (err) {
+        console.warn('[Notifications] DB delete failed:', err);
+      }
     } catch (error) {
       console.error('[Notifications] Delete error:', error);
       // Don't restore - local state is source of truth for this session
@@ -500,14 +509,18 @@ export default function NotificationsScreen() {
     notifications.forEach(n => {
       if (n.id) localReadIds.add(n.id.toString());
     });
-    saveLocalReadIds();
+    await saveLocalReadIds();
 
-    // 3. Try to update database in background
+    // 3. Persist to both DB tables
     if (user?.id) {
-      Promise.all([
-        notificationService.markAllNotificationsAsRead(user.id),
-        forumService.markAllAsRead(),
-      ]).catch(err => console.warn('[Notifications] DB update failed:', err));
+      try {
+        await Promise.all([
+          notificationService.markAllNotificationsAsRead(user.id),
+          forumService.markAllAsRead(),
+        ]);
+      } catch (err) {
+        console.warn('[Notifications] DB markAllAsRead failed:', err);
+      }
     }
   };
 
