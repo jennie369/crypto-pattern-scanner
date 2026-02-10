@@ -6,7 +6,7 @@
  * Uses design tokens for consistent styling.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Volume2, Check, ChevronLeft, ChevronRight, Flame, Sparkles } from 'lucide-react-native';
 import * as Speech from 'expo-speech';
@@ -96,6 +96,14 @@ const AffirmationCard = ({ widget, onComplete }) => {
       await cleanupPrimerSound();
     }
   };
+
+  // Cleanup primer sound and Speech on unmount
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+      cleanupPrimerSound();
+    };
+  }, []);
 
   const handleMarkDone = async () => {
     try {

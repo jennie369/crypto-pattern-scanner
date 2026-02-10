@@ -97,22 +97,18 @@ class RitualSoundService {
 
   /**
    * Initialize audio settings
-   * Safe to call multiple times - will only init once
+   * ALWAYS re-sets audio mode to ensure correct state,
+   * since other components (e.g. primer sound in GoalDetailScreen)
+   * may have changed the audio session configuration.
    */
   async init() {
-    // If already initialized, return immediately
-    if (this.isInitialized) {
-      console.log('[RitualSound] Already initialized');
-      return;
-    }
-
     // If init is in progress, wait for it
     if (this.initPromise) {
       console.log('[RitualSound] Init in progress, waiting...');
       return this.initPromise;
     }
 
-    // Start initialization
+    // Start initialization (always re-set audio mode)
     this.initPromise = this._doInit();
     return this.initPromise;
   }
@@ -122,7 +118,7 @@ class RitualSoundService {
    */
   async _doInit() {
     try {
-      console.log('[RitualSound] Initializing audio mode...');
+      console.log('[RitualSound] Setting audio mode...');
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         staysActiveInBackground: false,
@@ -131,7 +127,8 @@ class RitualSoundService {
         playThroughEarpieceAndroid: false,
       });
       this.isInitialized = true;
-      console.log('[RitualSound] Initialized successfully');
+      this.initPromise = null;
+      console.log('[RitualSound] Audio mode set successfully');
     } catch (error) {
       console.error('[RitualSound] Init error:', error);
       // Reset promise so init can be retried
@@ -145,6 +142,27 @@ class RitualSoundService {
   async ensureInitialized() {
     if (!this.isInitialized) {
       await this.init();
+    }
+  }
+
+  /**
+   * Force re-set audio mode regardless of initialization state.
+   * Call this when entering a ritual screen to reclaim audio session
+   * from other components that may have changed it.
+   */
+  async forceResetAudioMode() {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+      this.isInitialized = true;
+      console.log('[RitualSound] Audio mode force-reset');
+    } catch (error) {
+      console.error('[RitualSound] Force reset error:', error);
     }
   }
 

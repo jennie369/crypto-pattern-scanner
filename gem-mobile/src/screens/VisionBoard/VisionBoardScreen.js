@@ -3616,6 +3616,18 @@ const VisionBoardScreen = () => {
     loadReminderSettings();
   }, []);
 
+  // Cleanup primer sound and Speech on unmount
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+      if (primerSoundRef.current) {
+        primerSoundRef.current.stopAsync().catch(() => {});
+        primerSoundRef.current.unloadAsync().catch(() => {});
+        primerSoundRef.current = null;
+      }
+    };
+  }, []);
+
   // Load today's activity counts (affirmations, habits) from database
   const loadTodayActivityCounts = useCallback(async () => {
     if (!user?.id) return;

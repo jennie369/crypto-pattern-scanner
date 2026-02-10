@@ -77,6 +77,7 @@ import { ScoreRing } from '../../components/Charts';
 import { MilestoneIndicator } from '../../components/VisionBoard';
 import AddActionModal from '../../components/VisionBoard/AddActionModal';
 import { RITUAL_SCREENS, RITUAL_METADATA } from './rituals';
+import { preloadVideo } from '../../components/Rituals/cosmic';
 import statsService from '../../services/statsService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -750,6 +751,18 @@ const GoalDetailScreen = () => {
       loadGoalData();
     }
   }, [user?.id, goalId, loadGoalData]);
+
+  // Cleanup primer sound and Speech on unmount
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+      if (primerSoundRef.current) {
+        primerSoundRef.current.stopAsync().catch(() => {});
+        primerSoundRef.current.unloadAsync().catch(() => {});
+        primerSoundRef.current = null;
+      }
+    };
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -1511,9 +1524,11 @@ const GoalDetailScreen = () => {
                 let screenName = null;
 
                 // Match by title to find the correct ritual screen
-                for (const [ritualId, metadata] of Object.entries(RITUAL_METADATA)) {
+                let matchedRitualId = null;
+                for (const [rId, metadata] of Object.entries(RITUAL_METADATA)) {
                   if (metadata.name?.toLowerCase().trim() === ritualTitle) {
-                    screenName = RITUAL_SCREENS[ritualId];
+                    screenName = RITUAL_SCREENS[rId];
+                    matchedRitualId = rId;
                     break;
                   }
                 }
@@ -1521,6 +1536,7 @@ const GoalDetailScreen = () => {
                 // Also try matching by ID if title didn't match
                 if (!screenName && ritual.id) {
                   screenName = RITUAL_SCREENS[ritual.id];
+                  matchedRitualId = ritual.id;
                 }
 
                 return (
@@ -1529,6 +1545,18 @@ const GoalDetailScreen = () => {
                     style={styles.ritualItem}
                     onPress={() => {
                       if (screenName) {
+                        // Stop any playing affirmation/primer sound before navigating
+                        Speech.stop();
+                        if (primerSoundRef.current) {
+                          primerSoundRef.current.stopAsync().catch(() => {});
+                          primerSoundRef.current.unloadAsync().catch(() => {});
+                          primerSoundRef.current = null;
+                        }
+                        setPlayingAffirmationId(null);
+                        // Preload video for smoother transition
+                        if (matchedRitualId) {
+                          preloadVideo(matchedRitualId);
+                        }
                         navigation.navigate(screenName, { goalId: goal?.id });
                       }
                     }}
