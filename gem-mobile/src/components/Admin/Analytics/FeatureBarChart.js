@@ -10,7 +10,7 @@
  * Created: January 30, 2026
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -29,7 +29,7 @@ import {
   Star,
   Zap,
 } from 'lucide-react-native';
-import { COLORS, SPACING, GLASS } from '../../../utils/tokens';
+import { useSettings } from '../../../contexts/SettingsContext';
 
 // Icon mapping for feature categories
 const FEATURE_ICONS = {
@@ -67,11 +67,14 @@ const FeatureBar = ({
   trend,
   trendValue,
   onPress,
+  colors,
+  SPACING,
+  styles,
 }) => {
   const Icon = FEATURE_ICONS[category] || FEATURE_ICONS.default;
   const color = FEATURE_COLORS[category] || FEATURE_COLORS.default;
   const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
-  const trendColor = trend === 'up' ? COLORS.success : trend === 'down' ? COLORS.error : COLORS.textMuted;
+  const trendColor = trend === 'up' ? colors.success : trend === 'down' ? colors.error : colors.textMuted;
 
   return (
     <TouchableOpacity
@@ -85,9 +88,7 @@ const FeatureBar = ({
         <View style={[styles.iconContainer, { backgroundColor: `${color}20` }]}>
           <Icon size={14} color={color} />
         </View>
-      )}
         <Text style={styles.barName} numberOfLines={1}>{name}</Text>
-      )}
       </View>
 
       {/* Center: Bar */}
@@ -113,7 +114,6 @@ const FeatureBar = ({
             <Text style={[styles.trendValue, { color: trendColor }]}>
               {trendValue}
             </Text>
-          )}
           </View>
         )}
       </View>
@@ -129,6 +129,103 @@ const FeatureBarChart = ({
   maxItems = 10,
   style,
 }) => {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+      padding: SPACING.md,
+    },
+    title: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginBottom: SPACING.md,
+    },
+
+    barContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+      gap: SPACING.sm,
+    },
+    barLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: 100,
+      gap: 8,
+    },
+    iconContainer: {
+      width: 24,
+      height: 24,
+      borderRadius: 6,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    barName: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      flex: 1,
+    },
+
+    barTrack: {
+      flex: 1,
+      height: 8,
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+      borderRadius: 4,
+      overflow: 'hidden',
+    },
+    barFill: {
+      height: '100%',
+      borderRadius: 4,
+      minWidth: 4,
+    },
+
+    barRight: {
+      width: 70,
+      alignItems: 'flex-end',
+    },
+    barValue: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    trendContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+      marginTop: 2,
+    },
+    trendValue: {
+      fontSize: 10,
+    },
+
+    emptyContainer: {
+      paddingVertical: SPACING.lg,
+      alignItems: 'center',
+    },
+    emptyText: {
+      fontSize: 13,
+      color: colors.textMuted,
+    },
+
+    showMoreButton: {
+      marginTop: SPACING.sm,
+      paddingVertical: SPACING.sm,
+      alignItems: 'center',
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(106, 91, 255, 0.1)',
+    },
+    showMoreText: {
+      fontSize: 13,
+      color: colors.purple,
+      fontWeight: '500',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Sort by value and limit items
   const sortedData = [...data]
     .sort((a, b) => b.value - a.value)
@@ -161,6 +258,9 @@ const FeatureBarChart = ({
           trend={item.trend}
           trendValue={item.trendValue}
           onPress={onFeaturePress ? () => onFeaturePress(item) : undefined}
+          colors={colors}
+          SPACING={SPACING}
+          styles={styles}
         />
       ))}
 
@@ -172,106 +272,10 @@ const FeatureBarChart = ({
           <Text style={styles.showMoreText}>
             Xem thêm {data.length - maxItems} tính năng
           </Text>
-        )}
         </TouchableOpacity>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: GLASS.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-    padding: SPACING.md,
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.md,
-  },
-
-  barContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  barLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: 100,
-    gap: 8,
-  },
-  iconContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  barName: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    flex: 1,
-  },
-
-  barTrack: {
-    flex: 1,
-    height: 8,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: 4,
-    minWidth: 4,
-  },
-
-  barRight: {
-    width: 70,
-    alignItems: 'flex-end',
-  },
-  barValue: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  trendContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    marginTop: 2,
-  },
-  trendValue: {
-    fontSize: 10,
-  },
-
-  emptyContainer: {
-    paddingVertical: SPACING.lg,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-  },
-
-  showMoreButton: {
-    marginTop: SPACING.sm,
-    paddingVertical: SPACING.sm,
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(106, 91, 255, 0.1)',
-  },
-  showMoreText: {
-    fontSize: 13,
-    color: COLORS.purple,
-    fontWeight: '500',
-  },
-});
 
 export default FeatureBarChart;

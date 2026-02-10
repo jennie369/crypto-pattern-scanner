@@ -3,7 +3,7 @@
 // Purpose: Card so sánh tier với pricing và features
 // ============================================================
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Check, X, Crown, Zap, Star } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { formatPrice, parseFeatures } from '../../services/upgradeService';
 
 const UpgradeCard = ({
@@ -23,6 +23,237 @@ const UpgradeCard = ({
   compact = false,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 20,
+      padding: SPACING.lg,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    containerRecommended: {
+      borderColor: colors.gold,
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    },
+    containerCurrent: {
+      borderColor: colors.success,
+      opacity: 0.8,
+    },
+    containerCompact: {
+      padding: SPACING.md,
+    },
+
+    // Badges
+    recommendedBadge: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      backgroundColor: colors.gold,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 4,
+      borderBottomLeftRadius: 12,
+    },
+    recommendedText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.bgDarkest,
+    },
+    currentBadge: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      backgroundColor: colors.success,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 4,
+      borderBottomLeftRadius: 12,
+    },
+    currentText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.bgDarkest,
+    },
+
+    // Header
+    header: {
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    iconContainer: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+    },
+    tierName: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      textAlign: 'center',
+    },
+    tierLevel: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+
+    // Price
+    priceSection: {
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    originalPrice: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      textDecorationLine: 'line-through',
+    },
+    price: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.gold,
+    },
+    priceRecommended: {
+      fontSize: 28,
+    },
+    priceNote: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+
+    // Description
+    description: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: SPACING.md,
+    },
+
+    // Features
+    features: {
+      marginBottom: SPACING.md,
+    },
+    featureRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginBottom: SPACING.xs,
+    },
+    featureText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    featureTextDisabled: {
+      color: colors.textMuted,
+      textDecorationLine: 'line-through',
+    },
+    moreFeatures: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+      fontStyle: 'italic',
+      marginTop: SPACING.xs,
+    },
+
+    // CTA
+    ctaButton: {
+      borderRadius: 12,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.gold,
+    },
+    ctaButtonRecommended: {
+      borderWidth: 0,
+    },
+    ctaGradient: {
+      paddingVertical: SPACING.sm,
+      alignItems: 'center',
+    },
+    ctaText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+    },
+    ctaTextRecommended: {
+      color: colors.bgDarkest,
+    },
+
+    // Current
+    currentButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: SPACING.xs,
+      paddingVertical: SPACING.sm,
+      backgroundColor: 'rgba(46, 213, 115, 0.1)',
+      borderRadius: 12,
+    },
+    currentButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.success,
+    },
+
+    // Horizontal variant
+    horizontalContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.1)',
+    },
+    horizontalLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    horizontalIconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    horizontalName: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    horizontalPrice: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.gold,
+    },
+    horizontalRight: {
+      alignItems: 'flex-end',
+    },
+    horizontalFeatureCount: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    horizontalArrow: {
+      backgroundColor: colors.gold,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    horizontalArrowText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.bgDarkest,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!tier) return null;
 
   const features = parseFeatures(tier.features_json);
@@ -68,7 +299,7 @@ const UpgradeCard = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <TierIcon size={24} color={isRecommended ? COLORS.bgDarkest : COLORS.gold} />
+          <TierIcon size={24} color={isRecommended ? colors.bgDarkest : colors.gold} />
         </View>
         <Text style={styles.tierName}>{tier.display_name || tier.tier_name}</Text>
         <Text style={styles.tierLevel}>TIER {tier.tier_level}</Text>
@@ -99,9 +330,9 @@ const UpgradeCard = ({
         {features.slice(0, compact ? 3 : 5).map((feature, index) => (
           <View key={index} style={styles.featureRow}>
             {feature.included ? (
-              <Check size={16} color={COLORS.success} />
+              <Check size={16} color={colors.success} />
             ) : (
-              <X size={16} color={COLORS.textMuted} />
+              <X size={16} color={colors.textMuted} />
             )}
             <Text
               style={[
@@ -132,7 +363,7 @@ const UpgradeCard = ({
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={isRecommended ? [COLORS.gold, '#FFA500'] : ['transparent', 'transparent']}
+            colors={isRecommended ? [colors.gold, '#FFA500'] : ['transparent', 'transparent']}
             style={styles.ctaGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -151,7 +382,7 @@ const UpgradeCard = ({
 
       {isCurrentTier && (
         <View style={styles.currentButton}>
-          <Check size={18} color={COLORS.success} />
+          <Check size={18} color={colors.success} />
           <Text style={styles.currentButtonText}>Dang su dung</Text>
         </View>
       )}
@@ -167,6 +398,62 @@ export const UpgradeCardHorizontal = ({
   onSelect,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    horizontalContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.1)',
+    },
+    horizontalLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    horizontalIconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    horizontalName: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    horizontalPrice: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.gold,
+    },
+    horizontalRight: {
+      alignItems: 'flex-end',
+    },
+    horizontalFeatureCount: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    horizontalArrow: {
+      backgroundColor: colors.gold,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    horizontalArrowText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.bgDarkest,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!tier) return null;
 
   const features = parseFeatures(tier.features_json);
@@ -180,7 +467,7 @@ export const UpgradeCardHorizontal = ({
     >
       <View style={styles.horizontalLeft}>
         <View style={styles.horizontalIconContainer}>
-          <TierIcon size={20} color={COLORS.gold} />
+          <TierIcon size={20} color={colors.gold} />
         </View>
         <View>
           <Text style={styles.horizontalName}>{tier.display_name || tier.tier_name}</Text>
@@ -199,234 +486,5 @@ export const UpgradeCardHorizontal = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 20,
-    padding: SPACING.lg,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  containerRecommended: {
-    borderColor: COLORS.gold,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-  },
-  containerCurrent: {
-    borderColor: COLORS.success,
-    opacity: 0.8,
-  },
-  containerCompact: {
-    padding: SPACING.md,
-  },
-
-  // Badges
-  recommendedBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderBottomLeftRadius: 12,
-  },
-  recommendedText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.bgDarkest,
-  },
-  currentBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: COLORS.success,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderBottomLeftRadius: 12,
-  },
-  currentText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.bgDarkest,
-  },
-
-  // Header
-  header: {
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  tierName: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-  },
-  tierLevel: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-
-  // Price
-  priceSection: {
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  originalPrice: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    textDecorationLine: 'line-through',
-  },
-  price: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: COLORS.gold,
-  },
-  priceRecommended: {
-    fontSize: 28,
-  },
-  priceNote: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-
-  // Description
-  description: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginBottom: SPACING.md,
-  },
-
-  // Features
-  features: {
-    marginBottom: SPACING.md,
-  },
-  featureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.xs,
-  },
-  featureText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-    flex: 1,
-  },
-  featureTextDisabled: {
-    color: COLORS.textMuted,
-    textDecorationLine: 'line-through',
-  },
-  moreFeatures: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-    fontStyle: 'italic',
-    marginTop: SPACING.xs,
-  },
-
-  // CTA
-  ctaButton: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-  },
-  ctaButtonRecommended: {
-    borderWidth: 0,
-  },
-  ctaGradient: {
-    paddingVertical: SPACING.sm,
-    alignItems: 'center',
-  },
-  ctaText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-  },
-  ctaTextRecommended: {
-    color: COLORS.bgDarkest,
-  },
-
-  // Current
-  currentButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.sm,
-    backgroundColor: 'rgba(46, 213, 115, 0.1)',
-    borderRadius: 12,
-  },
-  currentButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.success,
-  },
-
-  // Horizontal variant
-  horizontalContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 16,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-  },
-  horizontalLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  horizontalIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  horizontalName: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  horizontalPrice: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gold,
-  },
-  horizontalRight: {
-    alignItems: 'flex-end',
-  },
-  horizontalFeatureCount: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-    marginBottom: 4,
-  },
-  horizontalArrow: {
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  horizontalArrowText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDarkest,
-  },
-});
 
 export default UpgradeCard;

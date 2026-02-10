@@ -3,7 +3,7 @@
 // Purpose: Overlay blur cho locked features
 // ============================================================
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { Lock, ArrowRight, Crown, Sparkles } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const FeatureLockOverlay = ({
   title = 'Tính năng Premium',
@@ -28,6 +28,7 @@ const FeatureLockOverlay = ({
   onUnlock,
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
 
   const handleUnlock = () => {
     if (onUnlock) {
@@ -44,6 +45,109 @@ const FeatureLockOverlay = ({
 
   const IconComponent = icon === 'crown' ? Crown : icon === 'sparkles' ? Sparkles : Lock;
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'relative',
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    contentContainer: {
+      position: 'relative',
+    },
+    blur: {
+      ...StyleSheet.absoluteFillObject,
+    },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(10, 10, 26, 0.7)',
+      padding: SPACING.lg,
+    },
+    lockContainer: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: SPACING.xs,
+    },
+    subtitle: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: SPACING.lg,
+    },
+    unlockButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.gold,
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.lg,
+      borderRadius: 25,
+      gap: SPACING.xs,
+    },
+    unlockText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.bgDarkest,
+    },
+
+    // Lock badge styles
+    lockBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 189, 89, 0.2)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      gap: 3,
+    },
+    lockBadgeMedium: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      gap: 4,
+    },
+    lockBadgeText: {
+      fontSize: 9,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+    },
+    lockBadgeTextMedium: {
+      fontSize: 11,
+    },
+
+    // Lock icon styles
+    lockIconContainer: {
+      position: 'relative',
+    },
+    tooltip: {
+      position: 'absolute',
+      bottom: '100%',
+      left: '50%',
+      transform: [{ translateX: -50 }],
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: 6,
+      marginBottom: 4,
+    },
+    tooltipText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+      whiteSpace: 'nowrap',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <View style={[styles.container, style]}>
       {/* Blurred content */}
@@ -55,7 +159,7 @@ const FeatureLockOverlay = ({
       {/* Lock overlay */}
       <View style={styles.overlay}>
         <View style={styles.lockContainer}>
-          <IconComponent size={32} color={COLORS.gold} />
+          <IconComponent size={32} color={colors.gold} />
         </View>
 
         <Text style={styles.title}>{title}</Text>
@@ -67,7 +171,7 @@ const FeatureLockOverlay = ({
           activeOpacity={0.8}
         >
           <Text style={styles.unlockText}>{ctaText}</Text>
-          <ArrowRight size={18} color={COLORS.bgDarkest} />
+          <ArrowRight size={18} color={colors.bgDarkest} />
         </TouchableOpacity>
       </View>
     </View>
@@ -83,6 +187,33 @@ export const LockBadge = ({
   onPress,
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    lockBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 189, 89, 0.2)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      gap: 3,
+    },
+    lockBadgeMedium: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      gap: 4,
+    },
+    lockBadgeText: {
+      fontSize: 9,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+    },
+    lockBadgeTextMedium: {
+      fontSize: 11,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handlePress = () => {
     if (onPress) {
@@ -101,7 +232,7 @@ export const LockBadge = ({
       onPress={handlePress}
       activeOpacity={0.8}
     >
-      <Lock size={size === 'medium' ? 14 : 10} color={COLORS.gold} />
+      <Lock size={size === 'medium' ? 14 : 10} color={colors.gold} />
       <Text style={[
         styles.lockBadgeText,
         size === 'medium' && styles.lockBadgeTextMedium,
@@ -120,9 +251,33 @@ export const LockIcon = ({
   tooltip = 'Cần nâng cấp',
   showTooltip = false,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    lockIconContainer: {
+      position: 'relative',
+    },
+    tooltip: {
+      position: 'absolute',
+      bottom: '100%',
+      left: '50%',
+      transform: [{ translateX: -50 }],
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: 6,
+      marginBottom: 4,
+    },
+    tooltipText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+      whiteSpace: 'nowrap',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <View style={styles.lockIconContainer}>
-      <Lock size={size} color={COLORS.gold} />
+      <Lock size={size} color={colors.gold} />
       {showTooltip && (
         <View style={styles.tooltip}>
           <Text style={styles.tooltipText}>{tooltip}</Text>
@@ -131,108 +286,5 @@ export const LockIcon = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  contentContainer: {
-    position: 'relative',
-  },
-  blur: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(10, 10, 26, 0.7)',
-    padding: SPACING.lg,
-  },
-  lockContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginBottom: SPACING.xs,
-  },
-  subtitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginBottom: SPACING.lg,
-  },
-  unlockButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.gold,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: 25,
-    gap: SPACING.xs,
-  },
-  unlockText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDarkest,
-  },
-
-  // Lock badge styles
-  lockBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 189, 89, 0.2)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    gap: 3,
-  },
-  lockBadgeMedium: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    gap: 4,
-  },
-  lockBadgeText: {
-    fontSize: 9,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-  },
-  lockBadgeTextMedium: {
-    fontSize: 11,
-  },
-
-  // Lock icon styles
-  lockIconContainer: {
-    position: 'relative',
-  },
-  tooltip: {
-    position: 'absolute',
-    bottom: '100%',
-    left: '50%',
-    transform: [{ translateX: -50 }],
-    backgroundColor: COLORS.glassBg,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: 6,
-    marginBottom: 4,
-  },
-  tooltipText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-    whiteSpace: 'nowrap',
-  },
-});
 
 export default FeatureLockOverlay;

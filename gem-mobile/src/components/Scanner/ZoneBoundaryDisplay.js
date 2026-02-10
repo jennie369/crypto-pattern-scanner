@@ -7,10 +7,10 @@
  * - LFZ: Entry = HIGH (near), Stop = LOW (far)
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { TrendingUp, TrendingDown, Target, Shield, Info, AlertTriangle, Check } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const ZoneBoundaryDisplay = memo(({
   zone,
@@ -20,6 +20,210 @@ const ZoneBoundaryDisplay = memo(({
   compact = false,
   onInfoPress,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      borderWidth: 1,
+      padding: SPACING.md,
+      marginVertical: SPACING.xs,
+    },
+    compactContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 8,
+      borderLeftWidth: 3,
+      padding: SPACING.sm,
+    },
+    compactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    compactLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    compactPrice: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textPrimary,
+      fontFamily: 'monospace',
+      flex: 1,
+    },
+    compactWidth: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    headerRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    iconContainer: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    zoneType: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    zoneBias: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    widthBadge: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xxs,
+      borderRadius: 8,
+    },
+    widthBadgeText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    boundariesContainer: {
+      gap: SPACING.sm,
+    },
+    boundaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    boundaryLabel: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    labelText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+    },
+    labelTextSmall: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    priceText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontFamily: 'monospace',
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    priceTextSmall: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontFamily: 'monospace',
+    },
+    entryPrice: {
+      color: colors.gold,
+    },
+    stopPrice: {
+      color: colors.textPrimary,
+    },
+    zoneBarContainer: {
+      alignItems: 'center',
+      paddingVertical: SPACING.xs,
+    },
+    zoneBar: {
+      width: '80%',
+      height: 8,
+      borderRadius: 4,
+      overflow: 'hidden',
+    },
+    zoneBarFill: {
+      height: '100%',
+      opacity: 0.6,
+    },
+    zoneWidthText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      marginTop: SPACING.xxs,
+    },
+    warningContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginTop: SPACING.sm,
+      padding: SPACING.sm,
+      backgroundColor: colors.warning + '15',
+      borderRadius: 8,
+      flexWrap: 'wrap',
+    },
+    warningText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.warning,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    suggestionText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      width: '100%',
+      marginTop: SPACING.xxs,
+    },
+    rrContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginTop: SPACING.sm,
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: colors.textMuted + '20',
+      flexWrap: 'wrap',
+    },
+    rrLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    rrBadge: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xxs,
+      borderRadius: 8,
+    },
+    rrText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    rrCheckContainer: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: colors.success + '20',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    rrWarning: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.error,
+      fontStyle: 'italic',
+    },
+    distanceContainer: {
+      marginTop: SPACING.sm,
+      alignItems: 'center',
+    },
+    distanceText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    errorText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      textAlign: 'center',
+      padding: SPACING.md,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!zone) {
     return (
       <View style={styles.container}>
@@ -41,7 +245,7 @@ const ZoneBoundaryDisplay = memo(({
   } = zone;
 
   const isHFZ = zoneType === 'HFZ';
-  const zoneColor = isHFZ ? COLORS.error : COLORS.success;
+  const zoneColor = isHFZ ? colors.error : colors.success;
   const ZoneIcon = isHFZ ? TrendingDown : TrendingUp;
 
   // Format price based on magnitude
@@ -101,7 +305,7 @@ const ZoneBoundaryDisplay = memo(({
               onPress={onInfoPress}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Info size={18} color={COLORS.textMuted} />
+              <Info size={18} color={colors.textMuted} />
             </TouchableOpacity>
           )}
         </View>
@@ -112,7 +316,7 @@ const ZoneBoundaryDisplay = memo(({
         {/* Entry Price */}
         <View style={styles.boundaryRow}>
           <View style={styles.boundaryLabel}>
-            <Target size={16} color={COLORS.gold} />
+            <Target size={16} color={colors.gold} />
             <Text style={styles.labelText}>Giá Entry</Text>
           </View>
           <Text style={[styles.priceText, styles.entryPrice]}>
@@ -141,7 +345,7 @@ const ZoneBoundaryDisplay = memo(({
         {/* Stop Price */}
         <View style={styles.boundaryRow}>
           <View style={styles.boundaryLabel}>
-            <Shield size={16} color={COLORS.textSecondary} />
+            <Shield size={16} color={colors.textSecondary} />
             <Text style={styles.labelText}>Giá Stop</Text>
           </View>
           <Text style={[styles.priceText, styles.stopPrice]}>
@@ -156,7 +360,7 @@ const ZoneBoundaryDisplay = memo(({
               <View style={{ width: 16 }} />
               <Text style={styles.labelTextSmall}>SL (có buffer)</Text>
             </View>
-            <Text style={[styles.priceTextSmall, { color: COLORS.error }]}>
+            <Text style={[styles.priceTextSmall, { color: colors.error }]}>
               {formatPrice(stopLossPrice)}
             </Text>
           </View>
@@ -166,7 +370,7 @@ const ZoneBoundaryDisplay = memo(({
       {/* Zone Validation Warning */}
       {zoneValidation && !zoneValidation.isValid && (
         <View style={styles.warningContainer}>
-          <AlertTriangle size={14} color={COLORS.warning} />
+          <AlertTriangle size={14} color={colors.warning} />
           <Text style={styles.warningText}>{zoneValidation.reason}</Text>
           {zoneValidation.suggestion && (
             <Text style={styles.suggestionText}>{zoneValidation.suggestion}</Text>
@@ -176,7 +380,7 @@ const ZoneBoundaryDisplay = memo(({
 
       {zoneValidation?.isExtended && (
         <View style={styles.warningContainer}>
-          <AlertTriangle size={14} color={COLORS.warning} />
+          <AlertTriangle size={14} color={colors.warning} />
           <Text style={styles.warningText}>{zoneValidation.reason}</Text>
           {zoneValidation.suggestion && (
             <Text style={styles.suggestionText}>{zoneValidation.suggestion}</Text>
@@ -193,10 +397,10 @@ const ZoneBoundaryDisplay = memo(({
               styles.rrBadge,
               {
                 backgroundColor: riskReward.isGood
-                  ? COLORS.success + '20'
+                  ? colors.success + '20'
                   : riskReward.isAcceptable
-                    ? COLORS.warning + '20'
-                    : COLORS.error + '20',
+                    ? colors.warning + '20'
+                    : colors.error + '20',
               },
             ]}
           >
@@ -205,10 +409,10 @@ const ZoneBoundaryDisplay = memo(({
                 styles.rrText,
                 {
                   color: riskReward.isGood
-                    ? COLORS.success
+                    ? colors.success
                     : riskReward.isAcceptable
-                      ? COLORS.warning
-                      : COLORS.error,
+                      ? colors.warning
+                      : colors.error,
                 },
               ]}
             >
@@ -217,7 +421,7 @@ const ZoneBoundaryDisplay = memo(({
           </View>
           {riskReward.isGood && (
             <View style={styles.rrCheckContainer}>
-              <Check size={14} color={COLORS.success} />
+              <Check size={14} color={colors.success} />
             </View>
           )}
           {!riskReward.isAcceptable && (
@@ -230,11 +434,11 @@ const ZoneBoundaryDisplay = memo(({
       {showDistance && distanceToZone && (
         <View style={styles.distanceContainer}>
           {distanceToZone.isInZone ? (
-            <Text style={[styles.distanceText, { color: COLORS.gold }]}>
+            <Text style={[styles.distanceText, { color: colors.gold }]}>
               Giá đang TRONG zone
             </Text>
           ) : distanceToZone.isApproaching ? (
-            <Text style={[styles.distanceText, { color: COLORS.warning }]}>
+            <Text style={[styles.distanceText, { color: colors.warning }]}>
               Giá đang tiến gần ({distanceToZone.percent}%)
             </Text>
           ) : (
@@ -246,208 +450,6 @@ const ZoneBoundaryDisplay = memo(({
       )}
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: GLASS.background,
-    borderRadius: BORDER_RADIUS.lg,
-    borderWidth: 1,
-    padding: SPACING.md,
-    marginVertical: SPACING.xs,
-  },
-  compactContainer: {
-    backgroundColor: GLASS.background,
-    borderRadius: BORDER_RADIUS.sm,
-    borderLeftWidth: 3,
-    padding: SPACING.sm,
-  },
-  compactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  compactLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  compactPrice: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textPrimary,
-    fontFamily: 'monospace',
-    flex: 1,
-  },
-  compactWidth: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  zoneType: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  zoneBias: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  widthBadge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  widthBadgeText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  boundariesContainer: {
-    gap: SPACING.sm,
-  },
-  boundaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  boundaryLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  labelText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-  },
-  labelTextSmall: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  priceText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontFamily: 'monospace',
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  priceTextSmall: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontFamily: 'monospace',
-  },
-  entryPrice: {
-    color: COLORS.gold,
-  },
-  stopPrice: {
-    color: COLORS.textPrimary,
-  },
-  zoneBarContainer: {
-    alignItems: 'center',
-    paddingVertical: SPACING.xs,
-  },
-  zoneBar: {
-    width: '80%',
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  zoneBarFill: {
-    height: '100%',
-    opacity: 0.6,
-  },
-  zoneWidthText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    marginTop: SPACING.xxs,
-  },
-  warningContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    marginTop: SPACING.sm,
-    padding: SPACING.sm,
-    backgroundColor: COLORS.warning + '15',
-    borderRadius: BORDER_RADIUS.sm,
-    flexWrap: 'wrap',
-  },
-  warningText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.warning,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  suggestionText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    width: '100%',
-    marginTop: SPACING.xxs,
-  },
-  rrContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginTop: SPACING.sm,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.textMuted + '20',
-    flexWrap: 'wrap',
-  },
-  rrLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-  },
-  rrBadge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  rrText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  rrCheckContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: COLORS.success + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  rrWarning: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.error,
-    fontStyle: 'italic',
-  },
-  distanceContainer: {
-    marginTop: SPACING.sm,
-    alignItems: 'center',
-  },
-  distanceText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-  },
-  errorText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    padding: SPACING.md,
-  },
 });
 
 ZoneBoundaryDisplay.displayName = 'ZoneBoundaryDisplay';

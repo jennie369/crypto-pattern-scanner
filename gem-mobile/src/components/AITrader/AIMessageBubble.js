@@ -3,10 +3,11 @@
  * Used for AI Sư Phụ messages in trade flow
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
 import { AI_MOODS } from '../../services/gemMasterAIService';
 
 const AIMessageBubble = ({
@@ -18,6 +19,7 @@ const AIMessageBubble = ({
   showMoodIndicator = true,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [displayedText, setDisplayedText] = useState('');
   const [isTypingActive, setIsTypingActive] = useState(false);
   const typingRef = useRef(null);
@@ -164,6 +166,70 @@ const AIMessageBubble = ({
     }
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      width: '100%',
+    },
+    moodIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+      paddingLeft: SPACING.xs,
+    },
+    moodDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      marginRight: SPACING.xs,
+    },
+    moodLabel: {
+      fontSize: FONT_SIZES.xs,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    bubble: {
+      borderWidth: 1,
+      borderRadius: BORDER_RADIUS.lg,
+      overflow: 'hidden',
+    },
+    bubbleGradient: {
+      padding: SPACING.lg,
+    },
+    messageText: {
+      color: colors.textPrimary,
+      fontSize: FONT_SIZES.md,
+      lineHeight: 22,
+    },
+    cursor: {
+      color: colors.cyan,
+      fontWeight: 'bold',
+    },
+    typingIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.md,
+    },
+    typingText: {
+      color: colors.textMuted,
+      fontSize: FONT_SIZES.sm,
+      marginRight: SPACING.sm,
+    },
+    dotsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    dot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.cyan,
+      marginHorizontal: 2,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <Animated.View
       style={[
@@ -195,7 +261,7 @@ const AIMessageBubble = ({
         ]}
       >
         <LinearGradient
-          colors={['rgba(15, 16, 48, 0.8)', 'rgba(15, 16, 48, 0.9)']}
+          colors={[settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.8)'), settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.9)')]}
           style={styles.bubbleGradient}
         >
           {/* Message text */}
@@ -261,69 +327,5 @@ const AIMessageBubble = ({
     </Animated.View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  moodIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-    paddingLeft: SPACING.xs,
-  },
-  moodDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: SPACING.xs,
-  },
-  moodLabel: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  bubble: {
-    borderWidth: 1,
-    borderRadius: BORDER_RADIUS.lg,
-    overflow: 'hidden',
-  },
-  bubbleGradient: {
-    padding: SPACING.lg,
-  },
-  messageText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZES.md,
-    lineHeight: 22,
-  },
-  cursor: {
-    color: COLORS.cyan,
-    fontWeight: 'bold',
-  },
-  typingIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.md,
-  },
-  typingText: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZES.sm,
-    marginRight: SPACING.sm,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.cyan,
-    marginHorizontal: 2,
-  },
-});
 
 export default AIMessageBubble;

@@ -12,6 +12,7 @@ import { supabase } from './supabase';
 import { callSignalingService } from './callSignalingService';
 import { webrtcService } from './webrtcService';
 import callKeepService from './callKeepService';
+import messagingService from './messagingService';
 import { Platform } from 'react-native';
 import {
   CALL_STATUS,
@@ -387,6 +388,13 @@ class CallService {
         console.log('[CallService] Cleared currentCallId immediately');
       }
 
+      // Fetch call details BEFORE updating for call event message
+      const { data: callDetails } = await supabase
+        .from('calls')
+        .select('conversation_id, call_type, caller_id')
+        .eq('id', callId)
+        .single();
+
       // End call in CallKeep (dismiss native UI)
       if (callKeepService.available) {
         callKeepService.endCall(callId);
@@ -441,6 +449,18 @@ class CallService {
       // Cleanup
       this._cleanup();
 
+      // Create call event message for chat history (non-blocking)
+      if (callDetails?.conversation_id) {
+        messagingService.createCallEventMessage(callDetails.conversation_id, {
+          callId,
+          callType: callDetails.call_type,
+          callStatus: CALL_STATUS.DECLINED,
+          callerId: callDetails.caller_id,
+          duration: 0,
+          endReason: END_REASON.DECLINED,
+        }).catch(err => console.log('[CallService] Call event message error:', err.message));
+      }
+
       return { success: true };
     } catch (error) {
       console.error('[CallService] declineCall error:', error);
@@ -468,6 +488,13 @@ class CallService {
         console.log('[CallService] Cleared currentCallId immediately');
       }
 
+      // Fetch call details BEFORE ending for call event message
+      const { data: callDetails } = await supabase
+        .from('calls')
+        .select('conversation_id, call_type, caller_id, started_at')
+        .eq('id', callId)
+        .single();
+
       // End call in CallKeep (dismiss native UI)
       if (callKeepService.available) {
         callKeepService.endCall(callId);
@@ -490,6 +517,19 @@ class CallService {
 
       // Cleanup local state
       this._cleanup();
+
+      // Create call event message for chat history (non-blocking)
+      if (callDetails?.conversation_id) {
+        const duration = data?.duration || 0;
+        messagingService.createCallEventMessage(callDetails.conversation_id, {
+          callId,
+          callType: callDetails.call_type,
+          callStatus: CALL_STATUS.ENDED,
+          callerId: callDetails.caller_id,
+          duration,
+          endReason: reason,
+        }).catch(err => console.log('[CallService] Call event message error:', err.message));
+      }
 
       console.log('[CallService] Call ended successfully:', data);
 
@@ -516,6 +556,13 @@ class CallService {
         this.currentCallId = null;
         console.log('[CallService] Cleared currentCallId immediately');
       }
+
+      // Fetch call details BEFORE updating for call event message
+      const { data: callDetails } = await supabase
+        .from('calls')
+        .select('conversation_id, call_type, caller_id')
+        .eq('id', callId)
+        .single();
 
       // End call in CallKeep (dismiss native UI)
       if (callKeepService.available) {
@@ -564,6 +611,18 @@ class CallService {
       webrtcService.cleanup();
       await callSignalingService.cleanup();
       this._cleanup();
+
+      // Create call event message for chat history (non-blocking)
+      if (callDetails?.conversation_id) {
+        messagingService.createCallEventMessage(callDetails.conversation_id, {
+          callId,
+          callType: callDetails.call_type,
+          callStatus: CALL_STATUS.CANCELLED,
+          callerId: callDetails.caller_id,
+          duration: 0,
+          endReason: END_REASON.CANCELLED,
+        }).catch(err => console.log('[CallService] Call event message error:', err.message));
+      }
 
       return { success: true };
     } catch (error) {
@@ -1122,6 +1181,18 @@ class CallService {
           reason: END_REASON.NO_ANSWER,
           timeout: CALL_TIMEOUTS.RING_TIMEOUT,
         });
+
+        // Create call event message for chat history (non-blocking)
+        if (call?.conversation_id) {
+          messagingService.createCallEventMessage(call.conversation_id, {
+            callId,
+            callType: call.call_type,
+            callStatus: CALL_STATUS.MISSED,
+            callerId: call.caller_id,
+            duration: 0,
+            endReason: END_REASON.NO_ANSWER,
+          }).catch(err => console.log('[CallService] Call event message error:', err.message));
+        }
 
       } catch (err) {
         console.error('[CallService] Ring timeout error:', err);

@@ -6,6 +6,20 @@
 
 import { supabase } from './supabase';
 
+// ============ ERROR LOGGING HELPER ============
+// Supabase errors are objects that don't serialize well in React Native console
+const formatSupabaseError = (error) => {
+  if (!error) return 'Unknown error';
+  if (typeof error === 'string') return error;
+  // Extract useful info from Supabase error object
+  const parts = [];
+  if (error.message) parts.push(`message: ${error.message}`);
+  if (error.code) parts.push(`code: ${error.code}`);
+  if (error.details) parts.push(`details: ${error.details}`);
+  if (error.hint) parts.push(`hint: ${error.hint}`);
+  return parts.length > 0 ? parts.join(', ') : JSON.stringify(error);
+};
+
 // ============ LEVELS ============
 export const LEVELS = [
   { level: 1, title: 'Người Mới Bắt Đầu', badge: '🌱', xpRequired: 0 },
@@ -131,7 +145,7 @@ export const calculateDailyScore = async (userId) => {
       ritualCompleted,
     };
   } catch (err) {
-    console.error('[statsService] calculateDailyScore error:', err);
+    console.error('[statsService] calculateDailyScore error:', formatSupabaseError(err));
     return {
       dailyScore: 0,
       tasks: { completed: 0, total: 0 },
@@ -154,7 +168,7 @@ export const calculateStreak = async (userId) => {
       .maybeSingle(); // Use maybeSingle() instead of single() to avoid error when no row exists
 
     if (error) {
-      console.error('[statsService] calculateStreak query error:', error);
+      console.error('[statsService] calculateStreak query error:', formatSupabaseError(error));
     }
 
     console.log('[statsService] calculateStreak result:', stats);
@@ -164,7 +178,7 @@ export const calculateStreak = async (userId) => {
       bestStreak: stats?.best_streak || 0,
     };
   } catch (err) {
-    console.error('[statsService] calculateStreak error:', err);
+    console.error('[statsService] calculateStreak error:', formatSupabaseError(err));
     return { currentStreak: 0, bestStreak: 0 };
   }
 };
@@ -186,7 +200,7 @@ export const updateStreak = async (userId) => {
       .maybeSingle(); // Use maybeSingle to avoid error when no row exists
 
     if (yesterdayError) {
-      console.error('[statsService] updateStreak yesterday query error:', yesterdayError);
+      console.error('[statsService] updateStreak yesterday query error:', formatSupabaseError(yesterdayError));
     }
 
     // Get current streak
@@ -197,7 +211,7 @@ export const updateStreak = async (userId) => {
       .maybeSingle(); // Use maybeSingle to avoid error when no row exists
 
     if (statsError) {
-      console.error('[statsService] updateStreak stats query error:', statsError);
+      console.error('[statsService] updateStreak stats query error:', formatSupabaseError(statsError));
     }
 
     console.log('[statsService] updateStreak - yesterday summary:', yesterdaySummary, 'current stats:', stats);
@@ -222,14 +236,14 @@ export const updateStreak = async (userId) => {
       }, { onConflict: 'user_id' });
 
     if (upsertError) {
-      console.error('[statsService] updateStreak upsert error:', upsertError);
+      console.error('[statsService] updateStreak upsert error:', formatSupabaseError(upsertError));
     }
 
     console.log('[statsService] updateStreak result:', { currentStreak: newStreak, bestStreak: newBestStreak });
 
     return { currentStreak: newStreak, bestStreak: newBestStreak };
   } catch (err) {
-    console.error('[statsService] updateStreak error:', err);
+    console.error('[statsService] updateStreak error:', formatSupabaseError(err));
     return { currentStreak: 0, bestStreak: 0 };
   }
 };
@@ -310,7 +324,7 @@ export const calculateCombo = async (userId) => {
       comboLabel: `x${comboMultiplier.toFixed(2)}`,
     };
   } catch (err) {
-    console.error('[statsService] calculateCombo error:', err);
+    console.error('[statsService] calculateCombo error:', formatSupabaseError(err));
     return { categoriesCompleted: 0, comboMultiplier: 1.0, comboLabel: 'x1.00' };
   }
 };
@@ -414,7 +428,7 @@ export const getWeeklyProgress = async (userId) => {
       .lte('summary_date', endDateStr);
 
     if (error) {
-      console.error('[statsService] getWeeklyProgress query error:', error);
+      console.error('[statsService] getWeeklyProgress query error:', formatSupabaseError(error));
     }
 
     console.log('[statsService] getWeeklyProgress - found summaries:', summaries?.length || 0);
@@ -449,7 +463,7 @@ export const getWeeklyProgress = async (userId) => {
 
     return { days, average, totalXP };
   } catch (err) {
-    console.error('[statsService] getWeeklyProgress error:', err);
+    console.error('[statsService] getWeeklyProgress error:', formatSupabaseError(err));
     return { days: [], average: 0, totalXP: 0 };
   }
 };
@@ -475,10 +489,10 @@ export const getLifeAreaScores = async (userId) => {
     ]);
 
     if (goalsResult.error) {
-      console.error('[statsService] getLifeAreaScores goals error:', goalsResult.error);
+      console.error('[statsService] getLifeAreaScores goals error:', formatSupabaseError(goalsResult.error));
     }
     if (habitsResult.error) {
-      console.error('[statsService] getLifeAreaScores habits error:', habitsResult.error);
+      console.error('[statsService] getLifeAreaScores habits error:', formatSupabaseError(habitsResult.error));
     }
 
     const goals = goalsResult.data || [];
@@ -507,7 +521,7 @@ export const getLifeAreaScores = async (userId) => {
 
     return scores;
   } catch (err) {
-    console.error('[statsService] getLifeAreaScores error:', err);
+    console.error('[statsService] getLifeAreaScores error:', formatSupabaseError(err));
     return {
       finance: 50, career: 50, health: 50,
       relationships: 50, personal: 50, spiritual: 50,
@@ -537,14 +551,14 @@ export const saveDailySummary = async (userId, summaryData) => {
       }, { onConflict: 'user_id,summary_date' });
 
     if (error) {
-      console.error('[statsService] saveDailySummary upsert error:', error);
+      console.error('[statsService] saveDailySummary upsert error:', formatSupabaseError(error));
       return false;
     }
 
     console.log('[statsService] saveDailySummary - saved successfully');
     return true;
   } catch (err) {
-    console.error('[statsService] saveDailySummary error:', err);
+    console.error('[statsService] saveDailySummary error:', formatSupabaseError(err));
     return false;
   }
 };
@@ -571,7 +585,7 @@ export const recalculateDailyScore = async (userId) => {
       combo: comboData,
     };
   } catch (err) {
-    console.error('[statsService] recalculateDailyScore error:', err);
+    console.error('[statsService] recalculateDailyScore error:', formatSupabaseError(err));
     return null;
   }
 };
@@ -625,7 +639,7 @@ export const getTodayActivityCounts = async (userId) => {
       goalsCompleted: goalsCount || 0,
     };
   } catch (err) {
-    console.error('[statsService] getTodayActivityCounts error:', err);
+    console.error('[statsService] getTodayActivityCounts error:', formatSupabaseError(err));
     return {
       affirmationsCompleted: 0,
       habitsCompleted: 0,
@@ -660,7 +674,7 @@ export const getFullStats = async (userId) => {
       todayActivity,
     };
   } catch (err) {
-    console.error('[statsService] getFullStats error:', err);
+    console.error('[statsService] getFullStats error:', formatSupabaseError(err));
     return null;
   }
 };

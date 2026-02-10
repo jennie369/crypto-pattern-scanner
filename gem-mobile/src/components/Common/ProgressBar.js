@@ -1,25 +1,31 @@
 /**
  * GEM Academy - Linear Progress Bar
- * Animated progress bar with gradient option
+ * Theme-aware animated progress bar with gradient option
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const ProgressBar = ({
   progress = 0, // 0-100 or 0-1
   height = 8,
-  backgroundColor = 'rgba(255, 255, 255, 0.1)',
-  fillColor = COLORS.gold,
+  backgroundColor,
+  fillColor,
   gradientColors = null, // ['#FFBD59', '#FFD700']
-  borderRadius = BORDER_RADIUS.full,
+  borderRadius,
   animated = true,
   animationDuration = 500,
   style = {},
 }) => {
+  const { colors, settings } = useSettings();
   const animatedWidth = useRef(new Animated.Value(0)).current;
+
+  // Use theme-aware defaults
+  const bgColor = backgroundColor || (settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)');
+  const fill = fillColor || colors.gold;
+  const radius = borderRadius ?? 9999; // full rounded by default
 
   // Normalize progress to 0-100
   const normalizedProgress = progress > 1 ? progress : progress * 100;
@@ -43,14 +49,30 @@ const ProgressBar = ({
     extrapolate: 'clamp',
   });
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      overflow: 'hidden',
+      width: '100%',
+    },
+    fill: {
+      overflow: 'hidden',
+    },
+    gradient: {
+      flex: 1,
+    },
+    solidFill: {
+      flex: 1,
+    },
+  }), []);
+
   return (
     <View
       style={[
         styles.container,
         {
           height,
-          backgroundColor,
-          borderRadius,
+          backgroundColor: bgColor,
+          borderRadius: radius,
         },
         style,
       ]}
@@ -61,7 +83,7 @@ const ProgressBar = ({
           {
             width: widthInterpolate,
             height: '100%',
-            borderRadius,
+            borderRadius: radius,
           },
         ]}
       >
@@ -70,13 +92,13 @@ const ProgressBar = ({
             colors={gradientColors}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            style={[styles.gradient, { borderRadius }]}
+            style={[styles.gradient, { borderRadius: radius }]}
           />
         ) : (
           <View
             style={[
               styles.solidFill,
-              { backgroundColor: fillColor, borderRadius },
+              { backgroundColor: fill, borderRadius: radius },
             ]}
           />
         )}
@@ -84,21 +106,5 @@ const ProgressBar = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    overflow: 'hidden',
-    width: '100%',
-  },
-  fill: {
-    overflow: 'hidden',
-  },
-  gradient: {
-    flex: 1,
-  },
-  solidFill: {
-    flex: 1,
-  },
-});
 
 export default ProgressBar;

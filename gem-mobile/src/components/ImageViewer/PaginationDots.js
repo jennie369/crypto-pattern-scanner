@@ -4,7 +4,7 @@
  * Phase 2: Image Viewer Enhancement (30/12/2024)
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,7 +14,7 @@ import Animated, {
   interpolate,
   Extrapolate,
 } from 'react-native-reanimated';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const DOT_SIZE = 8;
 const DOT_SPACING = 8;
@@ -35,6 +35,35 @@ const PaginationDots = ({
   scrollX,
   itemWidth,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.md,
+    },
+    dot: {
+      height: DOT_SIZE,
+      borderRadius: DOT_SIZE / 2,
+      backgroundColor: colors.gold,
+      marginHorizontal: DOT_SPACING / 2,
+    },
+    compactIndicator: {
+      width: 60,
+      height: 4,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+      borderRadius: 2,
+      overflow: 'hidden',
+    },
+    compactProgress: {
+      height: '100%',
+      backgroundColor: colors.gold,
+      borderRadius: 2,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (total <= 1) return null;
 
   // Limit dots shown (max 5 visible at a time for many items)
@@ -52,6 +81,7 @@ const PaginationDots = ({
             currentIndex={currentIndex}
             scrollX={scrollX}
             itemWidth={itemWidth}
+            colors={colors}
           />
         ))
       ) : (
@@ -74,7 +104,7 @@ const PaginationDots = ({
 /**
  * Individual pagination dot
  */
-const PaginationDot = memo(({ index, currentIndex, scrollX, itemWidth }) => {
+const PaginationDot = memo(({ index, currentIndex, scrollX, itemWidth, colors }) => {
   const animatedStyle = useAnimatedStyle(() => {
     if (scrollX && itemWidth) {
       // Animated based on scroll
@@ -112,38 +142,16 @@ const PaginationDot = memo(({ index, currentIndex, scrollX, itemWidth }) => {
   return (
     <Animated.View
       style={[
-        styles.dot,
+        {
+          height: DOT_SIZE,
+          borderRadius: DOT_SIZE / 2,
+          backgroundColor: colors.gold,
+          marginHorizontal: DOT_SPACING / 2,
+        },
         animatedStyle,
       ]}
     />
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.md,
-  },
-  dot: {
-    height: DOT_SIZE,
-    borderRadius: DOT_SIZE / 2,
-    backgroundColor: COLORS.gold,
-    marginHorizontal: DOT_SPACING / 2,
-  },
-  compactIndicator: {
-    width: 60,
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  compactProgress: {
-    height: '100%',
-    backgroundColor: COLORS.gold,
-    borderRadius: 2,
-  },
 });
 
 export default memo(PaginationDots);

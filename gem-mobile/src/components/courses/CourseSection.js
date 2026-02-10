@@ -3,7 +3,7 @@
  * Horizontal scrolling section with title and "See all" button
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { BORDER_RADIUS } from '../../utils/tokens';
 import CourseCardVertical from './CourseCardVertical';
 
 const CourseSection = ({
@@ -36,6 +37,71 @@ const CourseSection = ({
   style = {},
 }) => {
   const navigation = useNavigation();
+  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginVertical: SPACING.md,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.lg,
+      marginBottom: SPACING.md,
+    },
+    titleContainer: {
+      flex: 1,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xxxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    subtitle: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: SPACING.xxs,
+    },
+    seeAllButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    seeAllText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.gold,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      marginRight: SPACING.xxs,
+    },
+    listContent: {
+      paddingLeft: SPACING.lg,
+      paddingRight: SPACING.sm, // Less right padding to show "peek" of next card
+      paddingBottom: SPACING.sm,
+    },
+    separator: {
+      width: SPACING.md,
+    },
+    courseCard: {
+      // Additional card styling if needed
+    },
+    loadingContainer: {
+      height: 150,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyContainer: {
+      height: 100,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginHorizontal: SPACING.lg,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: BORDER_RADIUS.lg,
+    },
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handleSeeAll = () => {
     if (onSeeAll) {
@@ -90,7 +156,7 @@ const CourseSection = ({
           <Text style={styles.title}>{title}</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={COLORS.gold} />
+          <ActivityIndicator size="small" color={colors.gold} />
         </View>
       </View>
     );
@@ -127,7 +193,7 @@ const CourseSection = ({
             activeOpacity={0.7}
           >
             <Text style={styles.seeAllText}>Xem tất cả</Text>
-            <ChevronRight size={16} color={COLORS.gold} />
+            <ChevronRight size={16} color={colors.gold} />
           </TouchableOpacity>
         )}
       </View>
@@ -145,69 +211,5 @@ const CourseSection = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: SPACING.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  subtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: SPACING.xxs,
-  },
-  seeAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  seeAllText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.gold,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    marginRight: SPACING.xxs,
-  },
-  listContent: {
-    paddingLeft: SPACING.lg,
-    paddingRight: SPACING.sm, // Less right padding to show "peek" of next card
-    paddingBottom: SPACING.sm,
-  },
-  separator: {
-    width: SPACING.md,
-  },
-  courseCard: {
-    // Additional card styling if needed
-  },
-  loadingContainer: {
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    height: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: SPACING.lg,
-    backgroundColor: 'rgba(15, 16, 48, 0.5)',
-    borderRadius: BORDER_RADIUS.lg,
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-  },
-});
 
 export default CourseSection;

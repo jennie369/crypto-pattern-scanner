@@ -1,15 +1,15 @@
 /**
  * CRYSTAL LINK COMPONENT
- * Component hiển thị crystal recommendation với link tới Shop
+ * Component hien thi crystal recommendation voi link toi Shop
  *
  * Features:
- * - Hiển thị crystal info (name, reason)
- * - Deep link tới Shop product page
+ * - Hien thi crystal info (name, reason)
+ * - Deep link toi Shop product page
  * - Add to wishlist button
  * - Expandable description
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -31,69 +31,69 @@ import {
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 
 // Crystal icon mapping based on type
-const CRYSTAL_COLORS = {
-  // Clear/White
-  'clear-quartz': { primary: '#FFFFFF', secondary: '#E8E8E8' },
-  'selenite': { primary: '#F5F5F5', secondary: '#E0E0E0' },
-  'moonstone': { primary: '#F0F0F0', secondary: '#D0D0D0' },
+const getCrystalColors = (shopHandle, colors) => {
+  const CRYSTAL_COLORS = {
+    // Clear/White
+    'clear-quartz': { primary: '#FFFFFF', secondary: '#E8E8E8' },
+    'selenite': { primary: '#F5F5F5', secondary: '#E0E0E0' },
+    'moonstone': { primary: '#F0F0F0', secondary: '#D0D0D0' },
 
-  // Purple/Violet
-  'amethyst': { primary: '#9B59B6', secondary: '#8E44AD' },
-  'lepidolite': { primary: '#B39DDB', secondary: '#9575CD' },
-  'fluorite': { primary: '#7E57C2', secondary: '#5E35B1' },
+    // Purple/Violet
+    'amethyst': { primary: '#9B59B6', secondary: '#8E44AD' },
+    'lepidolite': { primary: '#B39DDB', secondary: '#9575CD' },
+    'fluorite': { primary: '#7E57C2', secondary: '#5E35B1' },
 
-  // Pink
-  'rose-quartz': { primary: '#FFB6C1', secondary: '#FF69B4' },
-  'rhodonite': { primary: '#E91E63', secondary: '#C2185B' },
+    // Pink
+    'rose-quartz': { primary: '#FFB6C1', secondary: '#FF69B4' },
+    'rhodonite': { primary: '#E91E63', secondary: '#C2185B' },
 
-  // Blue
-  'lapis-lazuli': { primary: '#1E40AF', secondary: '#1E3A8A' },
-  'sodalite': { primary: '#3B82F6', secondary: '#2563EB' },
-  'blue-lace-agate': { primary: '#93C5FD', secondary: '#60A5FA' },
-  'aquamarine': { primary: '#22D3EE', secondary: '#06B6D4' },
+    // Blue
+    'lapis-lazuli': { primary: '#1E40AF', secondary: '#1E3A8A' },
+    'sodalite': { primary: '#3B82F6', secondary: '#2563EB' },
+    'blue-lace-agate': { primary: '#93C5FD', secondary: '#60A5FA' },
+    'aquamarine': { primary: '#22D3EE', secondary: '#06B6D4' },
 
-  // Green
-  'green-aventurine': { primary: '#22C55E', secondary: '#16A34A' },
-  'jade': { primary: '#10B981', secondary: '#059669' },
-  'malachite': { primary: '#065F46', secondary: '#064E3B' },
+    // Green
+    'green-aventurine': { primary: '#22C55E', secondary: '#16A34A' },
+    'jade': { primary: '#10B981', secondary: '#059669' },
+    'malachite': { primary: '#065F46', secondary: '#064E3B' },
 
-  // Yellow/Gold
-  'citrine': { primary: '#FFBD59', secondary: '#F59E0B' },
-  'pyrite': { primary: '#D4AF37', secondary: '#B8860B' },
-  'sunstone': { primary: '#FF8C00', secondary: '#FF6600' },
+    // Yellow/Gold
+    'citrine': { primary: '#FFBD59', secondary: '#F59E0B' },
+    'pyrite': { primary: '#D4AF37', secondary: '#B8860B' },
+    'sunstone': { primary: '#FF8C00', secondary: '#FF6600' },
 
-  // Orange/Red
-  'carnelian': { primary: '#EA580C', secondary: '#C2410C' },
-  'garnet': { primary: '#991B1B', secondary: '#7F1D1D' },
-  'red-jasper': { primary: '#B91C1C', secondary: '#991B1B' },
+    // Orange/Red
+    'carnelian': { primary: '#EA580C', secondary: '#C2410C' },
+    'garnet': { primary: '#991B1B', secondary: '#7F1D1D' },
+    'red-jasper': { primary: '#B91C1C', secondary: '#991B1B' },
 
-  // Black/Dark
-  'black-tourmaline': { primary: '#1F2937', secondary: '#111827' },
-  'smoky-quartz': { primary: '#57534E', secondary: '#44403C' },
-  'obsidian': { primary: '#18181B', secondary: '#09090B' },
-  'onyx': { primary: '#27272A', secondary: '#18181B' },
+    // Black/Dark
+    'black-tourmaline': { primary: '#1F2937', secondary: '#111827' },
+    'smoky-quartz': { primary: '#57534E', secondary: '#44403C' },
+    'obsidian': { primary: '#18181B', secondary: '#09090B' },
+    'onyx': { primary: '#27272A', secondary: '#18181B' },
 
-  // Brown
-  'tiger-eye': { primary: '#92400E', secondary: '#78350F' },
+    // Brown
+    'tiger-eye': { primary: '#92400E', secondary: '#78350F' },
 
-  // Multi-color
-  'labradorite': { primary: '#6366F1', secondary: '#4F46E5' },
-  'opal': { primary: '#FEF3C7', secondary: '#F9A8D4' },
+    // Multi-color
+    'labradorite': { primary: '#6366F1', secondary: '#4F46E5' },
+    'opal': { primary: '#FEF3C7', secondary: '#F9A8D4' },
 
-  // Default
-  default: { primary: COLORS.purple, secondary: COLORS.purpleGlow },
-};
+    // Default
+    default: { primary: colors.purple, secondary: colors.purpleGlow },
+  };
 
-const getCrystalColors = (shopHandle) => {
   return CRYSTAL_COLORS[shopHandle] || CRYSTAL_COLORS.default;
 };
 
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 // MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 
 const CrystalLink = ({
   crystal,
@@ -105,6 +105,8 @@ const CrystalLink = ({
   style,
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [expanded, setExpanded] = useState(false);
   const [liked, setLiked] = useState(false);
 
@@ -120,7 +122,7 @@ const CrystalLink = ({
     properties = [],
   } = crystal || {};
 
-  const colors = getCrystalColors(shopHandle);
+  const crystalColors = getCrystalColors(shopHandle, colors);
 
   const handlePress = () => {
     if (onPress) {
@@ -143,6 +145,290 @@ const CrystalLink = ({
     onAddToCart?.(crystal);
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginVertical: SPACING.xs,
+    },
+
+    card: {
+      borderRadius: glass.borderRadius - 4,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+      padding: SPACING.md,
+    },
+
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+
+    iconContainer: {
+      marginRight: SPACING.md,
+    },
+
+    iconGradient: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+
+    crystalImage: {
+      width: 48,
+      height: 48,
+    },
+
+    info: {
+      flex: 1,
+    },
+
+    name: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    englishName: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+
+    elementBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+      paddingVertical: 2,
+      paddingHorizontal: 8,
+      borderRadius: 4,
+      marginTop: 4,
+    },
+
+    elementText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.purple,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+
+    actions: {
+      flexDirection: 'row',
+      gap: SPACING.xs,
+    },
+
+    actionButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    actionButtonActive: {
+      backgroundColor: 'rgba(255, 107, 107, 0.2)',
+    },
+
+    reasonContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginTop: SPACING.md,
+      paddingTop: SPACING.md,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+      gap: SPACING.sm,
+    },
+
+    reasonText: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
+
+    expandHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: SPACING.md,
+      paddingTop: SPACING.sm,
+    },
+
+    expandLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    propertiesContainer: {
+      marginTop: SPACING.sm,
+      paddingLeft: SPACING.sm,
+    },
+
+    propertyItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: SPACING.xs,
+    },
+
+    propertyDot: {
+      width: 4,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.cyan,
+      marginTop: 6,
+      marginRight: SPACING.sm,
+    },
+
+    propertyText: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+
+    chakraRow: {
+      flexDirection: 'row',
+      marginTop: SPACING.sm,
+    },
+
+    chakraLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginRight: SPACING.xs,
+    },
+
+    chakraValue: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.purple,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: SPACING.md,
+      paddingTop: SPACING.md,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+
+    price: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+    },
+
+    footerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+
+    cartButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      backgroundColor: colors.purple,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    shopLink: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+
+    shopLinkText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.gold,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    // Compact styles
+    compactContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(15, 16, 48, 0.6)',
+      borderRadius: 10,
+      padding: SPACING.sm,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+    },
+
+    compactIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: SPACING.sm,
+    },
+
+    compactText: {
+      flex: 1,
+    },
+
+    compactName: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    compactReason: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+
+    // List styles
+    listContainer: {
+      marginVertical: SPACING.sm,
+    },
+
+    listHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginBottom: SPACING.md,
+    },
+
+    listTitle: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    listItem: {
+      marginBottom: SPACING.sm,
+    },
+
+    showMoreButton: {
+      alignItems: 'center',
+      paddingVertical: SPACING.sm,
+    },
+
+    showMoreText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.purple,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    // Chip styles
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: 6,
+      borderWidth: 1,
+    },
+
+    chipText: {
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (compact) {
     return (
       <TouchableOpacity
@@ -150,8 +436,8 @@ const CrystalLink = ({
         onPress={handlePress}
         activeOpacity={0.8}
       >
-        <View style={[styles.compactIcon, { backgroundColor: colors.primary + '20' }]}>
-          <Gem size={16} color={colors.primary} />
+        <View style={[styles.compactIcon, { backgroundColor: crystalColors.primary + '20' }]}>
+          <Gem size={16} color={crystalColors.primary} />
         </View>
         <View style={styles.compactText}>
           <Text style={styles.compactName} numberOfLines={1}>
@@ -163,7 +449,7 @@ const CrystalLink = ({
             </Text>
           )}
         </View>
-        <ChevronRight size={16} color={COLORS.textMuted} />
+        <ChevronRight size={16} color={colors.textMuted} />
       </TouchableOpacity>
     );
   }
@@ -183,13 +469,13 @@ const CrystalLink = ({
           {/* Crystal Icon */}
           <View style={styles.iconContainer}>
             <LinearGradient
-              colors={[colors.primary, colors.secondary]}
+              colors={[crystalColors.primary, crystalColors.secondary]}
               style={styles.iconGradient}
             >
               {imageUrl ? (
                 <Image source={{ uri: imageUrl }} style={styles.crystalImage} />
               ) : (
-                <Gem size={24} color={COLORS.textPrimary} />
+                <Gem size={24} color={colors.textPrimary} />
               )}
             </LinearGradient>
           </View>
@@ -216,8 +502,8 @@ const CrystalLink = ({
               >
                 <Heart
                   size={18}
-                  color={liked ? COLORS.error : COLORS.textMuted}
-                  fill={liked ? COLORS.error : 'none'}
+                  color={liked ? colors.error : colors.textMuted}
+                  fill={liked ? colors.error : 'none'}
                 />
               </TouchableOpacity>
             </View>
@@ -227,7 +513,7 @@ const CrystalLink = ({
         {/* Reason */}
         {reason && (
           <View style={styles.reasonContainer}>
-            <Sparkles size={14} color={COLORS.gold} />
+            <Sparkles size={14} color={colors.gold} />
             <Text style={styles.reasonText}>{reason}</Text>
           </View>
         )}
@@ -239,11 +525,11 @@ const CrystalLink = ({
               style={styles.expandHeader}
               onPress={() => setExpanded(!expanded)}
             >
-              <Text style={styles.expandLabel}>Công dụng & Đặc tính</Text>
+              <Text style={styles.expandLabel}>Cong dung & Dac tinh</Text>
               {expanded ? (
-                <ChevronUp size={16} color={COLORS.textMuted} />
+                <ChevronUp size={16} color={colors.textMuted} />
               ) : (
-                <ChevronDown size={16} color={COLORS.textMuted} />
+                <ChevronDown size={16} color={colors.textMuted} />
               )}
             </TouchableOpacity>
 
@@ -270,7 +556,7 @@ const CrystalLink = ({
         <View style={styles.footer}>
           {price && (
             <Text style={styles.price}>
-              {typeof price === 'number' ? `${price.toLocaleString('vi-VN')}đ` : price}
+              {typeof price === 'number' ? `${price.toLocaleString('vi-VN')}d` : price}
             </Text>
           )}
 
@@ -280,7 +566,7 @@ const CrystalLink = ({
                 style={styles.cartButton}
                 onPress={handleAddToCart}
               >
-                <ShoppingCart size={16} color={COLORS.textPrimary} />
+                <ShoppingCart size={16} color={colors.textPrimary} />
               </TouchableOpacity>
             )}
 
@@ -289,7 +575,7 @@ const CrystalLink = ({
               onPress={handlePress}
             >
               <Text style={styles.shopLinkText}>Xem trong Shop</Text>
-              <ExternalLink size={14} color={COLORS.gold} />
+              <ExternalLink size={14} color={colors.gold} />
             </TouchableOpacity>
           </View>
         </View>
@@ -298,9 +584,9 @@ const CrystalLink = ({
   );
 };
 
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 // CRYSTAL LIST COMPONENT
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 
 export const CrystalList = ({
   crystals = [],
@@ -312,6 +598,42 @@ export const CrystalList = ({
   maxItems,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    listContainer: {
+      marginVertical: SPACING.sm,
+    },
+
+    listHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginBottom: SPACING.md,
+    },
+
+    listTitle: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    listItem: {
+      marginBottom: SPACING.sm,
+    },
+
+    showMoreButton: {
+      alignItems: 'center',
+      paddingVertical: SPACING.sm,
+    },
+
+    showMoreText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.purple,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const displayCrystals = maxItems ? crystals.slice(0, maxItems) : crystals;
 
   if (crystals.length === 0) return null;
@@ -320,7 +642,7 @@ export const CrystalList = ({
     <View style={[styles.listContainer, style]}>
       {title && (
         <View style={styles.listHeader}>
-          <Gem size={18} color={COLORS.purple} />
+          <Gem size={18} color={colors.purple} />
           <Text style={styles.listTitle}>{title}</Text>
         </View>
       )}
@@ -340,7 +662,7 @@ export const CrystalList = ({
       {maxItems && crystals.length > maxItems && (
         <TouchableOpacity style={styles.showMoreButton}>
           <Text style={styles.showMoreText}>
-            +{crystals.length - maxItems} crystals khác
+            +{crystals.length - maxItems} crystals khac
           </Text>
         </TouchableOpacity>
       )}
@@ -348,9 +670,9 @@ export const CrystalList = ({
   );
 };
 
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 // CRYSTAL CHIP (for inline display)
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 
 export const CrystalChip = ({
   crystal,
@@ -359,7 +681,22 @@ export const CrystalChip = ({
   showIcon = true,
 }) => {
   const navigation = useNavigation();
-  const colors = getCrystalColors(crystal?.shopHandle);
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const crystalColors = getCrystalColors(crystal?.shopHandle, colors);
+
+  const styles = useMemo(() => StyleSheet.create({
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: 6,
+      borderWidth: 1,
+    },
+
+    chipText: {
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handlePress = () => {
     if (onPress) {
@@ -387,8 +724,8 @@ export const CrystalChip = ({
         {
           paddingVertical: currentSize.paddingVertical,
           paddingHorizontal: currentSize.paddingHorizontal,
-          borderColor: colors.primary + '50',
-          backgroundColor: colors.primary + '15',
+          borderColor: crystalColors.primary + '50',
+          backgroundColor: crystalColors.primary + '15',
         },
       ]}
       onPress={handlePress}
@@ -397,14 +734,14 @@ export const CrystalChip = ({
       {showIcon && (
         <Gem
           size={currentSize.fontSize}
-          color={colors.primary}
+          color={crystalColors.primary}
           style={{ marginRight: 4 }}
         />
       )}
       <Text
         style={[
           styles.chipText,
-          { fontSize: currentSize.fontSize, color: colors.primary },
+          { fontSize: currentSize.fontSize, color: crystalColors.primary },
         ]}
       >
         {crystal?.vietnameseName || crystal?.name}
@@ -412,293 +749,5 @@ export const CrystalChip = ({
     </TouchableOpacity>
   );
 };
-
-// ═══════════════════════════════════════════════════════════
-// STYLES
-// ═══════════════════════════════════════════════════════════
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: SPACING.xs,
-  },
-
-  card: {
-    borderRadius: GLASS.borderRadius - 4,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-    padding: SPACING.md,
-  },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  iconContainer: {
-    marginRight: SPACING.md,
-  },
-
-  iconGradient: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-
-  crystalImage: {
-    width: 48,
-    height: 48,
-  },
-
-  info: {
-    flex: 1,
-  },
-
-  name: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  englishName: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-
-  elementBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-    marginTop: 4,
-  },
-
-  elementText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.purple,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-
-  actions: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-  },
-
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  actionButtonActive: {
-    backgroundColor: 'rgba(255, 107, 107, 0.2)',
-  },
-
-  reasonContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: SPACING.md,
-    paddingTop: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    gap: SPACING.sm,
-  },
-
-  reasonText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
-  },
-
-  expandHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: SPACING.md,
-    paddingTop: SPACING.sm,
-  },
-
-  expandLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  propertiesContainer: {
-    marginTop: SPACING.sm,
-    paddingLeft: SPACING.sm,
-  },
-
-  propertyItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.xs,
-  },
-
-  propertyDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: COLORS.cyan,
-    marginTop: 6,
-    marginRight: SPACING.sm,
-  },
-
-  propertyText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textSecondary,
-    lineHeight: 18,
-  },
-
-  chakraRow: {
-    flexDirection: 'row',
-    marginTop: SPACING.sm,
-  },
-
-  chakraLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginRight: SPACING.xs,
-  },
-
-  chakraValue: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.purple,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: SPACING.md,
-    paddingTop: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-
-  price: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-  },
-
-  footerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  cartButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: COLORS.purple,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  shopLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-
-  shopLinkText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.gold,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  // Compact styles
-  compactContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(15, 16, 48, 0.6)',
-    borderRadius: 10,
-    padding: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-
-  compactIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.sm,
-  },
-
-  compactText: {
-    flex: 1,
-  },
-
-  compactName: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  compactReason: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-
-  // List styles
-  listContainer: {
-    marginVertical: SPACING.sm,
-  },
-
-  listHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.md,
-  },
-
-  listTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  listItem: {
-    marginBottom: SPACING.sm,
-  },
-
-  showMoreButton: {
-    alignItems: 'center',
-    paddingVertical: SPACING.sm,
-  },
-
-  showMoreText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.purple,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  // Chip styles
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-
-  chipText: {
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-});
 
 export default CrystalLink;

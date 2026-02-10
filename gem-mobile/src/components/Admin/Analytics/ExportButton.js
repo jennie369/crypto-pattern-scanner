@@ -7,7 +7,7 @@
  * Created: January 30, 2026
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ import {
 } from 'lucide-react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { COLORS, SPACING, GLASS } from '../../../utils/tokens';
+import { useSettings } from '../../../contexts/SettingsContext';
 
 const EXPORT_FORMATS = [
   { id: 'csv', label: 'CSV', icon: Table, description: 'Excel, Google Sheets' },
@@ -42,9 +42,117 @@ const ExportButton = ({
   compact = false,
   style,
 }) => {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [showModal, setShowModal] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState(null);
+
+  const styles = useMemo(() => StyleSheet.create({
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+      gap: 6,
+    },
+    buttonCompact: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 6,
+      borderRadius: 8,
+    },
+    buttonDisabled: {
+      opacity: 0.5,
+    },
+    buttonText: {
+      fontSize: 13,
+      color: colors.textPrimary,
+    },
+    buttonTextDisabled: {
+      color: colors.textMuted,
+    },
+
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: SPACING.lg,
+    },
+    modalContent: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : '#1A1B3D',
+      borderRadius: 20,
+      width: '100%',
+      maxWidth: 320,
+      overflow: 'hidden',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    modalTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+
+    dataInfo: {
+      fontSize: 13,
+      color: colors.textMuted,
+      textAlign: 'center',
+      paddingVertical: SPACING.md,
+    },
+
+    formatList: {
+      padding: SPACING.md,
+    },
+    formatOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      borderRadius: 12,
+      marginBottom: SPACING.sm,
+      backgroundColor: 'rgba(106, 91, 255, 0.05)',
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    formatOptionSelected: {
+      backgroundColor: 'rgba(106, 91, 255, 0.15)',
+      borderColor: colors.purple,
+    },
+    formatIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 10,
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: SPACING.md,
+    },
+    formatInfo: {
+      flex: 1,
+    },
+    formatLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    formatLabelSelected: {
+      color: colors.purple,
+    },
+    formatDescription: {
+      fontSize: 12,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const convertToCSV = (data, columns) => {
     if (!data || data.length === 0) return '';
@@ -141,7 +249,7 @@ const ExportButton = ({
         disabled={disabled || data.length === 0}
         activeOpacity={0.7}
       >
-        <Download size={compact ? 14 : 16} color={disabled ? COLORS.textMuted : COLORS.textPrimary} />
+        <Download size={compact ? 14 : 16} color={disabled ? colors.textMuted : colors.textPrimary} />
         {!compact && (
           <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>
             Xuất
@@ -167,7 +275,7 @@ const ExportButton = ({
                 onPress={() => setShowModal(false)}
                 disabled={exporting}
               >
-                <X size={20} color={COLORS.textPrimary} />
+                <X size={20} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -192,9 +300,9 @@ const ExportButton = ({
                   >
                     <View style={styles.formatIcon}>
                       {exporting && isSelected ? (
-                        <ActivityIndicator size="small" color={COLORS.purple} />
+                        <ActivityIndicator size="small" color={colors.purple} />
                       ) : (
-                        <Icon size={20} color={isSelected ? COLORS.purple : COLORS.textSecondary} />
+                        <Icon size={20} color={isSelected ? colors.purple : colors.textSecondary} />
                       )}
                     </View>
                     <View style={styles.formatInfo}>
@@ -204,7 +312,7 @@ const ExportButton = ({
                       <Text style={styles.formatDescription}>{format.description}</Text>
                     </View>
                     {isSelected && !exporting && (
-                      <Check size={18} color={COLORS.purple} />
+                      <Check size={18} color={colors.purple} />
                     )}
                   </TouchableOpacity>
                 );
@@ -216,112 +324,5 @@ const ExportButton = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: GLASS.card,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-    gap: 6,
-  },
-  buttonCompact: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    fontSize: 13,
-    color: COLORS.textPrimary,
-  },
-  buttonTextDisabled: {
-    color: COLORS.textMuted,
-  },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.lg,
-  },
-  modalContent: {
-    backgroundColor: '#1A1B3D',
-    borderRadius: 20,
-    width: '100%',
-    maxWidth: 320,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-
-  dataInfo: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    paddingVertical: SPACING.md,
-  },
-
-  formatList: {
-    padding: SPACING.md,
-  },
-  formatOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    borderRadius: 12,
-    marginBottom: SPACING.sm,
-    backgroundColor: 'rgba(106, 91, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  formatOptionSelected: {
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
-    borderColor: COLORS.purple,
-  },
-  formatIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.md,
-  },
-  formatInfo: {
-    flex: 1,
-  },
-  formatLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  formatLabelSelected: {
-    color: COLORS.purple,
-  },
-  formatDescription: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-});
 
 export default ExportButton;

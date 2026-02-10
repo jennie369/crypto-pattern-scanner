@@ -4,7 +4,7 @@
  * Phase 2: Image Viewer Enhancement (30/12/2024)
  */
 
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -17,7 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Hand, ZoomIn, Move, ArrowDown } from 'lucide-react-native';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const STORAGE_KEY = '@gem:image_viewer_onboarding_seen';
 
@@ -28,6 +28,8 @@ const STORAGE_KEY = '@gem:image_viewer_onboarding_seen';
  * @param {Function} props.onComplete - Callback when onboarding completes
  */
 const ImageViewerOnboarding = ({ onComplete }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -58,6 +60,63 @@ const ImageViewerOnboarding = ({ onComplete }) => {
     }
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: SPACING.xl,
+    },
+    content: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 20,
+      padding: SPACING.lg,
+      maxWidth: 320,
+    },
+    tipRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    iconContainer: {
+      width: 50,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+    secondHand: {
+      marginLeft: -10,
+    },
+    tipText: {
+      flex: 1,
+      marginLeft: SPACING.sm,
+    },
+    tipTitle: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginBottom: 2,
+    },
+    tipDescription: {
+      fontSize: 13,
+      color: colors.textMuted,
+    },
+    dismissButton: {
+      backgroundColor: colors.gold,
+      paddingVertical: SPACING.md,
+      borderRadius: 12,
+      marginTop: SPACING.md,
+    },
+    dismissText: {
+      color: colors.bgDark || '#0F0F30',
+      fontWeight: '600',
+      textAlign: 'center',
+      fontSize: 15,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!visible) return null;
 
   return (
@@ -70,8 +129,8 @@ const ImageViewerOnboarding = ({ onComplete }) => {
         {/* Tip 1: Double tap */}
         <View style={styles.tipRow}>
           <View style={styles.iconContainer}>
-            <Hand size={24} color={COLORS.gold} />
-            <Hand size={24} color={COLORS.gold} style={styles.secondHand} />
+            <Hand size={24} color={colors.gold} />
+            <Hand size={24} color={colors.gold} style={styles.secondHand} />
           </View>
           <View style={styles.tipText}>
             <Text style={styles.tipTitle}>Chạm 2 lần để phóng to</Text>
@@ -84,7 +143,7 @@ const ImageViewerOnboarding = ({ onComplete }) => {
         {/* Tip 2: Pinch */}
         <View style={styles.tipRow}>
           <View style={styles.iconContainer}>
-            <ZoomIn size={24} color={COLORS.gold} />
+            <ZoomIn size={24} color={colors.gold} />
           </View>
           <View style={styles.tipText}>
             <Text style={styles.tipTitle}>Véo để zoom</Text>
@@ -97,7 +156,7 @@ const ImageViewerOnboarding = ({ onComplete }) => {
         {/* Tip 3: Pan */}
         <View style={styles.tipRow}>
           <View style={styles.iconContainer}>
-            <Move size={24} color={COLORS.gold} />
+            <Move size={24} color={colors.gold} />
           </View>
           <View style={styles.tipText}>
             <Text style={styles.tipTitle}>Kéo để di chuyển</Text>
@@ -110,7 +169,7 @@ const ImageViewerOnboarding = ({ onComplete }) => {
         {/* Tip 4: Dismiss */}
         <View style={styles.tipRow}>
           <View style={styles.iconContainer}>
-            <ArrowDown size={24} color={COLORS.gold} />
+            <ArrowDown size={24} color={colors.gold} />
           </View>
           <View style={styles.tipText}>
             <Text style={styles.tipTitle}>Vuốt xuống để đóng</Text>
@@ -128,62 +187,5 @@ const ImageViewerOnboarding = ({ onComplete }) => {
     </Animated.View>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-  content: {
-    backgroundColor: COLORS.bgCard || 'rgba(30, 30, 60, 0.95)',
-    borderRadius: 20,
-    padding: SPACING.lg,
-    maxWidth: 320,
-  },
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  iconContainer: {
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  secondHand: {
-    marginLeft: -10,
-  },
-  tipText: {
-    flex: 1,
-    marginLeft: SPACING.sm,
-  },
-  tipTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  tipDescription: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-  },
-  dismissButton: {
-    backgroundColor: COLORS.gold,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    marginTop: SPACING.md,
-  },
-  dismissText: {
-    color: COLORS.bgDark || '#0F0F30',
-    fontWeight: '600',
-    textAlign: 'center',
-    fontSize: 15,
-  },
-});
 
 export default memo(ImageViewerOnboarding);

@@ -3,7 +3,7 @@
 // Purpose: Bảng so sánh features giữa các tiers
 // ============================================================
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,11 @@ import {
   Dimensions,
 } from 'react-native';
 import { Check, X, Crown, Zap, Star, Infinity } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { formatPrice, formatPriceCompact, parseFeatures } from '../../services/upgradeService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CELL_WIDTH = (SCREEN_WIDTH - 100) / 3;
 
 const TierComparisonTable = ({
   tiers = [],
@@ -25,6 +26,201 @@ const TierComparisonTable = ({
   highlightedTierLevel = null,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+
+    // Header Row
+    headerRow: {
+      flexDirection: 'row',
+      borderBottomWidth: 2,
+      borderBottomColor: 'rgba(255,255,255,0.1)',
+    },
+    featureLabelCell: {
+      width: 100,
+      padding: SPACING.sm,
+      justifyContent: 'center',
+    },
+    featureLabelHeader: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textSecondary,
+      textTransform: 'uppercase',
+    },
+    tierHeaderCell: {
+      width: CELL_WIDTH,
+      padding: SPACING.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.bgDarkest,
+      position: 'relative',
+    },
+    tierHeaderCellHighlighted: {
+      backgroundColor: colors.gold,
+    },
+    tierHeaderCellCurrent: {
+      borderWidth: 2,
+      borderColor: colors.success,
+    },
+    featuredBadge: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: 'rgba(0,0,0,0.3)',
+      paddingVertical: 2,
+    },
+    featuredBadgeText: {
+      fontSize: 8,
+      fontWeight: '700',
+      color: colors.bgDarkest,
+      textAlign: 'center',
+    },
+    tierName: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      marginTop: 4,
+      textAlign: 'center',
+    },
+    tierNameHighlighted: {
+      color: colors.bgDarkest,
+    },
+    tierPrice: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+      marginTop: 2,
+    },
+    tierPriceHighlighted: {
+      color: colors.bgDarkest,
+    },
+    currentBadge: {
+      backgroundColor: colors.success,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      marginTop: 4,
+    },
+    currentBadgeText: {
+      fontSize: 9,
+      fontWeight: '700',
+      color: colors.bgDarkest,
+    },
+
+    // Feature Rows
+    featureRow: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255,255,255,0.05)',
+    },
+    featureRowAlt: {
+      backgroundColor: 'rgba(255,255,255,0.02)',
+    },
+    featureLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    featureValueCell: {
+      width: CELL_WIDTH,
+      padding: SPACING.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    featureValueCellHighlighted: {
+      backgroundColor: 'rgba(255, 189, 89, 0.05)',
+    },
+    featureLimit: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    // CTA Row
+    ctaRow: {
+      flexDirection: 'row',
+      paddingVertical: SPACING.sm,
+      backgroundColor: colors.bgDarkest,
+    },
+    ctaCell: {
+      width: CELL_WIDTH,
+      paddingHorizontal: SPACING.xs,
+      alignItems: 'center',
+    },
+    ctaButton: {
+      paddingVertical: SPACING.xs,
+      paddingHorizontal: SPACING.sm,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.gold,
+    },
+    ctaButtonHighlighted: {
+      backgroundColor: colors.gold,
+      borderColor: colors.gold,
+    },
+    ctaButtonCurrent: {
+      backgroundColor: 'transparent',
+      borderColor: colors.success,
+    },
+    ctaText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+    },
+    ctaTextHighlighted: {
+      color: colors.bgDarkest,
+    },
+    ctaTextCurrent: {
+      color: colors.success,
+    },
+
+    // Compact variant
+    compactContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: colors.gold,
+    },
+    compactHeader: {
+      marginBottom: SPACING.sm,
+    },
+    compactTitle: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    compactFeatures: {
+      marginBottom: SPACING.md,
+    },
+    compactFeatureRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginBottom: SPACING.xs,
+    },
+    compactFeatureText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+    },
+    compactCta: {
+      backgroundColor: colors.gold,
+      paddingVertical: SPACING.sm,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    compactCtaText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.bgDarkest,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!tiers.length) return null;
 
   // Get all unique feature keys from all tiers
@@ -86,7 +282,7 @@ const TierComparisonTable = ({
                   )}
                   <Icon
                     size={20}
-                    color={isHighlighted ? COLORS.bgDarkest : COLORS.gold}
+                    color={isHighlighted ? colors.bgDarkest : colors.gold}
                   />
                   <Text style={[
                     styles.tierName,
@@ -140,16 +336,16 @@ const TierComparisonTable = ({
                       value.limit ? (
                         <Text style={styles.featureLimit}>
                           {value.limit === -1 ? (
-                            <Infinity size={16} color={COLORS.success} />
+                            <Infinity size={16} color={colors.success} />
                           ) : (
                             value.limit
                           )}
                         </Text>
                       ) : (
-                        <Check size={18} color={COLORS.success} />
+                        <Check size={18} color={colors.success} />
                       )
                     ) : (
-                      <X size={18} color={COLORS.textMuted} />
+                      <X size={18} color={colors.textMuted} />
                     )}
                   </View>
                 );
@@ -203,6 +399,50 @@ export const TierComparisonCompact = ({
   onUpgrade,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    compactContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: colors.gold,
+    },
+    compactHeader: {
+      marginBottom: SPACING.sm,
+    },
+    compactTitle: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    compactFeatures: {
+      marginBottom: SPACING.md,
+    },
+    compactFeatureRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginBottom: SPACING.xs,
+    },
+    compactFeatureText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+    },
+    compactCta: {
+      backgroundColor: colors.gold,
+      paddingVertical: SPACING.sm,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    compactCtaText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.bgDarkest,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!currentTier || !upgradeTier) return null;
 
   const currentFeatures = parseFeatures(currentTier.features_json);
@@ -223,7 +463,7 @@ export const TierComparisonCompact = ({
       <View style={styles.compactFeatures}>
         {newFeatures.slice(0, 4).map((feature, index) => (
           <View key={index} style={styles.compactFeatureRow}>
-            <Check size={16} color={COLORS.success} />
+            <Check size={16} color={colors.success} />
             <Text style={styles.compactFeatureText}>{feature.label}</Text>
           </View>
         ))}
@@ -241,200 +481,5 @@ export const TierComparisonCompact = ({
     </View>
   );
 };
-
-const CELL_WIDTH = (SCREEN_WIDTH - 100) / 3;
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-
-  // Header Row
-  headerRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
-  },
-  featureLabelCell: {
-    width: 100,
-    padding: SPACING.sm,
-    justifyContent: 'center',
-  },
-  featureLabelHeader: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textSecondary,
-    textTransform: 'uppercase',
-  },
-  tierHeaderCell: {
-    width: CELL_WIDTH,
-    padding: SPACING.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.bgDarkest,
-    position: 'relative',
-  },
-  tierHeaderCellHighlighted: {
-    backgroundColor: COLORS.gold,
-  },
-  tierHeaderCellCurrent: {
-    borderWidth: 2,
-    borderColor: COLORS.success,
-  },
-  featuredBadge: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    paddingVertical: 2,
-  },
-  featuredBadgeText: {
-    fontSize: 8,
-    fontWeight: '700',
-    color: COLORS.bgDarkest,
-    textAlign: 'center',
-  },
-  tierName: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  tierNameHighlighted: {
-    color: COLORS.bgDarkest,
-  },
-  tierPrice: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-    marginTop: 2,
-  },
-  tierPriceHighlighted: {
-    color: COLORS.bgDarkest,
-  },
-  currentBadge: {
-    backgroundColor: COLORS.success,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginTop: 4,
-  },
-  currentBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: COLORS.bgDarkest,
-  },
-
-  // Feature Rows
-  featureRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
-  },
-  featureRowAlt: {
-    backgroundColor: 'rgba(255,255,255,0.02)',
-  },
-  featureLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-  },
-  featureValueCell: {
-    width: CELL_WIDTH,
-    padding: SPACING.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featureValueCellHighlighted: {
-    backgroundColor: 'rgba(255, 189, 89, 0.05)',
-  },
-  featureLimit: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  // CTA Row
-  ctaRow: {
-    flexDirection: 'row',
-    paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.bgDarkest,
-  },
-  ctaCell: {
-    width: CELL_WIDTH,
-    paddingHorizontal: SPACING.xs,
-    alignItems: 'center',
-  },
-  ctaButton: {
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-  },
-  ctaButtonHighlighted: {
-    backgroundColor: COLORS.gold,
-    borderColor: COLORS.gold,
-  },
-  ctaButtonCurrent: {
-    backgroundColor: 'transparent',
-    borderColor: COLORS.success,
-  },
-  ctaText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-  },
-  ctaTextHighlighted: {
-    color: COLORS.bgDarkest,
-  },
-  ctaTextCurrent: {
-    color: COLORS.success,
-  },
-
-  // Compact variant
-  compactContainer: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 16,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-  },
-  compactHeader: {
-    marginBottom: SPACING.sm,
-  },
-  compactTitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  compactFeatures: {
-    marginBottom: SPACING.md,
-  },
-  compactFeatureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.xs,
-  },
-  compactFeatureText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-  },
-  compactCta: {
-    backgroundColor: COLORS.gold,
-    paddingVertical: SPACING.sm,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  compactCtaText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDarkest,
-  },
-});
 
 export default TierComparisonTable;

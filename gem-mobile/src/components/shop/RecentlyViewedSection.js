@@ -4,7 +4,7 @@
  * Shown at bottom of ShopScreen
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,12 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Clock, ChevronRight } from 'lucide-react-native';
 import { getRecentlyViewed } from '../../services/recentlyViewedService';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const RecentlyViewedSection = ({ style, limit = 10 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+  const BORDER_RADIUS = { md: 12 };
+
   const navigation = useNavigation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,6 +77,79 @@ const RecentlyViewedSection = ({ style, limit = 10 }) => {
     }).format(value || 0);
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: SPACING.xl,
+    },
+    loadingContainer: {
+      height: 150,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.lg,
+      marginBottom: SPACING.md,
+    },
+    titleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    seeAllButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    seeAllText: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.md,
+    },
+    productList: {
+      paddingHorizontal: SPACING.lg,
+    },
+    productCard: {
+      width: 100,
+      marginRight: SPACING.md,
+    },
+    imageContainer: {
+      width: 100,
+      height: 100,
+      borderRadius: BORDER_RADIUS.md,
+      overflow: 'hidden',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      marginBottom: SPACING.xs,
+    },
+    productImage: {
+      width: '100%',
+      height: '100%',
+    },
+    imagePlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    productTitle: {
+      color: colors.textSecondary,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      lineHeight: 14,
+      marginBottom: 2,
+    },
+    productPrice: {
+      color: colors.cyan,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const renderProduct = ({ item }) => (
     <TouchableOpacity
       style={styles.productCard}
@@ -89,7 +165,7 @@ const RecentlyViewedSection = ({ style, limit = 10 }) => {
           />
         ) : (
           <View style={styles.imagePlaceholder}>
-            <Clock size={20} color={COLORS.textMuted} />
+            <Clock size={20} color={colors.textMuted} />
           </View>
         )}
       </View>
@@ -106,7 +182,7 @@ const RecentlyViewedSection = ({ style, limit = 10 }) => {
   if (loading) {
     return (
       <View style={[styles.loadingContainer, style]}>
-        <ActivityIndicator size="small" color={COLORS.burgundy} />
+        <ActivityIndicator size="small" color={colors.burgundy} />
       </View>
     );
   }
@@ -120,7 +196,7 @@ const RecentlyViewedSection = ({ style, limit = 10 }) => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Clock size={18} color={COLORS.textSecondary} />
+          <Clock size={18} color={colors.textSecondary} />
           <Text style={styles.title}>Đã xem gần đây</Text>
         </View>
 
@@ -130,7 +206,7 @@ const RecentlyViewedSection = ({ style, limit = 10 }) => {
           activeOpacity={0.7}
         >
           <Text style={styles.seeAllText}>Xem tất cả</Text>
-          <ChevronRight size={16} color={COLORS.textMuted} />
+          <ChevronRight size={16} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -146,78 +222,5 @@ const RecentlyViewedSection = ({ style, limit = 10 }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: SPACING.xl,
-  },
-  loadingContainer: {
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  seeAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  seeAllText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.md,
-  },
-  productList: {
-    paddingHorizontal: SPACING.lg,
-  },
-  productCard: {
-    width: 100,
-    marginRight: SPACING.md,
-  },
-  imageContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: BORDER_RADIUS.md,
-    overflow: 'hidden',
-    backgroundColor: COLORS.glassBg,
-    marginBottom: SPACING.xs,
-  },
-  productImage: {
-    width: '100%',
-    height: '100%',
-  },
-  imagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.glassBgHeavy,
-  },
-  productTitle: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    lineHeight: 14,
-    marginBottom: 2,
-  },
-  productPrice: {
-    color: COLORS.cyan,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-});
 
 export default RecentlyViewedSection;

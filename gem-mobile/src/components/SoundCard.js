@@ -4,7 +4,7 @@
  * Displays a sound item with play controls
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 import soundService from '../services/soundService';
 
 const SoundCard = ({
@@ -35,9 +35,176 @@ const SoundCard = ({
   showUseCount = true,
   compact = false,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [isSaved, setIsSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const pulseAnim = useState(new Animated.Value(1))[0];
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 12,
+      padding: SPACING.sm,
+      marginBottom: SPACING.sm,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    coverContainer: {
+      position: 'relative',
+      width: 56,
+      height: 56,
+    },
+    coverImage: {
+      width: 56,
+      height: 56,
+      borderRadius: 10,
+      backgroundColor: colors.glassBg,
+    },
+    coverPlaceholder: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    playButtonOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    playButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    playButtonActive: {
+      backgroundColor: colors.purple,
+    },
+    durationBadge: {
+      position: 'absolute',
+      bottom: 2,
+      right: 2,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      paddingHorizontal: 4,
+      paddingVertical: 1,
+      borderRadius: 4,
+    },
+    durationText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textPrimary,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    infoSection: {
+      flex: 1,
+      marginLeft: SPACING.md,
+      marginRight: SPACING.sm,
+    },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    originalBadge: {
+      backgroundColor: 'rgba(0, 240, 255, 0.2)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    originalText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.cyan,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    artist: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: SPACING.xs,
+      gap: SPACING.sm,
+    },
+    statItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    statText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    trendingBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(58, 247, 166, 0.15)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      gap: 2,
+    },
+    trendingText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.success,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    saveButton: {
+      padding: SPACING.sm,
+    },
+    // Compact styles
+    compactContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.xs,
+      gap: SPACING.sm,
+    },
+    compactPlayButton: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: 'rgba(106, 91, 255, 0.3)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    compactCover: {
+      width: 36,
+      height: 36,
+      borderRadius: 6,
+      backgroundColor: colors.glassBg,
+    },
+    compactInfo: {
+      flex: 1,
+    },
+    compactTitle: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textPrimary,
+    },
+    compactArtist: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    compactDuration: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (showSaveButton) {
@@ -123,9 +290,9 @@ const SoundCard = ({
           onPress={handlePlayPause}
         >
           {isPlaying ? (
-            <Pause size={16} color={COLORS.textPrimary} />
+            <Pause size={16} color={colors.textPrimary} />
           ) : (
-            <Play size={16} color={COLORS.textPrimary} />
+            <Play size={16} color={colors.textPrimary} />
           )}
         </TouchableOpacity>
 
@@ -133,7 +300,7 @@ const SoundCard = ({
           <Image source={{ uri: sound.cover_image }} style={styles.compactCover} />
         ) : (
           <View style={[styles.compactCover, styles.coverPlaceholder]}>
-            <Music size={14} color={COLORS.textMuted} />
+            <Music size={14} color={colors.textMuted} />
           </View>
         )}
 
@@ -165,7 +332,7 @@ const SoundCard = ({
           <Image source={{ uri: sound.cover_image }} style={styles.coverImage} />
         ) : (
           <View style={[styles.coverImage, styles.coverPlaceholder]}>
-            <Music size={24} color={COLORS.textMuted} />
+            <Music size={24} color={colors.textMuted} />
           </View>
         )}
 
@@ -181,9 +348,9 @@ const SoundCard = ({
             onPress={handlePlayPause}
           >
             {isPlaying ? (
-              <Pause size={20} color={COLORS.textPrimary} />
+              <Pause size={20} color={colors.textPrimary} />
             ) : (
-              <Play size={20} color={COLORS.textPrimary} />
+              <Play size={20} color={colors.textPrimary} />
             )}
           </TouchableOpacity>
         </Animated.View>
@@ -217,12 +384,12 @@ const SoundCard = ({
         {showUseCount && (
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Users size={12} color={COLORS.textMuted} />
+              <Users size={12} color={colors.textMuted} />
               <Text style={styles.statText}>{formatCount(sound.use_count)} bai dang</Text>
             </View>
             {sound.use_count > 100 && (
               <View style={styles.trendingBadge}>
-                <TrendingUp size={10} color={COLORS.success} />
+                <TrendingUp size={10} color={colors.success} />
                 <Text style={styles.trendingText}>Trending</Text>
               </View>
             )}
@@ -238,179 +405,14 @@ const SoundCard = ({
           disabled={saving}
         >
           {isSaved ? (
-            <BookmarkCheck size={20} color={COLORS.gold} />
+            <BookmarkCheck size={20} color={colors.gold} />
           ) : (
-            <Bookmark size={20} color={COLORS.textMuted} />
+            <Bookmark size={20} color={colors.textMuted} />
           )}
         </TouchableOpacity>
       )}
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  coverContainer: {
-    position: 'relative',
-    width: 56,
-    height: 56,
-  },
-  coverImage: {
-    width: 56,
-    height: 56,
-    borderRadius: 10,
-    backgroundColor: COLORS.glassBg,
-  },
-  coverPlaceholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  playButtonOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  playButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  playButtonActive: {
-    backgroundColor: COLORS.purple,
-  },
-  durationBadge: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    borderRadius: 4,
-  },
-  durationText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  infoSection: {
-    flex: 1,
-    marginLeft: SPACING.md,
-    marginRight: SPACING.sm,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    flex: 1,
-  },
-  originalBadge: {
-    backgroundColor: 'rgba(0, 240, 255, 0.2)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  originalText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.cyan,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  artist: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: SPACING.xs,
-    gap: SPACING.sm,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  trendingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(58, 247, 166, 0.15)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    gap: 2,
-  },
-  trendingText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.success,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  saveButton: {
-    padding: SPACING.sm,
-  },
-  // Compact styles
-  compactContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.xs,
-    gap: SPACING.sm,
-  },
-  compactPlayButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(106, 91, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  compactCover: {
-    width: 36,
-    height: 36,
-    borderRadius: 6,
-    backgroundColor: COLORS.glassBg,
-  },
-  compactInfo: {
-    flex: 1,
-  },
-  compactTitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textPrimary,
-  },
-  compactArtist: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  compactDuration: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-});
 
 export default SoundCard;

@@ -3,9 +3,10 @@
  * Reusable text input with label
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPOGRAPHY, INPUT } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { INPUT } from '../../utils/tokens';
 
 export default function Input({
   label,
@@ -18,6 +19,36 @@ export default function Input({
   error,
   style,
 }) {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      gap: SPACING.sm,
+    },
+    label: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textSecondary,
+    },
+    input: {
+      height: 48,
+      paddingHorizontal: SPACING.lg,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderWidth: 1,
+      borderColor: INPUT.borderColor,
+      borderRadius: INPUT.borderRadius,
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.xl,
+    },
+    inputError: {
+      borderColor: colors.error,
+    },
+    errorText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.error,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <View style={[styles.container, style]}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -35,31 +66,3 @@ export default function Input({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: SPACING.sm,
-  },
-  label: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textSecondary,
-  },
-  input: {
-    height: 48,
-    paddingHorizontal: SPACING.lg,
-    backgroundColor: INPUT.background,
-    borderWidth: 1,
-    borderColor: INPUT.borderColor,
-    borderRadius: INPUT.borderRadius,
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.xl,
-  },
-  inputError: {
-    borderColor: COLORS.error,
-  },
-  errorText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.error,
-  },
-});

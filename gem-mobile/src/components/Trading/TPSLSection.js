@@ -14,7 +14,7 @@ import {
   Switch,
 } from 'react-native';
 import { Target, Shield, TrendingUp, TrendingDown, HelpCircle, Lock, DollarSign, BarChart2 } from 'lucide-react-native';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { TPSL_CONFIG } from '../../constants/tradingConstants';
 import {
   calculateTPPrice,
@@ -53,6 +53,8 @@ const TPSLSection = ({
   locked = false,  // For Pattern mode - TP/SL are locked
   lockedText = null,  // Text to show when locked
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [showTPInput, setShowTPInput] = useState(false);
   const [showSLInput, setShowSLInput] = useState(false);
 
@@ -63,6 +65,305 @@ const TPSLSection = ({
   // PnL amount states (for PnL mode input)
   const [tpPnlInput, setTPPnlInput] = useState('');
   const [slPnlInput, setSLPnlInput] = useState('');
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: SPACING.md,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(255, 255, 255, 0.02)'),
+      borderRadius: 12,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    // Header
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: SPACING.md,
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    headerTitle: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    lockedBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    lockedText: {
+      fontSize: 9,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    helpButton: {
+      padding: 4,
+    },
+    // Section
+    section: {
+      marginBottom: SPACING.md,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    sectionTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    sectionTitle: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    sectionContent: {
+      marginTop: SPACING.sm,
+      paddingLeft: SPACING.lg,
+    },
+    // Price Input
+    priceInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      overflow: 'hidden',
+    },
+    inputError: {
+      borderColor: colors.error,
+    },
+    inputLocked: {
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+      borderStyle: 'dashed',
+      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    },
+    priceInput: {
+      flex: 1,
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.md,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    percentBadge: {
+      paddingVertical: SPACING.xs,
+      paddingHorizontal: SPACING.sm,
+      backgroundColor: 'rgba(58, 247, 166, 0.15)',
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.success,
+    },
+    percentBadgeLoss: {
+      backgroundColor: 'rgba(255, 107, 107, 0.15)',
+      color: colors.error,
+    },
+    errorText: {
+      fontSize: 10,
+      color: colors.error,
+      marginTop: SPACING.xs,
+    },
+    // Presets
+    presetRow: {
+      flexDirection: 'row',
+      gap: SPACING.xs,
+      marginTop: SPACING.sm,
+    },
+    presetButton: {
+      flex: 1,
+      paddingVertical: SPACING.xs,
+      borderRadius: 4,
+      backgroundColor: 'rgba(58, 247, 166, 0.1)',
+      borderWidth: 1,
+      borderColor: 'transparent',
+      alignItems: 'center',
+    },
+    presetButtonActive: {
+      backgroundColor: 'rgba(58, 247, 166, 0.2)',
+      borderColor: colors.success,
+    },
+    presetButtonLoss: {
+      backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    },
+    presetButtonLossActive: {
+      backgroundColor: 'rgba(255, 107, 107, 0.2)',
+      borderColor: colors.error,
+    },
+    presetText: {
+      fontSize: 10,
+      fontWeight: '600',
+      color: colors.success,
+    },
+    presetTextLoss: {
+      color: colors.error,
+    },
+    presetTextActive: {
+      fontWeight: '700',
+    },
+    presetTextLossActive: {
+      color: colors.error,
+      fontWeight: '700',
+    },
+    // PnL Preview
+    pnlPreview: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginTop: SPACING.sm,
+      padding: SPACING.sm,
+      backgroundColor: 'rgba(58, 247, 166, 0.1)',
+      borderRadius: 6,
+    },
+    pnlPreviewLoss: {
+      backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    },
+    pnlText: {
+      fontSize: 11,
+      color: colors.success,
+    },
+    pnlTextLoss: {
+      color: colors.error,
+    },
+    pnlValue: {
+      fontWeight: '700',
+    },
+    pnlValueLoss: {
+      fontWeight: '700',
+      color: colors.error,
+    },
+    // Risk:Reward
+    riskRewardContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: SPACING.md,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    riskRewardLabel: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    riskRewardValue: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    riskRewardRatio: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    goodRatioBadge: {
+      backgroundColor: colors.success,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    goodRatioText: {
+      fontSize: 9,
+      fontWeight: '700',
+      color: '#000',
+    },
+    // Input Mode Toggle (Price vs PnL)
+    inputModeToggle: {
+      flexDirection: 'row',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      borderRadius: 6,
+      padding: 2,
+      marginBottom: SPACING.sm,
+    },
+    inputModeTab: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 4,
+      paddingVertical: 6,
+      paddingHorizontal: 8,
+      borderRadius: 4,
+    },
+    inputModeTabActive: {
+      backgroundColor: 'rgba(58, 247, 166, 0.2)',
+    },
+    inputModeTabLoss: {
+      // Default style for loss tabs
+    },
+    inputModeTabLossActive: {
+      backgroundColor: 'rgba(255, 107, 107, 0.2)',
+    },
+    inputModeText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    inputModeTextActive: {
+      color: colors.success,
+    },
+    inputModeTextLossActive: {
+      color: colors.error,
+    },
+    // PnL Input Mode
+    pnlInputWrapper: {
+      // Container for PnL input and calculated price
+    },
+    pnlInputPrefix: {
+      paddingLeft: SPACING.md,
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.success,
+    },
+    pnlInputPrefixLoss: {
+      color: colors.error,
+    },
+    pnlInputSuffix: {
+      paddingRight: SPACING.md,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    // Calculated Price Row (shown in PnL mode)
+    calculatedPriceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: 6,
+      paddingLeft: 4,
+    },
+    calculatedPriceLabel: {
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    calculatedPriceValue: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.success,
+    },
+    calculatedPriceValueLoss: {
+      color: colors.error,
+    },
+    calculatedPricePercent: {
+      fontSize: 10,
+      color: colors.success,
+      opacity: 0.8,
+    },
+    calculatedPricePercentLoss: {
+      color: colors.error,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Calculate TP/SL percentages from entry
   const tpPercent = useMemo(() => {
@@ -273,13 +574,13 @@ const TPSLSection = ({
           <Text style={styles.headerTitle}>TP/SL</Text>
           {locked && (
             <View style={styles.lockedBadge}>
-              <Lock size={10} color={COLORS.textSecondary} />
+              <Lock size={10} color={colors.textSecondary} />
               {lockedText && <Text style={styles.lockedText}>{lockedText}</Text>}
             </View>
           )}
         </View>
         <TouchableOpacity style={styles.helpButton}>
-          <HelpCircle size={14} color={COLORS.textMuted} />
+          <HelpCircle size={14} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -287,14 +588,14 @@ const TPSLSection = ({
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
-            <Target size={16} color={COLORS.success} />
+            <Target size={16} color={colors.success} />
             <Text style={styles.sectionTitle}>Chốt lời (TP)</Text>
           </View>
           <Switch
             value={tpEnabled}
             onValueChange={onTPEnabledChange}
             trackColor={{ false: 'rgba(255, 255, 255, 0.1)', true: 'rgba(58, 247, 166, 0.3)' }}
-            thumbColor={tpEnabled ? COLORS.success : COLORS.textMuted}
+            thumbColor={tpEnabled ? colors.success : colors.textMuted}
             disabled={Boolean(disabled || locked)}
           />
         </View>
@@ -312,7 +613,7 @@ const TPSLSection = ({
                   onPress={() => setTPInputMode(INPUT_MODES.PRICE)}
                   disabled={disabled}
                 >
-                  <BarChart2 size={12} color={tpInputMode === INPUT_MODES.PRICE ? COLORS.success : COLORS.textMuted} />
+                  <BarChart2 size={12} color={tpInputMode === INPUT_MODES.PRICE ? colors.success : colors.textMuted} />
                   <Text style={[
                     styles.inputModeText,
                     tpInputMode === INPUT_MODES.PRICE && styles.inputModeTextActive,
@@ -326,7 +627,7 @@ const TPSLSection = ({
                   onPress={() => setTPInputMode(INPUT_MODES.PNL)}
                   disabled={disabled}
                 >
-                  <DollarSign size={12} color={tpInputMode === INPUT_MODES.PNL ? COLORS.success : COLORS.textMuted} />
+                  <DollarSign size={12} color={tpInputMode === INPUT_MODES.PNL ? colors.success : colors.textMuted} />
                   <Text style={[
                     styles.inputModeText,
                     tpInputMode === INPUT_MODES.PNL && styles.inputModeTextActive,
@@ -343,7 +644,7 @@ const TPSLSection = ({
                   value={tpPrice ? formatPrice(tpPrice) : ''}
                   onChangeText={handleTPPriceInput}
                   placeholder="Giá TP"
-                  placeholderTextColor={COLORS.textDisabled}
+                  placeholderTextColor={colors.textDisabled}
                   keyboardType="decimal-pad"
                   editable={!disabled && !locked}
                 />
@@ -363,7 +664,7 @@ const TPSLSection = ({
                     value={tpPnlInput}
                     onChangeText={handleTPPnlInputChange}
                     placeholder="Số tiền lời"
-                    placeholderTextColor={COLORS.textDisabled}
+                    placeholderTextColor={colors.textDisabled}
                     keyboardType="decimal-pad"
                     editable={!disabled}
                   />
@@ -414,7 +715,7 @@ const TPSLSection = ({
             {/* P&L Preview */}
             {tpPnL !== null && (
               <View style={styles.pnlPreview}>
-                <TrendingUp size={14} color={COLORS.success} />
+                <TrendingUp size={14} color={colors.success} />
                 <Text style={styles.pnlText}>
                   Lời ước tính: <Text style={styles.pnlValue}>{formatUSDT(tpPnL)}</Text>
                   {' '}({formatPercent(tpPercent * leverage, true)} ROI)
@@ -429,14 +730,14 @@ const TPSLSection = ({
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
-            <Shield size={16} color={COLORS.error} />
+            <Shield size={16} color={colors.error} />
             <Text style={styles.sectionTitle}>Cắt lỗ (SL)</Text>
           </View>
           <Switch
             value={slEnabled}
             onValueChange={onSLEnabledChange}
             trackColor={{ false: 'rgba(255, 255, 255, 0.1)', true: 'rgba(255, 107, 107, 0.3)' }}
-            thumbColor={slEnabled ? COLORS.error : COLORS.textMuted}
+            thumbColor={slEnabled ? colors.error : colors.textMuted}
             disabled={Boolean(disabled || locked)}
           />
         </View>
@@ -455,7 +756,7 @@ const TPSLSection = ({
                   onPress={() => setSLInputMode(INPUT_MODES.PRICE)}
                   disabled={disabled}
                 >
-                  <BarChart2 size={12} color={slInputMode === INPUT_MODES.PRICE ? COLORS.error : COLORS.textMuted} />
+                  <BarChart2 size={12} color={slInputMode === INPUT_MODES.PRICE ? colors.error : colors.textMuted} />
                   <Text style={[
                     styles.inputModeText,
                     slInputMode === INPUT_MODES.PRICE && styles.inputModeTextLossActive,
@@ -470,7 +771,7 @@ const TPSLSection = ({
                   onPress={() => setSLInputMode(INPUT_MODES.PNL)}
                   disabled={disabled}
                 >
-                  <DollarSign size={12} color={slInputMode === INPUT_MODES.PNL ? COLORS.error : COLORS.textMuted} />
+                  <DollarSign size={12} color={slInputMode === INPUT_MODES.PNL ? colors.error : colors.textMuted} />
                   <Text style={[
                     styles.inputModeText,
                     slInputMode === INPUT_MODES.PNL && styles.inputModeTextLossActive,
@@ -487,7 +788,7 @@ const TPSLSection = ({
                   value={slPrice ? formatPrice(slPrice) : ''}
                   onChangeText={handleSLPriceInput}
                   placeholder="Giá SL"
-                  placeholderTextColor={COLORS.textDisabled}
+                  placeholderTextColor={colors.textDisabled}
                   keyboardType="decimal-pad"
                   editable={!disabled && !locked}
                 />
@@ -507,7 +808,7 @@ const TPSLSection = ({
                     value={slPnlInput}
                     onChangeText={handleSLPnlInputChange}
                     placeholder="Số tiền lỗ tối đa"
-                    placeholderTextColor={COLORS.textDisabled}
+                    placeholderTextColor={colors.textDisabled}
                     keyboardType="decimal-pad"
                     editable={!disabled}
                   />
@@ -560,7 +861,7 @@ const TPSLSection = ({
             {/* P&L Preview */}
             {slPnL !== null && (
               <View style={[styles.pnlPreview, styles.pnlPreviewLoss]}>
-                <TrendingDown size={14} color={COLORS.error} />
+                <TrendingDown size={14} color={colors.error} />
                 <Text style={[styles.pnlText, styles.pnlTextLoss]}>
                   Lỗ ước tính: <Text style={styles.pnlValueLoss}>{formatUSDT(Math.abs(slPnL))}</Text>
                   {' '}({formatPercent(-slPercent * leverage, false)} ROI)
@@ -588,304 +889,5 @@ const TPSLSection = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: SPACING.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.md,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  headerTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  lockedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  lockedText: {
-    fontSize: 9,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  helpButton: {
-    padding: 4,
-  },
-  // Section
-  section: {
-    marginBottom: SPACING.md,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  sectionContent: {
-    marginTop: SPACING.sm,
-    paddingLeft: SPACING.lg,
-  },
-  // Price Input
-  priceInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    overflow: 'hidden',
-  },
-  inputError: {
-    borderColor: COLORS.error,
-  },
-  inputLocked: {
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderStyle: 'dashed',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-  },
-  priceInput: {
-    flex: 1,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  percentBadge: {
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    backgroundColor: 'rgba(58, 247, 166, 0.15)',
-    fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.success,
-  },
-  percentBadgeLoss: {
-    backgroundColor: 'rgba(255, 107, 107, 0.15)',
-    color: COLORS.error,
-  },
-  errorText: {
-    fontSize: 10,
-    color: COLORS.error,
-    marginTop: SPACING.xs,
-  },
-  // Presets
-  presetRow: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-    marginTop: SPACING.sm,
-  },
-  presetButton: {
-    flex: 1,
-    paddingVertical: SPACING.xs,
-    borderRadius: 4,
-    backgroundColor: 'rgba(58, 247, 166, 0.1)',
-    borderWidth: 1,
-    borderColor: 'transparent',
-    alignItems: 'center',
-  },
-  presetButtonActive: {
-    backgroundColor: 'rgba(58, 247, 166, 0.2)',
-    borderColor: COLORS.success,
-  },
-  presetButtonLoss: {
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
-  },
-  presetButtonLossActive: {
-    backgroundColor: 'rgba(255, 107, 107, 0.2)',
-    borderColor: COLORS.error,
-  },
-  presetText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: COLORS.success,
-  },
-  presetTextLoss: {
-    color: COLORS.error,
-  },
-  presetTextActive: {
-    fontWeight: '700',
-  },
-  presetTextLossActive: {
-    color: COLORS.error,
-    fontWeight: '700',
-  },
-  // PnL Preview
-  pnlPreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    marginTop: SPACING.sm,
-    padding: SPACING.sm,
-    backgroundColor: 'rgba(58, 247, 166, 0.1)',
-    borderRadius: 6,
-  },
-  pnlPreviewLoss: {
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
-  },
-  pnlText: {
-    fontSize: 11,
-    color: COLORS.success,
-  },
-  pnlTextLoss: {
-    color: COLORS.error,
-  },
-  pnlValue: {
-    fontWeight: '700',
-  },
-  pnlValueLoss: {
-    fontWeight: '700',
-    color: COLORS.error,
-  },
-  // Risk:Reward
-  riskRewardContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  riskRewardLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  riskRewardValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  riskRewardRatio: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  goodRatioBadge: {
-    backgroundColor: COLORS.success,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  goodRatioText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#000',
-  },
-  // Input Mode Toggle (Price vs PnL)
-  inputModeToggle: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 6,
-    padding: 2,
-    marginBottom: SPACING.sm,
-  },
-  inputModeTab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-  },
-  inputModeTabActive: {
-    backgroundColor: 'rgba(58, 247, 166, 0.2)',
-  },
-  inputModeTabLoss: {
-    // Default style for loss tabs
-  },
-  inputModeTabLossActive: {
-    backgroundColor: 'rgba(255, 107, 107, 0.2)',
-  },
-  inputModeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-  },
-  inputModeTextActive: {
-    color: COLORS.success,
-  },
-  inputModeTextLossActive: {
-    color: COLORS.error,
-  },
-  // PnL Input Mode
-  pnlInputWrapper: {
-    // Container for PnL input and calculated price
-  },
-  pnlInputPrefix: {
-    paddingLeft: SPACING.md,
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.success,
-  },
-  pnlInputPrefixLoss: {
-    color: COLORS.error,
-  },
-  pnlInputSuffix: {
-    paddingRight: SPACING.md,
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-  },
-  // Calculated Price Row (shown in PnL mode)
-  calculatedPriceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 6,
-    paddingLeft: 4,
-  },
-  calculatedPriceLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-  },
-  calculatedPriceValue: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.success,
-  },
-  calculatedPriceValueLoss: {
-    color: COLORS.error,
-  },
-  calculatedPricePercent: {
-    fontSize: 10,
-    color: COLORS.success,
-    opacity: 0.8,
-  },
-  calculatedPricePercentLoss: {
-    color: COLORS.error,
-  },
-});
 
 export default memo(TPSLSection);

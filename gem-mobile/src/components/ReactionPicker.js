@@ -4,7 +4,7 @@
  * Uses dark glass theme from DESIGN_TOKENS
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,15 +15,15 @@ import {
   Pressable,
 } from 'react-native';
 import { Heart, ThumbsUp, Laugh, Frown, AlertCircle } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 
 // Reaction types with icons and colors
 export const REACTION_TYPES = [
-  { id: 'like', icon: ThumbsUp, color: '#3B82F6', label: 'Thích', emoji: '👍' },
-  { id: 'love', icon: Heart, color: '#FF6B6B', label: 'Yêu thích', emoji: '❤️' },
-  { id: 'haha', icon: Laugh, color: '#FFBD59', label: 'Haha', emoji: '😂' },
-  { id: 'wow', icon: AlertCircle, color: '#FFBD59', label: 'Wow', emoji: '😮' },
-  { id: 'sad', icon: Frown, color: '#FFBD59', label: 'Buồn', emoji: '😢' },
+  { id: 'like', icon: ThumbsUp, color: '#3B82F6', label: 'Thich', emoji: '' },
+  { id: 'love', icon: Heart, color: '#FF6B6B', label: 'Yeu thich', emoji: '<3' },
+  { id: 'haha', icon: Laugh, color: '#FFBD59', label: 'Haha', emoji: ':D' },
+  { id: 'wow', icon: AlertCircle, color: '#FFBD59', label: 'Wow', emoji: ':O' },
+  { id: 'sad', icon: Frown, color: '#FFBD59', label: 'Buon', emoji: ':(' },
 ];
 
 const ReactionPicker = ({
@@ -34,6 +34,7 @@ const ReactionPicker = ({
   showLabel = false,
   count = 0,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [showPicker, setShowPicker] = useState(false);
   const [pickerPosition, setPickerPosition] = useState({ x: 0, y: 0 });
   const buttonRef = useRef(null);
@@ -99,7 +100,90 @@ const ReactionPicker = ({
 
   const current = getCurrentReaction();
   const Icon = current?.icon || Heart;
-  const iconColor = current?.color || COLORS.textMuted;
+  const iconColor = current?.color || colors.textMuted;
+
+  const styles = useMemo(() => StyleSheet.create({
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.xs,
+      paddingHorizontal: SPACING.sm,
+      gap: 6,
+    },
+    countText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textMuted,
+    },
+    labelText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      marginLeft: 2,
+    },
+    // Overlay
+    overlay: {
+      flex: 1,
+      backgroundColor: 'transparent',
+    },
+    // Picker
+    pickerContainer: {
+      position: 'absolute',
+      flexDirection: 'row',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 30,
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.md,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.5,
+      shadowRadius: 10,
+      elevation: 10,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.3)',
+    },
+    reactionItem: {
+      marginHorizontal: 2,
+    },
+    reactionButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+    },
+    reactionButtonActive: {
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    },
+    reactionEmoji: {
+      fontSize: 28,
+    },
+    // Summary
+    summaryContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    summaryIcons: {
+      flexDirection: 'row',
+    },
+    summaryIcon: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: glass.background || 'rgba(15, 16, 48, 0.95)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.bgDarkest,
+    },
+    summaryEmoji: {
+      fontSize: 12,
+    },
+    summaryCount: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <>
@@ -189,6 +273,36 @@ const ReactionPicker = ({
 
 // Reaction Summary Component - Shows counts by type
 export const ReactionSummary = ({ reactions = {}, onPress, maxDisplay = 3 }) => {
+  const { colors, glass, SPACING, TYPOGRAPHY, settings } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    summaryContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    summaryIcons: {
+      flexDirection: 'row',
+    },
+    summaryIcon: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.bgDarkest,
+    },
+    summaryEmoji: {
+      fontSize: 12,
+    },
+    summaryCount: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Get top reactions sorted by count
   const sortedReactions = Object.entries(reactions)
     .filter(([_, count]) => count > 0)
@@ -227,88 +341,5 @@ export const ReactionSummary = ({ reactions = {}, onPress, maxDisplay = 3 }) => 
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    gap: 6,
-  },
-  countText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textMuted,
-  },
-  labelText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    marginLeft: 2,
-  },
-  // Overlay
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  // Picker
-  pickerContainer: {
-    position: 'absolute',
-    flexDirection: 'row',
-    backgroundColor: GLASS.background,
-    borderRadius: 30,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-  },
-  reactionItem: {
-    marginHorizontal: 2,
-  },
-  reactionButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  reactionButtonActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  reactionEmoji: {
-    fontSize: 28,
-  },
-  // Summary
-  summaryContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  summaryIcons: {
-    flexDirection: 'row',
-  },
-  summaryIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: GLASS.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.bgDarkest,
-  },
-  summaryEmoji: {
-    fontSize: 12,
-  },
-  summaryCount: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-  },
-});
 
 export default ReactionPicker;

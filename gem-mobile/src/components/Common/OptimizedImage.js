@@ -1,6 +1,7 @@
 /**
  * OptimizedImage Component
  * High-performance image loading with aggressive caching using expo-image
+ * Theme-aware component
  *
  * Features:
  * - Uses expo-image for superior caching (disk + memory)
@@ -13,12 +14,12 @@
  * Updated: February 4, 2026 - Switched to expo-image for instant cached display
  */
 
-import React, { memo, useCallback, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { memo, useCallback, useState, useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ImageOff } from 'lucide-react-native';
-import { COLORS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 // In-memory tracking for prefetched URLs
 const prefetchedUrls = new Set();
@@ -119,12 +120,27 @@ const OptimizedImage = memo(({
   cachePolicy = 'disk',
   ...props
 }) => {
+  const { colors, settings } = useSettings();
   const [hasError, setHasError] = useState(false);
 
   // Resolve image source
   const imageUri = uri || (typeof source === 'object' ? source?.uri : source);
   const isValidUri = imageUri && typeof imageUri === 'string' && imageUri.startsWith('http');
   const currentUri = isValidUri ? imageUri : null;
+
+  // Theme-aware styles
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      overflow: 'hidden',
+      backgroundColor: settings.theme === 'light'
+        ? 'rgba(0, 0, 0, 0.05)'
+        : (colors.glassBgHeavy || 'rgba(30, 32, 80, 0.7)'),
+    },
+    fallbackContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  }), [colors, settings.theme]);
 
   const handleLoad = useCallback((event) => {
     setHasError(false);
@@ -142,14 +158,19 @@ const OptimizedImage = memo(({
     onError?.(event);
   }, [currentUri, onError]);
 
+  // Theme-aware fallback gradients
+  const fallbackGradient = settings.theme === 'light'
+    ? ['rgba(200, 200, 200, 0.5)', 'rgba(180, 180, 180, 0.6)']
+    : ['rgba(26, 11, 46, 0.9)', 'rgba(30, 32, 80, 0.95)'];
+
   // Render local fallback UI when image fails or no valid URL
   const renderFallback = () => (
     <View style={[StyleSheet.absoluteFill, styles.fallbackContainer]}>
       <LinearGradient
-        colors={['rgba(26, 11, 46, 0.9)', 'rgba(30, 32, 80, 0.95)']}
+        colors={fallbackGradient}
         style={StyleSheet.absoluteFill}
       />
-      <ImageOff size={24} color={COLORS.textMuted || 'rgba(255,255,255,0.4)'} />
+      <ImageOff size={24} color={colors.textMuted} />
     </View>
   );
 
@@ -180,24 +201,8 @@ const OptimizedImage = memo(({
       />
     </View>
   );
-}, (prevProps, nextProps) => {
-  // Custom comparison for better performance
-  const prevUri = prevProps.uri || prevProps.source?.uri || prevProps.source;
-  const nextUri = nextProps.uri || nextProps.source?.uri || nextProps.source;
-  return prevUri === nextUri;
 });
 
 OptimizedImage.displayName = 'OptimizedImage';
-
-const styles = StyleSheet.create({
-  container: {
-    overflow: 'hidden',
-    backgroundColor: COLORS.glassBgHeavy || 'rgba(30, 32, 80, 0.7)',
-  },
-  fallbackContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default OptimizedImage;

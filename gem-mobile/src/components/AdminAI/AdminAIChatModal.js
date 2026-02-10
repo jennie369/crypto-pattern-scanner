@@ -4,7 +4,7 @@
  * Features: text input, voice-to-text (Whisper API), quick actions
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import * as FileSystem from 'expo-file-system';
 import { Brain, X, Send, Shield, Mic, Square, Loader } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import AdminAIContextBar from './AdminAIContextBar';
@@ -48,6 +48,8 @@ const AdminAIChatModal = ({
   scanResults = [],
   userId,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // State
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -519,6 +521,198 @@ const AdminAIChatModal = ({
   const showSendButton = inputText.trim().length > 0;
   const canSend = inputText.trim().length > 0 && !loading;
 
+  // ═══════════════════════════════════════════════════════════
+  // STYLES
+  // ═══════════════════════════════════════════════════════════
+
+  const styles = useMemo(() => StyleSheet.create({
+    keyboardAvoid: {
+      flex: 1,
+    },
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    container: {
+      height: '95%',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: glass.borderRadius,
+      borderTopRightRadius: glass.borderRadius,
+      borderWidth: 1,
+      borderBottomWidth: 0,
+      borderColor: 'rgba(255, 189, 89, 0.3)',
+      overflow: 'hidden',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 189, 89, 0.2)',
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    brainIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      borderWidth: 2,
+      borderColor: colors.gold,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xxxl,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    adminBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 3,
+      backgroundColor: 'rgba(255, 189, 89, 0.2)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      alignSelf: 'flex-start',
+    },
+    adminBadgeText: {
+      fontSize: 9,
+      fontWeight: '800',
+      color: colors.gold,
+      letterSpacing: 0.5,
+    },
+    closeButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    messagesList: {
+      flex: 1,
+    },
+    messagesContent: {
+      paddingVertical: SPACING.md,
+    },
+    emptyContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 60,
+      paddingHorizontal: SPACING.xl,
+    },
+    emptyTitle: {
+      fontSize: TYPOGRAPHY.fontSize.display,
+      fontWeight: '700',
+      color: colors.textPrimary,
+      marginTop: SPACING.md,
+    },
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textMuted,
+      textAlign: 'center',
+      marginTop: SPACING.sm,
+      lineHeight: 22,
+    },
+    recordingBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: 8,
+      backgroundColor: 'rgba(255, 107, 107, 0.1)',
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 107, 107, 0.2)',
+    },
+    recordingDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: '#FF6B6B',
+    },
+    recordingText: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      flex: 1,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      paddingHorizontal: SPACING.md,
+      paddingTop: SPACING.sm,
+      paddingBottom: Platform.OS === 'ios' ? 34 : 42,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(106, 91, 255, 0.2)',
+      gap: SPACING.xs,
+    },
+    input: {
+      flex: 1,
+      minHeight: 44,
+      maxHeight: 100,
+      backgroundColor: colors.inputBg,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textPrimary,
+    },
+    micButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      borderWidth: 1,
+      borderColor: colors.gold,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    micButtonTranscribing: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.3)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    stopButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(255, 107, 107, 0.25)',
+      borderWidth: 1,
+      borderColor: '#FF6B6B',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sendButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      borderWidth: 1,
+      borderColor: colors.gold,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sendButtonDisabled: {
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+      borderColor: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <Modal
       visible={visible}
@@ -534,17 +728,17 @@ const AdminAIChatModal = ({
           <View style={styles.container}>
             {/* Header */}
             <LinearGradient
-              colors={['rgba(15, 16, 48, 0.95)', 'rgba(15, 16, 48, 0.9)']}
+              colors={settings.theme === 'light' ? [colors.bgDarkest, colors.bgDarkest] : ['rgba(15, 16, 48, 0.95)', 'rgba(15, 16, 48, 0.9)']}
               style={styles.header}
             >
               <View style={styles.headerLeft}>
                 <View style={styles.brainIcon}>
-                  <Brain size={24} color={COLORS.gold} />
+                  <Brain size={24} color={colors.gold} />
                 </View>
                 <View>
                   <Text style={styles.headerTitle}>GEM AI Brain</Text>
                   <View style={styles.adminBadge}>
-                    <Shield size={10} color={COLORS.gold} />
+                    <Shield size={10} color={colors.gold} />
                     <Text style={styles.adminBadgeText}>ADMIN</Text>
                   </View>
                 </View>
@@ -555,7 +749,7 @@ const AdminAIChatModal = ({
                 onPress={onClose}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <X size={24} color={COLORS.textSecondary} />
+                <X size={24} color={colors.textSecondary} />
               </TouchableOpacity>
             </LinearGradient>
 
@@ -587,7 +781,7 @@ const AdminAIChatModal = ({
               }}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Brain size={48} color={COLORS.gold} style={{ opacity: 0.5 }} />
+                  <Brain size={48} color={colors.gold} style={{ opacity: 0.5 }} />
                   <Text style={styles.emptyTitle}>GEM AI Trading Brain</Text>
                   <Text style={styles.emptyText}>
                     Hỏi bất cứ điều gì về trading, pattern, zone, hoặc position của bạn.
@@ -614,7 +808,7 @@ const AdminAIChatModal = ({
                   </>
                 ) : (
                   <>
-                    <ActivityIndicator size="small" color={COLORS.gold} />
+                    <ActivityIndicator size="small" color={colors.gold} />
                     <Text style={styles.recordingText}>Đang chuyển giọng nói thành văn bản...</Text>
                   </>
                 )}
@@ -629,7 +823,7 @@ const AdminAIChatModal = ({
                 value={inputText}
                 onChangeText={setInputText}
                 placeholder={isRecording ? 'Đang ghi âm...' : 'Hỏi về pattern, zone, entry...'}
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 multiline
                 maxLength={2000}
                 editable={!isRecording && !isTranscribing}
@@ -648,11 +842,11 @@ const AdminAIChatModal = ({
                   style={styles.stopButton}
                   onPress={stopRecording}
                 >
-                  <Square size={18} color={COLORS.textPrimary} fill={COLORS.textPrimary} />
+                  <Square size={18} color={colors.textPrimary} fill={colors.textPrimary} />
                 </TouchableOpacity>
               ) : isTranscribing ? (
                 <View style={styles.micButtonTranscribing}>
-                  <ActivityIndicator size="small" color={COLORS.gold} />
+                  <ActivityIndicator size="small" color={colors.gold} />
                 </View>
               ) : !showSendButton ? (
                 <TouchableOpacity
@@ -660,7 +854,7 @@ const AdminAIChatModal = ({
                   onPress={startRecording}
                   disabled={isTranscribing}
                 >
-                  <Mic size={20} color={COLORS.gold} />
+                  <Mic size={20} color={colors.gold} />
                 </TouchableOpacity>
               ) : null}
 
@@ -675,9 +869,9 @@ const AdminAIChatModal = ({
                   disabled={!canSend}
                 >
                   {loading ? (
-                    <ActivityIndicator size="small" color={COLORS.gold} />
+                    <ActivityIndicator size="small" color={colors.gold} />
                   ) : (
-                    <Send size={20} color={COLORS.gold} />
+                    <Send size={20} color={colors.gold} />
                   )}
                 </TouchableOpacity>
               )}
@@ -688,193 +882,5 @@ const AdminAIChatModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  keyboardAvoid: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  container: {
-    height: '95%',
-    backgroundColor: 'rgba(15, 16, 48, 0.97)',
-    borderTopLeftRadius: GLASS.borderRadius,
-    borderTopRightRadius: GLASS.borderRadius,
-    borderWidth: 1,
-    borderBottomWidth: 0,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 189, 89, 0.2)',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  brainIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    borderWidth: 2,
-    borderColor: COLORS.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  adminBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: 'rgba(255, 189, 89, 0.2)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-  },
-  adminBadgeText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: COLORS.gold,
-    letterSpacing: 0.5,
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  messagesList: {
-    flex: 1,
-  },
-  messagesContent: {
-    paddingVertical: SPACING.md,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: SPACING.xl,
-  },
-  emptyTitle: {
-    fontSize: TYPOGRAPHY.fontSize.display,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginTop: SPACING.md,
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-    lineHeight: 22,
-  },
-  recordingBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 107, 107, 0.2)',
-  },
-  recordingDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#FF6B6B',
-  },
-  recordingText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    flex: 1,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    paddingHorizontal: SPACING.md,
-    paddingTop: SPACING.sm,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 42,
-    backgroundColor: 'rgba(15, 16, 48, 0.97)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(106, 91, 255, 0.2)',
-    gap: SPACING.xs,
-  },
-  input: {
-    flex: 1,
-    minHeight: 44,
-    maxHeight: 100,
-    backgroundColor: COLORS.inputBg,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: COLORS.inputBorder,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textPrimary,
-  },
-  micButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  micButtonTranscribing: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stopButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 107, 107, 0.25)',
-    borderWidth: 1,
-    borderColor: '#FF6B6B',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendButtonDisabled: {
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderColor: COLORS.textMuted,
-  },
-});
 
 export default AdminAIChatModal;

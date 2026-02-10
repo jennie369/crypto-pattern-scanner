@@ -2,17 +2,17 @@
  * KarmaLeaderboardItem - Leaderboard row with rank, avatar, and karma
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Crown, Medal, Award, Flame, User } from 'lucide-react-native';
-import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { KARMA_LEVEL_THRESHOLDS } from '../../services/karmaService';
 
 const KarmaLeaderboardItem = ({
   rank = 1,
   userId = '',
-  displayName = 'Người dùng',
+  displayName = 'Nguoi dung',
   avatarUrl = null,
   karmaPoints = 0,
   karmaLevel = 'student',
@@ -21,6 +21,7 @@ const KarmaLeaderboardItem = ({
   onPress,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const levelConfig = KARMA_LEVEL_THRESHOLDS[karmaLevel] || KARMA_LEVEL_THRESHOLDS.student;
 
   // Get rank display
@@ -65,10 +66,123 @@ const KarmaLeaderboardItem = ({
     if (rank === 3) {
       return ['rgba(205, 127, 50, 0.1)', 'rgba(205, 127, 50, 0.02)'];
     }
-    return ['rgba(15, 16, 48, 0.5)', 'rgba(15, 16, 48, 0.3)'];
+    return settings.theme === 'light'
+      ? [colors.bgDarkest, colors.bgDarkest]
+      : ['rgba(15, 16, 48, 0.5)', 'rgba(15, 16, 48, 0.3)'];
   };
 
   const Container = onPress ? TouchableOpacity : View;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      borderRadius: SPACING.md,
+      gap: SPACING.md,
+    },
+    currentUserContainer: {
+      borderWidth: 1,
+      borderColor: 'rgba(139, 92, 246, 0.5)',
+    },
+    rankContainer: {
+      width: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rankBadge: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rankNumber: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.sizes.lg,
+      fontWeight: '600',
+    },
+    avatarContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      borderWidth: 2,
+      overflow: 'hidden',
+    },
+    avatar: {
+      width: '100%',
+      height: '100%',
+    },
+    avatarPlaceholder: {
+      width: '100%',
+      height: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    userInfo: {
+      flex: 1,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginBottom: 2,
+    },
+    displayName: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.sizes.md,
+      fontWeight: '600',
+      flex: 1,
+    },
+    currentUserName: {
+      color: '#8B5CF6',
+    },
+    youBadge: {
+      backgroundColor: 'rgba(139, 92, 246, 0.3)',
+      paddingHorizontal: SPACING.xs,
+      paddingVertical: 2,
+      borderRadius: SPACING.xs,
+    },
+    youBadgeText: {
+      color: '#8B5CF6',
+      fontSize: TYPOGRAPHY.sizes.xxs,
+      fontWeight: '600',
+    },
+    levelRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    levelText: {
+      fontSize: TYPOGRAPHY.sizes.sm,
+      fontWeight: '500',
+    },
+    streakBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+      backgroundColor: 'rgba(255, 184, 0, 0.15)',
+      paddingHorizontal: SPACING.xs,
+      paddingVertical: 2,
+      borderRadius: SPACING.xs,
+    },
+    streakText: {
+      color: colors.warning,
+      fontSize: TYPOGRAPHY.sizes.xs,
+      fontWeight: '600',
+    },
+    karmaContainer: {
+      alignItems: 'flex-end',
+    },
+    karmaValue: {
+      fontSize: TYPOGRAPHY.sizes.xl,
+      fontWeight: '700',
+    },
+    karmaLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.sizes.xs,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <Container
@@ -118,7 +232,7 @@ const KarmaLeaderboardItem = ({
             </Text>
             {isCurrentUser && (
               <View style={styles.youBadge}>
-                <Text style={styles.youBadgeText}>Bạn</Text>
+                <Text style={styles.youBadgeText}>Ban</Text>
               </View>
             )}
           </View>
@@ -128,7 +242,7 @@ const KarmaLeaderboardItem = ({
             </Text>
             {streak > 0 && (
               <View style={styles.streakBadge}>
-                <Flame size={12} color={COLORS.warning} strokeWidth={2} />
+                <Flame size={12} color={colors.warning} strokeWidth={2} />
                 <Text style={styles.streakText}>{streak}</Text>
               </View>
             )}
@@ -146,116 +260,5 @@ const KarmaLeaderboardItem = ({
     </Container>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    gap: SPACING.md,
-  },
-  currentUserContainer: {
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.5)',
-  },
-  rankContainer: {
-    width: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rankBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rankNumber: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZES.lg,
-    fontWeight: '600',
-  },
-  avatarContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    overflow: 'hidden',
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-  },
-  avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  userInfo: {
-    flex: 1,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    marginBottom: 2,
-  },
-  displayName: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZES.md,
-    fontWeight: '600',
-    flex: 1,
-  },
-  currentUserName: {
-    color: '#8B5CF6',
-  },
-  youBadge: {
-    backgroundColor: 'rgba(139, 92, 246, 0.3)',
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.xs,
-  },
-  youBadgeText: {
-    color: '#8B5CF6',
-    fontSize: FONT_SIZES.xxs,
-    fontWeight: '600',
-  },
-  levelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  levelText: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: '500',
-  },
-  streakBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    backgroundColor: 'rgba(255, 184, 0, 0.15)',
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.xs,
-  },
-  streakText: {
-    color: COLORS.warning,
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '600',
-  },
-  karmaContainer: {
-    alignItems: 'flex-end',
-  },
-  karmaValue: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: '700',
-  },
-  karmaLabel: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZES.xs,
-  },
-});
 
 export default KarmaLeaderboardItem;

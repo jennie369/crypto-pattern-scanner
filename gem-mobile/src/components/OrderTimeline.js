@@ -3,7 +3,7 @@
  * Visual timeline for order status tracking
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import {
   Clock,
@@ -14,9 +14,11 @@ import {
   CreditCard,
   MapPin,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 
 const OrderTimeline = ({ order, currentStatus }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // Define timeline steps based on order status
   const getTimelineSteps = () => {
     const baseSteps = [
@@ -98,6 +100,81 @@ const OrderTimeline = ({ order, currentStatus }) => {
   const currentStepIndex = steps.findIndex(s => !s.completed);
   const activeIndex = currentStepIndex === -1 ? steps.length - 1 : currentStepIndex - 1;
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      paddingVertical: SPACING.sm,
+    },
+    stepContainer: {
+      position: 'relative',
+      marginBottom: SPACING.md,
+    },
+    lineContainer: {
+      position: 'absolute',
+      left: 17,
+      top: 40,
+      bottom: -SPACING.md,
+      width: 2,
+    },
+    line: {
+      flex: 1,
+      width: 2,
+      borderRadius: 1,
+    },
+    stepContent: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    iconCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      marginRight: SPACING.md,
+    },
+    textContent: {
+      flex: 1,
+      paddingTop: 2,
+    },
+    labelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    label: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textMuted,
+    },
+    labelCompleted: {
+      color: colors.textPrimary,
+    },
+    labelCancelled: {
+      color: colors.error,
+    },
+    labelActive: {
+      color: colors.gold,
+    },
+    date: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    description: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSubtle,
+      lineHeight: 18,
+    },
+    descriptionCompleted: {
+      color: colors.textMuted,
+    },
+    descriptionCancelled: {
+      color: colors.error,
+      opacity: 0.8,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <View style={styles.container}>
       {steps.map((step, index) => {
@@ -108,17 +185,17 @@ const OrderTimeline = ({ order, currentStatus }) => {
         const isLast = index === steps.length - 1;
 
         // Determine colors
-        let iconColor = COLORS.textMuted;
+        let iconColor = colors.textMuted;
         let lineColor = 'rgba(255, 255, 255, 0.1)';
         let dotColor = 'rgba(255, 255, 255, 0.2)';
 
         if (isCompleted) {
-          iconColor = isCancelled ? COLORS.error : COLORS.success;
-          lineColor = isCancelled ? COLORS.error : COLORS.success;
-          dotColor = isCancelled ? COLORS.error : COLORS.success;
+          iconColor = isCancelled ? colors.error : colors.success;
+          lineColor = isCancelled ? colors.error : colors.success;
+          dotColor = isCancelled ? colors.error : colors.success;
         } else if (isActive) {
-          iconColor = COLORS.gold;
-          dotColor = COLORS.gold;
+          iconColor = colors.gold;
+          dotColor = colors.gold;
         }
 
         return (
@@ -186,80 +263,5 @@ const OrderTimeline = ({ order, currentStatus }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: SPACING.sm,
-  },
-  stepContainer: {
-    position: 'relative',
-    marginBottom: SPACING.md,
-  },
-  lineContainer: {
-    position: 'absolute',
-    left: 17,
-    top: 40,
-    bottom: -SPACING.md,
-    width: 2,
-  },
-  line: {
-    flex: 1,
-    width: 2,
-    borderRadius: 1,
-  },
-  stepContent: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    marginRight: SPACING.md,
-  },
-  textContent: {
-    flex: 1,
-    paddingTop: 2,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  label: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textMuted,
-  },
-  labelCompleted: {
-    color: COLORS.textPrimary,
-  },
-  labelCancelled: {
-    color: COLORS.error,
-  },
-  labelActive: {
-    color: COLORS.gold,
-  },
-  date: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  description: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSubtle,
-    lineHeight: 18,
-  },
-  descriptionCompleted: {
-    color: COLORS.textMuted,
-  },
-  descriptionCancelled: {
-    color: COLORS.error,
-    opacity: 0.8,
-  },
-});
 
 export default OrderTimeline;

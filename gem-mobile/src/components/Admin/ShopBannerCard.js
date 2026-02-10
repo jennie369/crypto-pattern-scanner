@@ -3,7 +3,7 @@
  * Displays a single shop banner in admin list with actions
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import {
   Calendar,
   AlertTriangle,
 } from 'lucide-react-native';
-import { COLORS, SPACING, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 /**
  * Format large numbers with K suffix
@@ -46,15 +46,15 @@ const isExpired = (endDate) => {
 const getLinkTypeLabel = (linkType) => {
   switch (linkType) {
     case 'product':
-      return 'Sản phẩm';
+      return 'San pham';
     case 'collection':
-      return 'Bộ sưu tập';
+      return 'Bo suu tap';
     case 'screen':
-      return 'Màn hình';
+      return 'Man hinh';
     case 'url':
       return 'URL';
     default:
-      return 'Không có';
+      return 'Khong co';
   }
 };
 
@@ -71,10 +71,139 @@ export default function ShopBannerCard({
   onDelete,
   onToggleActive,
 }) {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
+
   const expired = isExpired(banner.end_date);
   const ctr = banner.view_count > 0
     ? ((banner.click_count || 0) / banner.view_count * 100).toFixed(1)
     : '0.0';
+
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 14,
+      overflow: 'hidden',
+      marginBottom: SPACING.md,
+    },
+    bannerImage: {
+      width: '100%',
+      height: 100,
+    },
+    bannerPreview: {
+      width: '100%',
+      height: 80,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.md,
+    },
+    bannerPreviewTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    info: {
+      padding: SPACING.md,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      flex: 1,
+      marginRight: SPACING.sm,
+    },
+    statusBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 6,
+    },
+    statusText: {
+      fontSize: 10,
+      fontWeight: '600',
+    },
+    subtitle: {
+      fontSize: 12,
+      color: colors.textMuted,
+      marginBottom: 8,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+      marginBottom: 8,
+    },
+    stat: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    statText: {
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+    ctr: {
+      fontSize: 12,
+      color: colors.purple,
+      fontWeight: '600',
+    },
+    linkRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 4,
+    },
+    linkText: {
+      fontSize: 11,
+      color: colors.textSubtle,
+      flex: 1,
+    },
+    scheduleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 4,
+    },
+    scheduleText: {
+      fontSize: 11,
+      color: colors.textSubtle,
+    },
+    expiredBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: `${colors.warning}20`,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      gap: 3,
+      marginLeft: 8,
+    },
+    expiredText: {
+      fontSize: 9,
+      color: colors.warning,
+      fontWeight: '600',
+    },
+    orderText: {
+      fontSize: 10,
+      color: colors.textSubtle,
+      marginBottom: 8,
+    },
+    actions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 12,
+      marginTop: 4,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.05)',
+      paddingTop: SPACING.sm,
+    },
+    actionButton: {
+      padding: 8,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View style={styles.card}>
@@ -99,7 +228,7 @@ export default function ShopBannerCard({
             ]}
             numberOfLines={1}
           >
-            {banner.title || 'Chưa có tiêu đề'}
+            {banner.title || 'Chua co tieu de'}
           </Text>
         </View>
       )}
@@ -109,25 +238,25 @@ export default function ShopBannerCard({
         {/* Header Row */}
         <View style={styles.headerRow}>
           <Text style={styles.title} numberOfLines={1}>
-            {banner.title || 'Chưa có tiêu đề'}
+            {banner.title || 'Chua co tieu de'}
           </Text>
           <View
             style={[
               styles.statusBadge,
               {
                 backgroundColor: banner.is_active
-                  ? `${COLORS.success}20`
-                  : `${COLORS.error}20`,
+                  ? `${colors.success}20`
+                  : `${colors.error}20`,
               },
             ]}
           >
             <Text
               style={[
                 styles.statusText,
-                { color: banner.is_active ? COLORS.success : COLORS.error },
+                { color: banner.is_active ? colors.success : colors.error },
               ]}
             >
-              {banner.is_active ? 'Hiển thị' : 'Ẩn'}
+              {banner.is_active ? 'Hien thi' : 'An'}
             </Text>
           </View>
         </View>
@@ -142,11 +271,11 @@ export default function ShopBannerCard({
         {/* Stats Row */}
         <View style={styles.statsRow}>
           <View style={styles.stat}>
-            <Eye size={14} color={COLORS.textMuted} />
+            <Eye size={14} color={colors.textMuted} />
             <Text style={styles.statText}>{formatNumber(banner.view_count)}</Text>
           </View>
           <View style={styles.stat}>
-            <MousePointer2 size={14} color={COLORS.textMuted} />
+            <MousePointer2 size={14} color={colors.textMuted} />
             <Text style={styles.statText}>{formatNumber(banner.click_count)}</Text>
           </View>
           <Text style={styles.ctr}>CTR: {ctr}%</Text>
@@ -154,7 +283,7 @@ export default function ShopBannerCard({
 
         {/* Link Info */}
         <View style={styles.linkRow}>
-          <Link size={12} color={COLORS.textMuted} />
+          <Link size={12} color={colors.textMuted} />
           <Text style={styles.linkText}>
             {getLinkTypeLabel(banner.link_type)}
             {banner.link_value ? `: ${banner.link_value}` : ''}
@@ -164,20 +293,20 @@ export default function ShopBannerCard({
         {/* Schedule Info */}
         {(banner.start_date || banner.end_date) && (
           <View style={styles.scheduleRow}>
-            <Calendar size={12} color={COLORS.textMuted} />
+            <Calendar size={12} color={colors.textMuted} />
             <Text style={styles.scheduleText}>
               {banner.start_date
                 ? new Date(banner.start_date).toLocaleDateString('vi-VN')
-                : 'Không giới hạn'}
+                : 'Khong gioi han'}
               {' - '}
               {banner.end_date
                 ? new Date(banner.end_date).toLocaleDateString('vi-VN')
-                : 'Không giới hạn'}
+                : 'Khong gioi han'}
             </Text>
             {expired && (
               <View style={styles.expiredBadge}>
-                <AlertTriangle size={10} color={COLORS.warning} />
-                <Text style={styles.expiredText}>Hết hạn</Text>
+                <AlertTriangle size={10} color={colors.warning} />
+                <Text style={styles.expiredText}>Het han</Text>
               </View>
             )}
           </View>
@@ -185,7 +314,7 @@ export default function ShopBannerCard({
 
         {/* Display Order */}
         <Text style={styles.orderText}>
-          Thứ tự: {banner.display_order ?? 0}
+          Thu tu: {banner.display_order ?? 0}
         </Text>
 
         {/* Action Buttons */}
@@ -195,152 +324,25 @@ export default function ShopBannerCard({
             onPress={() => onToggleActive?.(banner)}
           >
             {banner.is_active ? (
-              <EyeOff size={18} color={COLORS.textMuted} />
+              <EyeOff size={18} color={colors.textMuted} />
             ) : (
-              <Eye size={18} color={COLORS.success} />
+              <Eye size={18} color={colors.success} />
             )}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => onEdit?.(banner)}
           >
-            <Edit2 size={18} color={COLORS.purple} />
+            <Edit2 size={18} color={colors.purple} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => onDelete?.(banner)}
           >
-            <Trash2 size={18} color={COLORS.error} />
+            <Trash2 size={18} color={colors.error} />
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: GLASS.background,
-    borderRadius: 14,
-    overflow: 'hidden',
-    marginBottom: SPACING.md,
-  },
-  bannerImage: {
-    width: '100%',
-    height: 100,
-  },
-  bannerPreview: {
-    width: '100%',
-    height: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-  },
-  bannerPreviewTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  info: {
-    padding: SPACING.md,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    flex: 1,
-    marginRight: SPACING.sm,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  subtitle: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    marginBottom: 8,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 8,
-  },
-  stat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statText: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-  },
-  ctr: {
-    fontSize: 12,
-    color: COLORS.purple,
-    fontWeight: '600',
-  },
-  linkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  linkText: {
-    fontSize: 11,
-    color: COLORS.textSubtle,
-    flex: 1,
-  },
-  scheduleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  scheduleText: {
-    fontSize: 11,
-    color: COLORS.textSubtle,
-  },
-  expiredBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${COLORS.warning}20`,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    gap: 3,
-    marginLeft: 8,
-  },
-  expiredText: {
-    fontSize: 9,
-    color: COLORS.warning,
-    fontWeight: '600',
-  },
-  orderText: {
-    fontSize: 10,
-    color: COLORS.textSubtle,
-    marginBottom: 8,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 4,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
-    paddingTop: SPACING.sm,
-  },
-  actionButton: {
-    padding: 8,
-  },
-});

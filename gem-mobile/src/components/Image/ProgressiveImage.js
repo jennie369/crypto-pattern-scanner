@@ -3,9 +3,9 @@
  * Blur-up loading effect for images
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { View, Image as RNImage, Animated, StyleSheet } from 'react-native';
-import { COLORS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const ProgressiveImage = ({
   source,
@@ -18,6 +18,18 @@ const ProgressiveImage = ({
   onError,
   ...props
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: colors.glassBg,
+      overflow: 'hidden'
+    },
+    loadingBg: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)')
+    }
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const [placeholderLoaded, setPlaceholderLoaded] = useState(false);
   const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
   const [fullLoaded, setFullLoaded] = useState(false);
@@ -122,15 +134,5 @@ const ProgressiveImage = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLORS.glassBg,
-    overflow: 'hidden'
-  },
-  loadingBg: {
-    backgroundColor: 'rgba(15, 16, 48, 0.8)'
-  }
-});
 
 export default ProgressiveImage;

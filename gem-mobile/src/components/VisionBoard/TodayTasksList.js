@@ -6,10 +6,10 @@
  * Part of Vision Board 2.0 Redesign
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import * as Icons from 'lucide-react-native';
-import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 // Life area colors
 const LIFE_AREA_COLORS = {

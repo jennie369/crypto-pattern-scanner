@@ -8,6 +8,19 @@
 import { supabase } from './supabase';
 import TierService from './tierService';
 
+// ============ ERROR LOGGING HELPER ============
+// Supabase errors are objects that don't serialize well in React Native console
+const formatSupabaseError = (error) => {
+  if (!error) return 'Unknown error';
+  if (typeof error === 'string') return error;
+  const parts = [];
+  if (error.message) parts.push(`message: ${error.message}`);
+  if (error.code) parts.push(`code: ${error.code}`);
+  if (error.details) parts.push(`details: ${error.details}`);
+  if (error.hint) parts.push(`hint: ${error.hint}`);
+  return parts.length > 0 ? parts.join(', ') : JSON.stringify(error);
+};
+
 // ============ LIFE AREAS ============
 // 6 lĩnh vực cuộc sống theo kịch bản demo Vision Board
 export const LIFE_AREAS = [
@@ -56,7 +69,7 @@ export const getGoalsCount = async (userId) => {
     if (error) throw error;
     return count || 0;
   } catch (err) {
-    console.error('[goalService] getGoalsCount error:', err);
+    console.error('[goalService] getGoalsCount error:', formatSupabaseError(err));
     return 0;
   }
 };
@@ -91,7 +104,7 @@ export const checkGoalQuota = async (userId) => {
       upgradeInfo,
     };
   } catch (err) {
-    console.error('[goalService] checkGoalQuota error:', err);
+    console.error('[goalService] checkGoalQuota error:', formatSupabaseError(err));
     // Default to allowing creation on error
     return {
       canCreate: true,
@@ -123,7 +136,7 @@ export const getGoals = async (userId, options = {}) => {
     if (error) throw error;
     return data || [];
   } catch (err) {
-    console.error('[goalService] getGoals error:', err);
+    console.error('[goalService] getGoals error:', formatSupabaseError(err));
     return [];
   }
 };
@@ -145,7 +158,7 @@ export const getGoalById = async (goalId) => {
     if (error) throw error;
     return data;
   } catch (err) {
-    console.error('[goalService] getGoalById error:', err);
+    console.error('[goalService] getGoalById error:', formatSupabaseError(err));
     return null;
   }
 };
@@ -176,7 +189,7 @@ export const getGoalsSummary = async (userId) => {
 
     return { total, active, completed, avgProgress };
   } catch (err) {
-    console.error('[goalService] getGoalsSummary error:', err);
+    console.error('[goalService] getGoalsSummary error:', formatSupabaseError(err));
     return { total: 0, active: 0, completed: 0, avgProgress: 0 };
   }
 };
@@ -252,7 +265,7 @@ export const createGoal = async (userId, goalData, options = {}) => {
 
     return data;
   } catch (err) {
-    console.error('[goalService] createGoal error:', err);
+    console.error('[goalService] createGoal error:', formatSupabaseError(err));
     throw err;
   }
 };
@@ -273,7 +286,7 @@ export const updateGoal = async (goalId, updates) => {
     if (error) throw error;
     return data;
   } catch (err) {
-    console.error('[goalService] updateGoal error:', err);
+    console.error('[goalService] updateGoal error:', formatSupabaseError(err));
     throw err;
   }
 };
@@ -316,7 +329,7 @@ export const uploadGoalCoverImage = async (userId, goalId, imageUri) => {
 
     return publicUrl;
   } catch (err) {
-    console.error('[goalService] uploadGoalCoverImage error:', err);
+    console.error('[goalService] uploadGoalCoverImage error:', formatSupabaseError(err));
     return null;
   }
 };
@@ -349,7 +362,7 @@ export const removeGoalCoverImage = async (userId, goalId) => {
 
     return true;
   } catch (err) {
-    console.error('[goalService] removeGoalCoverImage error:', err);
+    console.error('[goalService] removeGoalCoverImage error:', formatSupabaseError(err));
     return false;
   }
 };
@@ -366,7 +379,7 @@ export const deleteGoal = async (goalId) => {
     if (error) throw error;
     return true;
   } catch (err) {
-    console.error('[goalService] deleteGoal error:', err);
+    console.error('[goalService] deleteGoal error:', formatSupabaseError(err));
     throw err;
   }
 };
@@ -400,7 +413,7 @@ export const completeGoal = async (goalId, userId) => {
 
     return { goal: data, xpEarned };
   } catch (err) {
-    console.error('[goalService] completeGoal error:', err);
+    console.error('[goalService] completeGoal error:', formatSupabaseError(err));
     throw err;
   }
 };
@@ -466,7 +479,7 @@ export const calculateGoalProgress = async (goalId) => {
 
     return totalProgress;
   } catch (err) {
-    console.error('[goalService] calculateGoalProgress error:', err);
+    console.error('[goalService] calculateGoalProgress error:', formatSupabaseError(err));
     return 0;
   }
 };
@@ -565,7 +578,7 @@ export const checkMilestones = async (goalId, currentProgress, userId) => {
 
     return completedMilestones;
   } catch (err) {
-    console.error('[goalService] checkMilestones error:', err);
+    console.error('[goalService] checkMilestones error:', formatSupabaseError(err));
     return [];
   }
 };
@@ -582,7 +595,7 @@ export const getMilestones = async (goalId) => {
     if (error) throw error;
     return data || [];
   } catch (err) {
-    console.error('[goalService] getMilestones error:', err);
+    console.error('[goalService] getMilestones error:', formatSupabaseError(err));
     return [];
   }
 };
@@ -605,7 +618,7 @@ export const createMilestone = async (goalId, milestoneData) => {
     if (error) throw error;
     return data;
   } catch (err) {
-    console.error('[goalService] createMilestone error:', err);
+    console.error('[goalService] createMilestone error:', formatSupabaseError(err));
     throw err;
   }
 };
@@ -625,7 +638,7 @@ export const getNextMilestone = async (goalId, currentProgress) => {
 
     return data || null;
   } catch (err) {
-    console.error('[goalService] getNextMilestone error:', err);
+    console.error('[goalService] getNextMilestone error:', formatSupabaseError(err));
     return null;
   }
 };
@@ -654,7 +667,7 @@ export const addXPToUser = async (userId, xpAmount) => {
 
     return newTotalXP;
   } catch (err) {
-    console.error('[goalService] addXPToUser error:', err);
+    console.error('[goalService] addXPToUser error:', formatSupabaseError(err));
     return 0;
   }
 };
@@ -687,7 +700,7 @@ export const updateUserStats = async (userId, updates) => {
         });
     }
   } catch (err) {
-    console.error('[goalService] updateUserStats error:', err);
+    console.error('[goalService] updateUserStats error:', formatSupabaseError(err));
   }
 };
 
@@ -731,7 +744,7 @@ export const updateDailySummary = async (userId, updates) => {
         });
     }
   } catch (err) {
-    console.error('[goalService] updateDailySummary error:', err);
+    console.error('[goalService] updateDailySummary error:', formatSupabaseError(err));
   }
 };
 

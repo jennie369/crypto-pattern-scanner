@@ -4,30 +4,15 @@
  * Vietnamese labels with subtitles
  */
 
-import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Flame, Zap, Trophy, BookOpen, ChevronRight } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { getUserLearningStats } from '../../services/learningGamificationService';
 
-const StatItem = ({ icon: Icon, value, label, subtitle, color = COLORS.gold, onPress }) => (
-  <TouchableOpacity
-    style={styles.statItem}
-    onPress={onPress}
-    disabled={!onPress}
-    activeOpacity={onPress ? 0.7 : 1}
-  >
-    <View style={[styles.iconContainer, { backgroundColor: `${color}20` }]}>
-      <Icon size={18} color={color} strokeWidth={2.5} />
-    </View>
-    <View style={styles.statText}>
-      <Text style={[styles.statValue, { color }]} numberOfLines={1}>{value}</Text>
-      <Text style={styles.statLabel} numberOfLines={1}>{label}</Text>
-    </View>
-  </TouchableOpacity>
-);
+const BORDER_RADIUS = { lg: 16, md: 12 };
 
 const GamificationStatsStrip = ({
   userId = null,
@@ -37,6 +22,7 @@ const GamificationStatsStrip = ({
   onPressCourses,
   style = {},
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const navigation = useNavigation();
   const [stats, setStats] = useState({
     currentStreak: 0,
@@ -46,6 +32,86 @@ const GamificationStatsStrip = ({
   });
   const [loading, setLoading] = useState(true);
   const hasLoaded = useRef(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginHorizontal: SPACING.md,
+      marginVertical: SPACING.md,
+      borderRadius: BORDER_RADIUS.lg,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    gradient: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.md,
+    },
+    statsRow: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    },
+    statItem: {
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 55,
+      maxWidth: 70,
+    },
+    iconContainer: {
+      width: 36,
+      height: 36,
+      borderRadius: BORDER_RADIUS.md,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    statText: {
+      alignItems: 'center',
+    },
+    statValue: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      textAlign: 'center',
+    },
+    statLabel: {
+      fontSize: 10,
+      color: colors.textMuted,
+      marginTop: 1,
+      textAlign: 'center',
+    },
+    divider: {
+      width: 1,
+      height: 36,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      marginHorizontal: SPACING.xs,
+    },
+    viewAllButton: {
+      padding: SPACING.xs,
+      marginLeft: SPACING.xs,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
+  const StatItem = useCallback(({ icon: Icon, value, label, subtitle, color = colors.gold, onPress }) => (
+    <TouchableOpacity
+      style={styles.statItem}
+      onPress={onPress}
+      disabled={!onPress}
+      activeOpacity={onPress ? 0.7 : 1}
+    >
+      <View style={[styles.iconContainer, { backgroundColor: `${color}20` }]}>
+        <Icon size={18} color={color} strokeWidth={2.5} />
+      </View>
+      <View style={styles.statText}>
+        <Text style={[styles.statValue, { color }]} numberOfLines={1}>{value}</Text>
+        <Text style={styles.statLabel} numberOfLines={1}>{label}</Text>
+      </View>
+    </TouchableOpacity>
+  ), [colors, styles]);
 
   const loadStats = useCallback(async () => {
     // Prevent multiple loads
@@ -85,10 +151,12 @@ const GamificationStatsStrip = ({
     navigation.navigate('CourseAchievements');
   };
 
+  const gradientBackground = settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)');
+
   return (
     <View style={[styles.container, style]}>
       <LinearGradient
-        colors={['rgba(15, 16, 48, 0.8)', 'rgba(15, 16, 48, 0.6)']}
+        colors={[gradientBackground, gradientBackground]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.gradient}
@@ -106,7 +174,7 @@ const GamificationStatsStrip = ({
             icon={Zap}
             value={formatNumber(stats.totalXP)}
             label="Điểm"
-            color={COLORS.cyan}
+            color={colors.cyan}
             onPress={onPressXP}
           />
           <View style={styles.divider} />
@@ -114,7 +182,7 @@ const GamificationStatsStrip = ({
             icon={Trophy}
             value={stats.currentLevel}
             label="Cấp"
-            color={COLORS.gold}
+            color={colors.gold}
             onPress={onPressLevel}
           />
           <View style={styles.divider} />
@@ -122,7 +190,7 @@ const GamificationStatsStrip = ({
             icon={BookOpen}
             value={stats.totalCoursesCompleted}
             label="Khóa"
-            color={COLORS.success}
+            color={colors.success}
             onPress={onPressCourses}
           />
         </View>
@@ -132,75 +200,12 @@ const GamificationStatsStrip = ({
           onPress={handleNavigateToAchievements}
           activeOpacity={0.7}
         >
-          <ChevronRight size={18} color={COLORS.textMuted} />
+          <ChevronRight size={18} color={colors.textMuted} />
         </TouchableOpacity>
       </LinearGradient>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: SPACING.md,
-    marginVertical: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  gradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.md,
-  },
-  statsRow: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 55,
-    maxWidth: 70,
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: BORDER_RADIUS.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  statText: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-  },
-  statLabel: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-    marginTop: 1,
-    textAlign: 'center',
-  },
-  divider: {
-    width: 1,
-    height: 36,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginHorizontal: SPACING.xs,
-  },
-  viewAllButton: {
-    padding: SPACING.xs,
-    marginLeft: SPACING.xs,
-  },
-});
 
 // Memoize to prevent unnecessary re-renders
 export default memo(GamificationStatsStrip);

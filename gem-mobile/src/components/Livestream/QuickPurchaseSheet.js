@@ -12,7 +12,7 @@
  * - Price display with discounts
  */
 
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useMemo } from 'react';
 import {
   View,
   Text,
@@ -27,7 +27,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import tokens, { COLORS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { CartContext } from '../../contexts/CartContext';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -42,6 +42,7 @@ const QuickPurchaseSheet = ({
   onBuyNow,
   onViewDetails,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const { addToCart } = useContext(CartContext) || {};
 
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -69,6 +70,280 @@ const QuickPurchaseSheet = ({
   const stockQuantity = currentVariant?.inventory_quantity || product?.inventory_quantity || 0;
   const inStock = stockQuantity > 0;
   const maxQuantity = Math.min(stockQuantity, 10);
+
+  const styles = useMemo(() => StyleSheet.create({
+    backdrop: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      zIndex: 999,
+    },
+    backdropTouchable: {
+      flex: 1,
+    },
+    sheet: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: SHEET_HEIGHT,
+      zIndex: 1000,
+    },
+    dragHandleContainer: {
+      height: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    },
+    dragHandle: {
+      width: 40,
+      height: 4,
+      backgroundColor: colors.textMuted,
+      borderRadius: 2,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: 16,
+      paddingBottom: 24,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: 8,
+      right: 16,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 10,
+    },
+    scrollContent: {
+      flex: 1,
+      marginTop: 16,
+    },
+    productHeader: {
+      flexDirection: 'row',
+      gap: 16,
+      marginBottom: 16,
+    },
+    productImage: {
+      width: 100,
+      height: 100,
+      borderRadius: 12,
+      backgroundColor: colors.surfaceDark,
+    },
+    productInfo: {
+      flex: 1,
+      justifyContent: 'center',
+      gap: 8,
+    },
+    productTitle: {
+      color: colors.textLight,
+      fontSize: 16,
+      fontWeight: '600',
+      lineHeight: 22,
+    },
+    priceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap',
+    },
+    price: {
+      color: colors.gold,
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    comparePrice: {
+      color: colors.textMuted,
+      fontSize: 14,
+      textDecorationLine: 'line-through',
+    },
+    discountBadge: {
+      backgroundColor: colors.error,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    discountText: {
+      color: colors.textLight,
+      fontSize: 11,
+      fontWeight: '700',
+    },
+    stockContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    stockText: {
+      color: colors.success,
+      fontSize: 12,
+    },
+    outOfStock: {
+      color: colors.error,
+    },
+    benefitContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: 'rgba(255, 215, 0, 0.1)',
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderRadius: 10,
+      marginBottom: 16,
+    },
+    benefitText: {
+      color: colors.gold,
+      fontSize: 13,
+      flex: 1,
+    },
+    variantSection: {
+      marginBottom: 16,
+    },
+    optionGroup: {
+      marginBottom: 12,
+    },
+    optionLabel: {
+      color: colors.textMuted,
+      fontSize: 13,
+      marginBottom: 8,
+    },
+    optionValues: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    optionButton: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    optionButtonSelected: {
+      borderColor: colors.gold,
+      backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    },
+    optionButtonText: {
+      color: colors.textMuted,
+      fontSize: 14,
+    },
+    optionButtonTextSelected: {
+      color: colors.gold,
+      fontWeight: '600',
+    },
+    quantitySection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 16,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+      marginBottom: 16,
+    },
+    quantityLabel: {
+      color: colors.textLight,
+      fontSize: 15,
+      fontWeight: '500',
+    },
+    quantityControls: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+    },
+    quantityButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    quantityButtonDisabled: {
+      opacity: 0.4,
+    },
+    quantityValue: {
+      color: colors.textLight,
+      fontSize: 18,
+      fontWeight: '600',
+      minWidth: 30,
+      textAlign: 'center',
+    },
+    totalSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+    totalLabel: {
+      color: colors.textMuted,
+      fontSize: 15,
+    },
+    totalValue: {
+      color: colors.gold,
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    viewDetailsLink: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 4,
+      paddingVertical: 8,
+    },
+    viewDetailsText: {
+      color: colors.gold,
+      fontSize: 14,
+    },
+    actionButtons: {
+      flexDirection: 'row',
+      gap: 12,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    addToCartButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.gold,
+    },
+    addToCartText: {
+      color: colors.gold,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    buyNowButton: {
+      flex: 1.5,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      borderRadius: 12,
+      backgroundColor: colors.gold,
+    },
+    buyNowText: {
+      color: colors.background,
+      fontSize: 15,
+      fontWeight: '700',
+    },
+    buttonDisabled: {
+      opacity: 0.5,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Reset state when product changes
   useEffect(() => {
@@ -269,12 +544,12 @@ const QuickPurchaseSheet = ({
         </View>
 
         <LinearGradient
-          colors={['rgba(30, 30, 40, 0.98)', 'rgba(20, 20, 30, 1)']}
+          colors={settings.theme === 'light' ? [colors.bgDarkest, colors.bgDarkest] : ['rgba(30, 30, 40, 0.98)', 'rgba(20, 20, 30, 1)']}
           style={styles.content}
         >
           {/* Close Button */}
           <TouchableOpacity style={styles.closeButton} onPress={closeSheet}>
-            <Ionicons name="close" size={24} color={tokens.colors.textMuted} />
+            <Ionicons name="close" size={24} color={colors.textMuted} />
           </TouchableOpacity>
 
           <ScrollView
@@ -315,7 +590,7 @@ const QuickPurchaseSheet = ({
                       <Ionicons
                         name="checkmark-circle"
                         size={14}
-                        color={COLORS.success}
+                        color={colors.success}
                       />
                       <Text style={styles.stockText}>
                         Còn {stockQuantity} sản phẩm
@@ -326,7 +601,7 @@ const QuickPurchaseSheet = ({
                       <Ionicons
                         name="close-circle"
                         size={14}
-                        color={COLORS.error}
+                        color={colors.error}
                       />
                       <Text style={[styles.stockText, styles.outOfStock]}>
                         Hết hàng
@@ -340,7 +615,7 @@ const QuickPurchaseSheet = ({
             {/* Crystal Benefit */}
             {product.benefit && (
               <View style={styles.benefitContainer}>
-                <Ionicons name="sparkles" size={16} color={tokens.colors.gold} />
+                <Ionicons name="sparkles" size={16} color={colors.gold} />
                 <Text style={styles.benefitText}>{product.benefit}</Text>
               </View>
             )}
@@ -408,7 +683,7 @@ const QuickPurchaseSheet = ({
                   <Ionicons
                     name="remove"
                     size={20}
-                    color={quantity <= 1 ? tokens.colors.textMuted : tokens.colors.textLight}
+                    color={quantity <= 1 ? colors.textMuted : colors.textLight}
                   />
                 </TouchableOpacity>
 
@@ -427,8 +702,8 @@ const QuickPurchaseSheet = ({
                     size={20}
                     color={
                       quantity >= maxQuantity
-                        ? tokens.colors.textMuted
-                        : tokens.colors.textLight
+                        ? colors.textMuted
+                        : colors.textLight
                     }
                   />
                 </TouchableOpacity>
@@ -452,7 +727,7 @@ const QuickPurchaseSheet = ({
               }}
             >
               <Text style={styles.viewDetailsText}>Xem chi tiết sản phẩm</Text>
-              <Ionicons name="chevron-forward" size={16} color={tokens.colors.gold} />
+              <Ionicons name="chevron-forward" size={16} color={colors.gold} />
             </TouchableOpacity>
           </ScrollView>
 
@@ -468,10 +743,10 @@ const QuickPurchaseSheet = ({
               disabled={!inStock || isAdding}
             >
               {isAdding ? (
-                <ActivityIndicator size="small" color={tokens.colors.gold} />
+                <ActivityIndicator size="small" color={colors.gold} />
               ) : (
                 <>
-                  <Ionicons name="cart-outline" size={20} color={tokens.colors.gold} />
+                  <Ionicons name="cart-outline" size={20} color={colors.gold} />
                   <Text style={styles.addToCartText}>Thêm giỏ</Text>
                 </>
               )}
@@ -487,7 +762,7 @@ const QuickPurchaseSheet = ({
               disabled={!inStock || isBuying}
             >
               {isBuying ? (
-                <ActivityIndicator size="small" color={tokens.colors.background} />
+                <ActivityIndicator size="small" color={colors.background} />
               ) : (
                 <Text style={styles.buyNowText}>Mua ngay</Text>
               )}
@@ -498,279 +773,5 @@ const QuickPurchaseSheet = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    zIndex: 999,
-  },
-  backdropTouchable: {
-    flex: 1,
-  },
-  sheet: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: SHEET_HEIGHT,
-    zIndex: 1000,
-  },
-  dragHandleContainer: {
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(30, 30, 40, 0.98)',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  dragHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: tokens.colors.textMuted,
-    borderRadius: 2,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 8,
-    right: 16,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  scrollContent: {
-    flex: 1,
-    marginTop: 16,
-  },
-  productHeader: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 16,
-  },
-  productImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 12,
-    backgroundColor: tokens.colors.surfaceDark,
-  },
-  productInfo: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: 8,
-  },
-  productTitle: {
-    color: tokens.colors.textLight,
-    fontSize: 16,
-    fontWeight: '600',
-    lineHeight: 22,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  price: {
-    color: tokens.colors.gold,
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  comparePrice: {
-    color: tokens.colors.textMuted,
-    fontSize: 14,
-    textDecorationLine: 'line-through',
-  },
-  discountBadge: {
-    backgroundColor: COLORS.error,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  discountText: {
-    color: tokens.colors.textLight,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  stockContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  stockText: {
-    color: COLORS.success,
-    fontSize: 12,
-  },
-  outOfStock: {
-    color: COLORS.error,
-  },
-  benefitContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 10,
-    marginBottom: 16,
-  },
-  benefitText: {
-    color: tokens.colors.gold,
-    fontSize: 13,
-    flex: 1,
-  },
-  variantSection: {
-    marginBottom: 16,
-  },
-  optionGroup: {
-    marginBottom: 12,
-  },
-  optionLabel: {
-    color: tokens.colors.textMuted,
-    fontSize: 13,
-    marginBottom: 8,
-  },
-  optionValues: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  optionButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  optionButtonSelected: {
-    borderColor: tokens.colors.gold,
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-  },
-  optionButtonText: {
-    color: tokens.colors.textMuted,
-    fontSize: 14,
-  },
-  optionButtonTextSelected: {
-    color: tokens.colors.gold,
-    fontWeight: '600',
-  },
-  quantitySection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 16,
-  },
-  quantityLabel: {
-    color: tokens.colors.textLight,
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  quantityButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityButtonDisabled: {
-    opacity: 0.4,
-  },
-  quantityValue: {
-    color: tokens.colors.textLight,
-    fontSize: 18,
-    fontWeight: '600',
-    minWidth: 30,
-    textAlign: 'center',
-  },
-  totalSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  totalLabel: {
-    color: tokens.colors.textMuted,
-    fontSize: 15,
-  },
-  totalValue: {
-    color: tokens.colors.gold,
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  viewDetailsLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 8,
-  },
-  viewDetailsText: {
-    color: tokens.colors.gold,
-    fontSize: 14,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  addToCartButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: tokens.colors.gold,
-  },
-  addToCartText: {
-    color: tokens.colors.gold,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  buyNowButton: {
-    flex: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: tokens.colors.gold,
-  },
-  buyNowText: {
-    color: tokens.colors.background,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-});
 
 export default QuickPurchaseSheet;

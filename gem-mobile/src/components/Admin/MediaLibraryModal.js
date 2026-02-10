@@ -27,12 +27,11 @@ import {
   ImageIcon,
 } from 'lucide-react-native';
 
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import courseImageService from '../../services/courseImageService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NUM_COLUMNS = 3;
-const ITEM_SIZE = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.sm * 2) / NUM_COLUMNS;
 
 const MediaLibraryModal = ({
   visible,
@@ -40,6 +39,10 @@ const MediaLibraryModal = ({
   onSelectImage,
   currentLessonImages = [],
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
+
+  const ITEM_SIZE = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.sm * 2) / NUM_COLUMNS;
+
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -121,6 +124,207 @@ const MediaLibraryModal = ({
     [selectedImage, onSelectImage, onClose]
   );
 
+  const styles = useMemo(() => StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      justifyContent: 'flex-end',
+    },
+    modalContent: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (gradients.background?.[0] || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      maxHeight: '90%',
+      minHeight: '70%',
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: SPACING.lg,
+      paddingBottom: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: glass.border,
+    },
+    headerTitle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    },
+    closeBtn: {
+      padding: SPACING.xs,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.md,
+      gap: SPACING.sm,
+    },
+    searchInputWrapper: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: glass.border,
+    },
+    searchIcon: {
+      marginLeft: SPACING.md,
+    },
+    searchInput: {
+      flex: 1,
+      padding: SPACING.md,
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.md,
+    },
+    clearSearch: {
+      padding: SPACING.md,
+    },
+    refreshBtn: {
+      padding: SPACING.sm,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 8,
+    },
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: SPACING.xl,
+    },
+    loadingText: {
+      color: colors.textSecondary,
+      marginTop: SPACING.sm,
+    },
+    gridContainer: {
+      padding: SPACING.lg,
+      paddingTop: 0,
+    },
+    gridItem: {
+      width: ITEM_SIZE,
+      height: ITEM_SIZE,
+      margin: SPACING.xs,
+      borderRadius: 8,
+      overflow: 'hidden',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    gridItemSelected: {
+      borderWidth: 3,
+      borderColor: colors.gold,
+    },
+    gridItemAdded: {
+      opacity: 0.6,
+    },
+    gridImage: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: '#000',
+    },
+    selectedOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(255, 189, 89, 0.3)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.gold,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tapAgainText: {
+      color: '#fff',
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      marginTop: SPACING.xs,
+      textAlign: 'center',
+      textShadowColor: '#000',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 2,
+    },
+    addedBadge: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: colors.success,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    positionBadge: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      padding: 4,
+    },
+    positionText: {
+      color: '#fff',
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      textAlign: 'center',
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      padding: SPACING.xl * 2,
+    },
+    emptyText: {
+      color: colors.textSecondary,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      marginTop: SPACING.md,
+      textAlign: 'center',
+    },
+    emptyHint: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      marginTop: SPACING.xs,
+      textAlign: 'center',
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: SPACING.lg,
+      paddingTop: SPACING.md,
+      borderTopWidth: 1,
+      borderTopColor: glass.border,
+    },
+    footerText: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+    },
+    addBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.gold,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      borderRadius: 8,
+      gap: SPACING.xs,
+    },
+    addBtnDisabled: {
+      opacity: 0.7,
+    },
+    addBtnText: {
+      color: '#000',
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    },
+  }), [colors, settings.theme, glass, gradients, SPACING, TYPOGRAPHY, ITEM_SIZE]);
+
   // Render grid item
   const renderItem = useCallback(
     ({ item }) => {
@@ -169,14 +373,14 @@ const MediaLibraryModal = ({
         </TouchableOpacity>
       );
     },
-    [selectedImage, isImageInLesson, handleSelect, addingImage]
+    [selectedImage, isImageInLesson, handleSelect, addingImage, styles]
   );
 
   // Empty state
   const renderEmpty = useMemo(
     () => (
       <View style={styles.emptyContainer}>
-        <Inbox size={64} color={COLORS.textMuted} />
+        <Inbox size={64} color={colors.textMuted} />
         <Text style={styles.emptyText}>
           {searchQuery ? 'Khong tim thay hinh anh' : 'Thu vien trong'}
         </Text>
@@ -187,7 +391,7 @@ const MediaLibraryModal = ({
         </Text>
       </View>
     ),
-    [searchQuery]
+    [searchQuery, styles, colors]
   );
 
   // Header
@@ -195,13 +399,13 @@ const MediaLibraryModal = ({
     () => (
       <View style={styles.searchContainer}>
         <View style={styles.searchInputWrapper}>
-          <Search size={18} color={COLORS.textMuted} style={styles.searchIcon} />
+          <Search size={18} color={colors.textMuted} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Tim theo ten file hoac position_id..."
-            placeholderTextColor={COLORS.textMuted}
+            placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -210,16 +414,16 @@ const MediaLibraryModal = ({
               style={styles.clearSearch}
               onPress={() => setSearchQuery('')}
             >
-              <X size={16} color={COLORS.textMuted} />
+              <X size={16} color={colors.textMuted} />
             </TouchableOpacity>
           )}
         </View>
         <TouchableOpacity style={styles.refreshBtn} onPress={handleRefresh}>
-          <RefreshCw size={20} color={COLORS.textSecondary} />
+          <RefreshCw size={20} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
     ),
-    [searchQuery, handleRefresh]
+    [searchQuery, handleRefresh, styles, colors]
   );
 
   return (
@@ -234,11 +438,11 @@ const MediaLibraryModal = ({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerTitle}>
-              <ImageIcon size={24} color={COLORS.gold} />
+              <ImageIcon size={24} color={colors.gold} />
               <Text style={styles.title}>Thu vien hinh anh</Text>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-              <X size={24} color={COLORS.textPrimary} />
+              <X size={24} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -248,7 +452,7 @@ const MediaLibraryModal = ({
           {/* Grid */}
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={COLORS.gold} />
+              <ActivityIndicator size="large" color={colors.gold} />
               <Text style={styles.loadingText}>Dang tai...</Text>
             </View>
           ) : (
@@ -263,7 +467,7 @@ const MediaLibraryModal = ({
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={handleRefresh}
-                  tintColor={COLORS.gold}
+                  tintColor={colors.gold}
                 />
               }
               showsVerticalScrollIndicator={false}
@@ -297,206 +501,5 @@ const MediaLibraryModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: GRADIENTS.background[0],
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '90%',
-    minHeight: '70%',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.lg,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: GLASS.border,
-  },
-  headerTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
-  },
-  closeBtn: {
-    padding: SPACING.xs,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    gap: SPACING.sm,
-  },
-  searchInputWrapper: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: GLASS.border,
-  },
-  searchIcon: {
-    marginLeft: SPACING.md,
-  },
-  searchInput: {
-    flex: 1,
-    padding: SPACING.md,
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.md,
-  },
-  clearSearch: {
-    padding: SPACING.md,
-  },
-  refreshBtn: {
-    padding: SPACING.sm,
-    backgroundColor: GLASS.background,
-    borderRadius: 8,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: SPACING.xl,
-  },
-  loadingText: {
-    color: COLORS.textSecondary,
-    marginTop: SPACING.sm,
-  },
-  gridContainer: {
-    padding: SPACING.lg,
-    paddingTop: 0,
-  },
-  gridItem: {
-    width: ITEM_SIZE,
-    height: ITEM_SIZE,
-    margin: SPACING.xs,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: GLASS.background,
-  },
-  gridItemSelected: {
-    borderWidth: 3,
-    borderColor: COLORS.gold,
-  },
-  gridItemAdded: {
-    opacity: 0.6,
-  },
-  gridImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#000',
-  },
-  selectedOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 189, 89, 0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tapAgainText: {
-    color: '#fff',
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginTop: SPACING.xs,
-    textAlign: 'center',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  addedBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: COLORS.success,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  positionBadge: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: 4,
-  },
-  positionText: {
-    color: '#fff',
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    textAlign: 'center',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    padding: SPACING.xl * 2,
-  },
-  emptyText: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    marginTop: SPACING.md,
-    textAlign: 'center',
-  },
-  emptyHint: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    marginTop: SPACING.xs,
-    textAlign: 'center',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.lg,
-    paddingTop: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: GLASS.border,
-  },
-  footerText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-  },
-  addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: 8,
-    gap: SPACING.xs,
-  },
-  addBtnDisabled: {
-    opacity: 0.7,
-  },
-  addBtnText: {
-    color: '#000',
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
-  },
-});
 
 export default MediaLibraryModal;

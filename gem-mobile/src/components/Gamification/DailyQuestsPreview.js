@@ -3,22 +3,99 @@
  * Shows 3 daily quests on the courses home screen
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, Calendar, RefreshCw } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { getTodayQuests, claimQuestReward, getDailyQuestProgress } from '../../services/learningGamificationService';
 import DailyQuestCard from './DailyQuestCard';
 
+const BORDER_RADIUS = { lg: 16, md: 12 };
+
 const DailyQuestsPreview = ({ userId = null, onXPGained, style = {} }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const navigation = useNavigation();
   const [quests, setQuests] = useState([]);
   const [progressMap, setProgressMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState({});
   const [error, setError] = useState(null);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginHorizontal: SPACING.lg,
+      marginVertical: SPACING.md,
+    },
+    loadingContainer: {
+      padding: SPACING.xxl,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.5)'),
+      borderRadius: BORDER_RADIUS.lg,
+    },
+    loadingText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: SPACING.sm,
+    },
+    errorContainer: {
+      padding: SPACING.xxl,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.5)'),
+      borderRadius: BORDER_RADIUS.lg,
+    },
+    errorText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.error,
+      marginBottom: SPACING.md,
+      textAlign: 'center',
+    },
+    retryButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.sm,
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+      borderRadius: BORDER_RADIUS.md,
+    },
+    retryText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.gold,
+      marginLeft: SPACING.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: SPACING.md,
+    },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      marginLeft: SPACING.sm,
+    },
+    viewAllButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    timeRemaining: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginRight: SPACING.xxs,
+    },
+    questsList: {
+      gap: SPACING.sm,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const loadQuests = useCallback(async () => {
     try {
@@ -101,7 +178,7 @@ const DailyQuestsPreview = ({ userId = null, onXPGained, style = {} }) => {
   if (loading) {
     return (
       <View style={[styles.container, styles.loadingContainer, style]}>
-        <ActivityIndicator size="small" color={COLORS.gold} />
+        <ActivityIndicator size="small" color={colors.gold} />
         <Text style={styles.loadingText}>Đang tải nhiệm vụ...</Text>
       </View>
     );
@@ -113,7 +190,7 @@ const DailyQuestsPreview = ({ userId = null, onXPGained, style = {} }) => {
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadQuests}>
-            <RefreshCw size={16} color={COLORS.gold} />
+            <RefreshCw size={16} color={colors.gold} />
             <Text style={styles.retryText}>Thử lại</Text>
           </TouchableOpacity>
         </View>
@@ -130,12 +207,12 @@ const DailyQuestsPreview = ({ userId = null, onXPGained, style = {} }) => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Calendar size={18} color={COLORS.gold} strokeWidth={2} />
+          <Calendar size={18} color={colors.gold} strokeWidth={2} />
           <Text style={styles.title}>Nhiệm vụ hàng ngày</Text>
         </View>
         <TouchableOpacity style={styles.viewAllButton} onPress={handleViewAll}>
           <Text style={styles.timeRemaining}>{getTimeRemaining()}</Text>
-          <ChevronRight size={16} color={COLORS.textMuted} />
+          <ChevronRight size={16} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -159,79 +236,5 @@ const DailyQuestsPreview = ({ userId = null, onXPGained, style = {} }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: SPACING.lg,
-    marginVertical: SPACING.md,
-  },
-  loadingContainer: {
-    padding: SPACING.xxl,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(15, 16, 48, 0.5)',
-    borderRadius: BORDER_RADIUS.lg,
-  },
-  loadingText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: SPACING.sm,
-  },
-  errorContainer: {
-    padding: SPACING.xxl,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(15, 16, 48, 0.5)',
-    borderRadius: BORDER_RADIUS.lg,
-  },
-  errorText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.error,
-    marginBottom: SPACING.md,
-    textAlign: 'center',
-  },
-  retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    borderRadius: BORDER_RADIUS.md,
-  },
-  retryText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gold,
-    marginLeft: SPACING.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.md,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginLeft: SPACING.sm,
-  },
-  viewAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  timeRemaining: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginRight: SPACING.xxs,
-  },
-  questsList: {
-    gap: SPACING.sm,
-  },
-});
 
 export default DailyQuestsPreview;

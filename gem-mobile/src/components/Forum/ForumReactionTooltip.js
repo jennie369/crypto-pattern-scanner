@@ -10,7 +10,7 @@
  * - Realtime updates
  */
 
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -38,7 +38,8 @@ import {
   REACTION_CONFIG,
   REACTION_ORDER,
 } from '../../constants/reactions';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { formatError } from '../../utils/errorUtils';
 import reactionService from '../../services/reactionService';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -61,6 +62,8 @@ const ForumReactionTooltip = ({
   onClose,
   onUserPress,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // State
   const [activeFilter, setActiveFilter] = useState('all');
   const [reactions, setReactions] = useState([]);
@@ -106,7 +109,7 @@ const ForumReactionTooltip = ({
         const data = await reactionService.getPostReactions(postId, filterType, 100);
         setReactions(data || []);
       } catch (err) {
-        console.error('[ForumReactionTooltip] Fetch error:', err);
+        console.error('[ForumReactionTooltip] Fetch error:', formatError(err));
         setError('Không thể tải danh sách cảm xúc');
         setReactions([]);
       } finally {
@@ -145,6 +148,165 @@ const ForumReactionTooltip = ({
     onUserPress?.(userId);
     onClose?.();
   }, [onUserPress, onClose]);
+
+  // Memoized styles
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    },
+    modalContainer: {
+      height: MODAL_HEIGHT,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      overflow: 'hidden',
+      // Shadow
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 20,
+    },
+    blurView: {
+      flex: 1,
+      backgroundColor: Platform.OS === 'android' ? (settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.98)')) : 'transparent',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    handleBar: {
+      position: 'absolute',
+      top: 8,
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    closeButton: {
+      position: 'absolute',
+      right: SPACING.md,
+      padding: SPACING.sm,
+    },
+    filterContainer: {
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    filterList: {
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+    },
+    filterTab: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      marginRight: SPACING.sm,
+    },
+    filterTabActive: {
+      backgroundColor: 'rgba(255, 189, 89, 0.2)',
+      borderWidth: 1,
+      borderColor: colors.gold,
+    },
+    filterEmoji: {
+      fontSize: 16,
+      marginRight: SPACING.xs,
+    },
+    filterLabel: {
+      fontSize: 14,
+      color: colors.textMuted,
+      fontWeight: '500',
+    },
+    filterLabelActive: {
+      color: colors.gold,
+    },
+    listContent: {
+      padding: SPACING.md,
+      flexGrow: 1,
+    },
+    userItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.md,
+      marginBottom: SPACING.xs,
+      borderRadius: 12,
+      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    },
+    avatarContainer: {
+      position: 'relative',
+    },
+    avatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    avatarPlaceholder: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    reactionBadge: {
+      position: 'absolute',
+      bottom: -2,
+      right: -2,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.98)'),
+    },
+    reactionBadgeEmoji: {
+      fontSize: 10,
+    },
+    userInfo: {
+      flex: 1,
+      marginLeft: SPACING.md,
+    },
+    userName: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    userHandle: {
+      fontSize: 13,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    reactionLabel: {
+      fontSize: 13,
+      fontWeight: '500',
+    },
+    emptyContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.xl * 2,
+    },
+    emptyText: {
+      fontSize: 14,
+      color: colors.textMuted,
+      marginTop: SPACING.md,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   /**
    * Render filter tab
@@ -195,12 +357,12 @@ const ForumReactionTooltip = ({
             />
           ) : (
             <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <UserIcon size={20} color={COLORS.textMuted} />
+              <UserIcon size={20} color={colors.textMuted} />
             </View>
           )}
 
           {/* Reaction badge */}
-          <View style={[styles.reactionBadge, { backgroundColor: config?.color || COLORS.textMuted }]}>
+          <View style={[styles.reactionBadge, { backgroundColor: config?.color || colors.textMuted }]}>
             <Text style={styles.reactionBadgeEmoji}>{config?.emoji}</Text>
           </View>
         </View>
@@ -218,7 +380,7 @@ const ForumReactionTooltip = ({
         </View>
 
         {/* Reaction type label */}
-        <Text style={[styles.reactionLabel, { color: config?.color || COLORS.textMuted }]}>
+        <Text style={[styles.reactionLabel, { color: config?.color || colors.textMuted }]}>
           {config?.label || item.reaction_type}
         </Text>
       </Pressable>
@@ -232,7 +394,7 @@ const ForumReactionTooltip = ({
     if (loading) {
       return (
         <View style={styles.emptyContainer}>
-          <ActivityIndicator color={COLORS.gold} size="large" />
+          <ActivityIndicator color={colors.gold} size="large" />
           <Text style={styles.emptyText}>Đang tải...</Text>
         </View>
       );
@@ -291,7 +453,7 @@ const ForumReactionTooltip = ({
               <View style={styles.handleBar} />
               <Text style={styles.headerTitle}>Cảm xúc</Text>
               <Pressable onPress={onClose} style={styles.closeButton}>
-                <X size={24} color={COLORS.textMuted} />
+                <X size={24} color={colors.textMuted} />
               </Pressable>
             </View>
 
@@ -322,163 +484,5 @@ const ForumReactionTooltip = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-  },
-  modalContainer: {
-    height: MODAL_HEIGHT,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: 'hidden',
-    // Shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 20,
-  },
-  blurView: {
-    flex: 1,
-    backgroundColor: Platform.OS === 'android' ? 'rgba(15, 16, 48, 0.98)' : 'transparent',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  handleBar: {
-    position: 'absolute',
-    top: 8,
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  closeButton: {
-    position: 'absolute',
-    right: SPACING.md,
-    padding: SPACING.sm,
-  },
-  filterContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  filterList: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-  },
-  filterTab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    marginRight: SPACING.sm,
-  },
-  filterTabActive: {
-    backgroundColor: 'rgba(255, 189, 89, 0.2)',
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-  },
-  filterEmoji: {
-    fontSize: 16,
-    marginRight: SPACING.xs,
-  },
-  filterLabel: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    fontWeight: '500',
-  },
-  filterLabelActive: {
-    color: COLORS.gold,
-  },
-  listContent: {
-    padding: SPACING.md,
-    flexGrow: 1,
-  },
-  userItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.xs,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-  },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  avatarPlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reactionBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(15, 16, 48, 0.98)',
-  },
-  reactionBadgeEmoji: {
-    fontSize: 10,
-  },
-  userInfo: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  userName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  userHandle: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  reactionLabel: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.xl * 2,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    marginTop: SPACING.md,
-  },
-});
 
 export default memo(ForumReactionTooltip);

@@ -4,7 +4,7 @@
  * Phase 2: Image Viewer Enhancement (30/12/2024)
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -17,7 +17,7 @@ import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { useImageGestures } from '../../hooks/useImageGestures';
 import { calculateImageFit } from '../../utils/imageViewerUtils';
-import { COLORS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -44,6 +44,8 @@ const ZoomableImage = ({
   onZoomChange,
   isActive = true,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // State
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -87,13 +89,45 @@ const ZoomableImage = ({
     }
   }, [isActive, resetZoom]);
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      width: SCREEN_WIDTH,
+      height: SCREEN_HEIGHT,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    imageContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    image: {
+      backgroundColor: 'transparent',
+    },
+    loadingContainer: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorContainer: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorText: {
+      color: colors.error || '#FF5252',
+      fontSize: 14,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <GestureDetector gesture={gesture}>
       <Animated.View style={[styles.container, backgroundStyle]}>
         {/* Loading indicator */}
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.gold} />
+            <ActivityIndicator size="large" color={colors.gold} />
           </View>
         )}
 
@@ -125,37 +159,5 @@ const ZoomableImage = ({
     </GestureDetector>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  imageContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    backgroundColor: 'transparent',
-  },
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    color: COLORS.error || '#FF5252',
-    fontSize: 14,
-  },
-});
 
 export default memo(ZoomableImage);

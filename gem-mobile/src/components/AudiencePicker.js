@@ -4,7 +4,7 @@
  * Select who can see a post
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ import {
   Check,
   X,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 import privacyService from '../services/privacyService';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -43,6 +43,7 @@ const AudiencePicker = ({
   compact = false,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [showPicker, setShowPicker] = useState(false);
   const [closeFriendsCount, setCloseFriendsCount] = useState(0);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -50,6 +51,186 @@ const AudiencePicker = ({
   const options = privacyService.getAudienceOptions();
   const selectedOption = options.find(o => o.id === value) || options[0];
   const IconComponent = ICONS[selectedOption.icon] || Globe;
+
+  const styles = useMemo(() => StyleSheet.create({
+    selectButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 12,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    buttonDisabled: {
+      opacity: 0.5,
+    },
+    selectedInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.md,
+    },
+    selectedIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    selectedLabel: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    selectedDesc: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    compactButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: 8,
+      gap: SPACING.xs,
+    },
+    compactText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    pickerContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingBottom: SPACING.huge,
+      overflow: 'hidden',
+    },
+    pickerHandle: {
+      width: 40,
+      height: 4,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+      borderRadius: 2,
+      alignSelf: 'center',
+      marginTop: SPACING.sm,
+    },
+    pickerHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+      paddingBottom: SPACING.sm,
+    },
+    pickerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.display,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    closeButton: {
+      padding: SPACING.xs,
+    },
+    pickerSubtitle: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      paddingHorizontal: SPACING.lg,
+      marginBottom: SPACING.lg,
+    },
+    optionsList: {
+      paddingHorizontal: SPACING.lg,
+      gap: SPACING.sm,
+    },
+    optionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      borderRadius: 12,
+      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    },
+    optionRowSelected: {
+      backgroundColor: 'rgba(106, 91, 255, 0.15)',
+      borderWidth: 1,
+      borderColor: colors.purple,
+    },
+    optionIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 10,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: SPACING.md,
+    },
+    optionIconSelected: {
+      backgroundColor: colors.purple,
+    },
+    optionInfo: {
+      flex: 1,
+    },
+    optionLabelRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    optionLabel: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textSecondary,
+    },
+    optionLabelSelected: {
+      color: colors.textPrimary,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    countBadge: {
+      backgroundColor: colors.purple,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 10,
+    },
+    countText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    optionDesc: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    warningBox: {
+      marginHorizontal: SPACING.lg,
+      marginTop: SPACING.lg,
+      padding: SPACING.md,
+      backgroundColor: 'rgba(255, 183, 0, 0.15)',
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 183, 0, 0.3)',
+    },
+    warningText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.warning,
+      textAlign: 'center',
+    },
+    badge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    badgeText: {
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     loadCloseFriendsCount();
@@ -97,7 +278,7 @@ const AudiencePicker = ({
         <View style={[styles.optionIcon, isSelected && styles.optionIconSelected]}>
           <OptionIcon
             size={20}
-            color={isSelected ? COLORS.textPrimary : COLORS.textMuted}
+            color={isSelected ? colors.textPrimary : colors.textMuted}
           />
         </View>
         <View style={styles.optionInfo}>
@@ -114,7 +295,7 @@ const AudiencePicker = ({
           <Text style={styles.optionDesc}>{option.description}</Text>
         </View>
         {isSelected && (
-          <Check size={20} color={COLORS.success} />
+          <Check size={20} color={colors.success} />
         )}
       </TouchableOpacity>
     );
@@ -127,9 +308,9 @@ const AudiencePicker = ({
         onPress={() => !disabled && setShowPicker(true)}
         disabled={disabled}
       >
-        <IconComponent size={14} color={COLORS.textMuted} />
+        <IconComponent size={14} color={colors.textMuted} />
         <Text style={styles.compactText}>{selectedOption.label}</Text>
-        <ChevronDown size={12} color={COLORS.textMuted} />
+        <ChevronDown size={12} color={colors.textMuted} />
 
         <Modal
           visible={showPicker}
@@ -159,7 +340,7 @@ const AudiencePicker = ({
                   style={styles.closeButton}
                   onPress={() => setShowPicker(false)}
                 >
-                  <X size={24} color={COLORS.textPrimary} />
+                  <X size={24} color={colors.textPrimary} />
                 </TouchableOpacity>
               </View>
 
@@ -182,14 +363,14 @@ const AudiencePicker = ({
       >
         <View style={styles.selectedInfo}>
           <View style={styles.selectedIcon}>
-            <IconComponent size={18} color={COLORS.textPrimary} />
+            <IconComponent size={18} color={colors.textPrimary} />
           </View>
           <View>
             <Text style={styles.selectedLabel}>{selectedOption.label}</Text>
             <Text style={styles.selectedDesc}>{selectedOption.description}</Text>
           </View>
         </View>
-        <ChevronDown size={20} color={COLORS.textMuted} />
+        <ChevronDown size={20} color={colors.textMuted} />
       </TouchableOpacity>
 
       <Modal
@@ -220,7 +401,7 @@ const AudiencePicker = ({
                 style={styles.closeButton}
                 onPress={() => setShowPicker(false)}
               >
-                <X size={24} color={COLORS.textPrimary} />
+                <X size={24} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -250,6 +431,19 @@ const AudiencePicker = ({
  * Inline visibility indicator (read-only)
  */
 export const VisibilityBadge = ({ visibility = 'public', size = 'small' }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    badge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    badgeText: {
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const options = privacyService.getAudienceOptions();
   const option = options.find(o => o.id === visibility) || options[0];
   const IconComponent = ICONS[option.icon] || Globe;
@@ -263,190 +457,10 @@ export const VisibilityBadge = ({ visibility = 'public', size = 'small' }) => {
 
   return (
     <View style={styles.badge}>
-      <IconComponent size={s.icon} color={COLORS.textMuted} />
+      <IconComponent size={s.icon} color={colors.textMuted} />
       <Text style={[styles.badgeText, { fontSize: s.text }]}>{option.label}</Text>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  selectButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  selectedInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-  },
-  selectedIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  selectedDesc: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  compactButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: 8,
-    gap: SPACING.xs,
-  },
-  compactText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  pickerContainer: {
-    backgroundColor: GLASS.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingBottom: SPACING.huge,
-    overflow: 'hidden',
-  },
-  pickerHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginTop: SPACING.sm,
-  },
-  pickerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.sm,
-  },
-  pickerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.display,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  closeButton: {
-    padding: SPACING.xs,
-  },
-  pickerSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
-  },
-  optionsList: {
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-  },
-  optionRowSelected: {
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
-    borderWidth: 1,
-    borderColor: COLORS.purple,
-  },
-  optionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.md,
-  },
-  optionIconSelected: {
-    backgroundColor: COLORS.purple,
-  },
-  optionInfo: {
-    flex: 1,
-  },
-  optionLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  optionLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textSecondary,
-  },
-  optionLabelSelected: {
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  countBadge: {
-    backgroundColor: COLORS.purple,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  countText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  optionDesc: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  warningBox: {
-    marginHorizontal: SPACING.lg,
-    marginTop: SPACING.lg,
-    padding: SPACING.md,
-    backgroundColor: 'rgba(255, 183, 0, 0.15)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 183, 0, 0.3)',
-  },
-  warningText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.warning,
-    textAlign: 'center',
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  badgeText: {
-    color: COLORS.textMuted,
-  },
-});
 
 export default AudiencePicker;

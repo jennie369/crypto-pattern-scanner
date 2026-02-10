@@ -3,7 +3,7 @@
  * Facebook-style comments bottom sheet
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ import {
   MoreHorizontal,
   MessageCircle,
 } from 'lucide-react-native';
-import { COLORS, SPACING } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 
 /**
  * Format relative time (Vietnamese)
@@ -38,17 +38,92 @@ const formatRelativeTime = (dateString) => {
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffMins < 1) return 'Vừa xong';
-  if (diffMins < 60) return `${diffMins} phút`;
-  if (diffHours < 24) return `${diffHours} giờ`;
-  if (diffDays < 7) return `${diffDays} ngày`;
+  if (diffMins < 1) return 'Vua xong';
+  if (diffMins < 60) return `${diffMins} phut`;
+  if (diffHours < 24) return `${diffHours} gio`;
+  if (diffDays < 7) return `${diffDays} ngay`;
   return date.toLocaleDateString('vi-VN');
 };
 
 /**
  * Comment Item Component
  */
-const CommentItem = ({ comment, onLike, onReply, likedByUser }) => {
+const CommentItem = ({ comment, onLike, onReply, likedByUser, colors, SPACING }) => {
+  const styles = useMemo(() => StyleSheet.create({
+    commentItem: {
+      flexDirection: 'row',
+      marginBottom: 16,
+      gap: 10,
+    },
+    commentAvatar: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    commentContent: {
+      flex: 1,
+    },
+    commentBubble: {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 16,
+      borderTopLeftRadius: 4,
+    },
+    commentAuthor: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: '#FFFFFF',
+      marginBottom: 2,
+    },
+    commentText: {
+      fontSize: 14,
+      color: 'rgba(255, 255, 255, 0.9)',
+      lineHeight: 20,
+    },
+    commentActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 4,
+      paddingLeft: 8,
+      gap: 12,
+    },
+    commentTime: {
+      fontSize: 12,
+      color: 'rgba(255, 255, 255, 0.4)',
+    },
+    commentAction: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: 'rgba(255, 255, 255, 0.6)',
+    },
+    commentActionActive: {
+      color: colors.error,
+    },
+    likesCount: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    likesCountText: {
+      fontSize: 12,
+      color: 'rgba(255, 255, 255, 0.6)',
+    },
+    repliesButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: 8,
+      paddingLeft: 8,
+    },
+    repliesText: {
+      fontSize: 13,
+      color: colors.gold,
+      fontWeight: '500',
+    },
+  }), [colors, SPACING]);
+
   return (
     <View style={styles.commentItem}>
       {/* Avatar */}
@@ -61,7 +136,7 @@ const CommentItem = ({ comment, onLike, onReply, likedByUser }) => {
         {/* Comment Bubble */}
         <View style={styles.commentBubble}>
           <Text style={styles.commentAuthor}>
-            {comment.display_name || 'Người dùng ẩn danh'}
+            {comment.display_name || 'Nguoi dung an danh'}
           </Text>
           <Text style={styles.commentText}>{comment.content}</Text>
         </View>
@@ -78,15 +153,15 @@ const CommentItem = ({ comment, onLike, onReply, likedByUser }) => {
                 likedByUser && styles.commentActionActive,
               ]}
             >
-              Thích
+              Thich
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onReply?.(comment)}>
-            <Text style={styles.commentAction}>Trả lời</Text>
+            <Text style={styles.commentAction}>Tra loi</Text>
           </TouchableOpacity>
           {comment.likes_count > 0 && (
             <View style={styles.likesCount}>
-              <Heart size={12} color={COLORS.error} fill={COLORS.error} />
+              <Heart size={12} color={colors.error} fill={colors.error} />
               <Text style={styles.likesCountText}>{comment.likes_count}</Text>
             </View>
           )}
@@ -95,9 +170,9 @@ const CommentItem = ({ comment, onLike, onReply, likedByUser }) => {
         {/* Replies indicator */}
         {comment.replies_count > 0 && (
           <TouchableOpacity style={styles.repliesButton}>
-            <MessageCircle size={14} color={COLORS.gold} />
+            <MessageCircle size={14} color={colors.gold} />
             <Text style={styles.repliesText}>
-              Xem {comment.replies_count} trả lời
+              Xem {comment.replies_count} tra loi
             </Text>
           </TouchableOpacity>
         )}
@@ -133,6 +208,7 @@ export default function AdCommentsSheet({
   likedCommentIds = [],
   reactionCount = 0,
 }) {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [inputText, setInputText] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -166,8 +242,151 @@ export default function AdCommentsSheet({
       onLike={onLikeComment}
       onReply={handleReply}
       likedByUser={likedCommentIds.includes(item.id)}
+      colors={colors}
+      SPACING={SPACING}
     />
   );
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'flex-end',
+    },
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : '#1C1B23',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      height: '75%',
+    },
+    reactionBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 8,
+    },
+    reactionIcon: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: 'rgba(255, 107, 107, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 6,
+    },
+    reactionCount: {
+      fontSize: 14,
+      color: 'rgba(255, 255, 255, 0.7)',
+      fontWeight: '500',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#FFFFFF',
+    },
+    closeButton: {
+      padding: 4,
+    },
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    listContent: {
+      padding: 16,
+      flexGrow: 1,
+    },
+    emptyContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 60,
+    },
+    emptyIconContainer: {
+      marginBottom: 8,
+    },
+    emptyText: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#FFFFFF',
+      marginTop: 16,
+    },
+    emptySubtext: {
+      fontSize: 15,
+      color: 'rgba(255, 255, 255, 0.5)',
+      marginTop: 6,
+    },
+    loadingMore: {
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    replyIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      backgroundColor: 'rgba(255, 215, 0, 0.1)',
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    replyText: {
+      fontSize: 13,
+      color: 'rgba(255, 255, 255, 0.6)',
+    },
+    replyName: {
+      color: colors.gold,
+      fontWeight: '500',
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      paddingBottom: 34, // Safe area
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+      gap: 10,
+    },
+    inputAvatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    textInput: {
+      flex: 1,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: 20,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      paddingTop: 10,
+      fontSize: 14,
+      color: '#FFFFFF',
+      maxHeight: 100,
+    },
+    sendButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sendButtonDisabled: {
+      opacity: 0.5,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const renderEmpty = () => {
     if (loading) return null;
@@ -176,8 +395,8 @@ export default function AdCommentsSheet({
         <View style={styles.emptyIconContainer}>
           <MessageCircle size={56} color="#4A90D9" fill="#4A90D9" strokeWidth={0} />
         </View>
-        <Text style={styles.emptyText}>Chưa có bình luận</Text>
-        <Text style={styles.emptySubtext}>Hãy là người đầu tiên bình luận.</Text>
+        <Text style={styles.emptyText}>Chua co binh luan</Text>
+        <Text style={styles.emptySubtext}>Hay la nguoi dau tien binh luan.</Text>
       </View>
     );
   };
@@ -186,7 +405,7 @@ export default function AdCommentsSheet({
     if (!loadingMore) return null;
     return (
       <View style={styles.loadingMore}>
-        <ActivityIndicator size="small" color={COLORS.gold} />
+        <ActivityIndicator size="small" color={colors.gold} />
       </View>
     );
   };
@@ -215,20 +434,20 @@ export default function AdCommentsSheet({
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Bình luận</Text>
+            <Text style={styles.headerTitle}>Binh luan</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={onClose}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <X size={24} color={COLORS.textMuted} />
+              <X size={24} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
           {/* Comments List */}
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={COLORS.gold} />
+              <ActivityIndicator size="large" color={colors.gold} />
             </View>
           ) : (
             <FlatList
@@ -248,11 +467,11 @@ export default function AdCommentsSheet({
           {replyingTo && (
             <View style={styles.replyIndicator}>
               <Text style={styles.replyText}>
-                Đang trả lời{' '}
+                Dang tra loi{' '}
                 <Text style={styles.replyName}>{replyingTo.display_name}</Text>
               </Text>
               <TouchableOpacity onPress={cancelReply}>
-                <X size={16} color={COLORS.textMuted} />
+                <X size={16} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
           )}
@@ -269,7 +488,7 @@ export default function AdCommentsSheet({
             <TextInput
               ref={inputRef}
               style={styles.textInput}
-              placeholder={replyingTo ? 'Viết trả lời...' : 'Viết bình luận...'}
+              placeholder={replyingTo ? 'Viet tra loi...' : 'Viet binh luan...'}
               placeholderTextColor="rgba(255, 255, 255, 0.4)"
               value={inputText}
               onChangeText={setInputText}
@@ -285,11 +504,11 @@ export default function AdCommentsSheet({
               disabled={!inputText.trim() || submitting}
             >
               {submitting ? (
-                <ActivityIndicator size="small" color={COLORS.gold} />
+                <ActivityIndicator size="small" color={colors.gold} />
               ) : (
                 <Send
                   size={20}
-                  color={inputText.trim() ? COLORS.gold : COLORS.textMuted}
+                  color={inputText.trim() ? colors.gold : colors.textMuted}
                 />
               )}
             </TouchableOpacity>
@@ -299,216 +518,3 @@ export default function AdCommentsSheet({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  container: {
-    backgroundColor: '#1C1B23',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    height: '75%',
-  },
-  reactionBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  reactionIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 107, 107, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 6,
-  },
-  reactionCount: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontWeight: '500',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  listContent: {
-    padding: 16,
-    flexGrow: 1,
-  },
-  commentItem: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    gap: 10,
-  },
-  commentAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  commentContent: {
-    flex: 1,
-  },
-  commentBubble: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderTopLeftRadius: 4,
-  },
-  commentAuthor: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 2,
-  },
-  commentText: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
-    lineHeight: 20,
-  },
-  commentActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    paddingLeft: 8,
-    gap: 12,
-  },
-  commentTime: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.4)',
-  },
-  commentAction: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.6)',
-  },
-  commentActionActive: {
-    color: COLORS.error,
-  },
-  likesCount: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  likesCountText: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
-  },
-  repliesButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 8,
-    paddingLeft: 8,
-  },
-  repliesText: {
-    fontSize: 13,
-    color: COLORS.gold,
-    fontWeight: '500',
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-  },
-  emptyIconContainer: {
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 15,
-    color: 'rgba(255, 255, 255, 0.5)',
-    marginTop: 6,
-  },
-  loadingMore: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  replyIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  replyText: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.6)',
-  },
-  replyName: {
-    color: COLORS.gold,
-    fontWeight: '500',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingBottom: 34, // Safe area
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    gap: 10,
-  },
-  inputAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  textInput: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    paddingTop: 10,
-    fontSize: 14,
-    color: '#FFFFFF',
-    maxHeight: 100,
-  },
-  sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendButtonDisabled: {
-    opacity: 0.5,
-  },
-});

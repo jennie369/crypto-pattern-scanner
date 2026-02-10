@@ -3,7 +3,7 @@
  * Displays sticker or GIF in chat messages
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import LottieSticker from './LottieSticker';
 
 const STICKER_SIZE = 150;
@@ -29,6 +29,34 @@ const StickerMessage = memo(({
   onPress,
   onLongPress,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    stickerContainer: {
+      width: STICKER_SIZE,
+      height: STICKER_SIZE,
+      marginVertical: SPACING.xs,
+    },
+    lottieSticker: {
+      width: '100%',
+      height: '100%',
+    },
+    stickerImage: {
+      width: '100%',
+      height: '100%',
+    },
+    gifContainer: {
+      marginVertical: SPACING.xs,
+      borderRadius: 12,
+      overflow: 'hidden',
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+    },
+    gifImage: {
+      width: '100%',
+      height: '100%',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const isLottie = format === 'lottie' && lottieUrl;
   const isGif = giphyId || format === 'gif';
 
@@ -88,32 +116,6 @@ const StickerMessage = memo(({
       />
     </TouchableOpacity>
   );
-});
-
-const styles = StyleSheet.create({
-  stickerContainer: {
-    width: STICKER_SIZE,
-    height: STICKER_SIZE,
-    marginVertical: SPACING.xs,
-  },
-  lottieSticker: {
-    width: '100%',
-    height: '100%',
-  },
-  stickerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gifContainer: {
-    marginVertical: SPACING.xs,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  gifImage: {
-    width: '100%',
-    height: '100%',
-  },
 });
 
 export default StickerMessage;

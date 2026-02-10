@@ -4,7 +4,7 @@
  * Bottom sheet with comment moderation options
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -27,7 +27,7 @@ import {
   ChevronRight,
   CheckCircle,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, INPUT } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 import commentModerationService from '../services/commentModerationService';
 import CustomAlert, { useCustomAlert } from './CustomAlert';
 
@@ -42,6 +42,7 @@ const CommentActionSheet = ({
   onCommentPinned,
   onCommentReported,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [loading, setLoading] = useState(false);
   const [permissions, setPermissions] = useState(null);
   const [mode, setMode] = useState('actions'); // 'actions' or 'report'
@@ -49,6 +50,179 @@ const CommentActionSheet = ({
   const [reportDetails, setReportDetails] = useState('');
   const [slideAnim] = useState(new Animated.Value(SCREEN_HEIGHT));
   const { alert, AlertComponent } = useCustomAlert();
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    },
+    sheet: {
+      borderTopLeftRadius: glass.borderRadius,
+      borderTopRightRadius: glass.borderRadius,
+      overflow: 'hidden',
+      maxHeight: SCREEN_HEIGHT * 0.75,
+    },
+    blurContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      paddingBottom: 34,
+    },
+    header: {
+      alignItems: 'center',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    handle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+      marginBottom: SPACING.sm,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    closeButton: {
+      position: 'absolute',
+      right: SPACING.lg,
+      top: SPACING.lg,
+      padding: SPACING.xs,
+    },
+    loadingContainer: {
+      padding: SPACING.xxl,
+      alignItems: 'center',
+    },
+    actionsContainer: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+    },
+    actionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.md,
+    },
+    actionIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    actionText: {
+      flex: 1,
+      marginLeft: SPACING.md,
+    },
+    actionLabel: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textPrimary,
+    },
+    actionSubtitle: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    noActions: {
+      padding: SPACING.xxl,
+      alignItems: 'center',
+    },
+    noActionsText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+    },
+    reportContainer: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+    },
+    warningBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 184, 0, 0.1)',
+      padding: SPACING.md,
+      borderRadius: 12,
+      marginBottom: SPACING.lg,
+      gap: SPACING.sm,
+    },
+    warningText: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.warning,
+    },
+    reasonItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      marginBottom: SPACING.sm,
+    },
+    reasonItemActive: {
+      borderColor: colors.purple,
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    },
+    reasonContent: {
+      flex: 1,
+    },
+    reasonLabel: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textSecondary,
+    },
+    reasonLabelActive: {
+      color: colors.textPrimary,
+    },
+    reasonDescription: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    detailsContainer: {
+      marginTop: SPACING.md,
+    },
+    detailsInput: {
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      padding: SPACING.md,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textPrimary,
+      minHeight: 100,
+    },
+    submitButton: {
+      backgroundColor: colors.purple,
+      paddingVertical: SPACING.md,
+      borderRadius: 12,
+      alignItems: 'center',
+      marginTop: SPACING.lg,
+    },
+    submitButtonDisabled: {
+      opacity: 0.5,
+    },
+    submitButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    backButton: {
+      paddingVertical: SPACING.md,
+      alignItems: 'center',
+      marginTop: SPACING.sm,
+      marginBottom: SPACING.lg,
+    },
+    backButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Fetch permissions on mount
   useEffect(() => {
@@ -190,14 +364,14 @@ const CommentActionSheet = ({
                 {mode === 'actions' ? 'Tùy chọn bình luận' : 'Báo cáo bình luận'}
               </Text>
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <X size={20} color={COLORS.textMuted} />
+                <X size={20} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
 
             {/* Loading */}
             {!permissions ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator color={COLORS.purple} />
+                <ActivityIndicator color={colors.purple} />
               </View>
             ) : mode === 'actions' ? (
               /* Actions List */
@@ -211,7 +385,7 @@ const CommentActionSheet = ({
                     activeOpacity={0.7}
                   >
                     <View style={[styles.actionIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
-                      <Pin size={20} color={COLORS.purple} />
+                      <Pin size={20} color={colors.purple} />
                     </View>
                     <View style={styles.actionText}>
                       <Text style={styles.actionLabel}>
@@ -223,7 +397,7 @@ const CommentActionSheet = ({
                           : 'Hiển thị bình luận này lên đầu'}
                       </Text>
                     </View>
-                    {loading && <ActivityIndicator size="small" color={COLORS.purple} />}
+                    {loading && <ActivityIndicator size="small" color={colors.purple} />}
                   </TouchableOpacity>
                 )}
 
@@ -236,10 +410,10 @@ const CommentActionSheet = ({
                     activeOpacity={0.7}
                   >
                     <View style={[styles.actionIcon, { backgroundColor: 'rgba(255, 107, 107, 0.2)' }]}>
-                      <Trash2 size={20} color={COLORS.error} />
+                      <Trash2 size={20} color={colors.error} />
                     </View>
                     <View style={styles.actionText}>
-                      <Text style={[styles.actionLabel, { color: COLORS.error }]}>
+                      <Text style={[styles.actionLabel, { color: colors.error }]}>
                         Xóa bình luận
                       </Text>
                       <Text style={styles.actionSubtitle}>
@@ -259,7 +433,7 @@ const CommentActionSheet = ({
                     activeOpacity={0.7}
                   >
                     <View style={[styles.actionIcon, { backgroundColor: 'rgba(255, 184, 0, 0.2)' }]}>
-                      <Flag size={20} color={COLORS.warning} />
+                      <Flag size={20} color={colors.warning} />
                     </View>
                     <View style={styles.actionText}>
                       <Text style={styles.actionLabel}>Báo cáo bình luận</Text>
@@ -267,7 +441,7 @@ const CommentActionSheet = ({
                         Báo cáo nội dung vi phạm
                       </Text>
                     </View>
-                    <ChevronRight size={20} color={COLORS.textMuted} />
+                    <ChevronRight size={20} color={colors.textMuted} />
                   </TouchableOpacity>
                 )}
 
@@ -284,7 +458,7 @@ const CommentActionSheet = ({
               /* Report Form */
               <ScrollView style={styles.reportContainer}>
                 <View style={styles.warningBox}>
-                  <AlertTriangle size={18} color={COLORS.warning} />
+                  <AlertTriangle size={18} color={colors.warning} />
                   <Text style={styles.warningText}>
                     Vui lòng chọn lý do báo cáo bình luận này
                   </Text>
@@ -315,7 +489,7 @@ const CommentActionSheet = ({
                       </Text>
                     </View>
                     {selectedReason?.id === reason.id && (
-                      <CheckCircle size={20} color={COLORS.purple} />
+                      <CheckCircle size={20} color={colors.purple} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -326,7 +500,7 @@ const CommentActionSheet = ({
                     <TextInput
                       style={styles.detailsInput}
                       placeholder="Mô tả lý do báo cáo..."
-                      placeholderTextColor={COLORS.textMuted}
+                      placeholderTextColor={colors.textMuted}
                       value={reportDetails}
                       onChangeText={setReportDetails}
                       multiline
@@ -347,7 +521,7 @@ const CommentActionSheet = ({
                   activeOpacity={0.8}
                 >
                   {loading ? (
-                    <ActivityIndicator size="small" color={COLORS.textPrimary} />
+                    <ActivityIndicator size="small" color={colors.textPrimary} />
                   ) : (
                     <Text style={styles.submitButtonText}>Gửi báo cáo</Text>
                   )}
@@ -373,178 +547,5 @@ const CommentActionSheet = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-  },
-  sheet: {
-    borderTopLeftRadius: GLASS.borderRadius,
-    borderTopRightRadius: GLASS.borderRadius,
-    overflow: 'hidden',
-    maxHeight: SCREEN_HEIGHT * 0.75,
-  },
-  blurContainer: {
-    backgroundColor: GLASS.background,
-    paddingBottom: 34,
-  },
-  header: {
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    marginBottom: SPACING.sm,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  closeButton: {
-    position: 'absolute',
-    right: SPACING.lg,
-    top: SPACING.lg,
-    padding: SPACING.xs,
-  },
-  loadingContainer: {
-    padding: SPACING.xxl,
-    alignItems: 'center',
-  },
-  actionsContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-  },
-  actionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-  },
-  actionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  actionText: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  actionLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textPrimary,
-  },
-  actionSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  noActions: {
-    padding: SPACING.xxl,
-    alignItems: 'center',
-  },
-  noActionsText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-  },
-  reportContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-  },
-  warningBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 184, 0, 0.1)',
-    padding: SPACING.md,
-    borderRadius: 12,
-    marginBottom: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  warningText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.warning,
-  },
-  reasonItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: SPACING.sm,
-  },
-  reasonItemActive: {
-    borderColor: COLORS.purple,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-  },
-  reasonContent: {
-    flex: 1,
-  },
-  reasonLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textSecondary,
-  },
-  reasonLabelActive: {
-    color: COLORS.textPrimary,
-  },
-  reasonDescription: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  detailsContainer: {
-    marginTop: SPACING.md,
-  },
-  detailsInput: {
-    backgroundColor: INPUT.background,
-    borderRadius: INPUT.borderRadius,
-    borderWidth: 1,
-    borderColor: INPUT.borderColor,
-    padding: SPACING.md,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textPrimary,
-    minHeight: 100,
-  },
-  submitButton: {
-    backgroundColor: COLORS.purple,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: SPACING.lg,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  backButton: {
-    paddingVertical: SPACING.md,
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.lg,
-  },
-  backButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-  },
-});
 
 export default CommentActionSheet;

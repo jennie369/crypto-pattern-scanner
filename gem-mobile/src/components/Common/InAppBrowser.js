@@ -2,9 +2,10 @@
  * InAppBrowser Component
  * Modal WebView để mở links trong app
  * Thay vì dùng external browser
+ * Theme-aware with i18n support
  */
 
-import React, { useState, useRef, useCallback, memo } from 'react';
+import React, { useState, useRef, useCallback, memo, useMemo } from 'react';
 import {
   View,
   Text,
@@ -32,7 +33,7 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
 import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 /**
  * InAppBrowser - Modal WebView để mở links
@@ -48,6 +49,8 @@ const InAppBrowser = ({
   title,
   onClose,
 }) => {
+  const { colors, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // ========== STATE ==========
   const [loading, setLoading] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -192,6 +195,94 @@ const InAppBrowser = ({
     }
   }, []);
 
+  // Theme-aware styles
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (colors.bgDark || colors.bgDarkest),
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.sm,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : 'rgba(17, 34, 80, 0.95)',
+      borderBottomWidth: 1,
+      borderBottomColor: settings.theme === 'light' ? colors.border : 'rgba(255, 255, 255, 0.1)',
+      gap: SPACING.sm,
+    },
+    closeButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    urlBar: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.08)',
+      borderRadius: 8,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      gap: SPACING.xs,
+    },
+    urlText: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      gap: SPACING.xs,
+    },
+    headerButton: {
+      width: 36,
+      height: 36,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    progressBarContainer: {
+      height: 2,
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+    },
+    progressBar: {
+      height: '100%',
+      backgroundColor: colors.gold,
+    },
+    webview: {
+      flex: 1,
+      backgroundColor: '#FFFFFF',
+    },
+    loadingContainer: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (colors.bgDark || colors.bgDarkest),
+    },
+    bottomToolbar: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : 'rgba(17, 34, 80, 0.95)',
+      borderTopWidth: 1,
+      borderTopColor: settings.theme === 'light' ? colors.border : 'rgba(255, 255, 255, 0.1)',
+    },
+    toolbarContent: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      paddingVertical: SPACING.sm,
+    },
+    toolbarButton: {
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 22,
+    },
+    toolbarButtonDisabled: {
+      opacity: 0.4,
+    },
+  }), [colors, settings.theme, SPACING, TYPOGRAPHY]);
+
   // ========== RENDER ==========
   return (
     <Modal
@@ -202,7 +293,7 @@ const InAppBrowser = ({
       statusBarTranslucent
     >
       <SafeAreaView style={styles.container} edges={['top']}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={settings.theme === 'light' ? 'dark-content' : 'light-content'} />
 
         {/* Header */}
         <View style={styles.header}>
@@ -212,7 +303,7 @@ const InAppBrowser = ({
             onPress={handleClose}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <X size={24} color={COLORS.textPrimary} />
+            <X size={24} color={colors.textPrimary} />
           </TouchableOpacity>
 
           {/* URL Bar */}
@@ -222,9 +313,9 @@ const InAppBrowser = ({
             activeOpacity={0.7}
           >
             {isSecure ? (
-              <Lock size={12} color={COLORS.success} />
+              <Lock size={12} color={colors.success || colors.successText} />
             ) : (
-              <Globe size={12} color={COLORS.textMuted} />
+              <Globe size={12} color={colors.textMuted} />
             )}
             <Text style={styles.urlText} numberOfLines={1}>
               {getDomain(currentUrl)}
@@ -238,14 +329,14 @@ const InAppBrowser = ({
               onPress={handleShare}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Share2 size={20} color={COLORS.textPrimary} />
+              <Share2 size={20} color={colors.textPrimary} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
               onPress={handleOpenExternal}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <ExternalLink size={20} color={COLORS.textPrimary} />
+              <ExternalLink size={20} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -272,7 +363,7 @@ const InAppBrowser = ({
           allowsBackForwardNavigationGestures
           renderLoading={() => (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={COLORS.gold} />
+              <ActivityIndicator size="large" color={colors.gold} />
             </View>
           )}
           {...(Platform.OS === 'ios' && {
@@ -293,7 +384,7 @@ const InAppBrowser = ({
               onPress={handleGoBack}
               disabled={!canGoBack}
             >
-              <ChevronLeft size={24} color={canGoBack ? COLORS.textPrimary : COLORS.textMuted} />
+              <ChevronLeft size={24} color={canGoBack ? colors.textPrimary : colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -301,21 +392,21 @@ const InAppBrowser = ({
               onPress={handleGoForward}
               disabled={!canGoForward}
             >
-              <ChevronRight size={24} color={canGoForward ? COLORS.textPrimary : COLORS.textMuted} />
+              <ChevronRight size={24} color={canGoForward ? colors.textPrimary : colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.toolbarButton}
               onPress={handleReload}
             >
-              <RefreshCw size={22} color={COLORS.textPrimary} />
+              <RefreshCw size={22} color={colors.textPrimary} />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.toolbarButton}
               onPress={handleCopyUrl}
             >
-              <Copy size={22} color={COLORS.textPrimary} />
+              <Copy size={22} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -323,113 +414,6 @@ const InAppBrowser = ({
     </Modal>
   );
 };
-
-// ========== STYLES ==========
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bgDark,
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.sm,
-    backgroundColor: 'rgba(17, 34, 80, 0.95)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    gap: SPACING.sm,
-  },
-
-  closeButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  urlBar: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 8,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    gap: SPACING.xs,
-  },
-
-  urlText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-  },
-
-  headerActions: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-  },
-
-  headerButton: {
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // Progress Bar
-  progressBarContainer: {
-    height: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-
-  progressBar: {
-    height: '100%',
-    backgroundColor: COLORS.gold,
-  },
-
-  // WebView
-  webview: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.bgDark,
-  },
-
-  // Bottom Toolbar
-  bottomToolbar: {
-    backgroundColor: 'rgba(17, 34, 80, 0.95)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-
-  toolbarContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: SPACING.sm,
-  },
-
-  toolbarButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 22,
-  },
-
-  toolbarButtonDisabled: {
-    opacity: 0.4,
-  },
-});
 
 // ========== EXPORTS ==========
 

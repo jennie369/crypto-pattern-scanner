@@ -3,7 +3,7 @@
  * Displays pending limit orders waiting to be filled
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import {
   TrendingDown,
   AlertCircle,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { formatPrice, formatCurrency } from '../../utils/formatters';
 
 /**
@@ -44,9 +44,9 @@ const formatTimeAgo = (isoString) => {
 /**
  * Single pending order card
  */
-const PendingOrderCard = ({ order, onCancel, cancelling }) => {
+const PendingOrderCard = ({ order, onCancel, cancelling, colors, styles }) => {
   const isLong = (order.direction || '').toUpperCase() === 'LONG';
-  const directionColor = isLong ? COLORS.success : COLORS.error;
+  const directionColor = isLong ? colors.success : colors.error;
 
   // Calculate % difference from current price
   const priceDiff = order.currentPrice && order.entryPrice
@@ -78,10 +78,10 @@ const PendingOrderCard = ({ order, onCancel, cancelling }) => {
           disabled={cancelling}
         >
           {cancelling ? (
-            <ActivityIndicator size="small" color={COLORS.error} />
+            <ActivityIndicator size="small" color={colors.error} />
           ) : (
             <>
-              <X size={14} color={COLORS.error} />
+              <X size={14} color={colors.error} />
               <Text style={styles.cancelText}>Huỷ</Text>
             </>
           )}
@@ -100,7 +100,7 @@ const PendingOrderCard = ({ order, onCancel, cancelling }) => {
           <View style={styles.currentPriceContainer}>
             <Text style={styles.currentPrice}>${formatPrice(order.currentPrice || 0)}</Text>
             {priceDiff !== 0 && (
-              <Text style={[styles.priceDiff, { color: priceDiff > 0 ? COLORS.error : COLORS.success }]}>
+              <Text style={[styles.priceDiff, { color: priceDiff > 0 ? colors.error : colors.success }]}>
                 ({priceDiff > 0 ? '+' : ''}{priceDiff.toFixed(2)}%)
               </Text>
             )}
@@ -128,7 +128,7 @@ const PendingOrderCard = ({ order, onCancel, cancelling }) => {
 
       {/* Hint text */}
       <View style={styles.hintContainer}>
-        <AlertCircle size={12} color={COLORS.textMuted} />
+        <AlertCircle size={12} color={colors.textMuted} />
         <Text style={styles.hintText}>
           {isLong
             ? `Khớp khi giá giảm xuống $${formatPrice(order.entryPrice)}`
@@ -149,10 +149,211 @@ const PendingOrdersSection = ({
   cancellingId = null,
   loading = false,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: SPACING.lg,
+    },
+
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.warning,
+    },
+
+    countBadge: {
+      backgroundColor: 'rgba(255, 189, 89, 0.2)',
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.3)',
+    },
+
+    countText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.warning,
+    },
+
+    // Order Card
+    orderCard: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 14,
+      padding: SPACING.md,
+      marginBottom: SPACING.sm,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.2)',
+    },
+
+    orderHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+    },
+
+    symbolContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+
+    symbol: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+
+    directionBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      gap: 4,
+    },
+
+    directionText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+
+    cancelButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 107, 107, 0.15)',
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 8,
+      gap: 4,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 107, 107, 0.3)',
+    },
+
+    cancelText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.error,
+    },
+
+    // Price Info
+    priceContainer: {
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+      borderRadius: 10,
+      padding: SPACING.sm,
+      marginBottom: SPACING.sm,
+    },
+
+    priceRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 4,
+    },
+
+    priceLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+
+    entryPrice: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.warning,
+    },
+
+    currentPriceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+
+    currentPrice: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    priceDiff: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+
+    // Details Row
+    detailsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: SPACING.sm,
+    },
+
+    detailItem: {
+      flex: 1,
+      alignItems: 'center',
+    },
+
+    detailLabel: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      marginBottom: 2,
+    },
+
+    detailValue: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textSecondary,
+    },
+
+    // Hint
+    hintContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingTop: SPACING.xs,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    },
+
+    hintText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      fontStyle: 'italic',
+      flex: 1,
+    },
+
+    // Loading
+    loadingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: SPACING.lg,
+      gap: SPACING.sm,
+    },
+
+    loadingText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color={COLORS.gold} />
+        <ActivityIndicator size="small" color={colors.gold} />
         <Text style={styles.loadingText}>Đang tải lệnh chờ...</Text>
       </View>
     );
@@ -167,7 +368,7 @@ const PendingOrdersSection = ({
       {/* Section Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Clock size={18} color={COLORS.warning} />
+          <Clock size={18} color={colors.warning} />
           <Text style={styles.title}>Lệnh Đang Chờ</Text>
         </View>
         <View style={styles.countBadge}>
@@ -182,209 +383,12 @@ const PendingOrdersSection = ({
           order={order}
           onCancel={onCancel}
           cancelling={cancellingId === order.id}
+          colors={colors}
+          styles={styles}
         />
       ))}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: SPACING.lg,
-  },
-
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.warning,
-  },
-
-  countBadge: {
-    backgroundColor: 'rgba(255, 189, 89, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-  },
-
-  countText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.warning,
-  },
-
-  // Order Card
-  orderCard: {
-    backgroundColor: GLASS.background,
-    borderRadius: 14,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.2)',
-  },
-
-  orderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-
-  symbolContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  symbol: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  directionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    gap: 4,
-  },
-
-  directionText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-
-  cancelButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 107, 107, 0.15)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    gap: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 107, 0.3)',
-  },
-
-  cancelText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.error,
-  },
-
-  // Price Info
-  priceContainer: {
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    borderRadius: 10,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-
-  priceLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-
-  entryPrice: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.warning,
-  },
-
-  currentPriceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-
-  currentPrice: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  priceDiff: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-
-  // Details Row
-  detailsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.sm,
-  },
-
-  detailItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-
-  detailLabel: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    marginBottom: 2,
-  },
-
-  detailValue: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textSecondary,
-  },
-
-  // Hint
-  hintContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingTop: SPACING.xs,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
-  },
-
-  hintText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-    flex: 1,
-  },
-
-  // Loading
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: SPACING.lg,
-    gap: SPACING.sm,
-  },
-
-  loadingText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-});
 
 export default PendingOrdersSection;

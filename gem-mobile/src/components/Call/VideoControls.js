@@ -3,7 +3,7 @@
  * Controls for video call (mute, video, camera switch, end)
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -21,7 +21,7 @@ import {
   Volume2,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { CALL_UI } from '../../constants/callConstants';
 
 /**
@@ -51,7 +51,63 @@ const VideoControls = memo(({
   onMinimize,
   visible = true,
 }) => {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
   const [opacity] = useState(new Animated.Value(visible ? 1 : 0));
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'space-between',
+    },
+    topRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      paddingTop: 60,
+      paddingHorizontal: SPACING.lg,
+    },
+    topButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    bottomRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: 50,
+      paddingHorizontal: SPACING.lg,
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      paddingTop: SPACING.lg,
+      gap: SPACING.md,
+    },
+    controlButton: {
+      width: CALL_UI.CONTROL_BUTTON_SIZE,
+      height: CALL_UI.CONTROL_BUTTON_SIZE,
+      borderRadius: CALL_UI.CONTROL_BUTTON_SIZE / 2,
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    controlButtonActive: {
+      backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    },
+    endButton: {
+      width: CALL_UI.END_BUTTON_SIZE,
+      height: CALL_UI.END_BUTTON_SIZE,
+      borderRadius: CALL_UI.END_BUTTON_SIZE / 2,
+      backgroundColor: colors.error,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: SPACING.md,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Animate visibility
   useEffect(() => {
@@ -90,9 +146,9 @@ const VideoControls = memo(({
             style={styles.topButton}
             onPress={() => handlePress(onMinimize)}
             activeOpacity={0.7}
-            accessibilityLabel="Thu nhỏ"
+            accessibilityLabel="Thu nho"
           >
-            <Minimize2 size={24} color={COLORS.textPrimary} />
+            <Minimize2 size={24} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
       </View>
@@ -105,9 +161,9 @@ const VideoControls = memo(({
             style={styles.controlButton}
             onPress={() => handlePress(onSwitchCamera)}
             activeOpacity={0.7}
-            accessibilityLabel="Chuyển camera"
+            accessibilityLabel="Chuyen camera"
           >
-            <RotateCcw size={24} color={COLORS.textPrimary} />
+            <RotateCcw size={24} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
 
@@ -119,12 +175,12 @@ const VideoControls = memo(({
           ]}
           onPress={() => handlePress(onToggleVideo)}
           activeOpacity={0.7}
-          accessibilityLabel={isVideoEnabled ? 'Tắt camera' : 'Bật camera'}
+          accessibilityLabel={isVideoEnabled ? 'Tat camera' : 'Bat camera'}
         >
           {isVideoEnabled ? (
-            <Video size={24} color={COLORS.textPrimary} />
+            <Video size={24} color={colors.textPrimary} />
           ) : (
-            <VideoOff size={24} color={COLORS.textPrimary} />
+            <VideoOff size={24} color={colors.textPrimary} />
           )}
         </TouchableOpacity>
 
@@ -136,12 +192,12 @@ const VideoControls = memo(({
           ]}
           onPress={() => handlePress(onToggleMute)}
           activeOpacity={0.7}
-          accessibilityLabel={isMuted ? 'Bật mic' : 'Tắt mic'}
+          accessibilityLabel={isMuted ? 'Bat mic' : 'Tat mic'}
         >
           {isMuted ? (
-            <MicOff size={24} color={COLORS.textPrimary} />
+            <MicOff size={24} color={colors.textPrimary} />
           ) : (
-            <Mic size={24} color={COLORS.textPrimary} />
+            <Mic size={24} color={colors.textPrimary} />
           )}
         </TouchableOpacity>
 
@@ -154,9 +210,9 @@ const VideoControls = memo(({
             ]}
             onPress={() => handlePress(onToggleSpeaker)}
             activeOpacity={0.7}
-            accessibilityLabel={isSpeakerOn ? 'Tắt loa ngoài' : 'Bật loa ngoài'}
+            accessibilityLabel={isSpeakerOn ? 'Tat loa ngoai' : 'Bat loa ngoai'}
           >
-            <Volume2 size={24} color={COLORS.textPrimary} />
+            <Volume2 size={24} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
 
@@ -165,68 +221,13 @@ const VideoControls = memo(({
           style={styles.endButton}
           onPress={() => handlePress(onEndCall, 'heavy')}
           activeOpacity={0.8}
-          accessibilityLabel="Kết thúc cuộc gọi"
+          accessibilityLabel="Ket thuc cuoc goi"
         >
-          <PhoneOff size={28} color={COLORS.textPrimary} />
+          <PhoneOff size={28} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
     </Animated.View>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'space-between',
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingTop: 60,
-    paddingHorizontal: SPACING.lg,
-  },
-  topButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 50,
-    paddingHorizontal: SPACING.lg,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    paddingTop: SPACING.lg,
-    gap: SPACING.md,
-  },
-  controlButton: {
-    width: CALL_UI.CONTROL_BUTTON_SIZE,
-    height: CALL_UI.CONTROL_BUTTON_SIZE,
-    borderRadius: CALL_UI.CONTROL_BUTTON_SIZE / 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  controlButtonActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  endButton: {
-    width: CALL_UI.END_BUTTON_SIZE,
-    height: CALL_UI.END_BUTTON_SIZE,
-    borderRadius: CALL_UI.END_BUTTON_SIZE / 2,
-    backgroundColor: COLORS.error,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: SPACING.md,
-  },
 });
 
 VideoControls.displayName = 'VideoControls';

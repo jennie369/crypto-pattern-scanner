@@ -4,7 +4,7 @@
  * Full-screen modal for selecting audio
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -37,7 +37,7 @@ import {
   MoreHorizontal,
   ChevronRight,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import soundService from '../services/soundService';
 import SoundCard from './SoundCard';
@@ -65,6 +65,8 @@ const SoundPicker = ({
   onSelect,
   currentSound = null,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [activeTab, setActiveTab] = useState('trending');
   const [searchQuery, setSearchQuery] = useState('');
   const [sounds, setSounds] = useState([]);
@@ -75,6 +77,134 @@ const SoundPicker = ({
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   const categories = soundService.getCategories();
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    container: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: SCREEN_HEIGHT * 0.9,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      overflow: 'hidden',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+      paddingBottom: SPACING.md,
+    },
+    closeButton: {
+      padding: SPACING.xs,
+    },
+    headerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xxxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    placeholder: {
+      width: 32,
+    },
+    searchContainer: {
+      paddingHorizontal: SPACING.lg,
+      marginBottom: SPACING.md,
+    },
+    searchInputWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.inputBg,
+      borderRadius: 12,
+      paddingHorizontal: SPACING.md,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textPrimary,
+      paddingVertical: SPACING.md,
+      marginLeft: SPACING.sm,
+    },
+    tabsWrapper: {
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    tabsContainer: {
+      paddingHorizontal: SPACING.lg,
+      paddingBottom: SPACING.md,
+      gap: SPACING.sm,
+    },
+    categoryTab: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: 20,
+      gap: SPACING.xs,
+    },
+    categoryTabActive: {
+      backgroundColor: colors.purple,
+    },
+    categoryText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    categoryTextActive: {
+      color: colors.textPrimary,
+    },
+    listContent: {
+      padding: SPACING.lg,
+      paddingBottom: 120,
+    },
+    emptyState: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.huge,
+      gap: SPACING.md,
+    },
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textMuted,
+    },
+    currentSoundBar: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.md,
+      paddingBottom: SPACING.xxl,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    currentSoundInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      gap: SPACING.sm,
+    },
+    currentSoundText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    removeSoundButton: {
+      padding: SPACING.sm,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (visible) {
@@ -193,7 +323,7 @@ const SoundPicker = ({
       >
         <IconComponent
           size={16}
-          color={isActive ? COLORS.textPrimary : COLORS.textMuted}
+          color={isActive ? colors.textPrimary : colors.textMuted}
         />
         <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>
           {category.label}
@@ -231,15 +361,15 @@ const SoundPicker = ({
           ]}
         >
           <LinearGradient
-            colors={GRADIENTS.background}
-            locations={GRADIENTS.backgroundLocations}
+            colors={gradients.background}
+            locations={gradients.backgroundLocations}
             style={StyleSheet.absoluteFill}
           />
 
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-              <X size={24} color={COLORS.textPrimary} />
+              <X size={24} color={colors.textPrimary} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Chon am thanh</Text>
             <View style={styles.placeholder} />
@@ -248,11 +378,11 @@ const SoundPicker = ({
           {/* Search */}
           <View style={styles.searchContainer}>
             <View style={styles.searchInputWrapper}>
-              <Search size={18} color={COLORS.textMuted} />
+              <Search size={18} color={colors.textMuted} />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Tim kiem am thanh..."
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={handleSearch}
@@ -275,7 +405,7 @@ const SoundPicker = ({
               >
                 <Bookmark
                   size={16}
-                  color={activeTab === 'saved' ? COLORS.textPrimary : COLORS.textMuted}
+                  color={activeTab === 'saved' ? colors.textPrimary : colors.textMuted}
                 />
                 <Text style={[styles.categoryText, activeTab === 'saved' && styles.categoryTextActive]}>
                   Da luu
@@ -288,7 +418,7 @@ const SoundPicker = ({
               >
                 <Upload
                   size={16}
-                  color={activeTab === 'my_sounds' ? COLORS.textPrimary : COLORS.textMuted}
+                  color={activeTab === 'my_sounds' ? colors.textPrimary : colors.textMuted}
                 />
                 <Text style={[styles.categoryText, activeTab === 'my_sounds' && styles.categoryTextActive]}>
                   Cua toi
@@ -309,7 +439,7 @@ const SoundPicker = ({
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.emptyState}>
-                <Music size={48} color={COLORS.textMuted} />
+                <Music size={48} color={colors.textMuted} />
                 <Text style={styles.emptyText}>
                   {loading ? 'Dang tai...' : 'Khong tim thay am thanh'}
                 </Text>
@@ -321,7 +451,7 @@ const SoundPicker = ({
           {currentSound && (
             <View style={styles.currentSoundBar}>
               <View style={styles.currentSoundInfo}>
-                <Music size={16} color={COLORS.cyan} />
+                <Music size={16} color={colors.cyan} />
                 <Text style={styles.currentSoundText} numberOfLines={1}>
                   {currentSound.title} - {currentSound.artist_name}
                 </Text>
@@ -330,7 +460,7 @@ const SoundPicker = ({
                 style={styles.removeSoundButton}
                 onPress={() => onSelect?.(null)}
               >
-                <X size={16} color={COLORS.textMuted} />
+                <X size={16} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
           )}
@@ -339,133 +469,5 @@ const SoundPicker = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  container: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: SCREEN_HEIGHT * 0.9,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.md,
-  },
-  closeButton: {
-    padding: SPACING.xs,
-  },
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  placeholder: {
-    width: 32,
-  },
-  searchContainer: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  searchInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.inputBg,
-    borderRadius: 12,
-    paddingHorizontal: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.inputBorder,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textPrimary,
-    paddingVertical: SPACING.md,
-    marginLeft: SPACING.sm,
-  },
-  tabsWrapper: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  tabsContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    gap: SPACING.sm,
-  },
-  categoryTab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 20,
-    gap: SPACING.xs,
-  },
-  categoryTabActive: {
-    backgroundColor: COLORS.purple,
-  },
-  categoryText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  categoryTextActive: {
-    color: COLORS.textPrimary,
-  },
-  listContent: {
-    padding: SPACING.lg,
-    paddingBottom: 120,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.huge,
-    gap: SPACING.md,
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textMuted,
-  },
-  currentSoundBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: GLASS.background,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    paddingBottom: SPACING.xxl,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  currentSoundInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: SPACING.sm,
-  },
-  currentSoundText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textPrimary,
-    flex: 1,
-  },
-  removeSoundButton: {
-    padding: SPACING.sm,
-  },
-});
 
 export default SoundPicker;

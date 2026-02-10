@@ -11,7 +11,7 @@
  * - Close button to dismiss
  */
 
-import React, { useEffect, useRef, memo } from 'react';
+import React, { useEffect, useRef, memo, useMemo } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 /**
  * ReplyQuotePreview - Display preview bar when replying
@@ -38,9 +38,72 @@ const ReplyQuotePreview = memo(({
   isOwnMessage = false,
   onDismiss,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // Animation
   const slideAnim = useRef(new Animated.Value(60)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  // ========== STYLES ==========
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(106, 91, 255, 0.3)',
+      minHeight: 56,
+    },
+    accentBar: {
+      width: 4,
+      backgroundColor: colors.gold,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      justifyContent: 'center',
+    },
+    header: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginBottom: 2,
+    },
+    headerName: {
+      color: colors.gold,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    previewRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    thumbnail: {
+      width: 32,
+      height: 32,
+      borderRadius: 4,
+      marginRight: SPACING.sm,
+      backgroundColor: colors.glassBg,
+    },
+    iconContainer: {
+      width: 28,
+      height: 28,
+      borderRadius: 4,
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: SPACING.sm,
+    },
+    previewText: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textSecondary,
+    },
+    closeButton: {
+      width: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     // Slide in animation
@@ -161,7 +224,7 @@ const ReplyQuotePreview = memo(({
           {/* Icon for non-text messages */}
           {preview.icon && !preview.thumbnail && (
             <View style={styles.iconContainer}>
-              <Ionicons name={preview.icon} size={18} color={COLORS.gold} />
+              <Ionicons name={preview.icon} size={18} color={colors.gold} />
             </View>
           )}
 
@@ -178,7 +241,7 @@ const ReplyQuotePreview = memo(({
         onPress={handleDismiss}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Ionicons name="close" size={22} color={COLORS.textMuted} />
+        <Ionicons name="close" size={22} color={colors.textMuted} />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -187,63 +250,3 @@ const ReplyQuotePreview = memo(({
 ReplyQuotePreview.displayName = 'ReplyQuotePreview';
 
 export default ReplyQuotePreview;
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    backgroundColor: 'rgba(15, 16, 48, 0.95)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(106, 91, 255, 0.3)',
-    minHeight: 56,
-  },
-  accentBar: {
-    width: 4,
-    backgroundColor: COLORS.gold,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    justifyContent: 'center',
-  },
-  header: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginBottom: 2,
-  },
-  headerName: {
-    color: COLORS.gold,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  previewRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  thumbnail: {
-    width: 32,
-    height: 32,
-    borderRadius: 4,
-    marginRight: SPACING.sm,
-    backgroundColor: COLORS.glassBg,
-  },
-  iconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 4,
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.sm,
-  },
-  previewText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textSecondary,
-  },
-  closeButton: {
-    width: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

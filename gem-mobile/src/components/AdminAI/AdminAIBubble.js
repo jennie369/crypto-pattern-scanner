@@ -23,7 +23,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import { Brain } from 'lucide-react-native';
-import { COLORS, SHADOWS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { useAuth } from '../../contexts/AuthContext';
 
 import AdminAIChatModal from './AdminAIChatModal';
@@ -45,6 +45,8 @@ const AdminAIBubble = ({
   zones = [],
   patterns = [],
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // Auth check - only show for admins
   const { user, isAdmin } = useAuth();
 
@@ -168,6 +170,63 @@ const AdminAIBubble = ({
     opacity: pulseScale.value > 1 ? 0.7 : 0,
   }));
 
+  // ═══════════════════════════════════════════════════════════
+  // STYLES
+  // ═══════════════════════════════════════════════════════════
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 1000,
+    },
+    pulseRing: {
+      position: 'absolute',
+      width: BUBBLE_SIZE + 20,
+      height: BUBBLE_SIZE + 20,
+      borderRadius: (BUBBLE_SIZE + 20) / 2,
+      backgroundColor: colors.gold,
+      top: -10,
+      left: -10,
+    },
+    bubble: {
+      width: BUBBLE_SIZE,
+      height: BUBBLE_SIZE,
+      borderRadius: BUBBLE_SIZE / 2,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderWidth: 2,
+      borderColor: colors.gold,
+      alignItems: 'center',
+      justifyContent: 'center',
+      // Shadow
+      shadowColor: colors.gold,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 10,
+      elevation: 8,
+    },
+    badge: {
+      position: 'absolute',
+      top: -4,
+      right: -4,
+      minWidth: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: colors.error,
+      borderWidth: 2,
+      borderColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 4,
+    },
+    badgeText: {
+      fontSize: 10,
+      fontWeight: '800',
+      color: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Don't render if not admin - placed after all hooks to follow React Rules of Hooks
   if (!isAdmin) {
     return null;
@@ -184,7 +243,7 @@ const AdminAIBubble = ({
 
           {/* Main bubble */}
           <View style={styles.bubble}>
-            <Brain size={28} color={COLORS.gold} strokeWidth={2} />
+            <Brain size={28} color={colors.gold} strokeWidth={2} />
           </View>
 
           {/* Alert badge */}
@@ -214,57 +273,5 @@ const AdminAIBubble = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    zIndex: 1000,
-  },
-  pulseRing: {
-    position: 'absolute',
-    width: BUBBLE_SIZE + 20,
-    height: BUBBLE_SIZE + 20,
-    borderRadius: (BUBBLE_SIZE + 20) / 2,
-    backgroundColor: COLORS.gold,
-    top: -10,
-    left: -10,
-  },
-  bubble: {
-    width: BUBBLE_SIZE,
-    height: BUBBLE_SIZE,
-    borderRadius: BUBBLE_SIZE / 2,
-    backgroundColor: COLORS.glassBg,
-    borderWidth: 2,
-    borderColor: COLORS.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...SHADOWS.button,
-    // Extra glow
-    shadowColor: COLORS.gold,
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: COLORS.error,
-    borderWidth: 2,
-    borderColor: COLORS.glassBg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: COLORS.textPrimary,
-  },
-});
 
 export default AdminAIBubble;

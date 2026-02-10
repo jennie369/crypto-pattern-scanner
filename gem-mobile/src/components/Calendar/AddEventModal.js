@@ -7,7 +7,7 @@
  * Updated: February 2026 - Performance optimization
  */
 
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ import {
 } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS, TYPOGRAPHY, SPACING, INPUT } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import calendarService, { EVENT_SOURCE_TYPES } from '../../services/calendarService';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');

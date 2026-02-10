@@ -67,7 +67,7 @@ export default function NewConversationScreen({ navigation }) {
 
     try {
       setSearching(true);
-      const results = await messagingService.searchUsers(query);
+      const results = await messagingService.searchMutualFollowUsers(query);
       setSearchResults(results);
     } catch (error) {
       console.error('Error searching users:', error);
@@ -153,7 +153,9 @@ export default function NewConversationScreen({ navigation }) {
         {/* Info */}
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{item.display_name || 'Unknown'}</Text>
-          <Text style={styles.userEmail}>{item.email}</Text>
+          <Text style={styles.userEmail}>
+            {item.username ? `@${item.username}` : ''}
+          </Text>
         </View>
 
         {/* Arrow */}
@@ -167,9 +169,9 @@ export default function NewConversationScreen({ navigation }) {
       return (
         <View style={styles.emptyContainer}>
           <Ionicons name="search" size={48} color={COLORS.textMuted} />
-          <Text style={styles.emptyTitle}>No users found</Text>
+          <Text style={styles.emptyTitle}>No mutual follows found</Text>
           <Text style={styles.emptySubtitle}>
-            Try a different search term
+            You can message users who follow you back
           </Text>
         </View>
       );
@@ -178,9 +180,9 @@ export default function NewConversationScreen({ navigation }) {
     return (
       <View style={styles.emptyContainer}>
         <Ionicons name="people-outline" size={48} color={COLORS.textMuted} />
-        <Text style={styles.emptyTitle}>Search for users</Text>
+        <Text style={styles.emptyTitle}>Search mutual follows</Text>
         <Text style={styles.emptySubtitle}>
-          Find people to start a conversation
+          Find people you follow who also follow you
         </Text>
       </View>
     );

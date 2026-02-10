@@ -4,10 +4,10 @@
 // Side-by-side comparison of options (e.g., tier comparison)
 // ============================================================
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Star, Check, X } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const ComparisonResponse = memo(({
   title,
@@ -15,6 +15,80 @@ const ComparisonResponse = memo(({
   highlightIndex,
   onItemSelect,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginVertical: SPACING.sm,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.md,
+      paddingHorizontal: SPACING.sm,
+    },
+    scrollContent: {
+      paddingHorizontal: SPACING.sm,
+      gap: SPACING.md,
+    },
+    itemCard: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      minWidth: 180,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    itemCardHighlighted: {
+      borderColor: colors.gold,
+      backgroundColor: 'rgba(255,189,89,0.1)',
+    },
+    highlightBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: colors.gold,
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      borderRadius: 12,
+      alignSelf: 'flex-start',
+      marginBottom: SPACING.sm,
+    },
+    highlightText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.bgDark,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    itemName: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.xs,
+    },
+    itemPrice: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+      marginBottom: SPACING.md,
+    },
+    features: {
+      gap: SPACING.xs,
+    },
+    featureRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    featureText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+    },
+    featureTextDisabled: {
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title || 'So sánh'}</Text>
@@ -40,7 +114,7 @@ const ComparisonResponse = memo(({
               {/* Highlight Badge */}
               {isHighlighted && (
                 <View style={styles.highlightBadge}>
-                  <Star size={12} color={COLORS.bgDark} fill={COLORS.bgDark} />
+                  <Star size={12} color={colors.bgDark} fill={colors.bgDark} />
                   <Text style={styles.highlightText}>Đề xuất</Text>
                 </View>
               )}
@@ -58,9 +132,9 @@ const ComparisonResponse = memo(({
                 {(item?.features || []).map((feature, fIndex) => (
                   <View key={fIndex} style={styles.featureRow}>
                     {feature?.included ? (
-                      <Check size={14} color={COLORS.success} />
+                      <Check size={14} color={colors.success} />
                     ) : (
-                      <X size={14} color={COLORS.textMuted} />
+                      <X size={14} color={colors.textMuted} />
                     )}
                     <Text style={[
                       styles.featureText,
@@ -77,78 +151,6 @@ const ComparisonResponse = memo(({
       </ScrollView>
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: SPACING.sm,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.md,
-    paddingHorizontal: SPACING.sm,
-  },
-  scrollContent: {
-    paddingHorizontal: SPACING.sm,
-    gap: SPACING.md,
-  },
-  itemCard: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 16,
-    padding: SPACING.md,
-    minWidth: 180,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  itemCardHighlighted: {
-    borderColor: COLORS.gold,
-    backgroundColor: 'rgba(255,189,89,0.1)',
-  },
-  highlightBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: COLORS.gold,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginBottom: SPACING.sm,
-  },
-  highlightText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.bgDark,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  itemName: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
-  },
-  itemPrice: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-    marginBottom: SPACING.md,
-  },
-  features: {
-    gap: SPACING.xs,
-  },
-  featureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  featureText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-  },
-  featureTextDisabled: {
-    color: COLORS.textMuted,
-  },
 });
 
 ComparisonResponse.displayName = 'ComparisonResponse';

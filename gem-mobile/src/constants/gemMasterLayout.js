@@ -8,8 +8,8 @@
  * ║  Các giá trị này đã được calibrate cẩn thận cho keyboard positioning.        ║
  * ║  Nếu thay đổi sẽ gây ra lỗi hiển thị input field.                           ║
  * ║                                                                              ║
- * ║  Last calibrated: 2024-12-18                                                 ║
- * ║  Tested on: Android Samsung (keyboard height ~329px)                         ║
+ * ║  Last calibrated: 2026-02-09                                                 ║
+ * ║  Tested on: Android Samsung (keyboard ~329px), iOS (home indicator)          ║
  * ║                                                                              ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
  *
@@ -47,11 +47,17 @@ import { Platform } from 'react-native';
 
 /**
  * Vị trí bottom khi keyboard ĐÓNG
- * = Tab bar height (~100px) + margin (~10px)
  *
- * Giá trị đúng: 110
+ * Android: 110 = Tab bar height (~100px) + margin (~10px)
+ * iOS: 78 = GlassBottomTab top (bottom:6 + height:76 = 82) - 4px overlap
+ *
+ * GlassBottomTab: position absolute, bottom: 6, height: 76
+ * → pill top = 82px from screen bottom
+ * react-native-shadow-2 v7 uses absolute SVGs for shadow → no layout padding
+ * Input area must overlap tab bar by a few px to prevent any visible gap
+ * (input has backgroundColor so overlap is hidden behind the tab bar's zIndex:100)
  */
-export const KEYBOARD_CLOSED_BOTTOM = 110;
+export const KEYBOARD_CLOSED_BOTTOM = Platform.OS === 'ios' ? 78 : 110;
 
 /**
  * Offset thêm vào keyboard height khi keyboard MỞ
@@ -69,8 +75,10 @@ export const KEYBOARD_OPEN_OFFSET = Platform.OS === 'ios' ? 0 : 35;
 /**
  * Padding cho FlatList content (inverted list nên dùng paddingTop)
  * Để chat content không bị input area che mất
+ *
+ * iOS: Lower because KEYBOARD_CLOSED_BOTTOM is lower (78 vs 110)
  */
-export const CHAT_CONTENT_BOTTOM_PADDING = 220;
+export const CHAT_CONTENT_BOTTOM_PADDING = Platform.OS === 'ios' ? 188 : 220;
 
 /**
  * Padding khi keyboard MỞ (cần nhiều hơn để scroll được đến cuối)
@@ -81,8 +89,10 @@ export const CHAT_CONTENT_KEYBOARD_PADDING = 180;
 /**
  * Vị trí scroll-to-bottom button khi keyboard ĐÓNG
  * Increased from 210 to 260 to avoid being covered by sticky suggestion chips
+ *
+ * iOS: Lower to match KEYBOARD_CLOSED_BOTTOM = 78
  */
-export const SCROLL_BUTTON_BOTTOM_CLOSED = 260;
+export const SCROLL_BUTTON_BOTTOM_CLOSED = Platform.OS === 'ios' ? 228 : 260;
 
 /**
  * Offset cho scroll button khi keyboard MỞ

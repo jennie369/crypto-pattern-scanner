@@ -6,7 +6,7 @@
  * Uses DESIGN_TOKENS v3.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { X, Users, ChevronRight, Sparkles } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { suggestionService } from '../../services/suggestionService';
 import { FollowButtonMini } from './FollowButton';
 
@@ -40,9 +40,227 @@ const SuggestedUsersDropdown = ({
   onFollowChange,
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [slideAnim] = useState(new Animated.Value(0));
+
+  const styles = useMemo(() => StyleSheet.create({
+    // Dropdown container
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: glass.borderRadius,
+      borderWidth: glass.borderWidth,
+      borderColor: colors.inputBorder,
+      marginHorizontal: SPACING.lg,
+      marginVertical: SPACING.md,
+      overflow: 'hidden',
+    },
+
+    // Header
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    headerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    closeBtn: {
+      padding: SPACING.xs,
+    },
+
+    // Loading
+    loadingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.xxl,
+      gap: SPACING.sm,
+    },
+    loadingText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+    },
+
+    // Empty
+    emptyContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.xxl,
+    },
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+      marginTop: SPACING.sm,
+    },
+
+    // Scroll content
+    scrollContent: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.md,
+      gap: SPACING.sm,
+    },
+
+    // Card
+    cardContainer: {
+      width: 130,
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: 12,
+      padding: SPACING.md,
+      marginHorizontal: SPACING.xs,
+      position: 'relative',
+    },
+    cardAvatar: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: colors.bgMid,
+    },
+    cardAvatarPlaceholder: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    cardAvatarText: {
+      fontSize: 24,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    cardName: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      marginTop: SPACING.sm,
+      textAlign: 'center',
+      maxWidth: 100,
+    },
+    cardUsername: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      textAlign: 'center',
+      maxWidth: 100,
+    },
+    cardMutual: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      marginTop: SPACING.xs,
+    },
+    cardReason: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.gold,
+      marginTop: SPACING.xs,
+    },
+    cardRemove: {
+      position: 'absolute',
+      top: SPACING.xs,
+      right: SPACING.xs,
+      padding: SPACING.xs,
+    },
+
+    // View all
+    viewAllBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+      gap: SPACING.xs,
+    },
+    viewAllText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.gold,
+    },
+
+    // List styles
+    listContainer: {
+      paddingHorizontal: SPACING.lg,
+    },
+    listLoadingContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.huge,
+    },
+    listLoadingText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+      marginTop: SPACING.md,
+    },
+    listItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    listAvatar: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: colors.bgMid,
+    },
+    listAvatarPlaceholder: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    listAvatarText: {
+      fontSize: 20,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    listInfo: {
+      flex: 1,
+      marginLeft: SPACING.md,
+      marginRight: SPACING.md,
+    },
+    listName: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    listUsername: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+    },
+    listMutualRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginTop: SPACING.xxs,
+    },
+    listMutual: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    loadMoreBtn: {
+      alignItems: 'center',
+      paddingVertical: SPACING.lg,
+    },
+    loadMoreText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.purple,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (visible) {
@@ -127,23 +345,23 @@ const SuggestedUsersDropdown = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Sparkles size={16} color={COLORS.gold} />
+          <Sparkles size={16} color={colors.gold} />
           <Text style={styles.headerTitle}>Gợi ý cho bạn</Text>
         </View>
         <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-          <X size={18} color={COLORS.textMuted} />
+          <X size={18} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
       {/* Content */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={COLORS.purple} />
+          <ActivityIndicator size="small" color={colors.purple} />
           <Text style={styles.loadingText}>Đang tải gợi ý...</Text>
         </View>
       ) : suggestions.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Users size={32} color={COLORS.textMuted} />
+          <Users size={32} color={colors.textMuted} />
           <Text style={styles.emptyText}>Không có gợi ý</Text>
         </View>
       ) : (
@@ -158,6 +376,9 @@ const SuggestedUsersDropdown = ({
               user={user}
               onPress={() => handleUserPress(user)}
               onFollowChange={handleFollowChange}
+              colors={colors}
+              gradients={gradients}
+              styles={styles}
             />
           ))}
         </ScrollView>
@@ -167,7 +388,7 @@ const SuggestedUsersDropdown = ({
       {suggestions.length > 0 && (
         <TouchableOpacity style={styles.viewAllBtn} onPress={handleViewAll}>
           <Text style={styles.viewAllText}>Xem tất cả gợi ý</Text>
-          <ChevronRight size={16} color={COLORS.gold} />
+          <ChevronRight size={16} color={colors.gold} />
         </TouchableOpacity>
       )}
     </Animated.View>
@@ -177,7 +398,7 @@ const SuggestedUsersDropdown = ({
 /**
  * SuggestionCard - Individual suggestion card
  */
-const SuggestionCard = ({ user, onPress, onFollowChange }) => {
+const SuggestionCard = ({ user, onPress, onFollowChange, colors, gradients, styles }) => {
   const displayName = user.full_name || user.username || 'Người dùng';
 
   return (
@@ -187,7 +408,7 @@ const SuggestionCard = ({ user, onPress, onFollowChange }) => {
         {user.avatar_url ? (
           <Image source={{ uri: user.avatar_url }} style={styles.cardAvatar} />
         ) : (
-          <LinearGradient colors={GRADIENTS.avatar} style={styles.cardAvatarPlaceholder}>
+          <LinearGradient colors={gradients.avatar} style={styles.cardAvatarPlaceholder}>
             <Text style={styles.cardAvatarText}>
               {displayName.charAt(0).toUpperCase()}
             </Text>
@@ -228,7 +449,7 @@ const SuggestionCard = ({ user, onPress, onFollowChange }) => {
 
       {/* Remove button */}
       <TouchableOpacity style={styles.cardRemove}>
-        <X size={12} color={COLORS.textMuted} />
+        <X size={12} color={colors.textMuted} />
       </TouchableOpacity>
     </View>
   );
@@ -246,6 +467,82 @@ export const SuggestedUsersList = ({
   hasMore = false,
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    // List styles
+    listContainer: {
+      paddingHorizontal: SPACING.lg,
+    },
+    listLoadingContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.huge,
+    },
+    listLoadingText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+      marginTop: SPACING.md,
+    },
+    listItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    listAvatar: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: colors.bgMid,
+    },
+    listAvatarPlaceholder: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    listAvatarText: {
+      fontSize: 20,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    listInfo: {
+      flex: 1,
+      marginLeft: SPACING.md,
+      marginRight: SPACING.md,
+    },
+    listName: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    listUsername: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+    },
+    listMutualRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginTop: SPACING.xxs,
+    },
+    listMutual: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    loadMoreBtn: {
+      alignItems: 'center',
+      paddingVertical: SPACING.lg,
+    },
+    loadMoreText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.purple,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handleUserPress = (user) => {
     if (onUserPress) {
@@ -258,7 +555,7 @@ export const SuggestedUsersList = ({
   if (loading && suggestions.length === 0) {
     return (
       <View style={styles.listLoadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.purple} />
+        <ActivityIndicator size="large" color={colors.purple} />
         <Text style={styles.listLoadingText}>Đang tìm gợi ý...</Text>
       </View>
     );
@@ -272,6 +569,9 @@ export const SuggestedUsersList = ({
           user={user}
           onPress={() => handleUserPress(user)}
           onFollowChange={onFollowChange}
+          colors={colors}
+          gradients={gradients}
+          styles={styles}
         />
       ))}
 
@@ -287,7 +587,7 @@ export const SuggestedUsersList = ({
 /**
  * SuggestionListItem - List item for full page
  */
-const SuggestionListItem = ({ user, onPress, onFollowChange }) => {
+const SuggestionListItem = ({ user, onPress, onFollowChange, colors, gradients, styles }) => {
   const displayName = user.full_name || user.username || 'Người dùng';
 
   return (
@@ -297,7 +597,7 @@ const SuggestionListItem = ({ user, onPress, onFollowChange }) => {
         {user.avatar_url ? (
           <Image source={{ uri: user.avatar_url }} style={styles.listAvatar} />
         ) : (
-          <LinearGradient colors={GRADIENTS.avatar} style={styles.listAvatarPlaceholder}>
+          <LinearGradient colors={gradients.avatar} style={styles.listAvatarPlaceholder}>
             <Text style={styles.listAvatarText}>
               {displayName.charAt(0).toUpperCase()}
             </Text>
@@ -317,7 +617,7 @@ const SuggestionListItem = ({ user, onPress, onFollowChange }) => {
         )}
         {user.mutualCount > 0 && (
           <View style={styles.listMutualRow}>
-            <Users size={12} color={COLORS.textMuted} />
+            <Users size={12} color={colors.textMuted} />
             <Text style={styles.listMutual}>
               {user.mutualCount} người quen chung
             </Text>
@@ -334,222 +634,5 @@ const SuggestionListItem = ({ user, onPress, onFollowChange }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  // Dropdown container
-  container: {
-    backgroundColor: GLASS.background,
-    borderRadius: GLASS.borderRadius,
-    borderWidth: GLASS.borderWidth,
-    borderColor: COLORS.inputBorder,
-    marginHorizontal: SPACING.lg,
-    marginVertical: SPACING.md,
-    overflow: 'hidden',
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  closeBtn: {
-    padding: SPACING.xs,
-  },
-
-  // Loading
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.xxl,
-    gap: SPACING.sm,
-  },
-  loadingText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-  },
-
-  // Empty
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.xxl,
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-    marginTop: SPACING.sm,
-  },
-
-  // Scroll content
-  scrollContent: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.md,
-    gap: SPACING.sm,
-  },
-
-  // Card
-  cardContainer: {
-    width: 130,
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginHorizontal: SPACING.xs,
-    position: 'relative',
-  },
-  cardAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: COLORS.bgMid,
-  },
-  cardAvatarPlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardAvatarText: {
-    fontSize: 24,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  cardName: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginTop: SPACING.sm,
-    textAlign: 'center',
-    maxWidth: 100,
-  },
-  cardUsername: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    maxWidth: 100,
-  },
-  cardMutual: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    marginTop: SPACING.xs,
-  },
-  cardReason: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.gold,
-    marginTop: SPACING.xs,
-  },
-  cardRemove: {
-    position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
-    padding: SPACING.xs,
-  },
-
-  // View all
-  viewAllBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    gap: SPACING.xs,
-  },
-  viewAllText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.gold,
-  },
-
-  // List styles
-  listContainer: {
-    paddingHorizontal: SPACING.lg,
-  },
-  listLoadingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.huge,
-  },
-  listLoadingText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-    marginTop: SPACING.md,
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  listAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: COLORS.bgMid,
-  },
-  listAvatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listAvatarText: {
-    fontSize: 20,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  listInfo: {
-    flex: 1,
-    marginLeft: SPACING.md,
-    marginRight: SPACING.md,
-  },
-  listName: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  listUsername: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-  },
-  listMutualRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    marginTop: SPACING.xxs,
-  },
-  listMutual: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  loadMoreBtn: {
-    alignItems: 'center',
-    paddingVertical: SPACING.lg,
-  },
-  loadMoreText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.purple,
-  },
-});
 
 export default SuggestedUsersDropdown;

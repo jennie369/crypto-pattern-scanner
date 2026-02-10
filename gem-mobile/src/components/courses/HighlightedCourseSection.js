@@ -4,7 +4,7 @@
  * Admin-manageable content
  */
 
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,8 @@ import {
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, GRADIENTS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { BORDER_RADIUS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
 
 // =============================================
@@ -50,14 +51,189 @@ const isCacheValid = () => {
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
 
 const HighlightedCourseSection = ({ style }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
+
+  const CARD_WIDTH = SCREEN_WIDTH - SPACING.lg * 2;
+
   // Initialize state from cache if available (prevents loading flash)
   const [loading, setLoading] = useState(() => !isCacheValid());
   const [highlightData, setHighlightData] = useState(() => cachedHighlightData);
   const [error, setError] = useState(null);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      paddingHorizontal: SPACING.lg,
+      marginTop: SPACING.lg,
+    },
+
+    // Section Header
+    sectionHeader: {
+      marginBottom: SPACING.md,
+    },
+    sectionTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    sectionTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    sectionSubtitle: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: SPACING.xxs,
+      marginLeft: 28, // Align with title (icon width + gap)
+    },
+
+    // Card
+    card: {
+      borderRadius: BORDER_RADIUS.xl,
+      overflow: 'hidden',
+      position: 'relative',
+    },
+    imageBackground: {
+      width: '100%',
+      minHeight: 320,
+    },
+    imageStyle: {
+      borderRadius: BORDER_RADIUS.xl,
+    },
+    gradient: {
+      flex: 1,
+      minHeight: 320,
+      padding: SPACING.lg,
+      justifyContent: 'flex-end',
+    },
+
+    // Badge
+    badge: {
+      position: 'absolute',
+      top: SPACING.lg,
+      left: SPACING.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: BORDER_RADIUS.full,
+      gap: 4,
+    },
+    badgeText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.bgDarkest,
+    },
+
+    // Content
+    content: {
+      marginTop: 'auto',
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.xs,
+      lineHeight: 28,
+    },
+    subtitle: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+      marginBottom: SPACING.sm,
+      lineHeight: 20,
+    },
+    instructor: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.gold,
+      marginBottom: SPACING.md,
+    },
+
+    // Stats
+    statsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: SPACING.md,
+      marginBottom: SPACING.md,
+    },
+    stat: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    statText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+    },
+
+    // Bottom Row
+    bottomRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: SPACING.sm,
+    },
+    priceContainer: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      gap: SPACING.sm,
+    },
+    price: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+    },
+    freePrice: {
+      color: colors.success,
+    },
+
+    // CTA Button
+    ctaButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.gold,
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.sm,
+      borderRadius: BORDER_RADIUS.full,
+      gap: 4,
+    },
+    ctaText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.bgDarkest,
+    },
+
+    // Level Badge
+    levelBadge: {
+      position: 'absolute',
+      top: -280,
+      right: 0,
+      backgroundColor: 'rgba(106, 91, 255, 0.9)',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: BORDER_RADIUS.sm,
+    },
+    levelText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+
+    // Border Glow Effect
+    borderGlow: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderRadius: BORDER_RADIUS.xl,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.3)',
+      pointerEvents: 'none',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const loadHighlightedCourse = useCallback(async () => {
     // Use cache if still valid - prevents re-fetch on remount
@@ -163,12 +339,12 @@ const HighlightedCourseSection = ({ style }) => {
   // Get badge color
   const getBadgeColor = () => {
     switch (badge_color) {
-      case 'gold': return COLORS.gold;
-      case 'purple': return COLORS.purple;
-      case 'cyan': return COLORS.cyan;
-      case 'green': return COLORS.success;
-      case 'red': return COLORS.error;
-      default: return COLORS.gold;
+      case 'gold': return colors.gold;
+      case 'purple': return colors.purple;
+      case 'cyan': return colors.cyan;
+      case 'green': return colors.success;
+      case 'red': return colors.error;
+      default: return colors.gold;
     }
   };
 
@@ -177,7 +353,7 @@ const HighlightedCourseSection = ({ style }) => {
       {/* Section Header */}
       <View style={styles.sectionHeader}>
         <View style={styles.sectionTitleRow}>
-          <Sparkles size={20} color={COLORS.gold} />
+          <Sparkles size={20} color={colors.gold} />
           <Text style={styles.sectionTitle}>Khóa học nổi bật</Text>
         </View>
         <Text style={styles.sectionSubtitle}>Được đề xuất cho bạn</Text>
@@ -197,13 +373,13 @@ const HighlightedCourseSection = ({ style }) => {
         >
           {/* Gradient Overlay */}
           <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(15, 16, 48, 0.95)']}
+            colors={['transparent', 'rgba(0,0,0,0.7)', settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)')]}
             locations={[0, 0.5, 1]}
             style={styles.gradient}
           >
             {/* Badge */}
             <View style={[styles.badge, { backgroundColor: getBadgeColor() }]}>
-              <Award size={12} color={COLORS.bgDarkest} />
+              <Award size={12} color={colors.bgDarkest} />
               <Text style={styles.badgeText}>{badge_text || 'Nổi bật'}</Text>
             </View>
 
@@ -232,28 +408,28 @@ const HighlightedCourseSection = ({ style }) => {
               <View style={styles.statsRow}>
                 {show_rating && course_rating > 0 && (
                   <View style={styles.stat}>
-                    <Star size={14} color={COLORS.gold} fill={COLORS.gold} />
+                    <Star size={14} color={colors.gold} fill={colors.gold} />
                     <Text style={styles.statText}>{course_rating.toFixed(1)}</Text>
                   </View>
                 )}
 
                 {show_students && course_student_count > 0 && (
                   <View style={styles.stat}>
-                    <Users size={14} color={COLORS.cyan} />
+                    <Users size={14} color={colors.cyan} />
                     <Text style={styles.statText}>{course_student_count} học viên</Text>
                   </View>
                 )}
 
                 {show_lessons && course_lesson_count > 0 && (
                   <View style={styles.stat}>
-                    <BookOpen size={14} color={COLORS.purple} />
+                    <BookOpen size={14} color={colors.purple} />
                     <Text style={styles.statText}>{course_lesson_count} bài</Text>
                   </View>
                 )}
 
                 {course_duration_hours > 0 && (
                   <View style={styles.stat}>
-                    <Clock size={14} color={COLORS.textMuted} />
+                    <Clock size={14} color={colors.textMuted} />
                     <Text style={styles.statText}>{formatDuration(course_duration_hours)}</Text>
                   </View>
                 )}
@@ -280,7 +456,7 @@ const HighlightedCourseSection = ({ style }) => {
                   activeOpacity={0.8}
                 >
                   <Text style={styles.ctaText}>{cta_text || 'Xem chi tiết'}</Text>
-                  <ChevronRight size={16} color={COLORS.bgDarkest} />
+                  <ChevronRight size={16} color={colors.bgDarkest} />
                 </TouchableOpacity>
               </View>
 
@@ -304,178 +480,6 @@ const HighlightedCourseSection = ({ style }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.lg,
-  },
-
-  // Section Header
-  sectionHeader: {
-    marginBottom: SPACING.md,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  sectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  sectionSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: SPACING.xxs,
-    marginLeft: 28, // Align with title (icon width + gap)
-  },
-
-  // Card
-  card: {
-    borderRadius: BORDER_RADIUS.xl,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  imageBackground: {
-    width: '100%',
-    minHeight: 320,
-  },
-  imageStyle: {
-    borderRadius: BORDER_RADIUS.xl,
-  },
-  gradient: {
-    flex: 1,
-    minHeight: 320,
-    padding: SPACING.lg,
-    justifyContent: 'flex-end',
-  },
-
-  // Badge
-  badge: {
-    position: 'absolute',
-    top: SPACING.lg,
-    left: SPACING.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.full,
-    gap: 4,
-  },
-  badgeText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDarkest,
-  },
-
-  // Content
-  content: {
-    marginTop: 'auto',
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
-    lineHeight: 28,
-  },
-  subtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.sm,
-    lineHeight: 20,
-  },
-  instructor: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.gold,
-    marginBottom: SPACING.md,
-  },
-
-  // Stats
-  statsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  stat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-  },
-
-  // Bottom Row
-  bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: SPACING.sm,
-  },
-  price: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-  },
-  freePrice: {
-    color: COLORS.success,
-  },
-
-  // CTA Button
-  ctaButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.full,
-    gap: 4,
-  },
-  ctaText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDarkest,
-  },
-
-  // Level Badge
-  levelBadge: {
-    position: 'absolute',
-    top: -280,
-    right: 0,
-    backgroundColor: 'rgba(106, 91, 255, 0.9)',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  levelText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  // Border Glow Effect
-  borderGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: BORDER_RADIUS.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-    pointerEvents: 'none',
-  },
-});
 
 // Memoize to prevent unnecessary re-renders
 export default memo(HighlightedCourseSection);

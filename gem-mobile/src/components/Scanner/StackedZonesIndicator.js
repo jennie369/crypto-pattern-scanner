@@ -5,7 +5,7 @@
  * Phase 2B: Stacked Zones UI
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -23,15 +23,74 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react-native';
-import { COLORS, SPACING, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+
+// ═══════════════════════════════════════════════════════════
+// HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+const getQualityColor = (quality, colors) => {
+  switch (quality) {
+    case 'exceptional':
+      return colors.gold;
+    case 'excellent':
+      return colors.success;
+    case 'good':
+      return colors.info;
+    default:
+      return colors.textSecondary;
+  }
+};
+
+const getHierarchyShortName = (hierarchy) => {
+  const h = hierarchy?.toUpperCase?.() || hierarchy;
+  switch (h) {
+    case 'DECISION_POINT':
+      return 'DP';
+    case 'FTR':
+      return 'FTR';
+    case 'FLAG_LIMIT':
+      return 'FL';
+    default:
+      return '';
+  }
+};
 
 // ═══════════════════════════════════════════════════════════
 // COMPACT VERSION
 // ═══════════════════════════════════════════════════════════
 
 const StackedZonesCompact = memo(({ stackedZone, onPress }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    compactContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 8,
+      borderWidth: 1,
+      padding: SPACING.sm,
+    },
+    compactText: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    scoreBadge: {
+      paddingHorizontal: SPACING.xs,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    scoreText: {
+      fontSize: 10,
+      color: colors.bgDarkest,
+      fontWeight: '700',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const { stackedCount, confluenceScore, quality } = stackedZone;
-  const qualityColor = getQualityColor(quality);
+  const qualityColor = getQualityColor(quality, colors);
 
   return (
     <TouchableOpacity
@@ -59,7 +118,272 @@ const StackedZonesIndicator = memo(({
   onPress,
   compact = false,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [showDetails, setShowDetails] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    // Main container
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      borderWidth: 2,
+      padding: SPACING.md,
+      marginVertical: SPACING.xs,
+    },
+
+    // Header
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    iconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 14,
+      color: colors.textPrimary,
+      fontWeight: '600',
+    },
+    subtitle: {
+      fontSize: 11,
+      color: colors.textSecondary,
+    },
+    headerRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    qualityBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: 8,
+    },
+    qualityText: {
+      fontSize: 10,
+      color: colors.bgDarkest,
+      fontWeight: '700',
+      textTransform: 'capitalize',
+    },
+
+    // Score
+    scoreContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: SPACING.sm,
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    scoreLabel: {
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    scoreValue: {
+      fontSize: 20,
+      fontWeight: '700',
+    },
+
+    // Direction
+    directionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginTop: SPACING.xs,
+    },
+    directionText: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+
+    // Timeframes
+    timeframesContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: SPACING.xs,
+      marginTop: SPACING.sm,
+    },
+    timeframeBadge: {
+      backgroundColor: colors.bgDarkest,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: 8,
+    },
+    timeframeText: {
+      fontSize: 10,
+      color: colors.textSecondary,
+      fontWeight: '600',
+    },
+
+    // Recommendation
+    recommendationContainer: {
+      marginTop: SPACING.sm,
+      padding: SPACING.sm,
+      borderRadius: 8,
+    },
+    recommendationText: {
+      fontSize: 12,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+
+    // Details
+    detailsContainer: {
+      marginTop: SPACING.md,
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    detailsTitle: {
+      fontSize: 11,
+      color: colors.textMuted,
+      marginBottom: SPACING.xs,
+    },
+    zoneRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      paddingVertical: SPACING.xs,
+      borderBottomWidth: 1,
+      borderBottomColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    zoneDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    zoneTimeframe: {
+      fontSize: 11,
+      color: colors.textPrimary,
+      fontWeight: '600',
+      width: 35,
+    },
+    zoneType: {
+      fontSize: 11,
+      color: colors.textSecondary,
+      width: 30,
+    },
+    zonePattern: {
+      fontSize: 11,
+      color: colors.textMuted,
+      flex: 1,
+    },
+    hierarchyBadge: {
+      paddingHorizontal: SPACING.xs,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    hierarchyText: {
+      fontSize: 9,
+      color: colors.gold,
+      fontWeight: '600',
+    },
+
+    // Action button
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: SPACING.xs,
+      marginTop: SPACING.md,
+      paddingVertical: SPACING.sm,
+      borderRadius: 12,
+    },
+    actionText: {
+      fontSize: 13,
+      color: colors.bgDarkest,
+      fontWeight: '600',
+    },
+
+    // Empty state
+    emptyContainer: {
+      alignItems: 'center',
+      padding: SPACING.xl,
+      gap: SPACING.sm,
+    },
+    emptyText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      fontWeight: '500',
+    },
+    emptySubtext: {
+      fontSize: 12,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+
+    // List
+    listContainer: {
+      gap: SPACING.sm,
+    },
+
+    // Summary card
+    summaryCard: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: colors.gold + '30',
+    },
+    summaryHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginBottom: SPACING.sm,
+    },
+    summaryTitle: {
+      fontSize: 14,
+      color: colors.textPrimary,
+      fontWeight: '600',
+    },
+    summaryGrid: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: SPACING.sm,
+    },
+    summaryItem: {
+      alignItems: 'center',
+      gap: 2,
+    },
+    summaryValue: {
+      fontSize: 18,
+      color: colors.textPrimary,
+      fontWeight: '700',
+    },
+    summaryLabel: {
+      fontSize: 10,
+      color: colors.textMuted,
+    },
+    avgConfluence: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    avgLabel: {
+      fontSize: 11,
+      color: colors.textSecondary,
+    },
+    avgValue: {
+      fontSize: 14,
+      fontWeight: '600',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   if (!stackedZone?.isStacked) {
     return null;
@@ -76,9 +400,9 @@ const StackedZonesIndicator = memo(({
     tradingBias,
   } = stackedZone;
 
-  const qualityColor = getQualityColor(quality);
+  const qualityColor = getQualityColor(quality, colors);
   const TrendIcon = tradingBias === 'BUY' ? TrendingUp : TrendingDown;
-  const trendColor = tradingBias === 'BUY' ? COLORS.success : COLORS.error;
+  const trendColor = tradingBias === 'BUY' ? colors.success : colors.error;
 
   if (compact) {
     return <StackedZonesCompact stackedZone={stackedZone} onPress={onPress} />;
@@ -106,13 +430,13 @@ const StackedZonesIndicator = memo(({
 
         <View style={styles.headerRight}>
           <View style={[styles.qualityBadge, { backgroundColor: qualityColor }]}>
-            <Star size={12} color={COLORS.bgDarkest} fill={COLORS.bgDarkest} />
+            <Star size={12} color={colors.bgDarkest} fill={colors.bgDarkest} />
             <Text style={styles.qualityText}>{quality}</Text>
           </View>
           {showDetails ? (
-            <ChevronUp size={20} color={COLORS.textMuted} />
+            <ChevronUp size={20} color={colors.textMuted} />
           ) : (
-            <ChevronDown size={20} color={COLORS.textMuted} />
+            <ChevronDown size={20} color={colors.textMuted} />
           )}
         </View>
       </TouchableOpacity>
@@ -158,7 +482,7 @@ const StackedZonesIndicator = memo(({
               <View
                 style={[
                   styles.zoneDot,
-                  { backgroundColor: zone.zoneType === 'HFZ' ? COLORS.error : COLORS.success },
+                  { backgroundColor: zone.zoneType === 'HFZ' ? colors.error : colors.success },
                 ]}
               />
               <Text style={styles.zoneTimeframe}>{zone.timeframe || 'N/A'}</Text>
@@ -167,7 +491,7 @@ const StackedZonesIndicator = memo(({
                 {zone.pattern || zone.patternType || '-'}
               </Text>
               {zone.zoneHierarchy && zone.zoneHierarchy !== 'REGULAR' && zone.zoneHierarchy !== 'regular' && (
-                <View style={[styles.hierarchyBadge, { backgroundColor: COLORS.gold + '20' }]}>
+                <View style={[styles.hierarchyBadge, { backgroundColor: colors.gold + '20' }]}>
                   <Text style={styles.hierarchyText}>
                     {getHierarchyShortName(zone.zoneHierarchy)}
                   </Text>
@@ -185,7 +509,7 @@ const StackedZonesIndicator = memo(({
           onPress={onPress}
           activeOpacity={0.7}
         >
-          <Target size={16} color={COLORS.bgDarkest} />
+          <Target size={16} color={colors.bgDarkest} />
           <Text style={styles.actionText}>Trade Confluence</Text>
         </TouchableOpacity>
       )}
@@ -194,45 +518,37 @@ const StackedZonesIndicator = memo(({
 });
 
 // ═══════════════════════════════════════════════════════════
-// HELPER FUNCTIONS
-// ═══════════════════════════════════════════════════════════
-
-const getQualityColor = (quality) => {
-  switch (quality) {
-    case 'exceptional':
-      return COLORS.gold;
-    case 'excellent':
-      return COLORS.success;
-    case 'good':
-      return COLORS.info;
-    default:
-      return COLORS.textSecondary;
-  }
-};
-
-const getHierarchyShortName = (hierarchy) => {
-  const h = hierarchy?.toUpperCase?.() || hierarchy;
-  switch (h) {
-    case 'DECISION_POINT':
-      return 'DP';
-    case 'FTR':
-      return 'FTR';
-    case 'FLAG_LIMIT':
-      return 'FL';
-    default:
-      return '';
-  }
-};
-
-// ═══════════════════════════════════════════════════════════
 // STACKED ZONES LIST
 // ═══════════════════════════════════════════════════════════
 
 export const StackedZonesList = memo(({ stackedZones, onZonePress }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    emptyContainer: {
+      alignItems: 'center',
+      padding: SPACING.xl,
+      gap: SPACING.sm,
+    },
+    emptyText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      fontWeight: '500',
+    },
+    emptySubtext: {
+      fontSize: 12,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+    listContainer: {
+      gap: SPACING.sm,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!stackedZones || stackedZones.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Layers size={32} color={COLORS.textMuted} />
+        <Layers size={32} color={colors.textMuted} />
         <Text style={styles.emptyText}>Không có Stacked Zones</Text>
         <Text style={styles.emptySubtext}>
           Stacked zones xuất hiện khi nhiều zones chồng lên nhau
@@ -259,12 +575,69 @@ export const StackedZonesList = memo(({ stackedZones, onZonePress }) => {
 // ═══════════════════════════════════════════════════════════
 
 export const StackedZonesSummary = memo(({ summary, style }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    summaryCard: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: colors.gold + '30',
+    },
+    summaryHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginBottom: SPACING.sm,
+    },
+    summaryTitle: {
+      fontSize: 14,
+      color: colors.textPrimary,
+      fontWeight: '600',
+    },
+    summaryGrid: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: SPACING.sm,
+    },
+    summaryItem: {
+      alignItems: 'center',
+      gap: 2,
+    },
+    summaryValue: {
+      fontSize: 18,
+      color: colors.textPrimary,
+      fontWeight: '700',
+    },
+    summaryLabel: {
+      fontSize: 10,
+      color: colors.textMuted,
+    },
+    avgConfluence: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    avgLabel: {
+      fontSize: 11,
+      color: colors.textSecondary,
+    },
+    avgValue: {
+      fontSize: 14,
+      fontWeight: '600',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!summary || summary.total === 0) return null;
 
   return (
     <View style={[styles.summaryCard, style]}>
       <View style={styles.summaryHeader}>
-        <Layers size={18} color={COLORS.gold} />
+        <Layers size={18} color={colors.gold} />
         <Text style={styles.summaryTitle}>Stacked Zones</Text>
       </View>
 
@@ -274,19 +647,19 @@ export const StackedZonesSummary = memo(({ summary, style }) => {
           <Text style={styles.summaryLabel}>Total</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={[styles.summaryValue, { color: COLORS.gold }]}>
+          <Text style={[styles.summaryValue, { color: colors.gold }]}>
             {summary.exceptional || 0}
           </Text>
           <Text style={styles.summaryLabel}>A+</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={[styles.summaryValue, { color: COLORS.success }]}>
+          <Text style={[styles.summaryValue, { color: colors.success }]}>
             {summary.excellent || 0}
           </Text>
           <Text style={styles.summaryLabel}>A</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={[styles.summaryValue, { color: COLORS.info }]}>
+          <Text style={[styles.summaryValue, { color: colors.info }]}>
             {summary.good || 0}
           </Text>
           <Text style={styles.summaryLabel}>B</Text>
@@ -295,305 +668,12 @@ export const StackedZonesSummary = memo(({ summary, style }) => {
 
       <View style={styles.avgConfluence}>
         <Text style={styles.avgLabel}>Avg Confluence</Text>
-        <Text style={[styles.avgValue, { color: COLORS.gold }]}>
+        <Text style={[styles.avgValue, { color: colors.gold }]}>
           {summary.avgConfluence || 0}
         </Text>
       </View>
     </View>
   );
-});
-
-// ═══════════════════════════════════════════════════════════
-// STYLES
-// ═══════════════════════════════════════════════════════════
-
-const styles = StyleSheet.create({
-  // Main container
-  container: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: BORDER_RADIUS.lg,
-    borderWidth: 2,
-    padding: SPACING.md,
-    marginVertical: SPACING.xs,
-  },
-
-  // Compact styles
-  compactContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    backgroundColor: COLORS.glassBg,
-    borderRadius: BORDER_RADIUS.sm,
-    borderWidth: 1,
-    padding: SPACING.sm,
-  },
-  compactText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  scoreBadge: {
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.xs,
-  },
-  scoreText: {
-    fontSize: 10,
-    color: COLORS.bgDarkest,
-    fontWeight: '700',
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    fontWeight: '600',
-  },
-  subtitle: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  qualityBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  qualityText: {
-    fontSize: 10,
-    color: COLORS.bgDarkest,
-    fontWeight: '700',
-    textTransform: 'capitalize',
-  },
-
-  // Score
-  scoreContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.glassBg,
-  },
-  scoreLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-  },
-  scoreValue: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-
-  // Direction
-  directionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    marginTop: SPACING.xs,
-  },
-  directionText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-
-  // Timeframes
-  timeframesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.xs,
-    marginTop: SPACING.sm,
-  },
-  timeframeBadge: {
-    backgroundColor: COLORS.bgDarkest,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  timeframeText: {
-    fontSize: 10,
-    color: COLORS.textSecondary,
-    fontWeight: '600',
-  },
-
-  // Recommendation
-  recommendationContainer: {
-    marginTop: SPACING.sm,
-    padding: SPACING.sm,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  recommendationText: {
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-
-  // Details
-  detailsContainer: {
-    marginTop: SPACING.md,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.glassBg,
-  },
-  detailsTitle: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.xs,
-  },
-  zoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.glassBg,
-  },
-  zoneDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  zoneTimeframe: {
-    fontSize: 11,
-    color: COLORS.textPrimary,
-    fontWeight: '600',
-    width: 35,
-  },
-  zoneType: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    width: 30,
-  },
-  zonePattern: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    flex: 1,
-  },
-  hierarchyBadge: {
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.xs,
-  },
-  hierarchyText: {
-    fontSize: 9,
-    color: COLORS.gold,
-    fontWeight: '600',
-  },
-
-  // Action button
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.xs,
-    marginTop: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.md,
-  },
-  actionText: {
-    fontSize: 13,
-    color: COLORS.bgDarkest,
-    fontWeight: '600',
-  },
-
-  // Empty state
-  emptyContainer: {
-    alignItems: 'center',
-    padding: SPACING.xl,
-    gap: SPACING.sm,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-  },
-  emptySubtext: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
-
-  // List
-  listContainer: {
-    gap: SPACING.sm,
-  },
-
-  // Summary card
-  summaryCard: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.gold + '30',
-  },
-  summaryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    marginBottom: SPACING.sm,
-  },
-  summaryTitle: {
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    fontWeight: '600',
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: SPACING.sm,
-  },
-  summaryItem: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  summaryValue: {
-    fontSize: 18,
-    color: COLORS.textPrimary,
-    fontWeight: '700',
-  },
-  summaryLabel: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-  },
-  avgConfluence: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.glassBg,
-  },
-  avgLabel: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-  },
-  avgValue: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
 });
 
 StackedZonesIndicator.displayName = 'StackedZonesIndicator';

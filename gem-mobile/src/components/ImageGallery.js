@@ -4,7 +4,7 @@
  * Uses dark glass theme from DESIGN_TOKENS
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -28,7 +28,7 @@ import {
   Share2,
   Image as ImageIcon,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -40,6 +40,60 @@ export const ImageGalleryGrid = ({
   onImagePress,
   maxVisible = 4,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    // Single Image
+    singleImage: {
+      borderRadius: 12,
+      overflow: 'hidden',
+      aspectRatio: 16 / 9,
+    },
+    singleImageContent: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.glassBg,
+    },
+    // Grid
+    gridContainer: {
+      borderRadius: 12,
+      overflow: 'hidden',
+      aspectRatio: 1,
+    },
+    gridRow: {
+      flex: 1,
+      flexDirection: 'row',
+      gap: 2,
+    },
+    gridColumn: {
+      flexDirection: 'column',
+      gap: 2,
+    },
+    gridItem: {
+      overflow: 'hidden',
+    },
+    gridItemSmall: {
+      flex: 1,
+      overflow: 'hidden',
+    },
+    gridImage: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.glassBg,
+    },
+    remainingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    remainingText: {
+      fontSize: TYPOGRAPHY.fontSize['2xl'],
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!images || images.length === 0) return null;
 
   const visibleImages = images.slice(0, maxVisible);
@@ -174,6 +228,8 @@ const ImageGalleryViewer = ({
   onShare,
   onDownload,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const flatListRef = useRef(null);
   const scale = useRef(new Animated.Value(1)).current;
@@ -202,6 +258,81 @@ const ImageGalleryViewer = ({
       },
     })
   ).current;
+
+  const viewerStyles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    },
+    header: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+    },
+    closeButton: {
+      padding: SPACING.sm,
+    },
+    counter: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textPrimary,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      gap: SPACING.sm,
+    },
+    actionButton: {
+      padding: SPACING.sm,
+    },
+    imageContainer: {
+      width: SCREEN_WIDTH,
+      height: SCREEN_HEIGHT,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    image: {
+      width: SCREEN_WIDTH,
+      height: SCREEN_HEIGHT * 0.8,
+    },
+    navArrow: {
+      position: 'absolute',
+      top: '50%',
+      transform: [{ translateY: -20 }],
+      padding: SPACING.sm,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      borderRadius: 20,
+    },
+    navArrowLeft: {
+      left: SPACING.sm,
+    },
+    navArrowRight: {
+      right: SPACING.sm,
+    },
+    dotsContainer: {
+      position: 'absolute',
+      bottom: 50,
+      left: 0,
+      right: 0,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: SPACING.xs,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    dotActive: {
+      backgroundColor: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const goToPrevious = () => {
     if (currentIndex > 0) {
@@ -252,7 +383,7 @@ const ImageGalleryViewer = ({
         {/* Header */}
         <SafeAreaView style={viewerStyles.header}>
           <TouchableOpacity style={viewerStyles.closeButton} onPress={onClose}>
-            <X size={24} color={COLORS.textPrimary} />
+            <X size={24} color={colors.textPrimary} />
           </TouchableOpacity>
 
           <Text style={viewerStyles.counter}>
@@ -265,7 +396,7 @@ const ImageGalleryViewer = ({
                 style={viewerStyles.actionButton}
                 onPress={() => onShare?.(images[currentIndex])}
               >
-                <Share2 size={20} color={COLORS.textPrimary} />
+                <Share2 size={20} color={colors.textPrimary} />
               </TouchableOpacity>
             )}
             {onDownload && (
@@ -273,7 +404,7 @@ const ImageGalleryViewer = ({
                 style={viewerStyles.actionButton}
                 onPress={() => onDownload?.(images[currentIndex])}
               >
-                <Download size={20} color={COLORS.textPrimary} />
+                <Download size={20} color={colors.textPrimary} />
               </TouchableOpacity>
             )}
           </View>
@@ -303,7 +434,7 @@ const ImageGalleryViewer = ({
             style={[viewerStyles.navArrow, viewerStyles.navArrowLeft]}
             onPress={goToPrevious}
           >
-            <ChevronLeft size={32} color={COLORS.textPrimary} />
+            <ChevronLeft size={32} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
         {currentIndex < images.length - 1 && (
@@ -311,7 +442,7 @@ const ImageGalleryViewer = ({
             style={[viewerStyles.navArrow, viewerStyles.navArrowRight]}
             onPress={goToNext}
           >
-            <ChevronRight size={32} color={COLORS.textPrimary} />
+            <ChevronRight size={32} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
 
@@ -343,6 +474,48 @@ export const ImagePickerGrid = ({
   onSelect,
   maxSelection = 10,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const pickerStyles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 2,
+    },
+    item: {
+      width: '32.5%',
+      aspectRatio: 1,
+      position: 'relative',
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.glassBg,
+    },
+    checkbox: {
+      position: 'absolute',
+      top: SPACING.xs,
+      right: SPACING.xs,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.textPrimary,
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkboxSelected: {
+      backgroundColor: colors.purple,
+      borderColor: colors.purple,
+    },
+    checkboxText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const isSelected = (uri) => selectedImages.includes(uri);
   const selectionIndex = (uri) => selectedImages.indexOf(uri) + 1;
 
@@ -385,197 +558,34 @@ export const ImagePickerGrid = ({
 /**
  * Empty Gallery State
  */
-export const EmptyGallery = ({ onAddPress }) => (
-  <TouchableOpacity style={emptyStyles.container} onPress={onAddPress}>
-    <ImageIcon size={32} color={COLORS.textMuted} />
-    <Text style={emptyStyles.text}>Them hinh anh</Text>
-  </TouchableOpacity>
-);
+export const EmptyGallery = ({ onAddPress }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
 
-const styles = StyleSheet.create({
-  // Single Image
-  singleImage: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    aspectRatio: 16 / 9,
-  },
-  singleImageContent: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: COLORS.glassBg,
-  },
-  // Grid
-  gridContainer: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    aspectRatio: 1,
-  },
-  gridRow: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 2,
-  },
-  gridColumn: {
-    flexDirection: 'column',
-    gap: 2,
-  },
-  gridItem: {
-    overflow: 'hidden',
-  },
-  gridItemSmall: {
-    flex: 1,
-    overflow: 'hidden',
-  },
-  gridImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: COLORS.glassBg,
-  },
-  remainingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  remainingText: {
-    fontSize: TYPOGRAPHY.fontSize['2xl'],
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-});
+  const emptyStyles = useMemo(() => StyleSheet.create({
+    container: {
+      aspectRatio: 16 / 9,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+      borderStyle: 'dashed',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    text: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
-const viewerStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)',
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-  },
-  closeButton: {
-    padding: SPACING.sm,
-  },
-  counter: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textPrimary,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-  },
-  actionButton: {
-    padding: SPACING.sm,
-  },
-  imageContainer: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT * 0.8,
-  },
-  navArrow: {
-    position: 'absolute',
-    top: '50%',
-    transform: [{ translateY: -20 }],
-    padding: SPACING.sm,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-  },
-  navArrowLeft: {
-    left: SPACING.sm,
-  },
-  navArrowRight: {
-    right: SPACING.sm,
-  },
-  dotsContainer: {
-    position: 'absolute',
-    bottom: 50,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.xs,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  dotActive: {
-    backgroundColor: COLORS.textPrimary,
-  },
-});
-
-const pickerStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 2,
-  },
-  item: {
-    width: '32.5%',
-    aspectRatio: 1,
-    position: 'relative',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: COLORS.glassBg,
-  },
-  checkbox: {
-    position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: COLORS.textPrimary,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    backgroundColor: COLORS.purple,
-    borderColor: COLORS.purple,
-  },
-  checkboxText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-});
-
-const emptyStyles = StyleSheet.create({
-  container: {
-    aspectRatio: 16 / 9,
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  text: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-  },
-});
+  return (
+    <TouchableOpacity style={emptyStyles.container} onPress={onAddPress}>
+      <ImageIcon size={32} color={colors.textMuted} />
+      <Text style={emptyStyles.text}>Them hinh anh</Text>
+    </TouchableOpacity>
+  );
+};
 
 export { ImageGalleryViewer };
 export default ImageGalleryGrid;

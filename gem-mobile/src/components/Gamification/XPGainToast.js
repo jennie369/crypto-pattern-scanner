@@ -3,13 +3,14 @@
  * Animated toast notification when XP is earned
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Zap, Star, BookOpen, CheckCircle, Trophy, Flame } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const BORDER_RADIUS = { full: 9999 };
 
 // Action type icons
 const ACTION_ICONS = {
@@ -23,18 +24,6 @@ const ACTION_ICONS = {
   default: Zap,
 };
 
-// Action type colors
-const ACTION_COLORS = {
-  lesson_complete: COLORS.success,
-  quiz_pass: COLORS.cyan,
-  quiz_perfect: COLORS.gold,
-  course_complete: COLORS.gold,
-  streak_bonus: '#FF6B35',
-  achievement: COLORS.purple,
-  quest_complete: COLORS.gold,
-  default: COLORS.cyan,
-};
-
 const XPGainToast = ({
   visible = false,
   amount = 0,
@@ -44,12 +33,82 @@ const XPGainToast = ({
   onHide,
   position = 'top', // 'top' or 'bottom'
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const slideAnim = useRef(new Animated.Value(-100)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
+  // Action type colors - using colors from context
+  const ACTION_COLORS = useMemo(() => ({
+    lesson_complete: colors.success,
+    quiz_pass: colors.cyan,
+    quiz_perfect: colors.gold,
+    course_complete: colors.gold,
+    streak_bonus: '#FF6B35',
+    achievement: colors.purple,
+    quest_complete: colors.gold,
+    default: colors.cyan,
+  }), [colors]);
+
   const IconComponent = ACTION_ICONS[actionType] || ACTION_ICONS.default;
   const color = ACTION_COLORS[actionType] || ACTION_COLORS.default;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      left: SPACING.lg,
+      right: SPACING.lg,
+      zIndex: 9999,
+      alignItems: 'center',
+    },
+    containerTop: {
+      top: 60,
+    },
+    containerBottom: {
+      bottom: 100,
+    },
+    gradient: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+      borderRadius: BORDER_RADIUS.full,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.3)',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.9)'),
+      maxWidth: SCREEN_WIDTH - SPACING.lg * 2,
+      overflow: 'hidden',
+    },
+    iconContainer: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: SPACING.md,
+    },
+    content: {
+      flex: 1,
+    },
+    amount: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    message: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 1,
+    },
+    glow: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: 4,
+      height: '100%',
+      opacity: 0.5,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (visible) {
@@ -162,61 +221,5 @@ const getDefaultMessage = (actionType) => {
   };
   return messages[actionType] || 'XP earned';
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    left: SPACING.lg,
-    right: SPACING.lg,
-    zIndex: 9999,
-    alignItems: 'center',
-  },
-  containerTop: {
-    top: 60,
-  },
-  containerBottom: {
-    bottom: 100,
-  },
-  gradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: BORDER_RADIUS.full,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-    backgroundColor: 'rgba(15, 16, 48, 0.9)',
-    maxWidth: SCREEN_WIDTH - SPACING.lg * 2,
-    overflow: 'hidden',
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.md,
-  },
-  content: {
-    flex: 1,
-  },
-  amount: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  message: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 1,
-  },
-  glow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: 4,
-    height: '100%',
-    opacity: 0.5,
-  },
-});
 
 export default XPGainToast;

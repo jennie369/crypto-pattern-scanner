@@ -9,7 +9,7 @@
  * - VIP: Unlimited câu hỏi/day, 99.000đ/tháng
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -33,7 +33,7 @@ import {
   ExternalLink,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, SPACING, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { CHATBOT_PRODUCTS } from '../../constants/productConfig';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -117,6 +117,7 @@ const ChatbotPricingModal = ({
   currentTier = 'FREE',
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [loading, setLoading] = useState(false);
   const [selectedTier, setSelectedTier] = useState(null);
 
@@ -128,6 +129,222 @@ const ChatbotPricingModal = ({
 
   const currentLevel = getTierLevel(currentTier);
   const availableTiers = CHATBOT_TIERS.filter(t => getTierLevel(t.tier) > currentLevel);
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    },
+    backdrop: {
+      flex: 1,
+    },
+    content: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      width: '100%',
+      maxHeight: SCREEN_HEIGHT * 0.82,
+      paddingTop: SPACING.lg,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.3)',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    headerIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: 'rgba(251, 191, 36, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: SPACING.md,
+      borderWidth: 1.5,
+      borderColor: 'rgba(251, 191, 36, 0.5)',
+    },
+    title: {
+      flex: 1,
+      color: '#FFFFFF',
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    closeButton: {
+      padding: SPACING.xs,
+    },
+    statusBox: {
+      padding: SPACING.md,
+      backgroundColor: 'rgba(13, 40, 71, 0.6)',
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(0, 240, 255, 0.2)',
+      marginBottom: SPACING.md,
+    },
+    statusText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      textAlign: 'center',
+      marginBottom: SPACING.sm,
+    },
+    statusHighlight: {
+      color: colors.gold,
+      fontWeight: '700',
+    },
+    statusSubtext: {
+      color: colors.textMuted,
+      fontSize: 13,
+      textAlign: 'center',
+      marginBottom: SPACING.sm,
+    },
+    tierCompare: {
+      marginTop: SPACING.xs,
+    },
+    tierCompareItem: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginVertical: 2,
+    },
+    flatListContent: {
+      paddingHorizontal: SPACING.lg,
+      paddingBottom: SPACING.xl + 40,
+    },
+    tierCard: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      marginBottom: SPACING.md,
+      borderWidth: 1,
+      borderColor: glass.border,
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    tierCardPopular: {
+      borderColor: '#6A5BFF',
+      borderWidth: 2,
+    },
+    popularBadge: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      backgroundColor: '#6A5BFF',
+      paddingVertical: 4,
+      paddingHorizontal: 12,
+      borderBottomLeftRadius: 12,
+    },
+    popularText: {
+      color: '#fff',
+      fontSize: 9,
+      fontWeight: '700',
+      letterSpacing: 0.5,
+    },
+    tierHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+    },
+    tierIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    tierInfo: {
+      flex: 1,
+      marginLeft: SPACING.sm,
+    },
+    tierName: {
+      fontSize: 17,
+      fontWeight: '700',
+    },
+    tierQuotaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      marginTop: 2,
+    },
+    tierQueries: {
+      color: colors.textSecondary,
+      fontSize: 12,
+    },
+    tierPricing: {
+      alignItems: 'flex-end',
+    },
+    tierPrice: {
+      color: colors.textPrimary,
+      fontSize: 18,
+      fontWeight: '700',
+    },
+    tierPeriod: {
+      color: colors.textMuted,
+      fontSize: 11,
+    },
+    featureList: {
+      marginVertical: SPACING.sm,
+      gap: 6,
+    },
+    featureItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    featureText: {
+      color: colors.textSecondary,
+      fontSize: 12,
+    },
+    buttonRow: {
+      flexDirection: 'row',
+      gap: SPACING.sm,
+    },
+    learnMoreButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 10,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.4)',
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+      gap: 4,
+    },
+    learnMoreText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.gold,
+    },
+    upgradeButtonContainer: {
+      flex: 2,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    upgradeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 12,
+      borderRadius: 12,
+    },
+    upgradeButtonText: {
+      color: '#fff',
+      fontSize: 14,
+      fontWeight: '700',
+    },
+    dismissButton: {
+      alignItems: 'center',
+      paddingVertical: 12,
+      marginTop: SPACING.md,
+      backgroundColor: '#FFBD59',
+      borderRadius: 22,
+    },
+    dismissText: {
+      color: '#1a1a2e',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   /**
    * Handle upgrade - Navigate to Shopify product page in WebView
@@ -200,7 +417,7 @@ const ChatbotPricingModal = ({
             </Text>
             <View style={styles.tierQuotaRow}>
               {tier.queries === -1 ? (
-                <Infinity size={14} color={COLORS.success} />
+                <Infinity size={14} color={colors.success} />
               ) : null}
               <Text style={styles.tierQueries}>{tier.queriesDisplay}</Text>
             </View>
@@ -229,7 +446,7 @@ const ChatbotPricingModal = ({
             onPress={handleLearnMore}
             activeOpacity={0.7}
           >
-            <ExternalLink size={14} color={COLORS.gold} />
+            <ExternalLink size={14} color={colors.gold} />
             <Text style={styles.learnMoreText}>Tìm hiểu</Text>
           </TouchableOpacity>
 
@@ -267,11 +484,11 @@ const ChatbotPricingModal = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerIcon}>
-          <AlertCircle size={28} color={COLORS.gold} />
+          <AlertCircle size={28} color={colors.gold} />
         </View>
         <Text style={styles.title}>Hết lượt hôm nay</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <X size={24} color={COLORS.textMuted} />
+          <X size={24} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -336,221 +553,5 @@ const ChatbotPricingModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  },
-  backdrop: {
-    flex: 1,
-  },
-  content: {
-    backgroundColor: 'rgba(15, 25, 45, 0.98)',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    width: '100%',
-    maxHeight: SCREEN_HEIGHT * 0.82,
-    paddingTop: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  headerIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(251, 191, 36, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.md,
-    borderWidth: 1.5,
-    borderColor: 'rgba(251, 191, 36, 0.5)',
-  },
-  title: {
-    flex: 1,
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  closeButton: {
-    padding: SPACING.xs,
-  },
-  statusBox: {
-    padding: SPACING.md,
-    backgroundColor: 'rgba(13, 40, 71, 0.6)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.2)',
-    marginBottom: SPACING.md,
-  },
-  statusText: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
-  },
-  statusHighlight: {
-    color: COLORS.gold,
-    fontWeight: '700',
-  },
-  statusSubtext: {
-    color: COLORS.textMuted,
-    fontSize: 13,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
-  },
-  tierCompare: {
-    marginTop: SPACING.xs,
-  },
-  tierCompareItem: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    marginVertical: 2,
-  },
-  flatListContent: {
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.xl + 40,
-  },
-  tierCard: {
-    backgroundColor: GLASS.background,
-    borderRadius: 16,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: GLASS.border,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  tierCardPopular: {
-    borderColor: '#6A5BFF',
-    borderWidth: 2,
-  },
-  popularBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: '#6A5BFF',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderBottomLeftRadius: 12,
-  },
-  popularText: {
-    color: '#fff',
-    fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  tierHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  tierIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tierInfo: {
-    flex: 1,
-    marginLeft: SPACING.sm,
-  },
-  tierName: {
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  tierQuotaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 2,
-  },
-  tierQueries: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-  },
-  tierPricing: {
-    alignItems: 'flex-end',
-  },
-  tierPrice: {
-    color: COLORS.textPrimary,
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  tierPeriod: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-  },
-  featureList: {
-    marginVertical: SPACING.sm,
-    gap: 6,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  featureText: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-  },
-  learnMoreButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.4)',
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    gap: 4,
-  },
-  learnMoreText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.gold,
-  },
-  upgradeButtonContainer: {
-    flex: 2,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  upgradeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  upgradeButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  dismissButton: {
-    alignItems: 'center',
-    paddingVertical: 12,
-    marginTop: SPACING.md,
-    backgroundColor: '#FFBD59',
-    borderRadius: 22,
-  },
-  dismissText: {
-    color: '#1a1a2e',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
 
 export default ChatbotPricingModal;

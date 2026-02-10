@@ -3,7 +3,7 @@
  * Displays courses on sale with countdown timer
  */
 
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import { Zap, ChevronRight, Clock, Users, Star } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { supabase } from '../../services/supabase';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { BORDER_RADIUS } from '../../utils/tokens';
 import CountdownTimer from '../shop/CountdownTimer';
 
 // =============================================
@@ -42,9 +43,101 @@ const isCacheValid = () => {
 };
 
 // Flash Sale Course Card
-const FlashSaleCourseCard = ({ course, discountPercentage, onPress }) => {
+const FlashSaleCourseCard = ({ course, discountPercentage, onPress, colors, glass, settings, SPACING, TYPOGRAPHY }) => {
   const originalPrice = course.price || 0;
   const salePrice = Math.round(originalPrice * (1 - discountPercentage / 100));
+
+  const styles = useMemo(() => StyleSheet.create({
+    courseCard: {
+      width: 160,
+      marginRight: SPACING.md,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: BORDER_RADIUS.lg,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(156, 6, 18, 0.3)',
+    },
+    thumbnailContainer: {
+      height: 90,
+      position: 'relative',
+      backgroundColor: 'rgba(156, 6, 18, 0.2)',
+    },
+    thumbnail: {
+      width: '100%',
+      height: '100%',
+    },
+    thumbnailGradient: {
+      ...StyleSheet.absoluteFillObject,
+    },
+    thumbnailPlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    discountBadge: {
+      position: 'absolute',
+      top: SPACING.xs,
+      left: SPACING.xs,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.burgundy,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 2,
+      borderRadius: BORDER_RADIUS.sm,
+      gap: 2,
+    },
+    discountText: {
+      color: '#FFFFFF',
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    cardContent: {
+      padding: SPACING.sm,
+    },
+    courseTitle: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.xxs,
+      lineHeight: 18,
+    },
+    instructorName: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      marginBottom: SPACING.xs,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.xs,
+    },
+    statItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: SPACING.sm,
+    },
+    statText: {
+      fontSize: 10,
+      color: colors.textMuted,
+      marginLeft: 2,
+    },
+    priceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    salePrice: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.burgundy,
+    },
+    originalPrice: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      textDecorationLine: 'line-through',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <TouchableOpacity
@@ -91,16 +184,16 @@ const FlashSaleCourseCard = ({ course, discountPercentage, onPress }) => {
         <View style={styles.statsRow}>
           {course.rating > 0 && (
             <View style={styles.statItem}>
-              <Star size={10} color={COLORS.gold} fill={COLORS.gold} />
+              <Star size={10} color={colors.gold} fill={colors.gold} />
               <Text style={styles.statText}>{course.rating.toFixed(1)}</Text>
             </View>
           )}
           <View style={styles.statItem}>
-            <Users size={10} color={COLORS.textMuted} />
+            <Users size={10} color={colors.textMuted} />
             <Text style={styles.statText}>{course.student_count || 0}</Text>
           </View>
           <View style={styles.statItem}>
-            <Clock size={10} color={COLORS.textMuted} />
+            <Clock size={10} color={colors.textMuted} />
             <Text style={styles.statText}>{course.duration_minutes || 0}m</Text>
           </View>
         </View>
@@ -123,12 +216,63 @@ const FlashSaleCourseCard = ({ course, discountPercentage, onPress }) => {
 
 const CourseFlashSaleSection = ({ style }) => {
   const navigation = useNavigation();
+  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
 
   // Initialize state from cache if available (prevents loading flash)
   const [flashSale, setFlashSale] = useState(() => cachedFlashSale);
   const [courses, setCourses] = useState(() => cachedCourses);
   const [loading, setLoading] = useState(() => !isCacheValid());
   const [isExpired, setIsExpired] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: SPACING.xl,
+      backgroundColor: 'rgba(156, 6, 18, 0.1)',
+      paddingVertical: SPACING.lg,
+      borderRadius: BORDER_RADIUS.lg,
+      marginHorizontal: SPACING.lg,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.md,
+      marginBottom: SPACING.sm,
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.md,
+    },
+    titleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    subtitle: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      paddingHorizontal: SPACING.md,
+      marginBottom: SPACING.md,
+    },
+    seeAllButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    seeAllText: {
+      color: colors.burgundy,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    courseList: {
+      paddingHorizontal: SPACING.md,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Fetch active course flash sale
   const fetchFlashSale = useCallback(async () => {
@@ -234,6 +378,11 @@ const CourseFlashSaleSection = ({ style }) => {
       course={item}
       discountPercentage={flashSale?.discount_percentage || 30}
       onPress={handleCoursePress}
+      colors={colors}
+      glass={glass}
+      settings={settings}
+      SPACING={SPACING}
+      TYPOGRAPHY={TYPOGRAPHY}
     />
   );
 
@@ -250,7 +399,7 @@ const CourseFlashSaleSection = ({ style }) => {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.titleContainer}>
-            <Zap size={20} color={COLORS.burgundy} fill={COLORS.burgundy} />
+            <Zap size={20} color={colors.burgundy} fill={colors.burgundy} />
             <Text style={styles.title}>{flashSale.title || 'Flash Sale'}</Text>
           </View>
           <CountdownTimer
@@ -267,7 +416,7 @@ const CourseFlashSaleSection = ({ style }) => {
           activeOpacity={0.7}
         >
           <Text style={styles.seeAllText}>Xem tất cả</Text>
-          <ChevronRight size={16} color={COLORS.burgundy} />
+          <ChevronRight size={16} color={colors.burgundy} />
         </TouchableOpacity>
       </View>
 
@@ -288,147 +437,6 @@ const CourseFlashSaleSection = ({ style }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: SPACING.xl,
-    backgroundColor: 'rgba(156, 6, 18, 0.1)',
-    paddingVertical: SPACING.lg,
-    borderRadius: BORDER_RADIUS.lg,
-    marginHorizontal: SPACING.lg,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.sm,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  subtitle: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  seeAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  seeAllText: {
-    color: COLORS.burgundy,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  courseList: {
-    paddingHorizontal: SPACING.md,
-  },
-
-  // Course Card Styles
-  courseCard: {
-    width: 160,
-    marginRight: SPACING.md,
-    backgroundColor: COLORS.glassBg,
-    borderRadius: BORDER_RADIUS.lg,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(156, 6, 18, 0.3)',
-  },
-  thumbnailContainer: {
-    height: 90,
-    position: 'relative',
-    backgroundColor: 'rgba(156, 6, 18, 0.2)',
-  },
-  thumbnail: {
-    width: '100%',
-    height: '100%',
-  },
-  thumbnailGradient: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  thumbnailPlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  discountBadge: {
-    position: 'absolute',
-    top: SPACING.xs,
-    left: SPACING.xs,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.burgundy,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.sm,
-    gap: 2,
-  },
-  discountText: {
-    color: '#FFFFFF',
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  cardContent: {
-    padding: SPACING.sm,
-  },
-  courseTitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xxs,
-    lineHeight: 18,
-  },
-  instructorName: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.xs,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.xs,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: SPACING.sm,
-  },
-  statText: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-    marginLeft: 2,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  salePrice: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.burgundy,
-  },
-  originalPrice: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    textDecorationLine: 'line-through',
-  },
-});
 
 // Memoize to prevent unnecessary re-renders
 export default memo(CourseFlashSaleSection);

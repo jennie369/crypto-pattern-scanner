@@ -180,8 +180,24 @@ const TradingChart = ({
       const binanceInterval = TIMEFRAME_TO_BINANCE[timeframe] || timeframe;
       setActiveTimeframe(timeframe);
 
-      // Use injection method if chart is ready, otherwise reload
+      // ✅ FIX: Clear zones IMMEDIATELY when timeframe changes to prevent zone bleed
+      // This ensures old zones don't appear while new data loads
       if (chartReady && webViewRef.current) {
+        webViewRef.current.injectJavaScript(`
+          if (window.clearZones) {
+            window.clearZones();
+            console.log('[Chart] Zones cleared on TF change');
+          }
+          true;
+        `);
+      }
+
+      // ✅ FIX: Reset chartReady to prevent zone injection before new data loads
+      // The timeframe_changed message will set it back to true
+      setChartReady(false);
+
+      // Use injection method if chart was ready, otherwise reload
+      if (webViewRef.current) {
         webViewRef.current.injectJavaScript(`
           if (window.changeTimeframe) {
             window.changeTimeframe('${binanceInterval}');
@@ -651,17 +667,10 @@ const TradingChart = ({
           }, 150);
         }
 
-        // Refresh zones
-        if (webViewRef.current && zones.length > 0) {
-          setTimeout(() => {
-            webViewRef.current?.injectJavaScript(`
-              if (window.updateZones) {
-                window.updateZones(${JSON.stringify(zones)}, ${JSON.stringify(zonePreferences)});
-              }
-              true;
-            `);
-          }, 200);
-        }
+        // ✅ FIX: Set chartReady=true AFTER new data loaded
+        // This triggers the chartReady effect which injects zones from zonesRef.current
+        // Replacing the stale-closure zone injection that used old zones prop
+        setChartReady(true);
       } else if (data.type === 'zone_press') {
         // Handle zone press event
         console.log('[TradingChart] Zone pressed:', data.zoneId);
@@ -2588,18 +2597,55 @@ const TradingChart = ({
         let x1 = timeScale.timeToCoordinate(startTime);
         const x2 = endTime ? timeScale.timeToCoordinate(endTime) : null;
 
-        // ⚠️ FALLBACK: If x1 is null, use fixed position (8 candles from right)
-        // This handles cases where formation_time is outside visible range or far in the past
-        // DO NOT scroll chart here - it will interfere with user scrolling
+        // ⚠️ IMPROVED FALLBACK: If x1 is null, use candle index or intelligent positioning
+        // Don't just use fixed "8 candles from right" - try to anchor to actual candles
         if (x1 === null && lastCandleData && lastCandleData.length > 0) {
-          // Get timestamp of candle ~8 positions from the end
-          const fallbackIndex = Math.max(0, lastCandleData.length - 8);
-          const fallbackCandle = lastCandleData[fallbackIndex];
-          if (fallbackCandle?.time) {
-            startTime = fallbackCandle.time;
-            x1 = timeScale.timeToCoordinate(startTime);
-            if (idx === 0) {
-              console.log('[Zone] FALLBACK - using position 8 candles from right, x1:', x1);
+          // PRIORITY 1: Use start_candle_index if available and valid
+          const candleIdx = zone.start_candle_index ?? zone.startCandleIndex;
+          if (candleIdx !== null && candleIdx !== undefined && candleIdx >= 0 && candleIdx < lastCandleData.length) {
+            const candle = lastCandleData[candleIdx];
+            if (candle?.time) {
+              startTime = candle.time;
+              x1 = timeScale.timeToCoordinate(startTime);
+              if (idx === 0) {
+                console.log('[Zone] FALLBACK via candle index:', candleIdx, 'x1:', x1);
+              }
+            }
+          }
+
+          // PRIORITY 2: If startTime exists but is in the past (before visible data), find closest candle
+          if (x1 === null && startTime > 0) {
+            // Find the candle closest to startTime
+            let closestIdx = 0;
+            let closestDiff = Infinity;
+            for (let i = 0; i < lastCandleData.length; i++) {
+              const diff = Math.abs(lastCandleData[i].time - startTime);
+              if (diff < closestDiff) {
+                closestDiff = diff;
+                closestIdx = i;
+              }
+            }
+            const closestCandle = lastCandleData[closestIdx];
+            if (closestCandle?.time) {
+              startTime = closestCandle.time;
+              x1 = timeScale.timeToCoordinate(startTime);
+              if (idx === 0) {
+                console.log('[Zone] FALLBACK via closest candle at idx:', closestIdx, 'x1:', x1);
+              }
+            }
+          }
+
+          // PRIORITY 3: Last resort - position near recent candles (not fixed at 8)
+          if (x1 === null) {
+            // Use 20% from right edge based on candle count
+            const fallbackIndex = Math.max(0, Math.floor(lastCandleData.length * 0.8));
+            const fallbackCandle = lastCandleData[fallbackIndex];
+            if (fallbackCandle?.time) {
+              startTime = fallbackCandle.time;
+              x1 = timeScale.timeToCoordinate(startTime);
+              if (idx === 0) {
+                console.log('[Zone] FALLBACK via proportional position:', fallbackIndex, 'x1:', x1);
+              }
             }
           }
         }

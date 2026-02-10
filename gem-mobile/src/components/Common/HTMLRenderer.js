@@ -1,16 +1,18 @@
 /**
  * HTMLRenderer - Renders HTML content from Shopify using WebView
  * Properly displays tables, lists, and formatted text
+ * Theme-aware component
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { COLORS, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const HTMLRenderer = ({ html, style }) => {
+  const { colors, settings } = useSettings();
   const [webViewHeight, setWebViewHeight] = useState(200);
 
   // Handle height change from WebView
@@ -21,10 +23,33 @@ const HTMLRenderer = ({ html, style }) => {
     }
   }, []);
 
-  if (!html) return null;
+  // Memoize styles
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      width: '100%',
+      overflow: 'hidden',
+    },
+    webview: {
+      width: SCREEN_WIDTH - 64,
+      backgroundColor: 'transparent',
+    },
+  }), []);
 
-  // Wrap HTML with proper styling
-  const wrappedHtml = `
+  // Memoize wrapped HTML to avoid recreation on every render
+  const wrappedHtml = useMemo(() => {
+    if (!html) return '';
+
+    // Theme-aware colors
+    const textPrimary = colors.textPrimary;
+    const textSecondary = colors.textSecondary;
+    const goldColor = colors.gold;
+    const purpleColor = colors.purple || colors.burgundy || '#9C0612';
+    const borderColor = settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(106, 91, 255, 0.3)';
+    const tableBg = settings.theme === 'light' ? 'rgba(0, 0, 0, 0.02)' : 'rgba(106, 91, 255, 0.08)';
+    const theadBg = settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(106, 91, 255, 0.2)';
+    const codeBg = settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(106, 91, 255, 0.1)';
+
+    return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -39,17 +64,17 @@ const HTMLRenderer = ({ html, style }) => {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           font-size: 15px;
           line-height: 1.6;
-          color: ${COLORS.textPrimary};
+          color: ${textPrimary};
           background-color: transparent;
           padding: 0;
           margin: 0;
         }
         p {
           margin-bottom: 12px;
-          color: ${COLORS.textPrimary};
+          color: ${textPrimary};
         }
         h1, h2, h3, h4, h5, h6 {
-          color: ${COLORS.gold};
+          color: ${goldColor};
           margin-bottom: 10px;
           margin-top: 16px;
           font-weight: 600;
@@ -64,17 +89,17 @@ const HTMLRenderer = ({ html, style }) => {
         }
         li {
           margin-bottom: 6px;
-          color: ${COLORS.textSecondary};
+          color: ${textSecondary};
         }
         strong, b {
-          color: ${COLORS.textPrimary};
+          color: ${textPrimary};
           font-weight: 600;
         }
         em, i {
           font-style: italic;
         }
         a {
-          color: ${COLORS.purple};
+          color: ${purpleColor};
           text-decoration: none;
         }
         /* Table Styles */
@@ -82,26 +107,26 @@ const HTMLRenderer = ({ html, style }) => {
           width: 100%;
           border-collapse: collapse;
           margin: 16px 0;
-          background: rgba(106, 91, 255, 0.08);
+          background: ${tableBg};
           border-radius: 12px;
           overflow: hidden;
-          border: 1px solid rgba(106, 91, 255, 0.3);
+          border: 1px solid ${borderColor};
         }
         thead {
-          background: rgba(106, 91, 255, 0.2);
+          background: ${theadBg};
         }
         th {
           padding: 12px 10px;
           text-align: left;
           font-weight: 600;
-          color: ${COLORS.gold};
-          border-bottom: 1px solid rgba(106, 91, 255, 0.3);
+          color: ${goldColor};
+          border-bottom: 1px solid ${borderColor};
           font-size: 13px;
         }
         td {
           padding: 10px;
-          border-bottom: 1px solid rgba(106, 91, 255, 0.15);
-          color: ${COLORS.textPrimary};
+          border-bottom: 1px solid ${settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(106, 91, 255, 0.15)'};
+          color: ${textPrimary};
           font-size: 14px;
           vertical-align: top;
         }
@@ -109,12 +134,11 @@ const HTMLRenderer = ({ html, style }) => {
           border-bottom: none;
         }
         tr:nth-child(even) {
-          background: rgba(106, 91, 255, 0.05);
+          background: ${settings.theme === 'light' ? 'rgba(0, 0, 0, 0.02)' : 'rgba(106, 91, 255, 0.05)'};
         }
-        /* First column styling */
         td:first-child, th:first-child {
           font-weight: 500;
-          color: ${COLORS.textPrimary};
+          color: ${textPrimary};
           min-width: 80px;
         }
         img {
@@ -125,25 +149,25 @@ const HTMLRenderer = ({ html, style }) => {
         }
         hr {
           border: none;
-          border-top: 1px solid rgba(106, 91, 255, 0.2);
+          border-top: 1px solid ${borderColor};
           margin: 16px 0;
         }
         blockquote {
-          border-left: 3px solid ${COLORS.gold};
+          border-left: 3px solid ${goldColor};
           padding-left: 12px;
           margin: 12px 0;
-          color: ${COLORS.textSecondary};
+          color: ${textSecondary};
           font-style: italic;
         }
         code {
-          background: rgba(106, 91, 255, 0.1);
+          background: ${codeBg};
           padding: 2px 6px;
           border-radius: 4px;
           font-family: monospace;
           font-size: 13px;
         }
         pre {
-          background: rgba(106, 91, 255, 0.1);
+          background: ${codeBg};
           padding: 12px;
           border-radius: 8px;
           overflow-x: auto;
@@ -154,24 +178,22 @@ const HTMLRenderer = ({ html, style }) => {
     <body>
       ${html}
       <script>
-        // Send height to React Native
         function sendHeight() {
           const height = document.body.scrollHeight;
           window.ReactNativeWebView.postMessage(String(height));
         }
-        // Initial height
         setTimeout(sendHeight, 100);
-        // On load
         window.onload = sendHeight;
-        // On resize
         window.onresize = sendHeight;
-        // Observe DOM changes
         const observer = new MutationObserver(sendHeight);
         observer.observe(document.body, { childList: true, subtree: true });
       </script>
     </body>
     </html>
   `;
+  }, [html, colors, settings.theme]);
+
+  if (!html) return null;
 
   return (
     <View style={[styles.container, style]}>
@@ -194,16 +216,5 @@ const HTMLRenderer = ({ html, style }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    overflow: 'hidden',
-  },
-  webview: {
-    width: SCREEN_WIDTH - 64, // Account for section padding
-    backgroundColor: 'transparent',
-  },
-});
 
 export default HTMLRenderer;

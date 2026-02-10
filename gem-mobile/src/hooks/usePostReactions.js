@@ -13,6 +13,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import reactionService from '../services/reactionService';
+import { formatError } from '../utils/errorUtils';
 import {
   REACTION_ORDER,
   DEFAULT_REACTION_COUNTS,
@@ -101,7 +102,7 @@ export const usePostReactions = (
         currentReactionRef.current = reactionType; // Sync ref
         setUserReaction(reactionType);
       } catch (err) {
-        console.error('[usePostReactions] Fetch error:', err);
+        console.error('[usePostReactions] Fetch error:', formatError(err));
       }
     };
 
@@ -193,7 +194,7 @@ export const usePostReactions = (
         console.log('[usePostReactions] Reaction added:', reactionType, 'oldReaction:', oldReaction);
       } catch (err) {
         // Rollback on error
-        console.error('[usePostReactions] Add error:', err);
+        console.error('[usePostReactions] Add error:', formatError(err));
         currentReactionRef.current = previousReactionRef.current; // Rollback ref
         setUserReaction(previousReactionRef.current);
         setReactionCounts(previousCountsRef.current);
@@ -249,7 +250,7 @@ export const usePostReactions = (
       console.log('[usePostReactions] Reaction removed');
     } catch (err) {
       // Rollback on error
-      console.error('[usePostReactions] Remove error:', err);
+      console.error('[usePostReactions] Remove error:', formatError(err));
       currentReactionRef.current = previousReactionRef.current; // Rollback ref
       setUserReaction(previousReactionRef.current);
       setReactionCounts(previousCountsRef.current);
@@ -308,7 +309,7 @@ export const usePostReactions = (
       const counts = await reactionService.getReactionCounts(postId);
       setReactionCounts(counts);
     } catch (err) {
-      console.error('[usePostReactions] Refresh counts error:', err);
+      console.error('[usePostReactions] Refresh counts error:', formatError(err));
     }
   }, [postId]);
 

@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Target, Wallet, Briefcase, Heart, User, Sparkles, TrendingUp } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import OptimizedImage from '../Common/OptimizedImage';
 
 // ========== CONSTANTS ==========

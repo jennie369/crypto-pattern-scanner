@@ -8,7 +8,7 @@
  * - Action Cards Grid
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
   Dimensions,
   Modal,
   InteractionManager,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -84,10 +85,9 @@ import {
 import { Switch } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import useScrollToTop from '../../hooks/useScrollToTop';
 import { forumService } from '../../services/forumService';
 import { signOut, supabase } from '../../services/supabase';
@@ -102,6 +102,7 @@ import BiometricSetupModal from '../../components/Auth/BiometricSetupModal';
 import { getSession } from '../../services/supabase';
 import { UserBadges } from '../../components/UserBadge';
 import { UpgradeBanner } from '../../components/upgrade';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // ============================================
 // GLOBAL CACHE - persists across tab switches
@@ -119,6 +120,7 @@ export default function AccountScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { user, profile: authProfile, isAdmin } = useAuth();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const { alert, AlertComponent } = useCustomAlert();
 
   // State - initialize from cache for instant display
@@ -203,6 +205,24 @@ export default function AccountScreen() {
       }
     }, [user?.id, isAdmin])
   );
+
+  // Listen for FORCE_REFRESH_EVENT from app resume recovery system
+  // Invalidates cache so next focus will re-fetch fresh data (profile, avatar, role, stats)
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[AccountScreen] Force refresh event received - invalidating cache');
+      accountCache.lastFetch = 0; // Invalidate cache
+      accountCache.profile = null; // Clear stale profile (avatar, role)
+      // Reload immediately if screen is visible
+      if (user?.id) {
+        loadData();
+        if (isAdmin) {
+          loadAdminStats();
+        }
+      }
+    });
+    return () => listener.remove();
+  }, [user?.id, isAdmin]);
 
   // Handle deep link from notification - navigate to VisionBoard
   useEffect(() => {
@@ -485,8 +505,8 @@ export default function AccountScreen() {
       <View style={styles.adminSection}>
         {/* Admin Header */}
         <View style={styles.adminHeader}>
-          <Shield size={18} color={COLORS.gold} />
-          <Text style={styles.adminHeaderText}>ADMIN PANEL</Text>
+          <Shield size={18} color={colors.gold} />
+          <Text style={styles.adminHeaderText}>{t('account.admin.title', 'ADMIN PANEL')}</Text>
         </View>
 
         {/* Main Dashboard Button */}
@@ -496,10 +516,10 @@ export default function AccountScreen() {
           activeOpacity={0.8}
         >
           <View style={styles.adminButtonContent}>
-            <Settings size={18} color={COLORS.textPrimary} />
-            <Text style={styles.adminButtonText}>Quản Lý Hệ Thống</Text>
+            <Settings size={18} color={colors.textPrimary} />
+            <Text style={styles.adminButtonText}>{t('account.admin.systemManagement', 'Quản Lý Hệ Thống')}</Text>
           </View>
-          <ChevronRight size={18} color={COLORS.textMuted} />
+          <ChevronRight size={18} color={colors.textMuted} />
         </TouchableOpacity>
 
         {/* Quick Actions Row 1 */}
@@ -508,8 +528,8 @@ export default function AccountScreen() {
             style={styles.adminQuickBtn}
             onPress={() => navigation.navigate('AdminApplications')}
           >
-            <FileText size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Đơn đăng ký</Text>
+            <FileText size={18} color={colors.gold} />
+            <Text style={styles.adminQuickText}>{t('account.admin.applications', 'Đơn đăng ký')}</Text>
             {adminStats.pendingApplications > 0 && (
               <View style={styles.adminBadgeCount}>
                 <Text style={styles.adminBadgeCountText}>{adminStats.pendingApplications}</Text>
@@ -521,8 +541,8 @@ export default function AccountScreen() {
             style={styles.adminQuickBtn}
             onPress={() => navigation.navigate('AdminWithdrawals')}
           >
-            <CreditCard size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Rút tiền</Text>
+            <CreditCard size={18} color={colors.gold} />
+            <Text style={styles.adminQuickText}>{t('account.admin.withdrawals', 'Rút tiền')}</Text>
             {adminStats.pendingWithdrawals > 0 && (
               <View style={styles.adminBadgeCount}>
                 <Text style={styles.adminBadgeCountText}>{adminStats.pendingWithdrawals}</Text>
@@ -534,8 +554,8 @@ export default function AccountScreen() {
             style={styles.adminQuickBtn}
             onPress={() => navigation.navigate('AdminUsers')}
           >
-            <Users size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Users</Text>
+            <Users size={18} color={colors.gold} />
+            <Text style={styles.adminQuickText}>{t('account.admin.users', 'Users')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -545,16 +565,16 @@ export default function AccountScreen() {
             style={[styles.adminQuickBtn, styles.adminQuickBtnWide]}
             onPress={() => navigation.navigate('AdminCourses')}
           >
-            <GraduationCap size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Quản lý khóa học</Text>
+            <GraduationCap size={18} color={colors.gold} />
+            <Text style={styles.adminQuickText}>{t('account.admin.courseManagement', 'Quản lý khóa học')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.adminQuickBtn, styles.adminQuickBtnWide]}
             onPress={() => navigation.navigate('GrantAccess')}
           >
-            <UserCheck size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Cấp quyền truy cập</Text>
+            <UserCheck size={18} color={colors.gold} />
+            <Text style={styles.adminQuickText}>{t('account.admin.grantAccess', 'Cấp quyền truy cập')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -564,8 +584,8 @@ export default function AccountScreen() {
             style={[styles.adminQuickBtn, styles.adminQuickBtnWide]}
             onPress={() => navigation.navigate('AffiliateExchangeAdmin')}
           >
-            <Building2 size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Exchange Affiliate</Text>
+            <Building2 size={18} color={colors.gold} />
+            <Text style={styles.adminQuickText}>{t('account.admin.exchangeAffiliate', 'Exchange Affiliate')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -618,30 +638,146 @@ export default function AccountScreen() {
     setProfile(prev => ({ ...prev, ...updatedProfile }));
   };
 
+  // Theme-aware styles
+  const styles = useMemo(() => StyleSheet.create({
+    gradient: { flex: 1 },
+    container: { flex: 1 },
+    scrollView: { flex: 1 },
+    scrollContent: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.md,
+      paddingBottom: CONTENT_BOTTOM_PADDING + 40,
+    },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    loadingText: { marginTop: SPACING.md, fontSize: TYPOGRAPHY.fontSize.lg, color: colors.textSecondary },
+    notLoggedIn: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.huge },
+    notLoggedInTitle: { fontSize: TYPOGRAPHY.fontSize.display, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.textPrimary, marginTop: SPACING.lg },
+    notLoggedInText: { fontSize: TYPOGRAPHY.fontSize.lg, color: colors.textMuted, textAlign: 'center', marginTop: SPACING.sm, marginBottom: SPACING.xxl },
+    loginButton: { borderRadius: 12, overflow: 'hidden' },
+    loginButtonGradient: { paddingHorizontal: SPACING.huge, paddingVertical: SPACING.md, borderRadius: 12, borderWidth: 1, borderColor: colors.gold },
+    loginButtonText: { fontSize: TYPOGRAPHY.fontSize.xl, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.textPrimary },
+    profileSection: { flexDirection: 'row', alignItems: 'center', backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: glass.borderRadius || 16, padding: SPACING.lg, marginBottom: SPACING.md, borderWidth: 1, borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.2)' },
+    avatarContainer: { position: 'relative' },
+    avatar: { width: 70, height: 70, borderRadius: 35, backgroundColor: colors.bgMid },
+    avatarGradient: { width: 70, height: 70, borderRadius: 35, justifyContent: 'center', alignItems: 'center' },
+    avatarText: { fontSize: 28, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.textPrimary },
+    cameraButton: { position: 'absolute', bottom: 0, right: -4, width: 26, height: 26, borderRadius: 13, backgroundColor: colors.purple || colors.burgundy, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.bgMid },
+    userInfo: { flex: 1, marginLeft: SPACING.md },
+    displayName: { fontSize: TYPOGRAPHY.fontSize.xxxl, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.textPrimary },
+    username: { fontSize: TYPOGRAPHY.fontSize.md, color: colors.textMuted, marginTop: 2 },
+    bio: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textSecondary, marginTop: SPACING.xs, lineHeight: 16 },
+    editButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: 8, backgroundColor: settings.theme === 'light' ? 'rgba(255, 189, 89, 0.2)' : 'rgba(255, 189, 89, 0.1)', gap: 6 },
+    editButtonText: { fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.gold },
+    nameRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+    statsContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: 14, padding: SPACING.lg, marginBottom: SPACING.sm, borderWidth: 1, borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.2)' },
+    statItem: { flex: 1, alignItems: 'center' },
+    statNumber: { fontSize: TYPOGRAPHY.fontSize.display, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.cyan },
+    statLabel: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textMuted, marginTop: 4 },
+    statDivider: { width: 1, height: 30, backgroundColor: settings.theme === 'light' ? colors.border : 'rgba(255, 255, 255, 0.1)' },
+    viewProfileButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: 12, padding: SPACING.md, marginBottom: SPACING.lg, gap: SPACING.sm, borderWidth: 1, borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.2)' },
+    viewProfileText: { flex: 1, fontSize: TYPOGRAPHY.fontSize.lg, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.purple || colors.burgundy },
+    section: { marginBottom: SPACING.lg },
+    sectionTitle: { fontSize: TYPOGRAPHY.fontSize.lg, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.textPrimary, marginBottom: SPACING.md, marginLeft: 4 },
+    sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.md, marginLeft: 4 },
+    menuItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: 14, padding: SPACING.md, marginBottom: SPACING.sm, borderWidth: 1, borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.15)' },
+    menuIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+    menuContent: { flex: 1, marginLeft: SPACING.md },
+    menuText: { fontSize: TYPOGRAPHY.fontSize.lg, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.textPrimary },
+    menuSubtext: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textMuted, marginTop: 2 },
+    gemBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(58, 247, 166, 0.15)', paddingHorizontal: SPACING.sm, paddingVertical: SPACING.xs, borderRadius: 12, marginRight: SPACING.sm, gap: 4 },
+    gemBadgeText: { fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.success || colors.successText },
+    logoutItem: { borderColor: 'rgba(255, 107, 107, 0.3)' },
+    orderStatusRow: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: 14, padding: SPACING.lg, marginTop: SPACING.xs, borderWidth: 1, borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.15)' },
+    orderStatusItem: { alignItems: 'center' },
+    orderStatusIcon: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginBottom: SPACING.sm },
+    orderStatusText: { fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: TYPOGRAPHY.fontWeight.medium, color: colors.textSecondary },
+    affiliateCard: { backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: glass.borderRadius || 16, padding: SPACING.lg, borderWidth: 1, borderColor: settings.theme === 'light' ? colors.gold : 'rgba(255, 189, 89, 0.3)' },
+    affiliateHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.lg },
+    affiliateInfo: { marginLeft: SPACING.md },
+    affiliateTitle: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textMuted },
+    affiliateCode: { fontSize: TYPOGRAPHY.fontSize.xxxl, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.gold, marginTop: 4 },
+    affiliateActions: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.lg },
+    affiliateButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.burgundy || colors.purple, paddingVertical: SPACING.md, borderRadius: 10, gap: SPACING.sm },
+    affiliateButtonOutline: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.gold },
+    affiliateButtonText: { fontSize: TYPOGRAPHY.fontSize.lg, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.textPrimary },
+    commissionRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: settings.theme === 'light' ? colors.border : 'rgba(255, 255, 255, 0.1)', paddingTop: SPACING.lg },
+    commissionItem: { flex: 1, alignItems: 'center' },
+    commissionValue: { fontSize: TYPOGRAPHY.fontSize.xxxl, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.success || colors.successText },
+    commissionLabel: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textMuted, marginTop: 4 },
+    visionBoardCard: { marginBottom: SPACING.lg, borderRadius: 14, overflow: 'hidden', backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderWidth: 1, borderColor: settings.theme === 'light' ? colors.gold : 'rgba(255, 189, 89, 0.3)' },
+    visionBoardContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: SPACING.lg },
+    visionBoardLeft: { flex: 1 },
+    visionBoardIconRow: { flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.sm },
+    visionBoardTitle: { fontSize: TYPOGRAPHY.fontSize.xl, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.textPrimary, marginBottom: 2 },
+    visionBoardSubtitle: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textMuted },
+    visionBoardRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+    visionBoardStats: { alignItems: 'flex-end', gap: 4 },
+    visionBoardStatItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    visionBoardStatText: { fontSize: TYPOGRAPHY.fontSize.xs, color: colors.textMuted },
+    livestreamCard: { marginBottom: SPACING.lg, borderRadius: 14, overflow: 'hidden', backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderWidth: 1, borderColor: 'rgba(255, 107, 107, 0.3)' },
+    livestreamContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: SPACING.lg },
+    livestreamLeft: { flex: 1 },
+    livestreamIconRow: { flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.sm, gap: SPACING.sm },
+    liveBadge: { backgroundColor: colors.error, paddingHorizontal: SPACING.sm, paddingVertical: 2, borderRadius: 4 },
+    liveBadgeText: { fontSize: 10, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.white || '#FFFFFF' },
+    livestreamTitle: { fontSize: TYPOGRAPHY.fontSize.xl, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.textPrimary, marginBottom: 2 },
+    livestreamSubtitle: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textMuted },
+    livestreamRight: { flexDirection: 'row', alignItems: 'center' },
+    widgetWrapper: { borderRadius: 14, overflow: 'hidden' },
+    widgetHighlighted: { borderWidth: 2, borderColor: colors.gold, shadowColor: colors.gold, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 10, elevation: 8 },
+    confettiContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 999 },
+    confetti: { flex: 1 },
+    confettiDot: { position: 'absolute', width: 10, height: 10, borderRadius: 5, top: -10 },
+    adminSection: { backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: 14, padding: SPACING.lg, marginBottom: SPACING.lg, borderWidth: 1, borderColor: settings.theme === 'light' ? colors.gold : 'rgba(255, 189, 89, 0.3)' },
+    adminHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.md, gap: SPACING.sm },
+    adminHeaderText: { fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.gold, letterSpacing: 1.5 },
+    adminMainButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: settings.theme === 'light' ? 'rgba(106, 91, 255, 0.1)' : 'rgba(106, 91, 255, 0.15)', borderRadius: 12, padding: SPACING.md, marginBottom: SPACING.md },
+    adminButtonContent: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+    adminButtonText: { fontSize: TYPOGRAPHY.fontSize.lg, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.textPrimary },
+    adminQuickActions: { flexDirection: 'row', justifyContent: 'space-between', gap: SPACING.sm, marginTop: SPACING.xs },
+    adminQuickBtn: { flex: 1, alignItems: 'center', backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.03)', borderRadius: 10, padding: SPACING.md, borderWidth: 1, borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.1)' },
+    adminQuickBtnWide: { flexDirection: 'row', justifyContent: 'center', gap: SPACING.sm, minHeight: 48 },
+    adminQuickText: { fontSize: TYPOGRAPHY.fontSize.xs, color: colors.textSecondary, marginTop: SPACING.xs, textAlign: 'center' },
+    adminBadgeCount: { position: 'absolute', top: -4, right: -4, backgroundColor: colors.error, borderRadius: 10, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
+    adminBadgeCountText: { fontSize: 10, fontWeight: '700', color: '#FFF' },
+    assetStatsContainer: { flexDirection: 'row', paddingVertical: SPACING.lg, gap: SPACING.md },
+    assetStatCard: { flex: 1, backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: glass.borderRadius || 16, padding: SPACING.lg, alignItems: 'center', borderWidth: glass.borderWidth || 1, borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.2)' },
+    assetStatIconContainer: { marginBottom: SPACING.sm },
+    assetStatValue: { fontSize: TYPOGRAPHY.fontSize.display, fontWeight: TYPOGRAPHY.fontWeight.bold, color: colors.textPrimary, marginBottom: SPACING.xxs },
+    assetStatLabel: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textMuted, marginBottom: SPACING.xxs },
+    assetStatSubtitle: { fontSize: TYPOGRAPHY.fontSize.xs, color: colors.textSubtle || colors.textMuted },
+    quickActionsSectionTitle: { fontSize: TYPOGRAPHY.fontSize.xxxl, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.textPrimary, paddingTop: SPACING.md, paddingBottom: SPACING.md },
+    actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md, marginBottom: SPACING.lg },
+    actionCard: { width: (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2, backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), borderRadius: glass.borderRadius || 16, padding: SPACING.lg, borderWidth: glass.borderWidth || 1, borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.2)' },
+    actionIconContainer: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.md },
+    actionTitle: { fontSize: TYPOGRAPHY.fontSize.xxl, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: colors.textPrimary, marginBottom: SPACING.xxs },
+    actionSubtitle: { fontSize: TYPOGRAPHY.fontSize.sm, color: colors.textMuted },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Not logged in state
   if (!user) {
     return (
       <LinearGradient
-        colors={GRADIENTS.background}
-        locations={GRADIENTS.backgroundLocations}
+        colors={gradients.background}
+        locations={gradients.backgroundLocations}
         style={styles.gradient}
       >
         <SafeAreaView style={styles.container} edges={['top']}>
           <View style={styles.notLoggedIn}>
-            <User size={60} color={COLORS.textMuted} />
-            <Text style={styles.notLoggedInTitle}>Chưa đăng nhập</Text>
+            <User size={60} color={colors.textMuted} />
+            <Text style={styles.notLoggedInTitle}>{t('account.notLoggedIn.title', 'Chưa đăng nhập')}</Text>
             <Text style={styles.notLoggedInText}>
-              Đăng nhập để quản lý tài khoản của bạn
+              {t('account.notLoggedIn.description', 'Đăng nhập để quản lý tài khoản của bạn')}
             </Text>
             <TouchableOpacity
               style={styles.loginButton}
               onPress={() => navigation.navigate('Auth')}
             >
               <LinearGradient
-                colors={GRADIENTS.primaryButton}
+                colors={gradients.primaryButton}
                 style={styles.loginButtonGradient}
               >
-                <Text style={styles.loginButtonText}>Đăng Nhập</Text>
+                <Text style={styles.loginButtonText}>{t('common.login', 'Đăng Nhập')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -660,8 +796,8 @@ export default function AccountScreen() {
 
   return (
     <LinearGradient
-      colors={GRADIENTS.background}
-      locations={GRADIENTS.backgroundLocations}
+      colors={gradients.background}
+      locations={gradients.backgroundLocations}
       style={styles.gradient}
     >
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -673,8 +809,8 @@ export default function AccountScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={COLORS.gold}
-              colors={[COLORS.gold]}
+              tintColor={colors.gold}
+              colors={[colors.gold]}
             />
           }
           showsVerticalScrollIndicator={false}
@@ -691,14 +827,14 @@ export default function AccountScreen() {
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={styles.avatar} />
               ) : (
-                <LinearGradient colors={GRADIENTS.avatar} style={styles.avatarGradient}>
+                <LinearGradient colors={gradients.avatar} style={styles.avatarGradient}>
                   <Text style={styles.avatarText}>
                     {displayName.charAt(0).toUpperCase()}
                   </Text>
                 </LinearGradient>
               )}
               <View style={styles.cameraButton}>
-                <Camera size={14} color={COLORS.textPrimary} />
+                <Camera size={14} color={colors.textPrimary} />
               </View>
             </TouchableOpacity>
 
@@ -717,8 +853,8 @@ export default function AccountScreen() {
               style={styles.editButton}
               onPress={() => setEditModalVisible(true)}
             >
-              <Edit2 size={16} color={COLORS.gold} />
-              <Text style={styles.editButtonText}>Sửa</Text>
+              <Edit2 size={16} color={colors.gold} />
+              <Text style={styles.editButtonText}>{t('common.edit', 'Sửa')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -727,9 +863,9 @@ export default function AccountScreen() {
             style={styles.viewProfileButton}
             onPress={() => navigation.navigate('ProfileFull')}
           >
-            <User size={18} color={COLORS.purple} />
-            <Text style={styles.viewProfileText}>Xem trang cá nhân đầy đủ</Text>
-            <ChevronRight size={18} color={COLORS.textMuted} />
+            <User size={18} color={colors.purple || colors.burgundy} />
+            <Text style={styles.viewProfileText}>{t('account.viewProfile', 'Xem trang cá nhân đầy đủ')}</Text>
+            <ChevronRight size={18} color={colors.textMuted} />
           </TouchableOpacity>
 
           {/* ═══════════════════════════════════════════ */}
@@ -753,24 +889,24 @@ export default function AccountScreen() {
             <View style={styles.visionBoardContent}>
               <View style={styles.visionBoardLeft}>
                 <View style={styles.visionBoardIconRow}>
-                  <Eye size={20} color={COLORS.gold} />
-                  <Sparkles size={14} color={COLORS.gold} style={{ marginLeft: 6 }} />
+                  <Eye size={20} color={colors.gold} />
+                  <Sparkles size={14} color={colors.gold} style={{ marginLeft: 6 }} />
                 </View>
-                <Text style={styles.visionBoardTitle}>Vision Board</Text>
-                <Text style={styles.visionBoardSubtitle}>Mục tiêu & Affirmations</Text>
+                <Text style={styles.visionBoardTitle}>{t('account.visionBoard.title', 'Vision Board')}</Text>
+                <Text style={styles.visionBoardSubtitle}>{t('account.visionBoard.subtitle', 'Mục tiêu & Affirmations')}</Text>
               </View>
               <View style={styles.visionBoardRight}>
                 <View style={styles.visionBoardStats}>
                   <View style={styles.visionBoardStatItem}>
-                    <Target size={14} color={COLORS.gold} />
-                    <Text style={styles.visionBoardStatText}>Goals</Text>
+                    <Target size={14} color={colors.gold} />
+                    <Text style={styles.visionBoardStatText}>{t('account.visionBoard.goals', 'Goals')}</Text>
                   </View>
                   <View style={styles.visionBoardStatItem}>
-                    <Sparkles size={14} color={COLORS.gold} />
-                    <Text style={styles.visionBoardStatText}>Daily</Text>
+                    <Sparkles size={14} color={colors.gold} />
+                    <Text style={styles.visionBoardStatText}>{t('account.visionBoard.daily', 'Daily')}</Text>
                   </View>
                 </View>
-                <ChevronRight size={20} color={COLORS.textMuted} />
+                <ChevronRight size={20} color={colors.textMuted} />
               </View>
             </View>
           </Pressable>
@@ -791,16 +927,16 @@ export default function AccountScreen() {
             <View style={styles.livestreamContent}>
               <View style={styles.livestreamLeft}>
                 <View style={styles.livestreamIconRow}>
-                  <Radio size={20} color={COLORS.error} />
+                  <Radio size={20} color={colors.error} />
                   <View style={styles.liveBadge}>
                     <Text style={styles.liveBadgeText}>AI</Text>
                   </View>
                 </View>
-                <Text style={styles.livestreamTitle}>AI Livestream</Text>
-                <Text style={styles.livestreamSubtitle}>Avatar AI bán hàng tự động</Text>
+                <Text style={styles.livestreamTitle}>{t('account.livestream.title', 'AI Livestream')}</Text>
+                <Text style={styles.livestreamSubtitle}>{t('account.livestream.subtitle', 'Avatar AI bán hàng tự động')}</Text>
               </View>
               <View style={styles.livestreamRight}>
-                <ChevronRight size={20} color={COLORS.textMuted} />
+                <ChevronRight size={20} color={colors.textMuted} />
               </View>
             </View>
           </Pressable>
@@ -836,12 +972,12 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.assetStatIconContainer}>
-                <Gem size={24} color={COLORS.gold} />
+                <Gem size={24} color={colors.gold} />
               </View>
               <Text style={styles.assetStatValue}>
                 {assetStats.gems.toLocaleString()}
               </Text>
-              <Text style={styles.assetStatLabel}>Gems</Text>
+              <Text style={styles.assetStatLabel}>{t('account.stats.gems', 'Gems')}</Text>
               <Text style={styles.assetStatSubtitle}>
                 ~ {(assetStats.gems * 200).toLocaleString()}đ
               </Text>
@@ -853,7 +989,7 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.assetStatIconContainer}>
-                <DollarSign size={24} color={COLORS.gold} />
+                <DollarSign size={24} color={colors.gold} />
               </View>
               <Text style={styles.assetStatValue}>
                 {assetStats.earnings > 0
@@ -862,8 +998,8 @@ export default function AccountScreen() {
                     : assetStats.earnings.toLocaleString()
                   : '0'}
               </Text>
-              <Text style={styles.assetStatLabel}>Thu nhập</Text>
-              <Text style={styles.assetStatSubtitle}>Tháng này</Text>
+              <Text style={styles.assetStatLabel}>{t('account.stats.earnings', 'Thu nhập')}</Text>
+              <Text style={styles.assetStatSubtitle}>{t('account.stats.thisMonth', 'Tháng này')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -872,7 +1008,7 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.assetStatIconContainer}>
-                <Link2 size={24} color={COLORS.gold} />
+                <Link2 size={24} color={colors.gold} />
               </View>
               <Text style={styles.assetStatValue}>
                 {assetStats.affiliate > 0
@@ -881,8 +1017,8 @@ export default function AccountScreen() {
                     : assetStats.affiliate.toLocaleString()
                   : '0'}
               </Text>
-              <Text style={styles.assetStatLabel}>Affiliate</Text>
-              <Text style={styles.assetStatSubtitle}>Hoa hồng</Text>
+              <Text style={styles.assetStatLabel}>{t('account.stats.affiliate', 'Affiliate')}</Text>
+              <Text style={styles.assetStatSubtitle}>{t('account.stats.commission', 'Hoa hồng')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -897,7 +1033,7 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Gem size={24} color={COLORS.gold} />
+                <Gem size={24} color={colors.gold} />
               </View>
               <Text style={styles.actionTitle}>Ví Gems</Text>
               <Text style={styles.actionSubtitle}>Mua & quản lý</Text>
@@ -909,7 +1045,7 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <DollarSign size={24} color={COLORS.gold} />
+                <DollarSign size={24} color={colors.gold} />
               </View>
               <Text style={styles.actionTitle}>Thu Nhập</Text>
               <Text style={styles.actionSubtitle}>Xem & rút tiền</Text>
@@ -921,7 +1057,7 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <TrendingUp size={24} color={COLORS.gold} />
+                <TrendingUp size={24} color={colors.gold} />
               </View>
               <Text style={styles.actionTitle}>Giao Dịch</Text>
               <Text style={styles.actionSubtitle}>Lịch sử chi tiêu</Text>
@@ -933,7 +1069,7 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Rocket size={24} color={COLORS.gold} />
+                <Rocket size={24} color={colors.gold} />
               </View>
               <Text style={styles.actionTitle}>Boost</Text>
               <Text style={styles.actionSubtitle}>Quảng cáo bài</Text>
@@ -945,7 +1081,7 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <BarChart3 size={24} color={COLORS.gold} />
+                <BarChart3 size={24} color={colors.gold} />
               </View>
               <Text style={styles.actionTitle}>Portfolio</Text>
               <Text style={styles.actionSubtitle}>Thống kê</Text>
@@ -957,7 +1093,7 @@ export default function AccountScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Music size={24} color={COLORS.gold} />
+                <Music size={24} color={colors.gold} />
               </View>
               <Text style={styles.actionTitle}>Âm Thanh</Text>
               <Text style={styles.actionSubtitle}>Thư viện</Text>
@@ -975,13 +1111,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('GemPackList')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Gem size={20} color={COLORS.gold} />
+                <Gem size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Mua Gems</Text>
                 <Text style={styles.menuSubtext}>Nạp Gems để sử dụng dịch vụ</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -989,17 +1125,17 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('DailyCheckin')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Clock size={20} color={COLORS.gold} />
+                <Clock size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Điểm danh</Text>
                 <Text style={styles.menuSubtext}>Nhận 5 Gems miễn phí mỗi ngày</Text>
               </View>
               <View style={styles.gemBadge}>
-                <Gift size={12} color={COLORS.gold} />
-                <Text style={[styles.gemBadgeText, { color: COLORS.gold }]}>+5</Text>
+                <Gift size={12} color={colors.gold} />
+                <Text style={[styles.gemBadgeText, { color: colors.gold }]}>+5</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -1014,13 +1150,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('MyOrders')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Package size={20} color={COLORS.gold} />
+                <Package size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Tất cả đơn hàng</Text>
                 <Text style={styles.menuSubtext}>Theo dõi đơn hàng từ Shopify</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             {/* Link Order Button */}
@@ -1029,13 +1165,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('LinkOrder')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Link2 size={20} color={COLORS.gold} />
+                <Link2 size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Liên kết đơn hàng</Text>
                 <Text style={styles.menuSubtext}>Liên kết đơn mua bằng email khác</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -1055,13 +1191,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('Portfolio')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Wallet size={20} color={COLORS.gold} />
+                <Wallet size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Portfolio</Text>
                 <Text style={styles.menuSubtext}>Quản lý tài sản crypto</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1069,13 +1205,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('ExchangeAccounts')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Building2 size={20} color={COLORS.gold} />
+                <Building2 size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Tài khoản sàn</Text>
                 <Text style={styles.menuSubtext}>Đăng ký & quản lý sàn giao dịch</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1083,13 +1219,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('PaperTradeHistory')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <TrendingUp size={20} color={COLORS.gold} />
+                <TrendingUp size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Paper Trade History</Text>
                 <Text style={styles.menuSubtext}>Lịch sử giao dịch giả lập</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1097,13 +1233,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('KarmaDashboard')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Sparkles size={20} color={COLORS.gold} />
+                <Sparkles size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Karma Dashboard</Text>
                 <Text style={styles.menuSubtext}>Điểm karma & level của bạn</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -1112,7 +1248,7 @@ export default function AccountScreen() {
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
             <View style={styles.sectionHeaderRow}>
-              <Settings size={18} color={COLORS.gold} />
+              <Settings size={18} color={colors.gold} />
               <Text style={[styles.sectionTitle, { marginBottom: 0, marginLeft: SPACING.sm }]}>Cài Đặt</Text>
             </View>
 
@@ -1121,12 +1257,12 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('ProfileSettings')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <User size={20} color={COLORS.gold} />
+                <User size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Thông tin cá nhân</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1134,12 +1270,12 @@ export default function AccountScreen() {
               onPress={() => setPasswordModalVisible(true)}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Lock size={20} color={COLORS.gold} />
+                <Lock size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Đổi mật khẩu</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             {/* Biometric Toggle - Chỉ hiện nếu thiết bị hỗ trợ */}
@@ -1147,9 +1283,9 @@ export default function AccountScreen() {
               <View style={styles.menuItem}>
                 <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
                   {biometricType?.includes('Face') || biometricType?.includes('khuôn mặt') ? (
-                    <Scan size={20} color={COLORS.gold} />
+                    <Scan size={20} color={colors.gold} />
                   ) : (
-                    <Fingerprint size={20} color={COLORS.gold} />
+                    <Fingerprint size={20} color={colors.gold} />
                   )}
                 </View>
                 <View style={styles.menuContent}>
@@ -1159,13 +1295,13 @@ export default function AccountScreen() {
                   </Text>
                 </View>
                 {biometricLoading ? (
-                  <ActivityIndicator size="small" color={COLORS.gold} />
+                  <ActivityIndicator size="small" color={colors.gold} />
                 ) : (
                   <Switch
                     value={biometricEnabled}
                     onValueChange={handleBiometricToggle}
                     trackColor={{ false: 'rgba(255, 255, 255, 0.2)', true: 'rgba(255, 189, 89, 0.5)' }}
-                    thumbColor={biometricEnabled ? COLORS.gold : COLORS.textMuted}
+                    thumbColor={biometricEnabled ? colors.gold : colors.textMuted}
                   />
                 )}
               </View>
@@ -1176,12 +1312,12 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('NotificationSettings')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Bell size={20} color={COLORS.gold} />
+                <Bell size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Cài đặt thông báo</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1189,13 +1325,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('PrivacySettings')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Shield size={20} color={COLORS.gold} />
+                <Shield size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Cài đặt quyền riêng tư</Text>
                 <Text style={styles.menuSubtext}>Ai có thể xem bài viết của bạn</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1203,13 +1339,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('CloseFriends')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <UserCheck size={20} color={COLORS.gold} />
+                <UserCheck size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Bạn thân</Text>
                 <Text style={styles.menuSubtext}>Quản lý danh sách bạn thân</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1217,13 +1353,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('SavedPosts')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Bookmark size={20} color={COLORS.gold} />
+                <Bookmark size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Bài viết đã lưu</Text>
                 <Text style={styles.menuSubtext}>Các bài viết bạn đã bookmark</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1231,13 +1367,13 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('Settings')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Globe size={20} color={COLORS.gold} />
+                <Globe size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Cài đặt ứng dụng</Text>
                 <Text style={styles.menuSubtext}>Ngôn ngữ, tiền tệ, giao diện</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -1252,12 +1388,12 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('HelpSupport')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <HelpCircle size={20} color={COLORS.gold} />
+                <HelpCircle size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Trợ giúp & Hỗ trợ</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1265,12 +1401,12 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('Terms')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <FileText size={20} color={COLORS.gold} />
+                <FileText size={20} color={colors.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Điều khoản sử dụng</Text>
               </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
+              <ChevronRight size={20} color={colors.textMuted} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1278,10 +1414,10 @@ export default function AccountScreen() {
               onPress={handleLogout}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
-                <LogOut size={20} color={COLORS.error} />
+                <LogOut size={20} color={colors.error} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={[styles.menuText, { color: COLORS.error }]}>Đăng xuất</Text>
+                <Text style={[styles.menuText, { color: colors.error }]}>Đăng xuất</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -1351,683 +1487,3 @@ export default function AccountScreen() {
     </LinearGradient>
   );
 }
-
-const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: CONTENT_BOTTOM_PADDING + 40,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: SPACING.md,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textSecondary,
-  },
-
-  // Not Logged In
-  notLoggedIn: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.huge,
-  },
-  notLoggedInTitle: {
-    fontSize: TYPOGRAPHY.fontSize.display,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginTop: SPACING.lg,
-  },
-  notLoggedInText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.xxl,
-  },
-  loginButton: {
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  loginButtonGradient: {
-    paddingHorizontal: SPACING.huge,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-  },
-  loginButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  // Profile Section
-  profileSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.lg,
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: COLORS.bgMid,
-  },
-  avatarGradient: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 28,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  cameraButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: -4,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: COLORS.purple,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: COLORS.bgMid,
-  },
-  userInfo: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  displayName: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  username: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  bio: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    marginTop: SPACING.xs,
-    lineHeight: 16,
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    gap: 6,
-  },
-  editButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.gold,
-  },
-
-  // Name row with badges
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  // Stats
-  statsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: 14,
-    padding: SPACING.lg,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: TYPOGRAPHY.fontSize.display,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.cyan,
-  },
-  statLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-
-  // View Profile Button
-  viewProfileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-    gap: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  viewProfileText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.purple,
-  },
-
-  // Section
-  section: {
-    marginBottom: SPACING.lg,
-  },
-  sectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.md,
-    marginLeft: 4,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-    marginLeft: 4,
-  },
-
-  // Menu Item
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: 14,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.15)',
-  },
-  menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuContent: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  menuText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  menuSubtext: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  gemBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(58, 247, 166, 0.15)',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: 12,
-    marginRight: SPACING.sm,
-    gap: 4,
-  },
-  gemBadgeText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.success,
-  },
-  logoutItem: {
-    borderColor: 'rgba(255, 107, 107, 0.3)',
-  },
-
-  // Order Status Row
-  orderStatusRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: GLASS.background,
-    borderRadius: 14,
-    padding: SPACING.lg,
-    marginTop: SPACING.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.15)',
-  },
-  orderStatusItem: {
-    alignItems: 'center',
-  },
-  orderStatusIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  orderStatusText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textSecondary,
-  },
-
-  // Affiliate Card
-  affiliateCard: {
-    backgroundColor: GLASS.background,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-  },
-  affiliateHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
-  affiliateInfo: {
-    marginLeft: SPACING.md,
-  },
-  affiliateTitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  affiliateCode: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-    marginTop: 4,
-  },
-  affiliateActions: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    marginBottom: SPACING.lg,
-  },
-  affiliateButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.burgundy,
-    paddingVertical: SPACING.md,
-    borderRadius: 10,
-    gap: SPACING.sm,
-  },
-  affiliateButtonOutline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-  },
-  affiliateButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  commissionRow: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    paddingTop: SPACING.lg,
-  },
-  commissionItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  commissionValue: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.success,
-  },
-  commissionLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 4,
-  },
-
-  // ═══════════════════════════════════════════
-  // Vision Board Card Styles - Subtle, matching app theme
-  // ═══════════════════════════════════════════
-  visionBoardCard: {
-    marginBottom: SPACING.lg,
-    borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: GLASS.background,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-  },
-  visionBoardContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.lg,
-  },
-  visionBoardLeft: {
-    flex: 1,
-  },
-  visionBoardIconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  visionBoardTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  visionBoardSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  visionBoardRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-  },
-  visionBoardStats: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  visionBoardStatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  visionBoardStatText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-
-  // ═══════════════════════════════════════════
-  // AI Livestream Card Styles
-  // ═══════════════════════════════════════════
-  livestreamCard: {
-    marginBottom: SPACING.lg,
-    borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: GLASS.background,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 107, 0.3)',
-  },
-  livestreamContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.lg,
-  },
-  livestreamLeft: {
-    flex: 1,
-  },
-  livestreamIconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  liveBadge: {
-    backgroundColor: COLORS.error,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  liveBadgeText: {
-    fontSize: 10,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
-  },
-  livestreamTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  livestreamSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  livestreamRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  // ═══════════════════════════════════════════
-  // Deep Link / Notification Styles (Day 20-22)
-  // ═══════════════════════════════════════════
-  widgetWrapper: {
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  widgetHighlighted: {
-    borderWidth: 2,
-    borderColor: COLORS.gold,
-    shadowColor: COLORS.gold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-
-  // Confetti Container
-  confettiContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    pointerEvents: 'none',
-    zIndex: 999,
-  },
-  confetti: {
-    flex: 1,
-  },
-  confettiDot: {
-    position: 'absolute',
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    top: -10,
-  },
-
-  // ═══════════════════════════════════════════
-  // ⚡ ADMIN DASHBOARD STYLES - Subtle, matching app theme
-  // ═══════════════════════════════════════════
-  adminSection: {
-    backgroundColor: GLASS.background,
-    borderRadius: 14,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-  },
-  adminHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-    gap: SPACING.sm,
-  },
-  adminHeaderText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-    letterSpacing: 1.5,
-  },
-  adminMainButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  adminButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  adminButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  adminQuickActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: SPACING.sm,
-    marginTop: SPACING.xs,
-  },
-  adminQuickBtn: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 10,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.1)',
-  },
-  adminQuickBtnWide: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    minHeight: 48,
-  },
-  adminQuickText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-    marginTop: SPACING.xs,
-    textAlign: 'center',
-  },
-  adminBadgeCount: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: COLORS.error,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 5,
-  },
-  adminBadgeCountText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#FFF',
-  },
-
-  // ═══════════════════════════════════════════
-  // ASSET STATS CARDS (from AssetsHomeScreen)
-  // ═══════════════════════════════════════════
-  assetStatsContainer: {
-    flexDirection: 'row',
-    paddingVertical: SPACING.lg,
-    gap: SPACING.md,
-  },
-  assetStatCard: {
-    flex: 1,
-    backgroundColor: GLASS.background,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.lg,
-    alignItems: 'center',
-    borderWidth: GLASS.borderWidth,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  assetStatIconContainer: {
-    marginBottom: SPACING.sm,
-  },
-  assetStatValue: {
-    fontSize: TYPOGRAPHY.fontSize.display,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xxs,
-  },
-  assetStatLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.xxs,
-  },
-  assetStatSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSubtle,
-  },
-
-  // ═══════════════════════════════════════════
-  // QUICK ACTIONS GRID (from AssetsHomeScreen)
-  // ═══════════════════════════════════════════
-  quickActionsSectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
-  },
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.md,
-    marginBottom: SPACING.lg,
-  },
-  actionCard: {
-    width: (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2,
-    backgroundColor: GLASS.background,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.lg,
-    borderWidth: GLASS.borderWidth,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  actionIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.md,
-  },
-  actionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xxs,
-  },
-  actionSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-});

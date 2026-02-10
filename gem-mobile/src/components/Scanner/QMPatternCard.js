@@ -5,7 +5,7 @@
  * Phase 1B: Quasimodo Display Component
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import {
   TrendingUp,
@@ -17,7 +17,7 @@ import {
   ChevronRight,
   Repeat,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const QMPatternCard = memo(({
   qmPattern,
@@ -25,6 +25,312 @@ const QMPatternCard = memo(({
   showDetails = true,
   compact = false,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      borderLeftWidth: 4,
+      padding: SPACING.md,
+      marginVertical: SPACING.xs,
+    },
+    compactContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 8,
+      borderLeftWidth: 3,
+      padding: SPACING.sm,
+    },
+    compactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    compactIcon: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    compactContent: {
+      flex: 1,
+    },
+    compactTitle: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    compactSubtitle: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      fontFamily: 'monospace',
+    },
+    compactRight: {
+      alignItems: 'flex-end',
+      gap: 2,
+    },
+    starsRowCompact: {
+      flexDirection: 'row',
+    },
+    starSmall: {
+      fontSize: 8,
+    },
+    bosConfirmedCompact: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      backgroundColor: colors.success + '20',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    iconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    patternName: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textPrimary,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    starsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+      marginTop: 2,
+    },
+    star: {
+      fontSize: 10,
+    },
+    winRate: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+      marginLeft: SPACING.xs,
+    },
+    biasBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xxs,
+      borderRadius: 8,
+    },
+    biasText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+
+    bosContainer: {
+      marginBottom: SPACING.sm,
+    },
+    bosConfirmed: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      backgroundColor: colors.success + '15',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: 8,
+      alignSelf: 'flex-start',
+    },
+    bosText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.success,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    bosPrice: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.success,
+      fontFamily: 'monospace',
+    },
+    bosPending: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      backgroundColor: colors.warning + '15',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: 8,
+      alignSelf: 'flex-start',
+    },
+    bosTextPending: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.warning,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+
+    sectionTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      marginBottom: SPACING.xs,
+    },
+    structureContainer: {
+      marginBottom: SPACING.md,
+    },
+    structureRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    structurePoint: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    headPoint: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      paddingVertical: SPACING.xs,
+      paddingHorizontal: SPACING.sm,
+      borderRadius: 8,
+    },
+    structureLabel: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    structurePrice: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+      fontFamily: 'monospace',
+    },
+    structureArrow: {
+      paddingHorizontal: SPACING.xs,
+    },
+    arrow: {
+      color: colors.textMuted,
+      fontSize: 12,
+    },
+
+    levelsContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 8,
+      padding: SPACING.sm,
+      gap: SPACING.xs,
+      marginBottom: SPACING.sm,
+    },
+    levelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    levelRowLast: {
+      marginTop: SPACING.xs,
+      paddingTop: SPACING.xs,
+      borderTopWidth: 1,
+      borderTopColor: colors.textMuted + '20',
+    },
+    levelLabel: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    levelText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    levelTextSmall: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    levelTextMuted: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    levelPrice: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+      fontFamily: 'monospace',
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    levelPriceSmall: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontFamily: 'monospace',
+    },
+    levelPriceMuted: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      fontFamily: 'monospace',
+    },
+
+    rrContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginBottom: SPACING.sm,
+    },
+    rrLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+    },
+    rrBadge: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xxs,
+      borderRadius: 8,
+    },
+    rrText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+
+    distanceContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: colors.textMuted + '20',
+    },
+    distanceLabel: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    distanceValue: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+
+    currentPriceContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: SPACING.xs,
+    },
+    currentPriceLabel: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    currentPriceValue: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+      fontFamily: 'monospace',
+    },
+
+    viewDetailContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      marginTop: SPACING.sm,
+    },
+    viewDetailText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!qmPattern) {
     return null;
   }
@@ -50,7 +356,7 @@ const QMPatternCard = memo(({
   } = qmPattern;
 
   const isBearish = pattern === 'QUASIMODO_BEARISH';
-  const mainColor = isBearish ? COLORS.error : COLORS.success;
+  const mainColor = isBearish ? colors.error : colors.success;
   const TrendIcon = isBearish ? TrendingDown : TrendingUp;
 
   const formatPrice = (price) => {
@@ -88,7 +394,7 @@ const QMPatternCard = memo(({
             </View>
             {bos?.confirmed && (
               <View style={styles.bosConfirmedCompact}>
-                <CheckCircle size={10} color={COLORS.success} />
+                <CheckCircle size={10} color={colors.success} />
               </View>
             )}
           </View>
@@ -134,13 +440,13 @@ const QMPatternCard = memo(({
       <View style={styles.bosContainer}>
         {bos?.confirmed ? (
           <View style={styles.bosConfirmed}>
-            <CheckCircle size={14} color={COLORS.success} />
+            <CheckCircle size={14} color={colors.success} />
             <Text style={styles.bosText}>BOS Xác nhận</Text>
             <Text style={styles.bosPrice}>@ {formatPrice(bos.price)}</Text>
           </View>
         ) : (
           <View style={styles.bosPending}>
-            <AlertTriangle size={14} color={COLORS.warning} />
+            <AlertTriangle size={14} color={colors.warning} />
             <Text style={styles.bosTextPending}>Chờ BOS xác nhận</Text>
           </View>
         )}
@@ -184,10 +490,10 @@ const QMPatternCard = memo(({
             {/* QML - Entry */}
             <View style={styles.levelRow}>
               <View style={styles.levelLabel}>
-                <Target size={16} color={COLORS.gold} />
+                <Target size={16} color={colors.gold} />
                 <Text style={styles.levelText}>QML (Entry)</Text>
               </View>
-              <Text style={[styles.levelPrice, { color: COLORS.gold }]}>
+              <Text style={[styles.levelPrice, { color: colors.gold }]}>
                 {formatPrice(qmlPrice)}
               </Text>
             </View>
@@ -195,7 +501,7 @@ const QMPatternCard = memo(({
             {/* MPL - Stop Reference */}
             <View style={styles.levelRow}>
               <View style={styles.levelLabel}>
-                <Shield size={16} color={COLORS.error} />
+                <Shield size={16} color={colors.error} />
                 <Text style={styles.levelText}>MPL (Stop Ref)</Text>
               </View>
               <Text style={styles.levelPrice}>{formatPrice(mplPrice)}</Text>
@@ -207,7 +513,7 @@ const QMPatternCard = memo(({
                 <View style={{ width: 16 }} />
                 <Text style={styles.levelTextSmall}>Stop Loss</Text>
               </View>
-              <Text style={[styles.levelPriceSmall, { color: COLORS.error }]}>
+              <Text style={[styles.levelPriceSmall, { color: colors.error }]}>
                 {formatPrice(stopLossPrice)}
               </Text>
             </View>
@@ -219,7 +525,7 @@ const QMPatternCard = memo(({
                   <View style={{ width: 16 }} />
                   <Text style={styles.levelTextSmall}>Target (1:2)</Text>
                 </View>
-                <Text style={[styles.levelPriceSmall, { color: COLORS.success }]}>
+                <Text style={[styles.levelPriceSmall, { color: colors.success }]}>
                   {formatPrice(targetPrice)}
                 </Text>
               </View>
@@ -238,11 +544,11 @@ const QMPatternCard = memo(({
               <Text style={styles.rrLabel}>Risk:Reward</Text>
               <View style={[
                 styles.rrBadge,
-                { backgroundColor: riskReward.isAcceptable ? COLORS.success + '20' : COLORS.warning + '20' }
+                { backgroundColor: riskReward.isAcceptable ? colors.success + '20' : colors.warning + '20' }
               ]}>
                 <Text style={[
                   styles.rrText,
-                  { color: riskReward.isAcceptable ? COLORS.success : COLORS.warning }
+                  { color: riskReward.isAcceptable ? colors.success : colors.warning }
                 ]}>
                   {riskReward.ratioDisplay}
                 </Text>
@@ -257,8 +563,8 @@ const QMPatternCard = memo(({
               styles.distanceValue,
               {
                 color: Math.abs(parseFloat(distanceToQMLPercent)) < 1
-                  ? COLORS.warning
-                  : COLORS.textSecondary
+                  ? colors.warning
+                  : colors.textSecondary
               }
             ]}>
               {distanceToQMLPercent}%
@@ -277,315 +583,11 @@ const QMPatternCard = memo(({
       {onPress && (
         <View style={styles.viewDetailContainer}>
           <Text style={styles.viewDetailText}>Xem chi tiết</Text>
-          <ChevronRight size={16} color={COLORS.textMuted} />
+          <ChevronRight size={16} color={colors.textMuted} />
         </View>
       )}
     </TouchableOpacity>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: GLASS.background,
-    borderRadius: BORDER_RADIUS.lg,
-    borderLeftWidth: 4,
-    padding: SPACING.md,
-    marginVertical: SPACING.xs,
-  },
-  compactContainer: {
-    backgroundColor: GLASS.background,
-    borderRadius: BORDER_RADIUS.sm,
-    borderLeftWidth: 3,
-    padding: SPACING.sm,
-  },
-  compactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  compactIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  compactContent: {
-    flex: 1,
-  },
-  compactTitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  compactSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    fontFamily: 'monospace',
-  },
-  compactRight: {
-    alignItems: 'flex-end',
-    gap: 2,
-  },
-  starsRowCompact: {
-    flexDirection: 'row',
-  },
-  starSmall: {
-    fontSize: 8,
-  },
-  bosConfirmedCompact: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: COLORS.success + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  patternName: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  starsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    marginTop: 2,
-  },
-  star: {
-    fontSize: 10,
-  },
-  winRate: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-    marginLeft: SPACING.xs,
-  },
-  biasBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  biasText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-
-  bosContainer: {
-    marginBottom: SPACING.sm,
-  },
-  bosConfirmed: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    backgroundColor: COLORS.success + '15',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-    alignSelf: 'flex-start',
-  },
-  bosText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.success,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  bosPrice: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.success,
-    fontFamily: 'monospace',
-  },
-  bosPending: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    backgroundColor: COLORS.warning + '15',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-    alignSelf: 'flex-start',
-  },
-  bosTextPending: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.warning,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-
-  sectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.xs,
-  },
-  structureContainer: {
-    marginBottom: SPACING.md,
-  },
-  structureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  structurePoint: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  headPoint: {
-    backgroundColor: COLORS.surface,
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  structureLabel: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  structurePrice: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-    fontFamily: 'monospace',
-  },
-  structureArrow: {
-    paddingHorizontal: SPACING.xs,
-  },
-  arrow: {
-    color: COLORS.textMuted,
-    fontSize: 12,
-  },
-
-  levelsContainer: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.sm,
-    padding: SPACING.sm,
-    gap: SPACING.xs,
-    marginBottom: SPACING.sm,
-  },
-  levelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  levelRowLast: {
-    marginTop: SPACING.xs,
-    paddingTop: SPACING.xs,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.textMuted + '20',
-  },
-  levelLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  levelText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-  },
-  levelTextSmall: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  levelTextMuted: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  levelPrice: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-    fontFamily: 'monospace',
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  levelPriceSmall: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontFamily: 'monospace',
-  },
-  levelPriceMuted: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    fontFamily: 'monospace',
-  },
-
-  rrContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  rrLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-  },
-  rrBadge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  rrText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-
-  distanceContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.textMuted + '20',
-  },
-  distanceLabel: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  distanceValue: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-
-  currentPriceContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: SPACING.xs,
-  },
-  currentPriceLabel: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  currentPriceValue: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-    fontFamily: 'monospace',
-  },
-
-  viewDetailContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginTop: SPACING.sm,
-  },
-  viewDetailText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
 });
 
 QMPatternCard.displayName = 'QMPatternCard';

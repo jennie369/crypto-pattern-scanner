@@ -2,9 +2,10 @@
  * GEM Scanner - Info Tooltip Component
  * Inline contextual help tooltip with modal overlay
  * Different from Tooltip.js (which is a tour modal)
+ * Theme-aware with i18n support
  */
 
-import React, { memo, useState, useCallback, useRef } from 'react';
+import React, { memo, useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,7 +17,7 @@ import {
   Animated,
 } from 'react-native';
 import { HelpCircle, AlertTriangle, Lightbulb, Info, X } from 'lucide-react-native';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -47,17 +48,18 @@ const InfoTooltip = ({
   // Disabled
   disabled = false,
 }) => {
+  const { colors, settings, SPACING } = useSettings();
   const [visible, setVisible] = useState(false);
   const [triggerLayout, setTriggerLayout] = useState(null);
   const triggerRef = useRef(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Get icon based on type
+  // Get icon based on type - use theme colors
   const IconComponent = TOOLTIP_ICONS[type] || HelpCircle;
-  const defaultIconColor = type === 'warning' ? COLORS.warning
-    : type === 'tip' ? COLORS.gold
-    : type === 'info' ? COLORS.info
-    : COLORS.textMuted;
+  const defaultIconColor = type === 'warning' ? (colors.warning || colors.warningText)
+    : type === 'tip' ? colors.gold
+    : type === 'info' ? (colors.info || colors.infoText)
+    : colors.textMuted;
 
   // Open tooltip
   const handleOpen = useCallback(() => {
@@ -128,6 +130,98 @@ const InfoTooltip = ({
 
   const tooltipStyle = getTooltipPosition();
 
+  // Theme-aware styles
+  const styles = useMemo(() => StyleSheet.create({
+    trigger: {
+      padding: 4,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.7)',
+    },
+    tooltipContainer: {
+      position: 'absolute',
+      backgroundColor: settings.theme === 'light' ? colors.glassBg : 'rgba(15, 16, 48, 0.98)',
+      borderRadius: 12,
+      padding: SPACING.md,
+      borderWidth: 1,
+      borderColor: settings.theme === 'light' ? colors.border : 'rgba(106, 91, 255, 0.3)',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: settings.theme === 'light' ? 0.15 : 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+      maxHeight: SCREEN_HEIGHT * 0.6,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: SPACING.sm,
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      flex: 1,
+    },
+    title: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    closeButton: {
+      padding: 4,
+    },
+    content: {
+      fontSize: 13,
+      lineHeight: 20,
+      color: colors.textSecondary,
+      marginBottom: SPACING.sm,
+    },
+    warningContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: SPACING.sm,
+      backgroundColor: settings.theme === 'light' ? colors.warning : 'rgba(255, 184, 0, 0.1)',
+      padding: SPACING.sm,
+      borderRadius: 8,
+      marginTop: SPACING.xs,
+      borderWidth: 1,
+      borderColor: settings.theme === 'light' ? 'rgba(133, 100, 4, 0.3)' : 'rgba(255, 184, 0, 0.2)',
+    },
+    warningText: {
+      flex: 1,
+      fontSize: 12,
+      color: colors.warning || colors.warningText,
+      lineHeight: 18,
+    },
+    tipContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: SPACING.sm,
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+      padding: SPACING.sm,
+      borderRadius: 8,
+      marginTop: SPACING.xs,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.2)',
+    },
+    tipText: {
+      flex: 1,
+      fontSize: 12,
+      color: colors.gold,
+      lineHeight: 18,
+      fontStyle: 'italic',
+    },
+    wrapperContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+  }), [colors, settings.theme, SPACING]);
+
   return (
     <>
       {/* Trigger */}
@@ -190,7 +284,7 @@ const InfoTooltip = ({
                   onPress={handleClose}
                   style={styles.closeButton}
                 >
-                  <X size={18} color={COLORS.textMuted} />
+                  <X size={18} color={colors.textMuted} />
                 </TouchableOpacity>
               </View>
 
@@ -202,7 +296,7 @@ const InfoTooltip = ({
               {/* Warning */}
               {warning && (
                 <View style={styles.warningContainer}>
-                  <AlertTriangle size={14} color={COLORS.warning} />
+                  <AlertTriangle size={14} color={colors.warning || colors.warningText} />
                   <Text style={styles.warningText}>{warning}</Text>
                 </View>
               )}
@@ -210,7 +304,7 @@ const InfoTooltip = ({
               {/* Tip */}
               {tip && (
                 <View style={styles.tipContainer}>
-                  <Lightbulb size={14} color={COLORS.gold} />
+                  <Lightbulb size={14} color={colors.gold} />
                   <Text style={styles.tipText}>{tip}</Text>
                 </View>
               )}
@@ -228,13 +322,23 @@ export const TooltipWrapper = memo(({
   children,
   ...props
 }) => {
+  const { SPACING } = useSettings();
+
   // tooltipConfig should come from tooltipsConfig.js
   if (!tooltipConfig) {
     return children;
   }
 
+  const wrapperStyles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+  }), []);
+
   return (
-    <View style={styles.wrapperContainer}>
+    <View style={wrapperStyles.container}>
       {children}
       <InfoTooltip
         title={tooltipConfig.title}
@@ -246,102 +350,6 @@ export const TooltipWrapper = memo(({
       />
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  trigger: {
-    padding: 4,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  },
-  tooltipContainer: {
-    position: 'absolute',
-    backgroundColor: 'rgba(15, 16, 48, 0.98)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    maxHeight: SCREEN_HEIGHT * 0.6,
-  },
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.sm,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    flex: 1,
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    flex: 1,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  // Content
-  content: {
-    fontSize: 13,
-    lineHeight: 20,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.sm,
-  },
-  // Warning
-  warningContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: SPACING.sm,
-    backgroundColor: 'rgba(255, 184, 0, 0.1)',
-    padding: SPACING.sm,
-    borderRadius: 8,
-    marginTop: SPACING.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 184, 0, 0.2)',
-  },
-  warningText: {
-    flex: 1,
-    fontSize: 12,
-    color: COLORS.warning,
-    lineHeight: 18,
-  },
-  // Tip
-  tipContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: SPACING.sm,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    padding: SPACING.sm,
-    borderRadius: 8,
-    marginTop: SPACING.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.2)',
-  },
-  tipText: {
-    flex: 1,
-    fontSize: 12,
-    color: COLORS.gold,
-    lineHeight: 18,
-    fontStyle: 'italic',
-  },
-  // Wrapper
-  wrapperContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
 });
 
 export default memo(InfoTooltip);

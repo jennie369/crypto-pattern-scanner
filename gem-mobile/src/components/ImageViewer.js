@@ -5,7 +5,7 @@
  * FIXED: Using Gesture Handler for better swipe detection
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Modal,
@@ -33,7 +33,7 @@ import Animated, {
 import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { X, ChevronLeft, ChevronRight, Download, Share2 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, TYPOGRAPHY } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 import CustomAlert, { useCustomAlert } from './CustomAlert';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -46,7 +46,7 @@ const VELOCITY_THRESHOLD = 500;
 const SAFE_BOTTOM_PADDING = 50;
 
 // Post Overlay Component - uses safe area insets
-const PostOverlay = ({ authorName, postContent, overlayExpanded, toggleOverlay }) => {
+const PostOverlay = ({ authorName, postContent, overlayExpanded, toggleOverlay, colors, settings, glass, SPACING, TYPOGRAPHY }) => {
   // Get safe area insets for bottom padding
   let bottomInset = SAFE_BOTTOM_PADDING;
   try {
@@ -56,18 +56,65 @@ const PostOverlay = ({ authorName, postContent, overlayExpanded, toggleOverlay }
     // Hook not available, use default
   }
 
+  const overlayStyles = useMemo(() => StyleSheet.create({
+    postOverlay: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      maxHeight: SCREEN_HEIGHT * 0.65,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    },
+    postOverlayHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.15)',
+    },
+    postOverlayScroll: {
+      maxHeight: SCREEN_HEIGHT * 0.50,
+      flex: 1,
+    },
+    postOverlayScrollContent: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.md,
+      paddingBottom: SPACING.xxl + 40,
+      flexGrow: 1,
+    },
+    postOverlayAuthor: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: '#FFFFFF',
+    },
+    postOverlayContent: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: '#FFFFFF',
+      lineHeight: 24,
+      opacity: 0.95,
+    },
+    postOverlayHint: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: 'rgba(255, 255, 255, 0.6)',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
-    <View style={[styles.postOverlay, { paddingBottom: overlayExpanded ? 0 : bottomInset }]}>
+    <View style={[overlayStyles.postOverlay, { paddingBottom: overlayExpanded ? 0 : bottomInset }]}>
       {/* Author header with tap to toggle */}
       <TouchableOpacity
-        style={styles.postOverlayHeader}
+        style={overlayStyles.postOverlayHeader}
         activeOpacity={0.8}
         onPress={toggleOverlay}
       >
         {authorName && (
-          <Text style={styles.postOverlayAuthor}>{authorName}</Text>
+          <Text style={overlayStyles.postOverlayAuthor}>{authorName}</Text>
         )}
-        <Text style={styles.postOverlayHint}>
+        <Text style={overlayStyles.postOverlayHint}>
           {overlayExpanded ? '▼ Thu gọn' : '▲ Mở rộng'}
         </Text>
       </TouchableOpacity>
@@ -75,9 +122,9 @@ const PostOverlay = ({ authorName, postContent, overlayExpanded, toggleOverlay }
       {/* Scrollable content area - always scrollable when expanded */}
       {overlayExpanded && (
         <ScrollView
-          style={styles.postOverlayScroll}
+          style={overlayStyles.postOverlayScroll}
           contentContainerStyle={[
-            styles.postOverlayScrollContent,
+            overlayStyles.postOverlayScrollContent,
             { paddingBottom: SPACING.xxl + bottomInset }
           ]}
           showsVerticalScrollIndicator={true}
@@ -85,7 +132,7 @@ const PostOverlay = ({ authorName, postContent, overlayExpanded, toggleOverlay }
           scrollEnabled={true}
           bounces={true}
         >
-          <Text style={styles.postOverlayContent}>
+          <Text style={overlayStyles.postOverlayContent}>
             {postContent.replace(/<[^>]*>/g, '')}
           </Text>
         </ScrollView>
@@ -109,6 +156,8 @@ const ImageViewer = ({
   authorName = null,
   showOverlay = true,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [loading, setLoading] = useState(true);
   const [overlayExpanded, setOverlayExpanded] = useState(true); // true = text visible, false = hidden
@@ -329,6 +378,187 @@ const ImageViewer = ({
     }
   }, [visible, initialIndex]);
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    header: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: StatusBar.currentHeight || 44,
+      paddingHorizontal: SPACING.md,
+      paddingBottom: SPACING.md,
+      zIndex: 10,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    closeButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    counter: {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.xs,
+      borderRadius: 12,
+    },
+    counterText: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: SPACING.sm,
+    },
+    actionButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    imageContainer: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    imageWrapper: {
+      width: SCREEN_WIDTH,
+      height: SCREEN_HEIGHT,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    image: {
+      width: SCREEN_WIDTH,
+      height: SCREEN_HEIGHT * 0.8,
+    },
+    loadingContainer: {
+      position: 'absolute',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1,
+    },
+    navButton: {
+      position: 'absolute',
+      top: '50%',
+      marginTop: -24,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 10,
+    },
+    navButtonLeft: {
+      left: SPACING.md,
+    },
+    navButtonRight: {
+      right: SPACING.md,
+    },
+    pagination: {
+      position: 'absolute',
+      bottom: 100,
+      left: 0,
+      right: 0,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    dot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    },
+    dotActive: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.gold,
+    },
+    swipeHint: {
+      position: 'absolute',
+      bottom: 50,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+    },
+    swipeHintText: {
+      color: 'rgba(255, 255, 255, 0.5)',
+      fontSize: TYPOGRAPHY.fontSize.sm,
+    },
+    // Saving overlay
+    savingOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    savingText: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      marginTop: SPACING.sm,
+    },
+    // Long press options modal
+    optionsOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'flex-end',
+    },
+    optionsContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingTop: SPACING.lg,
+      paddingBottom: SPACING.xxl + 20,
+      paddingHorizontal: SPACING.lg,
+    },
+    optionsTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: SPACING.lg,
+      paddingBottom: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    optionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.md,
+      gap: SPACING.md,
+    },
+    optionText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textPrimary,
+    },
+    optionCancel: {
+      marginTop: SPACING.sm,
+      paddingTop: SPACING.lg,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    optionCancelText: {
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!visible || images.length === 0) {
     return null;
   }
@@ -358,7 +588,7 @@ const ImageViewer = ({
               onPress={onClose}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <X size={24} color={COLORS.textPrimary} />
+              <X size={24} color={colors.textPrimary} />
             </TouchableOpacity>
 
             {/* Counter */}
@@ -379,7 +609,7 @@ const ImageViewer = ({
                     onPress={handleShare}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Share2 size={20} color={COLORS.textPrimary} />
+                    <Share2 size={20} color={colors.textPrimary} />
                   </TouchableOpacity>
                 )}
                 {onDownload && (
@@ -388,7 +618,7 @@ const ImageViewer = ({
                     onPress={handleDownload}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Download size={20} color={COLORS.textPrimary} />
+                    <Download size={20} color={colors.textPrimary} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -425,7 +655,7 @@ const ImageViewer = ({
                   >
                     {loading && index === currentIndex && (
                       <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color={COLORS.gold} />
+                        <ActivityIndicator size="large" color={colors.gold} />
                       </View>
                     )}
                     <Image
@@ -449,7 +679,7 @@ const ImageViewer = ({
                   onPress={goToPrevious}
                   activeOpacity={0.7}
                 >
-                  <ChevronLeft size={32} color={COLORS.textPrimary} />
+                  <ChevronLeft size={32} color={colors.textPrimary} />
                 </TouchableOpacity>
               )}
               {currentIndex < images.length - 1 && (
@@ -458,7 +688,7 @@ const ImageViewer = ({
                   onPress={goToNext}
                   activeOpacity={0.7}
                 >
-                  <ChevronRight size={32} color={COLORS.textPrimary} />
+                  <ChevronRight size={32} color={colors.textPrimary} />
                 </TouchableOpacity>
               )}
             </>
@@ -488,6 +718,11 @@ const ImageViewer = ({
                 postContent={postContent}
                 overlayExpanded={overlayExpanded}
                 toggleOverlay={toggleOverlay}
+                colors={colors}
+                settings={settings}
+                glass={glass}
+                SPACING={SPACING}
+                TYPOGRAPHY={TYPOGRAPHY}
               />
             </Animated.View>
           )}
@@ -502,7 +737,7 @@ const ImageViewer = ({
           {/* Saving indicator */}
           {saving && (
             <View style={styles.savingOverlay}>
-              <ActivityIndicator size="large" color={COLORS.gold} />
+              <ActivityIndicator size="large" color={colors.gold} />
               <Text style={styles.savingText}>Đang lưu...</Text>
             </View>
           )}
@@ -528,7 +763,7 @@ const ImageViewer = ({
                 style={styles.optionItem}
                 onPress={handleSaveImage}
               >
-                <Download size={24} color={COLORS.textPrimary} />
+                <Download size={24} color={colors.textPrimary} />
                 <Text style={styles.optionText}>Lưu hình ảnh</Text>
               </TouchableOpacity>
 
@@ -536,7 +771,7 @@ const ImageViewer = ({
                 style={styles.optionItem}
                 onPress={handleShareImage}
               >
-                <Share2 size={24} color={COLORS.textPrimary} />
+                <Share2 size={24} color={colors.textPrimary} />
                 <Text style={styles.optionText}>Chia sẻ</Text>
               </TouchableOpacity>
 
@@ -544,7 +779,7 @@ const ImageViewer = ({
                 style={[styles.optionItem, styles.optionCancel]}
                 onPress={() => setOptionsVisible(false)}
               >
-                <X size={24} color={COLORS.textMuted} />
+                <X size={24} color={colors.textMuted} />
                 <Text style={[styles.optionText, styles.optionCancelText]}>Huỷ</Text>
               </TouchableOpacity>
             </View>
@@ -554,232 +789,6 @@ const ImageViewer = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: StatusBar.currentHeight || 44,
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.md,
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  closeButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  counter: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: 12,
-  },
-  counterText: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-  },
-  actionButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  imageContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  imageWrapper: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT * 0.8,
-  },
-  loadingContainer: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  navButton: {
-    position: 'absolute',
-    top: '50%',
-    marginTop: -24,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  navButtonLeft: {
-    left: SPACING.md,
-  },
-  navButtonRight: {
-    right: SPACING.md,
-  },
-  pagination: {
-    position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  dotActive: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.gold,
-  },
-  swipeHint: {
-    position: 'absolute',
-    bottom: 50,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  swipeHintText: {
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontSize: TYPOGRAPHY.fontSize.sm,
-  },
-  // Facebook-style Post Content Overlay - Scrollable text area (60%+ of screen)
-  postOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    maxHeight: SCREEN_HEIGHT * 0.65,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  postOverlayHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  postOverlayScroll: {
-    maxHeight: SCREEN_HEIGHT * 0.50,
-    flex: 1,
-  },
-  postOverlayScrollContent: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.xxl + 40,
-    flexGrow: 1,
-  },
-  postOverlayAuthor: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: '#FFFFFF',
-  },
-  postOverlayContent: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: '#FFFFFF',
-    lineHeight: 24,
-    opacity: 0.95,
-  },
-  postOverlayHint: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: 'rgba(255, 255, 255, 0.6)',
-  },
-  // Saving overlay
-  savingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  savingText: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    marginTop: SPACING.sm,
-  },
-  // Long press options modal
-  optionsOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'flex-end',
-  },
-  optionsContainer: {
-    backgroundColor: '#1a1a2e',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.xxl + 20,
-    paddingHorizontal: SPACING.lg,
-  },
-  optionsTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginBottom: SPACING.lg,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  optionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-    gap: SPACING.md,
-  },
-  optionText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textPrimary,
-  },
-  optionCancel: {
-    marginTop: SPACING.sm,
-    paddingTop: SPACING.lg,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  optionCancelText: {
-    color: COLORS.textMuted,
-  },
-});
 
 // Named export for compatibility (PostDetailScreen uses this)
 export { ImageViewer as ImageGallery };

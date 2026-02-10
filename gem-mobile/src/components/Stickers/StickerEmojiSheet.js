@@ -9,7 +9,7 @@
  * @param {string} context - 'chat' | 'forum' | 'reaction'
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -31,7 +31,7 @@ import {
   Smile,
   ImageIcon,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 // Sub-components
 import StickerGrid from './StickerGrid';
@@ -58,6 +58,100 @@ const StickerEmojiSheet = ({
   context = 'chat',
   defaultTab = 'sticker',
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    sheet: {
+      borderTopLeftRadius: glass.borderRadius,
+      borderTopRightRadius: glass.borderRadius,
+      overflow: 'hidden',
+      maxHeight: SCREEN_HEIGHT * 0.7,
+      minHeight: SCREEN_HEIGHT * 0.5,
+    },
+    blurContainer: {
+      flex: 1,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    header: {
+      paddingTop: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+    },
+    handle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)',
+      alignSelf: 'center',
+      marginBottom: SPACING.md,
+    },
+    tabBar: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: SPACING.md,
+      paddingBottom: SPACING.md,
+    },
+    tabButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.md,
+      borderRadius: 20,
+      gap: SPACING.xs,
+    },
+    tabButtonActive: {
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    },
+    tabText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textMuted,
+    },
+    tabTextActive: {
+      color: colors.gold,
+    },
+    closeButton: {
+      position: 'absolute',
+      right: SPACING.lg,
+      top: SPACING.lg,
+      padding: SPACING.xs,
+    },
+    searchContainer: {
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.sm,
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.3)',
+      borderRadius: 12,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      gap: SPACING.sm,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textPrimary,
+      paddingVertical: 0,
+    },
+    content: {
+      flex: 1,
+    },
+    tabContent: {
+      flex: 1,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // State
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [searchQuery, setSearchQuery] = useState('');
@@ -281,7 +375,7 @@ const StickerEmojiSheet = ({
             },
           ]}
         >
-          <BlurView intensity={40} tint="dark" style={styles.blurContainer}>
+          <BlurView intensity={40} tint={settings.theme === 'light' ? 'light' : 'dark'} style={styles.blurContainer}>
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.handle} />
@@ -304,7 +398,7 @@ const StickerEmojiSheet = ({
                     >
                       <IconComponent
                         size={18}
-                        color={isActive ? COLORS.gold : COLORS.textMuted}
+                        color={isActive ? colors.gold : colors.textMuted}
                       />
                       <Text
                         style={[
@@ -325,19 +419,19 @@ const StickerEmojiSheet = ({
                 onPress={onClose}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <X size={20} color={COLORS.textMuted} />
+                <X size={20} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
 
             {/* Search Bar */}
             <View style={styles.searchContainer}>
               <View style={styles.searchBar}>
-                <Search size={18} color={COLORS.textMuted} />
+                <Search size={18} color={colors.textMuted} />
                 <TextInput
                   ref={searchInputRef}
                   style={styles.searchInput}
                   placeholder={`Tim ${activeTab === 'sticker' ? 'sticker' : activeTab === 'emoji' ? 'emoji' : 'GIF'}...`}
-                  placeholderTextColor={COLORS.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   value={searchQuery}
                   onChangeText={(text) => {
                     setSearchQuery(text);
@@ -354,7 +448,7 @@ const StickerEmojiSheet = ({
                     }}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <X size={16} color={COLORS.textMuted} />
+                    <X size={16} color={colors.textMuted} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -380,97 +474,5 @@ const StickerEmojiSheet = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  sheet: {
-    borderTopLeftRadius: GLASS.borderRadius,
-    borderTopRightRadius: GLASS.borderRadius,
-    overflow: 'hidden',
-    maxHeight: SCREEN_HEIGHT * 0.7,
-    minHeight: SCREEN_HEIGHT * 0.5,
-  },
-  blurContainer: {
-    flex: 1,
-    backgroundColor: GLASS.background,
-  },
-  header: {
-    paddingTop: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    alignSelf: 'center',
-    marginBottom: SPACING.md,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.md,
-    paddingBottom: SPACING.md,
-  },
-  tabButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 20,
-    gap: SPACING.xs,
-  },
-  tabButtonActive: {
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-  },
-  tabText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textMuted,
-  },
-  tabTextActive: {
-    color: COLORS.gold,
-  },
-  closeButton: {
-    position: 'absolute',
-    right: SPACING.lg,
-    top: SPACING.lg,
-    padding: SPACING.xs,
-  },
-  searchContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 12,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textPrimary,
-    paddingVertical: 0,
-  },
-  content: {
-    flex: 1,
-  },
-  tabContent: {
-    flex: 1,
-  },
-});
 
 export default StickerEmojiSheet;

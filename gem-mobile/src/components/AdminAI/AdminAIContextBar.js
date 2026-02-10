@@ -4,10 +4,10 @@
  * Includes position selector for switching between open positions
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { TrendingUp, TrendingDown, Layers, Activity, Briefcase, ChevronRight } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { formatPrice } from '../../utils/formatters';
 
 const AdminAIContextBar = ({
@@ -23,9 +23,220 @@ const AdminAIContextBar = ({
   selectedPositionIndex = -1,
   onSelectPosition,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const isPositive = priceChange >= 0;
   const TrendIcon = isPositive ? TrendingUp : TrendingDown;
   const hasPositions = positions.length > 0;
+
+  // ═══════════════════════════════════════════════════════════
+  // STYLES
+  // ═══════════════════════════════════════════════════════════
+
+  const styles = useMemo(() => StyleSheet.create({
+    wrapper: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+    },
+    symbolSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    symbol: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: '700',
+      color: colors.gold,
+    },
+    timeframeBadge: {
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    timeframeText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.purple,
+    },
+    priceSection: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: SPACING.xs,
+    },
+    price: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    priceLoading: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      fontStyle: 'italic',
+    },
+    changeBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    changeBadgePositive: {
+      backgroundColor: 'rgba(58, 247, 166, 0.15)',
+    },
+    changeBadgeNegative: {
+      backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    },
+    changeText: {
+      fontSize: 10,
+      fontWeight: '600',
+    },
+    changeTextPositive: {
+      color: colors.success,
+    },
+    changeTextNegative: {
+      color: colors.error,
+    },
+    statsSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    statBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 3,
+      backgroundColor: 'rgba(106, 91, 255, 0.15)',
+      paddingHorizontal: 6,
+      paddingVertical: 3,
+      borderRadius: 4,
+    },
+    statText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.textSecondary,
+    },
+    trendBadge: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: SPACING.xs,
+    },
+    trendBadgeUp: {
+      backgroundColor: 'rgba(58, 247, 166, 0.2)',
+    },
+    trendBadgeDown: {
+      backgroundColor: 'rgba(255, 107, 107, 0.2)',
+    },
+    trendBadgeSideways: {
+      backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    },
+    trendText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+
+    // Position selector row
+    positionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingLeft: SPACING.md,
+      paddingRight: SPACING.xs,
+      paddingBottom: SPACING.sm,
+      gap: SPACING.xs,
+    },
+    positionLabel: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 3,
+    },
+    positionLabelText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.gold,
+    },
+    positionScrollContent: {
+      gap: SPACING.xs,
+      paddingRight: SPACING.md,
+    },
+    positionChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      borderRadius: 12,
+      backgroundColor: 'rgba(255, 255, 255, 0.06)',
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    positionChipSelected: {
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      borderColor: 'rgba(255, 189, 89, 0.4)',
+    },
+    positionChipLong: {
+      backgroundColor: 'rgba(58, 247, 166, 0.12)',
+      borderColor: 'rgba(58, 247, 166, 0.3)',
+    },
+    positionChipShort: {
+      backgroundColor: 'rgba(255, 107, 107, 0.12)',
+      borderColor: 'rgba(255, 107, 107, 0.3)',
+    },
+    positionChipText: {
+      fontSize: 10,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    positionChipTextSelected: {
+      color: colors.textPrimary,
+    },
+    positionChipSymbol: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.textSecondary,
+    },
+    positionChipDirection: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    directionLong: {
+      backgroundColor: 'rgba(58, 247, 166, 0.25)',
+    },
+    directionShort: {
+      backgroundColor: 'rgba(255, 107, 107, 0.25)',
+    },
+    positionChipDirectionText: {
+      fontSize: 8,
+      fontWeight: '800',
+      color: colors.textPrimary,
+    },
+    positionChipPnl: {
+      fontSize: 9,
+      fontWeight: '700',
+    },
+    pnlPositive: {
+      color: colors.success,
+    },
+    pnlNegative: {
+      color: colors.error,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <View style={styles.wrapper}>
@@ -46,7 +257,7 @@ const AdminAIContextBar = ({
               <Text style={styles.price}>${formatPrice(currentPrice)}</Text>
               {priceChange !== null && priceChange !== undefined && (
                 <View style={[styles.changeBadge, isPositive ? styles.changeBadgePositive : styles.changeBadgeNegative]}>
-                  <TrendIcon size={10} color={isPositive ? COLORS.success : COLORS.error} />
+                  <TrendIcon size={10} color={isPositive ? colors.success : colors.error} />
                   <Text style={[styles.changeText, isPositive ? styles.changeTextPositive : styles.changeTextNegative]}>
                     {isPositive ? '+' : ''}{priceChange.toFixed(2)}%
                   </Text>
@@ -62,13 +273,13 @@ const AdminAIContextBar = ({
         <View style={styles.statsSection}>
           {patternCount > 0 && (
             <View style={styles.statBadge}>
-              <Activity size={12} color={COLORS.purple} />
+              <Activity size={12} color={colors.purple} />
               <Text style={styles.statText}>{patternCount}</Text>
             </View>
           )}
           {zoneCount > 0 && (
             <View style={styles.statBadge}>
-              <Layers size={12} color={COLORS.cyan} />
+              <Layers size={12} color={colors.cyan} />
               <Text style={styles.statText}>{zoneCount}</Text>
             </View>
           )}
@@ -93,7 +304,7 @@ const AdminAIContextBar = ({
       {hasPositions && (
         <View style={styles.positionRow}>
           <View style={styles.positionLabel}>
-            <Briefcase size={12} color={COLORS.gold} />
+            <Briefcase size={12} color={colors.gold} />
             <Text style={styles.positionLabelText}>{positions.length}</Text>
           </View>
           <ScrollView
@@ -166,210 +377,5 @@ const AdminAIContextBar = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: 'rgba(15, 16, 48, 0.8)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-  },
-  symbolSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  symbol: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: '700',
-    color: COLORS.gold,
-  },
-  timeframeBadge: {
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  timeframeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.purple,
-  },
-  priceSection: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.xs,
-  },
-  price: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  priceLoading: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-  },
-  changeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  changeBadgePositive: {
-    backgroundColor: 'rgba(58, 247, 166, 0.15)',
-  },
-  changeBadgeNegative: {
-    backgroundColor: 'rgba(255, 107, 107, 0.15)',
-  },
-  changeText: {
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  changeTextPositive: {
-    color: COLORS.success,
-  },
-  changeTextNegative: {
-    color: COLORS.error,
-  },
-  statsSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  statBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  statText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-  },
-  trendBadge: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: SPACING.xs,
-  },
-  trendBadgeUp: {
-    backgroundColor: 'rgba(58, 247, 166, 0.2)',
-  },
-  trendBadgeDown: {
-    backgroundColor: 'rgba(255, 107, 107, 0.2)',
-  },
-  trendBadgeSideways: {
-    backgroundColor: 'rgba(255, 189, 89, 0.2)',
-  },
-  trendText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-
-  // Position selector row
-  positionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: SPACING.md,
-    paddingRight: SPACING.xs,
-    paddingBottom: SPACING.sm,
-    gap: SPACING.xs,
-  },
-  positionLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  positionLabelText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.gold,
-  },
-  positionScrollContent: {
-    gap: SPACING.xs,
-    paddingRight: SPACING.md,
-  },
-  positionChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  positionChipSelected: {
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    borderColor: 'rgba(255, 189, 89, 0.4)',
-  },
-  positionChipLong: {
-    backgroundColor: 'rgba(58, 247, 166, 0.12)',
-    borderColor: 'rgba(58, 247, 166, 0.3)',
-  },
-  positionChipShort: {
-    backgroundColor: 'rgba(255, 107, 107, 0.12)',
-    borderColor: 'rgba(255, 107, 107, 0.3)',
-  },
-  positionChipText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-  },
-  positionChipTextSelected: {
-    color: COLORS.textPrimary,
-  },
-  positionChipSymbol: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-  },
-  positionChipDirection: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  directionLong: {
-    backgroundColor: 'rgba(58, 247, 166, 0.25)',
-  },
-  directionShort: {
-    backgroundColor: 'rgba(255, 107, 107, 0.25)',
-  },
-  positionChipDirectionText: {
-    fontSize: 8,
-    fontWeight: '800',
-    color: COLORS.textPrimary,
-  },
-  positionChipPnl: {
-    fontSize: 9,
-    fontWeight: '700',
-  },
-  pnlPositive: {
-    color: COLORS.success,
-  },
-  pnlNegative: {
-    color: COLORS.error,
-  },
-});
 
 export default AdminAIContextBar;

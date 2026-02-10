@@ -29,7 +29,7 @@ import {
 } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import courseImageService from '../../services/courseImageService';
 import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
@@ -40,6 +40,7 @@ const LessonImageList = ({
   onReorder,
   loading = false,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
   const { alert, AlertComponent } = useCustomAlert();
 
   const [editingImage, setEditingImage] = useState(null);
@@ -60,15 +61,15 @@ const LessonImageList = ({
         await Clipboard.setStringAsync(url);
         alert({
           type: 'success',
-          title: 'Đã sao chép',
-          message: 'URL hình ảnh đã được sao chép vào clipboard',
+          title: 'Da sao chep',
+          message: 'URL hinh anh da duoc sao chep vao clipboard',
           buttons: [{ text: 'OK' }],
         });
       } catch (error) {
         alert({
           type: 'error',
-          title: 'Lỗi',
-          message: 'Không thể sao chép URL',
+          title: 'Loi',
+          message: 'Khong the sao chep URL',
           buttons: [{ text: 'OK' }],
         });
       }
@@ -84,15 +85,15 @@ const LessonImageList = ({
         await Clipboard.setStringAsync(htmlTag);
         alert({
           type: 'success',
-          title: 'Đã sao chép',
-          message: 'Thẻ HTML đã được sao chép. Paste vào nội dung bài học.',
+          title: 'Da sao chep',
+          message: 'The HTML da duoc sao chep. Paste vao noi dung bai hoc.',
           buttons: [{ text: 'OK' }],
         });
       } catch (error) {
         alert({
           type: 'error',
-          title: 'Lỗi',
-          message: 'Không thể sao chép',
+          title: 'Loi',
+          message: 'Khong the sao chep',
           buttons: [{ text: 'OK' }],
         });
       }
@@ -105,12 +106,12 @@ const LessonImageList = ({
     (image) => {
       alert({
         type: 'warning',
-        title: 'Xác nhận xóa',
-        message: `Bạn có chắc muốn xóa hình "${image.position_id || image.file_name}"?\n\nLưu ý: Nếu hình đang được sử dụng trong nội dung, cần xóa thủ công trong HTML.`,
+        title: 'Xac nhan xoa',
+        message: `Ban co chac muon xoa hinh "${image.position_id || image.file_name}"?\n\nLuu y: Neu hinh dang duoc su dung trong noi dung, can xoa thu cong trong HTML.`,
         buttons: [
-          { text: 'Hủy', style: 'cancel' },
+          { text: 'Huy', style: 'cancel' },
           {
-            text: 'Xóa',
+            text: 'Xoa',
             style: 'destructive',
             onPress: async () => {
               setDeletingId(image.id);
@@ -151,12 +152,12 @@ const LessonImageList = ({
       if (hasChanges) {
         alert({
           type: 'warning',
-          title: 'Hủy thay đổi?',
-          message: 'Bạn có thay đổi chưa lưu. Bạn có chắc muốn hủy?',
+          title: 'Huy thay doi?',
+          message: 'Ban co thay doi chua luu. Ban co chac muon huy?',
           buttons: [
-            { text: 'Tiếp tục sửa', style: 'cancel' },
+            { text: 'Tiep tuc sua', style: 'cancel' },
             {
-              text: 'Hủy',
+              text: 'Huy',
               style: 'destructive',
               onPress: () => setEditingImage(null),
             },
@@ -184,12 +185,12 @@ const LessonImageList = ({
 
     // Validate title length
     if (editForm.title && editForm.title.length > 200) {
-      errors.title = 'Tiêu đề tối đa 200 ký tự';
+      errors.title = 'Tieu de toi da 200 ky tu';
     }
 
     // Validate caption length
     if (editForm.caption && editForm.caption.length > 1000) {
-      errors.caption = 'Mô tả tối đa 1000 ký tự';
+      errors.caption = 'Mo ta toi da 1000 ky tu';
     }
 
     setFormErrors(errors);
@@ -207,15 +208,15 @@ const LessonImageList = ({
       setEditingImage(null);
       alert({
         type: 'success',
-        title: 'Thành công',
-        message: 'Đã cập nhật thông tin hình ảnh',
+        title: 'Thanh cong',
+        message: 'Da cap nhat thong tin hinh anh',
         buttons: [{ text: 'OK' }],
       });
     } catch (error) {
       alert({
         type: 'error',
-        title: 'Lỗi',
-        message: error.message || 'Không thể lưu thay đổi',
+        title: 'Loi',
+        message: error.message || 'Khong the luu thay doi',
         buttons: [{ text: 'OK' }],
       });
     } finally {
@@ -244,6 +245,199 @@ const LessonImageList = ({
     [images, onReorder]
   );
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginTop: SPACING.lg,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    sectionTitle: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    },
+    headerHint: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+    },
+    loadingContainer: {
+      alignItems: 'center',
+      padding: SPACING.xl,
+    },
+    loadingText: {
+      color: colors.textSecondary,
+      marginTop: SPACING.sm,
+    },
+    imageCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 10,
+      padding: SPACING.sm,
+      marginBottom: SPACING.sm,
+      borderWidth: 1,
+      borderColor: glass.border,
+    },
+    imageCardDeleting: {
+      opacity: 0.5,
+    },
+    sortButtons: {
+      marginRight: SPACING.xs,
+    },
+    sortBtn: {
+      padding: 4,
+    },
+    sortBtnDisabled: {
+      opacity: 0.3,
+    },
+    thumbnail: {
+      width: 56,
+      height: 56,
+      borderRadius: 8,
+      backgroundColor: '#000',
+    },
+    info: {
+      flex: 1,
+      marginLeft: SPACING.sm,
+      marginRight: SPACING.xs,
+    },
+    positionId: {
+      color: colors.gold,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    },
+    title: {
+      color: colors.textSecondary,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      marginTop: 2,
+    },
+    dimensions: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      marginTop: 2,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: 4,
+    },
+    actionBtn: {
+      padding: SPACING.sm,
+      borderRadius: 6,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      padding: SPACING.xl,
+    },
+    emptyList: {
+      flexGrow: 1,
+    },
+    emptyText: {
+      color: colors.textSecondary,
+      fontSize: TYPOGRAPHY.fontSize.md,
+      marginTop: SPACING.sm,
+    },
+    emptyHint: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      marginTop: SPACING.xs,
+    },
+    // Modal styles
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      justifyContent: 'flex-end',
+    },
+    modalContent: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (gradients.background?.[0] || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      padding: SPACING.lg,
+      maxHeight: '90%',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    modalTitle: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    },
+    modalCloseBtn: {
+      padding: SPACING.xs,
+    },
+    modalPreview: {
+      width: '100%',
+      height: 120,
+      borderRadius: 8,
+      backgroundColor: '#000',
+      marginBottom: SPACING.md,
+    },
+    formGroup: {
+      marginBottom: SPACING.md,
+    },
+    label: {
+      color: colors.textSecondary,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      marginBottom: SPACING.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    required: {
+      color: colors.error,
+    },
+    input: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderWidth: 1,
+      borderColor: glass.border,
+      borderRadius: 8,
+      padding: SPACING.md,
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.md,
+    },
+    inputError: {
+      borderColor: colors.error,
+    },
+    textArea: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+    inputHint: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      marginTop: SPACING.xs,
+    },
+    errorText: {
+      color: colors.error,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      marginTop: SPACING.xs,
+    },
+    saveBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.gold,
+      padding: SPACING.md,
+      borderRadius: 10,
+      marginTop: SPACING.sm,
+      gap: SPACING.sm,
+    },
+    saveBtnDisabled: {
+      opacity: 0.7,
+    },
+    saveBtnText: {
+      color: '#000',
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    },
+  }), [colors, settings.theme, glass, gradients, SPACING, TYPOGRAPHY]);
+
   // ========== RENDER ITEM ==========
   const renderItem = useCallback(
     ({ item, index }) => {
@@ -260,7 +454,7 @@ const LessonImageList = ({
             >
               <ChevronUp
                 size={16}
-                color={index === 0 ? COLORS.textMuted : COLORS.textPrimary}
+                color={index === 0 ? colors.textMuted : colors.textPrimary}
               />
             </TouchableOpacity>
             <TouchableOpacity
@@ -274,7 +468,7 @@ const LessonImageList = ({
               <ChevronDown
                 size={16}
                 color={
-                  index === images.length - 1 ? COLORS.textMuted : COLORS.textPrimary
+                  index === images.length - 1 ? colors.textMuted : colors.textPrimary
                 }
               />
             </TouchableOpacity>
@@ -293,7 +487,7 @@ const LessonImageList = ({
               {item.position_id || `image-${index + 1}`}
             </Text>
             <Text style={styles.title} numberOfLines={1}>
-              {item.title || item.file_name || 'Chưa đặt tên'}
+              {item.title || item.file_name || 'Chua dat ten'}
             </Text>
             {item.width && item.height && (
               <Text style={styles.dimensions}>
@@ -325,7 +519,7 @@ const LessonImageList = ({
               style={styles.actionBtn}
               onPress={() => openEditModal(item)}
             >
-              <Edit2 size={16} color={COLORS.gold} />
+              <Edit2 size={16} color={colors.gold} />
             </TouchableOpacity>
 
             {/* Delete */}
@@ -335,36 +529,36 @@ const LessonImageList = ({
               disabled={isDeleting}
             >
               {isDeleting ? (
-                <ActivityIndicator size="small" color={COLORS.error} />
+                <ActivityIndicator size="small" color={colors.error} />
               ) : (
-                <Trash2 size={16} color={COLORS.error} />
+                <Trash2 size={16} color={colors.error} />
               )}
             </TouchableOpacity>
           </View>
         </View>
       );
     },
-    [images, deletingId, copyUrl, copyHtmlTag, openEditModal, handleDelete, moveUp, moveDown]
+    [images, deletingId, copyUrl, copyHtmlTag, openEditModal, handleDelete, moveUp, moveDown, styles, colors]
   );
 
   // ========== EMPTY STATE ==========
   const renderEmpty = useMemo(
     () => (
       <View style={styles.emptyContainer}>
-        <Inbox size={48} color={COLORS.textMuted} />
-        <Text style={styles.emptyText}>Chưa có hình ảnh nào</Text>
-        <Text style={styles.emptyHint}>Upload hình ảnh ở trên để bắt đầu</Text>
+        <Inbox size={48} color={colors.textMuted} />
+        <Text style={styles.emptyText}>Chua co hinh anh nao</Text>
+        <Text style={styles.emptyHint}>Upload hinh anh o tren de bat dau</Text>
       </View>
     ),
-    []
+    [styles, colors]
   );
 
   // ========== LOADING STATE ==========
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.gold} />
-        <Text style={styles.loadingText}>Đang tải hình ảnh...</Text>
+        <ActivityIndicator size="large" color={colors.gold} />
+        <Text style={styles.loadingText}>Dang tai hinh anh...</Text>
       </View>
     );
   }
@@ -374,10 +568,10 @@ const LessonImageList = ({
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.sectionTitle}>
-          Hình ảnh đã tải lên ({images.length})
+          Hinh anh da tai len ({images.length})
         </Text>
         {images.length > 1 && (
-          <Text style={styles.headerHint}>Dùng arrows để sắp xếp</Text>
+          <Text style={styles.headerHint}>Dung arrows de sap xep</Text>
         )}
       </View>
 
@@ -402,9 +596,9 @@ const LessonImageList = ({
           <View style={styles.modalContent}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Chỉnh sửa hình ảnh</Text>
+              <Text style={styles.modalTitle}>Chinh sua hinh anh</Text>
               <TouchableOpacity style={styles.modalCloseBtn} onPress={closeEditModal}>
-                <X size={24} color={COLORS.textPrimary} />
+                <X size={24} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -432,7 +626,7 @@ const LessonImageList = ({
                   }
                 }}
                 placeholder="diagram-1, chart-btc, hero-image..."
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -440,19 +634,19 @@ const LessonImageList = ({
                 <Text style={styles.errorText}>{formErrors.position_id}</Text>
               ) : (
                 <Text style={styles.inputHint}>
-                  ID duy nhất để tham chiếu trong HTML. Chỉ dùng chữ, số, dấu - và _
+                  ID duy nhat de tham chieu trong HTML. Chi dung chu, so, dau - va _
                 </Text>
               )}
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Tiêu đề</Text>
+              <Text style={styles.label}>Tieu de</Text>
               <TextInput
                 style={[styles.input, formErrors.title && styles.inputError]}
                 value={editForm.title}
                 onChangeText={(t) => setEditForm((prev) => ({ ...prev, title: t }))}
-                placeholder="Tiêu đề hiển thị khi hover"
-                placeholderTextColor={COLORS.textMuted}
+                placeholder="Tieu de hien thi khi hover"
+                placeholderTextColor={colors.textMuted}
                 maxLength={200}
               />
               {formErrors.title && (
@@ -461,7 +655,7 @@ const LessonImageList = ({
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Mô tả (Caption)</Text>
+              <Text style={styles.label}>Mo ta (Caption)</Text>
               <TextInput
                 style={[
                   styles.input,
@@ -470,8 +664,8 @@ const LessonImageList = ({
                 ]}
                 value={editForm.caption}
                 onChangeText={(t) => setEditForm((prev) => ({ ...prev, caption: t }))}
-                placeholder="Mô tả hiển thị dưới hình ảnh"
-                placeholderTextColor={COLORS.textMuted}
+                placeholder="Mo ta hien thi duoi hinh anh"
+                placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
@@ -488,12 +682,12 @@ const LessonImageList = ({
                 style={styles.input}
                 value={editForm.alt_text}
                 onChangeText={(t) => setEditForm((prev) => ({ ...prev, alt_text: t }))}
-                placeholder="Mô tả cho người khiếm thị và SEO"
-                placeholderTextColor={COLORS.textMuted}
+                placeholder="Mo ta cho nguoi khiem thi va SEO"
+                placeholderTextColor={colors.textMuted}
                 maxLength={300}
               />
               <Text style={styles.inputHint}>
-                Mô tả nội dung hình cho người sử dụng screen reader
+                Mo ta noi dung hinh cho nguoi su dung screen reader
               </Text>
             </View>
 
@@ -509,7 +703,7 @@ const LessonImageList = ({
                 <Check size={18} color="#000" />
               )}
               <Text style={styles.saveBtnText}>
-                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                {saving ? 'Dang luu...' : 'Luu thay doi'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -520,198 +714,5 @@ const LessonImageList = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: SPACING.lg,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  sectionTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
-  },
-  headerHint: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-  loadingText: {
-    color: COLORS.textSecondary,
-    marginTop: SPACING.sm,
-  },
-  imageCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: 10,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: GLASS.border,
-  },
-  imageCardDeleting: {
-    opacity: 0.5,
-  },
-  sortButtons: {
-    marginRight: SPACING.xs,
-  },
-  sortBtn: {
-    padding: 4,
-  },
-  sortBtnDisabled: {
-    opacity: 0.3,
-  },
-  thumbnail: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-    backgroundColor: '#000',
-  },
-  info: {
-    flex: 1,
-    marginLeft: SPACING.sm,
-    marginRight: SPACING.xs,
-  },
-  positionId: {
-    color: COLORS.gold,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
-  },
-  title: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    marginTop: 2,
-  },
-  dimensions: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginTop: 2,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  actionBtn: {
-    padding: SPACING.sm,
-    borderRadius: 6,
-    backgroundColor: GLASS.background,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-  emptyList: {
-    flexGrow: 1,
-  },
-  emptyText: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    marginTop: SPACING.sm,
-  },
-  emptyHint: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    marginTop: SPACING.xs,
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: GRADIENTS.background[0],
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: SPACING.lg,
-    maxHeight: '90%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  modalTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
-  },
-  modalCloseBtn: {
-    padding: SPACING.xs,
-  },
-  modalPreview: {
-    width: '100%',
-    height: 120,
-    borderRadius: 8,
-    backgroundColor: '#000',
-    marginBottom: SPACING.md,
-  },
-  formGroup: {
-    marginBottom: SPACING.md,
-  },
-  label: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    marginBottom: SPACING.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  required: {
-    color: COLORS.error,
-  },
-  input: {
-    backgroundColor: GLASS.background,
-    borderWidth: 1,
-    borderColor: GLASS.border,
-    borderRadius: 8,
-    padding: SPACING.md,
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.md,
-  },
-  inputError: {
-    borderColor: COLORS.error,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  inputHint: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginTop: SPACING.xs,
-  },
-  errorText: {
-    color: COLORS.error,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginTop: SPACING.xs,
-  },
-  saveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.gold,
-    padding: SPACING.md,
-    borderRadius: 10,
-    marginTop: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  saveBtnDisabled: {
-    opacity: 0.7,
-  },
-  saveBtnText: {
-    color: '#000',
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
-  },
-});
 
 export default LessonImageList;

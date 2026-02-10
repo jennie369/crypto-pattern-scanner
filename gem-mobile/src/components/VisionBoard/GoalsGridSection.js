@@ -25,7 +25,7 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Target, Plus, HelpCircle, ChevronRight, MoreVertical, Trash2, X, Check, ChevronUp, ChevronDown } from 'lucide-react-native';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import GoalThumbnailCard from './GoalThumbnailCard';
 import { ControlledTooltip } from './Tooltip';
 
@@ -147,12 +147,313 @@ const GoalsGridSection = ({
   onDeleteGoal,
   navigation,
 }) => {
+  // ========== THEME ==========
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // ========== STATE ==========
   const [showTooltip, setShowTooltip] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDragMode, setIsDragMode] = useState(false);
   const [selectedGoalIds, setSelectedGoalIds] = useState(new Set());
   const [orderedGoalIds, setOrderedGoalIds] = useState(null); // Track custom order
+
+  // ========== STYLES ==========
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginTop: SPACING.lg,
+    },
+
+    sectionHeader: {
+      marginBottom: SPACING.sm,
+    },
+
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+
+    sectionTitle: {
+      flex: 1,
+      color: colors.textPrimary,
+      fontSize: 14,
+      fontWeight: '700',
+      letterSpacing: 1,
+    },
+
+    headerRightButtons: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+
+    headerButton: {
+      padding: 6,
+      borderRadius: 8,
+    },
+
+    editModeHint: {
+      color: colors.textMuted,
+      fontSize: 12,
+      marginTop: SPACING.xs,
+    },
+
+    categoryChipsContainer: {
+      marginVertical: SPACING.md,
+      paddingVertical: SPACING.sm,
+    },
+
+    categoryChipsContent: {
+      paddingRight: SPACING.lg,
+      paddingVertical: SPACING.xs,
+      gap: SPACING.sm,
+    },
+
+    categoryChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderRadius: 24,
+      height: 44,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : 'rgba(30, 35, 60, 0.6)',
+      marginRight: SPACING.sm,
+      borderWidth: 1,
+      borderColor: 'rgba(139, 92, 246, 0.2)',
+      gap: SPACING.xs,
+    },
+
+    categoryChipActive: {
+      backgroundColor: 'rgba(139, 92, 246, 0.2)',
+      borderColor: 'rgba(139, 92, 246, 0.5)',
+    },
+
+    categoryChipText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontWeight: '600',
+      lineHeight: 18,
+    },
+
+    categoryChipTextActive: {
+      color: colors.textPrimary,
+    },
+
+    categoryChipBadge: {
+      marginLeft: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 12,
+      backgroundColor: 'rgba(255,255,255,0.08)',
+      minWidth: 24,
+      alignItems: 'center',
+    },
+
+    categoryChipBadgeActive: {
+      backgroundColor: 'rgba(139, 92, 246, 0.3)',
+    },
+
+    categoryChipCount: {
+      color: colors.textMuted,
+      fontSize: 12,
+      fontWeight: '700',
+      lineHeight: 16,
+    },
+
+    categoryChipCountActive: {
+      color: colors.textPrimary,
+    },
+
+    gridContainer: {
+      paddingTop: SPACING.sm,
+    },
+
+    gridRow: {
+      justifyContent: 'flex-start',
+      gap: CARD_GAP,
+    },
+
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: SPACING.xl * 2,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : 'rgba(30, 35, 60, 0.4)',
+      borderRadius: 16,
+      marginTop: SPACING.sm,
+    },
+
+    emptyText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      marginTop: SPACING.md,
+      marginBottom: SPACING.lg,
+      textAlign: 'center',
+    },
+
+    addButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.sm,
+      borderRadius: 12,
+      backgroundColor: 'rgba(139, 92, 246, 0.3)',
+      borderWidth: 1,
+      borderColor: 'rgba(139, 92, 246, 0.5)',
+    },
+
+    addButtonText: {
+      color: colors.textPrimary,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+
+    viewAllButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+      marginTop: SPACING.sm,
+      borderRadius: 12,
+      backgroundColor: 'rgba(139, 92, 246, 0.1)',
+      borderWidth: 1,
+      borderColor: 'rgba(139, 92, 246, 0.3)',
+    },
+
+    viewAllText: {
+      color: '#8B5CF6',
+      fontSize: 14,
+      fontWeight: '600',
+      marginRight: SPACING.xs,
+    },
+
+    goalItemWrapper: {
+      position: 'relative',
+    },
+
+    selectionOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: CARD_GAP,
+      borderRadius: 16,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      backgroundColor: 'transparent',
+    },
+
+    selectionOverlaySelected: {
+      borderColor: '#8B5CF6',
+      backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    },
+
+    checkbox: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.5)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    checkboxSelected: {
+      backgroundColor: '#8B5CF6',
+      borderColor: '#8B5CF6',
+    },
+
+    deleteSelectedButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+      marginTop: SPACING.md,
+      borderRadius: 12,
+      backgroundColor: '#DC2626',
+      gap: SPACING.sm,
+    },
+
+    deleteSelectedText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+
+    dragHint: {
+      color: colors.textMuted,
+      fontSize: 11,
+      marginTop: 4,
+      fontStyle: 'italic',
+    },
+
+    doneButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#8B5CF6',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: 6,
+      borderRadius: 8,
+      gap: 4,
+    },
+
+    doneButtonText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '600',
+    },
+
+    reorderContainer: {
+      paddingTop: SPACING.sm,
+    },
+
+    reorderItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : 'rgba(30, 35, 60, 0.6)',
+      borderRadius: 12,
+      padding: SPACING.sm,
+      borderWidth: 1,
+      borderColor: 'rgba(139, 92, 246, 0.2)',
+    },
+
+    reorderControls: {
+      alignItems: 'center',
+      marginRight: SPACING.md,
+    },
+
+    reorderButton: {
+      padding: 4,
+    },
+
+    reorderButtonDisabled: {
+      opacity: 0.3,
+    },
+
+    reorderIndex: {
+      color: colors.textMuted,
+      fontSize: 12,
+      fontWeight: '600',
+      marginVertical: 2,
+    },
+
+    reorderCardContainer: {
+      flex: 1,
+    },
+
+    reorderTitle: {
+      color: colors.textPrimary,
+      fontSize: 14,
+      fontWeight: '500',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // ========== EXTRACT ALL GOALS ==========
   const allGoals = useMemo(() => {
@@ -373,7 +674,7 @@ const GoalsGridSection = ({
           >
             <Target
               size={12}
-              color={isActive ? '#8B5CF6' : COLORS.textMuted}
+              color={isActive ? '#8B5CF6' : colors.textMuted}
             />
             <Text
               style={[
@@ -407,7 +708,7 @@ const GoalsGridSection = ({
   // ========== RENDER EMPTY STATE ==========
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Target size={48} color={COLORS.textMuted} />
+      <Target size={48} color={colors.textMuted} />
       <Text style={styles.emptyText}>
         {selectedCategory === 'all'
           ? 'Chưa có mục tiêu nào'
@@ -418,7 +719,7 @@ const GoalsGridSection = ({
         onPress={handleAddGoal}
         activeOpacity={0.8}
       >
-        <Plus size={16} color={COLORS.textPrimary} />
+        <Plus size={16} color={colors.textPrimary} />
         <Text style={styles.addButtonText}>Thêm mục tiêu</Text>
       </TouchableOpacity>
     </View>

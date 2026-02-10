@@ -3,10 +3,10 @@
  * Instagram-style 3-column grid for profile view
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Image, TouchableOpacity, Dimensions, StyleSheet, Text } from 'react-native';
 import { Play, ImageIcon } from 'lucide-react-native';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -18,6 +18,62 @@ const ImageGrid = ({
   showEmpty = true,
   emptyMessage = 'Chưa có bài viết nào'
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      flexWrap: 'wrap'
+    },
+    gridItem: {
+      backgroundColor: colors.glassBg,
+      overflow: 'hidden',
+      position: 'relative'
+    },
+    gridImage: {
+      width: '100%',
+      height: '100%'
+    },
+    multiIndicator: {
+      position: 'absolute',
+      top: SPACING.xs,
+      right: SPACING.xs,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      paddingHorizontal: SPACING.xs,
+      paddingVertical: 2,
+      borderRadius: 4
+    },
+    multiText: {
+      fontSize: 10,
+      color: colors.textPrimary,
+      fontWeight: '600'
+    },
+    videoIndicator: {
+      position: 'absolute',
+      top: SPACING.xs,
+      right: SPACING.xs,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: SPACING.huge,
+      paddingHorizontal: SPACING.lg
+    },
+    emptyText: {
+      marginTop: SPACING.md,
+      fontSize: 14,
+      color: colors.textMuted,
+      textAlign: 'center'
+    }
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Calculate item dimensions
   const itemWidth = (SCREEN_WIDTH - (spacing * (columns - 1))) / columns;
   const itemHeight = itemWidth * (4 / 3); // 3:4 aspect ratio
@@ -28,7 +84,7 @@ const ImageGrid = ({
   if (imagePosts.length === 0 && showEmpty) {
     return (
       <View style={styles.emptyContainer}>
-        <ImageIcon size={48} color={COLORS.textMuted} />
+        <ImageIcon size={48} color={colors.textMuted} />
         <Text style={styles.emptyText}>{emptyMessage}</Text>
       </View>
     );
@@ -73,7 +129,7 @@ const ImageGrid = ({
             {/* Video indicator (for future use) */}
             {post.video_url && (
               <View style={styles.videoIndicator}>
-                <Play size={16} color={COLORS.textPrimary} fill={COLORS.textPrimary} />
+                <Play size={16} color={colors.textPrimary} fill={colors.textPrimary} />
               </View>
             )}
           </TouchableOpacity>
@@ -82,59 +138,5 @@ const ImageGrid = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    flexWrap: 'wrap'
-  },
-  gridItem: {
-    backgroundColor: COLORS.glassBg,
-    overflow: 'hidden',
-    position: 'relative'
-  },
-  gridImage: {
-    width: '100%',
-    height: '100%'
-  },
-  multiIndicator: {
-    position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 2,
-    borderRadius: 4
-  },
-  multiText: {
-    fontSize: 10,
-    color: COLORS.textPrimary,
-    fontWeight: '600'
-  },
-  videoIndicator: {
-    position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.huge,
-    paddingHorizontal: SPACING.lg
-  },
-  emptyText: {
-    marginTop: SPACING.md,
-    fontSize: 14,
-    color: COLORS.textMuted,
-    textAlign: 'center'
-  }
-});
 
 export default ImageGrid;

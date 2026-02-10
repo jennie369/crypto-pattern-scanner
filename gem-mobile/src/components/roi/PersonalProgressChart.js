@@ -9,7 +9,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path, Line, Circle, G, Text as SvgText } from 'react-native-svg';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { BORDER_RADIUS } from '../../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_HEIGHT = 180;
@@ -30,6 +31,8 @@ const PersonalProgressChart = ({
   title = 'Tiến bộ theo tháng',
   style,
 }) => {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // Chart dimensions
   const chartWidth = SCREEN_WIDTH - SPACING.lg * 2;
   const plotWidth = chartWidth - CHART_PADDING.left - CHART_PADDING.right;
@@ -115,6 +118,65 @@ const PersonalProgressChart = ({
     }
   }, [metric]);
 
+  // Generate Y-axis labels
+  const yLabels = useMemo(() => {
+    if (!chartData) return [];
+    const range = chartData.maxValue - chartData.minValue;
+    const step = range / 4;
+    return [0, 1, 2, 3, 4].map(i => ({
+      value: chartData.minValue + step * i,
+      y: CHART_PADDING.top + plotHeight - (i / 4) * plotHeight,
+    }));
+  }, [chartData, plotHeight]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING.lg,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.md,
+    },
+    emptyState: {
+      height: CHART_HEIGHT,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+    emptySubtext: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textDisabled,
+      textAlign: 'center',
+      marginTop: SPACING.xs,
+    },
+    legend: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: SPACING.sm,
+    },
+    legendDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginRight: SPACING.xs,
+    },
+    legendText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Empty state
   if (!chartData || chartData.points.length === 0) {
     return (
@@ -127,16 +189,6 @@ const PersonalProgressChart = ({
       </View>
     );
   }
-
-  // Generate Y-axis labels
-  const yLabels = useMemo(() => {
-    const range = chartData.maxValue - chartData.minValue;
-    const step = range / 4;
-    return [0, 1, 2, 3, 4].map(i => ({
-      value: chartData.minValue + step * i,
-      y: CHART_PADDING.top + plotHeight - (i / 4) * plotHeight,
-    }));
-  }, [chartData, plotHeight]);
 
   return (
     <View style={[styles.container, style]}>
@@ -162,7 +214,7 @@ const PersonalProgressChart = ({
             key={`ylabel-${i}`}
             x={CHART_PADDING.left - 8}
             y={label.y + 4}
-            fill={COLORS.textMuted}
+            fill={colors.textMuted}
             fontSize={10}
             textAnchor="end"
           >
@@ -214,7 +266,7 @@ const PersonalProgressChart = ({
             key={`xlabel-${i}`}
             x={point.x}
             y={CHART_HEIGHT - 10}
-            fill={COLORS.textMuted}
+            fill={colors.textMuted}
             fontSize={10}
             textAnchor="middle"
           >
@@ -231,53 +283,5 @@ const PersonalProgressChart = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: GLASS.backgroundColor,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.md,
-  },
-  emptyState: {
-    height: CHART_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textDisabled,
-    textAlign: 'center',
-    marginTop: SPACING.xs,
-  },
-  legend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: SPACING.sm,
-  },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: SPACING.xs,
-  },
-  legendText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-  },
-});
 
 export default React.memo(PersonalProgressChart);

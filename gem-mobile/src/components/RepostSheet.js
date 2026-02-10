@@ -4,7 +4,7 @@
  * Bottom sheet for reposting with optional quote
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,7 @@ import {
   MessageSquare,
   Send,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, INPUT } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 import QuotedPost from './QuotedPost';
 import repostService from '../services/repostService';
 
@@ -37,10 +37,146 @@ const RepostSheet = ({
   post,
   onSuccess,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [mode, setMode] = useState('instant'); // 'instant' or 'quote'
   const [quote, setQuote] = useState('');
   const [loading, setLoading] = useState(false);
   const [slideAnim] = useState(new Animated.Value(SCREEN_HEIGHT));
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    },
+    sheet: {
+      borderTopLeftRadius: glass.borderRadius,
+      borderTopRightRadius: glass.borderRadius,
+      overflow: 'hidden',
+      maxHeight: SCREEN_HEIGHT * 0.85,
+    },
+    blurContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      paddingBottom: 34, // Safe area
+    },
+    header: {
+      alignItems: 'center',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    handle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+      marginBottom: SPACING.sm,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    closeButton: {
+      position: 'absolute',
+      right: SPACING.lg,
+      top: SPACING.lg,
+      padding: SPACING.xs,
+    },
+    modeContainer: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+      gap: SPACING.md,
+    },
+    modeOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    },
+    modeOptionActive: {
+      borderColor: colors.purple,
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    },
+    modeText: {
+      flex: 1,
+      marginLeft: SPACING.md,
+    },
+    modeLabel: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textSecondary,
+    },
+    modeLabelActive: {
+      color: colors.textPrimary,
+    },
+    modeSubtitle: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    quoteContainer: {
+      marginHorizontal: SPACING.lg,
+      marginTop: SPACING.lg,
+      position: 'relative',
+    },
+    quoteInput: {
+      backgroundColor: colors.inputBackground || 'rgba(255, 255, 255, 0.05)',
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.inputBorder || 'rgba(255, 255, 255, 0.1)',
+      padding: SPACING.md,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textPrimary,
+      minHeight: 100,
+      maxHeight: 150,
+    },
+    charCount: {
+      position: 'absolute',
+      bottom: SPACING.sm,
+      right: SPACING.md,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    previewContainer: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+    },
+    previewLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginBottom: SPACING.xs,
+    },
+    actionContainer: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.purple,
+      paddingVertical: SPACING.md,
+      borderRadius: 12,
+      gap: SPACING.sm,
+    },
+    actionButtonDisabled: {
+      opacity: 0.6,
+    },
+    actionButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   React.useEffect(() => {
     if (visible) {
@@ -128,9 +264,9 @@ const RepostSheet = ({
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.handle} />
-              <Text style={styles.title}>Đăng lại</Text>
+              <Text style={styles.title}>Dang lai</Text>
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <X size={20} color={COLORS.textMuted} />
+                <X size={20} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -146,7 +282,7 @@ const RepostSheet = ({
               >
                 <Repeat
                   size={22}
-                  color={mode === 'instant' ? COLORS.purple : COLORS.textMuted}
+                  color={mode === 'instant' ? colors.purple : colors.textMuted}
                 />
                 <View style={styles.modeText}>
                   <Text
@@ -155,10 +291,10 @@ const RepostSheet = ({
                       mode === 'instant' && styles.modeLabelActive,
                     ]}
                   >
-                    Đăng lại ngay
+                    Dang lai ngay
                   </Text>
                   <Text style={styles.modeSubtitle}>
-                    Chia sẻ bài viết lên bảng tin của bạn
+                    Chia se bai viet len bang tin cua ban
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -173,7 +309,7 @@ const RepostSheet = ({
               >
                 <MessageSquare
                   size={22}
-                  color={mode === 'quote' ? COLORS.purple : COLORS.textMuted}
+                  color={mode === 'quote' ? colors.purple : colors.textMuted}
                 />
                 <View style={styles.modeText}>
                   <Text
@@ -182,10 +318,10 @@ const RepostSheet = ({
                       mode === 'quote' && styles.modeLabelActive,
                     ]}
                   >
-                    Đăng lại kèm bình luận
+                    Dang lai kem binh luan
                   </Text>
                   <Text style={styles.modeSubtitle}>
-                    Thêm bình luận của bạn khi đăng lại
+                    Them binh luan cua ban khi dang lai
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -196,8 +332,8 @@ const RepostSheet = ({
               <View style={styles.quoteContainer}>
                 <TextInput
                   style={styles.quoteInput}
-                  placeholder="Viết bình luận của bạn..."
-                  placeholderTextColor={COLORS.textMuted}
+                  placeholder="Viet binh luan cua ban..."
+                  placeholderTextColor={colors.textMuted}
                   value={quote}
                   onChangeText={setQuote}
                   multiline
@@ -211,7 +347,7 @@ const RepostSheet = ({
             {/* Post Preview */}
             {post && (
               <View style={styles.previewContainer}>
-                <Text style={styles.previewLabel}>Bài viết gốc</Text>
+                <Text style={styles.previewLabel}>Bai viet goc</Text>
                 <QuotedPost post={post} />
               </View>
             )}
@@ -228,12 +364,12 @@ const RepostSheet = ({
                 activeOpacity={0.8}
               >
                 {loading ? (
-                  <ActivityIndicator size="small" color={COLORS.textPrimary} />
+                  <ActivityIndicator size="small" color={colors.textPrimary} />
                 ) : (
                   <>
-                    <Send size={18} color={COLORS.textPrimary} />
+                    <Send size={18} color={colors.textPrimary} />
                     <Text style={styles.actionButtonText}>
-                      {mode === 'instant' ? 'Đăng lại ngay' : 'Đăng với bình luận'}
+                      {mode === 'instant' ? 'Dang lai ngay' : 'Dang voi binh luan'}
                     </Text>
                   </>
                 )}
@@ -245,139 +381,5 @@ const RepostSheet = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-  },
-  sheet: {
-    borderTopLeftRadius: GLASS.borderRadius,
-    borderTopRightRadius: GLASS.borderRadius,
-    overflow: 'hidden',
-    maxHeight: SCREEN_HEIGHT * 0.85,
-  },
-  blurContainer: {
-    backgroundColor: GLASS.background,
-    paddingBottom: 34, // Safe area
-  },
-  header: {
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    marginBottom: SPACING.sm,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  closeButton: {
-    position: 'absolute',
-    right: SPACING.lg,
-    top: SPACING.lg,
-    padding: SPACING.xs,
-  },
-  modeContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    gap: SPACING.md,
-  },
-  modeOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  },
-  modeOptionActive: {
-    borderColor: COLORS.purple,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-  },
-  modeText: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  modeLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textSecondary,
-  },
-  modeLabelActive: {
-    color: COLORS.textPrimary,
-  },
-  modeSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  quoteContainer: {
-    marginHorizontal: SPACING.lg,
-    marginTop: SPACING.lg,
-    position: 'relative',
-  },
-  quoteInput: {
-    backgroundColor: INPUT.background,
-    borderRadius: INPUT.borderRadius,
-    borderWidth: 1,
-    borderColor: INPUT.borderColor,
-    padding: SPACING.md,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textPrimary,
-    minHeight: 100,
-    maxHeight: 150,
-  },
-  charCount: {
-    position: 'absolute',
-    bottom: SPACING.sm,
-    right: SPACING.md,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  previewContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-  },
-  previewLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.xs,
-  },
-  actionContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.purple,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    gap: SPACING.sm,
-  },
-  actionButtonDisabled: {
-    opacity: 0.6,
-  },
-  actionButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-});
 
 export default RepostSheet;

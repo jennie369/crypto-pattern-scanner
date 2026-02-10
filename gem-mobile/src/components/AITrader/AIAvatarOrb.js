@@ -3,11 +3,12 @@
  * Used in Paper Trade flow and AI Sư Phụ interactions
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Bot, Brain, Shield, Sparkles } from 'lucide-react-native';
-import { COLORS, SPACING, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { BORDER_RADIUS } from '../../utils/tokens';
 import { AI_MOODS } from '../../services/gemMasterAIService';
 
 const AIAvatarOrb = ({
@@ -19,6 +20,8 @@ const AIAvatarOrb = ({
   showGlow = true,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // Animation values
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0.3)).current;
@@ -57,7 +60,7 @@ const AIAvatarOrb = ({
   const getIcon = () => {
     const iconProps = {
       size: sizeConfig.icon,
-      color: COLORS.textPrimary,
+      color: colors.textPrimary,
       strokeWidth: 2,
     };
 
@@ -205,9 +208,40 @@ const AIAvatarOrb = ({
     }
   }, [mood]);
 
-  const colors = getMoodColors();
+  const moodColors = getMoodColors();
 
   const Container = onPress ? TouchableOpacity : View;
+
+  const styles = useMemo(() => StyleSheet.create({
+    wrapper: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    glowOuter: {
+      position: 'absolute',
+    },
+    orbContainer: {
+      shadowColor: '#6A5BFF',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      elevation: 8,
+    },
+    gradient: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    innerGlow: {
+      position: 'absolute',
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+      top: '10%',
+    },
+    iconContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <Container
@@ -248,7 +282,7 @@ const AIAvatarOrb = ({
         ]}
       >
         <LinearGradient
-          colors={colors}
+          colors={moodColors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[
@@ -281,36 +315,5 @@ const AIAvatarOrb = ({
     </Container>
   );
 };
-
-const styles = StyleSheet.create({
-  wrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  glowOuter: {
-    position: 'absolute',
-  },
-  orbContainer: {
-    shadowColor: '#6A5BFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  gradient: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  innerGlow: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    top: '10%',
-  },
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 
 export default AIAvatarOrb;

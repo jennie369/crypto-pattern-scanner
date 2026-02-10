@@ -7,7 +7,7 @@
  * Updated: January 2026 - Cosmic theme redesign
  */
 
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler'
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Icons from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { COSMIC_COLORS, COSMIC_GRADIENTS, COSMIC_SHADOWS, COSMIC_SPACING } from '../../theme/cosmicTokens';
 import { CalendarEventItem } from './MonthCalendar';
 import { useAuth } from '../../contexts/AuthContext';

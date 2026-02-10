@@ -8,7 +8,8 @@ import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Clock, Users, Star, PlayCircle, CheckCircle, Lock } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { BORDER_RADIUS, SHADOWS } from '../../utils/tokens';
 import ProgressBar from '../Common/ProgressBar';
 
 // Helper: Add cache-busting parameter to image URL
@@ -29,6 +30,8 @@ const CourseCardVertical = React.memo(({
   compact = false,
   style = {},
 }) => {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
+
   if (!course) return null;
 
   const {
@@ -70,9 +73,9 @@ const CourseCardVertical = React.memo(({
 
   // Difficulty colors
   const difficultyColors = {
-    beginner: COLORS.success,
-    intermediate: COLORS.gold,
-    advanced: COLORS.error,
+    beginner: colors.success,
+    intermediate: colors.gold,
+    advanced: colors.error,
   };
 
   const difficultyLabels = {
@@ -80,6 +83,176 @@ const CourseCardVertical = React.memo(({
     intermediate: 'Trung cấp',
     advanced: 'Nâng cao',
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      width: 180,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: BORDER_RADIUS.lg,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+      ...SHADOWS.glass,
+    },
+    thumbnailContainer: {
+      height: 100,
+      position: 'relative',
+    },
+    thumbnail: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    thumbnailPlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    lockOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    durationBadge: {
+      position: 'absolute',
+      bottom: SPACING.xs,
+      right: SPACING.xs,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      paddingHorizontal: SPACING.xs,
+      paddingVertical: 2,
+      borderRadius: BORDER_RADIUS.xs,
+    },
+    durationText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textPrimary,
+      marginLeft: 3,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    difficultyBadge: {
+      position: 'absolute',
+      top: SPACING.xs,
+      left: SPACING.xs,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 2,
+      borderRadius: BORDER_RADIUS.xs,
+    },
+    difficultyText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    completedOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    completedText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.success,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      marginTop: SPACING.xxs,
+    },
+    completedBadge: {
+      position: 'absolute',
+      top: SPACING.xs,
+      right: SPACING.xs,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      borderRadius: BORDER_RADIUS.full,
+      padding: 2,
+    },
+    content: {
+      padding: SPACING.md,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.xxs,
+      lineHeight: 20,
+    },
+    instructor: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginBottom: SPACING.sm,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+    },
+    statItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: SPACING.md,
+    },
+    statText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      marginLeft: SPACING.xxs,
+    },
+    progressContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    progressText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.gold,
+      marginLeft: SPACING.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    priceContainer: {
+      marginTop: SPACING.xxs,
+    },
+    priceText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+    },
+    freeText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.success,
+    },
+    // Compact mode
+    compactContainer: {
+      width: 140,
+      marginRight: SPACING.md,
+    },
+    compactThumbnail: {
+      width: 140,
+      height: 80,
+      borderRadius: BORDER_RADIUS.md,
+      overflow: 'hidden',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      position: 'relative',
+    },
+    compactImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    compactPlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(15, 16, 48, 0.5)',
+    },
+    compactTitle: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textPrimary,
+      marginTop: SPACING.sm,
+      lineHeight: 16,
+    },
+    compactProgress: {
+      marginTop: SPACING.xs,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   if (compact) {
     return (
@@ -94,17 +267,17 @@ const CourseCardVertical = React.memo(({
             <Image source={{ uri: cacheBustedThumbnail }} style={styles.compactImage} />
           ) : (
             <View style={styles.compactPlaceholder}>
-              <PlayCircle size={24} color={COLORS.textMuted} />
+              <PlayCircle size={24} color={colors.textMuted} />
             </View>
           )}
           {isLocked && (
             <View style={styles.lockOverlay}>
-              <Lock size={20} color={COLORS.textPrimary} />
+              <Lock size={20} color={colors.textPrimary} />
             </View>
           )}
           {isCompleted && (
             <View style={styles.completedBadge}>
-              <CheckCircle size={16} color={COLORS.success} />
+              <CheckCircle size={16} color={colors.success} />
             </View>
           )}
         </View>
@@ -113,7 +286,7 @@ const CourseCardVertical = React.memo(({
           <ProgressBar
             progress={progress}
             height={4}
-            fillColor={isCompleted ? COLORS.success : COLORS.gold}
+            fillColor={isCompleted ? colors.success : colors.gold}
             style={styles.compactProgress}
           />
         )}
@@ -137,20 +310,20 @@ const CourseCardVertical = React.memo(({
             colors={['rgba(106, 91, 255, 0.3)', 'rgba(0, 240, 255, 0.2)']}
             style={styles.thumbnailPlaceholder}
           >
-            <PlayCircle size={40} color={COLORS.textMuted} />
+            <PlayCircle size={40} color={colors.textMuted} />
           </LinearGradient>
         )}
 
         {/* Overlays */}
         {isLocked && (
           <View style={styles.lockOverlay}>
-            <Lock size={24} color={COLORS.textPrimary} />
+            <Lock size={24} color={colors.textPrimary} />
           </View>
         )}
 
         {/* Duration badge */}
         <View style={styles.durationBadge}>
-          <Clock size={10} color={COLORS.textPrimary} />
+          <Clock size={10} color={colors.textPrimary} />
           <Text style={styles.durationText}>{formatDuration(duration_minutes)}</Text>
         </View>
 
@@ -164,7 +337,7 @@ const CourseCardVertical = React.memo(({
         {/* Completed indicator */}
         {isCompleted && (
           <View style={styles.completedOverlay}>
-            <CheckCircle size={32} color={COLORS.success} />
+            <CheckCircle size={32} color={colors.success} />
             <Text style={styles.completedText}>Hoàn thành</Text>
           </View>
         )}
@@ -182,16 +355,16 @@ const CourseCardVertical = React.memo(({
         <View style={styles.statsRow}>
           {rating > 0 && (
             <View style={styles.statItem}>
-              <Star size={12} color={COLORS.gold} fill={COLORS.gold} />
+              <Star size={12} color={colors.gold} fill={colors.gold} />
               <Text style={styles.statText}>{rating.toFixed(1)}</Text>
             </View>
           )}
           <View style={styles.statItem}>
-            <Users size={12} color={COLORS.textMuted} />
+            <Users size={12} color={colors.textMuted} />
             <Text style={styles.statText}>{formatStudentCount(student_count)}</Text>
           </View>
           <View style={styles.statItem}>
-            <PlayCircle size={12} color={COLORS.textMuted} />
+            <PlayCircle size={12} color={colors.textMuted} />
             <Text style={styles.statText}>{lesson_count} bài</Text>
           </View>
         </View>
@@ -202,7 +375,7 @@ const CourseCardVertical = React.memo(({
             <ProgressBar
               progress={progress}
               height={4}
-              fillColor={isCompleted ? COLORS.success : COLORS.gold}
+              fillColor={isCompleted ? colors.success : colors.gold}
             />
             <Text style={styles.progressText}>{Math.round(progress)}%</Text>
           </View>
@@ -224,175 +397,5 @@ const CourseCardVertical = React.memo(({
 });
 
 CourseCardVertical.displayName = 'CourseCardVertical';
-
-const styles = StyleSheet.create({
-  container: {
-    width: 180,
-    backgroundColor: COLORS.glassBg,
-    borderRadius: BORDER_RADIUS.lg,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-    ...SHADOWS.glass,
-  },
-  thumbnailContainer: {
-    height: 100,
-    position: 'relative',
-  },
-  thumbnail: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  thumbnailPlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  lockOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  durationBadge: {
-    position: 'absolute',
-    bottom: SPACING.xs,
-    right: SPACING.xs,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.xs,
-  },
-  durationText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textPrimary,
-    marginLeft: 3,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  difficultyBadge: {
-    position: 'absolute',
-    top: SPACING.xs,
-    left: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.xs,
-  },
-  difficultyText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  completedOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  completedText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.success,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    marginTop: SPACING.xxs,
-  },
-  completedBadge: {
-    position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: BORDER_RADIUS.full,
-    padding: 2,
-  },
-  content: {
-    padding: SPACING.md,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xxs,
-    lineHeight: 20,
-  },
-  instructor: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.sm,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: SPACING.md,
-  },
-  statText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    marginLeft: SPACING.xxs,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  progressText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.gold,
-    marginLeft: SPACING.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  priceContainer: {
-    marginTop: SPACING.xxs,
-  },
-  priceText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-  },
-  freeText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.success,
-  },
-  // Compact mode
-  compactContainer: {
-    width: 140,
-    marginRight: SPACING.md,
-  },
-  compactThumbnail: {
-    width: 140,
-    height: 80,
-    borderRadius: BORDER_RADIUS.md,
-    overflow: 'hidden',
-    backgroundColor: COLORS.glassBg,
-    position: 'relative',
-  },
-  compactImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  compactPlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(15, 16, 48, 0.5)',
-  },
-  compactTitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textPrimary,
-    marginTop: SPACING.sm,
-    lineHeight: 16,
-  },
-  compactProgress: {
-    marginTop: SPACING.xs,
-  },
-});
 
 export default CourseCardVertical;

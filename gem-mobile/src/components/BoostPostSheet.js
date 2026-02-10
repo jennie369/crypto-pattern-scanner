@@ -4,7 +4,7 @@
  * Bottom sheet for selecting boost packages
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -30,25 +30,11 @@ import {
   Gem,
   ChevronRight,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 import boostService from '../services/boostService';
 import CustomAlert, { useCustomAlert } from './CustomAlert';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-const PACKAGE_ICONS = {
-  basic: Zap,
-  standard: TrendingUp,
-  premium: Star,
-  ultra: Crown,
-};
-
-const PACKAGE_COLORS = {
-  basic: COLORS.cyan,
-  standard: COLORS.purple,
-  premium: COLORS.gold,
-  ultra: COLORS.burgundy,
-};
 
 const BoostPostSheet = ({
   visible,
@@ -58,12 +44,236 @@ const BoostPostSheet = ({
   onSuccess,
   onBuyGems,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [selectedPackage, setSelectedPackage] = useState('standard');
   const [boosting, setBoosting] = useState(false);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const { alert, AlertComponent } = useCustomAlert();
 
   const packages = boostService.getBoostPackages();
+
+  const PACKAGE_ICONS = {
+    basic: Zap,
+    standard: TrendingUp,
+    premium: Star,
+    ultra: Crown,
+  };
+
+  const PACKAGE_COLORS = useMemo(() => ({
+    basic: colors.cyan,
+    standard: colors.purple,
+    premium: colors.gold,
+    ultra: colors.burgundy,
+  }), [colors]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      maxHeight: SCREEN_HEIGHT * 0.85,
+      overflow: 'hidden',
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+      borderRadius: 2,
+      alignSelf: 'center',
+      marginTop: SPACING.sm,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.lg,
+      paddingBottom: SPACING.md,
+    },
+    headerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.display,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    headerSubtitle: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    closeButton: {
+      padding: SPACING.xs,
+    },
+    balanceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.lg,
+      paddingBottom: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    balanceLabel: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+    },
+    balanceValue: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    balanceText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    packagesScroll: {
+      flex: 1,
+    },
+    packagesContent: {
+      padding: SPACING.lg,
+      gap: SPACING.md,
+    },
+    packageCard: {
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: 16,
+      padding: SPACING.md,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      position: 'relative',
+    },
+    packageCardSelected: {
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    },
+    popularBadge: {
+      position: 'absolute',
+      top: -8,
+      right: 12,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 2,
+      borderRadius: 8,
+    },
+    popularText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    packageHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    packageIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    packageInfo: {
+      flex: 1,
+      marginLeft: SPACING.md,
+    },
+    packageName: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    packageDesc: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    selectedCheck: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    packageMeta: {
+      flexDirection: 'row',
+      gap: SPACING.lg,
+      marginBottom: SPACING.md,
+    },
+    metaItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    metaText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+    },
+    featuresList: {
+      gap: SPACING.xs,
+      marginBottom: SPACING.md,
+    },
+    featureItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    featureText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+    },
+    packagePrice: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: SPACING.xs,
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    priceText: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    priceTextInsufficient: {
+      color: colors.error,
+    },
+    insufficientText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.error,
+      marginLeft: SPACING.xs,
+    },
+    footer: {
+      paddingHorizontal: SPACING.lg,
+      paddingTop: SPACING.md,
+      paddingBottom: SPACING.xxl,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    boostButton: {
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    boostButtonDisabled: {
+      opacity: 0.7,
+    },
+    boostButtonGradient: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.lg,
+      gap: SPACING.sm,
+    },
+    boostButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (visible) {
@@ -129,7 +339,7 @@ const BoostPostSheet = ({
 
   const renderPackage = (pkg) => {
     const IconComponent = PACKAGE_ICONS[pkg.id] || Zap;
-    const color = PACKAGE_COLORS[pkg.id] || COLORS.purple;
+    const color = PACKAGE_COLORS[pkg.id] || colors.purple;
     const isSelected = selectedPackage === pkg.id;
     const canAfford = gemBalance >= pkg.price_gems;
 
@@ -160,14 +370,14 @@ const BoostPostSheet = ({
           </View>
           {isSelected && (
             <View style={[styles.selectedCheck, { backgroundColor: color }]}>
-              <Check size={14} color={COLORS.textPrimary} />
+              <Check size={14} color={colors.textPrimary} />
             </View>
           )}
         </View>
 
         <View style={styles.packageMeta}>
           <View style={styles.metaItem}>
-            <Clock size={14} color={COLORS.textMuted} />
+            <Clock size={14} color={colors.textMuted} />
             <Text style={styles.metaText}>
               {pkg.duration_hours >= 24
                 ? `${Math.floor(pkg.duration_hours / 24)} ngày`
@@ -175,7 +385,7 @@ const BoostPostSheet = ({
             </Text>
           </View>
           <View style={styles.metaItem}>
-            <Eye size={14} color={COLORS.textMuted} />
+            <Eye size={14} color={colors.textMuted} />
             <Text style={styles.metaText}>{pkg.reach_multiplier}x tiếp cận</Text>
           </View>
         </View>
@@ -183,14 +393,14 @@ const BoostPostSheet = ({
         <View style={styles.featuresList}>
           {pkg.features.map((feature, index) => (
             <View key={index} style={styles.featureItem}>
-              <Check size={12} color={COLORS.success} />
+              <Check size={12} color={colors.success} />
               <Text style={styles.featureText}>{feature}</Text>
             </View>
           ))}
         </View>
 
         <View style={styles.packagePrice}>
-          <Gem size={16} color={canAfford ? COLORS.cyan : COLORS.error} />
+          <Gem size={16} color={canAfford ? colors.cyan : colors.error} />
           <Text style={[styles.priceText, !canAfford && styles.priceTextInsufficient]}>
             {pkg.price_gems} Gems
           </Text>
@@ -234,7 +444,7 @@ const BoostPostSheet = ({
               <Text style={styles.headerSubtitle}>Tăng độ tiếp cận của bài viết</Text>
             </View>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <X size={24} color={COLORS.textPrimary} />
+              <X size={24} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -242,7 +452,7 @@ const BoostPostSheet = ({
           <View style={styles.balanceRow}>
             <Text style={styles.balanceLabel}>Số dư của bạn:</Text>
             <View style={styles.balanceValue}>
-              <Gem size={16} color={COLORS.cyan} />
+              <Gem size={16} color={colors.cyan} />
               <Text style={styles.balanceText}>{gemBalance.toLocaleString()} Gems</Text>
             </View>
           </View>
@@ -264,14 +474,14 @@ const BoostPostSheet = ({
               disabled={boosting}
             >
               <LinearGradient
-                colors={boosting ? ['#444', '#333'] : GRADIENTS.primaryButton}
+                colors={boosting ? ['#444', '#333'] : gradients.primaryButton}
                 style={styles.boostButtonGradient}
               >
                 {boosting ? (
-                  <ActivityIndicator color={COLORS.textPrimary} />
+                  <ActivityIndicator color={colors.textPrimary} />
                 ) : (
                   <>
-                    <Zap size={20} color={COLORS.textPrimary} />
+                    <Zap size={20} color={colors.textPrimary} />
                     <Text style={styles.boostButtonText}>
                       Boost với {selectedPkg?.price_gems} Gems
                     </Text>
@@ -286,214 +496,5 @@ const BoostPostSheet = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  container: {
-    backgroundColor: GLASS.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: SCREEN_HEIGHT * 0.85,
-    overflow: 'hidden',
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginTop: SPACING.sm,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.md,
-  },
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.display,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  headerSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  closeButton: {
-    padding: SPACING.xs,
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  balanceLabel: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-  },
-  balanceValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  balanceText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  packagesScroll: {
-    flex: 1,
-  },
-  packagesContent: {
-    padding: SPACING.lg,
-    gap: SPACING.md,
-  },
-  packageCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    padding: SPACING.md,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-  },
-  packageCardSelected: {
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-  },
-  popularBadge: {
-    position: 'absolute',
-    top: -8,
-    right: 12,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  popularText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  packageHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  packageIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  packageInfo: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  packageName: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  packageDesc: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  selectedCheck: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  packageMeta: {
-    flexDirection: 'row',
-    gap: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  metaText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-  },
-  featuresList: {
-    gap: SPACING.xs,
-    marginBottom: SPACING.md,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  featureText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-  },
-  packagePrice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: SPACING.xs,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  priceText: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  priceTextInsufficient: {
-    color: COLORS.error,
-  },
-  insufficientText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.error,
-    marginLeft: SPACING.xs,
-  },
-  footer: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.xxl,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  boostButton: {
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  boostButtonDisabled: {
-    opacity: 0.7,
-  },
-  boostButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  boostButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-});
 
 export default BoostPostSheet;

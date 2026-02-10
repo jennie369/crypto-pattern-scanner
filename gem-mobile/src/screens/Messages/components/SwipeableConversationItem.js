@@ -49,7 +49,7 @@ const SwipeableConversationItem = memo(({
   isPinned,
   index,
 }) => {
-  const { alert } = useCustomAlert();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // Animation refs
   const translateX = useRef(new Animated.Value(0)).current;
@@ -184,6 +184,9 @@ const SwipeableConversationItem = memo(({
 
   return (
     <View style={styles.container}>
+      {/* Custom Alert Modal */}
+      {AlertComponent}
+
       {/* Action buttons (behind the item) */}
       <Animated.View
         style={[

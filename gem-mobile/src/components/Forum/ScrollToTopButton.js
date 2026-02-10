@@ -7,11 +7,11 @@
  * @author GEM Team
  */
 
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef, useMemo } from 'react';
 import { TouchableOpacity, StyleSheet, Animated, Platform } from 'react-native';
 import { ChevronUp } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const COMPONENT_NAME = '[ScrollToTopButton]';
 
@@ -22,7 +22,7 @@ const COMPONENT_NAME = '[ScrollToTopButton]';
  * @param {function} onPress - Callback khi press
  * @param {object} style - Custom styles
  * @param {number} iconSize - Kích thước icon (default: 24)
- * @param {string} iconColor - Màu icon (default: COLORS.gold)
+ * @param {string} iconColor - Màu icon (default: colors.gold)
  * @param {string} backgroundColor - Màu nền button
  * @param {number} bottomOffset - Khoảng cách từ bottom (default: 100)
  */
@@ -31,10 +31,16 @@ const ScrollToTopButton = memo(({
   onPress,
   style,
   iconSize = 24,
-  iconColor = COLORS.gold,
-  backgroundColor = COLORS.glassBg || 'rgba(15, 16, 48, 0.9)',
+  iconColor,
+  backgroundColor,
   bottomOffset = 100,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  // Use theme-aware defaults
+  const finalIconColor = iconColor || colors.gold;
+  const finalBackgroundColor = backgroundColor || (settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.9)'));
+
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -76,6 +82,32 @@ const ScrollToTopButton = memo(({
     onPress?.();
   };
 
+  // Memoized styles
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      right: SPACING.md,
+      zIndex: 1000,
+    },
+    button: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+      // Shadow for iOS
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      // Elevation for Android
+      elevation: 8,
+      // Border for glass effect
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.3)',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Don't render if not visible (after animation completes)
   // Use __getValue() to check current value without triggering re-render
   // Note: In production, we render but let opacity hide it for smoother animations
@@ -94,7 +126,7 @@ const ScrollToTopButton = memo(({
       pointerEvents={visible ? 'auto' : 'none'}
     >
       <TouchableOpacity
-        style={[styles.button, { backgroundColor }]}
+        style={[styles.button, { backgroundColor: finalBackgroundColor }]}
         onPress={handlePress}
         activeOpacity={0.8}
         accessibilityLabel="Cuộn về đầu trang"
@@ -103,7 +135,7 @@ const ScrollToTopButton = memo(({
       >
         <ChevronUp
           size={iconSize}
-          color={iconColor}
+          color={finalIconColor}
           strokeWidth={2.5}
         />
       </TouchableOpacity>
@@ -112,34 +144,5 @@ const ScrollToTopButton = memo(({
 });
 
 ScrollToTopButton.displayName = 'ScrollToTopButton';
-
-// ============================================================
-// STYLES
-// ============================================================
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    right: SPACING.md,
-    zIndex: 1000,
-  },
-  button: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    // Elevation for Android
-    elevation: 8,
-    // Border for glass effect
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-  },
-});
 
 export default ScrollToTopButton;

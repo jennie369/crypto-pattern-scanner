@@ -9,7 +9,7 @@
  * - Vietnamese UI text
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import * as transcriptionService from '../../services/transcriptionService';
 
 /**
@@ -37,8 +37,60 @@ const TranscriptionDisplay = memo(({
   onRetry,
   onTranscriptionUpdate,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+
+  // ========== STYLES ==========
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginTop: SPACING.xs,
+    },
+    statusRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      paddingVertical: SPACING.xxs,
+    },
+    statusText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.cyan,
+    },
+    retryRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      paddingVertical: SPACING.xs,
+    },
+    retryText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.gold,
+    },
+    toggleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      paddingVertical: SPACING.xs,
+    },
+    toggleText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.cyan,
+      flex: 1,
+    },
+    transcriptionContainer: {
+      backgroundColor: 'rgba(0, 240, 255, 0.05)',
+      borderRadius: 8,
+      padding: SPACING.sm,
+      marginTop: SPACING.xs,
+      borderLeftWidth: 2,
+      borderLeftColor: colors.cyan,
+    },
+    transcriptionText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handleRetry = useCallback(async () => {
     if (!messageId) return;
@@ -69,7 +121,7 @@ const TranscriptionDisplay = memo(({
     return (
       <View style={styles.container}>
         <View style={styles.statusRow}>
-          <ActivityIndicator size="small" color={COLORS.cyan} />
+          <ActivityIndicator size="small" color={colors.cyan} />
           <Text style={styles.statusText}>Đang chuyển đổi giọng nói...</Text>
         </View>
       </View>
@@ -87,9 +139,9 @@ const TranscriptionDisplay = memo(({
           activeOpacity={0.7}
         >
           {isRetrying ? (
-            <ActivityIndicator size="small" color={COLORS.gold} />
+            <ActivityIndicator size="small" color={colors.gold} />
           ) : (
-            <Ionicons name="refresh-outline" size={14} color={COLORS.gold} />
+            <Ionicons name="refresh-outline" size={14} color={colors.gold} />
           )}
           <Text style={styles.retryText}>
             Không thể chuyển đổi. Nhấn để thử lại
@@ -120,7 +172,7 @@ const TranscriptionDisplay = memo(({
         <Ionicons
           name="document-text-outline"
           size={14}
-          color={COLORS.cyan}
+          color={colors.cyan}
         />
         <Text style={styles.toggleText}>
           {isExpanded ? 'Ẩn bản ghi' : 'Xem bản ghi'}
@@ -128,7 +180,7 @@ const TranscriptionDisplay = memo(({
         <Ionicons
           name={isExpanded ? 'chevron-up' : 'chevron-down'}
           size={14}
-          color={COLORS.cyan}
+          color={colors.cyan}
         />
       </TouchableOpacity>
 
@@ -144,53 +196,3 @@ const TranscriptionDisplay = memo(({
 TranscriptionDisplay.displayName = 'TranscriptionDisplay';
 
 export default TranscriptionDisplay;
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: SPACING.xs,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.xxs,
-  },
-  statusText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.cyan,
-  },
-  retryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.xs,
-  },
-  retryText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.gold,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.xs,
-  },
-  toggleText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.cyan,
-    flex: 1,
-  },
-  transcriptionContainer: {
-    backgroundColor: 'rgba(0, 240, 255, 0.05)',
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginTop: SPACING.xs,
-    borderLeftWidth: 2,
-    borderLeftColor: COLORS.cyan,
-  },
-  transcriptionText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
-  },
-});

@@ -11,17 +11,18 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { Polygon, Line, Circle, G, Text as SvgText } from 'react-native-svg';
 import * as Icons from 'lucide-react-native';
-import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 
-// Life area configuration - 6 lĩnh vực cuộc sống theo kịch bản demo
-const LIFE_AREAS = [
-  { key: 'finance', label: 'Tài chính', icon: 'Wallet', color: COLORS.gold },
-  { key: 'career', label: 'Sự nghiệp', icon: 'Briefcase', color: COLORS.purple },
-  { key: 'health', label: 'Sức khỏe', icon: 'Heart', color: COLORS.success },
-  { key: 'relationships', label: 'Tình yêu', icon: 'Heart', color: '#FF6B9D' },
-  { key: 'personal', label: 'Cá nhân', icon: 'User', color: COLORS.cyan || '#00D9FF' },
-  { key: 'spiritual', label: 'Tâm thức', icon: 'Sparkles', color: COLORS.burgundy || '#8B1C3A' },
+// Life area configuration - 6 linh vuc cuoc song theo kich ban demo
+// Note: colors will be set dynamically in the component
+const LIFE_AREAS_BASE = [
+  { key: 'finance', label: 'Tai chinh', icon: 'Wallet', colorKey: 'gold' },
+  { key: 'career', label: 'Su nghiep', icon: 'Briefcase', colorKey: 'purple' },
+  { key: 'health', label: 'Suc khoe', icon: 'Heart', colorKey: 'success' },
+  { key: 'relationships', label: 'Tinh yeu', icon: 'Heart', colorKey: null, staticColor: '#FF6B9D' },
+  { key: 'personal', label: 'Ca nhan', icon: 'User', colorKey: 'cyan' },
+  { key: 'spiritual', label: 'Tam thuc', icon: 'Sparkles', colorKey: 'burgundy' },
 ];
 
 const RadarChart = ({
@@ -31,12 +32,32 @@ const RadarChart = ({
   showLabels = true,
   showValues = false,
   fillColor = 'rgba(106, 91, 255, 0.3)',
-  strokeColor = COLORS.purple,
+  strokeColor,
   strokeWidth = 2,
   gridColor = 'rgba(255, 255, 255, 0.1)',
-  labelColor = COLORS.textMuted,
+  labelColor,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  // Build LIFE_AREAS with theme colors
+  const LIFE_AREAS = useMemo(() => {
+    return LIFE_AREAS_BASE.map(area => ({
+      ...area,
+      color: area.staticColor || colors[area.colorKey] || colors.purple,
+    }));
+  }, [colors]);
+
+  const effectiveStrokeColor = strokeColor || colors.purple;
+  const effectiveLabelColor = labelColor || colors.textMuted;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Add padding for labels - labels need extra space outside the chart
   const labelPadding = showLabels ? 55 : 0;
   const svgSize = size + labelPadding * 2;
@@ -105,7 +126,7 @@ const RadarChart = ({
       <Polygon
         points={points}
         fill={fillColor}
-        stroke={strokeColor}
+        stroke={effectiveStrokeColor}
         strokeWidth={strokeWidth}
         strokeLinejoin="round"
       />
@@ -125,7 +146,7 @@ const RadarChart = ({
           cy={pos.y}
           r={4}
           fill={area.color}
-          stroke={COLORS.bgDarkest}
+          stroke={colors.bgDarkest}
           strokeWidth={2}
         />
       );
@@ -152,7 +173,7 @@ const RadarChart = ({
           <SvgText
             x={x}
             y={y}
-            fill={labelColor}
+            fill={effectiveLabelColor}
             fontSize={12}
             fontWeight="500"
             textAnchor={textAnchor}
@@ -195,6 +216,49 @@ const RadarChart = ({
 
 // Life Area Legend component
 export const RadarChartLegend = ({ data = {} }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  // Build LIFE_AREAS with theme colors
+  const LIFE_AREAS = useMemo(() => {
+    return LIFE_AREAS_BASE.map(area => ({
+      ...area,
+      color: area.staticColor || colors[area.colorKey] || colors.purple,
+    }));
+  }, [colors]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    legendContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: SPACING.sm,
+      marginTop: SPACING.md,
+    },
+    legendItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: SPACING.sm,
+    },
+    legendDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      marginRight: SPACING.xs,
+    },
+    legendLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      marginRight: SPACING.xs,
+    },
+    legendValue: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <View style={styles.legendContainer}>
       {LIFE_AREAS.map(area => (
@@ -212,6 +276,29 @@ export const RadarChartLegend = ({ data = {} }) => {
 
 // Compact version for dashboard
 export const RadarChartCompact = ({ data = {}, size = 160 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    compactContainer: {
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    compactOverlay: {
+      position: 'absolute',
+      alignItems: 'center',
+    },
+    compactScore: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.display,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    compactLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const avgScore = Object.values(data).length > 0
     ? Math.round(Object.values(data).reduce((a, b) => a + b, 0) / Object.values(data).length)
     : 0;
@@ -226,7 +313,7 @@ export const RadarChartCompact = ({ data = {}, size = 160 }) => {
       />
       <View style={styles.compactOverlay}>
         <Text style={styles.compactScore}>{avgScore}</Text>
-        <Text style={styles.compactLabel}>Cân bằng</Text>
+        <Text style={styles.compactLabel}>Can bang</Text>
       </View>
     </View>
   );
@@ -239,6 +326,128 @@ export const LifeBalanceCard = ({
   onViewDetails,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  // Build LIFE_AREAS with theme colors
+  const LIFE_AREAS = useMemo(() => {
+    return LIFE_AREAS_BASE.map(area => ({
+      ...area,
+      color: area.staticColor || colors[area.colorKey] || colors.purple,
+    }));
+  }, [colors]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    lifeBalanceCard: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: glass.borderRadius,
+      padding: SPACING.lg,
+      borderWidth: glass.borderWidth,
+      borderColor: 'rgba(106, 91, 255, 0.3)',
+    },
+    lifeBalanceHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: SPACING.md,
+    },
+    lifeBalanceTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    lifeBalanceTitle: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    lifeBalanceViewBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xxs,
+    },
+    lifeBalanceViewBtnText: {
+      color: colors.purple,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    lifeBalanceChartContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginVertical: SPACING.md,
+    },
+    lifeBalanceFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: SPACING.md,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    lifeBalanceStatItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    lifeBalanceStatLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+    },
+    lifeBalanceStatValue: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    lifeBalanceStatNumber: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    lifeBalanceRecommendation: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: SPACING.sm,
+    },
+    lifeBalanceRecommendationText: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+    },
+    lifeAreaQuickStats: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      marginTop: SPACING.md,
+      gap: SPACING.sm,
+    },
+    lifeAreaQuickItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.sm,
+      borderRadius: SPACING.sm,
+      minWidth: '48%',
+      gap: SPACING.xs,
+    },
+    lifeAreaQuickIcon: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    lifeAreaQuickLabel: {
+      flex: 1,
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+    },
+    lifeAreaQuickValue: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Calculate statistics
   const stats = useMemo(() => {
     const values = LIFE_AREAS.map(area => data[area.key] || 0);
@@ -258,7 +467,7 @@ export const LifeBalanceCard = ({
     });
 
     return { avgScore, lowestArea, lowestScore };
-  }, [data]);
+  }, [data, LIFE_AREAS]);
 
   // Get icon component
   const getIcon = (iconName) => {
@@ -278,13 +487,13 @@ export const LifeBalanceCard = ({
       {/* Header */}
       <View style={styles.lifeBalanceHeader}>
         <View style={styles.lifeBalanceTitleRow}>
-          <Icons.Radar size={20} color={COLORS.purple} />
-          <Text style={styles.lifeBalanceTitle}>CÂN BẰNG CUỘC SỐNG</Text>
+          <Icons.Radar size={20} color={colors.purple} />
+          <Text style={styles.lifeBalanceTitle}>CAN BANG CUOC SONG</Text>
         </View>
         {onViewDetails && (
           <TouchableOpacity onPress={onViewDetails} style={styles.lifeBalanceViewBtn}>
-            <Text style={styles.lifeBalanceViewBtnText}>Chi tiết</Text>
-            <Icons.ChevronRight size={16} color={COLORS.purple} />
+            <Text style={styles.lifeBalanceViewBtnText}>Chi tiet</Text>
+            <Icons.ChevronRight size={16} color={colors.purple} />
           </TouchableOpacity>
         )}
       </View>
@@ -297,7 +506,7 @@ export const LifeBalanceCard = ({
           showLabels={true}
           showValues={true}
           fillColor="rgba(106, 91, 255, 0.25)"
-          strokeColor={COLORS.purple}
+          strokeColor={colors.purple}
           strokeWidth={2}
         />
       </View>
@@ -305,11 +514,11 @@ export const LifeBalanceCard = ({
       {/* Stats Footer */}
       <View style={styles.lifeBalanceFooter}>
         <View style={styles.lifeBalanceStatItem}>
-          <Text style={styles.lifeBalanceStatLabel}>Điểm cân bằng</Text>
+          <Text style={styles.lifeBalanceStatLabel}>Diem can bang</Text>
           <View style={styles.lifeBalanceStatValue}>
             <Text style={[
               styles.lifeBalanceStatNumber,
-              { color: stats.avgScore >= 70 ? COLORS.success : stats.avgScore >= 40 ? COLORS.gold : COLORS.error }
+              { color: stats.avgScore >= 70 ? colors.success : stats.avgScore >= 40 ? colors.gold : colors.error }
             ]}>
               {stats.avgScore}%
             </Text>
@@ -320,7 +529,7 @@ export const LifeBalanceCard = ({
           <View style={styles.lifeBalanceRecommendation}>
             <Icons.TrendingUp size={14} color={stats.lowestArea.color} />
             <Text style={styles.lifeBalanceRecommendationText}>
-              Khuyến nghị: Tập trung{' '}
+              Khuyen nghi: Tap trung{' '}
               <Text style={{ color: stats.lowestArea.color, fontWeight: 'bold' }}>
                 {stats.lowestArea.label}
               </Text>
@@ -356,173 +565,8 @@ export const LifeBalanceCard = ({
   );
 };
 
-// Export LIFE_AREAS for external use
-export { LIFE_AREAS };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  legendContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    marginTop: SPACING.md,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    backgroundColor: COLORS.glassBg,
-    borderRadius: SPACING.sm,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: SPACING.xs,
-  },
-  legendLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginRight: SPACING.xs,
-  },
-  legendValue: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  compactContainer: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  compactOverlay: {
-    position: 'absolute',
-    alignItems: 'center',
-  },
-  compactScore: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.display,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  compactLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-  },
-
-  // Life Balance Card styles
-  lifeBalanceCard: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.lg,
-    borderWidth: GLASS.borderWidth,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-  },
-  lifeBalanceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.md,
-  },
-  lifeBalanceTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  lifeBalanceTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  lifeBalanceViewBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xxs,
-  },
-  lifeBalanceViewBtnText: {
-    color: COLORS.purple,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  lifeBalanceChartContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: SPACING.md,
-  },
-  lifeBalanceFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  lifeBalanceStatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  lifeBalanceStatLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-  },
-  lifeBalanceStatValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  lifeBalanceStatNumber: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  lifeBalanceRecommendation: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: SPACING.sm,
-  },
-  lifeBalanceRecommendationText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-  },
-  lifeAreaQuickStats: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: SPACING.md,
-    gap: SPACING.sm,
-  },
-  lifeAreaQuickItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.sm, // Increased from xs
-    borderRadius: SPACING.sm,
-    minWidth: '48%',
-    gap: SPACING.xs,
-  },
-  lifeAreaQuickIcon: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lifeAreaQuickLabel: {
-    flex: 1,
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm, // Increased from xs
-  },
-  lifeAreaQuickValue: {
-    fontSize: TYPOGRAPHY.fontSize.md, // Increased from sm
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-});
+// Export LIFE_AREAS for external use - note: these won't have dynamic colors
+// For dynamic colors, use the hook inside your component
+export { LIFE_AREAS_BASE as LIFE_AREAS };
 
 export default RadarChart;

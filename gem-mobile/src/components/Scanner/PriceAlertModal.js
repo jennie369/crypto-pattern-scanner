@@ -3,7 +3,7 @@
  * Phase 3C: Create and manage price alerts
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -28,38 +28,8 @@ import {
   Trash2,
   Plus,
 } from 'lucide-react-native';
-import { COLORS, SPACING, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { alertManager } from '../../services/alertManager';
-
-/**
- * Alert direction options
- */
-const ALERT_DIRECTIONS = [
-  {
-    id: 'above',
-    name: 'Crosses Above',
-    nameVi: 'Vượt lên trên',
-    icon: TrendingUp,
-    color: COLORS.success,
-    description: 'Alert khi giá vượt lên trên mức này',
-  },
-  {
-    id: 'below',
-    name: 'Crosses Below',
-    nameVi: 'Xuống dưới',
-    icon: TrendingDown,
-    color: COLORS.error,
-    description: 'Alert khi giá xuống dưới mức này',
-  },
-  {
-    id: 'touches',
-    name: 'Touches',
-    nameVi: 'Chạm mức',
-    icon: Target,
-    color: COLORS.primary,
-    description: 'Alert khi giá chạm mức này (bất kỳ hướng nào)',
-  },
-];
 
 /**
  * Main PriceAlertModal component
@@ -74,11 +44,323 @@ const PriceAlertModal = memo(({
   userId,
   onAlertCreated,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [price, setPrice] = useState('');
   const [direction, setDirection] = useState('above');
   const [note, setNote] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  /**
+   * Alert direction options
+   */
+  const ALERT_DIRECTIONS = useMemo(() => [
+    {
+      id: 'above',
+      name: 'Crosses Above',
+      nameVi: 'Vượt lên trên',
+      icon: TrendingUp,
+      color: colors.success,
+      description: 'Alert khi giá vượt lên trên mức này',
+    },
+    {
+      id: 'below',
+      name: 'Crosses Below',
+      nameVi: 'Xuống dưới',
+      icon: TrendingDown,
+      color: colors.error,
+      description: 'Alert khi giá xuống dưới mức này',
+    },
+    {
+      id: 'touches',
+      name: 'Touches',
+      nameVi: 'Chạm mức',
+      icon: Target,
+      color: colors.primary,
+      description: 'Alert khi giá chạm mức này (bất kỳ hướng nào)',
+    },
+  ], [colors]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      justifyContent: 'flex-end',
+    },
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      maxHeight: '90%',
+    },
+
+    // Header
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    closeButton: {
+      padding: SPACING.xs,
+    },
+
+    // Content
+    content: {
+      padding: SPACING.lg,
+    },
+
+    // Symbol Info
+    symbolInfo: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.lg,
+      padding: SPACING.md,
+      backgroundColor: colors.bgDarkest,
+      borderRadius: 12,
+    },
+    symbol: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    currentPriceContainer: {
+      alignItems: 'flex-end',
+    },
+    currentPriceLabel: {
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    currentPrice: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      fontFamily: 'monospace',
+    },
+
+    // Section
+    section: {
+      marginBottom: SPACING.lg,
+    },
+    sectionTitle: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      marginBottom: SPACING.sm,
+    },
+
+    // Directions
+    directionsContainer: {
+      flexDirection: 'row',
+      gap: SPACING.sm,
+    },
+    directionOption: {
+      flex: 1,
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 6,
+      padding: SPACING.md,
+      backgroundColor: colors.bgDarkest,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    directionName: {
+      fontSize: 11,
+      color: colors.textSecondary,
+      fontWeight: '500',
+      textAlign: 'center',
+    },
+
+    // Price Input
+    priceInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.bgDarkest,
+      borderRadius: 12,
+      paddingHorizontal: SPACING.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    priceInput: {
+      flex: 1,
+      fontSize: 16,
+      color: colors.textPrimary,
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.sm,
+      fontFamily: 'monospace',
+    },
+    inputError: {
+      borderColor: colors.error,
+    },
+    distanceBadge: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    distanceText: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    errorContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      marginTop: SPACING.xs,
+    },
+    errorText: {
+      fontSize: 11,
+      color: colors.error,
+    },
+
+    // Quick Price Buttons
+    quickPriceContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: SPACING.xs,
+      marginBottom: SPACING.lg,
+    },
+    quickPriceButton: {
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      backgroundColor: colors.bgDarkest,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    quickPriceText: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      fontWeight: '500',
+    },
+
+    // Zone Price Buttons
+    zonePriceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginBottom: SPACING.lg,
+    },
+    zonePriceLabel: {
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+    zonePriceButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 6,
+      backgroundColor: colors.bgDarkest,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    zonePriceText: {
+      fontSize: 11,
+      color: colors.textSecondary,
+      fontFamily: 'monospace',
+    },
+
+    // Note Input
+    noteInput: {
+      backgroundColor: colors.bgDarkest,
+      borderRadius: 12,
+      padding: SPACING.md,
+      fontSize: 14,
+      color: colors.textPrimary,
+      borderWidth: 1,
+      borderColor: colors.border,
+      minHeight: 60,
+      textAlignVertical: 'top',
+    },
+
+    // Footer
+    footer: {
+      padding: SPACING.lg,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    createButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: SPACING.sm,
+      backgroundColor: colors.gold,
+      paddingVertical: SPACING.md,
+      borderRadius: 12,
+    },
+    createButtonText: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.bgDarkest,
+    },
+    buttonDisabled: {
+      opacity: 0.5,
+    },
+
+    // Quick Alert Button
+    quickAlertButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 6,
+      backgroundColor: colors.gold + '20',
+      borderRadius: 8,
+    },
+    quickAlertText: {
+      fontSize: 11,
+      color: colors.gold,
+      fontWeight: '600',
+    },
+
+    // Toast
+    toast: {
+      position: 'absolute',
+      bottom: 100,
+      left: SPACING.lg,
+      right: SPACING.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      padding: SPACING.md,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.success,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastContent: {
+      flex: 1,
+    },
+    toastTitle: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.success,
+    },
+    toastMessage: {
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Reset form when modal opens
   useEffect(() => {
@@ -221,11 +503,11 @@ const PriceAlertModal = memo(({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <Bell size={20} color={COLORS.gold} />
+              <Bell size={20} color={colors.gold} />
               <Text style={styles.headerTitle}>Price Alert</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={20} color={COLORS.textMuted} />
+              <X size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -263,7 +545,7 @@ const PriceAlertModal = memo(({
                       onPress={() => handleDirectionChange(dir.id)}
                       activeOpacity={0.7}
                     >
-                      <IconComponent size={20} color={isSelected ? dir.color : COLORS.textMuted} />
+                      <IconComponent size={20} color={isSelected ? dir.color : colors.textMuted} />
                       <Text style={[
                         styles.directionName,
                         isSelected && { color: dir.color },
@@ -280,23 +562,23 @@ const PriceAlertModal = memo(({
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Mức giá</Text>
               <View style={styles.priceInputContainer}>
-                <DollarSign size={20} color={COLORS.textMuted} />
+                <DollarSign size={20} color={colors.textMuted} />
                 <TextInput
                   style={[styles.priceInput, errors.price && styles.inputError]}
                   value={price}
                   onChangeText={handlePriceChange}
                   keyboardType="decimal-pad"
                   placeholder="Nhập mức giá"
-                  placeholderTextColor={COLORS.textMuted}
+                  placeholderTextColor={colors.textMuted}
                 />
                 {distanceText && (
                   <View style={[
                     styles.distanceBadge,
-                    { backgroundColor: isDistancePositive ? COLORS.success + '20' : COLORS.error + '20' },
+                    { backgroundColor: isDistancePositive ? colors.success + '20' : colors.error + '20' },
                   ]}>
                     <Text style={[
                       styles.distanceText,
-                      { color: isDistancePositive ? COLORS.success : COLORS.error },
+                      { color: isDistancePositive ? colors.success : colors.error },
                     ]}>
                       {distanceText}
                     </Text>
@@ -305,7 +587,7 @@ const PriceAlertModal = memo(({
               </View>
               {errors.price && (
                 <View style={styles.errorContainer}>
-                  <AlertTriangle size={12} color={COLORS.error} />
+                  <AlertTriangle size={12} color={colors.error} />
                   <Text style={styles.errorText}>{errors.price}</Text>
                 </View>
               )}
@@ -359,7 +641,7 @@ const PriceAlertModal = memo(({
                   style={styles.zonePriceButton}
                   onPress={() => handleSetFromZone('entry')}
                 >
-                  <Target size={14} color={COLORS.primary} />
+                  <Target size={14} color={colors.primary} />
                   <Text style={styles.zonePriceText}>
                     Entry: {zone.entryPrice?.toFixed(4)}
                   </Text>
@@ -368,7 +650,7 @@ const PriceAlertModal = memo(({
                   style={styles.zonePriceButton}
                   onPress={() => handleSetFromZone('stop')}
                 >
-                  <AlertTriangle size={14} color={COLORS.error} />
+                  <AlertTriangle size={14} color={colors.error} />
                   <Text style={styles.zonePriceText}>
                     Stop: {zone.stopPrice?.toFixed(4)}
                   </Text>
@@ -384,7 +666,7 @@ const PriceAlertModal = memo(({
                 value={note}
                 onChangeText={setNote}
                 placeholder="VD: Zone FTB, chờ confirmation..."
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={2}
                 maxLength={200}
@@ -404,7 +686,7 @@ const PriceAlertModal = memo(({
                 <Text style={styles.createButtonText}>Đang tạo...</Text>
               ) : (
                 <>
-                  <Plus size={18} color={COLORS.bgDarkest} />
+                  <Plus size={18} color={colors.bgDarkest} />
                   <Text style={styles.createButtonText}>Tạo Alert</Text>
                 </>
               )}
@@ -420,13 +702,32 @@ const PriceAlertModal = memo(({
  * Quick Alert Button - for creating alerts from zone cards
  */
 export const QuickAlertButton = memo(({ zone, symbol, currentPrice, onPress }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    quickAlertButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 6,
+      backgroundColor: colors.gold + '20',
+      borderRadius: 8,
+    },
+    quickAlertText: {
+      fontSize: 11,
+      color: colors.gold,
+      fontWeight: '600',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <TouchableOpacity
       style={styles.quickAlertButton}
       onPress={() => onPress?.({ zone, symbol, currentPrice })}
       activeOpacity={0.7}
     >
-      <Bell size={14} color={COLORS.gold} />
+      <Bell size={14} color={colors.gold} />
       <Text style={styles.quickAlertText}>Alert</Text>
     </TouchableOpacity>
   );
@@ -436,6 +737,42 @@ export const QuickAlertButton = memo(({ zone, symbol, currentPrice, onPress }) =
  * Alert Created Toast
  */
 export const AlertCreatedToast = memo(({ alert, visible, onHide }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    toast: {
+      position: 'absolute',
+      bottom: 100,
+      left: SPACING.lg,
+      right: SPACING.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      padding: SPACING.md,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.success,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastContent: {
+      flex: 1,
+    },
+    toastTitle: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.success,
+    },
+    toastMessage: {
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   useEffect(() => {
     if (visible) {
       const timer = setTimeout(onHide, 3000);
@@ -447,7 +784,7 @@ export const AlertCreatedToast = memo(({ alert, visible, onHide }) => {
 
   return (
     <View style={styles.toast}>
-      <Check size={18} color={COLORS.success} />
+      <Check size={18} color={colors.success} />
       <View style={styles.toastContent}>
         <Text style={styles.toastTitle}>Alert Created!</Text>
         <Text style={styles.toastMessage}>
@@ -456,287 +793,6 @@ export const AlertCreatedToast = memo(({ alert, visible, onHide }) => {
       </View>
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'flex-end',
-  },
-  container: {
-    backgroundColor: COLORS.glassBg,
-    borderTopLeftRadius: BORDER_RADIUS.xl,
-    borderTopRightRadius: BORDER_RADIUS.xl,
-    maxHeight: '90%',
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  closeButton: {
-    padding: SPACING.xs,
-  },
-
-  // Content
-  content: {
-    padding: SPACING.lg,
-  },
-
-  // Symbol Info
-  symbolInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-    padding: SPACING.md,
-    backgroundColor: COLORS.bgDarkest,
-    borderRadius: BORDER_RADIUS.md,
-  },
-  symbol: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  currentPriceContainer: {
-    alignItems: 'flex-end',
-  },
-  currentPriceLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-  },
-  currentPrice: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    fontFamily: 'monospace',
-  },
-
-  // Section
-  section: {
-    marginBottom: SPACING.lg,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.sm,
-  },
-
-  // Directions
-  directionsContainer: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-  },
-  directionOption: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 6,
-    padding: SPACING.md,
-    backgroundColor: COLORS.bgDarkest,
-    borderRadius: BORDER_RADIUS.md,
-    borderWidth: 2,
-    borderColor: COLORS.border,
-  },
-  directionName: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-
-  // Price Input
-  priceInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.bgDarkest,
-    borderRadius: BORDER_RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  priceInput: {
-    flex: 1,
-    fontSize: 16,
-    color: COLORS.textPrimary,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.sm,
-    fontFamily: 'monospace',
-  },
-  inputError: {
-    borderColor: COLORS.error,
-  },
-  distanceBadge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  distanceText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: SPACING.xs,
-  },
-  errorText: {
-    fontSize: 11,
-    color: COLORS.error,
-  },
-
-  // Quick Price Buttons
-  quickPriceContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.xs,
-    marginBottom: SPACING.lg,
-  },
-  quickPriceButton: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.bgDarkest,
-    borderRadius: BORDER_RADIUS.sm,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  quickPriceText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-  },
-
-  // Zone Price Buttons
-  zonePriceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.lg,
-  },
-  zonePriceLabel: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-  },
-  zonePriceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 6,
-    backgroundColor: COLORS.bgDarkest,
-    borderRadius: BORDER_RADIUS.sm,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  zonePriceText: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    fontFamily: 'monospace',
-  },
-
-  // Note Input
-  noteInput: {
-    backgroundColor: COLORS.bgDarkest,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    minHeight: 60,
-    textAlignVertical: 'top',
-  },
-
-  // Footer
-  footer: {
-    padding: SPACING.lg,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-  },
-  createButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    backgroundColor: COLORS.gold,
-    paddingVertical: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-  },
-  createButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.bgDarkest,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-
-  // Quick Alert Button
-  quickAlertButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 6,
-    backgroundColor: COLORS.gold + '20',
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  quickAlertText: {
-    fontSize: 11,
-    color: COLORS.gold,
-    fontWeight: '600',
-  },
-
-  // Toast
-  toast: {
-    position: 'absolute',
-    bottom: 100,
-    left: SPACING.lg,
-    right: SPACING.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    backgroundColor: COLORS.glassBg,
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1,
-    borderColor: COLORS.success,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastContent: {
-    flex: 1,
-  },
-  toastTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.success,
-  },
-  toastMessage: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-  },
 });
 
 PriceAlertModal.displayName = 'PriceAlertModal';

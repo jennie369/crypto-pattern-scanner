@@ -1,12 +1,13 @@
 /**
  * GEM Academy - Circular Progress Indicator
  * SVG-based circular progress with animation
+ * Theme-aware component
  */
 
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
-import { COLORS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -14,15 +15,20 @@ const CircularProgress = ({
   progress = 0, // 0-100 or 0-1
   size = 60,
   strokeWidth = 6,
-  backgroundColor = 'rgba(255, 255, 255, 0.1)',
-  progressColor = COLORS.gold,
+  backgroundColor, // Will use theme-aware default
+  progressColor, // Will use theme-aware default
   gradientColors = null, // ['#FFBD59', '#FFD700']
   animated = true,
   animationDuration = 500,
   children = null,
   style = {},
 }) => {
+  const { colors, settings } = useSettings();
   const animatedProgress = useRef(new Animated.Value(0)).current;
+
+  // Theme-aware defaults
+  const bgColor = backgroundColor || (settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)');
+  const fillColor = progressColor || colors.gold;
 
   // Normalize progress to 0-100
   const normalizedProgress = progress > 1 ? progress : progress * 100;
@@ -68,7 +74,7 @@ const CircularProgress = ({
           cx={center}
           cy={center}
           r={radius}
-          stroke={backgroundColor}
+          stroke={bgColor}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -78,7 +84,7 @@ const CircularProgress = ({
           cx={center}
           cy={center}
           r={radius}
-          stroke={gradientColors ? 'url(#progressGradient)' : progressColor}
+          stroke={gradientColors ? 'url(#progressGradient)' : fillColor}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={`${circumference} ${circumference}`}

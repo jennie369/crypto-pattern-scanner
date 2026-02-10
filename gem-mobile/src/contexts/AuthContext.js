@@ -2,8 +2,8 @@
  * Gemral - Auth Context
  */
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Alert } from 'react-native';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { Alert, AppState, Platform } from 'react-native';
 import { supabase, getCurrentUser, getUserProfile, signOut } from '../services/supabase';
 import presenceService from '../services/presenceService';
 import biometricService from '../services/biometricService';
@@ -200,6 +200,150 @@ export const AuthProvider = ({ children }) => {
   const closeUpgradeModal = () => {
     setUpgradeState(prev => ({ ...prev, showModal: false }));
   };
+
+  // =====================================================
+  // APP RESUME: Re-validate session + refresh profile
+  // Fixes: stale auth, missing avatar, role not recognized,
+  // quota not loaded after app idle/background
+  // =====================================================
+  const appStateRef = useRef(AppState.currentState);
+  const lastResumeRef = useRef(Date.now());
+  const isRefreshingRef = useRef(false);
+  // Minimum time in background before triggering refresh (60 seconds)
+  const RESUME_REFRESH_THRESHOLD = 60 * 1000;
+
+  /**
+   * Refresh user profile, role, and quota from database.
+   * Safe to call anytime - no-ops if no user or already refreshing.
+   * Called automatically on app resume and can be called manually.
+   */
+  const refreshProfile = useCallback(async () => {
+    // Guard: no user logged in
+    if (!user?.id) {
+      console.log('[AuthContext] refreshProfile: no user, skipping');
+      return { success: false, reason: 'no_user' };
+    }
+
+    // Guard: already refreshing
+    if (isRefreshingRef.current) {
+      console.log('[AuthContext] refreshProfile: already in progress, skipping');
+      return { success: false, reason: 'already_refreshing' };
+    }
+
+    isRefreshingRef.current = true;
+
+    try {
+      console.log('[AuthContext] refreshProfile: re-validating session and profile...');
+
+      // Step 1: Re-validate Supabase auth session
+      // getUser() calls the Supabase API server to verify the JWT is still valid
+      // and refreshes the token if needed
+      const { data: { user: freshUser }, error: authError } = await supabase.auth.getUser();
+
+      if (authError) {
+        // Check for invalid refresh token
+        if (authError.message?.includes('Refresh Token') ||
+            authError.message?.includes('refresh_token') ||
+            authError.code === 'invalid_grant') {
+          console.warn('[AuthContext] refreshProfile: session expired, clearing...');
+          await handleInvalidRefreshToken(setUser, setProfile);
+          return { success: false, reason: 'session_expired' };
+        }
+        console.warn('[AuthContext] refreshProfile: auth error:', authError.message);
+        return { success: false, reason: 'auth_error' };
+      }
+
+      if (!freshUser) {
+        console.warn('[AuthContext] refreshProfile: no user returned from auth');
+        return { success: false, reason: 'no_user_returned' };
+      }
+
+      // Step 2: Update user state (may have new metadata)
+      setUser(freshUser);
+
+      // Step 3: Re-fetch profile from database (role, avatar, tier, etc.)
+      const { data: freshProfile, error: profileError } = await getUserProfile(freshUser.id);
+
+      if (profileError) {
+        console.warn('[AuthContext] refreshProfile: profile fetch error:', profileError.message);
+        return { success: false, reason: 'profile_error' };
+      }
+
+      // Step 4: Update profile state - this triggers re-render for all consumers
+      setProfile(freshProfile);
+
+      console.log('[AuthContext] refreshProfile: success', {
+        userId: freshUser.id,
+        role: freshProfile?.role,
+        is_admin: freshProfile?.is_admin,
+        avatar_url: freshProfile?.avatar_url ? 'present' : 'missing',
+        scanner_tier: freshProfile?.scanner_tier,
+        chatbot_tier: freshProfile?.chatbot_tier,
+      });
+
+      // Step 5: Refresh quota cache
+      QuotaService.clearCache();
+      QuotaService.checkAllQuotas(freshUser.id, true).then((quota) => {
+        console.log('[AuthContext] refreshProfile: quota refreshed', {
+          chatbot: `${quota?.chatbot?.remaining ?? '?'}/${quota?.chatbot?.limit ?? '?'}`,
+          scanner: `${quota?.scanner?.remaining ?? '?'}/${quota?.scanner?.limit ?? '?'}`,
+        });
+      }).catch((err) => {
+        console.warn('[AuthContext] refreshProfile: quota refresh failed:', err?.message);
+      });
+
+      return { success: true, profile: freshProfile };
+
+    } catch (error) {
+      console.error('[AuthContext] refreshProfile error:', error);
+      return { success: false, reason: 'exception', error: error.message };
+    } finally {
+      isRefreshingRef.current = false;
+    }
+  }, [user?.id]);
+
+  // =====================================================
+  // APP STATE LISTENER: Refresh on foreground resume
+  // Handles background -> foreground transition on both
+  // iOS and Android to re-hydrate stale auth/profile data
+  // =====================================================
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState) => {
+      const previousState = appStateRef.current;
+
+      // App coming back to foreground from background/inactive
+      if (
+        previousState.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        const now = Date.now();
+        const timeSinceLastResume = now - lastResumeRef.current;
+
+        console.log(`[AuthContext] App resumed after ${Math.round(timeSinceLastResume / 1000)}s`);
+
+        // Only refresh if enough time has passed to avoid excessive API calls
+        if (timeSinceLastResume >= RESUME_REFRESH_THRESHOLD) {
+          lastResumeRef.current = now;
+          // Non-blocking refresh - don't await
+          refreshProfile().then((result) => {
+            if (result.success) {
+              console.log('[AuthContext] App resume profile refresh completed');
+            } else {
+              console.log('[AuthContext] App resume refresh skipped:', result.reason);
+            }
+          });
+        }
+      }
+
+      appStateRef.current = nextAppState;
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [refreshProfile]);
 
   // Load initial session
   useEffect(() => {
@@ -492,6 +636,9 @@ export const AuthProvider = ({ children }) => {
     refreshUserTier, // Call after purchase to refresh tier and show modal
     upgradeState, // { showModal, tierType, tierName, previousTier }
     closeUpgradeModal, // Close the upgrade success modal
+
+    // App resume re-hydration
+    refreshProfile, // Call to manually refresh profile, role, quota from database
   };
 
   return (

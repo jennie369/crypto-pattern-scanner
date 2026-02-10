@@ -6,7 +6,7 @@
  * Uses DESIGN_TOKENS v3.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ import {
   Grid3X3,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GRID_GAP = 2;
@@ -54,7 +54,160 @@ const ProfileImageGrid = ({
   emptyConfig,
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [pressedId, setPressedId] = useState(null);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    gridContent: {
+      minHeight: 200,
+    },
+
+    // Grid Item
+    gridItem: {
+      width: ITEM_SIZE,
+      height: ITEM_SIZE,
+      backgroundColor: colors.bgMid,
+      position: 'relative',
+    },
+    gridItemLeft: {
+      marginRight: GRID_GAP / 2,
+    },
+    gridItemRight: {
+      marginLeft: GRID_GAP / 2,
+    },
+    gridImage: {
+      width: '100%',
+      height: '100%',
+    },
+    gridPlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (colors.glassBg || 'rgba(15, 16, 48, 0.95)'),
+    },
+
+    // Video badge
+    videoBadge: {
+      position: 'absolute',
+      top: SPACING.xs,
+      right: SPACING.xs,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      padding: SPACING.xs,
+      borderRadius: 4,
+    },
+
+    // Multiple images indicator
+    multipleIndicator: {
+      position: 'absolute',
+      top: SPACING.xs,
+      right: SPACING.xs,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      padding: SPACING.xs,
+      borderRadius: 4,
+    },
+
+    // Stats overlay
+    statsOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: SPACING.lg,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    statsText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    statsTextSmall: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+
+    // Single Item
+    singleItem: {
+      backgroundColor: colors.bgMid,
+      position: 'relative',
+      margin: 1,
+    },
+    singleItemImage: {
+      width: '100%',
+      height: '100%',
+    },
+    singleItemPlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (colors.glassBg || 'rgba(15, 16, 48, 0.95)'),
+    },
+
+    // Empty state
+    emptyContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.huge,
+      paddingHorizontal: SPACING.lg,
+    },
+    emptyIconContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: SPACING.lg,
+      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    emptyTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xxxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.sm,
+    },
+    emptySubtitle: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+
+    // Loading
+    loadingContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.huge,
+    },
+    loadingText: {
+      marginTop: SPACING.md,
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+    },
+
+    // Load more
+    loadMoreContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.lg,
+      gap: SPACING.sm,
+    },
+    loadMoreText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handlePress = (item) => {
     if (onItemPress) {
@@ -98,14 +251,14 @@ const ProfileImageGrid = ({
           />
         ) : (
           <View style={styles.gridPlaceholder}>
-            <ImageIcon size={24} color={COLORS.textMuted} />
+            <ImageIcon size={24} color={colors.textMuted} />
           </View>
         )}
 
         {/* Video badge */}
         {isVideo && (
           <View style={styles.videoBadge}>
-            <Play size={12} color={COLORS.textPrimary} fill={COLORS.textPrimary} />
+            <Play size={12} color={colors.textPrimary} fill={colors.textPrimary} />
           </View>
         )}
 
@@ -113,11 +266,11 @@ const ProfileImageGrid = ({
         {isPressed && (
           <View style={styles.statsOverlay}>
             <View style={styles.statsRow}>
-              <Heart size={18} color={COLORS.textPrimary} fill={COLORS.textPrimary} />
+              <Heart size={18} color={colors.textPrimary} fill={colors.textPrimary} />
               <Text style={styles.statsText}>{item.likes_count || 0}</Text>
             </View>
             <View style={styles.statsRow}>
-              <MessageCircle size={18} color={COLORS.textPrimary} />
+              <MessageCircle size={18} color={colors.textPrimary} />
               <Text style={styles.statsText}>{item.comments_count || 0}</Text>
             </View>
           </View>
@@ -126,7 +279,7 @@ const ProfileImageGrid = ({
         {/* Multiple images indicator */}
         {item.images?.length > 1 && (
           <View style={styles.multipleIndicator}>
-            <Grid3X3 size={14} color={COLORS.textPrimary} />
+            <Grid3X3 size={14} color={colors.textPrimary} />
           </View>
         )}
       </TouchableOpacity>
@@ -147,7 +300,7 @@ const ProfileImageGrid = ({
     return (
       <View style={styles.emptyContainer}>
         <View style={styles.emptyIconContainer}>
-          <IconComponent size={48} color={COLORS.textMuted} />
+          <IconComponent size={48} color={colors.textMuted} />
         </View>
         <Text style={styles.emptyTitle}>{config.title}</Text>
         <Text style={styles.emptySubtitle}>{config.subtitle}</Text>
@@ -160,7 +313,7 @@ const ProfileImageGrid = ({
 
     return (
       <View style={styles.loadMoreContainer}>
-        <ActivityIndicator size="small" color={COLORS.purple} />
+        <ActivityIndicator size="small" color={colors.purple} />
         <Text style={styles.loadMoreText}>Đang tải thêm...</Text>
       </View>
     );
@@ -169,7 +322,7 @@ const ProfileImageGrid = ({
   if (loading && items.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.purple} />
+        <ActivityIndicator size="large" color={colors.purple} />
         <Text style={styles.loadingText}>Đang tải...</Text>
       </View>
     );
@@ -205,6 +358,57 @@ export const ProfileImageGridItem = ({
 }) => {
   const [isPressed, setIsPressed] = useState(false);
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    // Stats overlay
+    statsOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: SPACING.lg,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    statsTextSmall: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+
+    // Single Item
+    singleItem: {
+      backgroundColor: colors.bgMid,
+      position: 'relative',
+      margin: 1,
+    },
+    singleItemImage: {
+      width: '100%',
+      height: '100%',
+    },
+    singleItemPlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (colors.glassBg || 'rgba(15, 16, 48, 0.95)'),
+    },
+
+    // Video badge
+    videoBadge: {
+      position: 'absolute',
+      top: SPACING.xs,
+      right: SPACING.xs,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      padding: SPACING.xs,
+      borderRadius: 4,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const isVideo = item?.video_url || item?.type === 'video';
   const imageUrl = item?.image_url || item?.thumbnail_url;
@@ -233,24 +437,24 @@ export const ProfileImageGridItem = ({
         />
       ) : (
         <View style={styles.singleItemPlaceholder}>
-          <ImageIcon size={20} color={COLORS.textMuted} />
+          <ImageIcon size={20} color={colors.textMuted} />
         </View>
       )}
 
       {isVideo && (
         <View style={styles.videoBadge}>
-          <Play size={12} color={COLORS.textPrimary} fill={COLORS.textPrimary} />
+          <Play size={12} color={colors.textPrimary} fill={colors.textPrimary} />
         </View>
       )}
 
       {(showStats || isPressed) && (
         <View style={styles.statsOverlay}>
           <View style={styles.statsRow}>
-            <Heart size={14} color={COLORS.textPrimary} fill={COLORS.textPrimary} />
+            <Heart size={14} color={colors.textPrimary} fill={colors.textPrimary} />
             <Text style={styles.statsTextSmall}>{item?.likes_count || 0}</Text>
           </View>
           <View style={styles.statsRow}>
-            <MessageCircle size={14} color={COLORS.textPrimary} />
+            <MessageCircle size={14} color={colors.textPrimary} />
             <Text style={styles.statsTextSmall}>{item?.comments_count || 0}</Text>
           </View>
         </View>
@@ -258,157 +462,5 @@ export const ProfileImageGridItem = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  gridContent: {
-    minHeight: 200,
-  },
-
-  // Grid Item
-  gridItem: {
-    width: ITEM_SIZE,
-    height: ITEM_SIZE,
-    backgroundColor: COLORS.bgMid,
-    position: 'relative',
-  },
-  gridItemLeft: {
-    marginRight: GRID_GAP / 2,
-  },
-  gridItemRight: {
-    marginLeft: GRID_GAP / 2,
-  },
-  gridImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gridPlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.glassBg,
-  },
-
-  // Video badge
-  videoBadge: {
-    position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: SPACING.xs,
-    borderRadius: 4,
-  },
-
-  // Multiple images indicator
-  multipleIndicator: {
-    position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: SPACING.xs,
-    borderRadius: 4,
-  },
-
-  // Stats overlay
-  statsOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: SPACING.lg,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  statsText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  statsTextSmall: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  // Single Item
-  singleItem: {
-    backgroundColor: COLORS.bgMid,
-    position: 'relative',
-    margin: 1,
-  },
-  singleItemImage: {
-    width: '100%',
-    height: '100%',
-  },
-  singleItemPlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.glassBg,
-  },
-
-  // Empty state
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.huge,
-    paddingHorizontal: SPACING.lg,
-  },
-  emptyIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  emptyTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.sm,
-  },
-  emptySubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
-
-  // Loading
-  loadingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.huge,
-  },
-  loadingText: {
-    marginTop: SPACING.md,
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-  },
-
-  // Load more
-  loadMoreContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  loadMoreText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-  },
-});
 
 export default ProfileImageGrid;

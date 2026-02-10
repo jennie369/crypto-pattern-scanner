@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   Animated,
 } from 'react-native';
-import { MessageSquare, Trash2, Archive, Clock } from 'lucide-react-native';
+import { MessageSquare, Trash2, Archive, Clock, CheckCircle2, Circle } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import { Swipeable } from 'react-native-gesture-handler';
 
@@ -50,6 +50,9 @@ const ConversationCard = ({
   onDelete,
   onArchive,
   isArchived = false,
+  isSelecting = false,
+  isSelected = false,
+  onToggleSelect,
 }) => {
   const {
     id,
@@ -93,6 +96,75 @@ const ConversationCard = ({
       </View>
     );
   };
+
+  // Handle press - either toggle select or navigate
+  const handlePress = () => {
+    if (isSelecting) {
+      onToggleSelect?.(id);
+    } else {
+      onPress?.(id);
+    }
+  };
+
+  // In selection mode, don't show swipeable actions
+  if (isSelecting) {
+    return (
+      <TouchableOpacity
+        style={[styles.container, isSelected && styles.containerSelected]}
+        onPress={handlePress}
+        activeOpacity={0.8}
+      >
+        {/* Checkbox */}
+        <View style={styles.checkboxContainer}>
+          {isSelected ? (
+            <CheckCircle2 size={24} color={COLORS.gold} fill={COLORS.gold} />
+          ) : (
+            <Circle size={24} color={COLORS.textMuted} />
+          )}
+        </View>
+
+        {/* Icon */}
+        <View style={styles.iconContainer}>
+          <MessageSquare size={20} color={COLORS.gold} />
+        </View>
+
+        {/* Content */}
+        <View style={styles.content}>
+          {/* Title Row */}
+          <View style={styles.titleRow}>
+            <Text style={styles.title} numberOfLines={1}>
+              {title}
+            </Text>
+            {isArchived && (
+              <View style={styles.archivedBadge}>
+                <Text style={styles.archivedText}>Archived</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Preview */}
+          {preview ? (
+            <Text style={styles.preview} numberOfLines={2}>
+              {preview}
+            </Text>
+          ) : null}
+
+          {/* Meta Row */}
+          <View style={styles.metaRow}>
+            <View style={styles.metaItem}>
+              <Clock size={12} color={COLORS.textMuted} />
+              <Text style={styles.metaText}>
+                {formatRelativeTime(last_message_at)}
+              </Text>
+            </View>
+            <Text style={styles.messageCount}>
+              {message_count} tin nhắn
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <Swipeable
@@ -159,6 +231,15 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     marginBottom: SPACING.md,
     gap: SPACING.md,
+  },
+  containerSelected: {
+    borderColor: COLORS.gold,
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+  },
+  checkboxContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.xs,
   },
   iconContainer: {
     width: 44,

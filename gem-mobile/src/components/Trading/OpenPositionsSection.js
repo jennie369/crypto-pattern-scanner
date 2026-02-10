@@ -4,7 +4,7 @@
  * Full features: Edit, Stats, Navigate to detail, Drag to reorder
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -34,7 +34,7 @@ import {
   Award,
   Percent,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { formatPrice, formatCurrency } from '../../utils/formatters';
 import { binanceService } from '../../services/binanceService';
 import paperTradeService from '../../services/paperTradeService';
@@ -56,6 +56,8 @@ const PositionCard = ({
   onCancelEdit,
   setEditingTP,
   setEditingSL,
+  colors,
+  styles,
 }) => {
   const isLong = position.direction === 'LONG';
   const pnl = position.unrealizedPnL || 0;
@@ -82,7 +84,7 @@ const PositionCard = ({
         <View style={styles.leftColumn}>
           <View style={styles.symbolRow}>
             <Text style={styles.positionSymbol}>{position.symbol?.replace('USDT', '')}</Text>
-            <View style={[styles.directionBadge, { backgroundColor: isLong ? COLORS.success : COLORS.error }]}>
+            <View style={[styles.directionBadge, { backgroundColor: isLong ? colors.success : colors.error }]}>
               {isLong ? <TrendingUp size={10} color="#000" /> : <TrendingDown size={10} color="#FFF" />}
               <Text style={[styles.directionText, { color: isLong ? '#000' : '#FFF' }]}>
                 {position.direction}
@@ -96,10 +98,10 @@ const PositionCard = ({
           </View>
           {/* PnL under symbol */}
           <View style={styles.pnlRow}>
-            <Text style={[styles.pnlValue, { color: isProfitable ? COLORS.success : COLORS.error }]}>
+            <Text style={[styles.pnlValue, { color: isProfitable ? colors.success : colors.error }]}>
               {isProfitable ? '+' : ''}{formatCurrency(pnl)} USDT
             </Text>
-            <Text style={[styles.pnlPercent, { color: isProfitable ? COLORS.success : COLORS.error }]}>
+            <Text style={[styles.pnlPercent, { color: isProfitable ? colors.success : colors.error }]}>
               ({isProfitable ? '+' : ''}{pnlPercent.toFixed(2).replace('.', ',')}% ROI)
             </Text>
           </View>
@@ -113,7 +115,7 @@ const PositionCard = ({
               style={styles.editButton}
               onPress={() => onEdit?.(position)}
             >
-              <Edit2 size={14} color={COLORS.purple} />
+              <Edit2 size={14} color={colors.purple} />
             </TouchableOpacity>
           )}
           <TouchableOpacity
@@ -123,7 +125,7 @@ const PositionCard = ({
             activeOpacity={0.7}
           >
             {closing ? (
-              <ActivityIndicator size="small" color={COLORS.error} />
+              <ActivityIndicator size="small" color={colors.error} />
             ) : (
               <Text style={styles.closeButtonText}>Đóng lệnh</Text>
             )}
@@ -139,7 +141,7 @@ const PositionCard = ({
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Giá hiện tại</Text>
-          <Text style={[styles.detailValue, { color: isProfitable ? COLORS.success : COLORS.error }]}>
+          <Text style={[styles.detailValue, { color: isProfitable ? colors.success : colors.error }]}>
             ${formatPrice(position.currentPrice)}
           </Text>
         </View>
@@ -157,60 +159,60 @@ const PositionCard = ({
       {isEditingThis ? (
         <View style={styles.editRow}>
           <View style={styles.editInputGroup}>
-            <Text style={[styles.editLabel, { color: COLORS.success }]}>TP:</Text>
+            <Text style={[styles.editLabel, { color: colors.success }]}>TP:</Text>
             <TextInput
               style={styles.editInput}
               value={editingTP}
               onChangeText={setEditingTP}
               keyboardType="decimal-pad"
               placeholder="Take Profit"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={colors.textMuted}
             />
           </View>
           <View style={styles.editInputGroup}>
-            <Text style={[styles.editLabel, { color: COLORS.error }]}>SL:</Text>
+            <Text style={[styles.editLabel, { color: colors.error }]}>SL:</Text>
             <TextInput
               style={styles.editInput}
               value={editingSL}
               onChangeText={setEditingSL}
               keyboardType="decimal-pad"
               placeholder="Stop Loss"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={colors.textMuted}
             />
           </View>
           <TouchableOpacity style={styles.saveButton} onPress={() => onSaveEdit?.(position)}>
-            <Check size={16} color={COLORS.success} />
+            <Check size={16} color={colors.success} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.cancelButton} onPress={onCancelEdit}>
-            <X size={16} color={COLORS.textMuted} />
+            <X size={16} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
       ) : (
         <View style={styles.tpslRow}>
           {position.takeProfit ? (
             <View style={styles.tpslItem}>
-              <Target size={10} color={COLORS.success} />
-              <Text style={[styles.tpslText, { color: COLORS.success }]}>
+              <Target size={10} color={colors.success} />
+              <Text style={[styles.tpslText, { color: colors.success }]}>
                 TP: ${formatPrice(position.takeProfit)}
               </Text>
             </View>
           ) : (
             <View style={styles.tpslItem}>
-              <Target size={10} color={COLORS.textMuted} />
-              <Text style={[styles.tpslText, { color: COLORS.textMuted }]}>TP: --</Text>
+              <Target size={10} color={colors.textMuted} />
+              <Text style={[styles.tpslText, { color: colors.textMuted }]}>TP: --</Text>
             </View>
           )}
           {position.stopLoss ? (
             <View style={styles.tpslItem}>
-              <Target size={10} color={COLORS.error} />
-              <Text style={[styles.tpslText, { color: COLORS.error }]}>
+              <Target size={10} color={colors.error} />
+              <Text style={[styles.tpslText, { color: colors.error }]}>
                 SL: ${formatPrice(position.stopLoss)}
               </Text>
             </View>
           ) : (
             <View style={styles.tpslItem}>
-              <Target size={10} color={COLORS.textMuted} />
-              <Text style={[styles.tpslText, { color: COLORS.textMuted }]}>SL: --</Text>
+              <Target size={10} color={colors.textMuted} />
+              <Text style={[styles.tpslText, { color: colors.textMuted }]}>SL: --</Text>
             </View>
           )}
           <TouchableOpacity
@@ -240,6 +242,8 @@ const OpenPositionsSection = ({
   onPositionClose,
   refreshTrigger = 0,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // OPTIMIZATION: Get cached positions immediately (no async) to avoid loading flicker
   const getCachedPositions = () => {
     if (paperTradeService.initialized && paperTradeService.currentUserId === userId) {
@@ -271,6 +275,378 @@ const OpenPositionsSection = ({
   const [editingSL, setEditingSL] = useState('');
   const pricesRef = useRef({});
   const wsUnsubscribesRef = useRef([]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.6)'),
+      marginTop: SPACING.md,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.25)',
+      overflow: 'hidden',
+    },
+
+    loadingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: SPACING.lg,
+      gap: SPACING.sm,
+    },
+
+    loadingText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.md,
+      backgroundColor: 'rgba(106, 91, 255, 0.08)',
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(106, 91, 255, 0.15)',
+    },
+
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+
+    headerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+
+    countBadge: {
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.3)',
+    },
+
+    countText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.purple,
+    },
+
+    headerRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+
+    totalPnL: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+
+    // Stats Row
+    statsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.md,
+      backgroundColor: 'rgba(106, 91, 255, 0.05)',
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(106, 91, 255, 0.1)',
+    },
+
+    statItem: {
+      alignItems: 'center',
+      gap: 2,
+    },
+
+    statLabel: {
+      fontSize: 9,
+      color: colors.textMuted,
+    },
+
+    statValue: {
+      fontSize: 11,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+
+    positionsList: {
+      // No maxHeight - let parent ScrollView handle scrolling
+    },
+
+    positionsContent: {
+      padding: SPACING.sm,
+      paddingBottom: SPACING.lg,
+    },
+
+    // Position Card
+    positionCard: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.8)'),
+      borderRadius: 12,
+      padding: SPACING.sm,
+      marginBottom: SPACING.xs,
+      borderWidth: 1,
+    },
+
+    positionCardLong: {
+      borderColor: 'rgba(58, 247, 166, 0.25)',
+    },
+
+    positionCardShort: {
+      borderColor: 'rgba(255, 107, 107, 0.25)',
+    },
+
+    positionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: SPACING.xs,
+    },
+
+    leftColumn: {
+      flex: 1,
+    },
+
+    symbolRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+
+    positionSymbol: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+
+    directionBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      gap: 2,
+    },
+
+    directionText: {
+      fontSize: 10,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+
+    leverageText: {
+      fontSize: 10,
+      color: colors.textMuted,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    modeBadge: {
+      paddingHorizontal: 5,
+      paddingVertical: 1,
+      borderRadius: 3,
+      marginLeft: 2,
+    },
+
+    modeBadgePattern: {
+      backgroundColor: 'rgba(106, 91, 255, 0.25)',
+    },
+
+    modeBadgeCustom: {
+      backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    },
+
+    modeBadgeText: {
+      fontSize: 8,
+      color: colors.textSecondary,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    pnlRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: 4,
+    },
+
+    pnlValue: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+
+    pnlPercent: {
+      fontSize: 11,
+    },
+
+    rightActions: {
+      flexDirection: 'row',
+      gap: 6,
+    },
+
+    editButton: {
+      padding: 6,
+      backgroundColor: 'rgba(106, 91, 255, 0.15)',
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.3)',
+    },
+
+    closeButton: {
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      backgroundColor: 'rgba(255, 107, 107, 0.15)',
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 107, 107, 0.25)',
+    },
+
+    closeButtonText: {
+      fontSize: 11,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.error,
+    },
+
+    detailsRow: {
+      flexDirection: 'row',
+      gap: SPACING.xs,
+      marginBottom: SPACING.xs,
+    },
+
+    detailItem: {
+      flex: 1,
+      backgroundColor: 'rgba(106, 91, 255, 0.08)',
+      padding: 4,
+      borderRadius: 4,
+      alignItems: 'center',
+    },
+
+    detailLabel: {
+      fontSize: 8,
+      color: colors.textMuted,
+    },
+
+    detailValue: {
+      fontSize: 10,
+      color: colors.textSecondary,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    // Edit Row
+    editRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingTop: SPACING.xs,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(106, 91, 255, 0.1)',
+    },
+
+    editInputGroup: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+
+    editLabel: {
+      fontSize: 12,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      marginRight: 2,
+    },
+
+    editInput: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+      borderRadius: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.15)',
+      minWidth: 80,
+    },
+
+    saveButton: {
+      padding: 6,
+      backgroundColor: 'rgba(58, 247, 166, 0.15)',
+      borderRadius: 4,
+    },
+
+    cancelButton: {
+      padding: 6,
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+      borderRadius: 4,
+    },
+
+    // TP/SL Row
+    tpslRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.md,
+      paddingTop: SPACING.xs,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(106, 91, 255, 0.1)',
+    },
+
+    tpslItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+
+    tpslText: {
+      fontSize: 10,
+    },
+
+    tapHint: {
+      fontSize: 10,
+      color: colors.purple,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      marginLeft: 'auto',
+    },
+
+    viewAllButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: SPACING.sm,
+      marginTop: SPACING.xs,
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+      borderRadius: 8,
+    },
+
+    viewAllText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.purple,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    // Empty State
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: SPACING.lg,
+      paddingHorizontal: SPACING.md,
+    },
+
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+
+    emptySubtext: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: SPACING.xs,
+      opacity: 0.7,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Load positions with CLOUD SYNC
   const loadPositions = useCallback(async (forceRefresh = false) => {
@@ -549,7 +925,7 @@ const OpenPositionsSection = ({
       {/* Header */}
       <TouchableOpacity style={styles.header} onPress={toggleCollapse} activeOpacity={0.8}>
         <View style={styles.headerLeft}>
-          <Briefcase size={20} color={COLORS.gold} />
+          <Briefcase size={20} color={colors.gold} />
           <Text style={styles.headerTitle}>Lệnh Đang Mở</Text>
           <View style={styles.countBadge}>
             <Text style={styles.countText}>{positions.length}</Text>
@@ -558,13 +934,13 @@ const OpenPositionsSection = ({
 
         <View style={styles.headerRight}>
           {/* Total PnL */}
-          <Text style={[styles.totalPnL, { color: totalPnL >= 0 ? COLORS.success : COLORS.error }]}>
+          <Text style={[styles.totalPnL, { color: totalPnL >= 0 ? colors.success : colors.error }]}>
             {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL)}
           </Text>
           {collapsed ? (
-            <ChevronUp size={18} color={COLORS.textMuted} />
+            <ChevronUp size={18} color={colors.textMuted} />
           ) : (
-            <ChevronDown size={18} color={COLORS.textMuted} />
+            <ChevronDown size={18} color={colors.textMuted} />
           )}
         </View>
       </TouchableOpacity>
@@ -573,24 +949,24 @@ const OpenPositionsSection = ({
       {!collapsed && stats && (
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Wallet size={12} color={COLORS.textMuted} />
+            <Wallet size={12} color={colors.textMuted} />
             <Text style={styles.statLabel}>Margin</Text>
             <Text style={styles.statValue}>${formatCurrency(totalMargin)}</Text>
           </View>
           <View style={styles.statItem}>
-            <BarChart2 size={12} color={COLORS.textMuted} />
+            <BarChart2 size={12} color={colors.textMuted} />
             <Text style={styles.statLabel}>Đã đóng</Text>
             <Text style={styles.statValue}>{stats.totalTrades || 0}</Text>
           </View>
           <View style={styles.statItem}>
-            <Award size={12} color={COLORS.success} />
+            <Award size={12} color={colors.success} />
             <Text style={styles.statLabel}>Thắng</Text>
-            <Text style={[styles.statValue, { color: COLORS.success }]}>{stats.wins || 0}</Text>
+            <Text style={[styles.statValue, { color: colors.success }]}>{stats.wins || 0}</Text>
           </View>
           <View style={styles.statItem}>
-            <Percent size={12} color={COLORS.gold} />
+            <Percent size={12} color={colors.gold} />
             <Text style={styles.statLabel}>Win Rate</Text>
-            <Text style={[styles.statValue, { color: COLORS.gold }]}>{(stats.winRate || 0).toFixed(1).replace('.', ',')}%</Text>
+            <Text style={[styles.statValue, { color: colors.gold }]}>{(stats.winRate || 0).toFixed(1).replace('.', ',')}%</Text>
           </View>
         </View>
       )}
@@ -622,389 +998,19 @@ const OpenPositionsSection = ({
                 onCancelEdit={handleCancelEdit}
                 setEditingTP={setEditingTP}
                 setEditingSL={setEditingSL}
+                colors={colors}
+                styles={styles}
               />
             ))}
           </View>
           <TouchableOpacity style={styles.viewAllButton} onPress={onViewAllPress}>
             <Text style={styles.viewAllText}>Xem tất cả</Text>
-            <ExternalLink size={14} color={COLORS.purple} />
+            <ExternalLink size={14} color={colors.purple} />
           </TouchableOpacity>
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'rgba(15, 16, 48, 0.6)',
-    marginTop: SPACING.md,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.25)',
-    overflow: 'hidden',
-  },
-
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: SPACING.lg,
-    gap: SPACING.sm,
-  },
-
-  loadingText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    backgroundColor: 'rgba(106, 91, 255, 0.08)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.15)',
-  },
-
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  countBadge: {
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-  },
-
-  countText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.purple,
-  },
-
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  totalPnL: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-
-  // Stats Row
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    backgroundColor: 'rgba(106, 91, 255, 0.05)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.1)',
-  },
-
-  statItem: {
-    alignItems: 'center',
-    gap: 2,
-  },
-
-  statLabel: {
-    fontSize: 9,
-    color: COLORS.textMuted,
-  },
-
-  statValue: {
-    fontSize: 11,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  positionsList: {
-    // No maxHeight - let parent ScrollView handle scrolling
-  },
-
-  positionsContent: {
-    padding: SPACING.sm,
-    paddingBottom: SPACING.lg,
-  },
-
-  // Position Card
-  positionCard: {
-    backgroundColor: 'rgba(15, 16, 48, 0.8)',
-    borderRadius: 12,
-    padding: SPACING.sm,
-    marginBottom: SPACING.xs,
-    borderWidth: 1,
-  },
-
-  positionCardLong: {
-    borderColor: 'rgba(58, 247, 166, 0.25)',
-  },
-
-  positionCardShort: {
-    borderColor: 'rgba(255, 107, 107, 0.25)',
-  },
-
-  positionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.xs,
-  },
-
-  leftColumn: {
-    flex: 1,
-  },
-
-  symbolRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-
-  positionSymbol: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  directionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    gap: 2,
-  },
-
-  directionText: {
-    fontSize: 10,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-
-  leverageText: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  modeBadge: {
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 3,
-    marginLeft: 2,
-  },
-
-  modeBadgePattern: {
-    backgroundColor: 'rgba(106, 91, 255, 0.25)',
-  },
-
-  modeBadgeCustom: {
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
-  },
-
-  modeBadgeText: {
-    fontSize: 8,
-    color: COLORS.textSecondary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  pnlRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-
-  pnlValue: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-
-  pnlPercent: {
-    fontSize: 11,
-  },
-
-  rightActions: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-
-  editButton: {
-    padding: 6,
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-  },
-
-  closeButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: 'rgba(255, 107, 107, 0.15)',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 107, 0.25)',
-  },
-
-  closeButtonText: {
-    fontSize: 11,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.error,
-  },
-
-  detailsRow: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-    marginBottom: SPACING.xs,
-  },
-
-  detailItem: {
-    flex: 1,
-    backgroundColor: 'rgba(106, 91, 255, 0.08)',
-    padding: 4,
-    borderRadius: 4,
-    alignItems: 'center',
-  },
-
-  detailLabel: {
-    fontSize: 8,
-    color: COLORS.textMuted,
-  },
-
-  detailValue: {
-    fontSize: 10,
-    color: COLORS.textSecondary,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  // Edit Row
-  editRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingTop: SPACING.xs,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(106, 91, 255, 0.1)',
-  },
-
-  editInputGroup: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-
-  editLabel: {
-    fontSize: 12,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    marginRight: 2,
-  },
-
-  editInput: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    borderRadius: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    minWidth: 80,
-  },
-
-  saveButton: {
-    padding: 6,
-    backgroundColor: 'rgba(58, 247, 166, 0.15)',
-    borderRadius: 4,
-  },
-
-  cancelButton: {
-    padding: 6,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderRadius: 4,
-  },
-
-  // TP/SL Row
-  tpslRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    paddingTop: SPACING.xs,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(106, 91, 255, 0.1)',
-  },
-
-  tpslItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-
-  tpslText: {
-    fontSize: 10,
-  },
-
-  tapHint: {
-    fontSize: 10,
-    color: COLORS.purple,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    marginLeft: 'auto',
-  },
-
-  viewAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: SPACING.sm,
-    marginTop: SPACING.xs,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderRadius: 8,
-  },
-
-  viewAllText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.purple,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  // Empty State
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: SPACING.lg,
-    paddingHorizontal: SPACING.md,
-  },
-
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-
-  emptySubtext: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: SPACING.xs,
-    opacity: 0.7,
-  },
-});
 
 export default OpenPositionsSection;

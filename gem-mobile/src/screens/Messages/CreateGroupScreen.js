@@ -74,7 +74,7 @@ export default function CreateGroupScreen({ navigation }) {
 
     try {
       setSearching(true);
-      const results = await messagingService.searchUsers(query);
+      const results = await messagingService.searchGroupChatEligibleUsers(query);
       // Filter out already selected users
       const filtered = results.filter(
         u => !selectedUsers.some(s => s.id === u.id)
@@ -215,7 +215,9 @@ export default function CreateGroupScreen({ navigation }) {
         {/* Info */}
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{item.display_name || 'Unknown'}</Text>
-          <Text style={styles.userEmail}>{item.email}</Text>
+          <Text style={styles.userEmail}>
+            {item.username ? `@${item.username}` : ''}
+          </Text>
         </View>
 
         {/* Add icon */}

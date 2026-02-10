@@ -10,7 +10,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Modal, ScrollView, Pressable } from 'react-native';
 import * as Icons from 'lucide-react-native';
-import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

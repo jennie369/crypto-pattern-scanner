@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { Rect, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
 import * as Icons from 'lucide-react-native';
-import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 // Vietnamese day names
 const DAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
@@ -20,14 +20,69 @@ const WeeklyProgressChart = ({
   data = [], // Array of { day_date, day_name, total_score, xp_earned, ... }
   width = 320,
   height = 160,
-  barColor = COLORS.purple,
+  barColor,
   useGradient = true,
-  gradientColors = [COLORS.purple, COLORS.cyan],
+  gradientColors,
   showXP = false,
   showLabels = true,
   onBarPress = null,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  // Use theme colors for defaults
+  const effectiveBarColor = barColor || colors.purple;
+  const effectiveGradientColors = gradientColors || [colors.purple, colors.cyan];
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'relative',
+    },
+    yAxisLabels: {
+      position: 'absolute',
+      left: 0,
+      top: 16,
+      height: 100,
+      justifyContent: 'space-between',
+      zIndex: 10,
+    },
+    yAxisLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      width: 24,
+      textAlign: 'right',
+    },
+    xAxisLabels: {
+      flexDirection: 'row',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+    },
+    xAxisLabelContainer: {
+      alignItems: 'center',
+    },
+    xAxisLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    xAxisLabelToday: {
+      color: colors.gold,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    xpLabel: {
+      color: colors.success,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      marginTop: 2,
+    },
+    gridLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const paddingLeft = 30;
   const paddingRight = 10;
   const paddingTop = 20;
@@ -106,8 +161,8 @@ const WeeklyProgressChart = ({
         <Defs>
           {useGradient && (
             <LinearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-              <Stop offset="0%" stopColor={gradientColors[0]} />
-              <Stop offset="100%" stopColor={gradientColors[1]} />
+              <Stop offset="0%" stopColor={effectiveGradientColors[0]} />
+              <Stop offset="100%" stopColor={effectiveGradientColors[1]} />
             </LinearGradient>
           )}
         </Defs>
@@ -142,7 +197,7 @@ const WeeklyProgressChart = ({
               y={y}
               width={barWidth}
               height={Math.max(barHeight, 4)} // Minimum height for visibility
-              fill={useGradient ? `url(#${gradientId})` : barColor}
+              fill={useGradient ? `url(#${gradientId})` : effectiveBarColor}
               rx={4}
               ry={4}
               opacity={day.isToday ? 1 : 0.7}
@@ -180,6 +235,39 @@ const WeeklyProgressChart = ({
 
 // Summary stats row
 export const WeeklyProgressSummary = ({ data = [] }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    summaryContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: SPACING.md,
+      paddingVertical: SPACING.sm,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: SPACING.md,
+    },
+    summaryItem: {
+      alignItems: 'center',
+      paddingHorizontal: SPACING.lg,
+    },
+    summaryValue: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.xxxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    summaryLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      marginTop: SPACING.xxs,
+    },
+    summaryDivider: {
+      width: 1,
+      height: 30,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const totalXP = data.reduce((sum, d) => sum + (d.xp_earned || 0), 0);
   const avgScore = data.length > 0
     ? Math.round(data.reduce((sum, d) => sum + (d.total_score || 0), 0) / data.length)
@@ -192,17 +280,17 @@ export const WeeklyProgressSummary = ({ data = [] }) => {
     <View style={styles.summaryContainer}>
       <View style={styles.summaryItem}>
         <Text style={styles.summaryValue}>{avgScore}</Text>
-        <Text style={styles.summaryLabel}>Điểm TB</Text>
+        <Text style={styles.summaryLabel}>Diem TB</Text>
       </View>
       <View style={styles.summaryDivider} />
       <View style={styles.summaryItem}>
         <Text style={styles.summaryValue}>{totalXP}</Text>
-        <Text style={styles.summaryLabel}>XP tuần</Text>
+        <Text style={styles.summaryLabel}>XP tuan</Text>
       </View>
       <View style={styles.summaryDivider} />
       <View style={styles.summaryItem}>
         <Text style={styles.summaryValue}>{perfectDays}</Text>
-        <Text style={styles.summaryLabel}>Ngày hoàn hảo</Text>
+        <Text style={styles.summaryLabel}>Ngay hoan hao</Text>
       </View>
     </View>
   );
@@ -210,6 +298,14 @@ export const WeeklyProgressSummary = ({ data = [] }) => {
 
 // Compact version
 export const WeeklyProgressCompact = ({ data = [], width = 200 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    compactContainer: {
+      paddingVertical: SPACING.xs,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   const chartWidth = width;
   const chartHeight = 40;
   const barWidth = (chartWidth - 6 * 4) / 7;
@@ -238,7 +334,7 @@ export const WeeklyProgressCompact = ({ data = [], width = 200 }) => {
               y={y}
               width={barWidth}
               height={Math.max(barHeight, 2)}
-              fill={day.score > 60 ? COLORS.success : day.score > 30 ? COLORS.gold : COLORS.purple}
+              fill={day.score > 60 ? colors.success : day.score > 30 ? colors.gold : colors.purple}
               rx={2}
               ry={2}
               opacity={index === 6 ? 1 : 0.6}
@@ -257,6 +353,94 @@ export const WeeklyProgressCard = ({
   onViewDetails,
   style,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    weeklyCard: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: glass.borderRadius,
+      padding: SPACING.lg,
+      borderWidth: glass.borderWidth,
+      borderColor: 'rgba(106, 91, 255, 0.3)',
+    },
+    weeklyCardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: SPACING.md,
+    },
+    weeklyCardTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    weeklyCardTitle: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    weeklyCardViewBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xxs,
+    },
+    weeklyCardViewBtnText: {
+      color: colors.purple,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+    },
+    weeklyCardChartContainer: {
+      alignItems: 'center',
+    },
+    weeklyCardPercentages: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: 300,
+      paddingLeft: 30,
+      marginTop: -35,
+      marginBottom: SPACING.sm,
+    },
+    weeklyCardPercentText: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      width: 38,
+      textAlign: 'center',
+    },
+    weeklyCardFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: SPACING.md,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    weeklyCardStatItem: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    weeklyCardStatLabel: {
+      color: colors.textMuted,
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      marginBottom: SPACING.xxs,
+    },
+    weeklyCardStatValue: {
+      color: colors.textPrimary,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    weeklyCardStatDivider: {
+      width: 1,
+      height: 30,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    weeklyCardTrendRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xxs,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   // Calculate stats
   const stats = useMemo(() => {
     const weekData = Array.from({ length: 7 }, (_, i) => {
@@ -295,13 +479,13 @@ export const WeeklyProgressCard = ({
       {/* Header */}
       <View style={styles.weeklyCardHeader}>
         <View style={styles.weeklyCardTitleRow}>
-          <Icons.BarChart3 size={20} color={COLORS.purple} />
-          <Text style={styles.weeklyCardTitle}>TIẾN ĐỘ 7 NGÀY QUA</Text>
+          <Icons.BarChart3 size={20} color={colors.purple} />
+          <Text style={styles.weeklyCardTitle}>TIEN DO 7 NGAY QUA</Text>
         </View>
         {onViewDetails && (
           <TouchableOpacity onPress={onViewDetails} style={styles.weeklyCardViewBtn}>
-            <Text style={styles.weeklyCardViewBtnText}>Chi tiết</Text>
-            <Icons.ChevronRight size={16} color={COLORS.purple} />
+            <Text style={styles.weeklyCardViewBtnText}>Chi tiet</Text>
+            <Icons.ChevronRight size={16} color={colors.purple} />
           </TouchableOpacity>
         )}
       </View>
@@ -313,7 +497,7 @@ export const WeeklyProgressCard = ({
           width={300}
           height={160}
           useGradient={true}
-          gradientColors={[COLORS.purple, COLORS.gold]}
+          gradientColors={[colors.purple, colors.gold]}
           showLabels={true}
           showXP={false}
         />
@@ -325,8 +509,8 @@ export const WeeklyProgressCard = ({
               key={`perc-${index}`}
               style={[
                 styles.weeklyCardPercentText,
-                day.score >= 70 && { color: COLORS.success },
-                day.score < 40 && { color: COLORS.error },
+                day.score >= 70 && { color: colors.success },
+                day.score < 40 && { color: colors.error },
               ]}
             >
               {day.score}%
@@ -338,10 +522,10 @@ export const WeeklyProgressCard = ({
       {/* Stats Footer */}
       <View style={styles.weeklyCardFooter}>
         <View style={styles.weeklyCardStatItem}>
-          <Text style={styles.weeklyCardStatLabel}>Trung bình</Text>
+          <Text style={styles.weeklyCardStatLabel}>Trung binh</Text>
           <Text style={[
             styles.weeklyCardStatValue,
-            { color: stats.average >= 70 ? COLORS.success : stats.average >= 40 ? COLORS.gold : COLORS.error }
+            { color: stats.average >= 70 ? colors.success : stats.average >= 40 ? colors.gold : colors.error }
           ]}>
             {stats.average}%
           </Text>
@@ -350,7 +534,7 @@ export const WeeklyProgressCard = ({
         <View style={styles.weeklyCardStatDivider} />
 
         <View style={styles.weeklyCardStatItem}>
-          <Text style={styles.weeklyCardStatLabel}>Tốt nhất</Text>
+          <Text style={styles.weeklyCardStatLabel}>Tot nhat</Text>
           <Text style={styles.weeklyCardStatValue}>
             {stats.bestDay.dayName} ({stats.bestDay.score}%)
           </Text>
@@ -359,16 +543,16 @@ export const WeeklyProgressCard = ({
         <View style={styles.weeklyCardStatDivider} />
 
         <View style={styles.weeklyCardStatItem}>
-          <Text style={styles.weeklyCardStatLabel}>vs tuần trước</Text>
+          <Text style={styles.weeklyCardStatLabel}>vs tuan truoc</Text>
           <View style={styles.weeklyCardTrendRow}>
             {stats.trend >= 0 ? (
-              <Icons.TrendingUp size={14} color={COLORS.success} />
+              <Icons.TrendingUp size={14} color={colors.success} />
             ) : (
-              <Icons.TrendingDown size={14} color={COLORS.error} />
+              <Icons.TrendingDown size={14} color={colors.error} />
             )}
             <Text style={[
               styles.weeklyCardStatValue,
-              { color: stats.trend >= 0 ? COLORS.success : COLORS.error }
+              { color: stats.trend >= 0 ? colors.success : colors.error }
             ]}>
               {stats.trend >= 0 ? '+' : ''}{stats.trend}%
             </Text>
@@ -378,170 +562,5 @@ export const WeeklyProgressCard = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-  },
-  yAxisLabels: {
-    position: 'absolute',
-    left: 0,
-    top: 16,
-    height: 100,
-    justifyContent: 'space-between',
-    zIndex: 10,
-  },
-  yAxisLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    width: 24,
-    textAlign: 'right',
-  },
-  xAxisLabels: {
-    flexDirection: 'row',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  xAxisLabelContainer: {
-    alignItems: 'center',
-  },
-  xAxisLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  xAxisLabelToday: {
-    color: COLORS.gold,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  xpLabel: {
-    color: COLORS.success,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    marginTop: 2,
-  },
-  gridLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-  },
-  summaryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: SPACING.md,
-    paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.glassBg,
-    borderRadius: SPACING.md,
-  },
-  summaryItem: {
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-  },
-  summaryValue: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  summaryLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginTop: SPACING.xxs,
-  },
-  summaryDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  compactContainer: {
-    paddingVertical: SPACING.xs,
-  },
-
-  // Weekly Progress Card styles
-  weeklyCard: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.lg,
-    borderWidth: GLASS.borderWidth,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-  },
-  weeklyCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.md,
-  },
-  weeklyCardTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  weeklyCardTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  weeklyCardViewBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xxs,
-  },
-  weeklyCardViewBtnText: {
-    color: COLORS.purple,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  weeklyCardChartContainer: {
-    alignItems: 'center',
-  },
-  weeklyCardPercentages: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: 300,
-    paddingLeft: 30,
-    marginTop: -35,
-    marginBottom: SPACING.sm,
-  },
-  weeklyCardPercentText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    width: 38,
-    textAlign: 'center',
-  },
-  weeklyCardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  weeklyCardStatItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  weeklyCardStatLabel: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    marginBottom: SPACING.xxs,
-  },
-  weeklyCardStatValue: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  weeklyCardStatDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  weeklyCardTrendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xxs,
-  },
-});
 
 export default WeeklyProgressChart;

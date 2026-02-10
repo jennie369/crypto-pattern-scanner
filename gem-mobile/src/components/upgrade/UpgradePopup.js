@@ -3,7 +3,7 @@
 // Purpose: Modal popup để upgrade
 // ============================================================
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -29,7 +29,7 @@ import {
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useUpgrade } from '../../contexts/UpgradeContext';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import upgradeService from '../../services/upgradeService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -50,6 +50,7 @@ const ICONS = {
 const UpgradePopup = () => {
   const navigation = useNavigation();
   const { currentPopup, hideUpgradePopup, handleUpgradeClick } = useUpgrade();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
 
   // Animations
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -75,6 +76,125 @@ const UpgradePopup = () => {
       opacityAnim.setValue(0);
     }
   }, [currentPopup, scaleAnim, opacityAnim]);
+
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    container: {
+      width: SCREEN_WIDTH - 48,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 20,
+      padding: SPACING.xl,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.3,
+      shadowRadius: 20,
+      elevation: 10,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: SPACING.md,
+      right: SPACING.md,
+      padding: SPACING.xs,
+    },
+    iconContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: SPACING.lg,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: SPACING.sm,
+    },
+    subtitle: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.gold,
+      textAlign: 'center',
+      marginBottom: SPACING.sm,
+    },
+    description: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: SPACING.lg,
+      lineHeight: 20,
+    },
+    featuresContainer: {
+      width: '100%',
+      backgroundColor: 'rgba(255,255,255,0.05)',
+      borderRadius: 12,
+      padding: SPACING.md,
+      marginBottom: SPACING.lg,
+    },
+    featureRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SPACING.xs,
+    },
+    featureText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textPrimary,
+      marginLeft: SPACING.sm,
+    },
+    featureTextDisabled: {
+      color: colors.textMuted,
+      textDecorationLine: 'line-through',
+    },
+    priceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.lg,
+    },
+    price: {
+      fontSize: TYPOGRAPHY.fontSize.hero,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+    },
+    badge: {
+      backgroundColor: colors.gold,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: 12,
+      marginLeft: SPACING.sm,
+    },
+    badgeText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.bgDarkest,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    ctaButton: {
+      width: '100%',
+      backgroundColor: colors.gold,
+      paddingVertical: SPACING.md,
+      borderRadius: 12,
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+    },
+    ctaText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.bgDarkest,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+    },
+    secondaryButton: {
+      paddingVertical: SPACING.sm,
+    },
+    secondaryText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   if (!currentPopup) return null;
 
@@ -129,13 +249,13 @@ const UpgradePopup = () => {
               onPress={handleClose}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <X size={24} color={COLORS.textMuted} />
+              <X size={24} color={colors.textMuted} />
             </TouchableOpacity>
           )}
 
           {/* Icon */}
           <View style={styles.iconContainer}>
-            <IconComponent size={40} color={COLORS.gold} />
+            <IconComponent size={40} color={colors.gold} />
           </View>
 
           {/* Title */}
@@ -157,9 +277,9 @@ const UpgradePopup = () => {
               {features.slice(0, 4).map((feature, index) => (
                 <View key={index} style={styles.featureRow}>
                   {feature.included ? (
-                    <Check size={16} color={COLORS.success} />
+                    <Check size={16} color={colors.success} />
                   ) : (
-                    <X size={16} color={COLORS.textMuted} />
+                    <X size={16} color={colors.textMuted} />
                   )}
                   <Text
                     style={[
@@ -220,124 +340,5 @@ const UpgradePopup = () => {
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-  },
-  container: {
-    width: SCREEN_WIDTH - 48,
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 20,
-    padding: SPACING.xl,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: SPACING.md,
-    right: SPACING.md,
-    padding: SPACING.xs,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
-  },
-  subtitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.gold,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
-  },
-  description: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginBottom: SPACING.lg,
-    lineHeight: 20,
-  },
-  featuresContainer: {
-    width: '100%',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-  },
-  featureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.xs,
-  },
-  featureText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textPrimary,
-    marginLeft: SPACING.sm,
-  },
-  featureTextDisabled: {
-    color: COLORS.textMuted,
-    textDecorationLine: 'line-through',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
-  price: {
-    fontSize: TYPOGRAPHY.fontSize.hero,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-  },
-  badge: {
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: 12,
-    marginLeft: SPACING.sm,
-  },
-  badgeText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.bgDarkest,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  ctaButton: {
-    width: '100%',
-    backgroundColor: COLORS.gold,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  ctaText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.bgDarkest,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  secondaryButton: {
-    paddingVertical: SPACING.sm,
-  },
-  secondaryText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-  },
-});
 
 export default UpgradePopup;

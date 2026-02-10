@@ -12,7 +12,7 @@
  * - ReminderForm: Reminder/alarm
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -45,7 +45,7 @@ import {
   ShoppingCart,
 } from 'lucide-react-native';
 
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, INPUT } from '../utils/tokens';
+import { useSettings } from '../contexts/SettingsContext';
 import { WIDGET_TYPES, getWidgetIcon, getWidgetColor } from '../utils/widgetTriggerDetector';
 import { saveWidgetToVisionBoard } from '../services/gemMasterService';
 import { supabase } from '../services/supabase';
@@ -63,11 +63,331 @@ const SmartFormCard = ({
   onCancel,
   onNavigateToShop,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const [formData, setFormData] = useState(initialData);
   const [expanded, setExpanded] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(50))[0];
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginHorizontal: SPACING.lg,
+      marginVertical: SPACING.md,
+    },
+
+    card: {
+      borderRadius: glass.borderRadius,
+      borderWidth: glass.borderWidth,
+      borderColor: 'rgba(106, 91, 255, 0.3)',
+      overflow: 'hidden',
+    },
+
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    },
+
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+
+    headerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    headerRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+
+    expandButton: {
+      padding: SPACING.xs,
+    },
+
+    closeButton: {
+      padding: SPACING.xs,
+    },
+
+    formContainer: {
+      maxHeight: 350,
+      padding: SPACING.lg,
+    },
+
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      gap: SPACING.md,
+      padding: SPACING.lg,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+
+    cancelButton: {
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.xl,
+    },
+
+    cancelButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textSecondary,
+    },
+
+    saveButton: {
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+
+    saveButtonGradient: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.xl,
+    },
+
+    saveButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    // Sub-form styles
+    subForm: {
+      paddingBottom: SPACING.md,
+    },
+
+    defaultForm: {
+      alignItems: 'center',
+      padding: SPACING.xl,
+    },
+
+    formText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textSecondary,
+    },
+
+    inputLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textSecondary,
+      marginBottom: SPACING.sm,
+      textTransform: 'uppercase',
+      letterSpacing: TYPOGRAPHY.letterSpacing.wider,
+    },
+
+    input: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      padding: SPACING.md,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textPrimary,
+    },
+
+    textArea: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+
+    // Steps specific
+    stepItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+      borderRadius: 8,
+      padding: SPACING.sm,
+      marginBottom: SPACING.sm,
+    },
+
+    stepCheckbox: {
+      width: 24,
+      height: 24,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.purple,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: SPACING.sm,
+    },
+
+    emptyCheckbox: {
+      width: 14,
+      height: 14,
+      borderRadius: 2,
+      backgroundColor: 'transparent',
+    },
+
+    stepText: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textPrimary,
+    },
+
+    stepTextCompleted: {
+      textDecorationLine: 'line-through',
+      color: colors.textMuted,
+    },
+
+    addStepRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: SPACING.sm,
+    },
+
+    addStepButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      backgroundColor: colors.purple,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    // Switch row
+    switchRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: SPACING.lg,
+      paddingVertical: SPACING.sm,
+    },
+
+    switchLabel: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textPrimary,
+    },
+
+    switchSubLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+
+    // Shop button
+    shopButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: SPACING.sm,
+      marginTop: SPACING.lg,
+      paddingVertical: SPACING.md,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.gold,
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    },
+
+    shopButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.gold,
+    },
+
+    // Affirmation
+    affirmationItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+      borderRadius: 8,
+      padding: SPACING.sm,
+      marginBottom: SPACING.sm,
+    },
+
+    affirmationText: {
+      flex: 1,
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textPrimary,
+      fontStyle: 'italic',
+    },
+
+    // Timeline options
+    timelineRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: SPACING.sm,
+    },
+
+    timelineOption: {
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.md,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    },
+
+    timelineOptionActive: {
+      borderColor: colors.purple,
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    },
+
+    timelineOptionText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textSecondary,
+    },
+
+    timelineOptionTextActive: {
+      color: colors.textPrimary,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+
+    // Time picker
+    timePickerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+
+    timePickerLabel: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      color: colors.textSecondary,
+    },
+
+    timeInput: {
+      width: 80,
+      textAlign: 'center',
+    },
+
+    // Reading preview
+    readingPreview: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      borderRadius: 12,
+      padding: SPACING.md,
+      marginBottom: SPACING.lg,
+      gap: SPACING.md,
+    },
+
+    readingPreviewText: {
+      flex: 1,
+    },
+
+    readingPreviewTitle: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    readingPreviewSubtitle: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (visible) {
@@ -200,6 +520,10 @@ const SmartFormCard = ({
           <StepsForm
             data={formData}
             onChange={setFormData}
+            colors={colors}
+            styles={styles}
+            SPACING={SPACING}
+            TYPOGRAPHY={TYPOGRAPHY}
           />
         );
       case WIDGET_TYPES.CRYSTAL:
@@ -208,6 +532,10 @@ const SmartFormCard = ({
             data={formData}
             onChange={setFormData}
             onNavigateToShop={onNavigateToShop}
+            colors={colors}
+            styles={styles}
+            SPACING={SPACING}
+            TYPOGRAPHY={TYPOGRAPHY}
           />
         );
       case WIDGET_TYPES.AFFIRMATION:
@@ -215,6 +543,10 @@ const SmartFormCard = ({
           <AffirmationForm
             data={formData}
             onChange={setFormData}
+            colors={colors}
+            styles={styles}
+            SPACING={SPACING}
+            TYPOGRAPHY={TYPOGRAPHY}
           />
         );
       case WIDGET_TYPES.GOAL:
@@ -222,6 +554,10 @@ const SmartFormCard = ({
           <GoalForm
             data={formData}
             onChange={setFormData}
+            colors={colors}
+            styles={styles}
+            SPACING={SPACING}
+            TYPOGRAPHY={TYPOGRAPHY}
           />
         );
       case WIDGET_TYPES.ICHING:
@@ -231,6 +567,10 @@ const SmartFormCard = ({
             type={widgetType}
             data={formData}
             onChange={setFormData}
+            colors={colors}
+            styles={styles}
+            SPACING={SPACING}
+            TYPOGRAPHY={TYPOGRAPHY}
           />
         );
       case WIDGET_TYPES.REMINDER:
@@ -238,6 +578,10 @@ const SmartFormCard = ({
           <ReminderForm
             data={formData}
             onChange={setFormData}
+            colors={colors}
+            styles={styles}
+            SPACING={SPACING}
+            TYPOGRAPHY={TYPOGRAPHY}
           />
         );
       case WIDGET_TYPES.QUOTE:
@@ -245,6 +589,10 @@ const SmartFormCard = ({
           <QuoteForm
             data={formData}
             onChange={setFormData}
+            colors={colors}
+            styles={styles}
+            SPACING={SPACING}
+            TYPOGRAPHY={TYPOGRAPHY}
           />
         );
       default:
@@ -267,7 +615,7 @@ const SmartFormCard = ({
       ]}
     >
       <LinearGradient
-        colors={['rgba(15, 16, 48, 0.95)', 'rgba(15, 16, 48, 0.85)']}
+        colors={[settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'), 'rgba(15, 16, 48, 0.85)']}
         style={styles.card}
       >
         {/* Header */}
@@ -282,13 +630,13 @@ const SmartFormCard = ({
               style={styles.expandButton}
             >
               {expanded ? (
-                <ChevronUp size={20} color={COLORS.textSecondary} />
+                <ChevronUp size={20} color={colors.textSecondary} />
               ) : (
-                <ChevronDown size={20} color={COLORS.textSecondary} />
+                <ChevronDown size={20} color={colors.textSecondary} />
               )}
             </TouchableOpacity>
             <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
-              <X size={20} color={COLORS.textSecondary} />
+              <X size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -316,14 +664,14 @@ const SmartFormCard = ({
               disabled={isSaving}
             >
               <LinearGradient
-                colors={GRADIENTS.primaryButton}
+                colors={gradients.primaryButton}
                 style={styles.saveButtonGradient}
               >
                 {isSaving ? (
-                  <ActivityIndicator size="small" color={COLORS.textPrimary} />
+                  <ActivityIndicator size="small" color={colors.textPrimary} />
                 ) : (
                   <>
-                    <Check size={18} color={COLORS.textPrimary} />
+                    <Check size={18} color={colors.textPrimary} />
                     <Text style={styles.saveButtonText}>Lưu</Text>
                   </>
                 )}
@@ -341,7 +689,7 @@ const SmartFormCard = ({
 // ═══════════════════════════════════════════════════════════
 
 // Steps Form - Action steps/planning
-const StepsForm = ({ data, onChange }) => {
+const StepsForm = ({ data, onChange, colors, styles, SPACING, TYPOGRAPHY }) => {
   const [steps, setSteps] = useState(data.steps || []);
   const [newStep, setNewStep] = useState('');
   const [title, setTitle] = useState(data.title || '');
@@ -380,7 +728,7 @@ const StepsForm = ({ data, onChange }) => {
         value={title}
         onChangeText={setTitle}
         placeholder="Ví dụ: Kế hoạch tháng này"
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
       />
 
       <Text style={[styles.inputLabel, { marginTop: SPACING.lg }]}>Các bước</Text>
@@ -391,7 +739,7 @@ const StepsForm = ({ data, onChange }) => {
             onPress={() => toggleStep(index)}
           >
             {step.completed ? (
-              <Check size={16} color={COLORS.success} />
+              <Check size={16} color={colors.success} />
             ) : (
               <View style={styles.emptyCheckbox} />
             )}
@@ -406,7 +754,7 @@ const StepsForm = ({ data, onChange }) => {
             {step.number}. {step.text}
           </Text>
           <TouchableOpacity onPress={() => removeStep(index)}>
-            <Trash2 size={16} color={COLORS.error} />
+            <Trash2 size={16} color={colors.error} />
           </TouchableOpacity>
         </View>
       ))}
@@ -417,11 +765,11 @@ const StepsForm = ({ data, onChange }) => {
           value={newStep}
           onChangeText={setNewStep}
           placeholder="Thêm bước mới..."
-          placeholderTextColor={COLORS.textDisabled}
+          placeholderTextColor={colors.textDisabled}
           onSubmitEditing={addStep}
         />
         <TouchableOpacity style={styles.addStepButton} onPress={addStep}>
-          <Plus size={20} color={COLORS.textPrimary} />
+          <Plus size={20} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -429,7 +777,7 @@ const StepsForm = ({ data, onChange }) => {
 };
 
 // Crystal Form
-const CrystalForm = ({ data, onChange, onNavigateToShop }) => {
+const CrystalForm = ({ data, onChange, onNavigateToShop, colors, styles, SPACING, TYPOGRAPHY }) => {
   const [crystalName, setCrystalName] = useState(data.vietnameseName || data.name || '');
   const [reason, setReason] = useState(data.reason || '');
   const [reminder, setReminder] = useState(data.reminder || false);
@@ -452,7 +800,7 @@ const CrystalForm = ({ data, onChange, onNavigateToShop }) => {
         value={crystalName}
         onChangeText={setCrystalName}
         placeholder="Ví dụ: Thạch Anh Hồng"
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
       />
 
       <Text style={[styles.inputLabel, { marginTop: SPACING.lg }]}>Lý do sử dụng</Text>
@@ -461,7 +809,7 @@ const CrystalForm = ({ data, onChange, onNavigateToShop }) => {
         value={reason}
         onChangeText={setReason}
         placeholder="Tại sao bạn muốn dùng crystal này?"
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
         multiline
         numberOfLines={3}
       />
@@ -471,8 +819,8 @@ const CrystalForm = ({ data, onChange, onNavigateToShop }) => {
         <Switch
           value={reminder}
           onValueChange={setReminder}
-          trackColor={{ false: COLORS.inputBg, true: COLORS.purple }}
-          thumbColor={reminder ? COLORS.cyan : COLORS.textMuted}
+          trackColor={{ false: colors.inputBg, true: colors.purple }}
+          thumbColor={reminder ? colors.cyan : colors.textMuted}
         />
       </View>
 
@@ -481,7 +829,7 @@ const CrystalForm = ({ data, onChange, onNavigateToShop }) => {
           style={styles.shopButton}
           onPress={() => onNavigateToShop?.(data.shopHandle)}
         >
-          <ShoppingCart size={18} color={COLORS.gold} />
+          <ShoppingCart size={18} color={colors.gold} />
           <Text style={styles.shopButtonText}>Xem trong Shop</Text>
         </TouchableOpacity>
       )}
@@ -490,7 +838,7 @@ const CrystalForm = ({ data, onChange, onNavigateToShop }) => {
 };
 
 // Affirmation Form
-const AffirmationForm = ({ data, onChange }) => {
+const AffirmationForm = ({ data, onChange, colors, styles, SPACING, TYPOGRAPHY }) => {
   const [affirmations, setAffirmations] = useState(data.affirmations || []);
   const [newAffirmation, setNewAffirmation] = useState('');
   const [dailyReminder, setDailyReminder] = useState(data.dailyReminder || false);
@@ -516,12 +864,12 @@ const AffirmationForm = ({ data, onChange }) => {
       <Text style={styles.inputLabel}>Affirmations</Text>
       {affirmations.map((aff, index) => (
         <View key={index} style={styles.affirmationItem}>
-          <Heart size={14} color={COLORS.error} style={{ marginRight: SPACING.sm }} />
+          <Heart size={14} color={colors.error} style={{ marginRight: SPACING.sm }} />
           <Text style={styles.affirmationText} numberOfLines={2}>
             {aff}
           </Text>
           <TouchableOpacity onPress={() => removeAffirmation(index)}>
-            <X size={16} color={COLORS.textMuted} />
+            <X size={16} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
       ))}
@@ -532,11 +880,11 @@ const AffirmationForm = ({ data, onChange }) => {
           value={newAffirmation}
           onChangeText={setNewAffirmation}
           placeholder="Thêm affirmation..."
-          placeholderTextColor={COLORS.textDisabled}
+          placeholderTextColor={colors.textDisabled}
           onSubmitEditing={addAffirmation}
         />
         <TouchableOpacity style={styles.addStepButton} onPress={addAffirmation}>
-          <Plus size={20} color={COLORS.textPrimary} />
+          <Plus size={20} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -550,20 +898,20 @@ const AffirmationForm = ({ data, onChange }) => {
         <Switch
           value={dailyReminder}
           onValueChange={setDailyReminder}
-          trackColor={{ false: COLORS.inputBg, true: COLORS.purple }}
-          thumbColor={dailyReminder ? COLORS.cyan : COLORS.textMuted}
+          trackColor={{ false: colors.inputBg, true: colors.purple }}
+          thumbColor={dailyReminder ? colors.cyan : colors.textMuted}
         />
       </View>
 
       {dailyReminder && (
         <View style={styles.timePickerRow}>
-          <Clock size={18} color={COLORS.textSecondary} />
+          <Clock size={18} color={colors.textSecondary} />
           <TextInput
             style={[styles.input, styles.timeInput]}
             value={reminderTime}
             onChangeText={setReminderTime}
             placeholder="08:00"
-            placeholderTextColor={COLORS.textDisabled}
+            placeholderTextColor={colors.textDisabled}
           />
         </View>
       )}
@@ -572,7 +920,7 @@ const AffirmationForm = ({ data, onChange }) => {
 };
 
 // Goal Form
-const GoalForm = ({ data, onChange }) => {
+const GoalForm = ({ data, onChange, colors, styles, SPACING, TYPOGRAPHY }) => {
   const [goalText, setGoalText] = useState(data.goalText || '');
   const [timeline, setTimeline] = useState(data.timeline || '7_days');
   const [notes, setNotes] = useState(data.notes || '');
@@ -596,7 +944,7 @@ const GoalForm = ({ data, onChange }) => {
         value={goalText}
         onChangeText={setGoalText}
         placeholder="Mô tả mục tiêu của bạn..."
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
         multiline
         numberOfLines={3}
       />
@@ -630,7 +978,7 @@ const GoalForm = ({ data, onChange }) => {
         value={notes}
         onChangeText={setNotes}
         placeholder="Thêm ghi chú..."
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
         multiline
         numberOfLines={2}
       />
@@ -639,7 +987,7 @@ const GoalForm = ({ data, onChange }) => {
 };
 
 // Reading Form (I Ching / Tarot)
-const ReadingForm = ({ type, data, onChange }) => {
+const ReadingForm = ({ type, data, onChange, colors, styles, SPACING, TYPOGRAPHY }) => {
   const [title, setTitle] = useState(data.title || '');
   const [notes, setNotes] = useState(data.notes || '');
   const [pinToDashboard, setPinToDashboard] = useState(data.pinToDashboard ?? true);
@@ -655,9 +1003,9 @@ const ReadingForm = ({ type, data, onChange }) => {
       {/* Reading Preview */}
       <View style={styles.readingPreview}>
         {isIChing ? (
-          <Hexagon size={24} color={COLORS.success} />
+          <Hexagon size={24} color={colors.success} />
         ) : (
-          <Sparkles size={24} color={COLORS.purple} />
+          <Sparkles size={24} color={colors.purple} />
         )}
         <View style={styles.readingPreviewText}>
           <Text style={styles.readingPreviewTitle}>
@@ -678,7 +1026,7 @@ const ReadingForm = ({ type, data, onChange }) => {
         value={title}
         onChangeText={setTitle}
         placeholder={isIChing ? 'Ví dụ: Quyết định công việc' : 'Ví dụ: Tình yêu tháng 12'}
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
       />
 
       <Text style={[styles.inputLabel, { marginTop: SPACING.lg }]}>Ghi chú cá nhân</Text>
@@ -687,7 +1035,7 @@ const ReadingForm = ({ type, data, onChange }) => {
         value={notes}
         onChangeText={setNotes}
         placeholder="Suy nghĩ của bạn về lần đọc này..."
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
         multiline
         numberOfLines={4}
       />
@@ -697,8 +1045,8 @@ const ReadingForm = ({ type, data, onChange }) => {
         <Switch
           value={pinToDashboard}
           onValueChange={setPinToDashboard}
-          trackColor={{ false: COLORS.inputBg, true: COLORS.purple }}
-          thumbColor={pinToDashboard ? COLORS.cyan : COLORS.textMuted}
+          trackColor={{ false: colors.inputBg, true: colors.purple }}
+          thumbColor={pinToDashboard ? colors.cyan : colors.textMuted}
         />
       </View>
     </View>
@@ -706,7 +1054,7 @@ const ReadingForm = ({ type, data, onChange }) => {
 };
 
 // Reminder Form
-const ReminderForm = ({ data, onChange }) => {
+const ReminderForm = ({ data, onChange, colors, styles, SPACING, TYPOGRAPHY }) => {
   const [reminderText, setReminderText] = useState(data.reminderText || '');
   const [frequency, setFrequency] = useState(data.frequency || 'daily');
   const [time, setTime] = useState(data.time || '09:00');
@@ -729,7 +1077,7 @@ const ReminderForm = ({ data, onChange }) => {
         value={reminderText}
         onChangeText={setReminderText}
         placeholder="Bạn muốn được nhắc điều gì?"
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
         multiline
         numberOfLines={2}
       />
@@ -758,14 +1106,14 @@ const ReminderForm = ({ data, onChange }) => {
       </View>
 
       <View style={[styles.timePickerRow, { marginTop: SPACING.lg }]}>
-        <Clock size={18} color={COLORS.textSecondary} />
+        <Clock size={18} color={colors.textSecondary} />
         <Text style={styles.timePickerLabel}>Lúc</Text>
         <TextInput
           style={[styles.input, styles.timeInput]}
           value={time}
           onChangeText={setTime}
           placeholder="09:00"
-          placeholderTextColor={COLORS.textDisabled}
+          placeholderTextColor={colors.textDisabled}
         />
       </View>
     </View>
@@ -773,7 +1121,7 @@ const ReminderForm = ({ data, onChange }) => {
 };
 
 // Quote Form
-const QuoteForm = ({ data, onChange }) => {
+const QuoteForm = ({ data, onChange, colors, styles, SPACING, TYPOGRAPHY }) => {
   const [quote, setQuote] = useState(data.quote || '');
   const [source, setSource] = useState(data.source || '');
   const [favorite, setFavorite] = useState(data.favorite || false);
@@ -790,7 +1138,7 @@ const QuoteForm = ({ data, onChange }) => {
         value={quote}
         onChangeText={setQuote}
         placeholder="Nhập câu nói..."
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
         multiline
         numberOfLines={4}
       />
@@ -801,7 +1149,7 @@ const QuoteForm = ({ data, onChange }) => {
         value={source}
         onChangeText={setSource}
         placeholder="Ví dụ: GEM Master, Đức Phật..."
-        placeholderTextColor={COLORS.textDisabled}
+        placeholderTextColor={colors.textDisabled}
       />
 
       <View style={styles.switchRow}>
@@ -809,334 +1157,12 @@ const QuoteForm = ({ data, onChange }) => {
         <Switch
           value={favorite}
           onValueChange={setFavorite}
-          trackColor={{ false: COLORS.inputBg, true: COLORS.gold }}
-          thumbColor={favorite ? COLORS.goldBright : COLORS.textMuted}
+          trackColor={{ false: colors.inputBg, true: colors.gold }}
+          thumbColor={favorite ? colors.goldBright : colors.textMuted}
         />
       </View>
     </View>
   );
 };
-
-// ═══════════════════════════════════════════════════════════
-// STYLES
-// ═══════════════════════════════════════════════════════════
-
-const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: SPACING.lg,
-    marginVertical: SPACING.md,
-  },
-
-  card: {
-    borderRadius: GLASS.borderRadius,
-    borderWidth: GLASS.borderWidth,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-    overflow: 'hidden',
-  },
-
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-
-  expandButton: {
-    padding: SPACING.xs,
-  },
-
-  closeButton: {
-    padding: SPACING.xs,
-  },
-
-  formContainer: {
-    maxHeight: 350,
-    padding: SPACING.lg,
-  },
-
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    gap: SPACING.md,
-    padding: SPACING.lg,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-
-  cancelButton: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xl,
-  },
-
-  cancelButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textSecondary,
-  },
-
-  saveButton: {
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-
-  saveButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xl,
-  },
-
-  saveButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  // Sub-form styles
-  subForm: {
-    paddingBottom: SPACING.md,
-  },
-
-  defaultForm: {
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-
-  formText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textSecondary,
-  },
-
-  inputLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.sm,
-    textTransform: 'uppercase',
-    letterSpacing: TYPOGRAPHY.letterSpacing.wider,
-  },
-
-  input: {
-    backgroundColor: INPUT.background,
-    borderRadius: INPUT.borderRadius,
-    borderWidth: 1,
-    borderColor: INPUT.borderColor,
-    padding: SPACING.md,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textPrimary,
-  },
-
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-
-  // Steps specific
-  stepItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-
-  stepCheckbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: COLORS.purple,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.sm,
-  },
-
-  emptyCheckbox: {
-    width: 14,
-    height: 14,
-    borderRadius: 2,
-    backgroundColor: 'transparent',
-  },
-
-  stepText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textPrimary,
-  },
-
-  stepTextCompleted: {
-    textDecorationLine: 'line-through',
-    color: COLORS.textMuted,
-  },
-
-  addStepRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-  },
-
-  addStepButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: COLORS.purple,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Switch row
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: SPACING.lg,
-    paddingVertical: SPACING.sm,
-  },
-
-  switchLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textPrimary,
-  },
-
-  switchSubLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-
-  // Shop button
-  shopButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    marginTop: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.gold,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-  },
-
-  shopButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.gold,
-  },
-
-  // Affirmation
-  affirmationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-
-  affirmationText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textPrimary,
-    fontStyle: 'italic',
-  },
-
-  // Timeline options
-  timelineRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-  },
-
-  timelineOption: {
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  },
-
-  timelineOptionActive: {
-    borderColor: COLORS.purple,
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-  },
-
-  timelineOptionText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textSecondary,
-  },
-
-  timelineOptionTextActive: {
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-
-  // Time picker
-  timePickerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-
-  timePickerLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textSecondary,
-  },
-
-  timeInput: {
-    width: 80,
-    textAlign: 'center',
-  },
-
-  // Reading preview
-  readingPreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-    gap: SPACING.md,
-  },
-
-  readingPreviewText: {
-    flex: 1,
-  },
-
-  readingPreviewTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  readingPreviewSubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-});
 
 export default SmartFormCard;

@@ -11,7 +11,7 @@
  * - Vietnamese localization
  */
 
-import React, { memo, useEffect, useRef, useState, useCallback } from 'react';
+import React, { memo, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -28,7 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 
 // Utils
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TOAST_HEIGHT = 80;
@@ -60,10 +60,112 @@ const InAppNotificationToast = memo(({
   onPress,
   onDismiss,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(-TOAST_HEIGHT - insets.top - 20)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const dismissTimeoutRef = useRef(null);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 9999,
+      paddingHorizontal: SPACING.md,
+    },
+    touchable: {
+      borderRadius: 16,
+      overflow: 'hidden',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+        },
+        android: {
+          elevation: 8,
+        },
+      }),
+    },
+    blurContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      overflow: 'hidden',
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+    accentBar: {
+      width: 4,
+      alignSelf: 'stretch',
+    },
+    content: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.sm,
+      paddingLeft: SPACING.md,
+    },
+    avatarContainer: {
+      marginRight: SPACING.sm,
+    },
+    avatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    iconContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    textContainer: {
+      flex: 1,
+      marginRight: SPACING.sm,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      marginBottom: 2,
+    },
+    body: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    actionContainer: {
+      alignItems: 'flex-end',
+    },
+    timeText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+    callActions: {
+      flexDirection: 'row',
+      gap: SPACING.xs,
+    },
+    callButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    declineButton: {
+      backgroundColor: colors.error,
+    },
+    acceptButton: {
+      backgroundColor: colors.success,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Pan responder for swipe to dismiss
   const panResponder = useRef(
@@ -180,12 +282,12 @@ const InAppNotificationToast = memo(({
   const getAccentColor = () => {
     switch (notification.type) {
       case NOTIFICATION_TYPES.INCOMING_CALL:
-        return COLORS.success;
+        return colors.success;
       case NOTIFICATION_TYPES.MISSED_CALL:
-        return COLORS.error;
+        return colors.error;
       case NOTIFICATION_TYPES.MESSAGE:
       default:
-        return COLORS.purple;
+        return colors.purple;
     }
   };
 
@@ -256,7 +358,7 @@ const InAppNotificationToast = memo(({
                       }
                     }}
                   >
-                    <Ionicons name="close" size={16} color={COLORS.textPrimary} />
+                    <Ionicons name="close" size={16} color={colors.textPrimary} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.callButton, styles.acceptButton]}
@@ -270,7 +372,7 @@ const InAppNotificationToast = memo(({
                       }
                     }}
                   >
-                    <Ionicons name="call" size={16} color={COLORS.textPrimary} />
+                    <Ionicons name="call" size={16} color={colors.textPrimary} />
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -287,103 +389,3 @@ const InAppNotificationToast = memo(({
 InAppNotificationToast.displayName = 'InAppNotificationToast';
 
 export default InAppNotificationToast;
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 9999,
-    paddingHorizontal: SPACING.md,
-  },
-  touchable: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  blurContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    overflow: 'hidden',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  accentBar: {
-    width: 4,
-    alignSelf: 'stretch',
-  },
-  content: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.sm,
-    paddingLeft: SPACING.md,
-  },
-  avatarContainer: {
-    marginRight: SPACING.sm,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  textContainer: {
-    flex: 1,
-    marginRight: SPACING.sm,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  body: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    lineHeight: 18,
-  },
-  actionContainer: {
-    alignItems: 'flex-end',
-  },
-  timeText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-  callActions: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-  },
-  callButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  declineButton: {
-    backgroundColor: COLORS.error,
-  },
-  acceptButton: {
-    backgroundColor: COLORS.success,
-  },
-});

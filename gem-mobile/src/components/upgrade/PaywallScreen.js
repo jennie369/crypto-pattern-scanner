@@ -3,7 +3,7 @@
 // Purpose: Fullscreen paywall với tier options
 // ============================================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -35,7 +35,7 @@ import {
   Zap,
   Star,
 } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { getTiersByType, formatPrice, parseFeatures } from '../../services/upgradeService';
 import UpgradeCard from './UpgradeCard';
 
@@ -51,6 +51,7 @@ const PaywallScreen = ({
   subtitle,
   featureHighlights = [],
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [tiers, setTiers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTier, setSelectedTier] = useState(null);
@@ -107,6 +108,257 @@ const PaywallScreen = ({
     transform: [{ translateY: translateY.value }],
   }));
 
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 1000,
+    },
+    container: {
+      flex: 1,
+    },
+    safeArea: {
+      flex: 1,
+    },
+
+    // Header
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+    },
+    closeButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    // Content
+    content: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: SPACING.lg,
+      paddingBottom: SPACING.xl,
+    },
+
+    // Hero
+    heroSection: {
+      alignItems: 'center',
+      marginBottom: SPACING.xl,
+    },
+    iconContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: SPACING.xs,
+    },
+    subtitle: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+
+    // Highlights
+    highlightsSection: {
+      marginBottom: SPACING.xl,
+    },
+    highlightItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+      gap: SPACING.sm,
+    },
+    highlightIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    highlightText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+
+    // Tiers
+    tiersSection: {
+      marginBottom: SPACING.lg,
+      gap: SPACING.md,
+    },
+    tierOption: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 16,
+      padding: SPACING.md,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    tierOptionSelected: {
+      borderColor: colors.gold,
+    },
+    tierOptionFeatured: {
+      backgroundColor: 'rgba(255, 189, 89, 0.08)',
+    },
+    featuredBadge: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      backgroundColor: colors.gold,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 4,
+      borderBottomLeftRadius: 8,
+    },
+    featuredBadgeText: {
+      fontSize: 9,
+      fontWeight: '700',
+      color: colors.bgDarkest,
+    },
+    tierOptionContent: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    tierOptionLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      flex: 1,
+    },
+    radioOuter: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      borderWidth: 2,
+      borderColor: colors.textSecondary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioOuterSelected: {
+      borderColor: colors.gold,
+    },
+    radioInner: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: colors.gold,
+    },
+    tierOptionName: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    tierOptionDesc: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+      maxWidth: 180,
+    },
+    tierOptionRight: {
+      alignItems: 'flex-end',
+    },
+    tierOriginalPrice: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      textDecorationLine: 'line-through',
+    },
+    tierOptionPrice: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: '700',
+      color: colors.gold,
+    },
+    tierFeatures: {
+      marginTop: SPACING.sm,
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255,255,255,0.1)',
+      gap: 6,
+    },
+    tierFeatureItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    tierFeatureText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textSecondary,
+    },
+
+    // Trust
+    trustSection: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: SPACING.lg,
+      marginTop: SPACING.md,
+    },
+    trustItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    trustText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textSecondary,
+    },
+
+    // Loading
+    loadingContainer: {
+      paddingVertical: SPACING.xl,
+      alignItems: 'center',
+    },
+
+    // CTA
+    ctaContainer: {
+      paddingHorizontal: SPACING.lg,
+      paddingBottom: SPACING.md,
+      gap: SPACING.sm,
+    },
+    ctaButton: {
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    ctaButtonDisabled: {
+      opacity: 0.5,
+    },
+    ctaGradient: {
+      paddingVertical: SPACING.md,
+      alignItems: 'center',
+    },
+    ctaText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: '700',
+      color: colors.bgDarkest,
+    },
+    ctaTextDisabled: {
+      color: colors.textSecondary,
+    },
+    skipText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      paddingVertical: SPACING.sm,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!visible) return null;
 
   const TierIcon = tierType === 'chatbot' ? Sparkles : tierType === 'course' ? Crown : Zap;
@@ -138,7 +390,7 @@ const PaywallScreen = ({
     <View style={styles.overlay}>
       <StatusBar barStyle="light-content" />
       <LinearGradient
-        colors={GRADIENTS.primary}
+        colors={gradients.primary}
         style={styles.container}
       >
         <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -148,7 +400,7 @@ const PaywallScreen = ({
               style={styles.closeButton}
               onPress={onClose}
             >
-              <X size={24} color={COLORS.textPrimary} />
+              <X size={24} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -161,7 +413,7 @@ const PaywallScreen = ({
               {/* Hero Section */}
               <View style={styles.heroSection}>
                 <View style={styles.iconContainer}>
-                  <TierIcon size={48} color={COLORS.gold} />
+                  <TierIcon size={48} color={colors.gold} />
                 </View>
                 <Text style={styles.title}>
                   {title || `Mở khóa ${tierType.toUpperCase()} Premium`}
@@ -178,7 +430,7 @@ const PaywallScreen = ({
                   return (
                     <View key={index} style={styles.highlightItem}>
                       <View style={styles.highlightIcon}>
-                        <Icon size={20} color={COLORS.gold} />
+                        <Icon size={20} color={colors.gold} />
                       </View>
                       <Text style={styles.highlightText}>{item.text}</Text>
                     </View>
@@ -189,7 +441,7 @@ const PaywallScreen = ({
               {/* Tier Cards */}
               {loading ? (
                 <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color={COLORS.gold} />
+                  <ActivityIndicator size="large" color={colors.gold} />
                 </View>
               ) : (
                 <View style={styles.tiersSection}>
@@ -251,7 +503,7 @@ const PaywallScreen = ({
                             .slice(0, 3)
                             .map((feature, idx) => (
                               <View key={idx} style={styles.tierFeatureItem}>
-                                <Check size={14} color={COLORS.success} />
+                                <Check size={14} color={colors.success} />
                                 <Text style={styles.tierFeatureText}>{feature.label}</Text>
                               </View>
                             ))}
@@ -265,15 +517,15 @@ const PaywallScreen = ({
               {/* Trust badges */}
               <View style={styles.trustSection}>
                 <View style={styles.trustItem}>
-                  <Shield size={16} color={COLORS.textSecondary} />
+                  <Shield size={16} color={colors.textSecondary} />
                   <Text style={styles.trustText}>Thanh toan an toan</Text>
                 </View>
                 <View style={styles.trustItem}>
-                  <Headphones size={16} color={COLORS.textSecondary} />
+                  <Headphones size={16} color={colors.textSecondary} />
                   <Text style={styles.trustText}>Ho tro 24/7</Text>
                 </View>
                 <View style={styles.trustItem}>
-                  <RefreshCw size={16} color={COLORS.textSecondary} />
+                  <RefreshCw size={16} color={colors.textSecondary} />
                   <Text style={styles.trustText}>Hoan tien 7 ngay</Text>
                 </View>
               </View>
@@ -292,7 +544,7 @@ const PaywallScreen = ({
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={selectedTier ? [COLORS.gold, '#FFA500'] : [COLORS.glassBg, COLORS.glassBg]}
+                colors={selectedTier ? [colors.gold, '#FFA500'] : [glass.background || 'rgba(15, 16, 48, 0.95)', glass.background || 'rgba(15, 16, 48, 0.95)']}
                 style={styles.ctaGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -317,256 +569,5 @@ const PaywallScreen = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 1000,
-  },
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // Content
-  content: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.xl,
-  },
-
-  // Hero
-  heroSection: {
-    alignItems: 'center',
-    marginBottom: SPACING.xl,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginBottom: SPACING.xs,
-  },
-  subtitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-  },
-
-  // Highlights
-  highlightsSection: {
-    marginBottom: SPACING.xl,
-  },
-  highlightItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  highlightIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  highlightText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textPrimary,
-    flex: 1,
-  },
-
-  // Tiers
-  tiersSection: {
-    marginBottom: SPACING.lg,
-    gap: SPACING.md,
-  },
-  tierOption: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 16,
-    padding: SPACING.md,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  tierOptionSelected: {
-    borderColor: COLORS.gold,
-  },
-  tierOptionFeatured: {
-    backgroundColor: 'rgba(255, 189, 89, 0.08)',
-  },
-  featuredBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: COLORS.gold,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderBottomLeftRadius: 8,
-  },
-  featuredBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: COLORS.bgDarkest,
-  },
-  tierOptionContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  tierOptionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    flex: 1,
-  },
-  radioOuter: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: COLORS.textSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioOuterSelected: {
-    borderColor: COLORS.gold,
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: COLORS.gold,
-  },
-  tierOptionName: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  tierOptionDesc: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-    maxWidth: 180,
-  },
-  tierOptionRight: {
-    alignItems: 'flex-end',
-  },
-  tierOriginalPrice: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    textDecorationLine: 'line-through',
-  },
-  tierOptionPrice: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: '700',
-    color: COLORS.gold,
-  },
-  tierFeatures: {
-    marginTop: SPACING.sm,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
-    gap: 6,
-  },
-  tierFeatureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  tierFeatureText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
-  },
-
-  // Trust
-  trustSection: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.lg,
-    marginTop: SPACING.md,
-  },
-  trustItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  trustText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
-  },
-
-  // Loading
-  loadingContainer: {
-    paddingVertical: SPACING.xl,
-    alignItems: 'center',
-  },
-
-  // CTA
-  ctaContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    gap: SPACING.sm,
-  },
-  ctaButton: {
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  ctaButtonDisabled: {
-    opacity: 0.5,
-  },
-  ctaGradient: {
-    paddingVertical: SPACING.md,
-    alignItems: 'center',
-  },
-  ctaText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: '700',
-    color: COLORS.bgDarkest,
-  },
-  ctaTextDisabled: {
-    color: COLORS.textSecondary,
-  },
-  skipText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    paddingVertical: SPACING.sm,
-  },
-});
 
 export default PaywallScreen;

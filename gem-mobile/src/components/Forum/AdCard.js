@@ -4,7 +4,7 @@
  * Seamless design that blends with regular posts - Threads-style
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,13 +14,14 @@ import {
   Linking,
 } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { trackAdClick } from '../../services/engagementService';
 import { sponsorBannerService } from '../../services/sponsorBannerService';
 import deepLinkHandler from '../../services/deepLinkHandler';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdCard({ ad, sessionId, onPress }) {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const { user } = useAuth();
 
   // Handle ad click
@@ -82,6 +83,62 @@ export default function AdCard({ ad, sessionId, onPress }) {
     }
   }, [ad, user, sessionId, onPress]);
 
+  // Memoized styles
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.xs,
+    },
+    card: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.08)',
+      padding: SPACING.md,
+    },
+    sponsoredLabel: {
+      fontSize: 11,
+      color: colors.textMuted,
+      fontWeight: '500',
+      marginBottom: SPACING.sm,
+    },
+    content: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    thumbnail: {
+      width: 56,
+      height: 56,
+      borderRadius: 8,
+      marginRight: SPACING.md,
+    },
+    textContent: {
+      flex: 1,
+    },
+    title: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      lineHeight: 20,
+      marginBottom: 4,
+    },
+    description: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    ctaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: SPACING.sm,
+    },
+    ctaText: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: colors.textMuted,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!ad) return null;
 
   return (
@@ -120,65 +177,10 @@ export default function AdCard({ ad, sessionId, onPress }) {
         {ad.cta && (
           <View style={styles.ctaRow}>
             <Text style={styles.ctaText}>{ad.cta}</Text>
-            <ChevronRight size={14} color={COLORS.textMuted} />
+            <ChevronRight size={14} color={colors.textMuted} />
           </View>
         )}
       </View>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-  },
-  card: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    padding: SPACING.md,
-  },
-  sponsoredLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    fontWeight: '500',
-    marginBottom: SPACING.sm,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  thumbnail: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-    marginRight: SPACING.md,
-  },
-  textContent: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  description: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 18,
-  },
-  ctaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-  },
-  ctaText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: COLORS.textMuted,
-  },
-});

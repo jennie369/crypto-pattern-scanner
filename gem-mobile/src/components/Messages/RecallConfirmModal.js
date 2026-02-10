@@ -9,7 +9,7 @@
  * - Loading state during recall
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 /**
  * RecallConfirmModal - Modal xác nhận thu hồi tin nhắn
@@ -35,7 +35,105 @@ const RecallConfirmModal = memo(({
   onConfirm,
   onCancel,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [isRecalling, setIsRecalling] = useState(false);
+
+  // ========== STYLES ==========
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: SPACING.lg,
+    },
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || colors.glassBg),
+      borderRadius: 20,
+      padding: SPACING.xl,
+      width: '100%',
+      maxWidth: 340,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.3)',
+    },
+    iconContainer: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: 'rgba(255, 189, 89, 0.15)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.sm,
+    },
+    description: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    note: {
+      color: colors.gold,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+    },
+    previewContainer: {
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: 12,
+      padding: SPACING.md,
+      marginTop: SPACING.md,
+      width: '100%',
+    },
+    previewText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      fontStyle: 'italic',
+    },
+    mediaPreview: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+    },
+    mediaText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      gap: SPACING.md,
+      marginTop: SPACING.xl,
+      width: '100%',
+    },
+    button: {
+      flex: 1,
+      paddingVertical: SPACING.md,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 48,
+    },
+    cancelButton: {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    confirmButton: {
+      backgroundColor: colors.burgundy,
+    },
+    cancelButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+    confirmButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handleConfirm = useCallback(async () => {
     setIsRecalling(true);
@@ -60,7 +158,7 @@ const RecallConfirmModal = memo(({
         <View style={styles.container}>
           {/* Icon */}
           <View style={styles.iconContainer}>
-            <Ionicons name="alert-circle" size={32} color={COLORS.gold} />
+            <Ionicons name="alert-circle" size={32} color={colors.gold} />
           </View>
 
           {/* Title */}
@@ -96,7 +194,7 @@ const RecallConfirmModal = memo(({
                     'document-outline'
                   }
                   size={20}
-                  color={COLORS.textMuted}
+                  color={colors.textMuted}
                 />
                 <Text style={styles.mediaText}>
                   {message?.message_type === 'image' ? 'Hình ảnh' :
@@ -124,7 +222,7 @@ const RecallConfirmModal = memo(({
               disabled={isRecalling}
             >
               {isRecalling ? (
-                <ActivityIndicator size="small" color={COLORS.textPrimary} />
+                <ActivityIndicator size="small" color={colors.textPrimary} />
               ) : (
                 <Text style={styles.confirmButtonText}>Thu hồi</Text>
               )}
@@ -139,99 +237,3 @@ const RecallConfirmModal = memo(({
 RecallConfirmModal.displayName = 'RecallConfirmModal';
 
 export default RecallConfirmModal;
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.lg,
-  },
-  container: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 20,
-    padding: SPACING.xl,
-    width: '100%',
-    maxWidth: 340,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
-  },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.sm,
-  },
-  description: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  note: {
-    color: COLORS.gold,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-  },
-  previewContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginTop: SPACING.md,
-    width: '100%',
-  },
-  previewText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-  },
-  mediaPreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  mediaText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-    marginTop: SPACING.xl,
-    width: '100%',
-  },
-  button: {
-    flex: 1,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 48,
-  },
-  cancelButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  confirmButton: {
-    backgroundColor: COLORS.burgundy,
-  },
-  cancelButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  confirmButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-});

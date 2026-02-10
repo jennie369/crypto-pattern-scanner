@@ -6,7 +6,7 @@
  * Uses DESIGN_TOKENS v3.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,12 +18,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Heart, MessageCircle, Clock, ImageIcon } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { formatDistanceToNow } from '../../utils/dateFormatter';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_PADDING = SPACING.lg;
-const CARD_WIDTH = SCREEN_WIDTH - CARD_PADDING * 2;
 
 /**
  * ProfilePostCard - Post card with 1:1 image ratio
@@ -39,6 +37,167 @@ const ProfilePostCard = ({
   style,
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const CARD_PADDING = SPACING.lg;
+  const CARD_WIDTH = SCREEN_WIDTH - CARD_PADDING * 2;
+
+  const styles = useMemo(() => StyleSheet.create({
+    // Main Card
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (colors.glassBg || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: glass.borderRadius,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      marginBottom: SPACING.md,
+    },
+
+    // Image - 1:1 Aspect Ratio
+    imageContainer: {
+      width: '100%',
+      aspectRatio: 1,
+      position: 'relative',
+      backgroundColor: colors.bgMid,
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+    },
+    imagePlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    imageOverlay: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: '40%',
+    },
+    imageStats: {
+      position: 'absolute',
+      bottom: SPACING.sm,
+      left: SPACING.sm,
+      flexDirection: 'row',
+      gap: SPACING.md,
+    },
+    statItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      paddingVertical: SPACING.xs,
+      paddingHorizontal: SPACING.sm,
+      borderRadius: 12,
+    },
+    statText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+
+    // Content
+    content: {
+      padding: SPACING.md,
+    },
+    title: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      lineHeight: 20,
+    },
+    excerpt: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+      marginTop: SPACING.xs,
+      lineHeight: 18,
+    },
+
+    // Footer
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: SPACING.md,
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    footerStats: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+    },
+    footerStatText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    footerDot: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginHorizontal: SPACING.xxs,
+    },
+    timeContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xxs,
+    },
+    timeText: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+    },
+
+    // Compact Card
+    compactContainer: {
+      flexDirection: 'row',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (colors.glassBg || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 12,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      marginBottom: SPACING.sm,
+    },
+    compactImageContainer: {
+      width: 80,
+      height: 80,
+      backgroundColor: colors.bgMid,
+    },
+    compactImage: {
+      width: '100%',
+      height: '100%',
+    },
+    compactImagePlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    compactContent: {
+      flex: 1,
+      padding: SPACING.sm,
+      justifyContent: 'center',
+    },
+    compactTitle: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      lineHeight: 18,
+    },
+    compactStats: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginTop: SPACING.xs,
+    },
+    compactStatText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginRight: SPACING.sm,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   if (!post) return null;
 
@@ -89,7 +248,7 @@ const ProfilePostCard = ({
             colors={['rgba(106, 91, 255, 0.3)', 'rgba(0, 240, 255, 0.2)']}
             style={styles.imagePlaceholder}
           >
-            <ImageIcon size={32} color={COLORS.textMuted} />
+            <ImageIcon size={32} color={colors.textMuted} />
           </LinearGradient>
         )}
 
@@ -102,11 +261,11 @@ const ProfilePostCard = ({
         {/* Stats overlay on image */}
         <View style={styles.imageStats}>
           <View style={styles.statItem}>
-            <Heart size={14} color={COLORS.textPrimary} fill={COLORS.textPrimary} />
+            <Heart size={14} color={colors.textPrimary} fill={colors.textPrimary} />
             <Text style={styles.statText}>{likes_count}</Text>
           </View>
           <View style={styles.statItem}>
-            <MessageCircle size={14} color={COLORS.textPrimary} />
+            <MessageCircle size={14} color={colors.textPrimary} />
             <Text style={styles.statText}>{comments_count}</Text>
           </View>
         </View>
@@ -129,14 +288,14 @@ const ProfilePostCard = ({
         {/* Footer */}
         <View style={styles.footer}>
           <View style={styles.footerStats}>
-            <Heart size={12} color={COLORS.error} fill={COLORS.error} />
+            <Heart size={12} color={colors.error} fill={colors.error} />
             <Text style={styles.footerStatText}>{likes_count} lượt thích</Text>
             <Text style={styles.footerDot}>•</Text>
-            <MessageCircle size={12} color={COLORS.textMuted} />
+            <MessageCircle size={12} color={colors.textMuted} />
             <Text style={styles.footerStatText}>{comments_count}</Text>
           </View>
           <View style={styles.timeContainer}>
-            <Clock size={10} color={COLORS.textMuted} />
+            <Clock size={10} color={colors.textMuted} />
             <Text style={styles.timeText}>{timeAgo}</Text>
           </View>
         </View>
@@ -154,6 +313,57 @@ export const ProfilePostCardCompact = ({
   style,
 }) => {
   const navigation = useNavigation();
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    // Compact Card
+    compactContainer: {
+      flexDirection: 'row',
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (colors.glassBg || 'rgba(15, 16, 48, 0.95)'),
+      borderRadius: 12,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      marginBottom: SPACING.sm,
+    },
+    compactImageContainer: {
+      width: 80,
+      height: 80,
+      backgroundColor: colors.bgMid,
+    },
+    compactImage: {
+      width: '100%',
+      height: '100%',
+    },
+    compactImagePlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    compactContent: {
+      flex: 1,
+      padding: SPACING.sm,
+      justifyContent: 'center',
+    },
+    compactTitle: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      lineHeight: 18,
+    },
+    compactStats: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      marginTop: SPACING.xs,
+    },
+    compactStatText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginRight: SPACING.sm,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   if (!post) return null;
 
@@ -184,7 +394,7 @@ export const ProfilePostCardCompact = ({
             colors={['rgba(106, 91, 255, 0.3)', 'rgba(0, 240, 255, 0.2)']}
             style={styles.compactImagePlaceholder}
           >
-            <ImageIcon size={20} color={COLORS.textMuted} />
+            <ImageIcon size={20} color={colors.textMuted} />
           </LinearGradient>
         )}
       </View>
@@ -195,171 +405,14 @@ export const ProfilePostCardCompact = ({
           {post.title || 'Bài viết'}
         </Text>
         <View style={styles.compactStats}>
-          <Heart size={12} color={COLORS.error} fill={COLORS.error} />
+          <Heart size={12} color={colors.error} fill={colors.error} />
           <Text style={styles.compactStatText}>{post.likes_count || 0}</Text>
-          <MessageCircle size={12} color={COLORS.textMuted} />
+          <MessageCircle size={12} color={colors.textMuted} />
           <Text style={styles.compactStatText}>{post.comments_count || 0}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  // Main Card
-  container: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: GLASS.borderRadius,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.inputBorder,
-    marginBottom: SPACING.md,
-  },
-
-  // Image - 1:1 Aspect Ratio
-  imageContainer: {
-    width: '100%',
-    aspectRatio: 1,
-    position: 'relative',
-    backgroundColor: COLORS.bgMid,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  imagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '40%',
-  },
-  imageStats: {
-    position: 'absolute',
-    bottom: SPACING.sm,
-    left: SPACING.sm,
-    flexDirection: 'row',
-    gap: SPACING.md,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 12,
-  },
-  statText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  // Content
-  content: {
-    padding: SPACING.md,
-  },
-  title: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    lineHeight: 20,
-  },
-  excerpt: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-    marginTop: SPACING.xs,
-    lineHeight: 18,
-  },
-
-  // Footer
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: SPACING.md,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  footerStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  footerStatText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  footerDot: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginHorizontal: SPACING.xxs,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xxs,
-  },
-  timeText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-  },
-
-  // Compact Card
-  compactContainer: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.inputBorder,
-    marginBottom: SPACING.sm,
-  },
-  compactImageContainer: {
-    width: 80,
-    height: 80,
-    backgroundColor: COLORS.bgMid,
-  },
-  compactImage: {
-    width: '100%',
-    height: '100%',
-  },
-  compactImagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  compactContent: {
-    flex: 1,
-    padding: SPACING.sm,
-    justifyContent: 'center',
-  },
-  compactTitle: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    lineHeight: 18,
-  },
-  compactStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    marginTop: SPACING.xs,
-  },
-  compactStatText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginRight: SPACING.sm,
-  },
-});
 
 export default ProfilePostCard;

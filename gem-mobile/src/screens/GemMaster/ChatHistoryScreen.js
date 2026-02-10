@@ -27,6 +27,8 @@ import {
   ArrowLeft,
   Search,
   X,
+  Trash2,
+  CheckSquare,
 } from 'lucide-react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
@@ -57,6 +59,10 @@ const ChatHistoryScreen = ({ navigation, route }) => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Multi-select state
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const searchTimeoutRef = useRef(null);
 
@@ -219,6 +225,62 @@ const ChatHistoryScreen = ({ navigation, route }) => {
     }
   }, [user]);
 
+  // Toggle selection for a conversation
+  const handleToggleSelect = useCallback((conversationId) => {
+    setSelectedIds(prev => {
+      if (prev.includes(conversationId)) {
+        return prev.filter(id => id !== conversationId);
+      } else {
+        return [...prev, conversationId];
+      }
+    });
+  }, []);
+
+  // Enter selection mode
+  const handleEnterSelectMode = useCallback(() => {
+    setIsSelecting(true);
+    setSelectedIds([]);
+  }, []);
+
+  // Exit selection mode
+  const handleExitSelectMode = useCallback(() => {
+    setIsSelecting(false);
+    setSelectedIds([]);
+  }, []);
+
+  // Bulk delete selected conversations - NO CONFIRMATION
+  const handleBulkDelete = useCallback(async () => {
+    if (!user || selectedIds.length === 0) return;
+
+    try {
+      // Delete all selected conversations in parallel
+      await Promise.all(
+        selectedIds.map(id => chatHistoryService.deleteConversation(id, user.id))
+      );
+      // Remove from list
+      setConversations(prev => prev.filter(c => !selectedIds.includes(c.id)));
+      // Clear cache
+      chatHistoryService.clearCache(user.id);
+      // Exit selection mode
+      setIsSelecting(false);
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('[ChatHistory] Bulk delete error:', error);
+      alertService.error('Lỗi', 'Không thể xóa một số cuộc trò chuyện. Vui lòng thử lại.');
+    }
+  }, [user, selectedIds]);
+
+  // Select all conversations
+  const handleSelectAll = useCallback(() => {
+    if (selectedIds.length === conversations.length) {
+      // Deselect all
+      setSelectedIds([]);
+    } else {
+      // Select all
+      setSelectedIds(conversations.map(c => c.id));
+    }
+  }, [conversations, selectedIds.length]);
+
   // Handle archive/unarchive
   const handleArchive = useCallback(async (conversationId) => {
     if (!user) return;
@@ -253,12 +315,15 @@ const ChatHistoryScreen = ({ navigation, route }) => {
   const renderItem = useCallback(({ item }) => (
     <ConversationCard
       conversation={item}
-      onPress={handleConversationPress}
+      onPress={isSelecting ? handleToggleSelect : handleConversationPress}
       onDelete={handleDeletePress}
       onArchive={handleArchive}
       isArchived={activeTab === 'archived'}
+      isSelecting={isSelecting}
+      isSelected={selectedIds.includes(item.id)}
+      onToggleSelect={handleToggleSelect}
     />
-  ), [handleConversationPress, handleDeletePress, handleArchive, activeTab]);
+  ), [handleConversationPress, handleDeletePress, handleArchive, activeTab, isSelecting, selectedIds, handleToggleSelect]);
 
   // Key extractor
   const keyExtractor = useCallback((item) => item.id, []);
@@ -294,15 +359,58 @@ const ChatHistoryScreen = ({ navigation, route }) => {
         <SafeAreaView style={styles.container} edges={['top']}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-              activeOpacity={0.7}
-            >
-              <ArrowLeft size={24} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Lịch sử chat</Text>
-            <View style={styles.headerSpacer} />
+            {isSelecting ? (
+              // Selection mode header
+              <>
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={handleExitSelectMode}
+                  activeOpacity={0.7}
+                >
+                  <X size={24} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>
+                  {selectedIds.length > 0 ? `Đã chọn ${selectedIds.length}` : 'Chọn để xóa'}
+                </Text>
+                <View style={styles.headerActions}>
+                  <TouchableOpacity
+                    style={styles.headerActionBtn}
+                    onPress={handleSelectAll}
+                    activeOpacity={0.7}
+                  >
+                    <CheckSquare size={22} color={selectedIds.length === conversations.length ? COLORS.gold : COLORS.textMuted} />
+                  </TouchableOpacity>
+                  {selectedIds.length > 0 && (
+                    <TouchableOpacity
+                      style={styles.headerActionBtn}
+                      onPress={handleBulkDelete}
+                      activeOpacity={0.7}
+                    >
+                      <Trash2 size={22} color={COLORS.error} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </>
+            ) : (
+              // Normal header
+              <>
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={() => navigation.goBack()}
+                  activeOpacity={0.7}
+                >
+                  <ArrowLeft size={24} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Lịch sử chat</Text>
+                <TouchableOpacity
+                  style={styles.headerActionBtn}
+                  onPress={handleEnterSelectMode}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.editButtonText}>Sửa</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
 
           {/* Search Bar */}
@@ -417,6 +525,22 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 44,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  headerActionBtn: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.gold,
   },
 
   // Search

@@ -3,7 +3,7 @@
  * Displays stickers in a 4-column grid
  */
 
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import {
   View,
   FlatList,
@@ -15,24 +15,96 @@ import {
   Image,
 } from 'react-native';
 import { Sticker } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import LottieSticker from './LottieSticker';
 import stickerService from '../../services/stickerService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NUM_COLUMNS = 4;
-const GRID_PADDING = SPACING.md;
-const STICKER_GAP = SPACING.xs;
-const STICKER_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2 - STICKER_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
 
 const StickerGrid = memo(({
   packId,
   searchQuery,
   onSelect,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const GRID_PADDING = SPACING.md;
+  const STICKER_GAP = SPACING.xs;
+  const STICKER_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2 - STICKER_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
+
   const [stickers, setStickers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const styles = useMemo(() => StyleSheet.create({
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: SPACING.xxl,
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: SPACING.xxl,
+    },
+    errorText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.error,
+      marginBottom: SPACING.md,
+    },
+    retryButton: {
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.sm,
+      backgroundColor: colors.purple,
+      borderRadius: 8,
+    },
+    retryText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    gridContent: {
+      padding: GRID_PADDING,
+      flexGrow: 1,
+    },
+    columnWrapper: {
+      gap: STICKER_GAP,
+      marginBottom: STICKER_GAP,
+    },
+    stickerItem: {
+      width: STICKER_SIZE,
+      height: STICKER_SIZE,
+      borderRadius: 8,
+      overflow: 'hidden',
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+    },
+    stickerImage: {
+      width: '100%',
+      height: '100%',
+    },
+    stickerPlaceholder: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: SPACING.xxl,
+      gap: SPACING.md,
+    },
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY, GRID_PADDING, STICKER_GAP, STICKER_SIZE]);
 
   useEffect(() => {
     loadStickers();
@@ -101,7 +173,7 @@ const StickerGrid = memo(({
           />
         ) : (
           <View style={styles.stickerPlaceholder}>
-            <Sticker size={24} color={COLORS.textMuted} />
+            <Sticker size={24} color={colors.textMuted} />
           </View>
         )}
       </TouchableOpacity>
@@ -113,7 +185,7 @@ const StickerGrid = memo(({
 
     return (
       <View style={styles.emptyContainer}>
-        <Sticker size={48} color={COLORS.textMuted} />
+        <Sticker size={48} color={colors.textMuted} />
         <Text style={styles.emptyText}>
           {searchQuery
             ? 'Khong tim thay sticker'
@@ -126,7 +198,7 @@ const StickerGrid = memo(({
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator color={COLORS.gold} size="large" />
+        <ActivityIndicator color={colors.gold} size="large" />
       </View>
     );
   }
@@ -158,78 +230,6 @@ const StickerGrid = memo(({
       removeClippedSubviews={true}
     />
   );
-});
-
-// Need to import useCallback
-import { useCallback } from 'react';
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.xxl,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.xxl,
-  },
-  errorText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.error,
-    marginBottom: SPACING.md,
-  },
-  retryButton: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.purple,
-    borderRadius: 8,
-  },
-  retryText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  gridContent: {
-    padding: GRID_PADDING,
-    flexGrow: 1,
-  },
-  columnWrapper: {
-    gap: STICKER_GAP,
-    marginBottom: STICKER_GAP,
-  },
-  stickerItem: {
-    width: STICKER_SIZE,
-    height: STICKER_SIZE,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  stickerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  stickerPlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.xxl,
-    gap: SPACING.md,
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
 });
 
 export default StickerGrid;

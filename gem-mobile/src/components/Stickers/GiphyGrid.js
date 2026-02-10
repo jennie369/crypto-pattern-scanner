@@ -3,7 +3,7 @@
  * Search and browse GIFs from GIPHY/Tenor API
  */
 
-import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, memo, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,20 +15,23 @@ import {
   Image,
 } from 'react-native';
 import { TrendingUp, Search, ImageOff } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import giphyService from '../../services/giphyService';
 import stickerService from '../../services/stickerService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NUM_COLUMNS = 2;
-const GRID_PADDING = SPACING.md;
-const GIF_GAP = SPACING.xs;
-const GIF_WIDTH = (SCREEN_WIDTH - GRID_PADDING * 2 - GIF_GAP) / NUM_COLUMNS;
 
 const GiphyGrid = memo(({
   searchQuery,
   onSelect,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const GRID_PADDING = SPACING.md;
+  const GIF_GAP = SPACING.xs;
+  const GIF_WIDTH = (SCREEN_WIDTH - GRID_PADDING * 2 - GIF_GAP) / NUM_COLUMNS;
+
   const [gifs, setGifs] = useState([]);
   const [recentGifs, setRecentGifs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,114 @@ const GiphyGrid = memo(({
   const searchTimeoutRef = useRef(null);
 
   const LIMIT = 20;
+
+  const styles = useMemo(() => StyleSheet.create({
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: SPACING.md,
+    },
+    loadingText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: SPACING.xxl,
+    },
+    errorText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.error,
+      marginBottom: SPACING.md,
+    },
+    retryButton: {
+      paddingHorizontal: SPACING.lg,
+      paddingVertical: SPACING.sm,
+      backgroundColor: colors.purple,
+      borderRadius: 8,
+    },
+    retryText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    headerContainer: {
+      marginBottom: SPACING.sm,
+    },
+    recentSection: {
+      marginBottom: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+      paddingBottom: SPACING.md,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      paddingHorizontal: SPACING.md,
+      marginBottom: SPACING.sm,
+    },
+    sectionTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xs,
+      color: colors.textMuted,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      textTransform: 'uppercase',
+    },
+    recentContent: {
+      paddingHorizontal: SPACING.md,
+      gap: SPACING.xs,
+    },
+    recentItem: {
+      width: 70,
+      height: 70,
+      borderRadius: 8,
+      overflow: 'hidden',
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+      marginRight: SPACING.xs,
+    },
+    recentImage: {
+      width: '100%',
+      height: '100%',
+    },
+    gridContent: {
+      paddingHorizontal: GRID_PADDING,
+      paddingBottom: SPACING.xl,
+      flexGrow: 1,
+    },
+    columnWrapper: {
+      gap: GIF_GAP,
+      marginBottom: GIF_GAP,
+    },
+    gifItem: {
+      width: GIF_WIDTH,
+      borderRadius: 8,
+      overflow: 'hidden',
+      backgroundColor: settings.theme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+    },
+    gifImage: {
+      width: '100%',
+      height: '100%',
+    },
+    footerLoader: {
+      paddingVertical: SPACING.lg,
+      alignItems: 'center',
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: SPACING.xxl,
+      gap: SPACING.md,
+    },
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY, GRID_PADDING, GIF_GAP, GIF_WIDTH]);
 
   useEffect(() => {
     // Load recent GIFs on mount
@@ -194,12 +305,12 @@ const GiphyGrid = memo(({
       <View style={styles.sectionHeader}>
         {searchQuery ? (
           <>
-            <Search size={14} color={COLORS.textMuted} />
+            <Search size={14} color={colors.textMuted} />
             <Text style={styles.sectionTitle}>Ket qua</Text>
           </>
         ) : (
           <>
-            <TrendingUp size={14} color={COLORS.gold} />
+            <TrendingUp size={14} color={colors.gold} />
             <Text style={styles.sectionTitle}>Trending</Text>
           </>
         )}
@@ -212,7 +323,7 @@ const GiphyGrid = memo(({
 
     return (
       <View style={styles.footerLoader}>
-        <ActivityIndicator color={COLORS.gold} size="small" />
+        <ActivityIndicator color={colors.gold} size="small" />
       </View>
     );
   };
@@ -222,7 +333,7 @@ const GiphyGrid = memo(({
 
     return (
       <View style={styles.emptyContainer}>
-        <ImageOff size={48} color={COLORS.textMuted} />
+        <ImageOff size={48} color={colors.textMuted} />
         <Text style={styles.emptyText}>
           {searchQuery ? 'Khong tim thay GIF' : 'Khong co GIF trending'}
         </Text>
@@ -233,7 +344,7 @@ const GiphyGrid = memo(({
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator color={COLORS.gold} size="large" />
+        <ActivityIndicator color={colors.gold} size="large" />
         <Text style={styles.loadingText}>Dang tai GIF...</Text>
       </View>
     );
@@ -273,114 +384,6 @@ const GiphyGrid = memo(({
       removeClippedSubviews={true}
     />
   );
-});
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: SPACING.md,
-  },
-  loadingText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.xxl,
-  },
-  errorText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.error,
-    marginBottom: SPACING.md,
-  },
-  retryButton: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.purple,
-    borderRadius: 8,
-  },
-  retryText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  headerContainer: {
-    marginBottom: SPACING.sm,
-  },
-  recentSection: {
-    marginBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    paddingBottom: SPACING.md,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.sm,
-  },
-  sectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    textTransform: 'uppercase',
-  },
-  recentContent: {
-    paddingHorizontal: SPACING.md,
-    gap: SPACING.xs,
-  },
-  recentItem: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    marginRight: SPACING.xs,
-  },
-  recentImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gridContent: {
-    paddingHorizontal: GRID_PADDING,
-    paddingBottom: SPACING.xl,
-    flexGrow: 1,
-  },
-  columnWrapper: {
-    gap: GIF_GAP,
-    marginBottom: GIF_GAP,
-  },
-  gifItem: {
-    width: GIF_WIDTH,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  gifImage: {
-    width: '100%',
-    height: '100%',
-  },
-  footerLoader: {
-    paddingVertical: SPACING.lg,
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.xxl,
-    gap: SPACING.md,
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
 });
 
 export default GiphyGrid;

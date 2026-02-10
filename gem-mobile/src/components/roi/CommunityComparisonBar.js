@@ -6,9 +6,10 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
+import { BORDER_RADIUS } from '../../utils/tokens';
 
 /**
  * CommunityComparisonBar Component
@@ -31,13 +32,15 @@ const CommunityComparisonBar = ({
   isAboveAverage = false,
   style,
 }) => {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   // Calculate bar widths (normalized to max of 100%)
   const maxValue = Math.max(userValue, communityValue, 1);
   const userWidth = Math.min((userValue / maxValue) * 100, 100);
   const communityWidth = Math.min((communityValue / maxValue) * 100, 100);
 
   // Colors
-  const userColor = isAboveAverage ? COLORS.success : COLORS.warning;
+  const userColor = isAboveAverage ? colors.success : colors.warning;
   const communityColor = 'rgba(255, 255, 255, 0.3)';
 
   // Format value
@@ -59,6 +62,66 @@ const CommunityComparisonBar = ({
     ? `+${formatValue(difference)}`
     : formatValue(difference);
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: SPACING.md,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+    },
+    label: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textPrimary,
+    },
+    differenceContainer: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xxs,
+      borderRadius: BORDER_RADIUS.sm,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    difference: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+
+    // Bars
+    barsContainer: {
+      gap: SPACING.sm,
+    },
+    barRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    barLabel: {
+      width: 30,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    barTrack: {
+      flex: 1,
+      height: 8,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: BORDER_RADIUS.full,
+      overflow: 'hidden',
+      marginHorizontal: SPACING.sm,
+    },
+    barFill: {
+      height: '100%',
+      borderRadius: BORDER_RADIUS.full,
+    },
+    barValue: {
+      width: 60,
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textSecondary,
+      textAlign: 'right',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   return (
     <View style={[styles.container, style]}>
       {/* Header */}
@@ -68,7 +131,7 @@ const CommunityComparisonBar = ({
           <Text
             style={[
               styles.difference,
-              { color: isAboveAverage ? COLORS.success : COLORS.error },
+              { color: isAboveAverage ? colors.success : colors.error },
             ]}
           >
             {differenceText}
@@ -129,6 +192,30 @@ export const CommunityComparisonList = ({
   cohortName = 'Cộng đồng',
   style,
 }) => {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    // List
+    listContainer: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.55)'),
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING.lg,
+      borderWidth: 1,
+      borderColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    listHeader: {
+      marginBottom: SPACING.md,
+    },
+    listTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    comparisonItem: {
+      marginBottom: SPACING.md,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
   if (!comparisons || comparisons.length === 0) {
     return null;
   }
@@ -154,85 +241,5 @@ export const CommunityComparisonList = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: SPACING.md,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  label: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textPrimary,
-  },
-  differenceContainer: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xxs,
-    borderRadius: BORDER_RADIUS.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  difference: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-
-  // Bars
-  barsContainer: {
-    gap: SPACING.sm,
-  },
-  barRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  barLabel: {
-    width: 30,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  barTrack: {
-    flex: 1,
-    height: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: BORDER_RADIUS.full,
-    overflow: 'hidden',
-    marginHorizontal: SPACING.sm,
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: BORDER_RADIUS.full,
-  },
-  barValue: {
-    width: 60,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textSecondary,
-    textAlign: 'right',
-  },
-
-  // List
-  listContainer: {
-    backgroundColor: 'rgba(15, 16, 48, 0.55)',
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  listHeader: {
-    marginBottom: SPACING.md,
-  },
-  listTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  comparisonItem: {
-    marginBottom: SPACING.md,
-  },
-});
 
 export default React.memo(CommunityComparisonBar);

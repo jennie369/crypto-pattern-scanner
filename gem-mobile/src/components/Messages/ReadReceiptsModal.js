@@ -9,7 +9,7 @@
  * - Delivered vs Read status
  */
 
-import React, { memo, useState, useEffect, useCallback } from 'react';
+import React, { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -30,13 +30,8 @@ import { supabase } from '../../services/supabase';
 // Utils
 import { formatRelativeTime } from '../../utils/formatters';
 
-// Tokens
-import {
-  COLORS,
-  SPACING,
-  TYPOGRAPHY,
-  GLASS,
-} from '../../utils/tokens';
+// Context
+import { useSettings } from '../../contexts/SettingsContext';
 
 /**
  * ReadReceiptsModal - Modal hiển thị ai đã đọc tin nhắn
@@ -54,11 +49,179 @@ const ReadReceiptsModal = memo(({
   currentUserId,
   onClose,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const insets = useSafeAreaInsets();
 
   // State
   const [readReceipts, setReadReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // ========== STYLES ==========
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    blurContainer: {
+      flex: 1,
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(5, 4, 11, 0.95)'),
+    },
+
+    // Header
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.lg,
+      paddingBottom: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    headerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+    },
+    closeButton: {
+      width: 40,
+      height: 40,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    // Message preview
+    previewContainer: {
+      padding: SPACING.md,
+      backgroundColor: 'rgba(106, 91, 255, 0.1)',
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    previewText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textPrimary,
+      marginBottom: 4,
+    },
+    previewTime: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+
+    // Stats
+    statsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+    },
+    statItem: {
+      alignItems: 'center',
+      paddingHorizontal: SPACING.xxl,
+    },
+    statValue: {
+      fontSize: TYPOGRAPHY.fontSize.xxl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      marginTop: SPACING.xs,
+    },
+    statLabel: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    statDivider: {
+      width: 1,
+      height: 50,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+
+    // List
+    listContent: {
+      paddingBottom: SPACING.xl,
+    },
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyContainer: {
+      padding: SPACING.xxl,
+      alignItems: 'center',
+    },
+    emptyText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textMuted,
+    },
+
+    // User item
+    userItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    avatarContainer: {
+      position: 'relative',
+      marginRight: SPACING.md,
+    },
+    avatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+    },
+    avatarPlaceholder: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(106, 91, 255, 0.2)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    statusDot: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      borderWidth: 2,
+      borderColor: colors.bgDarkest,
+    },
+    statusDotRead: {
+      backgroundColor: colors.cyan,
+    },
+    statusDotDelivered: {
+      backgroundColor: colors.textMuted,
+    },
+    userInfo: {
+      flex: 1,
+      marginRight: SPACING.sm,
+    },
+    userName: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.medium,
+      color: colors.textPrimary,
+      marginBottom: 2,
+    },
+    userStatus: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textMuted,
+    },
+    statusIconContainer: {
+      width: 32,
+      alignItems: 'center',
+    },
+    readBadge: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: 'rgba(0, 240, 255, 0.1)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Fetch read receipts
   useEffect(() => {
@@ -143,7 +306,7 @@ const ReadReceiptsModal = memo(({
             <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={20} color={COLORS.textMuted} />
+              <Ionicons name="person" size={20} color={colors.textMuted} />
             </View>
           )}
 
@@ -162,12 +325,12 @@ const ReadReceiptsModal = memo(({
           <Text style={styles.userStatus}>
             {item.hasRead ? (
               <>
-                <Ionicons name="checkmark-done" size={12} color={COLORS.cyan} />
+                <Ionicons name="checkmark-done" size={12} color={colors.cyan} />
                 {' Đã xem • ' + formatRelativeTime(item.readAt)}
               </>
             ) : (
               <>
-                <Ionicons name="checkmark" size={12} color={COLORS.textMuted} />
+                <Ionicons name="checkmark" size={12} color={colors.textMuted} />
                 {' Đã gửi'}
               </>
             )}
@@ -178,15 +341,15 @@ const ReadReceiptsModal = memo(({
         <View style={styles.statusIconContainer}>
           {item.hasRead ? (
             <View style={styles.readBadge}>
-              <Ionicons name="eye" size={14} color={COLORS.cyan} />
+              <Ionicons name="eye" size={14} color={colors.cyan} />
             </View>
           ) : (
-            <Ionicons name="time-outline" size={18} color={COLORS.textMuted} />
+            <Ionicons name="time-outline" size={18} color={colors.textMuted} />
           )}
         </View>
       </View>
     );
-  }, []);
+  }, [styles, colors]);
 
   // Get stats
   const participantsWithStatus = getParticipantsWithStatus();
@@ -197,7 +360,7 @@ const ReadReceiptsModal = memo(({
   const renderHeader = () => (
     <View style={styles.statsContainer}>
       <View style={styles.statItem}>
-        <Ionicons name="checkmark-done" size={20} color={COLORS.cyan} />
+        <Ionicons name="checkmark-done" size={20} color={colors.cyan} />
         <Text style={styles.statValue}>{readCount}</Text>
         <Text style={styles.statLabel}>Đã xem</Text>
       </View>
@@ -205,7 +368,7 @@ const ReadReceiptsModal = memo(({
       <View style={styles.statDivider} />
 
       <View style={styles.statItem}>
-        <Ionicons name="checkmark" size={20} color={COLORS.textMuted} />
+        <Ionicons name="checkmark" size={20} color={colors.textMuted} />
         <Text style={styles.statValue}>{totalCount - readCount}</Text>
         <Text style={styles.statLabel}>Chưa xem</Text>
       </View>
@@ -257,7 +420,7 @@ const ReadReceiptsModal = memo(({
               style={styles.closeButton}
               onPress={onClose}
             >
-              <Ionicons name="close" size={24} color={COLORS.textPrimary} />
+              <Ionicons name="close" size={24} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -270,7 +433,7 @@ const ReadReceiptsModal = memo(({
           {/* Users list */}
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={COLORS.gold} />
+              <ActivityIndicator size="large" color={colors.gold} />
             </View>
           ) : (
             <FlatList
@@ -297,169 +460,3 @@ const ReadReceiptsModal = memo(({
 ReadReceiptsModal.displayName = 'ReadReceiptsModal';
 
 export default ReadReceiptsModal;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  blurContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(5, 4, 11, 0.95)',
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Message preview
-  previewContainer: {
-    padding: SPACING.md,
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  previewText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textPrimary,
-    marginBottom: 4,
-  },
-  previewTime: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-
-  // Stats
-  statsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-  },
-  statItem: {
-    alignItems: 'center',
-    paddingHorizontal: SPACING.xxl,
-  },
-  statValue: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginTop: SPACING.xs,
-  },
-  statLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-
-  // List
-  listContent: {
-    paddingBottom: SPACING.xl,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyContainer: {
-    padding: SPACING.xxl,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-  },
-
-  // User item
-  userItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginRight: SPACING.md,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-  avatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statusDot: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 2,
-    borderColor: COLORS.bgDarkest,
-  },
-  statusDotRead: {
-    backgroundColor: COLORS.cyan,
-  },
-  statusDotDelivered: {
-    backgroundColor: COLORS.textMuted,
-  },
-  userInfo: {
-    flex: 1,
-    marginRight: SPACING.sm,
-  },
-  userName: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.textPrimary,
-    marginBottom: 2,
-  },
-  userStatus: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-  },
-  statusIconContainer: {
-    width: 32,
-    alignItems: 'center',
-  },
-  readBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(0, 240, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

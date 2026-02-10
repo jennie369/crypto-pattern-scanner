@@ -3,7 +3,7 @@
  * Celebration modal when user levels up
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,10 +16,11 @@ import {
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Star, Zap, ChevronRight, Sparkles } from 'lucide-react-native';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, GLASS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { LEVEL_CONFIG } from '../../services/learningGamificationService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const BORDER_RADIUS = { xl: 20, md: 12, full: 9999 };
 
 const LevelUpModal = ({
   visible = false,
@@ -27,12 +28,14 @@ const LevelUpModal = ({
   onClose,
   onViewRewards,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const starAnims = useRef([...Array(5)].map(() => new Animated.Value(0))).current;
 
-  const levelInfo = LEVEL_CONFIG[newLevel] || { title: 'Unknown', color: COLORS.gold };
+  const levelInfo = LEVEL_CONFIG[newLevel] || { title: 'Unknown', color: colors.gold };
 
   useEffect(() => {
     if (visible) {
@@ -103,6 +106,140 @@ const LevelUpModal = ({
     outputRange: ['0deg', '10deg'],
   });
 
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContainer: {
+      width: SCREEN_WIDTH - SPACING.huge * 2,
+      maxWidth: 340,
+      borderRadius: BORDER_RADIUS.xl,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(255, 189, 89, 0.3)',
+      position: 'relative',
+    },
+    gradient: {
+      padding: SPACING.xxl,
+      alignItems: 'center',
+    },
+    star: {
+      position: 'absolute',
+      zIndex: 10,
+    },
+    badgeContainer: {
+      marginBottom: SPACING.lg,
+      position: 'relative',
+    },
+    badge: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 4,
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    badgeGlow: {
+      position: 'absolute',
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: colors.gold,
+      opacity: 0.2,
+      top: -10,
+      left: -10,
+      zIndex: -1,
+    },
+    levelNumber: {
+      fontSize: 36,
+      fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+      color: colors.bgDarkest,
+    },
+    congratsText: {
+      fontSize: TYPOGRAPHY.fontSize.xl,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.gold,
+      letterSpacing: 2,
+      marginBottom: SPACING.xs,
+    },
+    levelTitle: {
+      fontSize: TYPOGRAPHY.fontSize.hero,
+      fontWeight: TYPOGRAPHY.fontWeight.extrabold,
+      color: colors.textPrimary,
+      marginBottom: SPACING.md,
+      textAlign: 'center',
+    },
+    description: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textMuted,
+      textAlign: 'center',
+      lineHeight: 20,
+      marginBottom: SPACING.lg,
+    },
+    rewardsContainer: {
+      width: '100%',
+      marginBottom: SPACING.xl,
+    },
+    rewardItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      padding: SPACING.md,
+      borderRadius: BORDER_RADIUS.md,
+      marginBottom: SPACING.sm,
+    },
+    rewardText: {
+      fontSize: TYPOGRAPHY.fontSize.md,
+      color: colors.textSecondary,
+      marginLeft: SPACING.md,
+    },
+    buttonRow: {
+      flexDirection: 'row',
+      width: '100%',
+      gap: SPACING.md,
+    },
+    secondaryButton: {
+      flex: 1,
+      paddingVertical: SPACING.md,
+      borderRadius: BORDER_RADIUS.md,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    secondaryButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textSecondary,
+    },
+    primaryButton: {
+      flex: 1.5,
+      borderRadius: BORDER_RADIUS.md,
+      overflow: 'hidden',
+    },
+    primaryButtonGradient: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.lg,
+    },
+    primaryButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.bgDarkest,
+      marginRight: SPACING.xs,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
+
+  const modalBackground = settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)');
+
   return (
     <Modal
       visible={visible}
@@ -149,13 +286,13 @@ const LevelUpModal = ({
                     },
                   ]}
                 >
-                  <Sparkles size={20} color={COLORS.gold} />
+                  <Sparkles size={20} color={colors.gold} />
                 </Animated.View>
               );
             })}
 
             <LinearGradient
-              colors={['rgba(15, 16, 48, 0.95)', 'rgba(15, 16, 48, 0.9)']}
+              colors={[modalBackground, modalBackground]}
               style={styles.gradient}
             >
               {/* Level badge */}
@@ -166,7 +303,7 @@ const LevelUpModal = ({
                 ]}
               >
                 <LinearGradient
-                  colors={[COLORS.gold, '#FFD700']}
+                  colors={[colors.gold, '#FFD700']}
                   style={styles.badge}
                 >
                   <Text style={styles.levelNumber}>{newLevel}</Text>
@@ -186,11 +323,11 @@ const LevelUpModal = ({
               {/* Rewards preview */}
               <View style={styles.rewardsContainer}>
                 <View style={styles.rewardItem}>
-                  <Zap size={20} color={COLORS.cyan} />
+                  <Zap size={20} color={colors.cyan} />
                   <Text style={styles.rewardText}>+{newLevel * 50} XP bonus</Text>
                 </View>
                 <View style={styles.rewardItem}>
-                  <Star size={20} color={COLORS.gold} />
+                  <Star size={20} color={colors.gold} />
                   <Text style={styles.rewardText}>New achievements unlocked</Text>
                 </View>
               </View>
@@ -215,13 +352,13 @@ const LevelUpModal = ({
                     activeOpacity={0.7}
                   >
                     <LinearGradient
-                      colors={[COLORS.gold, '#FFD700']}
+                      colors={[colors.gold, '#FFD700']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={styles.primaryButtonGradient}
                     >
                       <Text style={styles.primaryButtonText}>Xem phần thưởng</Text>
-                      <ChevronRight size={18} color={COLORS.bgDarkest} />
+                      <ChevronRight size={18} color={colors.bgDarkest} />
                     </LinearGradient>
                   </TouchableOpacity>
                 )}
@@ -233,137 +370,5 @@ const LevelUpModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    width: SCREEN_WIDTH - SPACING.huge * 2,
-    maxWidth: 340,
-    borderRadius: BORDER_RADIUS.xl,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-    position: 'relative',
-  },
-  gradient: {
-    padding: SPACING.xxl,
-    alignItems: 'center',
-  },
-  star: {
-    position: 'absolute',
-    zIndex: 10,
-  },
-  badgeContainer: {
-    marginBottom: SPACING.lg,
-    position: 'relative',
-  },
-  badge: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  badgeGlow: {
-    position: 'absolute',
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: COLORS.gold,
-    opacity: 0.2,
-    top: -10,
-    left: -10,
-    zIndex: -1,
-  },
-  levelNumber: {
-    fontSize: 36,
-    fontWeight: TYPOGRAPHY.fontWeight.extrabold,
-    color: COLORS.bgDarkest,
-  },
-  congratsText: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
-    letterSpacing: 2,
-    marginBottom: SPACING.xs,
-  },
-  levelTitle: {
-    fontSize: TYPOGRAPHY.fontSize.hero,
-    fontWeight: TYPOGRAPHY.fontWeight.extrabold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.md,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: SPACING.lg,
-  },
-  rewardsContainer: {
-    width: '100%',
-    marginBottom: SPACING.xl,
-  },
-  rewardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    marginBottom: SPACING.sm,
-  },
-  rewardText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-    marginLeft: SPACING.md,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    width: '100%',
-    gap: SPACING.md,
-  },
-  secondaryButton: {
-    flex: 1,
-    paddingVertical: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textSecondary,
-  },
-  primaryButton: {
-    flex: 1.5,
-    borderRadius: BORDER_RADIUS.md,
-    overflow: 'hidden',
-  },
-  primaryButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-  },
-  primaryButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDarkest,
-    marginRight: SPACING.xs,
-  },
-});
 
 export default LevelUpModal;

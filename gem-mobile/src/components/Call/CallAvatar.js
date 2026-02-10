@@ -3,9 +3,9 @@
  * Pulsing avatar for call screens
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Image, StyleSheet, Animated } from 'react-native';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { CALL_UI } from '../../constants/callConstants';
 
 /**
@@ -20,10 +20,32 @@ const CallAvatar = ({
   uri,
   size = CALL_UI.AVATAR_SIZE_LARGE,
   isPulsing = false,
-  pulseColor = COLORS.gold,
+  pulseColor,
 }) => {
+  const { colors, glass, settings, SPACING, TYPOGRAPHY } = useSettings();
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(0.6)).current;
+
+  // Use provided pulseColor or default to colors.gold
+  const effectivePulseColor = pulseColor || colors.gold;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    pulseRing: {
+      position: 'absolute',
+      borderWidth: 2,
+    },
+    avatarContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatar: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || 'rgba(15, 16, 48, 0.95)'),
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   useEffect(() => {
     if (isPulsing) {
@@ -75,7 +97,7 @@ const CallAvatar = ({
                 width: ringSize,
                 height: ringSize,
                 borderRadius: ringSize / 2,
-                borderColor: pulseColor,
+                borderColor: effectivePulseColor,
                 transform: [{ scale: pulseAnim }],
                 opacity: opacityAnim,
               },
@@ -88,7 +110,7 @@ const CallAvatar = ({
                 width: ringSize + 20,
                 height: ringSize + 20,
                 borderRadius: (ringSize + 20) / 2,
-                borderColor: pulseColor,
+                borderColor: effectivePulseColor,
                 transform: [
                   {
                     scale: Animated.add(pulseAnim, 0.1),
@@ -109,7 +131,7 @@ const CallAvatar = ({
             width: size + 10,
             height: size + 10,
             borderRadius: (size + 10) / 2,
-            backgroundColor: pulseColor + '30',
+            backgroundColor: effectivePulseColor + '30',
           },
         ]}
       >
@@ -128,23 +150,5 @@ const CallAvatar = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pulseRing: {
-    position: 'absolute',
-    borderWidth: 2,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatar: {
-    backgroundColor: COLORS.glassBg,
-  },
-});
 
 export default CallAvatar;

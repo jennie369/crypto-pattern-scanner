@@ -9,7 +9,7 @@
  * - Vietnamese UI text
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const MUTE_OPTIONS = [
   { id: '1h', label: '1 giờ', hours: 1, icon: 'time-outline' },
@@ -45,8 +45,89 @@ const MuteOptionsModal = memo(({
   onUnmute,
   onClose,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+
+  // ========== STYLES ==========
+  const styles = useMemo(() => StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: SPACING.lg,
+    },
+    container: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || colors.glassBg),
+      borderRadius: 20,
+      width: '100%',
+      maxWidth: 340,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+      gap: SPACING.sm,
+    },
+    headerTitle: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.bold,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    closeButton: {
+      padding: SPACING.xs,
+    },
+    statusContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+      padding: SPACING.md,
+      gap: SPACING.xs,
+    },
+    statusText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.gold,
+      flex: 1,
+    },
+    optionsList: {
+      padding: SPACING.sm,
+    },
+    optionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SPACING.md,
+      gap: SPACING.md,
+      borderRadius: 12,
+    },
+    optionLabel: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    unmuteButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.purple,
+      marginHorizontal: SPACING.md,
+      marginBottom: SPACING.md,
+      paddingVertical: SPACING.md,
+      borderRadius: 12,
+      gap: SPACING.sm,
+    },
+    unmuteButtonText: {
+      fontSize: TYPOGRAPHY.fontSize.base,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   // Check if currently muted
   const isMuted = currentMuteUntil && new Date(currentMuteUntil) > new Date();
@@ -127,17 +208,17 @@ const MuteOptionsModal = memo(({
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
-            <Ionicons name="notifications-off" size={24} color={COLORS.textPrimary} />
+            <Ionicons name="notifications-off" size={24} color={colors.textPrimary} />
             <Text style={styles.headerTitle}>Tắt thông báo</Text>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Ionicons name="close" size={20} color={COLORS.textMuted} />
+              <Ionicons name="close" size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
           {/* Current status if muted */}
           {isMuted && (
             <View style={styles.statusContainer}>
-              <Ionicons name="information-circle" size={18} color={COLORS.gold} />
+              <Ionicons name="information-circle" size={18} color={colors.gold} />
               <Text style={styles.statusText}>
                 Đang tắt thông báo ({formatMuteRemaining()})
               </Text>
@@ -154,10 +235,10 @@ const MuteOptionsModal = memo(({
                 disabled={isLoading}
                 activeOpacity={0.7}
               >
-                <Ionicons name={option.icon} size={20} color={COLORS.textMuted} />
+                <Ionicons name={option.icon} size={20} color={colors.textMuted} />
                 <Text style={styles.optionLabel}>{option.label}</Text>
                 {selectedOption === option.id && isLoading && (
-                  <ActivityIndicator size="small" color={COLORS.gold} />
+                  <ActivityIndicator size="small" color={colors.gold} />
                 )}
               </TouchableOpacity>
             ))}
@@ -171,7 +252,7 @@ const MuteOptionsModal = memo(({
               disabled={isLoading}
               activeOpacity={0.8}
             >
-              <Ionicons name="notifications" size={18} color={COLORS.textPrimary} />
+              <Ionicons name="notifications" size={18} color={colors.textPrimary} />
               <Text style={styles.unmuteButtonText}>Bật thông báo</Text>
             </TouchableOpacity>
           )}
@@ -184,82 +265,3 @@ const MuteOptionsModal = memo(({
 MuteOptionsModal.displayName = 'MuteOptionsModal';
 
 export default MuteOptionsModal;
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.lg,
-  },
-  container: {
-    backgroundColor: COLORS.glassBg,
-    borderRadius: 20,
-    width: '100%',
-    maxWidth: 340,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    gap: SPACING.sm,
-  },
-  headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    flex: 1,
-  },
-  closeButton: {
-    padding: SPACING.xs,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    padding: SPACING.md,
-    gap: SPACING.xs,
-  },
-  statusText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gold,
-    flex: 1,
-  },
-  optionsList: {
-    padding: SPACING.sm,
-  },
-  optionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    gap: SPACING.md,
-    borderRadius: 12,
-  },
-  optionLabel: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textPrimary,
-    flex: 1,
-  },
-  unmuteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.purple,
-    marginHorizontal: SPACING.md,
-    marginBottom: SPACING.md,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    gap: SPACING.sm,
-  },
-  unmuteButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-});

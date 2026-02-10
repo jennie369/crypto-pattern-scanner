@@ -51,7 +51,7 @@ import {
 import Svg, { Circle, Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
-import { COLORS, SPACING, TYPOGRAPHY, GLASS, SHADOWS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { getCardImage, getCardImageByName } from '../../assets/tarot';
 import { getHexagramImage } from '../../assets/iching';
 

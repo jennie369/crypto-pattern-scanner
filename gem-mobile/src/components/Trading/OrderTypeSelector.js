@@ -4,7 +4,7 @@
  * Binance Futures style with English names
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -15,7 +15,7 @@ import {
   Pressable,
 } from 'react-native';
 import { HelpCircle, X, Lock } from 'lucide-react-native';
-import { COLORS, SPACING } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 import { ORDER_TYPE_LIST } from '../../constants/tradingConstants';
 
 const OrderTypeSelector = ({
@@ -25,7 +25,148 @@ const OrderTypeSelector = ({
   locked = false,  // For GEM Pattern mode - locks to Limit
   showDescriptions = false,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
   const [showTooltip, setShowTooltip] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: SPACING.md,
+    },
+    // Label Row
+    labelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.xs,
+    },
+    labelLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    label: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    lockedBadge: {
+      backgroundColor: 'rgba(255, 215, 0, 0.15)',
+      padding: 3,
+      borderRadius: 4,
+    },
+    helpButton: {
+      padding: 4,
+    },
+    // Tabs
+    scrollContent: {
+      flexDirection: 'row',
+      gap: SPACING.xs,
+      paddingHorizontal: 2,
+    },
+    tab: {
+      flex: 1,
+      minWidth: 75,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderWidth: 1,
+      borderColor: 'transparent',
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    tabSelected: {
+      backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    },
+    tabDisabled: {
+      opacity: 0.5,
+    },
+    tabContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 4,
+    },
+    tabLabel: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    tabLabelSelected: {
+      fontWeight: '700',
+    },
+    selectionIndicator: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 2,
+    },
+    descriptionContainer: {
+      marginTop: SPACING.sm,
+      paddingHorizontal: SPACING.xs,
+    },
+    descriptionText: {
+      fontSize: 11,
+      color: colors.textMuted,
+      fontStyle: 'italic',
+      textAlign: 'center',
+    },
+    // Tooltip Modal
+    tooltipOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: SPACING.lg,
+    },
+    tooltipContent: {
+      backgroundColor: settings.theme === 'light' ? colors.bgDarkest : (glass.background || '#1A1A2E'),
+      borderRadius: 12,
+      padding: SPACING.lg,
+      width: '100%',
+      maxWidth: 340,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    tooltipHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    tooltipTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    tooltipItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: SPACING.md,
+      gap: SPACING.sm,
+    },
+    tooltipIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tooltipText: {
+      flex: 1,
+    },
+    tooltipItemTitle: {
+      fontSize: 13,
+      fontWeight: '700',
+      marginBottom: 2,
+    },
+    tooltipItemDesc: {
+      fontSize: 11,
+      color: colors.textMuted,
+      lineHeight: 16,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   const handleSelect = useCallback((typeId) => {
     if (!disabled && !locked && onSelectType) {
@@ -43,7 +184,7 @@ const OrderTypeSelector = ({
           <Text style={styles.label}>Loại lệnh</Text>
           {locked && (
             <View style={styles.lockedBadge}>
-              <Lock size={10} color={COLORS.gold} />
+              <Lock size={10} color={colors.gold} />
             </View>
           )}
         </View>
@@ -52,7 +193,7 @@ const OrderTypeSelector = ({
           onPress={() => setShowTooltip(true)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <HelpCircle size={14} color={COLORS.textMuted} />
+          <HelpCircle size={14} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -82,7 +223,7 @@ const OrderTypeSelector = ({
               <View style={styles.tabContent}>
                 <IconComponent
                   size={16}
-                  color={isSelected ? orderType.color : COLORS.textMuted}
+                  color={isSelected ? orderType.color : colors.textMuted}
                 />
                 <Text
                   style={[
@@ -134,7 +275,7 @@ const OrderTypeSelector = ({
             <View style={styles.tooltipHeader}>
               <Text style={styles.tooltipTitle}>Các loại lệnh</Text>
               <TouchableOpacity onPress={() => setShowTooltip(false)}>
-                <X size={20} color={COLORS.textMuted} />
+                <X size={20} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -162,145 +303,5 @@ const OrderTypeSelector = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: SPACING.md,
-  },
-  // Label Row
-  labelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.xs,
-  },
-  labelLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  lockedBadge: {
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-    padding: 3,
-    borderRadius: 4,
-  },
-  helpButton: {
-    padding: 4,
-  },
-  // Tabs
-  scrollContent: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-    paddingHorizontal: 2,
-  },
-  tab: {
-    flex: 1,
-    minWidth: 75,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'transparent',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  tabSelected: {
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-  },
-  tabDisabled: {
-    opacity: 0.5,
-  },
-  tabContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  tabLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-  },
-  tabLabelSelected: {
-    fontWeight: '700',
-  },
-  selectionIndicator: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-  },
-  descriptionContainer: {
-    marginTop: SPACING.sm,
-    paddingHorizontal: SPACING.xs,
-  },
-  descriptionText: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  // Tooltip Modal
-  tooltipOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.lg,
-  },
-  tooltipContent: {
-    backgroundColor: COLORS.glassBg || '#1A1A2E',
-    borderRadius: 12,
-    padding: SPACING.lg,
-    width: '100%',
-    maxWidth: 340,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  tooltipHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  tooltipTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  tooltipItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.md,
-    gap: SPACING.sm,
-  },
-  tooltipIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tooltipText: {
-    flex: 1,
-  },
-  tooltipItemTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  tooltipItemDesc: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    lineHeight: 16,
-  },
-});
 
 export default memo(OrderTypeSelector);

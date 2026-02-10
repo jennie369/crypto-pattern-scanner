@@ -4,11 +4,11 @@
 // Beautiful affirmation card with pulse animation
 // ============================================================
 
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { Heart, Bookmark, Volume2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const AffirmationResponse = memo(({
   text,
@@ -17,6 +17,8 @@ const AffirmationResponse = memo(({
   onRepeat,
   onSave,
 }) => {
+  const { colors, gradients, glass, settings, SPACING, TYPOGRAPHY, t } = useSettings();
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   // Pulse animation
@@ -41,7 +43,57 @@ const AffirmationResponse = memo(({
 
   const gradientColors = backgroundColor
     ? [backgroundColor, 'rgba(0,0,0,0.3)']
-    : [COLORS.purple, COLORS.cyan];
+    : [colors.purple, colors.cyan];
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginVertical: SPACING.md,
+      borderRadius: 20,
+      overflow: 'hidden',
+    },
+    gradient: {
+      padding: SPACING.lg,
+      alignItems: 'center',
+    },
+    frequencyBadge: {
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      paddingVertical: SPACING.xs,
+      paddingHorizontal: SPACING.sm,
+      borderRadius: 20,
+      marginBottom: SPACING.md,
+    },
+    frequencyText: {
+      fontSize: TYPOGRAPHY.fontSize.sm,
+      color: colors.textPrimary,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    },
+    affirmationText: {
+      fontSize: TYPOGRAPHY.fontSize.xxxl,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      lineHeight: 32,
+      marginBottom: SPACING.lg,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: SPACING.lg,
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.xs,
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      paddingVertical: SPACING.sm,
+      paddingHorizontal: SPACING.md,
+      borderRadius: 12,
+    },
+    actionText: {
+      fontSize: TYPOGRAPHY.fontSize.lg,
+      fontWeight: TYPOGRAPHY.fontWeight.semibold,
+      color: colors.textPrimary,
+    },
+  }), [colors, settings.theme, glass, SPACING, TYPOGRAPHY]);
 
   return (
     <Animated.View style={[styles.container, { transform: [{ scale: pulseAnim }] }]}>
@@ -67,7 +119,7 @@ const AffirmationResponse = memo(({
             style={styles.actionButton}
             onPress={onRepeat}
           >
-            <Volume2 size={20} color={COLORS.textPrimary} />
+            <Volume2 size={20} color={colors.textPrimary} />
             <Text style={styles.actionText}>Lặp lại</Text>
           </TouchableOpacity>
 
@@ -75,63 +127,13 @@ const AffirmationResponse = memo(({
             style={styles.actionButton}
             onPress={onSave}
           >
-            <Bookmark size={20} color={COLORS.textPrimary} />
+            <Bookmark size={20} color={colors.textPrimary} />
             <Text style={styles.actionText}>Lưu</Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
     </Animated.View>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: SPACING.md,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  gradient: {
-    padding: SPACING.lg,
-    alignItems: 'center',
-  },
-  frequencyBadge: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 20,
-    marginBottom: SPACING.md,
-  },
-  frequencyText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  affirmationText: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    lineHeight: 32,
-    marginBottom: SPACING.lg,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: SPACING.lg,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 12,
-  },
-  actionText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
 });
 
 AffirmationResponse.displayName = 'AffirmationResponse';
