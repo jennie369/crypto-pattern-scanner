@@ -563,7 +563,7 @@ const CreatePostScreen = ({ navigation }) => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {/* Topic Selector - CHỈ HIỂN THỊ CHO ADMIN */}
             {isAdmin && (
               <>
@@ -605,7 +605,7 @@ const CreatePostScreen = ({ navigation }) => {
                         style={[
                           styles.mainTopicOption,
                           selectedTopic?.id === topic.id && styles.mainTopicOptionActive,
-                          topic.feedType && styles.adminTopicOption, // Visual indicator for admin topics
+                          topic.feedType && styles.adminTopicOption,
                         ]}
                         onPress={() => {
                           setSelectedTopic(topic);
@@ -632,21 +632,22 @@ const CreatePostScreen = ({ navigation }) => {
               </>
             )}
 
-            {/* Combined Content Input with @mention and #hashtag support */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>NỘI DUNG BÀI VIẾT *</Text>
-              <MentionInput
-                style={styles.contentInput}
-                placeholder="Dòng đầu tiên sẽ là tiêu đề...&#10;&#10;Viết nội dung bài viết của bạn...&#10;&#10;Dùng @ để tag người dùng, # để thêm hashtag"
-                value={content}
-                onChangeText={setContent}
-                multiline
-                numberOfLines={8}
-                triggerMention={triggerMention}
-                onTriggerMentionHandled={() => setTriggerMention(false)}
-              />
-              <Text style={styles.hint}>💡 Dòng đầu tiên sẽ tự động trở thành tiêu đề. Dùng @ để tag, # cho hashtag</Text>
-            </View>
+            {/* ═══════════════════════════════════════════ */}
+            {/* SEAMLESS CONTENT INPUT - Facebook-style     */}
+            {/* No card, no border, full-width writing area */}
+            {/* ═══════════════════════════════════════════ */}
+            <MentionInput
+              style={styles.contentInput}
+              placeholder="Dòng đầu tiên sẽ là tiêu đề...&#10;&#10;Viết nội dung bài viết của bạn...&#10;&#10;Dùng @ để tag người dùng, # để thêm hashtag"
+              value={content}
+              onChangeText={setContent}
+              multiline
+              numberOfLines={12}
+              triggerMention={triggerMention}
+              onTriggerMentionHandled={() => setTriggerMention(false)}
+              autoFocus
+            />
+            <Text style={styles.hint}>Dòng đầu tiên = tiêu đề. Dùng @ để tag, # cho hashtag</Text>
 
             {/* ═══════════════════════════════════════════ */}
             {/* LINK PREVIEW SECTION (Phase 4) */}
@@ -656,22 +657,6 @@ const CreatePostScreen = ({ navigation }) => {
               onPreviewChange={handlePreviewChange}
               disabled={submitting}
             />
-
-            {/* ═══════════════════════════════════════════ */}
-            {/* ACTION TOOLBAR - Photo, Tag People (MOVED UP) */}
-            {/* ═══════════════════════════════════════════ */}
-            <View style={styles.actionToolbar}>
-              <TouchableOpacity style={styles.toolbarItem} onPress={showMediaOptions}>
-                <ImagePlus size={22} color={COLORS.success} />
-                <Text style={styles.toolbarItemText}>
-                  {selectedImages.length > 0 ? `Ảnh (${selectedImages.length}/${MAX_IMAGES})` : 'Ảnh'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.toolbarItem} onPress={handleTagPeople}>
-                <Users size={22} color={COLORS.cyan} />
-                <Text style={styles.toolbarItemText}>Gắn thẻ</Text>
-              </TouchableOpacity>
-            </View>
 
             {/* ═══════════════════════════════════════════ */}
             {/* MEDIA SECTION - FULL ASPECT RATIO PREVIEW */}
@@ -721,100 +706,6 @@ const CreatePostScreen = ({ navigation }) => {
               </View>
             )}
 
-            {/* ═══════════════════════════════════════════ */}
-            {/* CREATOR TOOLBAR - Sound, Audience, Product */}
-            {/* ═══════════════════════════════════════════ */}
-            <View style={styles.creatorToolbar}>
-              {/* Sound Picker Button */}
-              <TouchableOpacity
-                style={[
-                  styles.toolbarBtn,
-                  selectedSound && styles.toolbarBtnActive,
-                ]}
-                onPress={() => setShowSoundPicker(true)}
-              >
-                <Music size={20} color={selectedSound ? COLORS.gold : COLORS.textMuted} />
-                <Text style={[
-                  styles.toolbarBtnText,
-                  selectedSound && styles.toolbarBtnTextActive,
-                ]}>
-                  {selectedSound ? selectedSound.name.substring(0, 12) + '...' : 'Nhạc nền'}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Audience Picker Button */}
-              <TouchableOpacity
-                style={styles.toolbarBtn}
-                onPress={() => setShowAudiencePicker(!showAudiencePicker)}
-              >
-                {audience === 'public' && <Globe size={20} color={COLORS.success} />}
-                {audience === 'followers' && <UserCheck size={20} color={COLORS.purple} />}
-                {audience === 'private' && <Lock size={20} color={COLORS.error} />}
-                <Text style={styles.toolbarBtnText}>
-                  {audience === 'public' && 'Công khai'}
-                  {audience === 'followers' && 'Followers'}
-                  {audience === 'private' && 'Riêng tư'}
-                </Text>
-                <ChevronDown size={14} color={COLORS.textMuted} />
-              </TouchableOpacity>
-
-              {/* Product Link Button - MULTI-SELECT */}
-              <TouchableOpacity
-                style={[
-                  styles.toolbarBtn,
-                  linkedProducts.length > 0 && styles.toolbarBtnActive,
-                ]}
-                onPress={() => setShowProductPicker(true)}
-              >
-                <ShoppingBag size={20} color={linkedProducts.length > 0 ? COLORS.gold : COLORS.textMuted} />
-                <Text style={[
-                  styles.toolbarBtnText,
-                  linkedProducts.length > 0 && styles.toolbarBtnTextActive,
-                ]}>
-                  {linkedProducts.length > 0 ? `${linkedProducts.length} SP` : 'Gắn SP'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Audience Picker Dropdown */}
-            {showAudiencePicker && (
-              <View style={styles.audienceDropdown}>
-                <TouchableOpacity
-                  style={[styles.audienceOption, audience === 'public' && styles.audienceOptionActive]}
-                  onPress={() => { setAudience('public'); setShowAudiencePicker(false); }}
-                >
-                  <Globe size={18} color={COLORS.success} />
-                  <View style={styles.audienceOptionInfo}>
-                    <Text style={styles.audienceOptionText}>Công khai</Text>
-                    <Text style={styles.audienceOptionDesc}>Mọi người đều thấy</Text>
-                  </View>
-                  {audience === 'public' && <Check size={18} color={COLORS.gold} />}
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.audienceOption, audience === 'followers' && styles.audienceOptionActive]}
-                  onPress={() => { setAudience('followers'); setShowAudiencePicker(false); }}
-                >
-                  <UserCheck size={18} color={COLORS.purple} />
-                  <View style={styles.audienceOptionInfo}>
-                    <Text style={styles.audienceOptionText}>Followers</Text>
-                    <Text style={styles.audienceOptionDesc}>Chỉ người theo dõi</Text>
-                  </View>
-                  {audience === 'followers' && <Check size={18} color={COLORS.gold} />}
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.audienceOption, audience === 'private' && styles.audienceOptionActive]}
-                  onPress={() => { setAudience('private'); setShowAudiencePicker(false); }}
-                >
-                  <Lock size={18} color={COLORS.error} />
-                  <View style={styles.audienceOptionInfo}>
-                    <Text style={styles.audienceOptionText}>Riêng tư</Text>
-                    <Text style={styles.audienceOptionDesc}>Chỉ mình bạn thấy</Text>
-                  </View>
-                  {audience === 'private' && <Check size={18} color={COLORS.gold} />}
-                </TouchableOpacity>
-              </View>
-            )}
-
             {/* Selected Sound Display */}
             {selectedSound && (
               <View style={styles.selectedSoundCard}>
@@ -857,6 +748,92 @@ const CreatePostScreen = ({ navigation }) => {
                 </ScrollView>
               </View>
             )}
+
+            {/* ═══════════════════════════════════════════ */}
+            {/* ACTIONS SECTION - Below content, like FB    */}
+            {/* ═══════════════════════════════════════════ */}
+            <View style={styles.actionsDivider} />
+
+            {/* Row 1: Photo + Tag People */}
+            <TouchableOpacity style={styles.actionRow} onPress={showMediaOptions}>
+              <ImagePlus size={22} color={COLORS.success} />
+              <Text style={styles.actionRowText}>
+                {selectedImages.length > 0 ? `Ảnh (${selectedImages.length}/${MAX_IMAGES})` : 'Ảnh / Video'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionRow} onPress={handleTagPeople}>
+              <Users size={22} color={COLORS.cyan} />
+              <Text style={styles.actionRowText}>Gắn thẻ người dùng</Text>
+            </TouchableOpacity>
+
+            {/* Row 2: Sound */}
+            <TouchableOpacity style={styles.actionRow} onPress={() => setShowSoundPicker(true)}>
+              <Music size={22} color={selectedSound ? COLORS.gold : COLORS.textMuted} />
+              <Text style={[styles.actionRowText, selectedSound && { color: COLORS.gold }]}>
+                {selectedSound ? selectedSound.name : 'Nhạc nền'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Row 3: Audience */}
+            <TouchableOpacity style={styles.actionRow} onPress={() => setShowAudiencePicker(!showAudiencePicker)}>
+              {audience === 'public' && <Globe size={22} color={COLORS.success} />}
+              {audience === 'followers' && <UserCheck size={22} color={COLORS.purple} />}
+              {audience === 'private' && <Lock size={22} color={COLORS.error} />}
+              <Text style={styles.actionRowText}>
+                {audience === 'public' && 'Công khai'}
+                {audience === 'followers' && 'Followers'}
+                {audience === 'private' && 'Riêng tư'}
+              </Text>
+              <ChevronDown size={16} color={COLORS.textMuted} />
+            </TouchableOpacity>
+
+            {/* Audience Picker Dropdown */}
+            {showAudiencePicker && (
+              <View style={styles.audienceDropdown}>
+                <TouchableOpacity
+                  style={[styles.audienceOption, audience === 'public' && styles.audienceOptionActive]}
+                  onPress={() => { setAudience('public'); setShowAudiencePicker(false); }}
+                >
+                  <Globe size={18} color={COLORS.success} />
+                  <View style={styles.audienceOptionInfo}>
+                    <Text style={styles.audienceOptionText}>Công khai</Text>
+                    <Text style={styles.audienceOptionDesc}>Mọi người đều thấy</Text>
+                  </View>
+                  {audience === 'public' && <Check size={18} color={COLORS.gold} />}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.audienceOption, audience === 'followers' && styles.audienceOptionActive]}
+                  onPress={() => { setAudience('followers'); setShowAudiencePicker(false); }}
+                >
+                  <UserCheck size={18} color={COLORS.purple} />
+                  <View style={styles.audienceOptionInfo}>
+                    <Text style={styles.audienceOptionText}>Followers</Text>
+                    <Text style={styles.audienceOptionDesc}>Chỉ người theo dõi</Text>
+                  </View>
+                  {audience === 'followers' && <Check size={18} color={COLORS.gold} />}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.audienceOption, audience === 'private' && styles.audienceOptionActive]}
+                  onPress={() => { setAudience('private'); setShowAudiencePicker(false); }}
+                >
+                  <Lock size={18} color={COLORS.error} />
+                  <View style={styles.audienceOptionInfo}>
+                    <Text style={styles.audienceOptionText}>Riêng tư</Text>
+                    <Text style={styles.audienceOptionDesc}>Chỉ mình bạn thấy</Text>
+                  </View>
+                  {audience === 'private' && <Check size={18} color={COLORS.gold} />}
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Row 4: Product */}
+            <TouchableOpacity style={styles.actionRow} onPress={() => setShowProductPicker(true)}>
+              <ShoppingBag size={22} color={linkedProducts.length > 0 ? COLORS.gold : COLORS.textMuted} />
+              <Text style={[styles.actionRowText, linkedProducts.length > 0 && { color: COLORS.gold }]}>
+                {linkedProducts.length > 0 ? `Sản phẩm (${linkedProducts.length})` : 'Gắn sản phẩm'}
+              </Text>
+            </TouchableOpacity>
 
             {/* Bottom padding */}
             <View style={{ height: 100 }} />
@@ -943,12 +920,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
   },
   categorySelector: {
     backgroundColor: GLASS.background,
     borderRadius: 12,
     padding: SPACING.lg,
+    marginTop: SPACING.md,
     marginBottom: SPACING.md,
     borderWidth: 1,
     borderColor: 'rgba(106, 91, 255, 0.2)',
@@ -1030,32 +1008,24 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginRight: SPACING.sm,
   },
-  inputGroup: {
-    marginBottom: SPACING.lg,
-  },
-  inputLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
   contentInput: {
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    padding: SPACING.lg,
-    fontSize: TYPOGRAPHY.fontSize.lg,
+    // Seamless: no background, no border, no card
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+    borderWidth: 0,
+    borderColor: 'transparent',
+    padding: 0,
+    paddingTop: SPACING.lg,
+    fontSize: TYPOGRAPHY.fontSize.xl,
     color: COLORS.textPrimary,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-    minHeight: 200,
-    lineHeight: 24,
+    minHeight: 280,
+    lineHeight: 28,
   },
   hint: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
-    marginTop: SPACING.xs,
-    fontStyle: 'italic',
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.md,
   },
 
   // Media styles
@@ -1187,26 +1157,24 @@ const styles = StyleSheet.create({
   },
 
   // ═══════════════════════════════════════════
-  // ACTION TOOLBAR STYLES - Photo, Tag, Products
+  // ACTIONS SECTION - Stacked rows below content
   // ═══════════════════════════════════════════
-  actionToolbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: SPACING.md,
-    marginBottom: SPACING.lg,
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+  actionsDivider: {
+    height: 1,
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    marginVertical: SPACING.sm,
   },
-  toolbarItem: {
+  actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
+    gap: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
   },
-  toolbarItemText: {
+  actionRowText: {
+    flex: 1,
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textPrimary,
     fontWeight: TYPOGRAPHY.fontWeight.medium,
@@ -1358,44 +1326,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
 
-  // ═══════════════════════════════════════════
-  // CREATOR TOOLBAR STYLES
-  // ═══════════════════════════════════════════
-  creatorToolbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    padding: SPACING.sm,
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
-    gap: SPACING.xs,
-  },
-  toolbarBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.xs,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  toolbarBtnActive: {
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-  },
-  toolbarBtnText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  toolbarBtnTextActive: {
-    color: COLORS.gold,
-  },
+  // (Creator toolbar replaced by actionRow stacked items)
 
   // Audience Dropdown
   audienceDropdown: {
