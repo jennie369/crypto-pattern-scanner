@@ -3006,6 +3006,9 @@ const VisionBoardScreen = () => {
   const route = useRoute();
   const { user, userTier } = useAuth();
 
+  // Ref to hold the primer sound that keeps audio session in playback mode (iOS silent mode fix)
+  const primerSoundRef = useRef(null);
+
   // Refs for scroll to section functionality
   const scrollViewRef = useRef(null);
   const goalsSectionY = useRef(0);
@@ -4533,11 +4536,43 @@ const VisionBoardScreen = () => {
       // Stop any ongoing speech first
       await Speech.stop();
 
+      // CRITICAL FIX: expo-speech (AVSpeechSynthesizer) on iOS respects mute switch
+      // Audio.setAudioModeAsync does NOT affect it. Workaround: play a nearly-silent
+      // sound via expo-av to force iOS audio session to playback mode.
+      try {
+        if (primerSoundRef.current) {
+          await primerSoundRef.current.stopAsync().catch(() => {});
+          await primerSoundRef.current.unloadAsync().catch(() => {});
+        }
+        const { sound: primer } = await Audio.Sound.createAsync(
+          require('../../../assets/sounds/Ritual_sounds/chime.mp3'),
+          { shouldPlay: true, isLooping: true, volume: 0.01 }
+        );
+        primerSoundRef.current = primer;
+      } catch (e) {
+        console.log('[VisionBoard] Primer sound error (non-critical):', e.message);
+      }
+
       // Speak the affirmation in Vietnamese
       await Speech.speak(currentAffirmation, {
         language: 'vi-VN',
         pitch: 1.0,
         rate: 0.9,
+        onDone: async () => {
+          // Stop primer sound when speech ends
+          if (primerSoundRef.current) {
+            await primerSoundRef.current.stopAsync().catch(() => {});
+            await primerSoundRef.current.unloadAsync().catch(() => {});
+            primerSoundRef.current = null;
+          }
+        },
+        onError: async () => {
+          if (primerSoundRef.current) {
+            await primerSoundRef.current.stopAsync().catch(() => {});
+            await primerSoundRef.current.unloadAsync().catch(() => {});
+            primerSoundRef.current = null;
+          }
+        },
       });
     } catch (error) {
       console.error('Speech error:', error);
@@ -4596,10 +4631,39 @@ const VisionBoardScreen = () => {
       await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
       await Speech.stop();
 
+      // Play primer sound (nearly silent) to force iOS audio session to playback mode
+      try {
+        if (primerSoundRef.current) {
+          await primerSoundRef.current.stopAsync().catch(() => {});
+          await primerSoundRef.current.unloadAsync().catch(() => {});
+        }
+        const { sound: primer } = await Audio.Sound.createAsync(
+          require('../../../assets/sounds/Ritual_sounds/chime.mp3'),
+          { shouldPlay: true, isLooping: true, volume: 0.01 }
+        );
+        primerSoundRef.current = primer;
+      } catch (e) {
+        console.log('[VisionBoard] Primer sound error (non-critical):', e.message);
+      }
+
       await Speech.speak(text, {
         language: 'vi-VN',
         pitch: 1.0,
         rate: 0.9,
+        onDone: async () => {
+          if (primerSoundRef.current) {
+            await primerSoundRef.current.stopAsync().catch(() => {});
+            await primerSoundRef.current.unloadAsync().catch(() => {});
+            primerSoundRef.current = null;
+          }
+        },
+        onError: async () => {
+          if (primerSoundRef.current) {
+            await primerSoundRef.current.stopAsync().catch(() => {});
+            await primerSoundRef.current.unloadAsync().catch(() => {});
+            primerSoundRef.current = null;
+          }
+        },
       });
     } catch (error) {
       console.error('Speech error:', error);

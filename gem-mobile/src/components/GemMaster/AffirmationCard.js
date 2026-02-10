@@ -6,7 +6,7 @@
  * Uses design tokens for consistent styling.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Volume2, Check, ChevronLeft, ChevronRight, Flame, Sparkles } from 'lucide-react-native';
 import * as Speech from 'expo-speech';
@@ -19,6 +19,9 @@ const AffirmationCard = ({ widget, onComplete }) => {
   const [currentIndex, setCurrentIndex] = useState(widget.data.currentIndex || 0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { alert, AlertComponent } = useCustomAlert();
+
+  // Ref to hold the primer sound that keeps audio session in playback mode (iOS silent mode fix)
+  const primerSoundRef = useRef(null);
 
   const { affirmations, completedToday, streak } = widget.data;
   const currentAffirmation = affirmations[currentIndex] || 'No affirmations available';
@@ -35,10 +38,20 @@ const AffirmationCard = ({ widget, onComplete }) => {
     }
   };
 
+  // Cleanup primer sound helper
+  const cleanupPrimerSound = async () => {
+    if (primerSoundRef.current) {
+      await primerSoundRef.current.stopAsync().catch(() => {});
+      await primerSoundRef.current.unloadAsync().catch(() => {});
+      primerSoundRef.current = null;
+    }
+  };
+
   const handleReadAloud = async () => {
     if (isSpeaking) {
       Speech.stop();
       setIsSpeaking(false);
+      await cleanupPrimerSound();
       return;
     }
 
@@ -46,17 +59,41 @@ const AffirmationCard = ({ widget, onComplete }) => {
       await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
       setIsSpeaking(true);
 
+      // CRITICAL FIX: expo-speech (AVSpeechSynthesizer) on iOS respects mute switch
+      // Audio.setAudioModeAsync does NOT affect it. Workaround: play a nearly-silent
+      // sound via expo-av to force iOS audio session to playback mode.
+      try {
+        await cleanupPrimerSound();
+        const { sound: primer } = await Audio.Sound.createAsync(
+          require('../../../assets/sounds/Ritual_sounds/chime.mp3'),
+          { shouldPlay: true, isLooping: true, volume: 0.01 }
+        );
+        primerSoundRef.current = primer;
+      } catch (e) {
+        console.log('[AffirmationCard] Primer sound error (non-critical):', e.message);
+      }
+
       await Speech.speak(currentAffirmation, {
         language: 'vi-VN',
         pitch: 1.0,
         rate: 0.8,
-        onDone: () => setIsSpeaking(false),
-        onStopped: () => setIsSpeaking(false),
-        onError: () => setIsSpeaking(false),
+        onDone: async () => {
+          setIsSpeaking(false);
+          await cleanupPrimerSound();
+        },
+        onStopped: async () => {
+          setIsSpeaking(false);
+          await cleanupPrimerSound();
+        },
+        onError: async () => {
+          setIsSpeaking(false);
+          await cleanupPrimerSound();
+        },
       });
     } catch (error) {
       console.error('[AffirmationCard] Error reading aloud:', error);
       setIsSpeaking(false);
+      await cleanupPrimerSound();
     }
   };
 

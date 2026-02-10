@@ -8,7 +8,7 @@
  * - Stats: completed today, streak
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -55,6 +55,9 @@ const AffirmationWidget = ({ completedToday = 0, streak = 0, onComplete }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
+  // Ref to hold the primer sound that keeps audio session in playback mode (iOS silent mode fix)
+  const primerSoundRef = useRef(null);
+
   const currentAffirmation = affirmations[currentIndex];
 
   // Navigate affirmations
@@ -76,28 +79,60 @@ const AffirmationWidget = ({ completedToday = 0, streak = 0, onComplete }) => {
     }
   };
 
+  // Cleanup primer sound helper
+  const cleanupPrimerSound = async () => {
+    if (primerSoundRef.current) {
+      await primerSoundRef.current.stopAsync().catch(() => {});
+      await primerSoundRef.current.unloadAsync().catch(() => {});
+      primerSoundRef.current = null;
+    }
+  };
+
   // Read aloud
   const handleReadAloud = async () => {
     if (isSpeaking) {
       Speech.stop();
       setIsSpeaking(false);
+      await cleanupPrimerSound();
     } else {
       await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
       setIsSpeaking(true);
+
+      // CRITICAL FIX: expo-speech (AVSpeechSynthesizer) on iOS respects mute switch
+      // Audio.setAudioModeAsync does NOT affect it. Workaround: play a nearly-silent
+      // sound via expo-av to force iOS audio session to playback mode.
+      try {
+        await cleanupPrimerSound();
+        const { sound: primer } = await Audio.Sound.createAsync(
+          require('../../../../assets/sounds/Ritual_sounds/chime.mp3'),
+          { shouldPlay: true, isLooping: true, volume: 0.01 }
+        );
+        primerSoundRef.current = primer;
+      } catch (e) {
+        console.log('[AffirmationWidget] Primer sound error (non-critical):', e.message);
+      }
+
       await Speech.speak(currentAffirmation, {
         language: 'vi-VN',
         pitch: 1,
         rate: 0.9,
-        onDone: () => setIsSpeaking(false),
-        onError: () => setIsSpeaking(false),
+        onDone: async () => {
+          setIsSpeaking(false);
+          await cleanupPrimerSound();
+        },
+        onError: async () => {
+          setIsSpeaking(false);
+          await cleanupPrimerSound();
+        },
       });
     }
   };
 
-  // Stop speaking when component unmounts
+  // Stop speaking and cleanup primer sound when component unmounts
   useEffect(() => {
     return () => {
       Speech.stop();
+      cleanupPrimerSound();
     };
   }, []);
 

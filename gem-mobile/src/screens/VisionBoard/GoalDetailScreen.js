@@ -966,21 +966,66 @@ const GoalDetailScreen = () => {
   };
 
   // ========== AFFIRMATION HANDLERS ==========
+  // Ref to hold the primer sound that keeps audio session in playback mode
+  const primerSoundRef = useRef(null);
+
   const handlePlayAffirmation = async (affirmation) => {
     if (playingAffirmationId === affirmation.id) {
       Speech.stop();
       setPlayingAffirmationId(null);
+      // Cleanup primer sound
+      if (primerSoundRef.current) {
+        await primerSoundRef.current.stopAsync().catch(() => {});
+        await primerSoundRef.current.unloadAsync().catch(() => {});
+        primerSoundRef.current = null;
+      }
     } else {
-      // Cho phép phát âm thanh khi iPhone đang ở chế độ silent/vibrate
+      // CRITICAL FIX: expo-speech (AVSpeechSynthesizer) trên iOS respects mute switch
+      // bất kể audio session category. Workaround: play 1 âm thanh rất nhỏ qua expo-av
+      // để "giữ" audio session ở playback mode trong khi Speech đang nói.
       await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
       });
+
+      // Play primer sound (nearly silent) to force iOS audio session to playback mode
+      try {
+        if (primerSoundRef.current) {
+          await primerSoundRef.current.stopAsync().catch(() => {});
+          await primerSoundRef.current.unloadAsync().catch(() => {});
+        }
+        const { sound: primer } = await Audio.Sound.createAsync(
+          require('../../../assets/sounds/Ritual_sounds/chime.mp3'),
+          { shouldPlay: true, isLooping: true, volume: 0.01 }
+        );
+        primerSoundRef.current = primer;
+      } catch (e) {
+        console.log('[GoalDetail] Primer sound error (non-critical):', e.message);
+      }
+
       setPlayingAffirmationId(affirmation.id);
       Speech.speak(affirmation.text, {
         language: 'vi-VN',
         rate: 0.85,
-        onDone: () => setPlayingAffirmationId(null),
-        onError: () => setPlayingAffirmationId(null),
+        onDone: async () => {
+          setPlayingAffirmationId(null);
+          // Stop primer sound when speech ends
+          if (primerSoundRef.current) {
+            await primerSoundRef.current.stopAsync().catch(() => {});
+            await primerSoundRef.current.unloadAsync().catch(() => {});
+            primerSoundRef.current = null;
+          }
+        },
+        onError: async () => {
+          setPlayingAffirmationId(null);
+          if (primerSoundRef.current) {
+            await primerSoundRef.current.stopAsync().catch(() => {});
+            await primerSoundRef.current.unloadAsync().catch(() => {});
+            primerSoundRef.current = null;
+          }
+        },
       });
     }
   };

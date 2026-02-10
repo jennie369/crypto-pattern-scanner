@@ -40,6 +40,7 @@ class SpeechRecognitionService {
     this.onErrorCallback = null;
     this.onEndCallback = null;
     this.partialResults = '';
+    this.primerSound = null; // iOS silent mode TTS fix - keeps audio session in playback mode
 
     // Initialize native voice if available
     if (Voice) {
@@ -548,6 +549,17 @@ class SpeechRecognitionService {
    * @param {string} language
    * @returns {Promise<void>}
    */
+  /**
+   * Cleanup primer sound (iOS silent mode TTS fix)
+   */
+  async _cleanupPrimerSound() {
+    if (this.primerSound) {
+      await this.primerSound.stopAsync().catch(() => {});
+      await this.primerSound.unloadAsync().catch(() => {});
+      this.primerSound = null;
+    }
+  }
+
   async speak(text, language = 'vi-VN') {
     try {
       // Cho phép phát âm thanh khi iPhone ở chế độ silent/vibrate
@@ -559,15 +571,31 @@ class SpeechRecognitionService {
         await Speech.stop();
       }
 
+      // CRITICAL FIX: expo-speech (AVSpeechSynthesizer) on iOS respects mute switch
+      // Audio.setAudioModeAsync does NOT affect it. Workaround: play a nearly-silent
+      // sound via expo-av to force iOS audio session to playback mode.
+      try {
+        await this._cleanupPrimerSound();
+        const { sound: primer } = await Audio.Sound.createAsync(
+          require('../../assets/sounds/Ritual_sounds/chime.mp3'),
+          { shouldPlay: true, isLooping: true, volume: 0.01 }
+        );
+        this.primerSound = primer;
+      } catch (e) {
+        console.log('[SpeechRecognition] Primer sound error (non-critical):', e.message);
+      }
+
       await Speech.speak(text, {
         language: language,
         pitch: 1.0,
         rate: 0.9, // Slightly slower for Vietnamese
-        onDone: () => {
+        onDone: async () => {
           console.log('[SpeechRecognition] Finished speaking');
+          await this._cleanupPrimerSound();
         },
-        onError: (error) => {
+        onError: async (error) => {
           console.error('[SpeechRecognition] Speak error:', error);
+          await this._cleanupPrimerSound();
         }
       });
 
@@ -575,6 +603,7 @@ class SpeechRecognitionService {
 
     } catch (error) {
       console.error('[SpeechRecognition] Speak error:', error);
+      await this._cleanupPrimerSound();
     }
   }
 
@@ -585,6 +614,7 @@ class SpeechRecognitionService {
   async stopSpeaking() {
     try {
       await Speech.stop();
+      await this._cleanupPrimerSound();
     } catch (error) {
       console.error('[SpeechRecognition] Stop speaking error:', error);
     }
