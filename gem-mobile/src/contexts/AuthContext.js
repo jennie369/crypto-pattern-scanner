@@ -97,6 +97,10 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
+  // Track current user in a ref so onAuthStateChange callback
+  // can detect involuntary sign-out (ref avoids stale closure issue with [] deps)
+  const userRef = useRef(null);
+
   // =====================================================
   // UPGRADE STATE - For showing UpgradeSuccessModal
   // =====================================================
@@ -360,6 +364,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         if (user) {
+          userRef.current = user;
           setUser(user);
           const { data: profileData } = await getUserProfile(user.id);
           setProfile(profileData);
@@ -447,6 +452,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         if (session?.user) {
+          userRef.current = session.user;
           setUser(session.user);
           const { data: profileData } = await getUserProfile(session.user.id);
           setProfile(profileData);
@@ -550,6 +556,12 @@ export const AuthProvider = ({ children }) => {
               });
           }
         } else {
+          // Detect involuntary sign-out (auto-refresh failed, token revoked, etc.)
+          // userRef.current is set when user was previously logged in
+          const wasLoggedIn = !!userRef.current;
+          const previousUserId = userRef.current?.id;
+
+          userRef.current = null;
           setUser(null);
           setProfile(null);
 
@@ -580,8 +592,8 @@ export const AuthProvider = ({ children }) => {
           hybridChatService.cleanup();
 
           // Clear user cache
-          if (user?.id) {
-            cacheService.clearUserCache(user.id).catch(() => {});
+          if (previousUserId) {
+            cacheService.clearUserCache(previousUserId).catch(() => {});
           }
 
           // Remove all Supabase Realtime channels
@@ -589,6 +601,21 @@ export const AuthProvider = ({ children }) => {
             supabase.getChannels().forEach(ch => supabase.removeChannel(ch));
           } catch (e) {
             console.warn('[AuthContext] Channel cleanup error:', e.message);
+          }
+
+          // If user was logged in before, this is an involuntary sign-out
+          // (e.g., auto-refresh failed due to revoked/expired refresh token)
+          // Clear biometric credentials so stale token doesn't cause repeated errors
+          if (wasLoggedIn && (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESH_FAILED')) {
+            console.warn('[AuthContext] Involuntary sign-out detected, clearing biometric...');
+            biometricService.disable().catch((err) => {
+              console.error('[AuthContext] Failed to disable biometric on involuntary sign-out:', err);
+            });
+            Alert.alert(
+              'Phiên đăng nhập hết hạn',
+              'Vui lòng đăng nhập lại để tiếp tục sử dụng app.',
+              [{ text: 'OK' }]
+            );
           }
         }
         setLoading(false);

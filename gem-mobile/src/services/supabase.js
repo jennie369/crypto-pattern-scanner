@@ -10,6 +10,10 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../utils/constants';
 // Re-export for use in other services
 export { SUPABASE_URL, SUPABASE_ANON_KEY };
 
+// Derive storage key from project URL (avoids hardcoding project ID)
+const PROJECT_REF = SUPABASE_URL.match(/https:\/\/([^.]+)/)?.[1] ?? 'pgfkbcnzqozzkohwbgbk';
+const AUTH_STORAGE_KEY = `sb-${PROJECT_REF}-auth-token`;
+
 // Custom storage adapter that works on both web and native
 const customStorage = {
   getItem: async (key) => {
@@ -116,7 +120,7 @@ export const getCurrentUser = async () => {
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
       console.warn('[Supabase] Invalid refresh token detected');
       // Clear stored session
-      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      await customStorage.removeItem(AUTH_STORAGE_KEY);
       return { user: null, error: { ...error, isInvalidRefreshToken: true } };
     }
 
@@ -125,7 +129,7 @@ export const getCurrentUser = async () => {
     console.error('GetCurrentUser error:', error);
     // Check for invalid refresh token in catch
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
-      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      await customStorage.removeItem(AUTH_STORAGE_KEY);
       return { user: null, error: { message: error.message, isInvalidRefreshToken: true } };
     }
     return { user: null, error };
@@ -139,7 +143,7 @@ export const getSession = async () => {
     // Check for invalid refresh token error
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
       console.warn('[Supabase] Invalid refresh token in getSession');
-      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      await customStorage.removeItem(AUTH_STORAGE_KEY);
       return { session: null, error: { ...error, isInvalidRefreshToken: true } };
     }
 
@@ -147,7 +151,7 @@ export const getSession = async () => {
   } catch (error) {
     console.error('GetSession error:', error);
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
-      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      await customStorage.removeItem(AUTH_STORAGE_KEY);
       return { session: null, error: { message: error.message, isInvalidRefreshToken: true } };
     }
     return { session: null, error };
@@ -198,7 +202,7 @@ export const setSessionFromToken = async (refreshToken) => {
     // Check for invalid refresh token
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
       console.warn('[Supabase] Biometric login failed - invalid refresh token');
-      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      await customStorage.removeItem(AUTH_STORAGE_KEY);
       return { data: null, error: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại bằng email/mật khẩu.', isInvalidRefreshToken: true } };
     }
 
@@ -206,7 +210,7 @@ export const setSessionFromToken = async (refreshToken) => {
   } catch (error) {
     console.error('SetSessionFromToken error:', error);
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
-      await customStorage.removeItem('sb-pgfkbcnzqozzkohwbgbk-auth-token');
+      await customStorage.removeItem(AUTH_STORAGE_KEY);
       return { data: null, error: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', isInvalidRefreshToken: true } };
     }
     return { data: null, error: { message: error.message || 'Lỗi khôi phục phiên đăng nhập' } };
