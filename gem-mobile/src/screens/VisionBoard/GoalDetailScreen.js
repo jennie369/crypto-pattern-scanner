@@ -524,12 +524,15 @@ const GoalDetailScreen = () => {
             .or('type.in.(affirmation,action_plan),widget_type.in.(affirmation,action_plan)');
 
           const linkedIdStr = String(linkedId);
+          const visionGoalIdStr = content?.vision_goal_id ? String(content.vision_goal_id) : null;
           const linkedWidgets = (potentialLinkedWidgets || []).filter(w => {
             if (w.id === widgetData.id) return false;
             const c = typeof w.content === 'string' ? JSON.parse(w.content) : w.content;
             const cLinkedId = c?.linked_goal_id ? String(c.linked_goal_id) : null;
             const cGoalId = c?.goalId ? String(c.goalId) : null;
-            return cLinkedId === linkedIdStr || cGoalId === linkedIdStr;
+            const cVisionGoalId = c?.vision_goal_id ? String(c.vision_goal_id) : null;
+            return cLinkedId === linkedIdStr || cGoalId === linkedIdStr
+              || (visionGoalIdStr && cVisionGoalId === visionGoalIdStr);
           });
 
           // Extract affirmations and actions from linked widgets
@@ -543,8 +546,8 @@ const GoalDetailScreen = () => {
               extractedAffirmations = [...extractedAffirmations, ...affs];
             }
 
-            if ((wType === 'action_plan' || wType === 'habit') && c?.steps) {
-              goalData._linkedSteps = c.steps;
+            if ((wType === 'action_plan' || wType === 'habit') && (c?.steps || c?.actions)) {
+              goalData._linkedSteps = c.steps || c.actions;
             }
           });
 
@@ -619,13 +622,27 @@ const GoalDetailScreen = () => {
       // Load actions
       let actionsLoaded = false;
 
-      // Try vision_actions table first
-      const { data: actionsData } = await supabase
+      // Try vision_actions table first (by goalId, then by vision_goal_id from widget content)
+      let actionsData = null;
+      const { data: directActions } = await supabase
         .from('vision_actions')
         .select('*')
         .eq('goal_id', goalId)
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
+
+      actionsData = directActions;
+
+      // If no actions found and we have a vision_goal_id (goalId is a widget ID), try that
+      if ((!actionsData || actionsData.length === 0) && goalData._content?.vision_goal_id) {
+        const { data: linkedActions } = await supabase
+          .from('vision_actions')
+          .select('*')
+          .eq('goal_id', goalData._content.vision_goal_id)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true });
+        actionsData = linkedActions;
+      }
 
       if (actionsData && actionsData.length > 0) {
         setGroupedActions({

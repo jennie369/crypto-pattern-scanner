@@ -1071,8 +1071,12 @@ export const createQuickGoalWithJournal = async ({
           id: `goal_${timestamp}_0`,
           title: goalTitle,
           completed: false,
+          actionSteps: actions,
+          affirmations: affirmations,
           rituals: rituals,
         }],
+        actionSteps: actions,
+        affirmations: affirmations,
         rituals: rituals,
         crystals: crystals,
         source, // Track where goal came from (tarot, iching, gemmaster, vision_board)
