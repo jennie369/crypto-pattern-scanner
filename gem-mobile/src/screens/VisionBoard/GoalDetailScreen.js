@@ -33,6 +33,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode as decodeBase64 } from 'base64-arraybuffer';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -970,10 +971,14 @@ const GoalDetailScreen = () => {
       Speech.stop();
       setPlayingAffirmationId(null);
     } else {
+      // Cho phép phát âm thanh khi iPhone đang ở chế độ silent/vibrate
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+      });
       setPlayingAffirmationId(affirmation.id);
       Speech.speak(affirmation.text, {
         language: 'vi-VN',
-        rate: 0.85, // Slower for better comprehension
+        rate: 0.85,
         onDone: () => setPlayingAffirmationId(null),
         onError: () => setPlayingAffirmationId(null),
       });

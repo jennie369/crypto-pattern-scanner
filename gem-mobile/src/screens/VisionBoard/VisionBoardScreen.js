@@ -77,6 +77,7 @@ import {
 
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect, G } from 'react-native-svg';
 
@@ -4527,6 +4528,8 @@ const VisionBoardScreen = () => {
     if (!currentAffirmation) return;
 
     try {
+      // Cho phép phát âm thanh khi iPhone ở chế độ silent/vibrate
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
       // Stop any ongoing speech first
       await Speech.stop();
 
@@ -4590,10 +4593,9 @@ const VisionBoardScreen = () => {
     if (!text) return;
 
     try {
-      // Stop any ongoing speech first
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
       await Speech.stop();
 
-      // Speak the text in Vietnamese
       await Speech.speak(text, {
         language: 'vi-VN',
         pitch: 1.0,

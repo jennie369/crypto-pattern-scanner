@@ -17,6 +17,7 @@
 
 import { Platform } from 'react-native';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase';
 
@@ -549,6 +550,9 @@ class SpeechRecognitionService {
    */
   async speak(text, language = 'vi-VN') {
     try {
+      // Cho phép phát âm thanh khi iPhone ở chế độ silent/vibrate
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+
       // Check if already speaking
       const isSpeaking = await Speech.isSpeakingAsync();
       if (isSpeaking) {

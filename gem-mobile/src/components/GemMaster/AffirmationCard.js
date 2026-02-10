@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Volume2, Check, ChevronLeft, ChevronRight, Flame, Sparkles } from 'lucide-react-native';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import widgetManagementService from '../../services/widgetManagementService';
 import CustomAlert, { useCustomAlert } from '../CustomAlert';
@@ -42,6 +43,7 @@ const AffirmationCard = ({ widget, onComplete }) => {
     }
 
     try {
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
       setIsSpeaking(true);
 
       await Speech.speak(currentAffirmation, {

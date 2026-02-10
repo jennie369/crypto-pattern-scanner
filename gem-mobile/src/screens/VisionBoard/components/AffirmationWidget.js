@@ -30,6 +30,7 @@ import {
   Flame,
 } from 'lucide-react-native';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { supabase } from '../../../services/supabase';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 
@@ -81,6 +82,7 @@ const AffirmationWidget = ({ completedToday = 0, streak = 0, onComplete }) => {
       Speech.stop();
       setIsSpeaking(false);
     } else {
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
       setIsSpeaking(true);
       await Speech.speak(currentAffirmation, {
         language: 'vi-VN',
