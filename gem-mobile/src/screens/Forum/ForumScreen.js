@@ -1089,7 +1089,7 @@ const ForumScreen = ({ navigation }) => {
     if (ad.link.startsWith('/upgrade')) {
       navigation.navigate('Shop', { screen: 'Pricing' });
     } else if (ad.link.startsWith('/academy')) {
-      navigation.navigate('Shop', { screen: 'CourseList', params: { sourceTab: 'Home' } });
+      navigation.navigate('CourseList', { sourceTab: 'Home' });
     }
   };
 

@@ -29,6 +29,15 @@ import FollowingListScreen from '../screens/Profile/FollowingListScreen';
 // Shop screen (for viewing products from posts without cross-tab navigation)
 import { ProductDetailScreen } from '../screens/Shop';
 
+// Course screens (for viewing courses without cross-tab navigation)
+import CoursesScreen from '../screens/Courses/CoursesScreen';
+import CourseDetailScreen from '../screens/Courses/CourseDetailScreen';
+import LessonPlayerScreen from '../screens/Courses/LessonPlayerScreen';
+import QuizScreen from '../screens/Courses/QuizScreen';
+import CertificateScreen from '../screens/Courses/CertificateScreen';
+import CourseCheckoutScreen from '../screens/Courses/CourseCheckout';
+import { CourseAchievementsScreen } from '../screens/Gamification';
+
 const Stack = createNativeStackNavigator();
 
 export default function HomeStack() {
@@ -120,6 +129,31 @@ export default function HomeStack() {
           animation: 'slide_from_right',
         }}
       />
+
+      {/* Course screens - avoids cross-tab navigation to Shop */}
+      <Stack.Screen name="CourseList" component={CoursesScreen} />
+      <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
+      <Stack.Screen
+        name="LessonPlayer"
+        component={LessonPlayerScreen}
+        options={{ presentation: 'fullScreenModal' }}
+      />
+      <Stack.Screen
+        name="QuizScreen"
+        component={QuizScreen}
+        options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="Certificate"
+        component={CertificateScreen}
+        options={{ presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="CourseCheckout"
+        component={CourseCheckoutScreen}
+        options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+      />
+      <Stack.Screen name="CourseAchievements" component={CourseAchievementsScreen} />
     </Stack.Navigator>
   );
 }

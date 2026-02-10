@@ -212,6 +212,17 @@ import {
   APIConnectionScreen,
 } from '../screens/Exchange';
 
+// User-facing Course Screens (for in-tab navigation from MyCoursesSection)
+// These are the SAME components used in ShopStack/CourseStack,
+// registered here so navigation stays within AccountStack (no cross-tab jump)
+import CoursesScreen from '../screens/Courses/CoursesScreen';
+import CourseDetailScreenUser from '../screens/Courses/CourseDetailScreen';
+import LessonPlayerScreen from '../screens/Courses/LessonPlayerScreen';
+import QuizScreenUser from '../screens/Courses/QuizScreen';
+import CertificateScreen from '../screens/Courses/CertificateScreen';
+import CourseCheckoutScreen from '../screens/Courses/CourseCheckout';
+import { CourseAchievementsScreen } from '../screens/Gamification';
+
 // Exchange Affiliate Admin Screen
 import AffiliateExchangeAdminScreen from '../screens/Admin/AffiliateExchangeAdminScreen';
 
@@ -829,6 +840,55 @@ export default function AccountStack() {
         name="AdminInstructors"
         component={AdminInstructorsScreen}
         options={{ headerShown: false }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* USER COURSE SCREENS (in-tab, no cross-tab) */}
+      {/* Keeps navigation within AccountStack so     */}
+      {/* back button returns to AssetsHome correctly  */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen name="CourseList" component={CoursesScreen} />
+      <Stack.Screen name="CourseDetail" component={CourseDetailScreenUser} />
+      <Stack.Screen
+        name="LessonPlayer"
+        component={LessonPlayerScreen}
+        options={{
+          presentation: 'fullScreenModal',
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name="QuizScreen"
+        component={QuizScreenUser}
+        options={{
+          presentation: 'fullScreenModal',
+          animation: 'slide_from_bottom',
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="Certificate"
+        component={CertificateScreen}
+        options={{
+          presentation: 'modal',
+          animation: 'fade_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name="CourseCheckout"
+        component={CourseCheckoutScreen}
+        options={{
+          presentation: 'fullScreenModal',
+          animation: 'slide_from_bottom',
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="CourseAchievements"
+        component={CourseAchievementsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
       />
 
       {/* ═══════════════════════════════════════════ */}

@@ -79,7 +79,7 @@ export default function MyCoursesSection({ navigation }) {
       {/* Main Navigation Button - All Courses */}
       <TouchableOpacity
         style={styles.mainButton}
-        onPress={() => navigation.navigate('Shop', { screen: 'CourseList', params: { sourceTab: 'Account' } })}
+        onPress={() => navigation.navigate('CourseList', { sourceTab: 'Account' })}
         activeOpacity={0.8}
       >
         <View style={styles.mainButtonContent}>
@@ -93,7 +93,7 @@ export default function MyCoursesSection({ navigation }) {
       <View style={styles.quickActions}>
         <TouchableOpacity
           style={[styles.quickBtn, styles.quickBtnWide]}
-          onPress={() => navigation.navigate('Shop', { screen: 'CourseList', params: { filter: 'enrolled', sourceTab: 'Account' } })}
+          onPress={() => navigation.navigate('CourseList', { filter: 'enrolled', sourceTab: 'Account' })}
         >
           <PlayCircle size={18} color={COLORS.gold} />
           <Text style={styles.quickText}>Đang học</Text>
@@ -106,7 +106,7 @@ export default function MyCoursesSection({ navigation }) {
 
         <TouchableOpacity
           style={[styles.quickBtn, styles.quickBtnWide]}
-          onPress={() => navigation.navigate('Shop', { screen: 'CourseList', params: { filter: 'completed', sourceTab: 'Account' } })}
+          onPress={() => navigation.navigate('CourseList', { filter: 'completed', sourceTab: 'Account' })}
         >
           <Award size={18} color={COLORS.gold} />
           <Text style={styles.quickText}>Hoàn thành</Text>
@@ -122,7 +122,7 @@ export default function MyCoursesSection({ navigation }) {
       <View style={styles.statsRow}>
         <TouchableOpacity
           style={styles.statItem}
-          onPress={() => navigation.navigate('Shop', { screen: 'CourseList', params: { filter: 'enrolled', sourceTab: 'Account' } })}
+          onPress={() => navigation.navigate('CourseList', { filter: 'enrolled', sourceTab: 'Account' })}
           activeOpacity={0.7}
         >
           <View style={[styles.statIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
@@ -140,7 +140,7 @@ export default function MyCoursesSection({ navigation }) {
 
         <TouchableOpacity
           style={styles.statItem}
-          onPress={() => navigation.navigate('Shop', { screen: 'CourseList', params: { filter: 'enrolled', sourceTab: 'Account' } })}
+          onPress={() => navigation.navigate('CourseList', { filter: 'enrolled', sourceTab: 'Account' })}
           activeOpacity={0.7}
         >
           <View style={[styles.statIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
@@ -158,7 +158,7 @@ export default function MyCoursesSection({ navigation }) {
 
         <TouchableOpacity
           style={styles.statItem}
-          onPress={() => navigation.navigate('Shop', { screen: 'CourseList', params: { filter: 'completed', sourceTab: 'Account' } })}
+          onPress={() => navigation.navigate('CourseList', { filter: 'completed', sourceTab: 'Account' })}
           activeOpacity={0.7}
         >
           <View style={[styles.statIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
