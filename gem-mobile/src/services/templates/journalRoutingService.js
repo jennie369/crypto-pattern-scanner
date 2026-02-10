@@ -1009,7 +1009,7 @@ export const createQuickGoalWithJournal = async ({
       created_from_template: 'quick_goal',
       status: 'active',
       progress_percent: 0,
-      deadline: deadline || null,
+      end_date: deadline || null,
     };
 
     const { data: goal, error: goalError } = await supabase
