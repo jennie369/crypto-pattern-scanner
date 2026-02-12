@@ -1,9 +1,9 @@
 /**
- * Gemral - Waitlist Leads Admin Screen
- * Manage waitlist leads from landing page
+ * Gemral - Waitlist Leads Admin Screen (CRM Redesign)
+ * HubSpot-inspired professional CRM for managing waitlist leads
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,63 +17,243 @@ import {
   ScrollView,
   Share,
   Linking,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import {
   ArrowLeft,
   Users,
   Search,
-  Filter,
-  TrendingUp,
   ChevronDown,
   ChevronUp,
   X,
   Phone,
   Mail,
   Calendar,
-  Tag,
   Star,
   Zap,
-  RefreshCw,
   Download,
   ExternalLink,
   MessageCircle,
   ShoppingBag,
-  Eye,
   Clock,
   Target,
   Award,
-  FileText,
+  Globe,
+  Smartphone,
+  Monitor,
+  Hash,
+  UserPlus,
+  BarChart3,
+  ArrowRight,
+  TrendingUp,
 } from 'lucide-react-native';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import AdminTooltip from '../../components/Admin/AdminTooltip';
-import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS, BORDER_RADIUS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
 import waitlistLeadService, {
   LEAD_STATUS_OPTIONS as IMPORTED_LEAD_STATUS_OPTIONS,
-  LEAD_GRADE_COLORS as IMPORTED_LEAD_GRADE_COLORS,
   INTEREST_LABELS as IMPORTED_INTEREST_LABELS,
   INTEREST_ICONS as IMPORTED_INTEREST_ICONS,
 } from '../../services/waitlistLeadService';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 // Fallback values in case imports fail
 const LEAD_STATUS_OPTIONS = IMPORTED_LEAD_STATUS_OPTIONS || ['all', 'new', 'engaged', 'qualified', 'hot', 'converted', 'inactive'];
-const LEAD_GRADE_COLORS = IMPORTED_LEAD_GRADE_COLORS || { A: '#22C55E', B: '#3B82F6', C: '#F59E0B', D: '#EF4444' };
 const INTEREST_LABELS = IMPORTED_INTEREST_LABELS || {};
 const INTEREST_ICONS = IMPORTED_INTEREST_ICONS || {};
 
-// Status labels and colors
+// Status labels and colors - using design tokens
 const STATUS_CONFIG = {
-  new: { label: 'Mới', color: '#6B7280', icon: Star },
-  engaged: { label: 'Đã tương tác', color: '#3B82F6', icon: MessageCircle },
-  qualified: { label: 'Tiềm năng', color: '#8B5CF6', icon: Target },
-  hot: { label: 'Hot', color: '#EF4444', icon: Zap },
-  converted: { label: 'Đã chuyển đổi', color: '#22C55E', icon: Award },
-  inactive: { label: 'Không hoạt động', color: '#9CA3AF', icon: Clock },
+  new: { label: 'Mới', color: COLORS.textMuted, icon: Star },
+  engaged: { label: 'Đã tương tác', color: COLORS.info, icon: MessageCircle },
+  qualified: { label: 'Tiềm năng', color: COLORS.purple, icon: Target },
+  hot: { label: 'Hot', color: COLORS.error, icon: Zap },
+  converted: { label: 'Đã chuyển đổi', color: COLORS.success, icon: Award },
+  inactive: { label: 'Không hoạt động', color: COLORS.textDisabled, icon: Clock },
 };
 
+// Grade colors using design tokens
+const LEAD_GRADE_COLORS = {
+  A: COLORS.success,
+  B: COLORS.info,
+  C: COLORS.warning,
+  D: COLORS.textMuted,
+  F: COLORS.error,
+};
+
+// Funnel stages for visualization
+const FUNNEL_STAGES = ['new', 'engaged', 'qualified', 'hot', 'converted'];
+
+// --- LeadCard Component (React.memo) ---
+const LeadCard = React.memo(({
+  item,
+  isExpanded,
+  onToggleExpand,
+  onCallPhone,
+  onZaloMessage,
+  onViewDetail,
+}) => {
+  const statusConfig = STATUS_CONFIG[item.lead_status] || STATUS_CONFIG.new;
+  const StatusIcon = statusConfig.icon;
+  const gradeColor = LEAD_GRADE_COLORS[item.lead_grade] || LEAD_GRADE_COLORS.D;
+
+  const daysAgo = useMemo(() => {
+    const diff = Date.now() - new Date(item.created_at).getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days === 0) return 'Hôm nay';
+    return `${days}d`;
+  }, [item.created_at]);
+
+  const interests = item.interested_products;
+  const hasInterests = Array.isArray(interests) && interests.length > 0;
+  const displayInterests = hasInterests ? interests.slice(0, 3) : [];
+
+  return (
+    <TouchableOpacity
+      style={styles.leadCard}
+      onPress={() => onToggleExpand(item.id)}
+      activeOpacity={0.8}
+    >
+      {/* Row 1: Avatar + Name + Days ago + Grade + Status + Chevron */}
+      <View style={styles.leadRow1}>
+        <View style={[styles.leadAvatar, { borderColor: statusConfig.color + '60' }]}>
+          <StatusIcon size={16} color={statusConfig.color} />
+        </View>
+
+        <View style={styles.leadNameCol}>
+          <Text style={styles.leadName} numberOfLines={1}>{item.full_name}</Text>
+          <Text style={styles.leadDaysAgo}>{daysAgo}</Text>
+        </View>
+
+        <View style={[styles.gradeBadge, { backgroundColor: gradeColor + '20' }]}>
+          <Text style={[styles.gradeText, { color: gradeColor }]}>
+            {item.lead_grade}
+          </Text>
+        </View>
+
+        <View style={[styles.statusBadge, { backgroundColor: statusConfig.color + '18' }]}>
+          <Text style={[styles.statusText, { color: statusConfig.color }]}>
+            {statusConfig.label}
+          </Text>
+        </View>
+
+        {isExpanded ? (
+          <ChevronUp size={18} color={COLORS.textSecondary} />
+        ) : (
+          <ChevronDown size={18} color={COLORS.textSecondary} />
+        )}
+      </View>
+
+      {/* Row 2: Phone + Email + Score */}
+      <View style={styles.leadRow2}>
+        <View style={styles.contactItem}>
+          <Phone size={12} color={COLORS.textMuted} />
+          <Text style={styles.contactText}>{item.phone}</Text>
+        </View>
+        {item.email ? (
+          <View style={[styles.contactItem, { flex: 1 }]}>
+            <Mail size={12} color={COLORS.textMuted} />
+            <Text style={styles.contactText} numberOfLines={1}>{item.email}</Text>
+          </View>
+        ) : null}
+        <View style={[styles.scoreBadge, {
+          backgroundColor: item.lead_score >= 80 ? COLORS.error + '20' :
+                          item.lead_score >= 60 ? COLORS.warning + '20' :
+                          COLORS.purple + '20',
+        }]}>
+          <Star size={10} color={COLORS.gold} />
+          <Text style={styles.scoreText}>{item.lead_score}</Text>
+        </View>
+      </View>
+
+      {/* Row 3: Interest chips + Quick actions */}
+      <View style={styles.leadRow3}>
+        <View style={styles.chipsContainer}>
+          {displayInterests.map((interest) => (
+            <View key={interest} style={styles.interestChip}>
+              <Text style={styles.interestChipText}>
+                {INTEREST_ICONS[interest] || '📦'} {INTEREST_LABELS[interest]?.split(' ')[0] || interest}
+              </Text>
+            </View>
+          ))}
+          {hasInterests && interests.length > 3 && (
+            <Text style={styles.moreChipsText}>+{interests.length - 3}</Text>
+          )}
+        </View>
+
+        <View style={styles.quickActions}>
+          <TouchableOpacity
+            style={[styles.quickActionBtn, { backgroundColor: COLORS.success + '15' }]}
+            onPress={() => onCallPhone(item.phone)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Phone size={14} color={COLORS.success} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.quickActionBtn, { backgroundColor: COLORS.info + '15' }]}
+            onPress={() => onZaloMessage(item.phone)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <MessageCircle size={14} color={COLORS.info} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Expanded Content */}
+      {isExpanded && (
+        <View style={styles.expandedContent}>
+          {item.utm_source && (
+            <View style={styles.expandedRow}>
+              <Globe size={13} color={COLORS.textMuted} />
+              <Text style={styles.expandedLabel}>Nguồn:</Text>
+              <Text style={styles.expandedValue}>{item.utm_source}</Text>
+            </View>
+          )}
+
+          {item.referral_code && (
+            <View style={styles.expandedRow}>
+              <Hash size={13} color={COLORS.textMuted} />
+              <Text style={styles.expandedLabel}>Mã giới thiệu:</Text>
+              <Text style={styles.expandedValue}>{item.referral_code}</Text>
+            </View>
+          )}
+
+          <View style={styles.expandedRow}>
+            <ShoppingBag size={13} color={COLORS.textMuted} />
+            <Text style={styles.expandedLabel}>Shopify:</Text>
+            <Text style={styles.expandedValue}>
+              {item.shopify_sync_status || 'Chưa đồng bộ'}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.viewDetailBtn}
+            onPress={() => onViewDetail(item)}
+          >
+            <Text style={styles.viewDetailText}>Xem chi tiết</Text>
+            <ArrowRight size={14} color={COLORS.gold} />
+          </TouchableOpacity>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.lead_status === nextProps.item.lead_status &&
+    prevProps.item.lead_score === nextProps.item.lead_score &&
+    prevProps.isExpanded === nextProps.isExpanded
+  );
+});
+
+// --- Main Screen ---
 const WaitlistLeadsScreen = ({ navigation }) => {
   const { isAdmin } = useAuth();
   const { alert, AlertComponent } = useCustomAlert();
@@ -91,6 +271,21 @@ const WaitlistLeadsScreen = ({ navigation }) => {
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const LIMIT = 20;
+
+  // Computed stats
+  const computedStats = useMemo(() => {
+    if (!leads || leads.length === 0) return { avgScore: 0, contactedPct: 0 };
+
+    const totalScore = leads.reduce((sum, l) => sum + (l.lead_score || 0), 0);
+    const avgScore = Math.round(totalScore / leads.length);
+
+    const contacted = leads.filter(
+      (l) => l.lead_status !== 'new' && l.lead_status !== 'inactive'
+    ).length;
+    const contactedPct = leads.length > 0 ? Math.round((contacted / leads.length) * 100) : 0;
+
+    return { avgScore, contactedPct };
+  }, [leads]);
 
   // Load stats
   const loadStats = useCallback(async () => {
@@ -162,15 +357,15 @@ const WaitlistLeadsScreen = ({ navigation }) => {
   }, [loadStats, loadLeads]);
 
   // Load more
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     if (!loadingMore && hasMore && !loading) {
       setLoadingMore(true);
       loadLeads(false);
     }
-  };
+  }, [loadingMore, hasMore, loading, loadLeads]);
 
   // Handle status change
-  const handleStatusChange = async (leadId, newStatus) => {
+  const handleStatusChange = useCallback(async (leadId, newStatus) => {
     try {
       await waitlistLeadService.updateLeadStatus(leadId, newStatus);
       alert({
@@ -189,22 +384,21 @@ const WaitlistLeadsScreen = ({ navigation }) => {
         buttons: [{ text: 'OK' }],
       });
     }
-  };
+  }, [loadLeads, loadStats, alert]);
 
   // Call phone
-  const handleCallPhone = (phone) => {
+  const handleCallPhone = useCallback((phone) => {
     Linking.openURL(`tel:${phone}`);
-  };
+  }, []);
 
   // Send Zalo message
-  const handleZaloMessage = (phone) => {
-    // Remove leading 0 and add 84
+  const handleZaloMessage = useCallback((phone) => {
     const zaloPhone = phone.startsWith('0') ? '84' + phone.slice(1) : phone;
     Linking.openURL(`https://zalo.me/${zaloPhone}`);
-  };
+  }, []);
 
   // Export leads
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     try {
       const exportData = await waitlistLeadService.exportLeads({ status: statusFilter });
 
@@ -218,7 +412,6 @@ const WaitlistLeadsScreen = ({ navigation }) => {
         return;
       }
 
-      // Convert to CSV-like text
       const headers = Object.keys(exportData[0] || {}).join('\t');
       const rows = exportData.map((row) => Object.values(row).join('\t'));
       const csvText = [headers, ...rows].join('\n');
@@ -230,10 +423,10 @@ const WaitlistLeadsScreen = ({ navigation }) => {
     } catch (error) {
       console.error('[WaitlistLeads] Export error:', error);
     }
-  };
+  }, [statusFilter, alert]);
 
   // View lead detail
-  const viewLeadDetail = async (lead) => {
+  const viewLeadDetail = useCallback(async (lead) => {
     try {
       const fullLead = await waitlistLeadService.getLead(lead.id);
       const activities = await waitlistLeadService.getLeadActivities(lead.id);
@@ -245,10 +438,15 @@ const WaitlistLeadsScreen = ({ navigation }) => {
     } catch (error) {
       console.error('[WaitlistLeads] Error getting lead detail:', error);
     }
-  };
+  }, []);
+
+  // Toggle expand
+  const handleToggleExpand = useCallback((id) => {
+    setExpandedLead((prev) => (prev === id ? null : id));
+  }, []);
 
   // Format date
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('vi-VN', {
@@ -258,55 +456,73 @@ const WaitlistLeadsScreen = ({ navigation }) => {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
+  }, []);
 
-  // Render stats cards
+  // keyExtractor
+  const keyExtractor = useCallback((item) => item.id, []);
+
+  // --- Render Stats Cards (2x3 grid) ---
   const renderStats = () => (
-    <View style={styles.statsContainer}>
-      <AdminTooltip
-        tooltipKey="leads_stats_intro"
-        message="Tổng quan về leads trong hệ thống"
-      >
+    <View style={styles.statsGrid}>
+      {/* Row 1 */}
+      <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>{stats.total_leads || 0}</Text>
+          <Users size={16} color={COLORS.gold} />
+          <Text style={[styles.statValue, { color: COLORS.gold }]}>
+            {stats.total_leads || 0}
+          </Text>
           <Text style={styles.statLabel}>Tổng leads</Text>
         </View>
-      </AdminTooltip>
 
-      <View style={styles.statCard}>
-        <Text style={[styles.statValue, { color: COLORS.cyan }]}>
-          {stats.today_leads || 0}
-        </Text>
-        <Text style={styles.statLabel}>Hôm nay</Text>
-      </View>
-
-      <AdminTooltip
-        tooltipKey="lead_score_explain"
-        message="Lead Hot có điểm >= 80"
-      >
         <View style={styles.statCard}>
-          <Text style={[styles.statValue, { color: '#EF4444' }]}>
+          <TrendingUp size={16} color={COLORS.cyan} />
+          <Text style={[styles.statValue, { color: COLORS.cyan }]}>
+            {stats.today_leads || 0}
+          </Text>
+          <Text style={styles.statLabel}>Hôm nay</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <Zap size={16} color={COLORS.error} />
+          <Text style={[styles.statValue, { color: COLORS.error }]}>
             {stats.hot_leads || 0}
           </Text>
           <Text style={styles.statLabel}>Hot</Text>
         </View>
-      </AdminTooltip>
+      </View>
 
-      <View style={styles.statCard}>
-        <Text style={[styles.statValue, { color: '#22C55E' }]}>
-          {stats.conversion_rate || 0}%
-        </Text>
-        <Text style={styles.statLabel}>Tỷ lệ chuyển</Text>
+      {/* Row 2 */}
+      <View style={styles.statsRow}>
+        <View style={styles.statCard}>
+          <Star size={16} color={COLORS.purple} />
+          <Text style={[styles.statValue, { color: COLORS.purple }]}>
+            {computedStats.avgScore}
+          </Text>
+          <Text style={styles.statLabel}>Điểm TB</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <BarChart3 size={16} color={COLORS.info} />
+          <Text style={[styles.statValue, { color: COLORS.info }]}>
+            {computedStats.contactedPct}%
+          </Text>
+          <Text style={styles.statLabel}>Đã liên hệ</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <Award size={16} color={COLORS.success} />
+          <Text style={[styles.statValue, { color: COLORS.success }]}>
+            {stats.conversion_rate || 0}%
+          </Text>
+          <Text style={styles.statLabel}>Chuyển đổi</Text>
+        </View>
       </View>
     </View>
   );
 
-  // Render filter tabs
+  // --- Render Filter Tabs ---
   const renderFilters = () => {
-    // Safety check for LEAD_STATUS_OPTIONS
-    if (!LEAD_STATUS_OPTIONS || !Array.isArray(LEAD_STATUS_OPTIONS)) {
-      return null;
-    }
+    if (!LEAD_STATUS_OPTIONS || !Array.isArray(LEAD_STATUS_OPTIONS)) return null;
 
     return (
       <AdminTooltip
@@ -343,154 +559,78 @@ const WaitlistLeadsScreen = ({ navigation }) => {
     );
   };
 
-  // Render lead card
-  const renderLeadCard = ({ item }) => {
-    const isExpanded = expandedLead === item.id;
-    const statusConfig = STATUS_CONFIG[item.lead_status] || STATUS_CONFIG.new;
-    const StatusIcon = statusConfig.icon;
-    const gradeColor = LEAD_GRADE_COLORS[item.lead_grade] || LEAD_GRADE_COLORS.D;
+  // --- Render Lead Card ---
+  const renderLeadCard = useCallback(({ item }) => (
+    <LeadCard
+      item={item}
+      isExpanded={expandedLead === item.id}
+      onToggleExpand={handleToggleExpand}
+      onCallPhone={handleCallPhone}
+      onZaloMessage={handleZaloMessage}
+      onViewDetail={viewLeadDetail}
+    />
+  ), [expandedLead, handleToggleExpand, handleCallPhone, handleZaloMessage, viewLeadDetail]);
+
+  // --- Funnel Stage Visualization ---
+  const renderFunnelStage = (currentStatus) => {
+    const currentIndex = FUNNEL_STAGES.indexOf(currentStatus);
 
     return (
-      <TouchableOpacity
-        style={styles.leadCard}
-        onPress={() => setExpandedLead(isExpanded ? null : item.id)}
-        activeOpacity={0.8}
-      >
-        {/* Header */}
-        <View style={styles.leadHeader}>
-          <View style={styles.leadAvatar}>
-            <StatusIcon size={18} color={statusConfig.color} />
-          </View>
+      <View style={styles.funnelContainer}>
+        {FUNNEL_STAGES.map((stage, index) => {
+          const stageConfig = STATUS_CONFIG[stage];
+          const isActive = index <= currentIndex;
+          const isCurrent = stage === currentStatus;
 
-          <View style={styles.leadInfo}>
-            <Text style={styles.leadName}>{item.full_name}</Text>
-            <Text style={styles.leadPhone}>{item.phone}</Text>
-          </View>
-
-          <View style={styles.leadBadges}>
-            <AdminTooltip
-              tooltipKey="lead_grade_explain"
-              message="A=Hot(80+), B=Qualified(60+), C=Engaged(40+)"
-            >
-              <View style={[styles.gradeBadge, { backgroundColor: gradeColor + '30' }]}>
-                <Text style={[styles.gradeText, { color: gradeColor }]}>
-                  {item.lead_grade}
+          return (
+            <React.Fragment key={stage}>
+              {index > 0 && (
+                <View
+                  style={[
+                    styles.funnelLine,
+                    { backgroundColor: isActive ? stageConfig.color : COLORS.textDisabled + '40' },
+                  ]}
+                />
+              )}
+              <View style={styles.funnelStageItem}>
+                <View
+                  style={[
+                    styles.funnelDot,
+                    {
+                      backgroundColor: isActive ? stageConfig.color : 'transparent',
+                      borderColor: isActive ? stageConfig.color : COLORS.textDisabled,
+                    },
+                    isCurrent && styles.funnelDotCurrent,
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.funnelLabel,
+                    { color: isActive ? COLORS.textPrimary : COLORS.textDisabled },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {stageConfig.label}
                 </Text>
               </View>
-            </AdminTooltip>
-
-            <View style={[styles.statusBadge, { backgroundColor: statusConfig.color + '20' }]}>
-              <Text style={[styles.statusText, { color: statusConfig.color }]}>
-                {statusConfig.label}
-              </Text>
-            </View>
-          </View>
-
-          {isExpanded ? (
-            <ChevronUp size={20} color={COLORS.textSecondary} />
-          ) : (
-            <ChevronDown size={20} color={COLORS.textSecondary} />
-          )}
-        </View>
-
-        {/* Interests */}
-        {item.interested_products && Array.isArray(item.interested_products) && item.interested_products.length > 0 && (
-          <View style={styles.interestsRow}>
-            {item.interested_products.map((interest) => (
-              <View key={interest} style={styles.interestTag}>
-                <Text style={styles.interestText}>
-                  {INTEREST_ICONS[interest] || '📦'} {INTEREST_LABELS[interest]?.split(' ')[0] || interest}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Score and Date */}
-        <View style={styles.leadMeta}>
-          <View style={styles.metaItem}>
-            <Star size={14} color={COLORS.gold} />
-            <Text style={styles.metaText}>Điểm: {item.lead_score}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <Calendar size={14} color={COLORS.textSecondary} />
-            <Text style={styles.metaText}>
-              {new Date(item.created_at).toLocaleDateString('vi-VN')}
-            </Text>
-          </View>
-        </View>
-
-        {/* Expanded Content */}
-        {isExpanded && (
-          <View style={styles.expandedContent}>
-            {/* Email */}
-            {item.email && (
-              <View style={styles.detailRow}>
-                <Mail size={14} color={COLORS.textSecondary} />
-                <Text style={styles.detailText}>{item.email}</Text>
-              </View>
-            )}
-
-            {/* Source */}
-            {item.utm_source && (
-              <View style={styles.detailRow}>
-                <ExternalLink size={14} color={COLORS.textSecondary} />
-                <Text style={styles.detailText}>Nguồn: {item.utm_source}</Text>
-              </View>
-            )}
-
-            {/* Shopify sync status */}
-            <AdminTooltip
-              tooltipKey="shopify_sync_status"
-              message="Trạng thái đồng bộ với Shopify Customer"
-            >
-              <View style={styles.detailRow}>
-                <ShoppingBag size={14} color={COLORS.textSecondary} />
-                <Text style={styles.detailText}>
-                  Shopify: {item.shopify_sync_status || 'Chưa đồng bộ'}
-                  {item.shopify_customer_id && ` (ID: ${item.shopify_customer_id})`}
-                </Text>
-              </View>
-            </AdminTooltip>
-
-            {/* Action buttons */}
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionBtnCall]}
-                onPress={() => handleCallPhone(item.phone)}
-              >
-                <Phone size={16} color="#22C55E" />
-                <Text style={styles.actionBtnText}>Gọi</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionBtnZalo]}
-                onPress={() => handleZaloMessage(item.phone)}
-              >
-                <MessageCircle size={16} color="#0068FF" />
-                <Text style={styles.actionBtnText}>Zalo</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionBtnView]}
-                onPress={() => viewLeadDetail(item)}
-              >
-                <Eye size={16} color={COLORS.gold} />
-                <Text style={styles.actionBtnText}>Chi tiết</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      </TouchableOpacity>
+            </React.Fragment>
+          );
+        })}
+      </View>
     );
   };
 
-  // Render detail modal
+  // --- Render Detail Modal (Bottom-Sheet with BlurView) ---
   const renderDetailModal = () => {
     const lead = detailModal.lead;
     if (!lead) return null;
 
     const statusConfig = STATUS_CONFIG[lead.lead_status] || STATUS_CONFIG.new;
+    const gradeColor = LEAD_GRADE_COLORS[lead.lead_grade] || LEAD_GRADE_COLORS.D;
+
+    const daysSinceSignup = Math.floor(
+      (Date.now() - new Date(lead.created_at).getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     return (
       <Modal
@@ -500,71 +640,101 @@ const WaitlistLeadsScreen = ({ navigation }) => {
         onRequestClose={() => setDetailModal({ visible: false, lead: null })}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <BlurView
+            intensity={Platform.OS === 'ios' ? 30 : 80}
+            tint="dark"
+            style={StyleSheet.absoluteFill}
+          />
+
+          {/* Tap-to-dismiss area */}
+          <TouchableOpacity
+            style={styles.modalDismissArea}
+            activeOpacity={1}
+            onPress={() => setDetailModal({ visible: false, lead: null })}
+          />
+
+          {/* Bottom sheet container */}
+          <View style={styles.modalSheet}>
+            {/* Drag indicator */}
+            <View style={styles.dragIndicator} />
+
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Chi tiết Lead</Text>
+              <View>
+                <Text style={styles.modalTitle}>{lead.full_name}</Text>
+                <Text style={styles.modalSubtitle}>
+                  {daysSinceSignup === 0 ? 'Đăng ký hôm nay' : `${daysSinceSignup} ngày trước`}
+                </Text>
+              </View>
               <TouchableOpacity
                 onPress={() => setDetailModal({ visible: false, lead: null })}
+                style={styles.modalCloseBtn}
               >
-                <X size={24} color={COLORS.text} />
+                <X size={20} color={COLORS.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              {/* Lead Info */}
+            <ScrollView
+              style={styles.modalBody}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+            >
+              {/* Score Triptych */}
               <View style={styles.modalSection}>
-                <Text style={styles.sectionTitle}>Thông tin liên hệ</Text>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Họ tên:</Text>
-                  <Text style={styles.infoValue}>{lead.full_name}</Text>
+                <View style={styles.scoreTriptych}>
+                  <View style={styles.scoreTriptychItem}>
+                    <Text style={styles.scoreTriptychValue}>{lead.lead_score}</Text>
+                    <Text style={styles.scoreTriptychLabel}>Điểm</Text>
+                  </View>
+
+                  <View style={styles.scoreTriptychItem}>
+                    <View style={[styles.gradeCircle, { backgroundColor: gradeColor }]}>
+                      <Text style={styles.gradeCircleText}>{lead.lead_grade}</Text>
+                    </View>
+                    <Text style={styles.scoreTriptychLabel}>Xếp hạng</Text>
+                  </View>
+
+                  <View style={styles.scoreTriptychItem}>
+                    <View style={[styles.statusCircle, { backgroundColor: statusConfig.color }]}>
+                      <statusConfig.icon size={16} color={COLORS.textPrimary} />
+                    </View>
+                    <Text style={styles.scoreTriptychLabel}>{statusConfig.label}</Text>
+                  </View>
                 </View>
+              </View>
+
+              {/* Funnel Stage */}
+              <View style={styles.modalSection}>
+                <Text style={styles.sectionTitle}>Funnel</Text>
+                {renderFunnelStage(lead.lead_status)}
+              </View>
+
+              {/* Contact Info */}
+              <View style={styles.modalSection}>
+                <Text style={styles.sectionTitle}>Liên hệ</Text>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Điện thoại:</Text>
+                  <Phone size={14} color={COLORS.textMuted} />
+                  <Text style={styles.infoLabel}>Điện thoại</Text>
                   <Text style={styles.infoValue}>{lead.phone}</Text>
                 </View>
                 {lead.email && (
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Email:</Text>
-                    <Text style={styles.infoValue}>{lead.email}</Text>
+                    <Mail size={14} color={COLORS.textMuted} />
+                    <Text style={styles.infoLabel}>Email</Text>
+                    <Text style={styles.infoValue} numberOfLines={1}>{lead.email}</Text>
                   </View>
                 )}
-              </View>
-
-              {/* Lead Score */}
-              <View style={styles.modalSection}>
-                <Text style={styles.sectionTitle}>Đánh giá</Text>
-                <View style={styles.scoreRow}>
-                  <View style={styles.scoreItem}>
-                    <Text style={styles.scoreValue}>{lead.lead_score}</Text>
-                    <Text style={styles.scoreLabel}>Điểm</Text>
-                  </View>
-                  <View style={styles.scoreItem}>
-                    <View
-                      style={[
-                        styles.gradeCircle,
-                        { backgroundColor: LEAD_GRADE_COLORS[lead.lead_grade] },
-                      ]}
-                    >
-                      <Text style={styles.gradeCircleText}>{lead.lead_grade}</Text>
-                    </View>
-                    <Text style={styles.scoreLabel}>Xếp hạng</Text>
-                  </View>
-                  <View style={styles.scoreItem}>
-                    <View
-                      style={[styles.statusCircle, { backgroundColor: statusConfig.color }]}
-                    >
-                      <statusConfig.icon size={16} color="#fff" />
-                    </View>
-                    <Text style={styles.scoreLabel}>{statusConfig.label}</Text>
-                  </View>
+                <View style={styles.infoRow}>
+                  <Calendar size={14} color={COLORS.textMuted} />
+                  <Text style={styles.infoLabel}>Đăng ký</Text>
+                  <Text style={styles.infoValue}>{formatDate(lead.created_at)}</Text>
                 </View>
               </View>
 
               {/* Interests */}
               {lead.interested_products && Array.isArray(lead.interested_products) && lead.interested_products.length > 0 && (
                 <View style={styles.modalSection}>
-                  <Text style={styles.sectionTitle}>Quan tâm đến</Text>
+                  <Text style={styles.sectionTitle}>Quan tâm</Text>
                   <View style={styles.interestsList}>
                     {lead.interested_products.map((interest) => (
                       <View key={interest} style={styles.interestItem}>
@@ -576,33 +746,100 @@ const WaitlistLeadsScreen = ({ navigation }) => {
                 </View>
               )}
 
-              {/* Source Info */}
+              {/* Source */}
               <View style={styles.modalSection}>
                 <Text style={styles.sectionTitle}>Nguồn</Text>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>UTM Source:</Text>
+                  <Globe size={14} color={COLORS.textMuted} />
+                  <Text style={styles.infoLabel}>UTM Source</Text>
                   <Text style={styles.infoValue}>{lead.utm_source || 'Direct'}</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>UTM Medium:</Text>
+                  <ExternalLink size={14} color={COLORS.textMuted} />
+                  <Text style={styles.infoLabel}>UTM Medium</Text>
                   <Text style={styles.infoValue}>{lead.utm_medium || 'N/A'}</Text>
                 </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Đăng ký lúc:</Text>
-                  <Text style={styles.infoValue}>{formatDate(lead.created_at)}</Text>
-                </View>
+                {lead.utm_campaign && (
+                  <View style={styles.infoRow}>
+                    <Target size={14} color={COLORS.textMuted} />
+                    <Text style={styles.infoLabel}>Campaign</Text>
+                    <Text style={styles.infoValue}>{lead.utm_campaign}</Text>
+                  </View>
+                )}
+                {lead.referrer_url && (
+                  <View style={styles.infoRow}>
+                    <Globe size={14} color={COLORS.textMuted} />
+                    <Text style={styles.infoLabel}>Referrer</Text>
+                    <Text style={styles.infoValue} numberOfLines={1}>{lead.referrer_url}</Text>
+                  </View>
+                )}
               </View>
 
-              {/* Shopify Sync */}
+              {/* Referral */}
+              {(lead.referral_code || lead.referred_by || lead.referral_count > 0 || lead.queue_number) && (
+                <View style={styles.modalSection}>
+                  <Text style={styles.sectionTitle}>Giới thiệu</Text>
+                  {lead.referral_code && (
+                    <View style={styles.infoRow}>
+                      <Hash size={14} color={COLORS.textMuted} />
+                      <Text style={styles.infoLabel}>Mã GT</Text>
+                      <Text style={styles.infoValue}>{lead.referral_code}</Text>
+                    </View>
+                  )}
+                  {lead.referred_by && (
+                    <View style={styles.infoRow}>
+                      <UserPlus size={14} color={COLORS.textMuted} />
+                      <Text style={styles.infoLabel}>GT bởi</Text>
+                      <Text style={styles.infoValue}>{lead.referred_by}</Text>
+                    </View>
+                  )}
+                  {lead.referral_count > 0 && (
+                    <View style={styles.infoRow}>
+                      <Users size={14} color={COLORS.textMuted} />
+                      <Text style={styles.infoLabel}>Số GT</Text>
+                      <Text style={styles.infoValue}>{lead.referral_count}</Text>
+                    </View>
+                  )}
+                  {lead.queue_number && (
+                    <View style={styles.infoRow}>
+                      <Hash size={14} color={COLORS.textMuted} />
+                      <Text style={styles.infoLabel}>Số thứ tự</Text>
+                      <Text style={styles.infoValue}>#{lead.queue_number}</Text>
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {/* Device */}
+              {lead.device_type && (
+                <View style={styles.modalSection}>
+                  <Text style={styles.sectionTitle}>Thiết bị</Text>
+                  <View style={styles.infoRow}>
+                    {lead.device_type === 'mobile' ? (
+                      <Smartphone size={14} color={COLORS.textMuted} />
+                    ) : (
+                      <Monitor size={14} color={COLORS.textMuted} />
+                    )}
+                    <Text style={styles.infoLabel}>Loại</Text>
+                    <Text style={styles.infoValue}>
+                      {lead.device_type === 'mobile' ? 'Di động' : 'Máy tính'}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Shopify */}
               <View style={styles.modalSection}>
                 <Text style={styles.sectionTitle}>Shopify</Text>
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Trạng thái:</Text>
+                  <ShoppingBag size={14} color={COLORS.textMuted} />
+                  <Text style={styles.infoLabel}>Trạng thái</Text>
                   <Text style={styles.infoValue}>{lead.shopify_sync_status || 'pending'}</Text>
                 </View>
                 {lead.shopify_customer_id && (
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Customer ID:</Text>
+                    <Hash size={14} color={COLORS.textMuted} />
+                    <Text style={styles.infoLabel}>Customer ID</Text>
                     <Text style={styles.infoValue}>{lead.shopify_customer_id}</Text>
                   </View>
                 )}
@@ -611,27 +848,58 @@ const WaitlistLeadsScreen = ({ navigation }) => {
               {/* Status Change */}
               <View style={styles.modalSection}>
                 <Text style={styles.sectionTitle}>Thay đổi trạng thái</Text>
-                <View style={styles.statusButtonsRow}>
-                  {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                    <TouchableOpacity
-                      key={key}
-                      style={[
-                        styles.statusButton,
-                        lead.lead_status === key && { borderColor: config.color },
-                      ]}
-                      onPress={() => {
-                        handleStatusChange(lead.id, key);
-                        setDetailModal({ visible: false, lead: null });
-                      }}
-                    >
-                      <config.icon size={16} color={config.color} />
-                      <Text style={[styles.statusButtonText, { color: config.color }]}>
-                        {config.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                <View style={styles.statusGrid}>
+                  {Object.entries(STATUS_CONFIG).map(([key, config]) => {
+                    const isCurrentStatus = lead.lead_status === key;
+                    return (
+                      <TouchableOpacity
+                        key={key}
+                        style={[
+                          styles.statusButton,
+                          isCurrentStatus && { borderColor: config.color, backgroundColor: config.color + '15' },
+                        ]}
+                        onPress={() => {
+                          handleStatusChange(lead.id, key);
+                          setDetailModal({ visible: false, lead: null });
+                        }}
+                      >
+                        <config.icon size={14} color={config.color} />
+                        <Text style={[styles.statusButtonText, { color: config.color }]}>
+                          {config.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
+
+              {/* Action Buttons */}
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={[styles.modalActionBtn, { backgroundColor: COLORS.success + '20', borderColor: COLORS.success + '40' }]}
+                  onPress={() => {
+                    handleCallPhone(lead.phone);
+                    setDetailModal({ visible: false, lead: null });
+                  }}
+                >
+                  <Phone size={18} color={COLORS.success} />
+                  <Text style={[styles.modalActionBtnText, { color: COLORS.success }]}>Gọi điện</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalActionBtn, { backgroundColor: COLORS.info + '20', borderColor: COLORS.info + '40' }]}
+                  onPress={() => {
+                    handleZaloMessage(lead.phone);
+                    setDetailModal({ visible: false, lead: null });
+                  }}
+                >
+                  <MessageCircle size={18} color={COLORS.info} />
+                  <Text style={[styles.modalActionBtnText, { color: COLORS.info }]}>Nhắn Zalo</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Bottom spacer */}
+              <View style={{ height: SPACING.huge }} />
             </ScrollView>
           </View>
         </View>
@@ -640,14 +908,14 @@ const WaitlistLeadsScreen = ({ navigation }) => {
   };
 
   // Render loading footer
-  const renderFooter = () => {
+  const renderFooter = useCallback(() => {
     if (!loadingMore) return null;
     return (
       <View style={styles.loadingFooter}>
         <ActivityIndicator size="small" color={COLORS.gold} />
       </View>
     );
-  };
+  }, [loadingMore]);
 
   // Access check
   if (!isAdmin) {
@@ -663,7 +931,7 @@ const WaitlistLeadsScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <LinearGradient
-        colors={GRADIENTS.backgroundDark}
+        colors={GRADIENTS.background}
         style={styles.gradient}
       >
         {/* Header */}
@@ -672,7 +940,7 @@ const WaitlistLeadsScreen = ({ navigation }) => {
             style={styles.backBtn}
             onPress={() => navigation.goBack()}
           >
-            <ArrowLeft size={24} color={COLORS.text} />
+            <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Quản lý Leads</Text>
           <TouchableOpacity style={styles.exportBtn} onPress={handleExport}>
@@ -681,7 +949,12 @@ const WaitlistLeadsScreen = ({ navigation }) => {
         </View>
 
         {/* Stats */}
-        {renderStats()}
+        <AdminTooltip
+          tooltipKey="leads_stats_intro"
+          message="Tổng quan về leads trong hệ thống"
+        >
+          {renderStats()}
+        </AdminTooltip>
 
         {/* Search */}
         <View style={styles.searchContainer}>
@@ -720,7 +993,7 @@ const WaitlistLeadsScreen = ({ navigation }) => {
         ) : (
           <FlatList
             data={leads}
-            keyExtractor={(item) => item.id}
+            keyExtractor={keyExtractor}
             renderItem={renderLeadCard}
             contentContainerStyle={styles.listContent}
             refreshControl={
@@ -733,6 +1006,9 @@ const WaitlistLeadsScreen = ({ navigation }) => {
             onEndReached={loadMore}
             onEndReachedThreshold={0.3}
             ListFooterComponent={renderFooter}
+            removeClippedSubviews={true}
+            windowSize={10}
+            maxToRenderPerBatch={10}
           />
         )}
 
@@ -740,16 +1016,17 @@ const WaitlistLeadsScreen = ({ navigation }) => {
         {renderDetailModal()}
 
         {/* Custom Alert */}
-        <AlertComponent />
+        {AlertComponent}
       </LinearGradient>
     </SafeAreaView>
   );
 };
 
+// ─── Styles ───────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDark,
+    backgroundColor: COLORS.bgDarkest,
   },
   gradient: {
     flex: 1,
@@ -761,14 +1038,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderDark,
+    borderBottomColor: COLORS.inputBorder,
   },
   backBtn: {
     padding: SPACING.xs,
   },
   headerTitle: {
     ...TYPOGRAPHY.heading3,
-    color: COLORS.text,
+    color: COLORS.textPrimary,
     flex: 1,
     textAlign: 'center',
   },
@@ -776,54 +1053,59 @@ const styles = StyleSheet.create({
     padding: SPACING.xs,
   },
 
-  // Stats
-  statsContainer: {
-    flexDirection: 'row',
+  // ─── Stats (2x3 Grid) ────────────────────────────────────
+  statsGrid: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  statsRow: {
+    flexDirection: 'row',
     gap: SPACING.sm,
   },
   statCard: {
     flex: 1,
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    padding: SPACING.sm,
+    backgroundColor: GLASS.backgroundColor,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: GLASS.border,
+    borderColor: COLORS.inputBorder,
+    gap: 2,
   },
   statValue: {
-    ...TYPOGRAPHY.heading2,
+    fontSize: 18,
+    fontWeight: '700',
     color: COLORS.gold,
-    fontSize: 20,
   },
   statLabel: {
-    ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
-    marginTop: 2,
+    fontSize: 10,
+    color: COLORS.textMuted,
+    textAlign: 'center',
   },
 
-  // Search
+  // ─── Search ───────────────────────────────────────────────
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
+    backgroundColor: GLASS.backgroundColor,
+    borderRadius: BORDER_RADIUS.md,
     paddingHorizontal: SPACING.md,
     marginHorizontal: SPACING.md,
     marginBottom: SPACING.sm,
     borderWidth: 1,
-    borderColor: GLASS.border,
+    borderColor: COLORS.inputBorder,
   },
   searchInput: {
     flex: 1,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.sm,
-    color: COLORS.text,
+    color: COLORS.textPrimary,
     ...TYPOGRAPHY.body,
   },
 
-  // Filters
+  // ─── Filters ──────────────────────────────────────────────
   filterScrollView: {
     maxHeight: 50,
     marginBottom: SPACING.sm,
@@ -832,181 +1114,211 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     gap: SPACING.xs,
     flexDirection: 'row',
+    alignItems: 'center',
   },
   filterTab: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
+    paddingVertical: SPACING.sm,
     borderRadius: 20,
-    backgroundColor: GLASS.background,
+    backgroundColor: GLASS.backgroundColor,
     borderWidth: 1,
-    borderColor: GLASS.border,
+    borderColor: COLORS.inputBorder,
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   filterTabActive: {
     backgroundColor: COLORS.gold + '30',
     borderColor: COLORS.gold,
   },
   filterTabText: {
-    ...TYPOGRAPHY.caption,
+    fontSize: 12,
     color: COLORS.textSecondary,
+    lineHeight: Math.ceil(12 * 1.4),
   },
   filterTabTextActive: {
     color: COLORS.gold,
     fontWeight: '600',
   },
 
-  // List
+  // ─── List ─────────────────────────────────────────────────
   listContent: {
     paddingHorizontal: SPACING.md,
     paddingBottom: CONTENT_BOTTOM_PADDING,
   },
 
-  // Lead Card
+  // ─── Lead Card ────────────────────────────────────────────
   leadCard: {
-    backgroundColor: GLASS.background,
-    borderRadius: 16,
+    backgroundColor: GLASS.backgroundColor,
+    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
     borderWidth: 1,
-    borderColor: GLASS.border,
+    borderColor: COLORS.inputBorder,
   },
-  leadHeader: {
+
+  // Row 1: Avatar + Name + Grade + Status + Chevron
+  leadRow1: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
   },
   leadAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.backgroundDark,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgDarkest,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
   },
-  leadInfo: {
+  leadNameCol: {
     flex: 1,
   },
   leadName: {
-    ...TYPOGRAPHY.bodyBold,
-    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
   },
-  leadPhone: {
-    ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
-  },
-  leadBadges: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
+  leadDaysAgo: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginTop: 1,
   },
   gradeBadge: {
     paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.sm,
   },
   gradeText: {
-    ...TYPOGRAPHY.captionBold,
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '700',
   },
   statusBadge: {
     paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.sm,
   },
   statusText: {
-    ...TYPOGRAPHY.caption,
-    fontSize: 11,
+    fontSize: 10,
+    fontWeight: '500',
   },
 
-  // Interests
-  interestsRow: {
+  // Row 2: Phone + Email + Score
+  leadRow2: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.xs,
-    marginTop: SPACING.sm,
-  },
-  interestTag: {
-    backgroundColor: COLORS.gold + '15',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  interestText: {
-    ...TYPOGRAPHY.caption,
-    color: COLORS.gold,
-    fontSize: 11,
-  },
-
-  // Meta
-  leadMeta: {
-    flexDirection: 'row',
+    alignItems: 'center',
     gap: SPACING.md,
     marginTop: SPACING.sm,
     paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderDark,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.inputBorder,
   },
-  metaItem: {
+  contactItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  metaText: {
-    ...TYPOGRAPHY.caption,
+  contactText: {
+    fontSize: 11,
     color: COLORS.textSecondary,
   },
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.sm,
+    marginLeft: 'auto',
+  },
+  scoreText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
 
-  // Expanded
+  // Row 3: Interest chips + Quick actions
+  leadRow3: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  chipsContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  interestChip: {
+    backgroundColor: COLORS.gold + '12',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  interestChipText: {
+    fontSize: 10,
+    color: COLORS.gold,
+  },
+  moreChipsText: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    alignSelf: 'center',
+  },
+  quickActions: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+  },
+  quickActionBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Expanded content
   expandedContent: {
     marginTop: SPACING.md,
     paddingTop: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderDark,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.inputBorder,
+    gap: SPACING.sm,
   },
-  detailRow: {
+  expandedRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginBottom: SPACING.xs,
   },
-  detailText: {
-    ...TYPOGRAPHY.caption,
+  expandedLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  expandedValue: {
+    fontSize: 11,
     color: COLORS.textSecondary,
     flex: 1,
   },
-
-  // Action buttons
-  actionButtons: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    marginTop: SPACING.md,
-  },
-  actionBtn: {
-    flex: 1,
+  viewDetailBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: SPACING.xs,
+    marginTop: SPACING.sm,
     paddingVertical: SPACING.sm,
-    borderRadius: 10,
+    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: COLORS.gold + '12',
     borderWidth: 1,
-  },
-  actionBtnCall: {
-    borderColor: '#22C55E30',
-    backgroundColor: '#22C55E10',
-  },
-  actionBtnZalo: {
-    borderColor: '#0068FF30',
-    backgroundColor: '#0068FF10',
-  },
-  actionBtnView: {
     borderColor: COLORS.gold + '30',
-    backgroundColor: COLORS.gold + '10',
   },
-  actionBtnText: {
-    ...TYPOGRAPHY.captionBold,
-    color: COLORS.text,
+  viewDetailText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.gold,
   },
 
-  // Loading
+  // ─── Loading / Empty ──────────────────────────────────────
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
@@ -1021,8 +1333,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     alignItems: 'center',
   },
-
-  // Empty
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
@@ -1041,7 +1351,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
 
-  // Access denied
+  // ─── Access Denied ────────────────────────────────────────
   accessDenied: {
     flex: 1,
     alignItems: 'center',
@@ -1052,18 +1362,31 @@ const styles = StyleSheet.create({
     color: COLORS.error,
   },
 
-  // Modal
+  // ─── Detail Modal (Bottom Sheet) ─────────────────────────
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    justifyContent: 'flex-end',
   },
-  modalContent: {
-    backgroundColor: COLORS.backgroundDark,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+  modalDismissArea: {
+    flex: 1,
+  },
+  modalSheet: {
+    backgroundColor: 'rgba(15, 16, 48, 0.95)',
+    borderTopLeftRadius: BORDER_RADIUS.xxl,
+    borderTopRightRadius: BORDER_RADIUS.xxl,
     maxHeight: '90%',
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    borderColor: COLORS.inputBorder,
     paddingBottom: CONTENT_BOTTOM_PADDING,
+  },
+  dragIndicator: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: COLORS.textDisabled,
+    alignSelf: 'center',
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1071,59 +1394,59 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderDark,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.inputBorder,
   },
   modalTitle: {
-    ...TYPOGRAPHY.heading3,
-    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  modalSubtitle: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  modalCloseBtn: {
+    padding: SPACING.xs,
   },
   modalBody: {
     paddingHorizontal: SPACING.lg,
   },
+
+  // ─── Modal Sections ──────────────────────────────────────
   modalSection: {
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderDark,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.inputBorder,
   },
   sectionTitle: {
-    ...TYPOGRAPHY.bodyBold,
+    fontSize: 12,
+    fontWeight: '600',
     color: COLORS.gold,
     marginBottom: SPACING.sm,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.xs,
-  },
-  infoLabel: {
-    ...TYPOGRAPHY.body,
-    color: COLORS.textSecondary,
-  },
-  infoValue: {
-    ...TYPOGRAPHY.body,
-    color: COLORS.text,
-    flex: 1,
-    textAlign: 'right',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 
-  // Score
-  scoreRow: {
+  // Score Triptych
+  scoreTriptych: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    paddingVertical: SPACING.sm,
   },
-  scoreItem: {
+  scoreTriptychItem: {
     alignItems: 'center',
+    gap: SPACING.xs,
   },
-  scoreValue: {
-    ...TYPOGRAPHY.heading1,
-    color: COLORS.gold,
+  scoreTriptychValue: {
     fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.gold,
   },
-  scoreLabel: {
-    ...TYPOGRAPHY.caption,
+  scoreTriptychLabel: {
+    fontSize: 11,
     color: COLORS.textSecondary,
-    marginTop: 4,
   },
   gradeCircle: {
     width: 40,
@@ -1133,8 +1456,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   gradeCircleText: {
-    ...TYPOGRAPHY.heading3,
-    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
   statusCircle: {
     width: 40,
@@ -1142,6 +1466,60 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // Funnel
+  funnelContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  funnelStageItem: {
+    alignItems: 'center',
+    width: (SCREEN_WIDTH - SPACING.lg * 2 - 48) / 5,
+  },
+  funnelDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+  },
+  funnelDotCurrent: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2.5,
+  },
+  funnelLine: {
+    height: 2,
+    width: 12,
+    alignSelf: 'center',
+    marginTop: 5,
+  },
+  funnelLabel: {
+    fontSize: 8,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+
+  // Info rows
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    minWidth: 70,
+  },
+  infoValue: {
+    fontSize: 12,
+    color: COLORS.textPrimary,
+    flex: 1,
+    textAlign: 'right',
   },
 
   // Interests
@@ -1155,15 +1533,15 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
   },
   interestEmoji: {
-    fontSize: 20,
+    fontSize: 18,
   },
   interestLabel: {
-    ...TYPOGRAPHY.body,
-    color: COLORS.text,
+    fontSize: 13,
+    color: COLORS.textPrimary,
   },
 
-  // Status buttons
-  statusButtonsRow: {
+  // Status grid
+  statusGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.sm,
@@ -1174,13 +1552,35 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    borderRadius: 10,
+    borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
-    borderColor: COLORS.borderDark,
-    backgroundColor: GLASS.background,
+    borderColor: COLORS.inputBorder,
+    backgroundColor: GLASS.backgroundColor,
   },
   statusButtonText: {
-    ...TYPOGRAPHY.captionBold,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+
+  // Modal action buttons
+  modalActions: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    paddingVertical: SPACING.lg,
+  },
+  modalActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+  },
+  modalActionBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
