@@ -18,20 +18,20 @@ const IMAGES = {
   hero: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767797226483_tq4kc1_gemral-landing-11.webp',
   painFinance: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767797396519_mkzpi0_gemral-landing-05.webp',
   painLife: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767797402692_ietkp7_gemral-landing-12.webp',
-  gemMaster: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768132189654_7j0vh6_gemral-landing-07.webp',
+  gemMaster: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/landing/gemral_20260123_011848_27.webp',
   tarot: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768132275766_haheqd_gemral-landing-06.webp',
   kinhDich: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768132608964_4cgufu_gemral_20260111_185544_02.webp',
   marketAnalysis: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768046652309_yyocqq_sec04-02.jpg.webp',
   visionBoard: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768132606257_kqq69q_gemral_20260111_185544_03.webp',
-  scanner: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768146551404_ka1emz_1767797543898_k4efcq_gemral-landing-03.webp',
+  scanner: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/landing/gemral_20260201_021757_02.webp',
   // New images for additional sections
   frequencyMethod: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768146689220_mbfoqb_gemral-landing-08.webp',
-  coursesMindset: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798515858_kz5dz0_gemral-landing-050.webp',
-  coursesTrading1: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768147823064_ljnkr2_gemral-landing-040.webp',
-  coursesTrading2: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798635167_0cdgtd_gemral-landing-13.webp',
+  coursesMindset: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/landing/gemral_20260123_011848_39.webp',
+  coursesTrading1: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/landing/gemral_20260123_011848_37.webp',
+  coursesTrading2: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/landing/gemral-landing-13.webp',
   personas: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768147893451_0cuqpi_gemral-landing-01.webp',
-  testimonials: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798880233_rzsx99_gemral-landing-10.webp',
-  partnership: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767799236693_odlylc_gemral-landing-02.jpg',
+  testimonials: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/landing/gemral_20260113_192423_02.webp',
+  partnership: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/landing/gemral_20260113_184459_03.webp',
   // Testimonial avatars
   testimonial1: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768156652185_flnht6_gemral_20260112_003909_01.webp',
   testimonial2: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768156549499_fm3fa3_gemral_20260112_003909_03.webp',
@@ -849,57 +849,7 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* ========== MAIN NAVIGATION BAR ========== */}
-      <nav className="landing-nav">
-        <div className="landing-nav-inner">
-          <Link to="/" className="landing-nav-logo">
-            <Sparkles size={20} />
-            <span>GEMRAL</span>
-          </Link>
-
-          <div className={`landing-nav-links ${mobileMenuOpen ? 'open' : ''}`}>
-            <Link to="/courses" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
-              <GraduationCap size={16} /> Khóa Học
-            </Link>
-            <Link to="/shop" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
-              <ShoppingBag size={16} /> Cửa Hàng
-            </Link>
-            <Link to="/pricing" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
-              <CreditCard size={16} /> Bảng Giá
-            </Link>
-            <Link to="/forum" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
-              <MessageCircle size={16} /> Cộng Đồng
-            </Link>
-
-            {user ? (
-              <>
-                <Link to="/scanner-v2" className="landing-nav-link highlight" onClick={() => setMobileMenuOpen(false)}>
-                  <BarChart3 size={16} /> Scanner
-                </Link>
-                <Link to="/chatbot" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>
-                  <Compass size={16} /> GEM Master
-                </Link>
-                <Link to="/scanner-v2" className="landing-nav-btn primary" onClick={() => setMobileMenuOpen(false)}>
-                  <Activity size={16} /> Vào App
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="landing-nav-btn secondary" onClick={() => setMobileMenuOpen(false)}>
-                  <LogIn size={16} /> Đăng Nhập
-                </Link>
-                <Link to="/signup" className="landing-nav-btn primary" onClick={() => setMobileMenuOpen(false)}>
-                  <UserPlus size={16} /> Đăng Ký
-                </Link>
-              </>
-            )}
-          </div>
-
-          <button className="landing-nav-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </nav>
+      {/* ========== MAIN NAVIGATION BAR (Hidden) ========== */}
 
       {/* ========== FOMO WIDGET STICKY ========== */}
       <div className="fomo-widget">
@@ -2232,7 +2182,7 @@ export default function Landing() {
                 <li><CheckCircle size={14} /> Bài tập viết nhật ký có hướng dẫn giúp bạn nhận diện pattern năng lượng cá nhân</li>
                 <li><CheckCircle size={14} /> 7 Nghi Thức buổi sáng và buổi tối để duy trì tần số cao suốt cả ngày</li>
               </ul>
-              <button className="btn-course" onClick={scrollToWaitlist}>Tham Gia Ngay</button>
+              <button className="btn-course" onClick={() => addToCart('mindset-7days')}>Đăng Ký Ngay</button>
             </div>
 
             <div className="mindset-course-card featured">
@@ -2249,7 +2199,7 @@ export default function Landing() {
                 <li><CheckCircle size={14} /> Kỹ thuật nâng tần số để trở thành nam châm thu hút tình yêu đích thực</li>
                 <li><CheckCircle size={14} /> Bài tập thực hành yêu thương bản thân trước khi yêu người khác</li>
               </ul>
-              <button className="btn-course primary" onClick={scrollToWaitlist}>Tham Gia Ngay</button>
+              <button className="btn-course primary" onClick={() => addToCart('mindset-love')}>Đăng Ký Ngay</button>
             </div>
 
             <div className="mindset-course-card">
@@ -2265,7 +2215,7 @@ export default function Landing() {
                 <li><CheckCircle size={14} /> Kỹ thuật gieo hạt tài chính để tạo năng lượng mới về tiền bạc</li>
                 <li><CheckCircle size={14} /> Bài tập thực hành "Xả để Nhận" giúp mở rộng khả năng tiếp nhận</li>
               </ul>
-              <button className="btn-course" onClick={scrollToWaitlist}>Tham Gia Ngay</button>
+              <button className="btn-course" onClick={() => addToCart('mindset-wealth')}>Đăng Ký Ngay</button>
             </div>
           </div>
 
