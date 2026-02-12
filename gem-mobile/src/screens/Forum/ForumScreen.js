@@ -87,9 +87,11 @@ const MAX_CACHE_SIZE = 300;
 const MAX_TRACKED_POSTS = 500;
 
 // Feed loading timeout - prevents infinite spinner
-const FEED_LOAD_TIMEOUT = 15000; // 15 seconds (generous for initial load with multiple queries)
-const FEED_LOADMORE_TIMEOUT = 12000; // 12 seconds for pagination
-const TIMEOUT_RETRY_COOLDOWN = 5000; // 5 second cooldown between retries after timeout
+// Individual Supabase DB queries now abort at 8s (see supabase.js global.fetch),
+// so 10s is enough headroom for 3 parallel queries + processing.
+const FEED_LOAD_TIMEOUT = 10000; // 10 seconds
+const FEED_LOADMORE_TIMEOUT = 8000; // 8 seconds for pagination
+const TIMEOUT_RETRY_COOLDOWN = 3000; // 3 second cooldown between retries after timeout
 
 // Helper: wrap a promise with timeout
 const withTimeout = (promise, ms, label = 'operation') => {

@@ -13,6 +13,7 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  Pressable,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { BlurView } from 'expo-blur';
@@ -160,19 +161,19 @@ const SideMenu = ({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      {/* Overlay */}
-      <TouchableOpacity
-        style={styles.overlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        {/* Side Panel */}
+      {/* Container: backdrop and panel as SIBLINGS, not parent-child.
+          This prevents the backdrop's touch handler from intercepting
+          scroll gestures inside the panel. */}
+      <View style={styles.container}>
+        {/* Backdrop - only catches taps OUTSIDE the panel to dismiss */}
+        <Pressable style={styles.backdrop} onPress={onClose} />
+
+        {/* Side Panel - NOT nested inside any touchable */}
         <Animated.View
           style={[
             styles.sidePanel,
             { transform: [{ translateX: slideAnim }] },
           ]}
-          onStartShouldSetResponder={() => true}
         >
           {/* Menu Header - Glass Morphism Liquid Effect */}
           <BlurView
@@ -191,6 +192,7 @@ const SideMenu = ({
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
+              pointerEvents="none"
             />
             {/* Top Sheen for Liquid Effect */}
             <LinearGradient
@@ -198,6 +200,7 @@ const SideMenu = ({
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               style={styles.topSheen}
+              pointerEvents="none"
             />
 
             <View style={styles.menuHeaderContent}>
@@ -279,7 +282,7 @@ const SideMenu = ({
             tint="dark"
             style={styles.feedListBlur}
           >
-            {/* Liquid Glass Gradient Background - Deep purple tones */}
+            {/* Decorative gradients — pointerEvents="none" so they never steal touches */}
             <LinearGradient
               colors={[
                 'rgba(15, 16, 48, 0.85)',
@@ -292,33 +295,37 @@ const SideMenu = ({
               start={{ x: 0, y: 0 }}
               end={{ x: 0.2, y: 1 }}
               style={StyleSheet.absoluteFill}
+              pointerEvents="none"
             />
-            {/* Top highlight sheen for liquid depth */}
             <LinearGradient
               colors={['rgba(255,255,255,0.06)', 'rgba(255,255,255,0)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 0.3 }}
               style={styles.topHighlight}
+              pointerEvents="none"
             />
-            {/* Left edge sheen for liquid effect */}
             <LinearGradient
               colors={['rgba(106, 91, 255, 0.1)', 'rgba(106, 91, 255, 0)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.leftSheen}
+              pointerEvents="none"
             />
-            {/* Subtle inner glow */}
             <LinearGradient
               colors={['rgba(138, 123, 255, 0.05)', 'transparent', 'rgba(138, 123, 255, 0.03)']}
               locations={[0, 0.5, 1]}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
               style={styles.innerGlow}
+              pointerEvents="none"
             />
 
             <ScrollView
               style={styles.feedList}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled
+              contentContainerStyle={styles.feedListContent}
             >
               {/* System Feeds */}
               {systemFeeds.map((section, sectionIndex) => {
@@ -486,16 +493,21 @@ const SideMenu = ({
             </ScrollView>
           </BlurView>
         </Animated.View>
-      </TouchableOpacity>
+      </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  // Full-screen container — backdrop and panel are siblings
+  container: {
     flex: 1,
+  },
+
+  // Backdrop — absolute fill behind the panel, catches dismiss taps
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-start',
   },
 
   sidePanel: {
@@ -610,6 +622,10 @@ const styles = StyleSheet.create({
 
   feedList: {
     flex: 1,
+  },
+
+  feedListContent: {
+    flexGrow: 1,
   },
 
   feedSection: {

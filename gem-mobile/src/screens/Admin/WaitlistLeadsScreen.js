@@ -118,14 +118,16 @@ const WaitlistLeadsScreen = ({ navigation }) => {
         offset: currentOffset,
       });
 
+      const fetchedLeads = result?.leads || [];
+
       if (reset) {
-        setLeads(result.leads);
+        setLeads(fetchedLeads);
       } else {
-        setLeads((prev) => [...prev, ...result.leads]);
+        setLeads((prev) => [...prev, ...fetchedLeads]);
       }
 
-      setHasMore(result.hasMore);
-      setOffset(currentOffset + result.leads.length);
+      setHasMore(result?.hasMore ?? false);
+      setOffset(currentOffset + fetchedLeads.length);
     } catch (error) {
       console.error('[WaitlistLeads] Error loading leads:', error);
       alert({
@@ -206,6 +208,16 @@ const WaitlistLeadsScreen = ({ navigation }) => {
     try {
       const exportData = await waitlistLeadService.exportLeads({ status: statusFilter });
 
+      if (!Array.isArray(exportData) || exportData.length === 0) {
+        alert({
+          type: 'info',
+          title: 'Thông báo',
+          message: 'Không có dữ liệu để xuất',
+          buttons: [{ text: 'OK' }],
+        });
+        return;
+      }
+
       // Convert to CSV-like text
       const headers = Object.keys(exportData[0] || {}).join('\t');
       const rows = exportData.map((row) => Object.values(row).join('\t'));
@@ -227,8 +239,8 @@ const WaitlistLeadsScreen = ({ navigation }) => {
       const activities = await waitlistLeadService.getLeadActivities(lead.id);
       setDetailModal({
         visible: true,
-        lead: fullLead,
-        activities,
+        lead: fullLead || lead,
+        activities: activities || [],
       });
     } catch (error) {
       console.error('[WaitlistLeads] Error getting lead detail:', error);
@@ -697,7 +709,7 @@ const WaitlistLeadsScreen = ({ navigation }) => {
             <ActivityIndicator size="large" color={COLORS.gold} />
             <Text style={styles.loadingText}>Đang tải leads...</Text>
           </View>
-        ) : leads.length === 0 ? (
+        ) : !leads || leads.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Users size={48} color={COLORS.textMuted} />
             <Text style={styles.emptyText}>Chưa có lead nào</Text>

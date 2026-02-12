@@ -365,25 +365,14 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
 
   } catch (error) {
     console.error('[FeedService] Error in fast mode:', error?.message);
-    // Fall back to legacy feed generation with a timeout to prevent infinite hang
-    try {
-      console.log('[FeedService] Falling back to legacy feed generation...');
-      const legacyTimeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Legacy fallback timeout')), 12000)
-      );
-      const legacyResult = await Promise.race([
-        generateFeedLegacy(userId, sessionId, limit),
-        legacyTimeout,
-      ]);
-      return legacyResult;
-    } catch (legacyError) {
-      console.error('[FeedService] Legacy fallback also failed:', legacyError?.message);
-      return {
-        feed: [],
-        sessionId: sessionId || generateUUID(),
-        hasMore: true, // Allow retry
-      };
-    }
+    // Return empty feed immediately — let ForumScreen handle retry/fallback.
+    // Previously this cascaded to generateFeedLegacy which ran 5+ more queries,
+    // doubling the total wait time on slow networks before the caller's timeout fired.
+    return {
+      feed: [],
+      sessionId: sessionId || generateUUID(),
+      hasMore: true, // Allow retry
+    };
   }
 }
 

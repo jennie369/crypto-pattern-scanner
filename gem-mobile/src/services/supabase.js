@@ -51,13 +51,36 @@ const customStorage = {
   },
 };
 
-// Create Supabase client with custom storage
+// Per-request timeout for database (PostgREST) queries.
+// Prevents individual HTTP requests from hanging indefinitely on stalled mobile connections.
+// Only applies to /rest/v1/ endpoints — auth, storage, realtime, edge functions are unaffected.
+const DB_QUERY_TIMEOUT = 8000; // 8 seconds
+
+// Create Supabase client with custom storage and fetch timeout
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: customStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: Platform.OS === 'web',
+  },
+  global: {
+    fetch: (url, options = {}) => {
+      // Only add timeout for PostgREST API calls (database queries)
+      // Skip for storage (/storage/v1/), auth (/auth/v1/), edge functions (/functions/v1/)
+      const isDataQuery = typeof url === 'string' && url.includes('/rest/v1/');
+
+      if (!isDataQuery || options.signal) {
+        return fetch(url, options);
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), DB_QUERY_TIMEOUT);
+      return fetch(url, {
+        ...options,
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeoutId));
+    },
   },
 });
 
