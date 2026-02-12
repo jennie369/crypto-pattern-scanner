@@ -87,7 +87,9 @@ const MAX_CACHE_SIZE = 300;
 const MAX_TRACKED_POSTS = 500;
 
 // Feed loading timeout - prevents infinite spinner
-const FEED_LOAD_TIMEOUT = 10000; // 10 seconds
+const FEED_LOAD_TIMEOUT = 15000; // 15 seconds (generous for initial load with multiple queries)
+const FEED_LOADMORE_TIMEOUT = 12000; // 12 seconds for pagination
+const TIMEOUT_RETRY_COOLDOWN = 5000; // 5 second cooldown between retries after timeout
 
 // Helper: wrap a promise with timeout
 const withTimeout = (promise, ms, label = 'operation') => {
@@ -126,6 +128,7 @@ const ForumScreen = ({ navigation }) => {
   const lastPostIdRef = useRef(null);
   const lastCreatedAtRef = useRef(null); // Track last post created_at for pagination
   const loadMoreStartTimeRef = useRef(null); // Track when loadMore started for stuck detection
+  const lastTimeoutRef = useRef(0); // Cooldown after timeout to prevent retry loops
 
   // Request ID for cancelling stale requests when user switches tabs quickly
   const currentRequestIdRef = useRef(0);
@@ -512,6 +515,8 @@ const ForumScreen = ({ navigation }) => {
       setPage(1);
       lastPostIdRef.current = null;
       lastCreatedAtRef.current = null;
+      lastTimeoutRef.current = 0; // Clear timeout cooldown
+      loadMoreStartTimeRef.current = null;
 
       // Invalidate caches
       forumCache.lastFetch = 0;
@@ -669,13 +674,20 @@ const ForumScreen = ({ navigation }) => {
           return;
         }
 
-        setFeedItems(result.feed);
-        setSessionId(result.sessionId);
-
         // Extract posts for legacy compatibility
         const postsOnly = result.feed
           .filter(item => item.type === 'post')
           .map(item => item.data);
+
+        // SELF-HEALING: If API returned empty on reset, keep cached data visible
+        if (postsOnly.length === 0 && feedItems.length > 0) {
+          console.log('[ForumScreen] Empty feed response on reset - keeping cached data');
+          setHasMore(true); // Allow retry
+          return;
+        }
+
+        setFeedItems(result.feed);
+        setSessionId(result.sessionId);
         setPosts(postsOnly);
 
         // Track last post ID and created_at for pagination
@@ -705,7 +717,7 @@ const ForumScreen = ({ navigation }) => {
 
         const result = await withTimeout(
           getNextFeedPage(user.id, sessionId, lastPostIdRef.current, 20),
-          FEED_LOAD_TIMEOUT,
+          FEED_LOADMORE_TIMEOUT,
           'getNextFeedPage'
         );
 
@@ -766,12 +778,14 @@ const ForumScreen = ({ navigation }) => {
         return;
       }
 
-      // On timeout: keep existing posts visible, allow retry on next scroll
+      // On timeout: keep existing posts visible, allow retry after cooldown
       if (isTimeout) {
-        console.log('[ForumScreen] Timeout - keeping cached data, allowing retry');
-        setHasMore(true); // Allow retry
+        console.log('[ForumScreen] Timeout - keeping cached data, retry after cooldown');
+        lastTimeoutRef.current = Date.now(); // Set cooldown to prevent rapid retry loop
+        setHasMore(true); // Allow retry (after cooldown)
         setLoadingMore(false);
         setLoading(false);
+        loadMoreStartTimeRef.current = null;
         return;
       }
 
@@ -852,6 +866,7 @@ const ForumScreen = ({ navigation }) => {
     setPage(1);
     setHasMore(true);
     lastPostIdRef.current = null;
+    lastTimeoutRef.current = 0; // Clear timeout cooldown on manual refresh
     lastCreatedAtRef.current = null;
     setSessionId(null); // Force new session for hybrid feed
     trackedPostIds.current.clear(); // Clear local impression tracking
@@ -927,6 +942,7 @@ const ForumScreen = ({ navigation }) => {
 
   // INFINITE SCROLL: Trigger when user scrolls near bottom
   // SELF-HEALING: Auto-recover if loadingMore has been stuck for >15 seconds
+  // ANTI-LOOP: Respect timeout cooldown to prevent rapid retry after timeout
   const onEndReached = useCallback(() => {
     // Detect stuck loadingMore state
     if (loadingMore && loadMoreStartTimeRef.current) {
@@ -937,6 +953,14 @@ const ForumScreen = ({ navigation }) => {
         loadMoreStartTimeRef.current = null;
         // Allow the next onEndReached call to trigger loadPosts
         return;
+      }
+    }
+
+    // Respect timeout cooldown - don't retry immediately after a timeout
+    if (lastTimeoutRef.current > 0) {
+      const timeSinceTimeout = Date.now() - lastTimeoutRef.current;
+      if (timeSinceTimeout < TIMEOUT_RETRY_COOLDOWN) {
+        return; // Wait before retrying
       }
     }
 

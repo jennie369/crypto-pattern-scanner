@@ -90,7 +90,7 @@ import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
 import useScrollToTop from '../../hooks/useScrollToTop';
 import { forumService } from '../../services/forumService';
-import { signOut, supabase } from '../../services/supabase';
+import { supabase } from '../../services/supabase';
 import EditProfileModal from './components/EditProfileModal';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import AffiliateSection from './components/AffiliateSection';
@@ -118,7 +118,7 @@ const accountCache = {
 export default function AccountScreen() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { user, profile: authProfile, isAdmin } = useAuth();
+  const { user, profile: authProfile, isAdmin, intentionalLogout } = useAuth();
   const { alert, AlertComponent } = useCustomAlert();
 
   // State - initialize from cache for instant display
@@ -583,12 +583,12 @@ export default function AccountScreen() {
           text: 'Đăng xuất',
           style: 'destructive',
           onPress: async () => {
-            console.log('[AccountScreen] Logout button pressed, calling signOut...');
+            console.log('[AccountScreen] Logout button pressed, calling intentionalLogout...');
             try {
-              const result = await signOut();
-              console.log('[AccountScreen] SignOut result:', result);
+              const result = await intentionalLogout();
+              console.log('[AccountScreen] Logout result:', result);
             } catch (error) {
-              console.error('[AccountScreen] SignOut error:', error);
+              console.error('[AccountScreen] Logout error:', error);
             }
           }
         },

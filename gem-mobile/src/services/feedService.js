@@ -364,9 +364,26 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
     return result;
 
   } catch (error) {
-    console.error('[FeedService] Error in fast mode, falling back to legacy:', error);
-    // Fall back to legacy feed generation
-    return generateFeedLegacy(userId, sessionId, limit);
+    console.error('[FeedService] Error in fast mode:', error?.message);
+    // Fall back to legacy feed generation with a timeout to prevent infinite hang
+    try {
+      console.log('[FeedService] Falling back to legacy feed generation...');
+      const legacyTimeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Legacy fallback timeout')), 12000)
+      );
+      const legacyResult = await Promise.race([
+        generateFeedLegacy(userId, sessionId, limit),
+        legacyTimeout,
+      ]);
+      return legacyResult;
+    } catch (legacyError) {
+      console.error('[FeedService] Legacy fallback also failed:', legacyError?.message);
+      return {
+        feed: [],
+        sessionId: sessionId || generateUUID(),
+        hasMore: true, // Allow retry
+      };
+    }
   }
 }
 
@@ -1336,71 +1353,48 @@ export async function getNextFeedPage(userId, sessionId, lastPostId, limit = 20)
   try {
     console.log(`[FeedService] getNextFeedPage - lastPostId: ${lastPostId}, limit: ${limit}`);
 
-    // Try to find lastPostId in forum_posts first
-    let lastCreatedAt = null;
+    // OPTIMIZED: Find lastCreatedAt from both tables in parallel
+    const [forumPostResult, seedPostResult] = await Promise.all([
+      supabase.from('forum_posts').select('created_at').eq('id', lastPostId).single(),
+      supabase.from('seed_posts').select('created_at').eq('id', lastPostId).single(),
+    ]);
 
-    const { data: forumPost } = await supabase
-      .from('forum_posts')
-      .select('created_at')
-      .eq('id', lastPostId)
-      .single();
-
-    if (forumPost) {
-      lastCreatedAt = forumPost.created_at;
-      console.log(`[FeedService] Found lastPost in forum_posts: ${lastCreatedAt}`);
-    } else {
-      // Try seed_posts table
-      const { data: seedPost } = await supabase
-        .from('seed_posts')
-        .select('created_at')
-        .eq('id', lastPostId)
-        .single();
-
-      if (seedPost) {
-        lastCreatedAt = seedPost.created_at;
-        console.log(`[FeedService] Found lastPost in seed_posts: ${lastCreatedAt}`);
-      }
-    }
+    const lastCreatedAt = forumPostResult.data?.created_at || seedPostResult.data?.created_at;
 
     if (!lastCreatedAt) {
-      // Post not found in either table - stop pagination
       console.log('[FeedService] Last post not found in any table, stopping pagination');
-      return {
-        feed: [],
-        sessionId,
-        hasMore: false
-      };
+      return { feed: [], sessionId, hasMore: false };
     }
 
     console.log(`[FeedService] Fetching posts older than: ${lastCreatedAt}`);
 
-    // Get user preferences
-    const userPrefs = await getUserPreferences(userId);
-    const followingUsers = userPrefs.following_users || [];
+    // OPTIMIZED: Fetch forum posts and seed posts in parallel (no need for prefs here)
+    const [forumResult, seedResult] = await Promise.all([
+      supabase
+        .from('forum_posts')
+        .select(POST_SELECT_FAST)
+        .eq('status', 'published')
+        .lt('created_at', lastCreatedAt)
+        .order('created_at', { ascending: false })
+        .limit(limit),
+      supabase
+        .from('seed_posts')
+        .select(SEED_POST_SELECT_QUERY)
+        .eq('status', 'published')
+        .lt('created_at', lastCreatedAt)
+        .order('created_at', { ascending: false })
+        .limit(limit),
+    ]);
 
-    // Fetch older forum_posts
-    let query = supabase
-      .from('forum_posts')
-      .select(POST_SELECT_QUERY)
-      .eq('status', 'published')
-      .lt('created_at', lastCreatedAt)
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    const forumPosts = forumResult.data || [];
+    const seedPosts = seedResult.data || [];
 
-    const { data: forumPosts, error: forumError } = await query;
-    if (forumError) throw forumError;
-
-    // Also fetch older seed_posts
-    const { data: seedPosts, error: seedError } = await supabase
-      .from('seed_posts')
-      .select(SEED_POST_SELECT_QUERY)
-      .eq('status', 'published')
-      .lt('created_at', lastCreatedAt)
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    if (forumResult.error) {
+      console.error('[FeedService] Forum posts query error:', forumResult.error);
+    }
 
     // Transform forum posts for PostCard compatibility
-    const transformedForumPosts = (forumPosts || []).map(post => ({
+    const transformedForumPosts = forumPosts.map(post => ({
       ...post,
       feed_source: 'pagination',
       author: post.profiles,
@@ -1425,42 +1419,31 @@ export async function getNextFeedPage(userId, sessionId, lastPostId, limit = 20)
       category: null,
     }));
 
-    // Combine all posts
+    // Combine and sort by created_at (newest first)
     const allPosts = [...transformedForumPosts, ...transformedSeedPosts];
-
-    // Sort by created_at (newest first)
     allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-    console.log(`[FeedService] getNextFeedPage fetched ${forumPosts?.length || 0} forum + ${seedPosts?.length || 0} seed = ${allPosts.length} total`);
+    console.log(`[FeedService] getNextFeedPage fetched ${forumPosts.length} forum + ${seedPosts.length} seed = ${allPosts.length} total`);
 
-    // Score and diversify
-    const scoredPosts = await scorePostsForUser(userId, allPosts);
-    const diversifiedPosts = applyDiversityRules(scoredPosts);
+    // OPTIMIZED: Skip expensive scorePostsForUser for pagination
+    // Just apply light diversity rules and use lightweight ads
+    const diversifiedPosts = applyDiversityRules(allPosts).slice(0, limit);
 
-    // Insert ads
-    const feedWithAds = await insertAds(userId, sessionId, diversifiedPosts.slice(0, limit));
-
-    // DO NOT track impressions here - track only when posts become visible
-    // await trackImpressions(userId, sessionId, feedWithAds);
+    // Use lightweight ad insertion (no extra profile query needed)
+    const feedWithAds = await insertAdsLight(userId, sessionId,
+      diversifiedPosts.map(post => ({ type: 'post', data: post, score: 0 }))
+    );
 
     // INFINITE SCROLL: hasMore is true as long as we got any posts
     const hasMore = allPosts.length > 0;
     console.log(`[FeedService] getNextFeedPage returning ${feedWithAds.length} items, hasMore: ${hasMore}`);
 
-    return {
-      feed: feedWithAds,
-      sessionId,
-      hasMore
-    };
+    return { feed: feedWithAds, sessionId, hasMore };
 
   } catch (error) {
     console.error('[FeedService] Error getting next feed page:', error);
-    // Return empty with hasMore false to stop pagination on error
-    return {
-      feed: [],
-      sessionId,
-      hasMore: false
-    };
+    // Return empty but keep hasMore true to allow retry
+    return { feed: [], sessionId, hasMore: true };
   }
 }
 

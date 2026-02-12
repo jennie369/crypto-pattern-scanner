@@ -11,6 +11,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
+  AppState,
 } from 'react-native';
 import { Scan, Fingerprint, AlertCircle } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BUTTON } from '../../utils/tokens';
@@ -41,9 +42,20 @@ const BiometricButton = ({
   const [scaleAnim] = useState(new Animated.Value(1));
 
   // ========== EFFECTS ==========
+  // Check on mount
   useEffect(() => {
     checkBiometricStatus();
   }, []);
+
+  // Re-check when app comes to foreground (handles logout → return to login)
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        checkBiometricStatus();
+      }
+    });
+    return () => subscription?.remove();
+  }, [checkBiometricStatus]);
 
   // ========== CHECK STATUS ==========
   const checkBiometricStatus = useCallback(async () => {

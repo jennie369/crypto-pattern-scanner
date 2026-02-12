@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: width - 48,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(15, 16, 48, 0.95)',
     borderRadius: GLASS.borderRadius,
     padding: GLASS.padding,
     alignItems: 'center',

@@ -5,17 +5,17 @@
 ### Hình 1: hfz-overview.png
 - **Vị trí trong bài:** Section 1 - Định Nghĩa
 - **Mô tả:** Biểu đồ BTC/USDT 4H thể hiện một HFZ rõ ràng. Đánh dấu vùng HFZ bằng hình chữ nhật màu đỏ nhạt ở phía trên giá hiện tại. Có mũi tên chỉ xuống thể hiện áp lực bán.
-- **Kích thước đề xuất:** 800x500
+
 
 ### Hình 2: hfz-formation.png
 - **Vị trí trong bài:** Section 2 - HFZ Xuất Hiện Ở Đâu
 - **Mô tả:** Biểu đồ minh họa quá trình hình thành HFZ: xu hướng tăng → vùng tích lũy → phá vỡ xuống. Đánh dấu 3 giai đoạn bằng số 1, 2, 3.
-- **Kích thước đề xuất:** 800x500
+
 
 ### Hình 3: hfz-retest.png
 - **Vị trí trong bài:** Section 3 - Tín Hiệu Giao Dịch
 - **Mô tả:** Biểu đồ thể hiện giá quay lại test HFZ với nến Shooting Star. Đánh dấu điểm entry SHORT, SL và TP.
-- **Kích thước đề xuất:** 800x500
+
 
 ---
 
@@ -24,17 +24,17 @@
 ### Hình 1: lfz-overview.png
 - **Vị trí trong bài:** Section 1 - Định Nghĩa
 - **Mô tả:** Biểu đồ BTC/USDT 4H thể hiện một LFZ rõ ràng. Đánh dấu vùng LFZ bằng hình chữ nhật màu xanh nhạt ở phía dưới giá hiện tại. Có mũi tên chỉ lên thể hiện áp lực mua.
-- **Kích thước đề xuất:** 800x500
+
 
 ### Hình 2: lfz-formation.png
 - **Vị trí trong bài:** Section 2 - LFZ Xuất Hiện Ở Đâu
 - **Mô tả:** Biểu đồ minh họa quá trình hình thành LFZ: xu hướng giảm → vùng tích lũy → phá vỡ lên. Đánh dấu 3 giai đoạn bằng số 1, 2, 3.
-- **Kích thước đề xuất:** 800x500
+
 
 ### Hình 3: lfz-retest.png
 - **Vị trí trong bài:** Section 3 - Tín Hiệu Giao Dịch
 - **Mô tả:** Biểu đồ thể hiện giá quay xuống test LFZ với nến Hammer. Đánh dấu điểm entry LONG, SL và TP.
-- **Kích thước đề xuất:** 800x500
+
 
 ---
 
@@ -48,12 +48,12 @@
 ### Hình 2: hfz-identification.png
 - **Vị trí trong bài:** Section 2 - Nhận Diện HFZ
 - **Mô tả:** Biểu đồ BTC 4H với 3 HFZ được đánh dấu. Mỗi HFZ có label "HFZ #1", "HFZ #2", "HFZ #3".
-- **Kích thước đề xuất:** 800x500
+
 
 ### Hình 3: lfz-identification.png
 - **Vị trí trong bài:** Section 3 - Nhận Diện LFZ
 - **Mô tả:** Biểu đồ ETH 4H với 3 LFZ được đánh dấu. Mỗi LFZ có label "LFZ #1", "LFZ #2", "LFZ #3".
-- **Kích thước đề xuất:** 800x500
+
 
 ---
 
@@ -72,7 +72,7 @@
 ### Hình 3: stop-loss-take-profit.png
 - **Vị trí trong bài:** Section 3 - SL và TP
 - **Mô tả:** Biểu đồ thể hiện cách đặt SL (trên/dưới zone) và TP (R:R 1:2) với đường ngang và label.
-- **Kích thước đề xuất:** 800x500
+
 
 ---
 

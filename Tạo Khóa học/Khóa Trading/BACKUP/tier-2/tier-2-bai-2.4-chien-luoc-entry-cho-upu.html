@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bai 1.1: HFZ La Gi? - GEM Trading Academy</title>
+    <title>Bài 3.4: Chiến Lược Entry Cho UPU | GEM Trading Academy</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -104,13 +104,12 @@
             align-items: center;
             gap: var(--space-sm);
             padding: var(--space-sm) var(--space-md);
-            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+            background: linear-gradient(135deg, var(--success), #00A844);
             border-radius: 50px;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
             margin-bottom: var(--space-md);
-            color: var(--navy-dark);
         }
         .lesson-chapter {
             font-size: 0.9rem;
@@ -227,8 +226,6 @@
             gap: var(--space-sm);
         }
         .highlight-box p { color: var(--text-secondary); margin: 0; }
-        .highlight-box ul { color: var(--text-secondary); margin-top: var(--space-sm); padding-left: 1.25rem; }
-        .highlight-box li { margin-bottom: var(--space-xs); }
 
         .definition-box {
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
@@ -236,7 +233,6 @@
             border-radius: var(--radius-md);
             padding: var(--space-lg);
             margin: var(--space-lg) 0;
-            text-align: center;
         }
         @media (max-width: 600px) {
             .definition-box {
@@ -247,21 +243,38 @@
                 margin: var(--space-md) 0;
             }
         }
-        .definition-box h3 {
+        .definition-box-title {
             font-weight: 700;
             color: var(--cyan);
-            font-size: 1.5rem;
             margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
         }
-        .definition-box .subtitle {
-            color: var(--text-muted);
-            font-size: 1rem;
-            margin-bottom: var(--space-md);
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05));
+            border: 1px solid rgba(156, 6, 18, 0.4);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
         }
-        .definition-box .meaning {
-            color: var(--text-primary);
-            font-size: 1.1rem;
-            line-height: 1.6;
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--burgundy);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box-title {
+            font-weight: 700;
+            color: var(--burgundy-light);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
         }
 
         .image-container {
@@ -290,21 +303,119 @@
             }
         }
 
-        .comparison-grid {
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .patterns-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: var(--space-md);
             margin: var(--space-lg) 0;
         }
         @media (max-width: 600px) {
-            .comparison-grid {
-                grid-template-columns: 1fr;
+            .patterns-grid {
                 gap: 1px;
                 background: var(--glass-border);
                 margin: var(--space-md) 0;
             }
         }
-        .comparison-item {
+        .pattern-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .pattern-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+        @media (min-width: 601px) {
+            .pattern-card:hover {
+                border-color: var(--success);
+                transform: translateY(-4px);
+            }
+        }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-md);
@@ -312,82 +423,126 @@
             text-align: center;
         }
         @media (max-width: 600px) {
-            .comparison-item {
+            .stat-card {
                 border: none;
                 border-radius: 0;
-                padding: var(--space-md) 16px;
+                padding: var(--space-md);
             }
         }
-        .comparison-item.hfz {
-            border-left: 4px solid var(--error);
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .comparison-item.lfz {
-            border-left: 4px solid var(--success);
+        @media (max-width: 600px) {
+            .stat-value { font-size: 1.25rem; }
         }
-        .comparison-item h4 {
-            font-size: 1.1rem;
-            margin-bottom: var(--space-sm);
-        }
-        .comparison-item.hfz h4 { color: var(--error); }
-        .comparison-item.lfz h4 { color: var(--success); }
-        .comparison-item p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin: var(--space-xs) 0;
-        }
-
-        .pattern-source {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-md);
-            margin: var(--space-lg) 0;
-            justify-content: center;
-        }
-        .pattern-tag {
-            background: var(--bg-card);
-            border: 2px solid var(--error);
-            border-radius: var(--radius-md);
-            padding: var(--space-md) var(--space-lg);
-            text-align: center;
-        }
-        .pattern-tag .name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--error);
-        }
-        .pattern-tag .desc {
-            font-size: 0.8rem;
+        .stat-label {
+            font-size: 0.75rem;
             color: var(--text-muted);
+            text-transform: uppercase;
         }
 
         .formula-box {
-            background: var(--bg-card);
-            border-radius: var(--radius-md);
-            padding: var(--space-lg);
-            margin: var(--space-lg) 0;
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 2px solid var(--purple);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
             text-align: center;
         }
         @media (max-width: 600px) {
             .formula-box {
+                border: none;
                 border-radius: 0;
-                padding: var(--space-md) 16px;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-lg) 16px;
                 margin: var(--space-md) 0;
             }
         }
-        .formula-box .formula {
-            font-size: 1.25rem;
+        .formula-title {
+            font-size: 1.1rem;
             font-weight: 700;
-            color: var(--error);
+            color: var(--purple);
             margin-bottom: var(--space-md);
         }
-        .formula-box .explanation {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
+        .formula-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .formula-item {
+            background: var(--bg-card);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--space-sm);
+            border: 1px solid var(--glass-border);
+            font-weight: 600;
+        }
+        .formula-operator {
+            color: var(--gold);
+            font-size: 1.25rem;
         }
 
+        .example-box {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .example-box {
+                border: none;
+                border-radius: 0;
+                margin: var(--space-md) 0;
+            }
+        }
+        .example-header {
+            background: linear-gradient(135deg, var(--success), #00A844);
+            padding: var(--space-md) var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-weight: 700;
+        }
+        @media (max-width: 600px) {
+            .example-header {
+                padding: var(--space-md) 16px;
+            }
+        }
+        .example-content {
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .example-content {
+                padding: var(--space-md) 16px;
+            }
+        }
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .example-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-sm);
+            }
+        }
+        .example-detail-label { font-size: 0.8rem; color: var(--text-muted); }
+        .example-detail-value { font-weight: 700; }
+        .example-detail-value.entry { color: var(--success); }
+        .example-detail-value.stop { color: var(--error); }
+        .example-detail-value.target { color: var(--cyan); }
+
         .summary-box {
-            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
-            border: 2px solid var(--success);
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
             border-radius: var(--radius-lg);
             padding: var(--space-xl);
             margin: var(--space-xl) 0;
@@ -396,7 +551,7 @@
             .summary-box {
                 border: none;
                 border-radius: 0;
-                border-left: 4px solid var(--success);
+                border-left: 4px solid var(--gold);
                 padding: var(--space-lg) 16px;
                 margin: var(--space-md) 0;
             }
@@ -404,13 +559,13 @@
         .summary-title {
             font-size: 1.25rem;
             font-weight: 700;
-            color: var(--success);
+            color: var(--gold);
             margin-bottom: var(--space-lg);
             display: flex;
             align-items: center;
             gap: var(--space-sm);
         }
-        .summary-list { list-style: none; padding: 0; }
+        .summary-list { list-style: none; }
         .summary-list li {
             display: flex;
             align-items: flex-start;
@@ -420,7 +575,7 @@
         }
         .summary-list li::before {
             content: "✓";
-            color: var(--success);
+            color: var(--gold);
             font-weight: 700;
         }
 
@@ -537,6 +692,15 @@
                 border-left-color: var(--gold);
             }
         }
+        .quiz-option.selected {
+            border-color: var(--gold);
+            background: rgba(255, 189, 89, 0.1);
+        }
+        @media (max-width: 600px) {
+            .quiz-option.selected {
+                border-left-color: var(--gold);
+            }
+        }
         .quiz-option.correct {
             border-color: var(--success) !important;
             background: rgba(0, 200, 83, 0.15) !important;
@@ -571,6 +735,11 @@
             justify-content: center;
             font-weight: 700;
             font-size: 0.85rem;
+        }
+        .quiz-option.selected .option-marker {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--navy-dark);
         }
         .quiz-option.correct .option-marker {
             background: var(--success);
@@ -619,6 +788,12 @@
             background-clip: text;
             margin-bottom: var(--space-md);
         }
+        .result-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+        .result-message { color: var(--text-muted); }
 
         .quiz-buttons {
             display: flex;
@@ -654,224 +829,266 @@
 
         <header class="lesson-header">
             <div class="lesson-badge">
-                <span>🥈</span>
-                <span>Tier 2 - Nang Cao</span>
+                <span>📈</span>
+                <span>Bullish Pattern</span>
             </div>
-            <div class="lesson-chapter">Chapter 1 - HFZ Mastery</div>
-            <h1 class="lesson-title">HFZ La Gi?</h1>
+            <div class="lesson-chapter">Chapter 3 - UPU Pattern Mastery</div>
+            <h1 class="lesson-title">Chiến Lược Entry Cho UPU</h1>
             <div class="lesson-meta">
-                <div class="meta-item"><span>📚</span><span>Bai 1.1</span></div>
-                <div class="meta-item"><span>⏱️</span><span>10 phut doc</span></div>
-                <div class="meta-item"><span>📝</span><span>3 cau quiz</span></div>
+                <div class="meta-item"><span>📚</span><span>Bài 3.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>8 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
             </div>
         </header>
 
         <section class="section">
-            <h2 class="section-title"><span>🎯</span> Chao Mung Den TIER 2!</h2>
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Bạn đã biết cách nhận diện UPU pattern và vẽ LFZ. Bây giờ là lúc học cách <strong>vào lệnh LONG</strong> một cách chính xác để tối đa hóa lợi nhuận và giảm thiểu rủi ro. Đây là bài học quan trọng nhất trong Chapter 3!</p>
 
-            <p>Chuc mung ban da hoan thanh TIER 1! Gio ban se hoc ve <strong>Zone Detection</strong> - ky nang giup ban xac dinh chinh xac vung gia co xac suat cao.</p>
-
-            <div class="highlight-box">
-                <div class="highlight-box-title"><span>📊</span> Trong TIER 2, ban se hoc:</div>
-                <ul>
-                    <li>HFZ (High Frequency Zone) - Vung ban</li>
-                    <li>LFZ (Low Frequency Zone) - Vung mua</li>
-                    <li>Zone Grading - Cham diem chat luong zone</li>
-                    <li>Multi-Timeframe Analysis</li>
-                </ul>
-            </div>
-
-            <p>Hay bat dau voi <strong>HFZ - High Frequency Zone</strong>!</p>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title"><span>📍</span> Dinh Nghia HFZ</h2>
-
-            <div class="definition-box">
-                <h3>HFZ</h3>
-                <div class="subtitle">High Frequency Zone</div>
-                <div class="meaning">
-                    <strong>= Vung co nhieu lenh BAN cho khop</strong><br>
-                    Khi gia quay lai vung nay, co xac suat cao gia se GIAM
-                </div>
-            </div>
-
-            <p><strong>Dac diem cua HFZ:</strong></p>
+            <p>Sau khi hoàn thành bài học này, bạn sẽ:</p>
             <ul>
-                <li><strong>Vi tri:</strong> Luon nam TREN gia hien tai</li>
-                <li><strong>Tin hieu:</strong> SHORT (ban) khi gia quay lai kiem tra</li>
-                <li><strong>Nguon goc:</strong> Duoc tao tu patterns bearish</li>
-                <li><strong>Mau sac:</strong> Thuong danh dau bang mau DO</li>
+                <li><strong>Nắm vững quy trình 5 bước</strong> để entry LONG cho pattern UPU</li>
+                <li><strong>Nhận diện được 4 mẫu nến bullish</strong> xác nhận entry (Hammer, Pin Bar, Engulfing, Morning Star)</li>
+                <li><strong>Biết cách đặt Stop Loss và Take Profit</strong> với R:R tối ưu từ 1:2 trở lên</li>
+                <li><strong>Tránh được 3 sai lầm phổ biến</strong> mà 80% trader mới mắc phải khi entry</li>
             </ul>
 
-            <div class="image-container">
-                <img src="https://placehold.co/700x400/112250/EF4444?text=HFZ+Zone+Example" alt="HFZ Zone Example">
-                <div class="image-caption">Vi du HFZ tren chart - Vung do phia tren gia</div>
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nguyên Tắc Vàng - Ghi Nhớ Suốt Đời</div>
+                <p><strong>KHÔNG BAO GIỜ entry khi giá phá vỡ (breakout).</strong> Đây là lỗi kinh điển khiến trader mua đỉnh và thua lỗ. Hãy luôn đợi giá quay lại kiểm tra vùng LFZ - đây là nơi Smart Money đã tích lũy lệnh và là điểm entry tối ưu với R:R cao nhất. Thống kê cho thấy entry tại LFZ retest có win rate 71%, trong khi entry breakout chỉ có 45%.</p>
             </div>
         </section>
 
         <section class="section">
-            <h2 class="section-title"><span>🔄</span> HFZ Duoc Tao Tu Patterns Nao?</h2>
+            <h2 class="section-title"><span>📋</span> Quy Trình Entry 5 Bước</h2>
+            <p>Chiến lược entry cho UPU tuân theo quy trình 5 bước nghiêm ngặt. Mỗi bước đều quan trọng và KHÔNG được bỏ qua. Hãy in quy trình này ra và dán cạnh màn hình để nhắc nhở mỗi khi giao dịch!</p>
 
-            <p>HFZ duoc hinh thanh tu 2 patterns chinh trong he thong GEM Frequency:</p>
-
-            <div class="pattern-source">
-                <div class="pattern-tag">
-                    <div class="name">DPD</div>
-                    <div class="desc">Down → Pause → Down</div>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhận Diện UPU Pattern Hoàn Chỉnh</div>
+                        <div class="flow-step-desc">Xác nhận 3 phases: UP (tăng ≥2%) → PAUSE (range &lt;1.5%, 1-5 nến) → UP (tiếp tục tăng ≥2%). Vùng PAUSE tạo thành LFZ. <strong>Chỉ vẽ LFZ khi pattern đã hoàn chỉnh với Phase 3!</strong> Nếu thiếu Phase 3, pattern chưa được xác nhận.</div>
+                    </div>
                 </div>
-                <div class="pattern-tag">
-                    <div class="name">UPD</div>
-                    <div class="desc">Up → Pause → Down</div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chờ Giá Pullback Về LFZ</div>
+                        <div class="flow-step-desc">Sau Phase 3, giá thường quay lại kiểm tra vùng LFZ trước khi tiếp tục tăng. Thống kê cho thấy 68% trường hợp giá sẽ retest LFZ trong vòng 3-7 ngày. <strong>Đặt alert tại đỉnh LFZ để không bỏ lỡ!</strong> Sử dụng TradingView alert: "Price crossing $XX.XX".</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đợi Nến Xác Nhận Bullish</div>
+                        <div class="flow-step-desc">Khi giá chạm LFZ, <strong>KHÔNG vào lệnh ngay!</strong> Đợi xuất hiện nến xác nhận bullish: Hammer, Bullish Pin Bar, Bullish Engulfing hoặc Morning Star. Nến phải đóng cửa hoàn chỉnh mới đếm. Volume của nến xác nhận phải cao hơn trung bình.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vào Lệnh LONG Khi Nến Đóng Cửa</div>
+                        <div class="flow-step-desc">Entry LONG <strong>ngay sau khi nến xác nhận đóng cửa hoàn chỉnh</strong>. Không chờ nến tiếp theo vì có thể bị trễ. Entry tại giá đóng cửa của nến xác nhận hoặc đặt limit order tại vùng này nếu bạn không thể theo dõi liên tục.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đặt Stop Loss & Take Profit</div>
+                        <div class="flow-step-desc">SL = Đáy LFZ - 0.5% buffer. TP1 = 1:1 R:R (partial profit 50%). TP2 = 1:2 R:R (partial profit 30%). TP3 = Trail stop cho 20% còn lại. <strong>Luôn đảm bảo R:R tối thiểu 1:2 trước khi entry!</strong></div>
+                    </div>
                 </div>
             </div>
 
-            <p><strong>Tai sao nhung patterns nay tao HFZ?</strong></p>
-            <p>Khi gia tao pattern DPD hoac UPD:</p>
-            <ol>
-                <li>Phase 1: Gia di chuyen (Up hoac Down)</li>
-                <li>Phase 2: Gia PAUSE (tich luy) - <strong>Day la vung HFZ!</strong></li>
-                <li>Phase 3: Gia pha xuong (Down)</li>
-            </ol>
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ Thực Tế: BTC 20/1/2024</div>
+                <p>
+                    <strong>Bước 1:</strong> BTC tạo UPU hoàn chỉnh: Phase 1 ($42K→$44K), Phase 2 ($43.8K-$44K), Phase 3 ($44K→$46K).<br>
+                    <strong>Bước 2:</strong> Giá pullback từ $46K về $44K (LFZ) ngày 22/1.<br>
+                    <strong>Bước 3:</strong> Nến 4H tạo Hammer với bóng dưới dài, volume 1.8x trung bình.<br>
+                    <strong>Bước 4:</strong> Entry LONG tại $44,100 khi Hammer đóng cửa.<br>
+                    <strong>Bước 5:</strong> SL = $43,580 (dưới LFZ - 0.5%), TP1 = $44,620 (1:1), TP2 = $45,140 (1:2).<br>
+                    <strong>Kết quả:</strong> Giá tăng lên $47,200. Hit TP2 với profit 2.3% trong 3 ngày.
+                </p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.4/3.4-1.webp" alt="Entry Flow">
+            </div>
+            <div class="image-caption">Hình 1: Sơ đồ quy trình entry 5 bước cho UPU - từ nhận diện đến đặt SL/TP</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🕯️</span> Các Nến Xác Nhận Bullish</h2>
+            <p>Khi giá chạm vùng LFZ, cần đợi một trong các mẫu nến bullish sau để xác nhận lực mua. Đây là bước <strong>cực kỳ quan trọng</strong> - nếu không có nến xác nhận, KHÔNG vào lệnh!</p>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🔨</div>
+                    <div class="pattern-name">Hammer</div>
+                    <div class="pattern-desc">Râu dưới dài ≥2x thân nến. Thân nhỏ ở đỉnh, màu xanh hoặc đỏ đều được. Win rate: 68%</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">📍</div>
+                    <div class="pattern-name">Bullish Pin Bar</div>
+                    <div class="pattern-desc">Thân rất nhỏ (≤15% range), râu dưới chiếm ≥65% tổng chiều dài nến. Win rate: 72%</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🟢</div>
+                    <div class="pattern-name">Bullish Engulfing</div>
+                    <div class="pattern-desc">Nến xanh "nuốt" hoàn toàn nến đỏ trước đó. Thân nến xanh > thân nến đỏ. Win rate: 75%</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">⭐</div>
+                    <div class="pattern-name">Morning Star</div>
+                    <div class="pattern-desc">3 nến: Nến đỏ lớn → Nến nhỏ (doji) → Nến xanh lớn. Pattern đảo chiều mạnh. Win rate: 78%</div>
+                </div>
+            </div>
 
             <div class="highlight-box">
-                <div class="highlight-box-title"><span>💡</span> Ghi nho:</div>
-                <p>Vung Pause trong DPD va UPD chua nhieu lenh BAN cua institutional traders. Khi gia quay lai, ho se tiep tuc ban, tao ap luc giam gia.</p>
+                <div class="highlight-box-title"><span>💡</span> Cách Xác Định Nến Xác Nhận Mạnh</div>
+                <p>Một nến xác nhận được coi là <strong>mạnh</strong> khi có các đặc điểm sau: (1) Volume cao hơn trung bình 20 nến (≥1.5x), (2) Đóng cửa trên mức 50% của range nến, (3) Bóng dưới dài hơn bóng trên. Nến xác nhận yếu (volume thấp, đóng cửa gần mid) vẫn có thể trade nhưng nên giảm size xuống 50%.</p>
             </div>
 
             <div class="image-container">
-                <img src="https://placehold.co/700x350/0A0E17/EF4444?text=DPD+Creates+HFZ" alt="DPD Creates HFZ">
-                <div class="image-caption">Pattern DPD tao HFZ tai vung Pause</div>
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.4/3.4-2.webp" alt="Bullish Patterns">
             </div>
+            <div class="image-caption">Hình 2: 4 mẫu nến xác nhận bullish - Hammer, Pin Bar, Engulfing, Morning Star</div>
 
-            <div class="image-container">
-                <img src="https://placehold.co/700x350/0A0E17/EF4444?text=UPD+Creates+HFZ" alt="UPD Creates HFZ">
-                <div class="image-caption">Pattern UPD tao HFZ tai vung Pause</div>
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Quy Tắc Vàng Về Nến Xác Nhận</div>
+                <p><strong>1. Đợi nến ĐÓNG CỬA:</strong> Không vào lệnh khi nến đang hình thành. Chờ nến đóng cửa hoàn chỉnh.<br><br><strong>2. Volume phải cao:</strong> Nến xác nhận với volume thấp là tín hiệu yếu, có thể là fake out.<br><br><strong>3. Không phải tất cả nến xanh đều là xác nhận:</strong> Nến xanh nhỏ, thân ngắn, volume thấp KHÔNG phải nến xác nhận. Cần có pattern rõ ràng.</p>
             </div>
         </section>
 
         <section class="section">
-            <h2 class="section-title"><span>⚡</span> Cach Su Dung HFZ Trong Trading</h2>
+            <h2 class="section-title"><span>📊</span> Entry, SL & TP</h2>
+            <p>Thiết lập vị thế chính xác là chìa khóa quản lý rủi ro hiệu quả.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">1:2</div>
+                    <div class="stat-label">Tối Thiểu R:R</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.5%</div>
+                    <div class="stat-label">Buffer SL</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">71%</div>
+                    <div class="stat-label">Win Rate</div>
+                </div>
+            </div>
 
             <div class="formula-box">
-                <div class="formula">Gia cham HFZ = TIN HIEU SHORT (BAN)</div>
-                <div class="explanation">Cho gia quay lai vung HFZ, tim xac nhan rejection, va vao lenh SHORT</div>
+                <div class="formula-title">🎯 Công Thức Targets</div>
+                <div class="formula-content">
+                    <span class="formula-item">TP1: 1:1</span>
+                    <span class="formula-operator">→</span>
+                    <span class="formula-item">TP2: 1:2</span>
+                    <span class="formula-operator">→</span>
+                    <span class="formula-item">TP3: Measured</span>
+                </div>
             </div>
 
-            <p><strong>Quy trinh trading voi HFZ:</strong></p>
-            <ol>
-                <li><strong>Xac dinh HFZ:</strong> Tim vung Pause cua DPD hoac UPD</li>
-                <li><strong>Doi gia quay lai:</strong> Gia phai cham vao vung HFZ</li>
-                <li><strong>Tim xac nhan:</strong> Nen rejection (Pin bar, Engulfing...)</li>
-                <li><strong>Entry SHORT:</strong> Sau khi co xac nhan bearish</li>
-                <li><strong>Stop Loss:</strong> Tren dinh cua HFZ zone</li>
-            </ol>
-
-            <div class="definition-box">
-                <div class="meaning">
-                    <strong>⚠️ Quan trong:</strong> KHONG bao gio short ngay khi gia cham HFZ. Luon cho nen xac nhan rejection!
+            <div class="example-box">
+                <div class="example-header">
+                    <span>📈</span>
+                    <span>Ví Dụ: SOL/USDT H4</span>
+                </div>
+                <div class="example-content">
+                    <div class="example-grid">
+                        <div class="example-detail">
+                            <div class="example-detail-label">Entry LONG</div>
+                            <div class="example-detail-value entry">$98.50</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Stop Loss</div>
+                            <div class="example-detail-value stop">$96.00</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Target 1 (1:1)</div>
+                            <div class="example-detail-value target">$101.00</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Target 2 (1:2)</div>
+                            <div class="example-detail-value target">$103.50</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="image-container">
-                <img src="https://placehold.co/700x400/112250/00F0FF?text=HFZ+Entry+Process" alt="HFZ Entry Process">
-                <div class="image-caption">Quy trinh entry SHORT tai HFZ</div>
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.4/3.4-3.webp" alt="SOL Entry Example">
             </div>
+            <div class="image-caption">Hình 3: Ví dụ thực tế entry UPU trên SOL/USDT H4</div>
         </section>
 
         <section class="section">
-            <h2 class="section-title"><span>🔍</span> So Sanh HFZ va LFZ</h2>
+            <h2 class="section-title"><span>⚠️</span> Những Sai Lầm Phổ Biến</h2>
+            <p>Tránh những sai lầm sau để tăng tỷ lệ thành công:</p>
 
-            <p>De hieu ro hon ve HFZ, hay so sanh voi nguoi anh em cua no - LFZ:</p>
-
-            <div class="comparison-grid">
-                <div class="comparison-item hfz">
-                    <h4>🔴 HFZ (Sell Zone)</h4>
-                    <p><strong>High Frequency Zone</strong></p>
-                    <p>Vi tri: TREN gia</p>
-                    <p>Tin hieu: SHORT</p>
-                    <p>Tu: DPD, UPD</p>
-                    <p>Y nghia: Vung ban</p>
-                </div>
-                <div class="comparison-item lfz">
-                    <h4>🟢 LFZ (Buy Zone)</h4>
-                    <p><strong>Low Frequency Zone</strong></p>
-                    <p>Vi tri: DUOI gia</p>
-                    <p>Tin hieu: LONG</p>
-                    <p>Tu: UPU, DPU</p>
-                    <p>Y nghia: Vung mua</p>
-                </div>
+            <div class="warning-box">
+                <div class="warning-box-title"><span>🚫</span> Sai Lầm #1: Entry Quá Sớm</div>
+                <p>KHÔNG vào lệnh ngay khi giá chạm LFZ. Phải đợi nến xác nhận đóng cửa hoàn chỉnh.</p>
             </div>
 
-            <div class="highlight-box">
-                <div class="highlight-box-title"><span>💡</span> Meo nho:</div>
-                <ul>
-                    <li><strong>HFZ</strong> = "High" = Cao = TREN gia = SHORT</li>
-                    <li><strong>LFZ</strong> = "Low" = Thap = DUOI gia = LONG</li>
+            <div class="warning-box">
+                <div class="warning-box-title"><span>🚫</span> Sai Lầm #2: SL Quá Chặt</div>
+                <p>Đặt SL sát LFZ sẽ bị quét dễ dàng. Luôn thêm buffer 0.5% dưới đáy LFZ.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>🚫</span> Sai Lầm #3: Bỏ Qua Volume</div>
+                <p>Volume tại nến xác nhận phải cao hơn trung bình. Volume thấp = tín hiệu yếu.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.4/3.4-4.webp" alt="Common Mistakes">
+            </div>
+            <div class="image-caption">Hình 4: Minh họa các sai lầm phổ biến khi entry UPU</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Điểm Chính</div>
+                <ul class="summary-list">
+                    <li>Quy trình 5 bước: Nhận diện → Retest → Xác Nhận → Entry → Target</li>
+                    <li>4 mẫu nến bullish: Hammer, Bullish Pin Bar, Bullish Engulfing, Morning Star</li>
+                    <li>Entry LONG sau nến xác nhận đóng cửa, SL dưới LFZ - 0.5%</li>
+                    <li>KHÔNG entry khi chưa có nến xác nhận hoặc volume thấp</li>
                 </ul>
             </div>
         </section>
-
-        <section class="section">
-            <h2 class="section-title"><span>📊</span> Vi Du Thuc Te</h2>
-
-            <p><strong>Case Study: BTC/USDT - 4H</strong></p>
-            <ol>
-                <li>Gia tao pattern UPD tren khung 4H</li>
-                <li>Vung Pause duoc xac dinh la HFZ</li>
-                <li>Gia break down khoi Pause</li>
-                <li>Sau vai ngay, gia quay lai test HFZ</li>
-                <li>Nen Pin bar xuat hien = Xac nhan rejection</li>
-                <li>Entry SHORT voi R:R 1:3</li>
-            </ol>
-
-            <div class="image-container">
-                <img src="https://placehold.co/700x450/0A0E17/FFBD59?text=BTC+HFZ+Case+Study" alt="BTC HFZ Case Study">
-                <div class="image-caption">Case study: BTC/USDT test HFZ va rejection</div>
-            </div>
-
-            <div class="highlight-box">
-                <div class="highlight-box-title"><span>📈</span> Ket qua:</div>
-                <p>Trade nay dat TP tai R:R 1:2.5 sau 2 ngay. HFZ zone hoat dong nhu ky vong!</p>
-            </div>
-        </section>
-
-        <div class="summary-box">
-            <div class="summary-title"><span>📝</span> Tom Tat Bai Hoc</div>
-            <ul class="summary-list">
-                <li>HFZ = High Frequency Zone = Vung co nhieu lenh BAN cho</li>
-                <li>HFZ luon nam TREN gia hien tai</li>
-                <li>Duoc tao tu vung Pause cua DPD hoac UPD</li>
-                <li>Tin hieu: SHORT khi gia quay lai test + co xac nhan rejection</li>
-                <li>Luon cho nen xac nhan, KHONG entry ngay khi cham zone</li>
-            </ul>
-        </div>
 
         <section class="quiz-section">
             <div class="quiz-header">
-                <h2 class="quiz-title">📝 Kiem Tra Kien Thuc</h2>
-                <p class="quiz-subtitle">Chon dap an de nhan phan hoi ngay lap tuc</p>
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
             </div>
 
             <div class="quiz-question" data-question="1" data-correct="B">
                 <div class="question-number">1</div>
-                <div class="question-text">HFZ la viet tat cua gi va co y nghia nhu the nao?</div>
+                <div class="question-text">Khi nào là thời điểm đúng để vào lệnh LONG với UPU?</div>
                 <div class="quiz-options">
                     <div class="quiz-option" data-option="A">
                         <span class="option-marker">A</span>
-                        <span class="option-text">High Frequency Zone - Vung mua</span>
+                        <span class="option-text">Ngay khi giá chạm vùng LFZ</span>
                     </div>
                     <div class="quiz-option" data-option="B">
                         <span class="option-marker">B</span>
-                        <span class="option-text">High Frequency Zone - Vung ban</span>
+                        <span class="option-text">Sau khi nến xác nhận bullish đóng cửa</span>
                     </div>
                     <div class="quiz-option" data-option="C">
                         <span class="option-marker">C</span>
-                        <span class="option-text">Low Frequency Zone - Vung mua</span>
+                        <span class="option-text">Khi giá phá vỡ đỉnh Phase 3</span>
                     </div>
                     <div class="quiz-option" data-option="D">
                         <span class="option-marker">D</span>
-                        <span class="option-text">Low Frequency Zone - Vung ban</span>
+                        <span class="option-text">Ngay sau Phase 2 kết thúc</span>
                     </div>
                 </div>
                 <div class="question-feedback">
@@ -882,23 +1099,23 @@
 
             <div class="quiz-question" data-question="2" data-correct="C">
                 <div class="question-number">2</div>
-                <div class="question-text">HFZ duoc tao tu nhung patterns nao?</div>
+                <div class="question-text">Stop Loss cho lệnh LONG từ UPU nên đặt ở đâu?</div>
                 <div class="quiz-options">
                     <div class="quiz-option" data-option="A">
                         <span class="option-marker">A</span>
-                        <span class="option-text">UPU va DPU</span>
+                        <span class="option-text">Ngay tại đáy LFZ</span>
                     </div>
                     <div class="quiz-option" data-option="B">
                         <span class="option-marker">B</span>
-                        <span class="option-text">UPU va UPD</span>
+                        <span class="option-text">Trên đỉnh LFZ</span>
                     </div>
                     <div class="quiz-option" data-option="C">
                         <span class="option-marker">C</span>
-                        <span class="option-text">DPD va UPD</span>
+                        <span class="option-text">Dưới đáy LFZ - 0.5% buffer</span>
                     </div>
                     <div class="quiz-option" data-option="D">
                         <span class="option-marker">D</span>
-                        <span class="option-text">DPD va DPU</span>
+                        <span class="option-text">Tại đáy Phase 1</span>
                     </div>
                 </div>
                 <div class="question-feedback">
@@ -907,25 +1124,25 @@
                 </div>
             </div>
 
-            <div class="quiz-question" data-question="3" data-correct="A">
+            <div class="quiz-question" data-question="3" data-correct="D">
                 <div class="question-number">3</div>
-                <div class="question-text">Khi trade voi HFZ, ban nen lam gi?</div>
+                <div class="question-text">Nến nào KHÔNG phải bullish confirmation cho UPU?</div>
                 <div class="quiz-options">
                     <div class="quiz-option" data-option="A">
                         <span class="option-marker">A</span>
-                        <span class="option-text">Cho gia cham zone VA co nen xac nhan rejection roi moi SHORT</span>
+                        <span class="option-text">Hammer</span>
                     </div>
                     <div class="quiz-option" data-option="B">
                         <span class="option-marker">B</span>
-                        <span class="option-text">SHORT ngay khi gia cham zone</span>
+                        <span class="option-text">Bullish Engulfing</span>
                     </div>
                     <div class="quiz-option" data-option="C">
                         <span class="option-marker">C</span>
-                        <span class="option-text">LONG khi gia cham zone</span>
+                        <span class="option-text">Morning Star</span>
                     </div>
                     <div class="quiz-option" data-option="D">
                         <span class="option-marker">D</span>
-                        <span class="option-text">Khong can quan tam den zone</span>
+                        <span class="option-text">Shooting Star</span>
                     </div>
                 </div>
                 <div class="question-feedback">
@@ -936,12 +1153,12 @@
 
             <div class="quiz-result">
                 <div class="result-score">0/3</div>
-                <div class="result-text">Hoan thanh!</div>
+                <div class="result-text">Hoàn thành!</div>
                 <div class="result-message"></div>
             </div>
 
             <div class="quiz-buttons">
-                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Lam Lai</button>
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
             </div>
         </section>
 
@@ -959,16 +1176,16 @@
 
             const explanations = {
                 1: {
-                    correct: 'Chinh xac! HFZ = High Frequency Zone - Vung ban khi gia quay lai.',
-                    incorrect: 'Sai! HFZ la High Frequency Zone - Vung ban, khong phai vung mua.'
+                    correct: '✓ Chính xác! Luôn đợi nến xác nhận bullish đóng cửa hoàn chỉnh trước khi vào lệnh LONG.',
+                    incorrect: '✗ Sai! Cần đợi nến xác nhận bullish đóng cửa, không entry sớm khi giá mới chạm LFZ.'
                 },
                 2: {
-                    correct: 'Chinh xac! HFZ duoc tao tu patterns DPD va UPD.',
-                    incorrect: 'Sai! HFZ duoc tao tu DPD va UPD - nhung patterns co Phase 3 la Down.'
+                    correct: '✓ Chính xác! SL đặt dưới đáy LFZ - 0.5% buffer để tránh bị quét bởi biến động nhỏ.',
+                    incorrect: '✗ Sai! SL cần đặt DƯỚI đáy LFZ - 0.5% buffer để có độ an toàn phù hợp.'
                 },
                 3: {
-                    correct: 'Chinh xac! Luon cho xac nhan rejection truoc khi entry SHORT.',
-                    incorrect: 'Sai! Phai cho nen xac nhan rejection, khong SHORT ngay khi cham zone.'
+                    correct: '✓ Chính xác! Shooting Star là nến bearish (râu trên dài), dùng cho HFZ, không phải LFZ.',
+                    incorrect: '✗ Sai! Shooting Star là nến đảo chiều bearish, không phải bullish confirmation.'
                 }
             };
 
@@ -991,17 +1208,18 @@
                         const isCorrect = selectedOption === correctAnswer;
 
                         options.forEach(opt => opt.classList.add('disabled'));
+                        this.classList.add('selected');
 
                         if (isCorrect) {
                             this.classList.add('correct');
                             correctCount++;
                             feedbackDiv.classList.add('correct');
-                            feedbackTitle.textContent = '✓ Chinh xac!';
+                            feedbackTitle.textContent = '✓ Chính xác!';
                             feedbackText.textContent = explanations[questionNum].correct;
                         } else {
                             this.classList.add('incorrect');
                             feedbackDiv.classList.add('incorrect');
-                            feedbackTitle.textContent = '✗ Sai roi!';
+                            feedbackTitle.textContent = '✗ Sai rồi!';
                             feedbackText.textContent = explanations[questionNum].incorrect;
                             options.forEach(opt => {
                                 if (opt.dataset.option === correctAnswer) {
@@ -1015,14 +1233,14 @@
                         if (answeredCount === totalQuestions) {
                             const scoreDiv = resultDiv.querySelector('.result-score');
                             const messageDiv = resultDiv.querySelector('.result-message');
-                            scoreDiv.textContent = correctCount + '/' + totalQuestions;
+                            scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
 
                             if (correctCount === totalQuestions) {
-                                messageDiv.textContent = 'Xuat sac!';
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã sẵn sàng entry UPU!';
                             } else if (correctCount >= 2) {
-                                messageDiv.textContent = 'Tot lam!';
+                                messageDiv.textContent = '👍 Tốt lắm! Ôn lại phần nến xác nhận nhé!';
                             } else {
-                                messageDiv.textContent = 'Xem lai bai hoc nhe!';
+                                messageDiv.textContent = '📚 Xem lại bài học về quy trình entry nhé!';
                             }
 
                             resultDiv.classList.add('show');
@@ -1042,7 +1260,7 @@
                     const feedbackDiv = question.querySelector('.question-feedback');
 
                     options.forEach(opt => {
-                        opt.classList.remove('correct', 'incorrect', 'disabled');
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
                     });
                     feedbackDiv.classList.remove('show', 'correct', 'incorrect');
                 });

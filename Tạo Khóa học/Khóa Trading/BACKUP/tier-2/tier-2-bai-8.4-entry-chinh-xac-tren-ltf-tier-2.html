@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.4: Entry Chính Xác Trên LTF - Tier 2</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <span class="header-badge">📊 Tier 2 - Bài 4.4</span>
+            <h1 class="lesson-title">Entry Chính Xác Trên LTF</h1>
+            <p class="lesson-subtitle">Precision Entry Techniques</p>
+        </header>
+
+        <!-- Section 1: Tại Sao Entry Trên LTF -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>🎯 Tại Sao Entry Trên LTF?</h2>
+            </div>
+            <div class="card-content">
+                <p>Sau khi đã xác định <span class="highlight">bias từ HTF</span> và <span class="highlight">zone từ ITF</span>, bước cuối cùng là tìm entry chính xác trên <span class="highlight-green">LTF (Lower Timeframe)</span>.</p>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Lợi Ích Entry Trên LTF</div>
+                    <ul class="styled-list">
+                        <li><strong>Stoploss nhỏ hơn:</strong> Risk giảm 50-70%</li>
+                        <li><strong>RR ratio cao hơn:</strong> Từ 2:1 lên 4:1 - 5:1</li>
+                        <li><strong>Timing chính xác:</strong> Vào đúng điểm reversal</li>
+                        <li><strong>Confirm reaction:</strong> Thấy giá phản ứng trước khi vào</li>
+                    </ul>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/10B981?text=ITF+Entry+vs+LTF+Entry+Comparison" alt="ITF vs LTF Entry">
+                </div>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Rủi Ro Nếu Entry Trên ITF</div>
+                    <p>Entry ngay khi giá chạm ITF zone → Stoploss rộng → Risk lớn → RR thấp → Dễ bị stopped out bởi spike.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Entry Triggers cho Long -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>📈 Entry Triggers Cho LONG (tại LFZ)</h2>
+            </div>
+            <div class="card-content">
+                <p>Khi giá về <span class="highlight-green">LFZ trên ITF</span>, chuyển sang LTF và tìm các trigger sau:</p>
+
+                <div class="trigger-grid">
+                    <div class="trigger-card">
+                        <div class="trigger-title">🕯️ Bullish Candle Patterns</div>
+                        <ul class="trigger-list">
+                            <li>✓ Bullish Engulfing</li>
+                            <li>✓ Hammer / Pin Bar</li>
+                            <li>✓ Morning Star</li>
+                            <li>✓ Bullish Harami</li>
+                            <li>✓ Double Bottom (LTF)</li>
+                        </ul>
+                    </div>
+                    <div class="trigger-card">
+                        <div class="trigger-title">📊 Structure Confirmation</div>
+                        <ul class="trigger-list">
+                            <li>✓ Higher High (HH)</li>
+                            <li>✓ Higher Low (HL)</li>
+                            <li>✓ Break of LTF downtrend</li>
+                            <li>✓ LFZ created on LTF</li>
+                            <li>✓ Volume increase on bounce</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x450/112250/10B981?text=Long+Entry+Triggers+on+LTF" alt="Long Entry Triggers">
+                </div>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Entry Setup Mạnh Nhất</div>
+                    <p><strong>LTF Break of Structure + Bullish Engulfing</strong> tại ITF LFZ = Setup có win rate cao nhất (70%+)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Entry Triggers cho Short -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>📉 Entry Triggers Cho SHORT (tại HFZ)</h2>
+            </div>
+            <div class="card-content">
+                <p>Khi giá về <span class="highlight-red">HFZ trên ITF</span>, chuyển sang LTF và tìm các trigger sau:</p>
+
+                <div class="trigger-grid">
+                    <div class="trigger-card sell">
+                        <div class="trigger-title">🕯️ Bearish Candle Patterns</div>
+                        <ul class="trigger-list">
+                            <li>✓ Bearish Engulfing</li>
+                            <li>✓ Shooting Star / Inverted Hammer</li>
+                            <li>✓ Evening Star</li>
+                            <li>✓ Bearish Harami</li>
+                            <li>✓ Double Top (LTF)</li>
+                        </ul>
+                    </div>
+                    <div class="trigger-card sell">
+                        <div class="trigger-title">📊 Structure Confirmation</div>
+                        <ul class="trigger-list">
+                            <li>✓ Lower High (LH)</li>
+                            <li>✓ Lower Low (LL)</li>
+                            <li>✓ Break of LTF uptrend</li>
+                            <li>✓ HFZ created on LTF</li>
+                            <li>✓ Volume increase on rejection</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x450/112250/EF4444?text=Short+Entry+Triggers+on+LTF" alt="Short Entry Triggers">
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">💡 Entry Setup Mạnh Nhất</div>
+                    <p><strong>LTF Break of Structure + Bearish Engulfing</strong> tại ITF HFZ = Setup Short có win rate cao nhất (70%+)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Step-by-Step Entry Process -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>📋 Quy Trình Entry 5 Bước</h2>
+            </div>
+            <div class="card-content">
+                <div class="step-card">
+                    <span class="step-number">1</span>
+                    <span class="step-title">Set Alert tại ITF Zone</span>
+                    <div class="step-desc">Đặt alert khi giá đến gần zone (cách 0.5-1% giá). Không ngồi nhìn chart liên tục.</div>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">2</span>
+                    <span class="step-title">Chuyển sang LTF khi Alert</span>
+                    <div class="step-desc">Khi alert trigger, mở chart LTF (1H hoặc 15M). Quan sát price action tại zone.</div>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">3</span>
+                    <span class="step-title">Đợi Entry Trigger</span>
+                    <div class="step-desc">KHÔNG vào ngay! Đợi bullish/bearish trigger xuất hiện. Có thể mất 1-4 candles.</div>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">4</span>
+                    <span class="step-title">Xác Định Stoploss</span>
+                    <div class="step-desc">Stoploss = Below/Above LTF swing low/high + buffer. Thường là 5-15 pips dưới zone.</div>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">5</span>
+                    <span class="step-title">Vào Lệnh với Risk:Reward</span>
+                    <div class="step-desc">Check RR ratio ≥ 2:1. Nếu đạt → Entry. Nếu không → Skip hoặc đợi setup tốt hơn.</div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x450/112250/FFBD59?text=5-Step+Entry+Process" alt="Entry Process">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Common Mistakes -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>⚠️ Lỗi Thường Gặp Khi Entry LTF</h2>
+            </div>
+            <div class="card-content">
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Lỗi 1: Entry Quá Sớm</div>
+                    <p>Vào ngay khi giá chạm zone mà không đợi confirmation → Bị stopped out bởi liquidity grab.</p>
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Lỗi 2: Entry Quá Muộn</div>
+                    <p>Đợi quá nhiều confirmation → Giá đã move xa → Stoploss rộng, RR thấp.</p>
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Lỗi 3: Stoploss Quá Chặt</div>
+                    <p>Đặt SL ngay dưới trigger candle → Dễ bị stopped out bởi noise. Nên đặt dưới zone.</p>
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Lỗi 4: Bỏ Qua RR Check</div>
+                    <p>Entry mà không tính RR → Trade với RR 1:1 hoặc thấp hơn → Long-term loss.</p>
+                </div>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Giải Pháp</div>
+                    <p>Luôn tuân thủ quy trình 5 bước. <strong>Patience = Profits.</strong> Bỏ lỡ trade tốt còn hơn vào trade xấu.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Box -->
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li>Entry trên <strong>LTF</strong> giúp giảm risk 50-70%, tăng RR lên 4:1+</li>
+                <li><strong>Long triggers:</strong> Bullish Engulfing, Hammer, HH-HL structure</li>
+                <li><strong>Short triggers:</strong> Bearish Engulfing, Shooting Star, LH-LL structure</li>
+                <li>Tuân thủ <strong>quy trình 5 bước:</strong> Alert → LTF → Trigger → SL → RR check</li>
+                <li><strong>Không vào sớm:</strong> Đợi confirmation trên LTF</li>
+                <li><strong>RR ≥ 2:1</strong> là yêu cầu bắt buộc trước khi entry</li>
+            </ul>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="quiz-section">
+            <h3>📝 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <p>1. Tại sao nên entry trên LTF thay vì ITF?</p>
+                <button class="quiz-option" data-index="0">Vì LTF có nhiều cơ hội hơn</button>
+                <button class="quiz-option" data-index="1">Vì stoploss nhỏ hơn và RR ratio cao hơn</button>
+                <button class="quiz-option" data-index="2">Vì LTF dễ đọc hơn ITF</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p>2. Trigger nào mạnh nhất cho LONG entry tại LFZ?</p>
+                <button class="quiz-option" data-index="0">LTF Break of Structure + Bullish Engulfing</button>
+                <button class="quiz-option" data-index="1">Chỉ cần giá chạm LFZ</button>
+                <button class="quiz-option" data-index="2">RSI oversold</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p>3. Trong quy trình 5 bước, bước nào sau khi đợi Entry Trigger?</p>
+                <button class="quiz-option" data-index="0">Chuyển sang LTF</button>
+                <button class="quiz-option" data-index="1">Vào lệnh ngay</button>
+                <button class="quiz-option" data-index="2">Xác định Stoploss</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-number"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="btn-retake" onclick="retakeQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 2</p>
+            <p>© 2025 GEM Frequency Trading Method</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem đáp án đúng ở trên.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

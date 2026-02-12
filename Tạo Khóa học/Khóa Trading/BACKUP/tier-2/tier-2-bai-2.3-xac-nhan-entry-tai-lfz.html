@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.3: Xác Nhận Entry Tại LFZ | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --accent-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --gradient-gold: linear-gradient(135deg, #FFBD59 0%, #FFCF87 100%);
+            --gradient-green: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--primary-navy);
+        }
+
+        /* HEADER */
+        .lesson-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient-green);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #000;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-chapter {
+            font-size: 0.875rem;
+            color: var(--success-green);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* CONTENT SECTION */
+        .content-section {
+            padding: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--success-green);
+        }
+
+        .content-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--success-green);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .image-placeholder {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border: 2px dashed var(--success-green);
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin: 1.25rem 0;
+        }
+
+        .image-placeholder .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-placeholder .label {
+            font-size: 0.875rem;
+            color: var(--success-green);
+            font-weight: 600;
+        }
+
+        .image-placeholder .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* INFO BOX */
+        .info-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .info-box.warning {
+            background: rgba(255, 189, 89, 0.1);
+            border-color: rgba(255, 189, 89, 0.3);
+        }
+
+        .info-box.warning .info-box-title {
+            color: var(--accent-gold);
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: var(--success-green);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* CANDLE PATTERN CARDS */
+        .candle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .candle-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .candle-card.strong {
+            border-color: var(--success-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .candle-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .candle-name {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .candle-signal {
+            font-size: 0.8125rem;
+            color: var(--success-green);
+        }
+
+        .candle-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* VOLUME INDICATOR */
+        .volume-box {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .volume-title {
+            font-weight: 600;
+            color: var(--accent-cyan);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .volume-levels {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .volume-level {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .volume-level.low {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error-red);
+        }
+
+        .volume-level.medium {
+            background: rgba(255, 189, 89, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .volume-level.high {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-green);
+        }
+
+        /* FLOW STEPS */
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .flow-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--gradient-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .flow-content h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .flow-content p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: var(--success-green);
+            font-size: 1.25rem;
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+        }
+
+        .summary-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--success-green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.625rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .summary-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-green);
+            font-weight: bold;
+        }
+
+        /* QUIZ SECTION */
+        .quiz-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .quiz-result.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .score-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .retake-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .retake-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* FOOTER */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo .gem {
+            color: var(--accent-gold);
+        }
+
+        .footer-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            .content-card {
+                margin: 0.75rem 0;
+                border-radius: 0;
+                border-left: 4px solid var(--success-green);
+                border-right: none;
+                border-top: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .summary-box,
+            .quiz-section {
+                margin: 1rem 0;
+                border-radius: 0;
+            }
+
+            .lesson-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .lesson-title {
+                font-size: 1.5rem;
+            }
+
+            .candle-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="header-badge">
+                <span>📈</span>
+                <span>Tier 2 - Nâng Cao</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - LFZ Mastery</div>
+            <h1 class="lesson-title">Xác Nhận Entry Tại LFZ</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>10 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>2 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content-section">
+            <!-- Section 1: Tại sao cần xác nhận -->
+            <div class="content-card">
+                <h2>❓ Tại Sao Cần Xác Nhận Entry?</h2>
+
+                <p>Không phải mọi lần giá chạm LFZ đều nên entry! Đợi xác nhận (confirmation) giúp tăng win rate từ 60% lên 72%+ và giảm false entries.</p>
+
+                <div class="info-box">
+                    <div class="info-box-title">💡 Xác Nhận = Bằng Chứng Buyers Đang Tham Gia</div>
+                    <p>Khi giá về LFZ, chúng ta cần thấy dấu hiệu buyers đang mua vào (buying pressure) trước khi entry LONG. Các candlestick patterns và volume là những confirmation tốt nhất.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🎯</div>
+                    <div class="label">Hình 2.3.1: Entry Không Xác Nhận vs Có Xác Nhận</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 2: Bullish Candlestick Patterns -->
+            <div class="content-card">
+                <h2>🕯️ Các Mẫu Nến Bullish Xác Nhận</h2>
+
+                <p>Đây là những candlestick patterns cho tín hiệu LONG mạnh khi xuất hiện tại LFZ:</p>
+
+                <div class="candle-grid">
+                    <div class="candle-card strong">
+                        <div class="candle-icon">🔨</div>
+                        <div class="candle-name">Hammer</div>
+                        <div class="candle-signal">⭐⭐⭐ Mạnh</div>
+                        <div class="candle-desc">Bóng dưới dài ≥2x body<br>Thân nến nhỏ ở trên</div>
+                    </div>
+                    <div class="candle-card strong">
+                        <div class="candle-icon">🌅</div>
+                        <div class="candle-name">Morning Star</div>
+                        <div class="candle-signal">⭐⭐⭐ Mạnh</div>
+                        <div class="candle-desc">Pattern 3 nến<br>Đảo chiều từ giảm → tăng</div>
+                    </div>
+                    <div class="candle-card strong">
+                        <div class="candle-icon">🔥</div>
+                        <div class="candle-name">Bullish Engulfing</div>
+                        <div class="candle-signal">⭐⭐⭐ Rất mạnh</div>
+                        <div class="candle-desc">Nến xanh nuốt trọn nến đỏ<br>Volume cao = tuyệt vời</div>
+                    </div>
+                    <div class="candle-card">
+                        <div class="candle-icon">🪢</div>
+                        <div class="candle-name">Tweezer Bottom</div>
+                        <div class="candle-signal">⭐⭐ Khá</div>
+                        <div class="candle-desc">2 nến có đáy bằng nhau<br>Double test support</div>
+                    </div>
+                    <div class="candle-card">
+                        <div class="candle-icon">📍</div>
+                        <div class="candle-name">Dragonfly Doji</div>
+                        <div class="candle-signal">⭐⭐ Khá</div>
+                        <div class="candle-desc">Body cực nhỏ, bóng dưới dài<br>Buyers reject giá thấp</div>
+                    </div>
+                    <div class="candle-card">
+                        <div class="candle-icon">💹</div>
+                        <div class="candle-name">Piercing Pattern</div>
+                        <div class="candle-signal">⭐⭐ Khá</div>
+                        <div class="candle-desc">Nến xanh close > 50% nến đỏ<br>Bullish reversal</div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🕯️</div>
+                    <div class="label">Hình 2.3.2: 6 Mẫu Nến Bullish Confirmation</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- Section 3: Volume Confirmation -->
+            <div class="content-card">
+                <h2>📊 Volume Confirmation</h2>
+
+                <p>Volume là "nhiên liệu" của price movement. Khi bounce từ LFZ có volume cao, xác suất thành công tăng đáng kể.</p>
+
+                <div class="volume-box">
+                    <div class="volume-title">📈 Đánh Giá Volume Khi Entry LFZ</div>
+                    <div class="volume-levels">
+                        <div class="volume-level high">Volume > 1.5x TB = Tuyệt vời ✓</div>
+                        <div class="volume-level medium">Volume = TB = Chấp nhận</div>
+                        <div class="volume-level low">Volume < 0.5x TB = Cẩn thận!</div>
+                    </div>
+                </div>
+
+                <h3>Cách Đọc Volume Tại LFZ</h3>
+                <ul>
+                    <li><strong>Volume tăng đột biến + nến xanh:</strong> Buying pressure mạnh, entry confident</li>
+                    <li><strong>Volume bình thường + nến xanh:</strong> OK, có thể entry với position size nhỏ hơn</li>
+                    <li><strong>Volume thấp + nến xanh:</strong> Thiếu conviction, nên đợi thêm confirmation</li>
+                    <li><strong>Volume cao + nến đỏ:</strong> Selling pressure, LFZ có thể bị phá vỡ</li>
+                </ul>
+
+                <div class="image-placeholder">
+                    <div class="icon">📊</div>
+                    <div class="label">Hình 2.3.3: Volume Analysis Tại LFZ</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 4: Quy trình Entry -->
+            <div class="content-card">
+                <h2>🎯 Quy Trình Entry 5 Bước</h2>
+
+                <div class="flow-container">
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div class="flow-content">
+                            <h4>Đợi Giá Chạm LFZ</h4>
+                            <p>Giá pullback về vùng LFZ đã vẽ trước đó</p>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div class="flow-content">
+                            <h4>Quan Sát Phản Ứng</h4>
+                            <p>Xem giá phản ứng thế nào khi chạm zone (reject hay xuyên qua)</p>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div class="flow-content">
+                            <h4>Đợi Bullish Candle</h4>
+                            <p>Đợi xuất hiện một trong các mẫu nến bullish confirmation</p>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div class="flow-content">
+                            <h4>Kiểm Tra Volume</h4>
+                            <p>Xác nhận volume >= trung bình trên nến bullish</p>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">
+                        <div class="flow-number">5</div>
+                        <div class="flow-content">
+                            <h4>Entry LONG</h4>
+                            <p>Mở lệnh LONG, SL dưới đáy LFZ, TP theo R:R tối thiểu 1:2</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Lưu Ý Quan Trọng</div>
+                    <p>KHÔNG entry ngay khi giá chạm LFZ! Luôn đợi ít nhất 1 nến bullish confirmation đóng cửa hoàn toàn trước khi vào lệnh.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🎯</div>
+                    <div class="label">Hình 2.3.4: Quy Trình Entry 5 Bước Tại LFZ</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- Section 5: Ví dụ thực tế -->
+            <div class="content-card">
+                <h2>📈 Ví Dụ Thực Tế</h2>
+
+                <h3>Case Study: BTC/USDT 4H</h3>
+                <p>BTC tạo UPU pattern → LFZ tại $41,500-$42,000. Giá pullback về test LFZ:</p>
+
+                <ol>
+                    <li><strong>Giá chạm $41,650</strong> - Trong vùng LFZ ✓</li>
+                    <li><strong>Hammer candle hình thành</strong> - Bóng dưới dài reject $41,500 ✓</li>
+                    <li><strong>Volume spike 180% so với TB</strong> - Buying pressure mạnh ✓</li>
+                    <li><strong>Entry LONG tại $41,800</strong> sau khi Hammer close</li>
+                    <li><strong>SL: $41,400</strong> (dưới đáy LFZ)</li>
+                    <li><strong>TP1: $43,000</strong> (R:R 1:2), <strong>TP2: $44,200</strong> (R:R 1:3)</li>
+                </ol>
+
+                <div class="image-placeholder">
+                    <div class="icon">📈</div>
+                    <div class="label">Hình 2.3.5: Case Study - Entry LFZ Với Hammer + Volume</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt Bài Học</h3>
+            <ul>
+                <li>Luôn đợi xác nhận trước khi entry tại LFZ</li>
+                <li>3 mẫu nến mạnh nhất: Hammer, Morning Star, Bullish Engulfing</li>
+                <li>Volume > 1.5x trung bình = tín hiệu mạnh</li>
+                <li>Quy trình 5 bước: Chạm zone → Quan sát → Bullish candle → Volume → Entry</li>
+                <li>KHÔNG entry ngay khi giá chạm zone, đợi candle close</li>
+            </ul>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="quiz-section">
+            <div class="quiz-header">
+                <h3>🎯 Kiểm Tra Kiến Thức</h3>
+                <p>Trả lời các câu hỏi để củng cố bài học</p>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <div class="question-text">Câu 1: Mẫu nến nào sau đây cho tín hiệu bullish MẠNH NHẤT khi xuất hiện tại LFZ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Doji thường</div>
+                    <div class="quiz-option" data-index="1">Bullish Engulfing với volume cao</div>
+                    <div class="quiz-option" data-index="2">Nến xanh nhỏ body</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <div class="question-text">Câu 2: Khi nào là thời điểm đúng để entry LONG tại LFZ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Sau khi nến bullish confirmation đóng cửa hoàn toàn</div>
+                    <div class="quiz-option" data-index="1">Ngay khi giá chạm vào LFZ</div>
+                    <div class="quiz-option" data-index="2">Khi thấy nến đỏ trong LFZ</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text">🎉 Bạn trả lời đúng <span id="correct-count">0</span>/2 câu!</div>
+                <button class="retake-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <div class="footer-text">© 2024 GEM Trading Academy. All rights reserved.</div>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem đáp án đúng ở trên.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

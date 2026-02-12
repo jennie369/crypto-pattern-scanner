@@ -4,7 +4,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Alert, AppState, Platform } from 'react-native';
-import { supabase, getCurrentUser, getUserProfile, signOut } from '../services/supabase';
+import { supabase, getCurrentUser, getUserProfile, signOut, localOnlySignOut } from '../services/supabase';
 import presenceService from '../services/presenceService';
 import biometricService from '../services/biometricService';
 import notificationScheduler from '../services/notificationScheduler';
@@ -19,8 +19,8 @@ import cacheService from '../services/cacheService';
 const handleInvalidRefreshToken = async (setUser, setProfile) => {
   console.warn('[AuthContext] ⚠️ Invalid refresh token detected, clearing session...');
   try {
-    // Clear biometric stored credentials
-    await biometricService.disable();
+    // Clear biometric stored credentials (but keep biometric_enabled preference)
+    await biometricService.clearCredentials();
     // Sign out to clear invalid session
     await signOut();
     // Clear state
@@ -100,6 +100,11 @@ export const AuthProvider = ({ children }) => {
   // Track current user in a ref so onAuthStateChange callback
   // can detect involuntary sign-out (ref avoids stale closure issue with [] deps)
   const userRef = useRef(null);
+
+  // Flag to distinguish manual logout from involuntary sign-out
+  // When true, onAuthStateChange won't show "session expired" popup
+  // and won't clear biometric preferences
+  const isIntentionalLogoutRef = useRef(false);
 
   // =====================================================
   // UPGRADE STATE - For showing UpgradeSuccessModal
@@ -603,19 +608,26 @@ export const AuthProvider = ({ children }) => {
             console.warn('[AuthContext] Channel cleanup error:', e.message);
           }
 
-          // If user was logged in before, this is an involuntary sign-out
-          // (e.g., auto-refresh failed due to revoked/expired refresh token)
-          // Clear biometric credentials so stale token doesn't cause repeated errors
+          // Distinguish manual logout from involuntary sign-out
           if (wasLoggedIn && (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESH_FAILED')) {
-            console.warn('[AuthContext] Involuntary sign-out detected, clearing biometric...');
-            biometricService.disable().catch((err) => {
-              console.error('[AuthContext] Failed to disable biometric on involuntary sign-out:', err);
-            });
-            Alert.alert(
-              'Phiên đăng nhập hết hạn',
-              'Vui lòng đăng nhập lại để tiếp tục sử dụng app.',
-              [{ text: 'OK' }]
-            );
+            if (isIntentionalLogoutRef.current) {
+              // Manual logout: don't show expired popup, don't clear biometric preference
+              console.log('[AuthContext] Intentional logout - no expired popup, keeping biometric preference');
+              isIntentionalLogoutRef.current = false;
+            } else {
+              // Involuntary sign-out (token expired/revoked)
+              // Only clear stored credentials (token), keep biometric_enabled preference
+              // so BiometricButton still shows on login screen
+              console.warn('[AuthContext] Involuntary sign-out detected, clearing biometric credentials...');
+              biometricService.clearCredentials().catch((err) => {
+                console.error('[AuthContext] Failed to clear biometric credentials:', err);
+              });
+              Alert.alert(
+                'Phiên đăng nhập hết hạn',
+                'Vui lòng đăng nhập lại để tiếp tục sử dụng app.',
+                [{ text: 'OK' }]
+              );
+            }
           }
         }
         setLoading(false);
@@ -625,6 +637,57 @@ export const AuthProvider = ({ children }) => {
     return () => {
       subscription?.unsubscribe();
     };
+  }, []);
+
+  // =====================================================
+  // INTENTIONAL LOGOUT
+  // Sets flag before signOut so onAuthStateChange knows
+  // this is a manual logout, not a session expiry
+  // =====================================================
+  const intentionalLogout = useCallback(async () => {
+    isIntentionalLogoutRef.current = true;
+    console.log('[AuthContext] Intentional logout initiated');
+    try {
+      // Use localOnlySignOut to clear session WITHOUT revoking on server
+      // This keeps the refresh token valid for biometric re-login
+      // (supabase.auth.signOut even with scope:'local' still revokes server session)
+      await localOnlySignOut();
+
+      // Manually trigger state cleanup (normally done by onAuthStateChange)
+      const previousUserId = userRef.current?.id;
+      userRef.current = null;
+      setUser(null);
+      setProfile(null);
+
+      // Cleanup services
+      presenceService.cleanup();
+      QuotaService.clearCache();
+      paperTradeService.stopGlobalMonitoring();
+      connectionHealthMonitor.stop();
+      websocketService.disconnect();
+      hybridChatService.cleanup();
+      try {
+        const { zonePriceMonitor } = require('../services/zonePriceMonitor');
+        zonePriceMonitor.stop();
+      } catch (e) {}
+      if (previousUserId) {
+        cacheService.clearUserCache(previousUserId).catch(() => {});
+      }
+      try {
+        supabase.getChannels().forEach(ch => supabase.removeChannel(ch));
+      } catch (e) {}
+
+      // Reset the flag
+      isIntentionalLogoutRef.current = false;
+      setLoading(false);
+
+      console.log('[AuthContext] Intentional logout completed - biometric preserved');
+      return { error: null };
+    } catch (error) {
+      isIntentionalLogoutRef.current = false;
+      console.error('[AuthContext] Intentional logout error:', error);
+      throw error;
+    }
   }, []);
 
   // ⚡ ADMIN CHECK - Critical for admin features
@@ -666,6 +729,9 @@ export const AuthProvider = ({ children }) => {
 
     // App resume re-hydration
     refreshProfile, // Call to manually refresh profile, role, quota from database
+
+    // Logout
+    intentionalLogout, // Call this for manual logout (won't show expired popup)
   };
 
   return (

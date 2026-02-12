@@ -248,7 +248,28 @@ const biometricService = {
   },
 
   /**
-   * Disable biometric and clear stored credentials
+   * Clear only stored credentials (token + email) but keep biometric_enabled preference
+   * Use this for involuntary sign-outs where the token is invalid but user still
+   * wants biometric enabled for next login
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async clearCredentials() {
+    try {
+      if (SecureStore) {
+        await SecureStore.deleteItemAsync(STORAGE_KEYS.USER_EMAIL);
+        await SecureStore.deleteItemAsync(STORAGE_KEYS.USER_TOKEN);
+      }
+      console.log('[BiometricService] Credentials cleared (preference kept)');
+      return { success: true };
+    } catch (error) {
+      console.error('[BiometricService] clearCredentials error:', error);
+      return { success: false, error: 'Không thể xoá thông tin đăng nhập' };
+    }
+  },
+
+  /**
+   * Fully disable biometric and clear ALL stored data (credentials + preference)
+   * Use this only when user explicitly turns off biometric in settings
    * @returns {Promise<{success: boolean, error?: string}>}
    */
   async disable() {
@@ -332,18 +353,20 @@ const biometricService = {
       // Get stored credentials
       const credentials = await this.getStoredCredentials();
       if (!credentials) {
-        // Credentials not found, disable biometric
-        await this.disable();
-        return { success: false, error: 'Không tìm thấy thông tin đăng nhập' };
+        // Credentials not found - clear credentials but keep biometric preference
+        // After user logs in with email/password, autoEnableBiometric will restore credentials
+        await this.clearCredentials();
+        return { success: false, error: 'Vui lòng đăng nhập bằng email/mật khẩu để kích hoạt lại' };
       }
 
       // Call sign in callback with refresh token
       if (signInCallback) {
         const result = await signInCallback(credentials.token);
         if (result?.error) {
-          // Token might be expired, disable biometric
-          await this.disable();
-          return { success: false, error: 'Phiên đăng nhập hết hạn, vui lòng đăng nhập lại' };
+          // Token expired - clear credentials but keep biometric preference
+          // autoEnableBiometric will restore on next email/password login
+          await this.clearCredentials();
+          return { success: false, error: 'Phiên đăng nhập hết hạn, vui lòng đăng nhập lại bằng email' };
         }
       }
 

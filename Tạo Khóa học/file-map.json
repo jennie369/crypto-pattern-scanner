@@ -1,0 +1,797 @@
+[
+  {
+    "id": "les-t1-1.1",
+    "tier": "tier-1",
+    "file": "tier-1-bai-1.1-chao-mung-den-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-1.2",
+    "tier": "tier-1",
+    "file": "tier-1-bai-1.2-nguyen-ly-cot-loi-mat-can-bang-cung-cau.html"
+  },
+  {
+    "id": "les-t1-1.3",
+    "tier": "tier-1",
+    "file": "tier-1-bai-1.3-smart-money-va-retail-traders.html"
+  },
+  {
+    "id": "les-t1-1.4",
+    "tier": "tier-1",
+    "file": "tier-1-bai-1.4-zone-va-support-resistance-truyen-thong.html"
+  },
+  {
+    "id": "les-t1-1.5",
+    "tier": "tier-1",
+    "file": "tier-1-bai-1.5-tong-quan-6-cong-thuc-frequency-doc-quyen.html"
+  },
+  {
+    "id": "les-t1-1.6",
+    "tier": "tier-1",
+    "file": "tier-1-bai-1.6-nguyen-tac-vang-doi-retest.html"
+  },
+  {
+    "id": "les-t1-2.1",
+    "tier": "tier-1",
+    "file": "tier-1-bai-2.1-hfz-la-gi.html"
+  },
+  {
+    "id": "les-t1-2.2",
+    "tier": "tier-1",
+    "file": "tier-1-bai-2.2-lfz-la-gi.html"
+  },
+  {
+    "id": "les-t1-2.3",
+    "tier": "tier-1",
+    "file": "tier-1-bai-2.3-cach-nhan-dien-zone-tren-bieu-do.html"
+  },
+  {
+    "id": "les-t1-2.4",
+    "tier": "tier-1",
+    "file": "tier-1-bai-2.4-nguyen-tac-giao-dich-voi-zone.html"
+  },
+  {
+    "id": "les-t1-2.5",
+    "tier": "tier-1",
+    "file": "tier-1-bai-2.5-gioi-han-tier-1-va-preview-tier-2.html"
+  },
+  {
+    "id": "les-t1-3.1",
+    "tier": "tier-1",
+    "file": "tier-1-bai-3.1-tong-quan-classic-patterns.html"
+  },
+  {
+    "id": "les-t1-3.2",
+    "tier": "tier-1",
+    "file": "tier-1-bai-3.2-flag-pennant-patterns.html"
+  },
+  {
+    "id": "les-t1-3.3",
+    "tier": "tier-1",
+    "file": "tier-1-bai-3.3-triangle-patterns.html"
+  },
+  {
+    "id": "les-t1-3.4",
+    "tier": "tier-1",
+    "file": "tier-1-bai-3.4-head-shoulders-pattern-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-3.5",
+    "tier": "tier-1",
+    "file": "tier-1-bai-3.5-double-top-double-bottom-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-3.6",
+    "tier": "tier-1",
+    "file": "tier-1-bai-3.6-classic-patterns-tong-ket-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-4.1",
+    "tier": "tier-1",
+    "file": "tier-1-bai-4.1-shooting-star.html"
+  },
+  {
+    "id": "les-t1-4.2",
+    "tier": "tier-1",
+    "file": "tier-1-bai-4.2-hanging-man.html"
+  },
+  {
+    "id": "les-t1-4.3",
+    "tier": "tier-1",
+    "file": "tier-1-bai-4.3-hammer-inverted-hammer.html"
+  },
+  {
+    "id": "les-t1-4.4",
+    "tier": "tier-1",
+    "file": "tier-1-bai-4.4-ket-hop-patterns-hfz-lfz.html"
+  },
+  {
+    "id": "les-t1-4.5",
+    "tier": "tier-1",
+    "file": "tier-1-bai-4.5-on-tap-tong-hop.html"
+  },
+  {
+    "id": "les-t1-5.1",
+    "tier": "tier-1",
+    "file": "tier-1-bai-5.1-paper-trading-la-gi-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-5.2",
+    "tier": "tier-1",
+    "file": "tier-1-bai-5.2-huong-dan-paper-trade-trong-gem-app-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-5.3",
+    "tier": "tier-1",
+    "file": "tier-1-bai-5.3-trading-journal-ghi-chep-giao-dich-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-5.4",
+    "tier": "tier-1",
+    "file": "tier-1-bai-5.4-backtesting-co-ban-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-5.5",
+    "tier": "tier-1",
+    "file": "tier-1-bai-5.5-tu-paper-trading-den-giao-dich-that-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-6.1",
+    "tier": "tier-1",
+    "file": "tier-1-bai-6.1-gioi-thieu-gem-master-ai-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-6.2",
+    "tier": "tier-1",
+    "file": "tier-1-bai-6.2-su-dung-chatbot-hoi-dap-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-6.3",
+    "tier": "tier-1",
+    "file": "tier-1-bai-6.3-scanner-co-ban-tim-patterns-tu-dong-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-6.4",
+    "tier": "tier-1",
+    "file": "tier-1-bai-6.4-thiet-lap-canh-bao-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-6.5",
+    "tier": "tier-1",
+    "file": "tier-1-bai-6.5-tong-ket-tier-1-xem-truoc-tier-2-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t1-7.1",
+    "tier": "tier-1",
+    "file": "tier-1-bai-7.1-con-nguoi-cu-va-con-nguoi-moi.html"
+  },
+  {
+    "id": "les-t1-7.2",
+    "tier": "tier-1",
+    "file": "tier-1-bai-7.2-ban-do-hanh-trinh-cua-ban.html"
+  },
+  {
+    "id": "les-t1-7.3",
+    "tier": "tier-1",
+    "file": "tier-1-bai-7.3-su-thay-doi-thuc-su.html"
+  },
+  {
+    "id": "les-t1-7.4",
+    "tier": "tier-1",
+    "file": "tier-1-bai-7.4-dieu-khien-ban-khac-biet.html"
+  },
+  {
+    "id": "les-t1-8.1",
+    "tier": "tier-1",
+    "file": "tier-1-bai-8.1-nga-ba-duong.html"
+  },
+  {
+    "id": "les-t1-8.2",
+    "tier": "tier-1",
+    "file": "tier-1-bai-8.2-cong-cu-tang-toc.html"
+  },
+  {
+    "id": "les-t1-8.3",
+    "tier": "tier-1",
+    "file": "tier-1-bai-8.3-co-hoi-doi-tac.html"
+  },
+  {
+    "id": "les-t1-8.4",
+    "tier": "tier-1",
+    "file": "tier-1-bai-8.4-cau-chuyen-thanh-cong.html"
+  },
+  {
+    "id": "les-t1-8.5",
+    "tier": "tier-1",
+    "file": "tier-1-bai-8.5-loi-the-di-som.html"
+  },
+  {
+    "id": "les-t1-8.6",
+    "tier": "tier-1",
+    "file": "tier-1-bai-8.6-khung-quyet-dinh.html"
+  },
+  {
+    "id": "les-t1-8.7",
+    "tier": "tier-1",
+    "file": "tier-1-bai-8.7-cac-buoc-tiep-theo.html"
+  },
+  {
+    "id": "les-t2-1.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-1.1-dpd-la-gi.html"
+  },
+  {
+    "id": "les-t2-1.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-1.2-cau-truc-3-phases-cua-dpd.html"
+  },
+  {
+    "id": "les-t2-1.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-1.3-cach-ve-hfz-tu-dpd.html"
+  },
+  {
+    "id": "les-t2-1.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-1.4-chien-luoc-entry-cho-dpd.html"
+  },
+  {
+    "id": "les-t2-1.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-1.5-checklist-xac-nhan-dpd.html"
+  },
+  {
+    "id": "les-t2-1.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-1.6-vi-du-thuc-te-dpd.html"
+  },
+  {
+    "id": "les-t2-2.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-2.1-upu-la-gi.html"
+  },
+  {
+    "id": "les-t2-2.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-2.2-cau-truc-3-phases-cua-upu.html"
+  },
+  {
+    "id": "les-t2-2.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-2.3-cach-ve-lfz-tu-upu.html"
+  },
+  {
+    "id": "les-t2-2.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-2.4-chien-luoc-entry-cho-upu.html"
+  },
+  {
+    "id": "les-t2-2.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-2.5-checklist-xac-nhan-upu.html"
+  },
+  {
+    "id": "les-t2-2.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-2.6-vi-du-thuc-te-upu.html"
+  },
+  {
+    "id": "les-t2-3.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-3.1-upd-la-gi.html"
+  },
+  {
+    "id": "les-t2-3.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-3.2-cau-truc-3-phases-cua-upd.html"
+  },
+  {
+    "id": "les-t2-3.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-3.3-tai-sao-upd-la-pattern-manh.html"
+  },
+  {
+    "id": "les-t2-3.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-3.4-chien-luoc-entry-cho-upd.html"
+  },
+  {
+    "id": "les-t2-3.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-3.5-phan-biet-upd-va-dpd.html"
+  },
+  {
+    "id": "les-t2-3.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-3.6-vi-du-thuc-te-upd-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-4.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-4.1-dpu-pattern-la-gi-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-4.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-4.2-cau-truc-3-phases-cua-dpu-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-4.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-4.3-cach-ve-lfz-chinh-xac-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-4.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-4.4-chien-luoc-entry-dpu-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-4.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-4.5-dpu-checklist-8-diem-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-4.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-4.6-vi-du-thuc-te-dpu.html"
+  },
+  {
+    "id": "les-t2-5.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-5.1-hfz-la-gi-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-5.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-5.2-cach-ve-hfz-chinh-xac-xac-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-5.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-5.3-vong-doi-zone-zone-lifecycle-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-5.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-5.4-chien-luoc-entry-tai-hfz-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-5.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-5.5-ket-hop-hfz-voi-da-khung-thoi-gian-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-5.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-5.6-vi-du-thuc-te-hfz-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-6.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-6.1-lfz-la-gi.html"
+  },
+  {
+    "id": "les-t2-6.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-6.2-cach-ve-lfz-chinh-xac.html"
+  },
+  {
+    "id": "les-t2-6.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-6.3-xac-nhan-entry-tai-lfz.html"
+  },
+  {
+    "id": "les-t2-6.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-6.4-so-sanh-hfz-va-lfz.html"
+  },
+  {
+    "id": "les-t2-6.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-6.5-ket-hop-lfz-voi-classic-patterns.html"
+  },
+  {
+    "id": "les-t2-6.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-6.6-vi-du-thuc-te-lfz.html"
+  },
+  {
+    "id": "les-t2-7.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-7.1-doji-patterns-NEW.html"
+  },
+  {
+    "id": "les-t2-7.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-7.2-rounding-bottom-NEW.html"
+  },
+  {
+    "id": "les-t2-7.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-7.3-rounding-top-NEW.html"
+  },
+  {
+    "id": "les-t2-7.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-7.4-ascending-triangle-tam-giac-tang.html"
+  },
+  {
+    "id": "les-t2-7.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-7.5-descending-triangle-tam-giac-giam.html"
+  },
+  {
+    "id": "les-t2-7.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-7.6-symmetrical-triangle-tam-giac-can.html"
+  },
+  {
+    "id": "les-t2-7.7",
+    "tier": "tier-2",
+    "file": "tier-2-bai-7.7-ket-hop-triangles-voi-gem-zones.html"
+  },
+  {
+    "id": "les-t2-7.8",
+    "tier": "tier-2",
+    "file": "tier-2-bai-7.8-vi-du-thuc-te-triangle-patterns.html"
+  },
+  {
+    "id": "les-t2-8.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.1-nguyen-tac-da-khung-thoi-gian-tier-2.html"
+  },
+  {
+    "id": "les-t2-8.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.2-he-thong-3-khung-thoi-gian-tier-2.html"
+  },
+  {
+    "id": "les-t2-8.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.3-zone-hierarchy-tier-2.html"
+  },
+  {
+    "id": "les-t2-8.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.4-entry-chinh-xac-tren-ltf-tier-2.html"
+  },
+  {
+    "id": "les-t2-8.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.5-vi-du-thuc-te-multi-tf-tier-2.html"
+  },
+  {
+    "id": "les-t2-8.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.6-cong-thuc-tinh-khoi-luong-lenh-tier-2.html"
+  },
+  {
+    "id": "les-t2-8.7",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.7-dat-stop-loss-dung-cach-tier-2.html"
+  },
+  {
+    "id": "les-t2-8.8",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.8-chien-luoc-take-profit-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-8.9",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.9-quy-tac-nhin-sang-phai-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-8.10",
+    "tier": "tier-2",
+    "file": "tier-2-bai-8.10-tong-ket-xem-truoc-tier-3-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-9.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.1-he-thong-cham-diem-zone-tier-2.html"
+  },
+  {
+    "id": "les-t2-9.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.2-odds-enhancers-tier-2.html"
+  },
+  {
+    "id": "les-t2-9.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.3-zone-scoring-worksheet-tier-2.html"
+  },
+  {
+    "id": "les-t2-9.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.4-filter-zones-tren-scanner-tier-2.html"
+  },
+  {
+    "id": "les-t2-9.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.5-vi-du-thuc-te-zone-grading-tier-2.html"
+  },
+  {
+    "id": "les-t2-10.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.1-con-nguoi-cu-va-con-nguoi-moi-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-10.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.2-ban-do-hanh-trinh-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-10.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.3-su-thay-doi-thuc-su-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-10.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-9.4-dieu-khien-ban-khac-biet-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-11.1",
+    "tier": "tier-2",
+    "file": "tier-2-bai-10.1-nga-ba-duong-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-11.2",
+    "tier": "tier-2",
+    "file": "tier-2-bai-10.2-cong-cu-tang-toc-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-11.3",
+    "tier": "tier-2",
+    "file": "tier-2-bai-10.3-co-hoi-doi-tac-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-11.4",
+    "tier": "tier-2",
+    "file": "tier-2-bai-10.4-cau-chuyen-thanh-cong-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-11.5",
+    "tier": "tier-2",
+    "file": "tier-2-bai-10.5-loi-the-di-som-gem-trading-academy.html"
+  },
+  {
+    "id": "les-t2-11.6",
+    "tier": "tier-2",
+    "file": "tier-2-bai-10.6-khung-quyet-dinh-module-b.html"
+  },
+  {
+    "id": "les-t2-11.7",
+    "tier": "tier-2",
+    "file": "tier-2-bai-10.7-cac-buoc-tiep-theo-module-b.html"
+  },
+  {
+    "id": "les-t3-1.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-1.1-flag-pattern-la-gi.html"
+  },
+  {
+    "id": "les-t3-1.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-1.2-bullish-vs-bearish-flag.html"
+  },
+  {
+    "id": "les-t3-1.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-1.3-pennant-pattern.html"
+  },
+  {
+    "id": "les-t3-1.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-1.4-trading-flag-pennant.html"
+  },
+  {
+    "id": "les-t3-1.5",
+    "tier": "tier-3",
+    "file": "tier-3-bai-1.5-vi-du-thuc-te-flag-pennant.html"
+  },
+  {
+    "id": "les-t3-2.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-2.1-wedge-rising-wedge-NEW.html"
+  },
+  {
+    "id": "les-t3-2.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-2.2-wedge-falling-wedge-NEW.html"
+  },
+  {
+    "id": "les-t3-2.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-2.3-wedge-vs-triangle-NEW.html"
+  },
+  {
+    "id": "les-t3-2.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-2.4-wedge-vi-du-thuc-te-NEW.html"
+  },
+  {
+    "id": "les-t3-3.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-3.1-doji-va-spinning-top.html"
+  },
+  {
+    "id": "les-t3-3.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-3.2-engulfing-patterns.html"
+  },
+  {
+    "id": "les-t3-3.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-3.3-hammer-va-shooting-star.html"
+  },
+  {
+    "id": "les-t3-3.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-3.4-three-methods-pattern.html"
+  },
+  {
+    "id": "les-t3-3.5",
+    "tier": "tier-3",
+    "file": "tier-3-bai-3.5-candlesticks-lam-xac-nhan.html"
+  },
+  {
+    "id": "les-t3-3.6",
+    "tier": "tier-3",
+    "file": "tier-3-bai-3.6-vi-du-thuc-te-candlesticks.html"
+  },
+  {
+    "id": "les-t3-4.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-4.1-advanced-cup-and-handle-NEW.html"
+  },
+  {
+    "id": "les-t3-4.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-4.2-advanced-falling-three-methods-NEW.html"
+  },
+  {
+    "id": "les-t3-4.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-4.3-advanced-rising-three-methods-NEW.html"
+  },
+  {
+    "id": "les-t3-4.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-4.4-advanced-ket-hop-gem-zones-NEW.html"
+  },
+  {
+    "id": "les-t3-4.5",
+    "tier": "tier-3",
+    "file": "tier-3-bai-4.5-advanced-vi-du-thuc-te-NEW.html"
+  },
+  {
+    "id": "les-t3-5.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-5.1-gioi-thieu-gem-ai-brain.html"
+  },
+  {
+    "id": "les-t3-5.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-5.2-cach-doc-ai-signals.html"
+  },
+  {
+    "id": "les-t3-5.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-5.3-thiet-lap-canh-bao-tu-dong.html"
+  },
+  {
+    "id": "les-t3-5.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-5.4-ai-phan-tich-con-nguoi.html"
+  },
+  {
+    "id": "les-t3-5.5",
+    "tier": "tier-3",
+    "file": "tier-3-bai-5.5-vi-du-ai-signals.html"
+  },
+  {
+    "id": "les-t3-6.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-6.1-whale-la-ai.html"
+  },
+  {
+    "id": "les-t3-6.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-6.2-phat-hien-lenh-lon.html"
+  },
+  {
+    "id": "les-t3-6.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-6.3-phan-tich-order-flow.html"
+  },
+  {
+    "id": "les-t3-6.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-6.4-tich-hop-whale-signals.html"
+  },
+  {
+    "id": "les-t3-6.5",
+    "tier": "tier-3",
+    "file": "tier-3-bai-6.5-vi-du-whale-tracking.html"
+  },
+  {
+    "id": "les-t3-7.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-7.1-quan-ly-danh-muc.html"
+  },
+  {
+    "id": "les-t3-7.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-7.2-kiem-soat-drawdown.html"
+  },
+  {
+    "id": "les-t3-7.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-7.3-tam-ly-giao-dich-chuyen-sau.html"
+  },
+  {
+    "id": "les-t3-7.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-7.4-chien-luoc-giao-dich-nang-cao.html"
+  },
+  {
+    "id": "les-t3-7.5",
+    "tier": "tier-3",
+    "file": "tier-3-bai-7.5-tot-nghiep-doi-tac.html"
+  },
+  {
+    "id": "les-t3-8.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-8.1-con-nguoi-cu-va-con-nguoi-moi.html"
+  },
+  {
+    "id": "les-t3-8.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-8.2-ban-do-hanh-trinh-cua-ban.html"
+  },
+  {
+    "id": "les-t3-8.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-8.3-su-thay-doi-thuc-su.html"
+  },
+  {
+    "id": "les-t3-8.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-8.4-dieu-khien-ban-khac-biet.html"
+  },
+  {
+    "id": "les-t3-9.1",
+    "tier": "tier-3",
+    "file": "tier-3-bai-9.1-nga-ba-duong-ban-dang-dung-o-dau.html"
+  },
+  {
+    "id": "les-t3-9.2",
+    "tier": "tier-3",
+    "file": "tier-3-bai-9.2-co-hoi-tiep-theo.html"
+  },
+  {
+    "id": "les-t3-9.3",
+    "tier": "tier-3",
+    "file": "tier-3-bai-9.3-co-hoi-doi-tac-cao-cap.html"
+  },
+  {
+    "id": "les-t3-9.4",
+    "tier": "tier-3",
+    "file": "tier-3-bai-9.4-cau-chuyen-thanh-cong-elite.html"
+  },
+  {
+    "id": "les-t3-9.5",
+    "tier": "tier-3",
+    "file": "tier-3-bai-9.5-loi-the-di-som.html"
+  },
+  {
+    "id": "les-t3-9.6",
+    "tier": "tier-3",
+    "file": "tier-3-bai-9.6-khung-quyet-dinh.html"
+  },
+  {
+    "id": "les-t3-9.7",
+    "tier": "tier-3",
+    "file": "tier-3-bai-9.7-cac-buoc-tiep-theo.html"
+  }
+]

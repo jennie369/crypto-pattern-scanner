@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Flame, Clock, Gift, Users, Eye, ChevronUp, Send, Lock, Shield, CheckCircle,
@@ -7,7 +7,8 @@ import {
   BarChart3, Layers, Activity, Timer, Bell, History, FileText, Gamepad2,
   Compass, Quote, Play, UserPlus, Mic, GraduationCap, Facebook, Youtube,
   Instagram, MessageCircle, ChevronRight, X, User, ArrowUp, TrendingUp,
-  CircleX, ShoppingBag, Award, Briefcase, Globe, Info, Smile, LogIn, Menu
+  CircleX, ShoppingBag, Award, Briefcase, Globe, Info, Smile, LogIn, Menu,
+  ShoppingCart, Plus, Minus, Trash2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './Landing.css';
@@ -24,9 +25,9 @@ const IMAGES = {
   visionBoard: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768132606257_kqq69q_gemral_20260111_185544_03.webp',
   scanner: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768146551404_ka1emz_1767797543898_k4efcq_gemral-landing-03.webp',
   // New images for additional sections
-  frequencyMethod: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767797580694_rbmj5h_gemral-landing-08.webp',
+  frequencyMethod: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768146689220_mbfoqb_gemral-landing-08.webp',
   coursesMindset: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798515858_kz5dz0_gemral-landing-050.webp',
-  coursesTrading1: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798566073_pwkp5z_gemral-landing-040.webp',
+  coursesTrading1: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768147823064_ljnkr2_gemral-landing-040.webp',
   coursesTrading2: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798635167_0cdgtd_gemral-landing-13.webp',
   personas: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk9i1b5i-70exnb/1768147893451_0cuqpi_gemral-landing-01.webp',
   testimonials: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798880233_rzsx99_gemral-landing-10.webp',
@@ -58,6 +59,83 @@ const notificationActions = [
 
 const timeAgoTexts = ['Vừa xong', '1 phút trước', '2 phút trước', '3 phút trước', '5 phút trước'];
 
+// Product catalog for Shopify checkout
+const PRODUCT_CATALOG = {
+  'course-starter': {
+    id: 'course-starter', name: 'Khóa Học Trading - Starter',
+    price: 299000, priceDisplay: '299.000đ', variantId: '46448154050737',
+    shopifyUrl: 'https://yinyangmasters.com/products/gem-trading-course-tier-starter',
+  },
+  'course-tier1': {
+    id: 'course-tier1', name: 'Khóa Học Trading - Tier 1',
+    price: 11000000, priceDisplay: '11.000.000đ', variantId: '46351707898033',
+    shopifyUrl: 'https://yinyangmasters.com/products/gem-tier1',
+  },
+  'course-tier2': {
+    id: 'course-tier2', name: 'Khóa Học Trading - Tier 2',
+    price: 21000000, priceDisplay: '21.000.000đ', variantId: '46351719235761',
+    shopifyUrl: 'https://yinyangmasters.com/products/gem-tier2',
+  },
+  'course-tier3': {
+    id: 'course-tier3', name: 'Khóa Học Trading - Tier 3',
+    price: 68000000, priceDisplay: '68.000.000đ', variantId: '46351723331761',
+    shopifyUrl: 'https://yinyangmasters.com/products/gem-tier3',
+  },
+  'chatbot-pro': {
+    id: 'chatbot-pro', name: 'GEM MASTER Sư Phụ AI - PRO',
+    price: 39000, priceDisplay: '39.000đ/tháng', variantId: '46351763701937',
+    shopifyUrl: 'https://yinyangmasters.com/products/yinyang-chatbot-ai-pro',
+  },
+  'chatbot-premium': {
+    id: 'chatbot-premium', name: 'GEM MASTER Sư Phụ AI - PREMIUM',
+    price: 59000, priceDisplay: '59.000đ/tháng', variantId: '46351771893937',
+    shopifyUrl: 'https://yinyangmasters.com/products/gem-chatbot-premium',
+  },
+  'chatbot-vip': {
+    id: 'chatbot-vip', name: 'GEM MASTER Sư Phụ AI - VIP',
+    price: 99000, priceDisplay: '99.000đ/tháng', variantId: '46421822832817',
+    shopifyUrl: 'https://yinyangmasters.com/products/yinyang-chatbot-ai-vip',
+  },
+  'scanner-pro': {
+    id: 'scanner-pro', name: 'Scanner Dashboard - Pro',
+    price: 997000, priceDisplay: '997.000đ/tháng', variantId: '46351752069297',
+    shopifyUrl: 'https://yinyangmasters.com/products/gem-scanner-pro',
+  },
+  'scanner-premium': {
+    id: 'scanner-premium', name: 'Scanner Dashboard - Premium',
+    price: 1997000, priceDisplay: '1.997.000đ/tháng', variantId: '46351759507633',
+    shopifyUrl: 'https://yinyangmasters.com/products/scanner-dashboard-premium',
+  },
+  'scanner-vip': {
+    id: 'scanner-vip', name: 'Scanner Dashboard - VIP',
+    price: 5997000, priceDisplay: '5.997.000đ/tháng', variantId: '46351760294065',
+    shopifyUrl: 'https://yinyangmasters.com/products/scanner-dashboard-vip',
+  },
+  'mindset-7days': {
+    id: 'mindset-7days', name: '7 Ngày Khai Mở Tần Số Gốc',
+    price: 1990000, priceDisplay: '1.990.000đ', variantId: '46448176758961',
+    shopifyUrl: 'https://yinyangmasters.com/products/khoa-hoc-7-ngay-khai-mo-tan-so-goc',
+  },
+  'mindset-love': {
+    id: 'mindset-love', name: 'Kích Hoạt Tần Số Tình Yêu',
+    price: 399000, priceDisplay: '399.000đ', variantId: '46448180166833',
+    shopifyUrl: 'https://yinyangmasters.com/products/khoa-hoc-kich-hoat-tan-so-tinh-yeu',
+  },
+  'mindset-wealth': {
+    id: 'mindset-wealth', name: 'Tái Tạo Tư Duy Triệu Phú',
+    price: 499000, priceDisplay: '499.000đ', variantId: '46448192192689',
+    shopifyUrl: 'https://yinyangmasters.com/products/khoa-hoc-tai-tao-tu-duy-trieu-phu',
+  },
+};
+
+// Waitlist form config
+const WAITLIST_CONFIG = {
+  EDGE_FUNCTION_URL: 'https://pgfkbcnzqozzkohwbgbk.supabase.co/functions/v1/waitlist-submit',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnZmtiY256cW96emtvaHdiZ2JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNzc1MzYsImV4cCI6MjA3Nzc1MzUzNn0.1De0-m3GhFHUrKl-ViqX_r6bydVFoWDaW8DsxhhbjEc',
+  PHONE_REGEX: /^(\+84|84|0)(3|5|7|8|9)[0-9]{8}$/,
+  MIN_FILL_TIME: 2000,
+};
+
 export default function Landing() {
   const { user } = useAuth();
   // === STATE ===
@@ -77,6 +155,372 @@ export default function Landing() {
     marketingConsent: true
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successModal, setSuccessModal] = useState(null); // { queue_number, referral_code }
+  const [errorModal, setErrorModal] = useState(null); // string message
+  const [referralCode, setReferralCode] = useState('');
+  const formLoadTime = useRef(Date.now());
+
+  // === CART STATE ===
+  const [cart, setCart] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('gemral_cart')) || []; }
+    catch { return []; }
+  });
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartToast, setCartToast] = useState(null);
+
+  // === PARTNERSHIP FORM STATE ===
+  const [partnershipOpen, setPartnershipOpen] = useState(false);
+  const [partnershipType, setPartnershipType] = useState(null); // 'ctv' | 'kol'
+  const [partnershipStep, setPartnershipStep] = useState('form'); // 'form' | 'success'
+  const [partnershipLoading, setPartnershipLoading] = useState(false);
+  const [partnershipError, setPartnershipError] = useState('');
+  const [partnershipSuccess, setPartnershipSuccess] = useState(null);
+  const [partnerForm, setPartnerForm] = useState({
+    fullName: '', email: '', phone: '', referralCode: '', reason: '',
+    // KOL fields
+    youtubeUrl: '', youtubeFollowers: '', facebookUrl: '', facebookFollowers: '',
+    instagramUrl: '', instagramFollowers: '', tiktokUrl: '', tiktokFollowers: '',
+    telegramUrl: '', telegramMembers: '', discordUrl: '', discordMembers: '',
+  });
+
+  const SUPABASE_URL = 'https://pgfkbcnzqozzkohwbgbk.supabase.co';
+  const SUPABASE_ANON_KEY = WAITLIST_CONFIG.SUPABASE_ANON_KEY;
+
+  const openPartnershipForm = useCallback((type) => {
+    setPartnershipType(type);
+    setPartnershipStep('form');
+    setPartnershipError('');
+    setPartnershipSuccess(null);
+    setPartnerForm({
+      fullName: '', email: '', phone: '', referralCode: '', reason: '',
+      youtubeUrl: '', youtubeFollowers: '', facebookUrl: '', facebookFollowers: '',
+      instagramUrl: '', instagramFollowers: '', tiktokUrl: '', tiktokFollowers: '',
+      telegramUrl: '', telegramMembers: '', discordUrl: '', discordMembers: '',
+    });
+    setPartnershipOpen(true);
+  }, []);
+
+  const closePartnershipForm = useCallback(() => {
+    setPartnershipOpen(false);
+    setPartnershipType(null);
+  }, []);
+
+  const handlePartnerInput = useCallback((field, value) => {
+    setPartnerForm(prev => ({ ...prev, [field]: value }));
+    setPartnershipError('');
+  }, []);
+
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validatePartnerPhone = (phone) => {
+    const cleaned = phone.replace(/\D/g, '');
+    return cleaned.length >= 9 && cleaned.length <= 11;
+  };
+  const formatPartnerPhone = (phone) => {
+    let cleaned = phone.replace(/\D/g, '');
+    if (cleaned.startsWith('84')) cleaned = '0' + cleaned.substring(2);
+    if (cleaned.startsWith('+84')) cleaned = '0' + cleaned.substring(3);
+    return cleaned;
+  };
+
+  const submitPartnership = useCallback(async () => {
+    const { fullName, email, phone, referralCode: refCode, reason } = partnerForm;
+    const cleanPhone = formatPartnerPhone(phone);
+
+    // Validate
+    if (!fullName || fullName.trim().length < 2) {
+      setPartnershipError('Vui lòng nhập họ và tên');
+      return;
+    }
+    if (!validateEmail(email)) {
+      setPartnershipError('Email không hợp lệ');
+      return;
+    }
+    if (!validatePartnerPhone(cleanPhone)) {
+      setPartnershipError('Số điện thoại không hợp lệ');
+      return;
+    }
+
+    // KOL: validate social media
+    if (partnershipType === 'kol') {
+      const socialPlatforms = {
+        youtube: parseInt(partnerForm.youtubeFollowers) || 0,
+        facebook: parseInt(partnerForm.facebookFollowers) || 0,
+        instagram: parseInt(partnerForm.instagramFollowers) || 0,
+        tiktok: parseInt(partnerForm.tiktokFollowers) || 0,
+        telegram: parseInt(partnerForm.telegramMembers) || 0,
+        discord: parseInt(partnerForm.discordMembers) || 0,
+      };
+      const totalFollowers = Object.values(socialPlatforms).reduce((a, b) => a + b, 0);
+      const socialUrls = [
+        partnerForm.youtubeUrl, partnerForm.facebookUrl, partnerForm.instagramUrl,
+        partnerForm.tiktokUrl, partnerForm.telegramUrl, partnerForm.discordUrl,
+      ].filter(Boolean);
+
+      if (totalFollowers < 20000) {
+        setPartnershipError(`Tổng followers cần ≥ 20,000. Hiện tại: ${totalFollowers.toLocaleString()}`);
+        return;
+      }
+      if (socialUrls.length === 0) {
+        setPartnershipError('Vui lòng nhập ít nhất 1 link social media');
+        return;
+      }
+    }
+
+    setPartnershipLoading(true);
+    setPartnershipError('');
+
+    try {
+      // Check existing application
+      const checkRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/partnership_applications?email=eq.${encodeURIComponent(email.trim().toLowerCase())}&application_type=eq.${partnershipType}&status=eq.pending&select=id`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      const existing = await checkRes.json();
+      if (existing && existing.length > 0) {
+        throw new Error(`Email này đã có đơn đăng ký ${partnershipType === 'ctv' ? 'CTV' : 'KOL'} đang chờ duyệt`);
+      }
+
+      // Build submission data
+      const submissionData = {
+        full_name: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        phone: cleanPhone,
+        application_type: partnershipType,
+        referred_by_code: refCode.trim().toUpperCase() || null,
+        status: 'pending',
+        source: 'landing_page',
+      };
+
+      if (partnershipType === 'ctv') {
+        const autoApproveAt = new Date();
+        autoApproveAt.setDate(autoApproveAt.getDate() + 3);
+        submissionData.auto_approve_at = autoApproveAt.toISOString();
+        submissionData.reason_for_joining = reason.trim() || null;
+      } else {
+        // KOL
+        const socialPlatforms = {
+          youtube: parseInt(partnerForm.youtubeFollowers) || 0,
+          facebook: parseInt(partnerForm.facebookFollowers) || 0,
+          instagram: parseInt(partnerForm.instagramFollowers) || 0,
+          tiktok: parseInt(partnerForm.tiktokFollowers) || 0,
+          telegram: parseInt(partnerForm.telegramMembers) || 0,
+          discord: parseInt(partnerForm.discordMembers) || 0,
+        };
+        submissionData.social_platforms = socialPlatforms;
+        submissionData.total_followers = Object.values(socialPlatforms).reduce((a, b) => a + b, 0);
+        submissionData.social_proof_urls = [
+          partnerForm.youtubeUrl, partnerForm.facebookUrl, partnerForm.instagramUrl,
+          partnerForm.tiktokUrl, partnerForm.telegramUrl, partnerForm.discordUrl,
+        ].filter(Boolean);
+      }
+
+      // Submit
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/partnership_applications`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation',
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || errData.details || 'Đăng ký thất bại');
+      }
+
+      const result = await response.json();
+      const app = Array.isArray(result) ? result[0] : result;
+
+      // Send admin notification
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/admin_notifications`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: partnershipType === 'ctv' ? 'new_ctv_application' : 'new_kol_application',
+            title: partnershipType === 'ctv'
+              ? `Đơn đăng ký CTV mới: ${fullName.trim()}`
+              : `Đơn đăng ký KOL mới: ${fullName.trim()} (${submissionData.total_followers?.toLocaleString() || 0} followers)`,
+            message: `Email: ${email.trim().toLowerCase()}, Phone: ${cleanPhone}`,
+            data: { application_id: app.id, application_type: partnershipType },
+            is_read: false,
+          }),
+        });
+      } catch (notifyErr) {
+        console.warn('[Partnership] Admin notification failed:', notifyErr);
+      }
+
+      // Show success
+      const code = app.id ? `${partnershipType === 'ctv' ? 'CTV' : 'KOL'}-${app.id.substring(0, 8).toUpperCase()}` : null;
+      setPartnershipSuccess({ code, type: partnershipType, email: email.trim().toLowerCase() });
+      setPartnershipStep('success');
+
+    } catch (error) {
+      console.error('[Partnership] Submit error:', error);
+      setPartnershipError(error.message);
+    } finally {
+      setPartnershipLoading(false);
+    }
+  }, [partnerForm, partnershipType]);
+
+  // Lock body scroll when partnership form is open
+  useEffect(() => {
+    if (partnershipOpen) document.body.style.overflow = 'hidden';
+    else if (!cartOpen) document.body.style.overflow = '';
+  }, [partnershipOpen, cartOpen]);
+
+  // Sync cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('gemral_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  // Auto-hide cart toast
+  useEffect(() => {
+    if (!cartToast) return;
+    const timer = setTimeout(() => setCartToast(null), 3000);
+    return () => clearTimeout(timer);
+  }, [cartToast]);
+
+  // Lock body scroll when cart is open
+  useEffect(() => {
+    document.body.style.overflow = cartOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [cartOpen]);
+
+  const addToCart = (productId) => {
+    const product = PRODUCT_CATALOG[productId];
+    if (!product) return;
+    setCart(prev => {
+      const existing = prev.find(item => item.id === productId);
+      if (existing) {
+        return prev.map(item => item.id === productId ? { ...item, qty: item.qty + 1 } : item);
+      }
+      return [...prev, { id: productId, qty: 1 }];
+    });
+    setCartToast({ type: 'success', message: `${product.name} đã thêm vào giỏ hàng!` });
+  };
+
+  const removeFromCart = (productId) => {
+    setCart(prev => prev.filter(item => item.id !== productId));
+  };
+
+  const updateQuantity = (productId, qty) => {
+    if (qty <= 0) { removeFromCart(productId); return; }
+    setCart(prev => prev.map(item => item.id === productId ? { ...item, qty } : item));
+  };
+
+  const getCartTotal = () => cart.reduce((sum, item) => {
+    const product = PRODUCT_CATALOG[item.id];
+    return sum + (product ? product.price * item.qty : 0);
+  }, 0);
+
+  const getCartCount = () => cart.reduce((sum, item) => sum + item.qty, 0);
+
+  const formatPrice = (price) => price.toLocaleString('vi-VN') + 'đ';
+
+  const checkout = () => {
+    if (cart.length === 0) return;
+    const items = cart.map(item => {
+      const product = PRODUCT_CATALOG[item.id];
+      return product ? `${product.variantId}:${item.qty}` : null;
+    }).filter(Boolean).join(',');
+    let url = `https://yinyangmasters.com/cart/${items}`;
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref') || localStorage.getItem('gemral_referral');
+    if (ref) url += `?ref=${encodeURIComponent(ref)}`;
+    window.location.href = url;
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    setCartToast({ type: 'info', message: 'Đã xóa toàn bộ giỏ hàng' });
+  };
+
+  // Cross-tab cart sync
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'gemral_cart') {
+        try { setCart(JSON.parse(e.newValue) || []); } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  // === REFERRAL CODE CAPTURE ===
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref') || params.get('referral') || params.get('r') || params.get('code') || '';
+    if (ref) {
+      const code = ref.toUpperCase();
+      setReferralCode(code);
+      try {
+        sessionStorage.setItem('gemral_referral', code);
+        localStorage.setItem('gemral_referral', code);
+      } catch {}
+    } else {
+      try {
+        const stored = sessionStorage.getItem('gemral_referral') || localStorage.getItem('gemral_referral') || '';
+        if (stored) setReferralCode(stored);
+      } catch {}
+    }
+  }, []);
+
+  // === SCROLL ANIMATIONS (IntersectionObserver) ===
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -60px 0px', threshold: 0.05 });
+
+    document.querySelectorAll('.section-hero, .section-pain, .section-pricing, .section-courses-mindset, .section-courses-trading, .section-personas, .section-testimonials, .section-partnership, .section-waitlist').forEach(el => {
+      el.classList.add('animate-on-scroll');
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // === 3D CARD HOVER EFFECTS (CSS-only, no JS transform conflicts) ===
+  // Removed JS mousemove transform — it conflicts with scroll animation transforms.
+  // Hover effects are now handled purely via CSS :hover (see Landing.css).
+
+  // === COUNTER ANIMATION ===
+  useEffect(() => {
+    const counters = document.querySelectorAll('.stat-number[data-animate]');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
+          entry.target.classList.add('counted');
+          const el = entry.target;
+          const target = parseInt(el.textContent.replace(/[^\d]/g, '')) || 0;
+          const suffix = el.textContent.replace(/[\d,.]+/g, '');
+          const duration = 2000;
+          const startTime = performance.now();
+          const animate = (now) => {
+            const progress = Math.min((now - startTime) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 4);
+            el.textContent = Math.floor(target * eased).toLocaleString() + suffix;
+            if (progress < 1) requestAnimationFrame(animate);
+          };
+          requestAnimationFrame(animate);
+        }
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(c => observer.observe(c));
+    return () => observer.disconnect();
+  }, []);
 
   // === COUNTDOWN TIMER - Fixed end date: Feb 17, 2026 ===
   useEffect(() => {
@@ -184,10 +628,16 @@ export default function Landing() {
   // === FORM HANDLERS ===
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    if (name === 'phone') {
+      // Phone formatting: digits only, max 11
+      const digits = value.replace(/\D/g, '').slice(0, 11);
+      setFormData(prev => ({ ...prev, phone: digits }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
   };
 
   const toggleInterest = (interest) => {
@@ -199,13 +649,165 @@ export default function Landing() {
     }));
   };
 
+  const normalizePhone = (phone) => {
+    let normalized = phone.replace(/\D/g, '');
+    if (normalized.startsWith('84')) normalized = '0' + normalized.slice(2);
+    return normalized;
+  };
+
+  const getUrlParam = (param) => new URLSearchParams(window.location.search).get(param) || '';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+
+    // Anti-spam: ensure minimum fill time
+    const fillTime = Date.now() - formLoadTime.current;
+    if (fillTime < WAITLIST_CONFIG.MIN_FILL_TIME) {
+      await new Promise(r => setTimeout(r, WAITLIST_CONFIG.MIN_FILL_TIME - fillTime));
+    }
+
+    // Honeypot check
+    const honeypot = e.target.querySelector('input[name="website"]');
+    if (honeypot && honeypot.value) {
       setIsSubmitting(false);
-      alert('Đăng ký thành công! Chúng tôi sẽ liên hệ bạn sớm.');
-    }, 2000);
+      setSuccessModal({ queue_number: 999, referral_code: 'GEMXXXXX' });
+      return;
+    }
+
+    const name = formData.fullName.trim();
+    const phone = normalizePhone(formData.phone);
+    const email = formData.email.trim().toLowerCase();
+
+    // Validation
+    if (!name || name.length < 2) {
+      setIsSubmitting(false);
+      setErrorModal('Vui lòng nhập họ tên (ít nhất 2 ký tự)');
+      return;
+    }
+    if (!phone || !WAITLIST_CONFIG.PHONE_REGEX.test(phone)) {
+      setIsSubmitting(false);
+      setErrorModal('Số điện thoại không hợp lệ (VD: 0912345678)');
+      return;
+    }
+
+    const requestData = {
+      full_name: name,
+      phone,
+      email: email || null,
+      interested_products: formData.interests,
+      marketing_consent: formData.marketingConsent,
+      referral_code: referralCode || null,
+      utm_source: getUrlParam('utm_source') || null,
+      utm_medium: getUrlParam('utm_medium') || null,
+      utm_campaign: getUrlParam('utm_campaign') || null,
+      utm_content: getUrlParam('utm_content') || null,
+      referrer_url: document.referrer || null,
+    };
+
+    try {
+      const response = await fetch(WAITLIST_CONFIG.EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + WAITLIST_CONFIG.SUPABASE_ANON_KEY,
+          'apikey': WAITLIST_CONFIG.SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) throw new Error(result.error || result.message || 'Đã có lỗi xảy ra');
+
+      if (result.success) {
+        setSuccessModal(result.data || {});
+        setFormData({ fullName: '', phone: '', email: '', interests: [], marketingConsent: true });
+        setTodaySignups(prev => prev + 1);
+        setSpotsRemaining(prev => Math.max(1, prev - 1));
+
+        // Analytics
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'waitlist_signup', {
+            queue_number: result.data?.queue_number,
+            interests: formData.interests.join(','),
+          });
+        }
+        if (typeof window.fbq === 'function') {
+          window.fbq('track', 'Lead', { content_name: 'Waitlist Signup' });
+        }
+      } else {
+        throw new Error(result.message || 'Đăng ký không thành công');
+      }
+    } catch (error) {
+      let msg = 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+      if (error.message.includes('rate limit') || error.message.includes('quá nhiều'))
+        msg = 'Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.';
+      else if (error.message.includes('phone') || error.message.includes('điện thoại'))
+        msg = 'Số điện thoại không hợp lệ hoặc đã được đăng ký.';
+      else if (error.name === 'TypeError' || error.message.includes('fetch'))
+        msg = 'Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.';
+      else if (error.message) msg = error.message;
+      setErrorModal(msg);
+    } finally {
+      setIsSubmitting(false);
+      formLoadTime.current = Date.now();
+    }
+  };
+
+  // === SHARE FUNCTIONS ===
+  const getShareLink = () => {
+    const code = successModal?.referral_code || referralCode;
+    return code ? `https://gemral.com/?ref=${code}` : 'https://gemral.com/';
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      return true;
+    } catch { return false; }
+  };
+
+  const copyReferralCode = async () => {
+    const code = successModal?.referral_code || '';
+    if (!code) return;
+    const ok = await copyToClipboard(code);
+    setCartToast({ type: 'success', message: ok ? `Đã copy mã: ${code}` : 'Không thể copy' });
+  };
+
+  const copyShareLink = async () => {
+    const link = getShareLink();
+    const ok = await copyToClipboard(link);
+    setCartToast({ type: 'success', message: ok ? 'Đã copy link giới thiệu!' : 'Không thể copy' });
+  };
+
+  const shareToZalo = () => {
+    const link = getShareLink();
+    window.open(`https://zalo.me/share?url=${encodeURIComponent(link)}&title=${encodeURIComponent('Đăng ký GEMRAL ngay để nhận ưu đãi Early Bird!')}`, '_blank');
+  };
+
+  const shareToFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareLink())}`, '_blank');
+  };
+
+  const nativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'GEMRAL - Ưu đãi Early Bird', text: 'Đăng ký GEMRAL ngay để nhận ưu đãi đặc biệt!', url: getShareLink() });
+      } catch { copyShareLink(); }
+    } else {
+      copyShareLink();
+    }
   };
 
   // === RENDER ===
@@ -434,7 +1036,8 @@ export default function Landing() {
                 <h4>Tần số sợ hãi chi phối quyết định</h4>
                 <p>
                   Bạn thấy Bitcoin tăng 20% trong một đêm, vội vàng mua vào ở đỉnh vì sợ bỏ lỡ.
-                  Đó không phải quyết định từ lý trí — đó là Hình Tư Tưởng sợ hãi đang điều khiển bạn.
+                  Đó không phải quyết định từ lý trí — đó là Hình Tư Tưởng sợ hãi đang điều khiển bạn,
+                  khiến bạn hành động từ tần số thấp và thu hút kết quả tương ứng.
                 </p>
                 <div className="quote-box">
                   <p>"Trong thế nào, ngoài thế ấy" — Khi tâm bạn hoảng loạn, quyết định sẽ hoảng loạn.</p>
@@ -446,7 +1049,8 @@ export default function Landing() {
                 <h4>Vòng lặp "mua đỉnh bán đáy"</h4>
                 <p>
                   Dù đã nghiên cứu kỹ lưỡng, bạn vẫn cứ mua là giảm, bán là tăng.
-                  Đây không phải xui xẻo — đây là Hình Tư Tưởng "tôi không đủ giỏi" đang hoạt động như nam châm.
+                  Đây không phải xui xẻo — đây là Hình Tư Tưởng "tôi không đủ giỏi" đang hoạt động như nam châm,
+                  thu hút về những tình huống xác nhận niềm tin đó. Vòng lặp được củng cố mỗi ngày.
                 </p>
               </div>
 
@@ -455,7 +1059,8 @@ export default function Landing() {
                 <h4>Quá tải thông tin — Không có hệ thống</h4>
                 <p>
                   Người này nói Long, người kia nói Short. Bạn bị nhấn chìm trong biển thông tin mâu thuẫn,
-                  không biết đâu là sự thật. Vấn đề là bạn chưa có HỆ THỐNG rõ ràng.
+                  không biết đâu là sự thật. Vấn đề không phải thiếu kiến thức — vấn đề là bạn chưa có
+                  HỆ THỐNG rõ ràng để đưa ra quyết định từ tần số ổn định, không bị chi phối bởi nhiễu loạn bên ngoài.
                 </p>
               </div>
 
@@ -463,7 +1068,9 @@ export default function Landing() {
                 <div className="pain-icon"><DollarSign size={36} /></div>
                 <h4>Tần số thiếu thốn tạo thiếu thốn</h4>
                 <p>
-                  Mỗi lần lo lắng về tiền, bạn đang phát ra tần số thiếu thốn và tạo thêm một Hình Tư Tưởng thu hút thiếu thốn.
+                  Mỗi lần lo lắng về tiền, bạn đang phát ra tần số thiếu thốn (150-200 Hz)
+                  và tạo thêm một Hình Tư Tưởng thu hút thiếu thốn. Kết quả? Deal thất bại,
+                  chi phí bất ngờ, khách hàng trả chậm. Vòng lặp cứ tiếp diễn vì "Trong thế nào, ngoài thế ấy".
                 </p>
                 <img src={IMAGES.painFinance} alt="Pain Finance" className="pain-image" />
               </div>
@@ -481,7 +1088,8 @@ export default function Landing() {
                 <h4>Thành công bên ngoài, trống rỗng bên trong</h4>
                 <p>
                   Bạn có công việc ổn định, thu nhập khá, mọi thứ bên ngoài đều ổn...
-                  nhưng sâu trong lòng có một khoảng trống. Đó là dấu hiệu bạn đang sống ở tầng tâm thức chỉ tập trung vào vật chất.
+                  nhưng sâu trong lòng có một khoảng trống. Đó là dấu hiệu: bạn đang sống ở tầng tâm thức
+                  chỉ tập trung vào vật chất, chưa kết nối với tần số cao hơn của bản thể.
                 </p>
               </div>
 
@@ -491,6 +1099,7 @@ export default function Landing() {
                 <p>
                   Bạn thức dậy mỗi sáng mà không có động lực, làm việc như một cỗ máy.
                   Đây là trạng thái "ngủ mê" — sống theo quán tính, không có ý thức.
+                  Bạn chưa tìm được "Tần Số Bản Nguyên" của mình — tần số độc đáo mà chỉ bạn mới có.
                 </p>
               </div>
 
@@ -499,7 +1108,9 @@ export default function Landing() {
                 <h4>Cảm giác chưa đạt được tiềm năng thật sự</h4>
                 <p>
                   Sâu trong thâm tâm, bạn biết mình có thể làm được nhiều hơn.
-                  Nhưng có thứ gì đó kìm hãm — đó là những Hình Tư Tưởng giới hạn từ quá khứ.
+                  Nhưng có thứ gì đó kìm hãm — đó là những Hình Tư Tưởng giới hạn từ quá khứ:
+                  "Tôi không xứng đáng", "Tôi không đủ giỏi". Chúng là nghiệp tần số tích lũy,
+                  và chúng có thể được chuyển hóa.
                 </p>
                 <div className="quote-box">
                   <p>"Kiến thức không thay đổi cuộc đời. Hành động mới thay đổi."</p>
@@ -511,6 +1122,7 @@ export default function Landing() {
                 <h4>Thiếu hệ thống hướng dẫn đáng tin cậy</h4>
                 <p>
                   Bạn muốn hiểu bản thân sâu hơn, muốn có công cụ để đưa ra quyết định tốt hơn.
+                  Nhưng ngoài kia đầy những thông tin rời rạc, thiếu hệ thống.
                   Bạn cần một lộ trình rõ ràng — không phải để ai đó nói cho bạn "tương lai",
                   mà để bạn tự HIỂU mình và CHỌN tương lai của chính mình.
                 </p>
@@ -565,7 +1177,7 @@ export default function Landing() {
               <h3>Rút Tarot 3 Lá</h3>
               <p>
                 Công cụ giải mã tần số giúp bạn nhìn thấy những pattern năng lượng đang diễn ra
-                trong cuộc sống — không phải để "đoán" tương lai, mà để HIỂU hiện tại.
+                trong cuộc sống — không phải để "đoán" tương lai, mà để HIỂU hiện tại và đưa ra lựa chọn có ý thức.
               </p>
               <ul className="feature-list">
                 <li>Nhận diện tần số đang phát ra</li>
@@ -671,6 +1283,7 @@ export default function Landing() {
             <p className="section-subtitle">
               Scanner tự động phát hiện <strong>6 công thức tần số độc quyền của Gem Trading</strong> —
               duy nhất tại Việt Nam. Giúp bạn đưa ra quyết định từ dữ liệu thay vì cảm xúc.
+              Không còn hoảng loạn, không còn đoán mò — chỉ có hệ thống và kỷ luật.
             </p>
           </div>
 
@@ -694,6 +1307,7 @@ export default function Landing() {
               <p>
                 Scanner hoạt động không ngừng nghỉ, phân tích hàng trăm cặp coin mỗi giờ
                 để tìm ra những setup có xác suất cao nhất.
+                Bạn không cần ngồi trước màn hình cả ngày — hệ thống làm việc đó cho bạn.
               </p>
             </div>
 
@@ -704,7 +1318,7 @@ export default function Landing() {
               <h3>6 Pattern Độc Quyền</h3>
               <p>
                 Phát hiện tự động <strong>6 công thức Frequency độc quyền của Gem Trading</strong>,
-                duy nhất tại Việt Nam. Đã được backtest qua 5 năm dữ liệu.
+                duy nhất tại Việt Nam. Đã được backtest qua 5 năm dữ liệu với win rate từ 68% đến 85% khi áp dụng đúng điều kiện.
               </p>
             </div>
 
@@ -716,6 +1330,7 @@ export default function Landing() {
               <p>
                 Không còn phải đoán mò. Mỗi signal đều đi kèm điểm Entry chính xác,
                 Stop Loss để bảo vệ vốn, và Take Profit targets theo từng mức.
+                Bạn chỉ cần thực thi theo hệ thống.
               </p>
             </div>
 
@@ -726,7 +1341,7 @@ export default function Landing() {
               <h3>Paper Trading</h3>
               <p>
                 Thực hành giao dịch với tiền ảo trước khi dùng tiền thật.
-                Luyện tập không giới hạn, hoàn toàn miễn phí, không rủi ro.
+                Luyện tập không giới hạn, hoàn toàn miễn phí, không rủi ro — cho đến khi bạn tự tin 100% với phương pháp GEM Frequency.
               </p>
             </div>
 
@@ -737,7 +1352,7 @@ export default function Landing() {
               <h3>Thông Báo Real-time</h3>
               <p>
                 Nhận alert ngay lập tức khi có pattern mới xuất hiện qua Telegram hoặc app.
-                Bạn có thể đang làm việc khác mà vẫn không bỏ lỡ cơ hội.
+                Bạn có thể đang làm việc khác mà vẫn không bỏ lỡ cơ hội — hệ thống sẽ báo cho bạn khi cần hành động.
               </p>
             </div>
 
@@ -748,7 +1363,7 @@ export default function Landing() {
               <h3>Backtest 5+ Năm Data</h3>
               <p>
                 Tất cả công thức đều được kiểm chứng qua hơn 5 năm dữ liệu lịch sử
-                với hàng nghìn giao dịch. Đây là kết quả thực tế đã được chứng minh.
+                với hàng nghìn giao dịch. Đây không phải lý thuyết — đây là kết quả thực tế đã được chứng minh qua thời gian.
               </p>
             </div>
           </div>
@@ -780,95 +1395,128 @@ export default function Landing() {
       <section className="section-patterns">
         <div className="container">
           <div className="section-header">
-            <span className="badge badge-cyan">
-              <Layers size={14} /> Phương Pháp Độc Quyền
+            <span className="badge badge-gold">
+              <Target size={14} /> GEM Frequency Method
             </span>
+            <div className="exclusive-tag">ĐỘC QUYỀN TẠI VIỆT NAM</div>
             <h2 className="section-title">
-              <span className="text-gold">GEM FREQUENCY METHOD</span>
+              6 CÔNG THỨC TẦN SỐ<br />
+              <span className="text-gold">TÍN HIỆU VÀO LỆNH CHUẨN XÁC NHẤT</span>
             </h2>
             <p className="section-subtitle">
-              6 công thức pattern độc quyền được phát triển và backtest qua 5+ năm data —
-              giúp bạn nhận diện cơ hội với xác suất thắng cao.
+              6 mẫu nến đặc biệt được phát triển độc quyền bởi Gem Trading —
+              đây là những dấu hiệu mua/bán rõ ràng nhất mà bạn có thể học và áp dụng ngay.
+              Không cần kinh nghiệm, không cần đoán mò — chỉ cần nhận diện đúng pattern là vào lệnh.
             </p>
+            <img src={IMAGES.frequencyMethod} alt="Frequency Method" className="section-hero-image" style={{marginTop: '20px'}} />
           </div>
 
           <div className="patterns-grid">
-            {/* Pattern Cards */}
+            {/* Pattern 1: DPD */}
             <div className="pattern-card bullish">
               <div className="pattern-header">
                 <TrendingUp size={24} />
-                <span className="pattern-label">BULLISH</span>
+                <span className="pattern-label">TÍN HIỆU MUA</span>
               </div>
-              <h3 className="pattern-name">DPD Pattern</h3>
-              <p className="pattern-desc">Down-Pivot-Down: Đảo chiều tăng mạnh khi giá retest vùng HFZ</p>
+              <h3 className="pattern-name">DPD</h3>
+              <p className="pattern-tagline text-cyan">Điểm Mua Vàng Trong Xu Hướng Tăng</p>
+              <p className="pattern-desc">
+                Mẫu nến cho bạn biết chính xác khi nào nên MUA VÀO —
+                điểm entry tối ưu với rủi ro thấp nhất và tiềm năng lợi nhuận cao nhất trong sóng tăng.
+              </p>
               <div className="pattern-stats">
-                <div className="stat"><span className="label">Win Rate</span><span className="value text-green">78%</span></div>
-                <div className="stat"><span className="label">R:R</span><span className="value text-cyan">1:2.5</span></div>
+                <div className="stat"><span className="label">Tỷ Lệ Thắng</span><span className="value text-green">72%</span></div>
+                <div className="stat"><span className="label">Lời/Lỗ</span><span className="value text-cyan">2.5:1</span></div>
               </div>
             </div>
 
+            {/* Pattern 2: UPU */}
+            <div className="pattern-card bearish">
+              <div className="pattern-header">
+                <TrendingDown size={24} />
+                <span className="pattern-label">TÍN HIỆU BÁN</span>
+              </div>
+              <h3 className="pattern-name">UPU</h3>
+              <p className="pattern-tagline text-cyan">Điểm Bán Đỉnh Trong Xu Hướng Giảm</p>
+              <p className="pattern-desc">
+                Mẫu nến báo hiệu thời điểm BÁN RA hoàn hảo —
+                giúp bạn thoát hàng ở đỉnh hoặc mở vị thế Short khi thị trường chuẩn bị đảo chiều.
+              </p>
+              <div className="pattern-stats">
+                <div className="stat"><span className="label">Tỷ Lệ Thắng</span><span className="value text-red">68%</span></div>
+                <div className="stat"><span className="label">Lời/Lỗ</span><span className="value text-cyan">2.2:1</span></div>
+              </div>
+            </div>
+
+            {/* Pattern 3: UPD */}
             <div className="pattern-card bullish">
               <div className="pattern-header">
                 <TrendingUp size={24} />
-                <span className="pattern-label">BULLISH</span>
+                <span className="pattern-label">TÍN HIỆU MUA</span>
               </div>
-              <h3 className="pattern-name">UPU Pattern</h3>
-              <p className="pattern-desc">Up-Pivot-Up: Tiếp diễn xu hướng tăng sau pullback về vùng LFZ</p>
+              <h3 className="pattern-name">UPD</h3>
+              <p className="pattern-tagline text-cyan">Bắt Đáy Chính Xác Sau Điều Chỉnh</p>
+              <p className="pattern-desc">
+                Pattern giúp bạn MUA VÀO đúng đáy khi giá vừa điều chỉnh xong —
+                cơ hội vàng cho những ai đã bỏ lỡ đợt tăng trước đó.
+              </p>
               <div className="pattern-stats">
-                <div className="stat"><span className="label">Win Rate</span><span className="value text-green">72%</span></div>
-                <div className="stat"><span className="label">R:R</span><span className="value text-cyan">1:2.0</span></div>
+                <div className="stat"><span className="label">Tỷ Lệ Thắng</span><span className="value text-green">75%</span></div>
+                <div className="stat"><span className="label">Lời/Lỗ</span><span className="value text-cyan">2.8:1</span></div>
               </div>
             </div>
 
+            {/* Pattern 4: DPU */}
             <div className="pattern-card bearish">
               <div className="pattern-header">
                 <TrendingDown size={24} />
-                <span className="pattern-label">BEARISH</span>
+                <span className="pattern-label">TÍN HIỆU BÁN</span>
               </div>
-              <h3 className="pattern-name">UPD Pattern</h3>
-              <p className="pattern-desc">Up-Pivot-Down: Đảo chiều giảm mạnh khi giá retest vùng HFZ từ dưới lên</p>
+              <h3 className="pattern-name">DPU</h3>
+              <p className="pattern-tagline text-cyan">Bán Đỉnh Sau Nhịp Hồi Phục</p>
+              <p className="pattern-desc">
+                Mẫu nến cho phép bạn BÁN RA ở mức giá cao nhất có thể khi thị trường hồi phục tạm thời —
+                lý tưởng để chốt lời hoặc mở Short.
+              </p>
               <div className="pattern-stats">
-                <div className="stat"><span className="label">Win Rate</span><span className="value text-green">75%</span></div>
-                <div className="stat"><span className="label">R:R</span><span className="value text-cyan">1:2.3</span></div>
+                <div className="stat"><span className="label">Tỷ Lệ Thắng</span><span className="value text-red">70%</span></div>
+                <div className="stat"><span className="label">Lời/Lỗ</span><span className="value text-cyan">2.4:1</span></div>
               </div>
             </div>
 
-            <div className="pattern-card bearish">
-              <div className="pattern-header">
-                <TrendingDown size={24} />
-                <span className="pattern-label">BEARISH</span>
-              </div>
-              <h3 className="pattern-name">DPU Pattern</h3>
-              <p className="pattern-desc">Down-Pivot-Up: Tiếp diễn xu hướng giảm sau pullback lên vùng LFZ</p>
-              <div className="pattern-stats">
-                <div className="stat"><span className="label">Win Rate</span><span className="value text-green">70%</span></div>
-                <div className="stat"><span className="label">R:R</span><span className="value text-cyan">1:2.0</span></div>
-              </div>
-            </div>
-
+            {/* Pattern 5: HFZ */}
             <div className="pattern-card zone">
               <div className="pattern-header">
                 <Layers size={24} />
-                <span className="pattern-label">ZONE</span>
+                <span className="pattern-label">VÙNG KHÁNG CỰ</span>
               </div>
-              <h3 className="pattern-name">HFZ - High Frequency Zone</h3>
-              <p className="pattern-desc">Vùng kháng cự mạnh - Nơi giá thường đảo chiều hoặc bị chặn lại</p>
+              <h3 className="pattern-name">HFZ</h3>
+              <p className="pattern-tagline text-cyan">Vùng Giá Sẽ Bật Xuống</p>
+              <p className="pattern-desc">
+                Hệ thống tự động đánh dấu những vùng giá quan trọng mà thị trường có khả năng cao sẽ QUAY ĐẦU GIẢM —
+                giúp bạn tránh mua đỉnh.
+              </p>
               <div className="pattern-stats">
-                <div className="stat"><span className="label">Accuracy</span><span className="value text-green">85%</span></div>
-                <div className="stat"><span className="label">Touch</span><span className="value text-cyan">2-3x</span></div>
+                <div className="stat"><span className="label">Độ Chính Xác</span><span className="value text-purple">85%</span></div>
+                <div className="stat"><span className="label">Nhận Diện</span><span className="value text-cyan">Tự Động</span></div>
               </div>
             </div>
 
+            {/* Pattern 6: LFZ */}
             <div className="pattern-card zone">
               <div className="pattern-header">
                 <Layers size={24} />
-                <span className="pattern-label">ZONE</span>
+                <span className="pattern-label">VÙNG HỖ TRỢ</span>
               </div>
-              <h3 className="pattern-name">LFZ - Low Frequency Zone</h3>
-              <p className="pattern-desc">Vùng hỗ trợ mạnh - Nơi giá thường bật lên hoặc tích lũy</p>
+              <h3 className="pattern-name">LFZ</h3>
+              <p className="pattern-tagline text-cyan">Vùng Giá Sẽ Bật Lên</p>
+              <p className="pattern-desc">
+                Hệ thống tự động đánh dấu những vùng giá quan trọng mà thị trường có khả năng cao sẽ QUAY ĐẦU TĂNG —
+                giúp bạn tìm điểm mua đáy.
+              </p>
               <div className="pattern-stats">
-                <div className="stat"><span className="label">Accuracy</span><span className="value text-green">82%</span></div>
-                <div className="stat"><span className="label">Touch</span><span className="value text-cyan">2-3x</span></div>
+                <div className="stat"><span className="label">Độ Chính Xác</span><span className="value text-purple">83%</span></div>
+                <div className="stat"><span className="label">Nhận Diện</span><span className="value text-cyan">Tự Động</span></div>
               </div>
             </div>
           </div>
@@ -876,136 +1524,666 @@ export default function Landing() {
           <div className="paper-trading-box">
             <Gamepad2 size={28} />
             <div className="paper-trading-content">
-              <h4>Paper Trading - Luyện Tập Không Rủi Ro</h4>
-              <p>Thực hành giao dịch với tiền ảo trước khi dùng tiền thật. Luyện tập không giới hạn, hoàn toàn miễn phí.</p>
+              <h4><span className="text-cyan">Paper Trading</span> — Thực Hành Không Mất Tiền Thật</h4>
+              <p>
+                Trước khi giao dịch bằng tiền thật, bạn có thể luyện tập với tài khoản ảo để làm quen với 6 công thức tần số.
+                Thực hành bao nhiêu cũng được, hoàn toàn miễn phí, không rủi ro — cho đến khi bạn tự tin 100% với phương pháp.
+              </p>
+              <div className="paper-trading-features">
+                <span className="pt-feature"><CheckCircle size={14} /> Tiền ảo không giới hạn</span>
+                <span className="pt-feature"><CheckCircle size={14} /> Dữ liệu thị trường thực</span>
+                <span className="pt-feature"><CheckCircle size={14} /> Theo dõi kết quả chi tiết</span>
+                <span className="pt-feature"><CheckCircle size={14} /> Luyện tập đến khi tự tin</span>
+              </div>
             </div>
           </div>
 
           <div className="method-box">
-            <h4 className="text-gold">Quy Trình 5 Bước</h4>
+            <h4 className="text-gold">Quy Trình 5 Bước Đơn Giản</h4>
             <div className="method-steps">
-              <div className="step"><span className="step-num">1</span><span>Xác định xu hướng chính</span></div>
-              <div className="step"><span className="step-num">2</span><span>Tìm vùng HFZ/LFZ</span></div>
-              <div className="step"><span className="step-num">3</span><span>Chờ pattern hình thành</span></div>
-              <div className="step"><span className="step-num">4</span><span>Xác nhận bằng nến</span></div>
-              <div className="step"><span className="step-num">5</span><span>Vào lệnh với SL/TP rõ ràng</span></div>
+              <div className="step"><span className="step-num">1</span><span>Scanner phát hiện vùng giá quan trọng (HFZ/LFZ)</span></div>
+              <div className="step"><span className="step-num">2</span><span>Chờ giá quay về test vùng đó</span></div>
+              <div className="step"><span className="step-num">3</span><span>Nhận diện mẫu nến xác nhận (DPD, UPU...)</span></div>
+              <div className="step"><span className="step-num">4</span><span>Vào lệnh theo Entry/Stop/Target có sẵn</span></div>
+              <div className="step"><span className="step-num">5</span><span>Quản lý vốn 1-2% mỗi lệnh</span></div>
+            </div>
+            <div className="method-quote">
+              <p>"Trong thế nào, ngoài thế ấy" — Khi bạn có hệ thống rõ ràng, tâm lý sẽ ổn định, quyết định sẽ chính xác hơn.</p>
             </div>
           </div>
-
-          <img src={IMAGES.frequencyMethod} alt="Frequency Method" className="section-hero-image" />
 
           <div className="section-footer">gemral.com</div>
         </div>
       </section>
 
-      {/* ========== SECTION 6: TIER COMPARISON ========== */}
+      {/* ========== SECTION 6: TIER COMPARISON (PART 1 + PART 2) ========== */}
       <section className="section-pricing">
         <div className="container">
           <div className="section-header">
-            <span className="badge badge-gold">
-              <Star size={14} /> Bảng Giá Khóa Học
+            <span className="badge badge-burgundy">
+              💎 Bảng Giá Sản Phẩm
             </span>
             <h2 className="section-title">
               CHỌN GÓI PHÙ HỢP<br />
-              <span className="text-gold">VỚI BẠN</span>
+              <span className="text-gold">VỚI HÀNH TRÌNH CỦA BẠN</span>
             </h2>
+            <p className="section-subtitle">
+              Từ người mới bắt đầu đến trader chuyên nghiệp, từ tìm kiếm sự thịnh vượng tài chính
+              đến chuyển hóa tư duy — GEMRAL có giải pháp phù hợp cho mọi giai đoạn.
+            </p>
           </div>
 
-          {/* Trading Courses */}
-          <h3 className="pricing-category-title text-cyan">Khóa Học Trading</h3>
-          <div className="pricing-grid">
-            <div className="pricing-card">
-              <span className="card-badge free-badge">Miễn Phí</span>
-              <h4>Starter</h4>
-              <div className="price"><span className="amount">299K</span></div>
-              <p className="price-note">Truy cập cơ bản</p>
-              <ul className="pricing-features">
-                <li><CheckCircle size={14} /> 5 bài học cơ bản</li>
-                <li><CheckCircle size={14} /> Paper Trading</li>
-                <li><CircleX size={14} className="text-red" /> Không có Scanner</li>
-              </ul>
-              <button className="btn-pricing" onClick={scrollToWaitlist}>Đăng Ký</button>
+          {/* ===== CATEGORY 1: KHÓA HỌC FREQUENCY TRADING ===== */}
+          <div className="pricing-category">
+            <div className="category-header">
+              <div className="category-icon">
+                <TrendingUp size={28} />
+              </div>
+              <h3 className="category-title">Khóa Học Frequency Trading</h3>
+              <span className="category-desc">Phương pháp giao dịch tần số độc quyền của Gem Trading</span>
             </div>
 
-            <div className="pricing-card popular">
-              <span className="card-badge popular-badge">Phổ Biến</span>
-              <h4>Tier 1</h4>
-              <div className="price"><span className="amount">11M</span></div>
-              <p className="price-note">Trọn bộ cơ bản</p>
-              <ul className="pricing-features">
-                <li><CheckCircle size={14} /> Toàn bộ video Tier 1</li>
-                <li><CheckCircle size={14} /> Scanner 3 tháng</li>
-                <li><CheckCircle size={14} /> Nhóm hỗ trợ</li>
-              </ul>
-              <button className="btn-pricing primary" onClick={scrollToWaitlist}>Đăng Ký</button>
-            </div>
+            <div className="pricing-grid-4">
+              {/* STARTER */}
+              <div className="pricing-card free">
+                <span className="card-badge badge-free">Người Mới</span>
+                <div className="card-head">
+                  <span className="card-tier">Starter</span>
+                  <h4 className="card-name">Khóa Học Cơ Bản</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-cyan">299.000</span>
+                    <span className="price-period">đ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Dành cho người mới bắt đầu muốn học trading</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Kiến thức nền tảng về thị trường crypto</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Giới thiệu 6 công thức tần số cơ bản</span>
+                  </div>
+                  <div className="feature-item disabled">
+                    <CircleX size={14} />
+                    <span>Không bao gồm Scanner & Chatbot</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('course-starter')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
 
-            <div className="pricing-card">
-              <span className="card-badge best-badge">Tốt Nhất</span>
-              <h4>Tier 2</h4>
-              <div className="price"><span className="amount">21M</span></div>
-              <p className="price-note">Nâng cao chuyên sâu</p>
-              <ul className="pricing-features">
-                <li><CheckCircle size={14} /> Toàn bộ Tier 1 + 2</li>
-                <li><CheckCircle size={14} /> Scanner 6 tháng</li>
-                <li><CheckCircle size={14} /> 1:1 Mentoring</li>
-              </ul>
-              <button className="btn-pricing" onClick={scrollToWaitlist}>Đăng Ký</button>
-            </div>
+              {/* TIER 1 */}
+              <div className="pricing-card pro">
+                <div className="card-head">
+                  <span className="card-tier">Tier 1</span>
+                  <h4 className="card-name">Frequency Pro</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-cyan">11.000.000</span>
+                    <span className="price-period">đ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Toàn bộ nội dung khóa Trading Frequency</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Scanner PRO (997K/tháng × 12) <span className="bonus-tag">MIỄN PHÍ</span></span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Chatbot PRO (39K/tháng × 12) <span className="bonus-tag">MIỄN PHÍ</span></span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Hỗ trợ qua nhóm Telegram</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('course-tier1')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
 
-            <div className="pricing-card vip">
-              <span className="card-badge vip-badge">VIP</span>
-              <h4>Tier 3</h4>
-              <div className="price"><span className="amount">68M</span></div>
-              <p className="price-note">Full Access Lifetime</p>
-              <ul className="pricing-features">
-                <li><CheckCircle size={14} /> Tất cả Tier 1, 2, 3</li>
-                <li><CheckCircle size={14} /> Scanner Lifetime</li>
-                <li><CheckCircle size={14} /> Private 1:1 Jennie</li>
-                <li><CheckCircle size={14} /> Crystal Tặng Kèm</li>
-              </ul>
-              <button className="btn-pricing vip" onClick={scrollToWaitlist}>Liên Hệ</button>
+              {/* TIER 2 */}
+              <div className="pricing-card premium">
+                <span className="card-badge badge-popular">Phổ Biến Nhất</span>
+                <div className="card-head">
+                  <span className="card-tier">Tier 2</span>
+                  <h4 className="card-name">Frequency Premium</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-gold">21.000.000</span>
+                    <span className="price-period">đ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Toàn bộ Tier 1 + Chiến lược nâng cao</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Scanner PREMIUM (1.997K × 12) <span className="bonus-tag">MIỄN PHÍ</span></span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Chatbot PREMIUM (99K × 12) <span className="bonus-tag">MIỄN PHÍ</span></span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Hướng dẫn 1-1 hàng tháng</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('course-tier2')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* TIER 3 */}
+              <div className="pricing-card vip">
+                <span className="card-badge badge-best">VIP Cao Cấp</span>
+                <div className="card-head">
+                  <span className="card-tier">Tier 3</span>
+                  <h4 className="card-name">Frequency VIP</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-purple">68.000.000</span>
+                    <span className="price-period">đ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Toàn bộ Tier 2 + Lớp học VIP riêng tư</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Scanner VIP (5.997K × 24) <span className="bonus-tag">MIỄN PHÍ</span></span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Chatbot PREMIUM (24 tháng) <span className="bonus-tag">MIỄN PHÍ</span></span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Nhóm VIP riêng + Hỗ trợ 24/7</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('course-tier3')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Mindset Courses */}
-          <h3 className="pricing-category-title text-pink" style={{marginTop: '60px'}}>Khóa Học Mindset</h3>
-          <div className="pricing-grid three-cols">
-            <div className="pricing-card">
-              <h4>7 Ngày Chuyển Hóa</h4>
-              <div className="price"><span className="amount">1.99M</span></div>
-              <p className="price-note">Hành trình 7 ngày</p>
-              <ul className="pricing-features">
-                <li><CheckCircle size={14} /> 7 ngày thực hành</li>
-                <li><CheckCircle size={14} /> Thiền định + Journaling</li>
-                <li><CheckCircle size={14} /> Nhóm đồng hành</li>
-              </ul>
-              <button className="btn-pricing" onClick={scrollToWaitlist}>Đăng Ký</button>
+          <div className="section-divider"></div>
+
+          {/* ===== CATEGORY 2: KHÓA HỌC CHUYỂN HÓA TƯ DUY ===== */}
+          <div className="pricing-category">
+            <div className="category-header">
+              <div className="category-icon">
+                <Brain size={28} />
+              </div>
+              <h3 className="category-title">Khóa Học Chuyển Hóa Tư Duy</h3>
+              <span className="category-desc">Học Thuyết Chuyển Hóa Nội Tâm — Jennie Uyen Chu</span>
             </div>
 
-            <div className="pricing-card featured">
-              <span className="card-badge popular-badge">Hot</span>
-              <h4>Tần Số Tình Yêu</h4>
-              <div className="price"><span className="amount">399K</span></div>
-              <p className="price-note">Thu hút tình yêu</p>
-              <ul className="pricing-features">
-                <li><CheckCircle size={14} /> Chữa lành vết thương tình cảm</li>
-                <li><CheckCircle size={14} /> Nâng cao tần số tình yêu</li>
-                <li><CheckCircle size={14} /> Thiền định chuyên biệt</li>
-              </ul>
-              <button className="btn-pricing primary" onClick={scrollToWaitlist}>Đăng Ký</button>
+            <div className="pricing-grid-3">
+              {/* 7 Ngày Chuyển Hóa */}
+              <div className="pricing-card mindset">
+                <span className="card-badge badge-popular">Bán Chạy Nhất</span>
+                <div className="card-head">
+                  <span className="card-tier">7 Ngày Chuyển Hóa</span>
+                  <h4 className="card-name">Khai Mở Tần Số Gốc</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-gold">1.990.000</span>
+                    <span className="price-period">đ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Hành trình 7 ngày chuyển hóa tần số từ gốc rễ</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Hiểu rõ 5 Niềm Tin Nền Tảng</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>7 Nghi Thức duy trì tần số cao</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Bài tập thực hành và nhật ký hướng dẫn</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('mindset-7days')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/pages/7ngaykhaimotansogoc" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* Tình Yêu */}
+              <div className="pricing-card mindset">
+                <div className="card-head">
+                  <span className="card-tier">Tình Yêu & Quan Hệ</span>
+                  <h4 className="card-name">Kích Hoạt Tần Số Tình Yêu</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-pink">399.000</span>
+                    <span className="price-period">đ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Hiểu tần số tình yêu trong các mối quan hệ</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Phá vỡ Hình Tư Tưởng "không xứng đáng"</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Kỹ thuật thu hút quan hệ lành mạnh</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Bài tập yêu thương bản thân</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('mindset-love')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/pages/khoahockichhoattansotinhyeu" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* Triệu Phú */}
+              <div className="pricing-card mindset">
+                <div className="card-head">
+                  <span className="card-tier">Tài Chính & Thịnh Vượng</span>
+                  <h4 className="card-name">Tái Tạo Tư Duy Triệu Phú</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-gold">499.000</span>
+                    <span className="price-period">đ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Phá vỡ Hình Tư Tưởng thiếu thốn</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Cài đặt tư duy thịnh vượng</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Kỹ thuật gieo hạt tài chính</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Bài tập xả bỏ và nhận vào</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('mindset-wealth')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/pages/khoahoctaitaotuduytrieuphu" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="section-divider"></div>
+
+          {/* ===== CATEGORY 3: GEM MASTER SƯ PHỤ AI (PART 2) ===== */}
+          <div className="pricing-category">
+            <div className="category-header">
+              <div className="category-icon">
+                <MessageCircle size={28} />
+              </div>
+              <h3 className="category-title">GEM Master Sư Phụ AI</h3>
+              <span className="category-desc">Người bạn đồng hành trên hành trình chuyển hóa</span>
             </div>
 
-            <div className="pricing-card">
-              <h4>Tư Duy Triệu Phú</h4>
-              <div className="price"><span className="amount">499K</span></div>
-              <p className="price-note">Tư duy thịnh vượng</p>
-              <ul className="pricing-features">
-                <li><CheckCircle size={14} /> Phá vỡ niềm tin giới hạn</li>
-                <li><CheckCircle size={14} /> Xây dựng mindset thịnh vượng</li>
-                <li><CheckCircle size={14} /> Hành động thực tế</li>
-              </ul>
-              <button className="btn-pricing" onClick={scrollToWaitlist}>Đăng Ký</button>
+            <div className="pricing-grid-4">
+              {/* FREE */}
+              <div className="pricing-card free">
+                <span className="card-badge badge-free">Miễn Phí</span>
+                <div className="card-head">
+                  <span className="card-tier">Miễn Phí</span>
+                  <h4 className="card-name">Trải Nghiệm</h4>
+                  <div className="card-price">
+                    <span className="price-free">MIỄN PHÍ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>5 câu hỏi mỗi ngày</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Tự động reset mỗi 24 giờ</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Rút Tarot, Kinh Dịch, Tử Vi cơ bản</span>
+                  </div>
+                  <div className="feature-item disabled">
+                    <CircleX size={14} />
+                    <span>Không có phân tích chuyên sâu</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={scrollToWaitlist}>Bắt Đầu Miễn Phí</button>
+                  <a href="#" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* PRO */}
+              <div className="pricing-card pro">
+                <div className="card-head">
+                  <span className="card-tier">Pro</span>
+                  <h4 className="card-name">Nâng Cao</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-cyan">39.000</span>
+                    <span className="price-period">đ/tháng</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>15 câu hỏi mỗi ngày</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Phân tích chi tiết hơn</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Gợi ý pha lê phù hợp</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Lưu lịch sử hội thoại</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Nghi thức Luật Hấp Dẫn <span className="exclusive-tag">ĐỘC QUYỀN</span></span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('chatbot-pro')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/products/yinyang-chatbot-ai-pro" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* PREMIUM */}
+              <div className="pricing-card premium">
+                <span className="card-badge badge-popular">Phổ Biến</span>
+                <div className="card-head">
+                  <span className="card-tier">Premium</span>
+                  <h4 className="card-name">Chuyên Nghiệp</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-gold">59.000</span>
+                    <span className="price-period">đ/tháng</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>50 câu hỏi mỗi ngày</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Phân tích chuyên sâu theo Học Thuyết</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Bảng Tầm Nhìn tích hợp</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Theo dõi hành trình chuyển hóa</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Nghi thức Luật Hấp Dẫn <span className="exclusive-tag">ĐẦU TIÊN TẠI VN</span></span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('chatbot-premium')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/products/gem-chatbot-premium" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* VIP */}
+              <div className="pricing-card vip">
+                <span className="card-badge badge-best">Không Giới Hạn</span>
+                <div className="card-head">
+                  <span className="card-tier">VIP</span>
+                  <h4 className="card-name">Không Giới Hạn</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-purple">99.000</span>
+                    <span className="price-period">đ/tháng</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Không giới hạn câu hỏi mỗi ngày</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Tất cả tính năng Premium</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Ưu tiên phản hồi nhanh hơn</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Truy cập tính năng mới sớm nhất</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">Nghi thức Luật Hấp Dẫn <span className="exclusive-tag">ĐẦU TIÊN TẠI VN</span></span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('chatbot-vip')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/products/yinyang-chatbot-ai-vip" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="section-divider"></div>
+
+          {/* ===== CATEGORY 4: GEM SCANNER DASHBOARD (PART 2) ===== */}
+          <div className="pricing-category">
+            <div className="category-header">
+              <div className="category-icon">
+                <Search size={28} />
+              </div>
+              <h3 className="category-title">GEM Scanner Dashboard</h3>
+              <span className="category-desc">Mua riêng không bao gồm khóa học</span>
+            </div>
+
+            <div className="pricing-grid-4">
+              {/* FREE */}
+              <div className="pricing-card free">
+                <span className="card-badge badge-free">Dùng Thử</span>
+                <div className="card-head">
+                  <span className="card-tier">Miễn Phí</span>
+                  <h4 className="card-name">Trải Nghiệm</h4>
+                  <div className="card-price">
+                    <span className="price-free">MIỄN PHÍ</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>5 lần quét mỗi ngày</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>3 mẫu nến cơ bản</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Giao dịch thử không giới hạn</span>
+                  </div>
+                  <div className="feature-item disabled">
+                    <CircleX size={14} />
+                    <span>Không có thông báo tức thời</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={scrollToWaitlist}>Dùng Thử Miễn Phí</button>
+                  <a href="#" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* PRO */}
+              <div className="pricing-card pro">
+                <div className="card-head">
+                  <span className="card-tier">Pro</span>
+                  <h4 className="card-name">Scanner Pro</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-cyan">997.000</span>
+                    <span className="price-period">đ/tháng</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Quét không giới hạn</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>7 mẫu nến đầy đủ</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Thông báo qua Telegram</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Gợi ý điểm vào/cắt lỗ/chốt lời</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('scanner-pro')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/products/gem-scanner-pro" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* PREMIUM */}
+              <div className="pricing-card premium">
+                <span className="card-badge badge-popular">Phổ Biến</span>
+                <div className="card-head">
+                  <span className="card-tier">Premium</span>
+                  <h4 className="card-name">Scanner Premium</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-gold">1.997.000</span>
+                    <span className="price-period">đ/tháng</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Tất cả tính năng Pro</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">15 mẫu nến + công cụ nâng cao</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Phân tích đa khung thời gian</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Bảng điều khiển kiểm chứng lịch sử</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('scanner-premium')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/products/scanner-dashboard-premium" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
+
+              {/* VIP */}
+              <div className="pricing-card vip">
+                <span className="card-badge badge-best">Đầy Đủ Nhất</span>
+                <div className="card-head">
+                  <span className="card-tier">VIP</span>
+                  <h4 className="card-name">Scanner VIP</h4>
+                  <div className="card-price">
+                    <span className="price-amount text-purple">5.997.000</span>
+                    <span className="price-period">đ/tháng</span>
+                  </div>
+                </div>
+                <div className="card-features">
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Tất cả tính năng Premium</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span className="feature-highlight">24 mẫu nến + dự đoán AI</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Theo dõi cá voi & phân tích khối lượng</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle size={14} />
+                    <span>Hỗ trợ ưu tiên + Nhóm riêng tư</span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <button className="btn-card btn-card-primary" onClick={() => addToCart('scanner-vip')}>
+                    <ShoppingBag size={14} /> Thêm Vào Giỏ
+                  </button>
+                  <a href="https://yinyangmasters.com/products/scanner-dashboard-vip" target="_blank" rel="noopener noreferrer" className="btn-card btn-card-secondary">Tìm Hiểu Thêm →</a>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1021,71 +2199,71 @@ export default function Landing() {
               <Heart size={14} /> Khóa Học Chuyển Hóa
             </span>
             <h2 className="section-title">
-              NÂNG CAO TẦN SỐ<br />
+              HÀNH TRÌNH CHUYỂN HÓA<br />
               <span className="text-pink">TỪ BÊN TRONG</span>
             </h2>
             <p className="section-subtitle">
-              Ba khóa học chuyển hóa nội tâm giúp bạn giải phóng những Hình Tư Tưởng cũ,
-              nâng cao tần số và thu hút cuộc sống bạn xứng đáng.
+              Dựa trên Học Thuyết Chuyển Hóa Nội Tâm của Jennie Uyen Chu,
+              mỗi khóa học là một hành trình giúp bạn nhận diện và thay đổi những năng lượng tiêu cực
+              đã ăn sâu trong tiềm thức, để từ đó thu hút cuộc sống bạn thực sự xứng đáng.
             </p>
           </div>
 
           <div className="intro-quote-box">
             <Quote size={32} className="quote-icon" />
             <blockquote>
-              "Tôi đã trải qua hành trình chuyển hóa từ một người luôn sống trong sợ hãi và thiếu thốn,
-              đến việc xây dựng cuộc sống thịnh vượng cả về tài chính lẫn tinh thần.
-              Giờ đây tôi muốn chia sẻ những công cụ đã giúp tôi với bạn."
+              "Bạn không cần thay đổi thế giới bên ngoài. Bạn chỉ cần thay đổi tần số bên trong —
+              và thế giới sẽ tự động phản chiếu sự thay đổi đó."
             </blockquote>
-            <cite>— Jennie Uyên Chu, Founder GEMRAL</cite>
+            <cite>— Jennie Uyen Chu, Tác giả Học Thuyết Chuyển Hóa Nội Tâm</cite>
           </div>
 
           <div className="mindset-courses-grid">
             <div className="mindset-course-card">
-              <h4>7 Ngày Chuyển Hóa Tần Số Gốc</h4>
-              <p>Hành trình 7 ngày thực hành để nhận diện và giải phóng những Hình Tư Tưởng đang giới hạn bạn.</p>
+              <h4>Khai Mở Tần Số Gốc</h4>
+              <p>Hành trình 7 ngày đặt nền móng cho mọi sự chuyển hóa, giúp bạn nhận diện và phá vỡ những năng lượng tiêu cực đã ăn sâu trong tiềm thức từ thuở nhỏ, đồng thời hiểu rõ 5 Niềm Tin Nền Tảng của Học Thuyết để áp dụng vào cuộc sống hàng ngày.</p>
               <div className="price-box">
                 <span className="original-price">2.990.000đ</span>
                 <span className="current-price">1.990.000đ</span>
               </div>
               <ul className="course-features">
-                <li><CheckCircle size={14} /> 7 ngày audio hướng dẫn</li>
-                <li><CheckCircle size={14} /> Thiền định buổi sáng & tối</li>
-                <li><CheckCircle size={14} /> Journaling template</li>
-                <li><CheckCircle size={14} /> Nhóm đồng hành</li>
+                <li><CheckCircle size={14} /> 7 bài học chuyên sâu với hướng dẫn chi tiết từng bước thực hành nghi thức hàng ngày</li>
+                <li><CheckCircle size={14} /> Hiểu rõ 5 Niềm Tin Nền Tảng của Học Thuyết và cách chúng vận hành trong cuộc sống</li>
+                <li><CheckCircle size={14} /> Bài tập viết nhật ký có hướng dẫn giúp bạn nhận diện pattern năng lượng cá nhân</li>
+                <li><CheckCircle size={14} /> 7 Nghi Thức buổi sáng và buổi tối để duy trì tần số cao suốt cả ngày</li>
               </ul>
               <button className="btn-course" onClick={scrollToWaitlist}>Tham Gia Ngay</button>
             </div>
 
             <div className="mindset-course-card featured">
-              <span className="featured-tag">Được Yêu Thích</span>
-              <h4>Tần Số Tình Yêu</h4>
-              <p>Chữa lành những vết thương cũ và mở lòng đón nhận tình yêu xứng đáng.</p>
+              <span className="featured-tag">Mới Ra Mắt</span>
+              <h4>Kích Hoạt Tần Số Tình Yêu</h4>
+              <p>Khóa học giúp bạn hiểu sâu về tần số tình yêu và cách nó vận hành trong các mối quan hệ, từ đó phá vỡ những năng lượng tiêu cực như "không xứng đáng được yêu" hoặc "sợ bị tổn thương" để thu hút và duy trì mối quan hệ lành mạnh, viên mãn.</p>
               <div className="price-box">
                 <span className="original-price">599.000đ</span>
                 <span className="current-price">399.000đ</span>
               </div>
               <ul className="course-features">
-                <li><CheckCircle size={14} /> Nhận diện pattern tình yêu</li>
-                <li><CheckCircle size={14} /> Chữa lành inner child</li>
-                <li><CheckCircle size={14} /> Thiền nâng tần số</li>
-                <li><CheckCircle size={14} /> Bài tập tha thứ & buông bỏ</li>
+                <li><CheckCircle size={14} /> Hiểu cơ chế tần số tình yêu và tại sao bạn thu hút những mối quan hệ hiện tại</li>
+                <li><CheckCircle size={14} /> Nhận diện và chuyển hóa năng lượng "sợ bị bỏ rơi" và "không đủ tốt"</li>
+                <li><CheckCircle size={14} /> Kỹ thuật nâng tần số để trở thành nam châm thu hút tình yêu đích thực</li>
+                <li><CheckCircle size={14} /> Bài tập thực hành yêu thương bản thân trước khi yêu người khác</li>
               </ul>
               <button className="btn-course primary" onClick={scrollToWaitlist}>Tham Gia Ngay</button>
             </div>
 
             <div className="mindset-course-card">
-              <h4>Tư Duy Triệu Phú</h4>
-              <p>Phá vỡ niềm tin giới hạn về tiền bạc và xây dựng tư duy thịnh vượng từ gốc rễ.</p>
+              <h4>Tái Tạo Tư Duy Triệu Phú</h4>
+              <p>Khóa học giúp bạn nhận diện những tần số thiếu thốn đang kìm hãm dòng chảy thịnh vượng trong cuộc sống, rồi cài đặt tư duy giàu có theo đúng nguyên lý của Học Thuyết Chuyển Hóa Nội Tâm để tiền bạc tự nhiên chảy về phía bạn.</p>
               <div className="price-box">
                 <span className="original-price">799.000đ</span>
                 <span className="current-price">499.000đ</span>
               </div>
               <ul className="course-features">
-                <li><CheckCircle size={14} /> Audit niềm tin về tiền</li>
-                <li><CheckCircle size={14} /> Reprogramming mindset</li>
-                <li><CheckCircle size={14} /> Affirmation chuyên biệt</li>
-                <li><CheckCircle size={14} /> Action plan 30 ngày</li>
+                <li><CheckCircle size={14} /> Nhận diện những niềm tin vô thức về tiền bạc đã được gieo từ thuở nhỏ</li>
+                <li><CheckCircle size={14} /> Cài đặt tư duy thịnh vượng theo nguyên lý "Trong thế nào, ngoài thế ấy"</li>
+                <li><CheckCircle size={14} /> Kỹ thuật gieo hạt tài chính để tạo năng lượng mới về tiền bạc</li>
+                <li><CheckCircle size={14} /> Bài tập thực hành "Xả để Nhận" giúp mở rộng khả năng tiếp nhận</li>
               </ul>
               <button className="btn-course" onClick={scrollToWaitlist}>Tham Gia Ngay</button>
             </div>
@@ -1095,7 +2273,10 @@ export default function Landing() {
 
           <div className="highlight-box">
             <Sparkles size={24} />
-            <p>Tất cả khóa học đều đi kèm <strong className="text-gold">quyền truy cập GEM Master miễn phí 30 ngày</strong> để hỗ trợ hành trình chuyển hóa của bạn.</p>
+            <div>
+              <h4 className="text-gold">Tại Sao Chọn Học Thuyết Chuyển Hóa Nội Tâm?</h4>
+              <p>Khác với những phương pháp chỉ tập trung vào hành động bên ngoài, Học Thuyết Chuyển Hóa Nội Tâm đi vào gốc rễ vấn đề — những năng lượng tiêu cực đã được gieo từ vô thức. Khi bạn thay đổi tần số bên trong, mọi thứ bên ngoài sẽ tự động thay đổi theo nguyên lý "Trong thế nào, ngoài thế ấy".</p>
+            </div>
           </div>
 
           <div className="section-footer">gemral.com</div>
@@ -1110,86 +2291,137 @@ export default function Landing() {
               <BarChart3 size={14} /> Khóa Học Trading
             </span>
             <h2 className="section-title">
-              LỘ TRÌNH TRỌN VẸN<br />
-              <span className="text-cyan">TỪ ZERO ĐẾN HERO</span>
+              LỘ TRÌNH HỌC<br />
+              <span className="text-cyan">FREQUENCY TRADING</span>
             </h2>
             <p className="section-subtitle">
-              4 cấp độ từ cơ bản đến chuyên gia, giúp bạn xây dựng kỹ năng trading có hệ thống.
+              Từ người mới bắt đầu đến trader chuyên nghiệp — lộ trình được thiết kế khoa học
+              giúp bạn làm chủ phương pháp GEM Frequency Method với tỷ lệ thắng từ 68-85%
+              đã được kiểm chứng qua hàng nghìn giao dịch thực tế.
             </p>
+          </div>
+
+          <div className="exclusive-tag">
+            <MapPin size={12} /> CÔNG THỨC ĐỘC QUYỀN TẠI VIỆT NAM
           </div>
 
           <img src={IMAGES.coursesTrading1} alt="Trading Path" className="section-hero-image" />
 
-          <div className="trading-timeline">
-            <div className="timeline-line" />
-
-            <div className="timeline-item">
+          <div className="levels-container">
+            {/* STARTER */}
+            <div className="level-card starter">
               <div className="level-indicator">
-                <span className="level-num">0</span>
+                <div className="level-number">S</div>
               </div>
-              <div className="timeline-card starter">
-                <h4>Starter</h4>
-                <p className="card-price">299K</p>
-                <p>Nền tảng cơ bản cho người mới bắt đầu</p>
-                <ul>
-                  <li>5 video cơ bản về thị trường crypto</li>
-                  <li>Giới thiệu Frequency Method</li>
-                  <li>Paper Trading không giới hạn</li>
+              <div className="card-info">
+                <span className="card-tier-name">Dành Cho Người Mới</span>
+                <h4 className="card-title">Khóa Học Cơ Bản</h4>
+                <p className="card-description">
+                  Bước đầu tiên trên hành trình làm chủ thị trường crypto, giúp bạn hiểu rõ nền tảng
+                  của phương pháp GEM Frequency và có thể tự tin đọc biểu đồ, nhận diện xu hướng
+                  cơ bản trước khi bước vào các cấp độ chuyên sâu hơn.
+                </p>
+                <ul className="features-list">
+                  <li><CheckCircle size={14} /> Kiến thức nền tảng về thị trường cryptocurrency và cách thức vận hành của nó</li>
+                  <li><CheckCircle size={14} /> Giới thiệu 6 công thức tần số cơ bản của phương pháp GEM Frequency</li>
+                  <li><CheckCircle size={14} /> Hướng dẫn sử dụng nền tảng giao dịch và các công cụ cần thiết</li>
+                  <li><CheckCircle size={14} /> Truy cập nhóm học viên để trao đổi và hỗ trợ lẫn nhau</li>
                 </ul>
+              </div>
+              <div className="card-pricing">
+                <span className="price-amount">299.000đ</span>
+                <span className="price-period">Thanh toán một lần</span>
+                <button className="btn-primary" onClick={() => addToCart('course-starter')}><ShoppingBag size={16} /> Thêm Vào Giỏ</button>
+                <a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen" target="_blank" rel="noopener noreferrer" className="btn-secondary">Xem Chi Tiết →</a>
               </div>
             </div>
 
-            <div className="timeline-item">
+            {/* TIER 1 */}
+            <div className="level-card tier1">
               <div className="level-indicator">
-                <span className="level-num">1</span>
+                <div className="level-number">1</div>
               </div>
-              <div className="timeline-card tier1">
-                <span className="timeline-badge popular">Phổ Biến</span>
-                <h4>Tier 1</h4>
-                <p className="card-price">11.000.000đ</p>
-                <p>Làm chủ 6 công thức Pattern độc quyền</p>
-                <ul>
-                  <li>Toàn bộ video Tier 1 (30+ bài)</li>
-                  <li>Scanner PRO 3 tháng</li>
-                  <li>Nhóm Telegram hỗ trợ</li>
-                  <li>Weekly Live Q&A</li>
+              <div className="card-info">
+                <span className="card-tier-name">Nâng Cao</span>
+                <h4 className="card-title">Frequency Pro</h4>
+                <p className="card-description">
+                  Bước tiến quan trọng giúp bạn làm chủ hoàn toàn phương pháp GEM Frequency,
+                  với khả năng nhận diện patterns chính xác và thực hiện giao dịch có hệ thống
+                  để đạt được kết quả ổn định và bền vững theo thời gian.
+                </p>
+                <ul className="features-list">
+                  <li><CheckCircle size={14} /> Toàn bộ nội dung khóa Trading Frequency chuyên sâu với case studies thực tế</li>
+                  <li><CheckCircle size={14} /> <span className="feature-highlight">Scanner PRO 12 tháng (trị giá 11.964.000đ) <span className="bonus-tag">MIỄN PHÍ</span></span></li>
+                  <li><CheckCircle size={14} /> <span className="feature-highlight">GEM Master Chatbot PRO 12 tháng <span className="bonus-tag">MIỄN PHÍ</span></span></li>
+                  <li><CheckCircle size={14} /> Hỗ trợ qua nhóm riêng với các học viên cùng cấp độ</li>
                 </ul>
+              </div>
+              <div className="card-pricing">
+                <span className="price-original">15.000.000đ</span>
+                <span className="price-amount text-cyan">11.000.000đ</span>
+                <span className="price-period">Thanh toán một lần</span>
+                <button className="btn-primary" onClick={() => addToCart('course-tier1')}><ShoppingBag size={16} /> Thêm Vào Giỏ</button>
+                <a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen" target="_blank" rel="noopener noreferrer" className="btn-secondary">Xem Chi Tiết →</a>
               </div>
             </div>
 
-            <div className="timeline-item">
+            {/* TIER 2 - POPULAR */}
+            <div className="level-card tier2">
+              <span className="card-badge badge-popular">Phổ Biến Nhất</span>
               <div className="level-indicator">
-                <span className="level-num">2</span>
+                <div className="level-number">2</div>
               </div>
-              <div className="timeline-card tier2">
-                <h4>Tier 2</h4>
-                <p className="card-price">21.000.000đ</p>
-                <p>Nâng cao kỹ năng với chiến lược chuyên sâu</p>
-                <ul>
-                  <li>Toàn bộ Tier 1 + Tier 2</li>
-                  <li>Scanner PRO 6 tháng</li>
-                  <li>1:1 Mentoring (2 sessions)</li>
-                  <li>Advanced Risk Management</li>
+              <div className="card-info">
+                <span className="card-tier-name">Chuyên Nghiệp</span>
+                <h4 className="card-title">Frequency Premium</h4>
+                <p className="card-description">
+                  Gói được chọn nhiều nhất dành cho những ai muốn đạt kết quả tối ưu trong giao dịch,
+                  với chiến lược nâng cao, công cụ Premium và hỗ trợ ưu tiên qua nhóm riêng giúp bạn
+                  nhanh chóng trở thành trader có lợi nhuận ổn định và bền vững.
+                </p>
+                <ul className="features-list">
+                  <li><CheckCircle size={14} /> Toàn bộ nội dung Tier 1 cộng thêm chiến lược nâng cao cho trader chuyên nghiệp</li>
+                  <li><CheckCircle size={14} /> <span className="feature-highlight">Scanner PREMIUM 12 tháng (trị giá 23.964.000đ) <span className="bonus-tag">MIỄN PHÍ</span></span></li>
+                  <li><CheckCircle size={14} /> <span className="feature-highlight">GEM Master Chatbot PREMIUM 12 tháng <span className="bonus-tag">MIỄN PHÍ</span></span></li>
+                  <li><CheckCircle size={14} /> Hỗ trợ ưu tiên qua nhóm riêng để review và cải thiện kết quả</li>
                 </ul>
+              </div>
+              <div className="card-pricing">
+                <span className="price-original">28.000.000đ</span>
+                <span className="price-amount text-gold">21.000.000đ</span>
+                <span className="price-period">Thanh toán một lần</span>
+                <button className="btn-primary" onClick={() => addToCart('course-tier2')}><ShoppingBag size={16} /> Thêm Vào Giỏ</button>
+                <a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen" target="_blank" rel="noopener noreferrer" className="btn-secondary">Xem Chi Tiết →</a>
               </div>
             </div>
 
-            <div className="timeline-item">
+            {/* TIER 3 - VIP */}
+            <div className="level-card tier3">
+              <span className="card-badge badge-vip">VIP Cao Cấp</span>
               <div className="level-indicator">
-                <span className="level-num">3</span>
+                <div className="level-number">3</div>
               </div>
-              <div className="timeline-card tier3">
-                <span className="timeline-badge vip">VIP</span>
-                <h4>Tier 3</h4>
-                <p className="card-price">68.000.000đ</p>
-                <p>Full Access Lifetime + Private Mentoring</p>
-                <ul>
-                  <li>Tất cả Tier 1, 2, 3</li>
-                  <li>Scanner Lifetime Access</li>
-                  <li>Private 1:1 với Jennie (6 sessions)</li>
-                  <li>Crystal Năng Lượng tặng kèm</li>
-                  <li>Ưu tiên tham gia events</li>
+              <div className="card-info">
+                <span className="card-tier-name">Cao Cấp Nhất</span>
+                <h4 className="card-title">Frequency VIP</h4>
+                <p className="card-description">
+                  Gói cao cấp nhất dành cho những ai muốn được đồng hành sát sao trên hành trình
+                  trở thành trader chuyên nghiệp, với quyền truy cập VIP suốt 24 tháng, nội dung
+                  độc quyền và hỗ trợ ưu tiên cao nhất từ đội ngũ.
+                </p>
+                <ul className="features-list">
+                  <li><CheckCircle size={14} /> Toàn bộ nội dung Tier 2 cộng thêm nội dung VIP độc quyền với số lượng giới hạn</li>
+                  <li><CheckCircle size={14} /> <span className="feature-highlight">Scanner VIP 24 tháng (trị giá 143.928.000đ) <span className="bonus-tag">MIỄN PHÍ</span></span></li>
+                  <li><CheckCircle size={14} /> <span className="feature-highlight">GEM Master Chatbot PREMIUM 24 tháng <span className="bonus-tag">MIỄN PHÍ</span></span></li>
+                  <li><CheckCircle size={14} /> Truy cập nhóm VIP riêng với hỗ trợ ưu tiên cao nhất từ đội ngũ</li>
                 </ul>
+              </div>
+              <div className="card-pricing">
+                <span className="price-original">90.000.000đ</span>
+                <span className="price-amount text-purple">68.000.000đ</span>
+                <span className="price-period">Thanh toán một lần</span>
+                <button className="btn-primary" onClick={() => addToCart('course-tier3')}><ShoppingBag size={16} /> Thêm Vào Giỏ</button>
+                <a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen" target="_blank" rel="noopener noreferrer" className="btn-secondary">Xem Chi Tiết →</a>
               </div>
             </div>
           </div>
@@ -1198,20 +2430,20 @@ export default function Landing() {
 
           <div className="stats-row trading-stats">
             <div className="stat-item">
-              <span className="stat-number text-green">68-85%</span>
-              <span className="stat-label">Win Rate Backtest</span>
+              <span className="stat-number text-cyan">68-85%</span>
+              <span className="stat-label">Tỷ Lệ Thắng Backtest</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number text-cyan">686+</span>
-              <span className="stat-label">Giao dịch phân tích</span>
+              <span className="stat-number text-gold">686+</span>
+              <span className="stat-label">Giao Dịch Đã Kiểm Chứng</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number text-purple">5+ năm</span>
-              <span className="stat-label">Data đã kiểm chứng</span>
+              <span className="stat-number text-pink">5+ năm</span>
+              <span className="stat-label">Dữ Liệu Lịch Sử</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number text-gold">6</span>
-              <span className="stat-label">Công thức độc quyền</span>
+              <span className="stat-number text-purple">6</span>
+              <span className="stat-label">Công Thức Độc Quyền</span>
             </div>
           </div>
 
@@ -1247,7 +2479,7 @@ export default function Landing() {
                 </div>
               </div>
               <p className="card-quote">"Em muốn kiếm tiền từ crypto nhưng không biết bắt đầu từ đâu, sợ mất tiền lắm."</p>
-              <p className="card-description">Bạn trẻ năng động muốn tạo thu nhập từ thị trường crypto nhưng chưa có kinh nghiệm, dễ bị cuốn vào FOMO.</p>
+              <p className="card-description">Bạn trẻ năng động muốn tạo thu nhập từ thị trường crypto nhưng chưa có kinh nghiệm, dễ bị cuốn vào FOMO và thường mua đỉnh bán đáy vì thiếu phương pháp rõ ràng.</p>
               <div className="pain-points">
                 <span className="pain-title">Nỗi đau</span>
                 <ul className="pain-list">
@@ -1267,7 +2499,7 @@ export default function Landing() {
                 </div>
               </div>
               <p className="card-quote">"Tôi đã mất rất nhiều tiền vào crypto. Cần một phương pháp có hệ thống thật sự."</p>
-              <p className="card-description">Trader đã có kinh nghiệm nhưng vẫn chưa tìm được phương pháp hiệu quả.</p>
+              <p className="card-description">Trader đã có kinh nghiệm nhưng vẫn chưa tìm được phương pháp hiệu quả, từng trải qua những lần thua lỗ đau thương và đang tìm kiếm cách giao dịch bền vững hơn.</p>
               <div className="pain-points">
                 <span className="pain-title">Nỗi đau</span>
                 <ul className="pain-list">
@@ -1287,7 +2519,7 @@ export default function Landing() {
                 </div>
               </div>
               <p className="card-quote">"Tôi tin vào năng lượng và luật hấp dẫn, muốn hiểu sâu hơn để áp dụng vào cuộc sống."</p>
-              <p className="card-description">Người quan tâm đến phát triển bản thân và các phương pháp nâng cao nhận thức.</p>
+              <p className="card-description">Người quan tâm đến phát triển bản thân và các phương pháp nâng cao nhận thức, tin vào sức mạnh của năng lượng nhưng chưa tìm được hệ thống có cơ sở rõ ràng.</p>
               <div className="pain-points">
                 <span className="pain-title">Nỗi đau</span>
                 <ul className="pain-list">
@@ -1307,7 +2539,7 @@ export default function Landing() {
                 </div>
               </div>
               <p className="card-quote">"Tôi cứ mãi gặp sai người, không biết làm sao để thu hút tình yêu đích thực."</p>
-              <p className="card-description">Phụ nữ đã trải qua những mối quan hệ không như ý.</p>
+              <p className="card-description">Phụ nữ đã trải qua những mối quan hệ không như ý, cảm thấy mình không xứng đáng được yêu thương hoặc sợ bị tổn thương nên vô tình đẩy tình yêu ra xa.</p>
               <div className="pain-points">
                 <span className="pain-title">Nỗi đau</span>
                 <ul className="pain-list">
@@ -1327,7 +2559,7 @@ export default function Landing() {
                 </div>
               </div>
               <p className="card-quote">"Kinh doanh thành công nhưng luôn có cảm giác thiếu thốn, sợ mất những gì đang có."</p>
-              <p className="card-description">Người đã có sự nghiệp nhưng vẫn cảm thấy thiếu thốn.</p>
+              <p className="card-description">Người đã có sự nghiệp nhất định nhưng vẫn cảm thấy thiếu thốn, lo lắng về tài chính dù có thu nhập tốt, muốn xây dựng tư duy thịnh vượng bền vững từ bên trong.</p>
               <div className="pain-points">
                 <span className="pain-title">Nỗi đau</span>
                 <ul className="pain-list">
@@ -1347,7 +2579,7 @@ export default function Landing() {
                 </div>
               </div>
               <p className="card-quote">"Tôi cảm thấy cuộc sống cứ trôi đi mà không biết mình thực sự muốn gì."</p>
-              <p className="card-description">Người đang ở giai đoạn chuyển đổi trong cuộc sống.</p>
+              <p className="card-description">Người đang ở giai đoạn chuyển đổi trong cuộc sống, cảm thấy mất phương hướng, không biết mình muốn gì và cần một người bạn đồng hành để tìm lại chính mình.</p>
               <div className="pain-points">
                 <span className="pain-title">Nỗi đau</span>
                 <ul className="pain-list">
@@ -1369,8 +2601,9 @@ export default function Landing() {
                 </div>
                 <p className="card-quote">"Tôi muốn cả tài chính tự do, tình yêu viên mãn và sự bình an trong tâm hồn — tôi tin mình xứng đáng có tất cả."</p>
                 <p className="card-description">
-                  Bạn không chỉ muốn thành công trong một lĩnh vực mà khao khát sự thịnh vượng toàn diện.
-                  GEMRAL được tạo ra chính xác dành cho những người như bạn.
+                  Bạn không chỉ muốn thành công trong một lĩnh vực mà khao khát sự thịnh vượng toàn diện — tài chính,
+                  tình yêu, sức khỏe và sự bình an nội tâm. GEMRAL được tạo ra chính xác dành cho những người như bạn,
+                  những người tin rằng mình xứng đáng có được cuộc sống trọn vẹn và đang sẵn sàng hành động để đạt được điều đó.
                 </p>
                 <div className="solution-tag"><CheckCircle size={14} /> Trọn Bộ GEMRAL — Trading + Mindset + GEM Master + Vision Board</div>
               </div>
@@ -1398,7 +2631,8 @@ export default function Landing() {
               <span className="text-gold">TỪ CỘNG ĐỒNG GEMRAL</span>
             </h2>
             <p className="section-subtitle">
-              Những chia sẻ thực tế từ học viên đã trải nghiệm hành trình chuyển hóa cùng GEMRAL.
+              Những chia sẻ thực tế từ học viên đã trải nghiệm hành trình chuyển hóa cùng GEMRAL,
+              từ người mới bắt đầu đến trader có kinh nghiệm đều tìm thấy giá trị phù hợp với mình.
             </p>
           </div>
 
@@ -1417,8 +2651,9 @@ export default function Landing() {
                 </div>
               </div>
               <blockquote className="testimonial-quote">
-                "Trước khi biết GEMRAL, tôi đã thua gần 50 triệu trong 6 tháng trading theo cảm tính.
-                Sau khi học Frequency Method và sử dụng Scanner, 3 tháng đầu tôi đã hòa vốn và tháng thứ 4 bắt đầu có lợi nhuận ổn định."
+                "Trước khi biết GEMRAL, tôi đã thua gần 50 triệu trong 6 tháng trading theo cảm tính mà không có hệ thống rõ ràng.
+                Sau khi học Frequency Method và sử dụng Scanner, 3 tháng đầu tôi đã hòa vốn và tháng thứ 4 bắt đầu có lợi nhuận ổn định.
+                Bây giờ trung bình mỗi tháng tôi kiếm thêm 15-20 triệu từ trading part-time bên cạnh công việc chính tại công ty."
               </blockquote>
               <div className="result-badge success"><CheckCircle size={16} /> +45% ROI trong 90 ngày</div>
             </div>
@@ -1437,8 +2672,10 @@ export default function Landing() {
                 </div>
               </div>
               <blockquote className="testimonial-quote">
-                "GEM Master thực sự thay đổi cách tôi nhìn nhận cuộc sống và công việc kinh doanh.
-                Kết hợp với Scanner, tôi có thêm nguồn thu nhập thụ động từ trading mà không mất nhiều thời gian."
+                "GEM Master thực sự thay đổi cách tôi nhìn nhận cuộc sống và công việc kinh doanh của mình.
+                Những lần rút Tarot và gieo quẻ Kinh Dịch giúp tôi bình tĩnh hơn khi đưa ra quyết định kinh doanh quan trọng.
+                Kết hợp với Scanner, tôi có thêm nguồn thu nhập thụ động từ trading mà không mất nhiều thời gian theo dõi thị trường
+                vì hệ thống đã làm phần lớn công việc phân tích thay tôi."
               </blockquote>
               <div className="result-badge success"><CheckCircle size={16} /> Thu nhập tăng 80%</div>
             </div>
@@ -1457,8 +2694,10 @@ export default function Landing() {
                 </div>
               </div>
               <blockquote className="testimonial-quote">
-                "Tôi đã trade được 3 năm và thử qua nhiều phương pháp. Frequency Method cho tôi một góc nhìn hoàn toàn mới
-                và quan trọng nhất là có kỷ luật trading rõ ràng."
+                "Tôi đã trade được 3 năm và thử qua nhiều phương pháp khác nhau như ICT, SMC, Wyckoff nhưng kết quả vẫn không ổn định.
+                Frequency Method cho tôi một góc nhìn hoàn toàn mới về thị trường mà trước đây tôi chưa từng nghĩ đến.
+                Scanner giúp tôi không bỏ lỡ bất kỳ setup nào và quan trọng nhất là có kỷ luật trading rõ ràng,
+                không còn giao dịch theo cảm xúc như trước đây nữa."
               </blockquote>
               <div className="result-badge success"><CheckCircle size={16} /> Win rate từ 45% lên 72%</div>
             </div>
@@ -1477,8 +2716,10 @@ export default function Landing() {
                 </div>
               </div>
               <blockquote className="testimonial-quote">
-                "Là mẹ của 2 bé nhỏ, tôi không có nhiều thời gian. Scanner cho tôi tín hiệu rõ ràng,
-                chỉ cần check app 15 phút buổi sáng và buổi tối là đủ."
+                "Là mẹ của 2 bé nhỏ, tôi không có nhiều thời gian rảnh để ngồi trước màn hình phân tích thị trường.
+                Scanner cho tôi tín hiệu rõ ràng và cụ thể, chỉ cần check app 15 phút buổi sáng và buổi tối là đủ.
+                Khóa học Chuyển Hóa giúp tôi cân bằng hơn rất nhiều trong vai trò làm mẹ và đồng thời vẫn có thể
+                tạo thu nhập phụ để đóng góp vào tài chính gia đình."
               </blockquote>
               <div className="result-badge success"><CheckCircle size={16} /> +18 triệu/tháng part-time</div>
             </div>
@@ -1501,7 +2742,7 @@ export default function Landing() {
 
           <div className="video-cta-box">
             <h3><Play size={28} /> Xem Thêm Chia Sẻ Từ Học Viên</h3>
-            <p>Hơn 50 câu chuyện thực tế từ học viên đã trải nghiệm hành trình chuyển hóa cùng GEMRAL.</p>
+            <p>Hơn 50 câu chuyện thực tế từ học viên đã trải nghiệm hành trình chuyển hóa cùng GEMRAL, từ những người mới bắt đầu đến trader có kinh nghiệm lâu năm.</p>
             <img src={IMAGES.testimonials} alt="More Testimonials" className="video-cta-image" />
           </div>
 
@@ -1521,7 +2762,8 @@ export default function Landing() {
               <span className="text-gold">HỆ SINH THÁI GEMRAL</span>
             </h2>
             <p className="section-subtitle">
-              Trở thành đối tác của GEMRAL và tạo thu nhập không giới hạn khi giới thiệu sản phẩm đến cộng đồng của bạn.
+              Trở thành đối tác của GEMRAL và tạo thu nhập không giới hạn khi giới thiệu sản phẩm đến
+              cộng đồng của bạn. Ba chương trình partnership với mức hoa hồng hấp dẫn dành cho mọi đối tượng.
             </p>
           </div>
 
@@ -1531,7 +2773,7 @@ export default function Landing() {
               <h3 className="text-cyan">TIER 1: CTV</h3>
               <div className="commission text-cyan">10-30%</div>
               <span className="requirement-badge">Ai cũng đăng ký được</span>
-              <p>Chương trình Cộng Tác Viên dành cho tất cả mọi người muốn kiếm thu nhập thụ động.</p>
+              <p>Chương trình Cộng Tác Viên dành cho tất cả mọi người muốn kiếm thu nhập thụ động bằng cách giới thiệu sản phẩm GEMRAL đến bạn bè và người quen.</p>
               <ul className="partner-features">
                 <li><CheckCircle size={14} /> 5 cấp bậc thăng tiến: Bronze → Diamond</li>
                 <li><CheckCircle size={14} /> Hoa hồng Digital: 10% - 30%</li>
@@ -1544,7 +2786,7 @@ export default function Landing() {
               <h3 className="text-gold">TIER 2: KOL AFFILIATE</h3>
               <div className="commission text-gold">20%</div>
               <span className="requirement-badge warning">Yêu cầu: 20,000+ followers</span>
-              <p>Chương trình dành riêng cho Influencers và KOLs có tầm ảnh hưởng lớn.</p>
+              <p>Chương trình dành riêng cho Influencers và KOLs có tầm ảnh hưởng lớn trên mạng xã hội, với mức hoa hồng đồng nhất cao cho cả sản phẩm Digital và Physical.</p>
               <ul className="partner-features">
                 <li><CheckCircle size={14} /> Hoa hồng Digital: 20%</li>
                 <li><CheckCircle size={14} /> Hoa hồng Physical: 20%</li>
@@ -1556,7 +2798,7 @@ export default function Landing() {
               <h3 className="text-purple">TIER 3: INSTRUCTOR</h3>
               <div className="commission text-purple">40-60%</div>
               <span className="requirement-badge exclusive">Được GEM mời hoặc có chuyên môn</span>
-              <p>Chương trình Giảng Viên dành cho chuyên gia có năng lực đặc biệt.</p>
+              <p>Chương trình Giảng Viên dành cho chuyên gia có năng lực đặc biệt trong lĩnh vực trading, tài chính hoặc phát triển bản thân muốn đồng sáng tạo nội dung cùng GEMRAL.</p>
               <ul className="partner-features">
                 <li><CheckCircle size={14} /> Revenue Share: 40-60%</li>
                 <li><CheckCircle size={14} /> Multiple Income Streams</li>
@@ -1614,18 +2856,18 @@ export default function Landing() {
           <div className="cta-section">
             <div className="cta-card">
               <h4 className="text-gold">Mua Sản Phẩm</h4>
-              <p>Khám phá bộ sưu tập Crystal và các sản phẩm năng lượng giúp nâng cao tần số cuộc sống.</p>
-              <button className="btn-primary" onClick={scrollToWaitlist}><ShoppingBag size={16} /> Shop Crystal/Products</button>
+              <p>Khám phá bộ sưu tập Crystal và các sản phẩm năng lượng giúp nâng cao tần số cuộc sống của bạn.</p>
+              <Link to="/shop" className="btn-primary"><ShoppingBag size={16} /> Shop Crystal/Products</Link>
             </div>
             <div className="cta-card">
               <h4 className="text-cyan">Trở Thành CTV</h4>
-              <p>Đăng ký miễn phí và bắt đầu kiếm hoa hồng từ ngày đầu tiên.</p>
-              <button className="btn-secondary" onClick={scrollToWaitlist}><UserPlus size={16} /> Đăng Ký CTV (Miễn Phí)</button>
+              <p>Đăng ký miễn phí và bắt đầu kiếm hoa hồng từ ngày đầu tiên. Không cần điều kiện, ai cũng tham gia được.</p>
+              <button className="btn-secondary" onClick={() => openPartnershipForm('ctv')}><UserPlus size={16} /> Đăng Ký CTV (Miễn Phí)</button>
             </div>
             <div className="cta-card">
               <h4 className="text-purple">Đăng Ký KOL</h4>
-              <p>Bạn có 20,000+ followers? Đăng ký chương trình KOL để nhận mức hoa hồng 20%.</p>
-              <button className="btn-tertiary" onClick={scrollToWaitlist}><Star size={16} /> Đăng Ký KOL</button>
+              <p>Bạn có 20,000+ followers? Đăng ký chương trình KOL để nhận mức hoa hồng 20% cho tất cả sản phẩm.</p>
+              <button className="btn-tertiary" onClick={() => openPartnershipForm('kol')}><Star size={16} /> Đăng Ký KOL (20K+ Followers)</button>
             </div>
           </div>
 
@@ -1646,7 +2888,8 @@ export default function Landing() {
               <span className="text-gold">KHÔNG NÓI DỐI</span>
             </h2>
             <p className="section-subtitle">
-              Tất cả con số dưới đây đều được kiểm chứng từ dữ liệu backtest thực tế trên thị trường crypto.
+              Tất cả con số dưới đây đều được kiểm chứng từ dữ liệu backtest thực tế trên thị trường crypto,
+              không phải lời hứa hão huyền mà là kết quả có thể tái lập được.
             </p>
           </div>
 
@@ -1655,28 +2898,28 @@ export default function Landing() {
               <div className="stat-icon"><CheckCircle size={28} /></div>
               <div className="stat-number">68-85%</div>
               <div className="stat-label">Win Rate Backtest</div>
-              <div className="stat-desc">Tỷ lệ thắng được kiểm chứng qua hơn 5 năm dữ liệu lịch sử.</div>
+              <div className="stat-desc">Tỷ lệ thắng được kiểm chứng qua hơn 5 năm dữ liệu lịch sử trên các cặp tiền phổ biến.</div>
             </div>
 
             <div className="stat-card cyan">
               <div className="stat-icon"><Activity size={28} /></div>
               <div className="stat-number">686+</div>
               <div className="stat-label">Giao Dịch Phân Tích</div>
-              <div className="stat-desc">Số lượng giao dịch đã được backtest để xây dựng 6 công thức.</div>
+              <div className="stat-desc">Số lượng giao dịch đã được backtest và phân tích để xây dựng 6 công thức Frequency Method.</div>
             </div>
 
             <div className="stat-card purple">
               <div className="stat-icon"><Clock size={28} /></div>
               <div className="stat-number">5+ năm</div>
               <div className="stat-label">Dữ Liệu Kiểm Chứng</div>
-              <div className="stat-desc">Frequency Method được xây dựng và kiểm chứng qua hơn 5 năm.</div>
+              <div className="stat-desc">Frequency Method được xây dựng và kiểm chứng qua hơn 5 năm dữ liệu thị trường crypto.</div>
             </div>
 
             <div className="stat-card pink">
               <div className="stat-icon"><Layers size={28} /></div>
               <div className="stat-number">6</div>
               <div className="stat-label">Công Thức Độc Quyền</div>
-              <div className="stat-desc">Hệ thống 6 pattern tần số: DPD, UPU, UPD, DPU, HFZ, LFZ.</div>
+              <div className="stat-desc">Hệ thống 6 pattern tần số: DPD, UPU, UPD, DPU, HFZ, LFZ giúp nhận diện điểm vào lệnh.</div>
             </div>
           </div>
 
@@ -1685,21 +2928,21 @@ export default function Landing() {
               <div className="stat-icon"><Users size={28} /></div>
               <div className="stat-number">500+</div>
               <div className="stat-label">Học Viên Đã Tham Gia</div>
-              <div className="stat-desc">Cộng đồng học viên đã và đang thực hành Frequency Method.</div>
+              <div className="stat-desc">Cộng đồng học viên đã và đang thực hành Frequency Method trên thị trường thực tế.</div>
             </div>
 
             <div className="stat-card">
               <div className="stat-icon"><UserPlus size={28} /></div>
               <div className="stat-number">100+</div>
               <div className="stat-label">Đối Tác CTV/KOL</div>
-              <div className="stat-desc">Mạng lưới đối tác đang cùng phát triển hệ sinh thái GEMRAL.</div>
+              <div className="stat-desc">Mạng lưới đối tác đang cùng phát triển và lan tỏa hệ sinh thái GEMRAL tại Việt Nam.</div>
             </div>
 
             <div className="stat-card cyan">
               <div className="stat-icon"><Smile size={28} /></div>
               <div className="stat-number">92%</div>
               <div className="stat-label">Hài Lòng Với Kết Quả</div>
-              <div className="stat-desc">Tỷ lệ học viên hài lòng sau khi áp dụng hệ thống.</div>
+              <div className="stat-desc">Tỷ lệ học viên hài lòng với kết quả sau khi áp dụng hệ thống vào giao dịch thực tế.</div>
             </div>
           </div>
 
@@ -1746,7 +2989,7 @@ export default function Landing() {
                   </div>
                   <div className="benefit-text">
                     <strong>Giảm 5% Khóa Học Premium</strong>
-                    <span>Áp dụng cho tất cả khóa học khi ra mắt chính thức trong 7 ngày đầu.</span>
+                    <span>Áp dụng cho tất cả khóa học Tư Duy và Trading khi ra mắt chính thức trong 7 ngày đầu.</span>
                   </div>
                 </li>
                 <li>
@@ -1755,7 +2998,7 @@ export default function Landing() {
                   </div>
                   <div className="benefit-text">
                     <strong>Truy Cập Scanner Sớm 14 Ngày</strong>
-                    <span>Sử dụng GEM Scanner miễn phí trong 14 ngày trước khi tính phí.</span>
+                    <span>Sử dụng GEM Scanner miễn phí trong 14 ngày trước khi tính phí subscription chính thức.</span>
                   </div>
                 </li>
                 <li>
@@ -1764,7 +3007,7 @@ export default function Landing() {
                   </div>
                   <div className="benefit-text">
                     <strong>Tham Gia Nhóm Riêng VIP</strong>
-                    <span>Kết nối trực tiếp với cộng đồng Early Birds và nhận hỗ trợ ưu tiên.</span>
+                    <span>Kết nối trực tiếp với cộng đồng Early Birds và nhận hỗ trợ ưu tiên từ đội ngũ GEMRAL.</span>
                   </div>
                 </li>
                 <li>
@@ -1773,7 +3016,7 @@ export default function Landing() {
                   </div>
                   <div className="benefit-text">
                     <strong>Tặng Crystal Năng Lượng</strong>
-                    <span>Nhận miễn phí 1 viên Crystal trị giá 200K cho 100 người đầu tiên.</span>
+                    <span>Nhận miễn phí 1 viên Crystal năng lượng trị giá 200K cho 100 người đăng ký đầu tiên.</span>
                   </div>
                 </li>
               </ul>
@@ -1797,6 +3040,9 @@ export default function Landing() {
               </div>
 
               <form className="waitlist-form" onSubmit={handleSubmit}>
+                {/* Honeypot anti-spam */}
+                <input type="text" name="website" style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0 }} tabIndex={-1} autoComplete="off" />
+
                 <div className="form-group">
                   <label>Họ và tên <span className="required">*</span></label>
                   <div className="input-wrapper">
@@ -1897,108 +3143,50 @@ export default function Landing() {
         <div className="footer-glow" />
 
         <div className="container">
-          <div className="footer-main">
-            {/* Brand */}
+          <div className="footer-content">
+            {/* Brand Column */}
             <div className="footer-brand">
-              <div className="footer-logo">
-                <div className="logo-icon">
-                  <Sparkles size={28} />
-                </div>
-                <span className="logo-text">GEMRAL</span>
-              </div>
+              <div className="footer-logo">Gemral</div>
               <p className="footer-tagline">
-                Hệ sinh thái kết hợp công nghệ hiện đại và trí tuệ phương Đông,
-                giúp bạn nâng cao tần số cuộc sống.
+                Nền tảng chuyển hóa tư duy và phát triển bản thân hàng đầu Việt Nam.
               </p>
               <div className="social-links">
                 <a href="#" className="social-link" aria-label="Facebook">
                   <Facebook size={20} />
                 </a>
-                <a href="#" className="social-link" aria-label="YouTube">
-                  <Youtube size={20} />
-                </a>
                 <a href="#" className="social-link" aria-label="Instagram">
                   <Instagram size={20} />
                 </a>
-                <a href="#" className="social-link" aria-label="Zalo">
+                <a href="#" className="social-link" aria-label="YouTube">
+                  <Youtube size={20} />
+                </a>
+                <a href="#" className="social-link" aria-label="TikTok">
                   <MessageCircle size={20} />
                 </a>
               </div>
             </div>
 
-            {/* Products */}
-            <div className="footer-column">
-              <h4>Sản Phẩm</h4>
-              <ul className="footer-links">
-                <li><a href="#">GEM Scanner <ChevronRight size={14} /></a></li>
-                <li><a href="#">GEM Master AI <ChevronRight size={14} /></a></li>
-                <li><a href="#">Khóa Học Trading <ChevronRight size={14} /></a></li>
-                <li><a href="#">Khóa Học Tư Duy <ChevronRight size={14} /></a></li>
-                <li><a href="#">Crystal & Đá Năng Lượng <ChevronRight size={14} /></a></li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div className="footer-column">
-              <h4>Về GEMRAL</h4>
-              <ul className="footer-links">
-                <li><a href="#">Giới Thiệu <ChevronRight size={14} /></a></li>
-                <li><a href="#">Đội Ngũ <ChevronRight size={14} /></a></li>
-                <li><a href="#">Blog & Tin Tức <ChevronRight size={14} /></a></li>
-                <li><a href="#">Partnership <ChevronRight size={14} /></a></li>
-                <li><a href="#">Tuyển Dụng <ChevronRight size={14} /></a></li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div className="footer-column">
-              <h4>Hỗ Trợ</h4>
-              <ul className="footer-links">
-                <li><a href="#">Trung Tâm Trợ Giúp <ChevronRight size={14} /></a></li>
-                <li><a href="#">Hướng Dẫn Sử Dụng <ChevronRight size={14} /></a></li>
-                <li><a href="#">FAQ <ChevronRight size={14} /></a></li>
-                <li><a href="#">Liên Hệ <ChevronRight size={14} /></a></li>
-                <li><a href="#">Báo Lỗi <ChevronRight size={14} /></a></li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div className="footer-column">
-              <h4>Liên Hệ</h4>
-              <div className="footer-contact-item">
-                <div className="contact-icon"><Mail size={18} /></div>
-                <div className="contact-text">
-                  <strong>Email</strong>
-                  <a href="mailto:info@gemral.com">info@gemral.com</a>
-                </div>
-              </div>
-              <div className="footer-contact-item">
-                <div className="contact-icon"><Phone size={18} /></div>
-                <div className="contact-text">
-                  <strong>Hotline</strong>
-                  <span>0787 238 002</span>
-                </div>
-              </div>
-              <div className="footer-contact-item">
-                <div className="contact-icon"><MapPin size={18} /></div>
-                <div className="contact-text">
-                  <span>Công ty TNHH Gem Capital Holding</span>
-                  <span>MST: 0319056208</span>
-                </div>
+            {/* Links */}
+            <div className="footer-links-grid">
+              <div className="links-column">
+                <h4>Khóa Học</h4>
+                <ul>
+                  <li><a href="https://yinyangmasters.com/pages/khoahoctaitaotuduytrieuphu"><ChevronRight size={14} /> Tái Tạo Tư Duy Triệu Phú</a></li>
+                  <li><a href="https://yinyangmasters.com/pages/khoahockichhoattansotinhyeu"><ChevronRight size={14} /> Kích Hoạt Tần Số Tình Yêu</a></li>
+                  <li><a href="https://yinyangmasters.com/pages/khoatradingtansodocquyen"><ChevronRight size={14} /> GEM Trading</a></li>
+                  <li><a href="https://yinyangmasters.com/pages/7ngaykhaimotansogoc"><ChevronRight size={14} /> 7 Ngày Khai Mở Tần Số Gốc</a></li>
+                </ul>
               </div>
 
-              <form className="newsletter-form">
-                <div className="newsletter-input-group">
-                  <input
-                    type="email"
-                    className="newsletter-input"
-                    placeholder="Email của bạn"
-                  />
-                  <button type="submit" className="newsletter-btn">
-                    <Send size={18} />
-                  </button>
-                </div>
-              </form>
+              <div className="links-column">
+                <h4>Đối Tác</h4>
+                <ul>
+                  <li><a href="https://yinyangmasters.com/pages/doitacthinhvuong"><ChevronRight size={14} /> Chương trình CTV</a></li>
+                  <li><a href="https://yinyangmasters.com/pages/doitacthinhvuong"><ChevronRight size={14} /> KOL Affiliate</a></li>
+                  <li><a href="https://yinyangmasters.com/pages/doitacthinhvuong"><ChevronRight size={14} /> Giảng viên Partner</a></li>
+                  <li><a href="https://yinyangmasters.com/pages/doitacthinhvuong"><ChevronRight size={14} /> Enterprise B2B</a></li>
+                </ul>
+              </div>
             </div>
           </div>
 
@@ -2006,21 +3194,12 @@ export default function Landing() {
 
           <div className="footer-bottom">
             <div className="copyright">
-              © 2025 <a href="https://gemral.com">GEMRAL</a>. Bảo lưu mọi quyền.
+              © 2025 GEM Academy by Gemral. All rights reserved.
             </div>
             <div className="legal-links">
-              <a href="#">Điều Khoản Sử Dụng</a>
-              <a href="#">Chính Sách Bảo Mật</a>
-              <a href="#">Chính Sách Hoàn Tiền</a>
-            </div>
-            <div className="payment-methods">
-              <span className="payment-label">Thanh toán:</span>
-              <div className="payment-icons">
-                <span className="payment-icon">VISA</span>
-                <span className="payment-icon">MC</span>
-                <span className="payment-icon">MoMo</span>
-                <span className="payment-icon">VNPay</span>
-              </div>
+              <a href="#">Công ty TNHH Gem Capital Holding</a>
+              <a href="#">MST: 0319056208</a>
+              <a href="#">Chính sách cookie</a>
             </div>
           </div>
         </div>
@@ -2036,6 +3215,326 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* ========== PARTNERSHIP FORM MODAL ========== */}
+      {partnershipOpen && (
+        <div className="partnership-overlay" onClick={(e) => { if (e.target === e.currentTarget) closePartnershipForm(); }}>
+          <div className="partnership-popup">
+            <button className="partnership-close" onClick={closePartnershipForm}><X size={18} /></button>
+
+            {partnershipStep === 'form' ? (
+              <>
+                {/* Header */}
+                <div className="partnership-header">
+                  <div className="partnership-icon">{partnershipType === 'ctv' ? '🥉' : '⭐'}</div>
+                  <h2 className="partnership-title">
+                    {partnershipType === 'ctv' ? 'ĐĂNG KÝ CTV' : 'ĐĂNG KÝ KOL'}
+                  </h2>
+                  <p className="partnership-subtitle">
+                    {partnershipType === 'ctv'
+                      ? 'Cộng Tác Viên — Bán hàng & Giới thiệu'
+                      : 'KOL Affiliate — Influencer & Creator'}
+                  </p>
+                </div>
+
+                {/* Benefits */}
+                <div className="partner-benefits-box">
+                  <div className="partner-benefits-title">
+                    {partnershipType === 'ctv' ? '🎁 Quyền lợi CTV Bronze' : '🌟 Quyền lợi KOL Affiliate'}
+                  </div>
+                  <ul className="partner-benefits-list">
+                    {partnershipType === 'ctv' ? (
+                      <>
+                        <li>Hoa hồng Digital: 10%</li>
+                        <li>Hoa hồng Physical: 6%</li>
+                        <li>Sub-affiliate: 2%</li>
+                        <li>Thanh toán: Hàng tháng</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Hoa hồng Digital: 20%</li>
+                        <li>Hoa hồng Physical: 20%</li>
+                        <li>Sub-affiliate: 3.5%</li>
+                        <li>Thanh toán: 2 tuần/lần</li>
+                        <li>Marketing Kit chuyên nghiệp</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+
+                {partnershipType === 'ctv' && (
+                  <div className="partner-auto-approve">
+                    <span className="partner-auto-approve-icon">⏰</span>
+                    <span className="partner-auto-approve-text">Đơn đăng ký sẽ được duyệt trong vòng 3 ngày</span>
+                  </div>
+                )}
+
+                {partnershipType === 'kol' && (
+                  <div className="partner-kol-note">
+                    <Info size={14} /> Yêu cầu: Tổng followers ≥ 20,000 trên các nền tảng social
+                  </div>
+                )}
+
+                {/* Form Fields */}
+                <div className="partner-form-group">
+                  <label className="partner-form-label">Họ và tên <span>*</span></label>
+                  <input type="text" className="partner-form-input" placeholder="Nguyễn Văn A"
+                    value={partnerForm.fullName} onChange={e => handlePartnerInput('fullName', e.target.value)} />
+                </div>
+                <div className="partner-form-group">
+                  <label className="partner-form-label">Email <span>*</span></label>
+                  <input type="email" className="partner-form-input" placeholder="email@example.com"
+                    value={partnerForm.email} onChange={e => handlePartnerInput('email', e.target.value)} />
+                </div>
+                <div className="partner-form-group">
+                  <label className="partner-form-label">Số điện thoại <span>*</span></label>
+                  <input type="tel" className="partner-form-input" placeholder="0901234567"
+                    value={partnerForm.phone} onChange={e => handlePartnerInput('phone', e.target.value)} />
+                </div>
+
+                {/* KOL Social Media */}
+                {partnershipType === 'kol' && (
+                  <div className="partner-social-section">
+                    <div className="partner-social-title"><Mic size={14} /> Kênh Social Media (điền ít nhất 1)</div>
+                    <div className="partner-social-grid">
+                      {[
+                        { label: '🎬 YouTube', urlField: 'youtubeUrl', countField: 'youtubeFollowers', countLabel: 'Subscribers' },
+                        { label: '📘 Facebook', urlField: 'facebookUrl', countField: 'facebookFollowers', countLabel: 'Followers' },
+                        { label: '📸 Instagram', urlField: 'instagramUrl', countField: 'instagramFollowers', countLabel: 'Followers' },
+                        { label: '🎵 TikTok', urlField: 'tiktokUrl', countField: 'tiktokFollowers', countLabel: 'Followers' },
+                        { label: '💬 Telegram', urlField: 'telegramUrl', countField: 'telegramMembers', countLabel: 'Members' },
+                        { label: '🎮 Discord', urlField: 'discordUrl', countField: 'discordMembers', countLabel: 'Members' },
+                      ].map(({ label, urlField, countField, countLabel }) => (
+                        <div className="partner-social-item" key={urlField}>
+                          <label className="partner-social-label">{label}</label>
+                          <input type="text" className="partner-social-input" placeholder="URL kênh"
+                            value={partnerForm[urlField]} onChange={e => handlePartnerInput(urlField, e.target.value)} />
+                          <input type="number" className="partner-social-input" placeholder={countLabel}
+                            value={partnerForm[countField]} onChange={e => handlePartnerInput(countField, e.target.value)} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="partner-form-group">
+                  <label className="partner-form-label">Mã giới thiệu (nếu có)</label>
+                  <input type="text" className="partner-form-input" placeholder="GEM12345" style={{ textTransform: 'uppercase' }}
+                    value={partnerForm.referralCode} onChange={e => handlePartnerInput('referralCode', e.target.value)} />
+                </div>
+
+                {partnershipType === 'ctv' && (
+                  <div className="partner-form-group">
+                    <label className="partner-form-label">Lý do tham gia (tùy chọn)</label>
+                    <textarea className="partner-form-input partner-form-textarea" placeholder="Chia sẻ lý do bạn muốn trở thành CTV..."
+                      value={partnerForm.reason} onChange={e => handlePartnerInput('reason', e.target.value)} />
+                  </div>
+                )}
+
+                {partnershipError && (
+                  <div className="partner-form-error">{partnershipError}</div>
+                )}
+
+                <button
+                  className="partner-submit-btn"
+                  onClick={submitPartnership}
+                  disabled={partnershipLoading}
+                >
+                  {partnershipLoading ? 'Đang gửi...' : `Gửi Đăng Ký ${partnershipType === 'ctv' ? 'CTV' : 'KOL'}`}
+                </button>
+
+                {partnershipType === 'kol' && (
+                  <p className="partner-note">
+                    * Sau khi đăng ký, Admin sẽ xác minh và thông báo kết quả trong 3-5 ngày làm việc.
+                  </p>
+                )}
+              </>
+            ) : (
+              /* Success State */
+              <div className="partner-success">
+                <div className="partner-success-icon">🎉</div>
+                <h3 className="partner-success-title">
+                  {partnershipSuccess?.type === 'ctv' ? 'ĐĂNG KÝ CTV THÀNH CÔNG!' : 'ĐƠN ĐĂNG KÝ KOL ĐÃ GỬI!'}
+                </h3>
+                <p className="partner-success-message">
+                  {partnershipSuccess?.type === 'ctv'
+                    ? <>Đơn đăng ký của bạn sẽ được <strong>duyệt trong vòng 3 ngày</strong>.<br /><br />
+                        Bạn sẽ nhận được thông báo khi được duyệt qua app GEMRAL.<br />
+                        Hãy tải app <strong>Gemral</strong> và đăng ký với email <strong>{partnershipSuccess?.email}</strong> để sẵn sàng nhận hoa hồng!</>
+                    : <>Admin sẽ xác minh và thông báo kết quả trong <strong>3-5 ngày làm việc</strong>.<br /><br />
+                        Để được duyệt nhanh hơn, hãy tải app <strong>Gemral</strong> và hoàn thành xác minh KYC.</>
+                  }
+                </p>
+                {partnershipSuccess?.code && (
+                  <div className="partner-success-code">
+                    <div className="partner-success-code-label">Mã đăng ký của bạn:</div>
+                    <div className="partner-success-code-value">{partnershipSuccess.code}</div>
+                  </div>
+                )}
+                <button className="partner-submit-btn" onClick={closePartnershipForm}>Đóng</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ========== SUCCESS MODAL ========== */}
+      {successModal && (
+        <div className="waitlist-modal" onClick={(e) => { if (e.target === e.currentTarget) setSuccessModal(null); }}>
+          <div className="waitlist-modal-content success">
+            <button className="modal-close-btn" onClick={() => setSuccessModal(null)}><X size={20} /></button>
+            <div className="modal-icon-success"><CheckCircle size={48} /></div>
+            <h3>Đăng Ký Thành Công!</h3>
+            {successModal.queue_number && (
+              <p className="modal-queue">Số thứ tự của bạn: <strong>#{successModal.queue_number}</strong></p>
+            )}
+            {successModal.referral_code && (
+              <div className="modal-referral">
+                <p>Mã giới thiệu của bạn:</p>
+                <div className="referral-code-box">
+                  <span className="referral-code-text">{successModal.referral_code}</span>
+                  <button className="referral-copy-btn" onClick={copyReferralCode}>Copy</button>
+                </div>
+                <p className="referral-hint">Chia sẻ mã này để nhận thêm ưu đãi!</p>
+              </div>
+            )}
+            <div className="modal-share-buttons">
+              <button className="share-btn share-btn-copy" onClick={copyShareLink}>
+                <ExternalLink size={16} /> Copy Link
+              </button>
+              <button className="share-btn share-btn-zalo" onClick={shareToZalo}>
+                <MessageCircle size={16} /> Zalo
+              </button>
+              <button className="share-btn share-btn-facebook" onClick={shareToFacebook}>
+                <Facebook size={16} /> Facebook
+              </button>
+              <button className="share-btn share-btn-native" onClick={nativeShare}>
+                <Send size={16} /> Chia Sẻ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== ERROR MODAL ========== */}
+      {errorModal && (
+        <div className="waitlist-modal" onClick={(e) => { if (e.target === e.currentTarget) setErrorModal(null); }}>
+          <div className="waitlist-modal-content error">
+            <button className="modal-close-btn" onClick={() => setErrorModal(null)}><X size={20} /></button>
+            <div className="modal-icon-error"><AlertTriangle size={48} /></div>
+            <h3>Có Lỗi Xảy Ra</h3>
+            <p className="modal-error-message">{errorModal}</p>
+            <button className="modal-retry-btn" onClick={() => setErrorModal(null)}>Thử Lại</button>
+          </div>
+        </div>
+      )}
+
+      {/* ========== MOBILE FOMO BANNER (bottom) ========== */}
+      <div className={`fomo-banner-mobile ${showBackToTop ? 'show' : ''}`}>
+        <div className="fomo-banner-content">
+          <div className="fomo-banner-info">
+            <Flame size={14} />
+            <span>Còn <strong>{spotsRemaining}</strong> chỗ VIP</span>
+          </div>
+          <button className="btn-fomo-mobile" onClick={scrollToWaitlist}>ĐĂNG KÝ</button>
+        </div>
+      </div>
+
+      {/* ========== CART ICON (Fixed) ========== */}
+      <div className="gemral-cart-icon-wrapper">
+        <button className="gemral-cart-icon-btn" onClick={() => setCartOpen(true)} aria-label="Mở giỏ hàng">
+          <ShoppingCart size={24} />
+          {getCartCount() > 0 && (
+            <span className="gemral-cart-count" key={getCartCount()}>{getCartCount()}</span>
+          )}
+        </button>
+      </div>
+
+      {/* ========== CART OVERLAY ========== */}
+      <div
+        className={`gemral-cart-overlay ${cartOpen ? 'active' : ''}`}
+        onClick={() => setCartOpen(false)}
+      />
+
+      {/* ========== CART DRAWER ========== */}
+      <aside className={`gemral-cart-drawer ${cartOpen ? 'open' : ''}`} aria-label="Giỏ hàng">
+        <div className="gemral-cart-header">
+          <h3><ShoppingCart size={22} /> Giỏ Hàng</h3>
+          <button className="gemral-cart-close-btn" onClick={() => setCartOpen(false)} aria-label="Đóng giỏ hàng">
+            <X size={20} />
+          </button>
+        </div>
+
+        {cart.length === 0 ? (
+          <div className="gemral-cart-empty">
+            <ShoppingBag size={80} strokeWidth={1} className="gemral-cart-empty-icon" />
+            <h4 className="gemral-cart-empty-title">Giỏ hàng trống</h4>
+            <p className="gemral-cart-empty-text">Hãy khám phá các sản phẩm của chúng tôi!</p>
+          </div>
+        ) : (
+          <div className="gemral-cart-content">
+            <div className="gemral-cart-items">
+              {cart.map(item => {
+                const product = PRODUCT_CATALOG[item.id];
+                if (!product) return null;
+                return (
+                  <div className="gemral-cart-item" key={item.id}>
+                    <div className="gemral-cart-item-details">
+                      <a
+                        href={product.shopifyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="gemral-cart-item-name"
+                      >
+                        {product.name} <ExternalLink size={12} className="external-link-icon" />
+                      </a>
+                      <span className="gemral-cart-item-price">{product.priceDisplay}</span>
+                    </div>
+                    <div className="gemral-cart-item-actions">
+                      <div className="gemral-quantity-control">
+                        <button className="gemral-qty-btn" onClick={() => updateQuantity(item.id, item.qty - 1)}>
+                          <Minus size={14} />
+                        </button>
+                        <span className="gemral-qty-value">{item.qty}</span>
+                        <button className="gemral-qty-btn" onClick={() => updateQuantity(item.id, item.qty + 1)}>
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                      <button className="gemral-remove-btn" onClick={() => removeFromCart(item.id)} aria-label="Xóa">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="gemral-cart-footer">
+          <div className="gemral-cart-total-row">
+            <span className="gemral-cart-total-label">Tổng cộng:</span>
+            <span className="gemral-cart-total">{formatPrice(getCartTotal())}</span>
+          </div>
+          <button
+            className="gemral-btn-checkout"
+            onClick={checkout}
+            disabled={cart.length === 0}
+          >
+            <CreditCard size={20} /> Thanh Toán
+          </button>
+        </div>
+      </aside>
+
+      {/* ========== CART TOAST ========== */}
+      {cartToast && (
+        <div className={`gemral-toast show gemral-toast--${cartToast.type || 'success'}`}>
+          <div className="gemral-toast-icon">
+            <CheckCircle size={20} />
+          </div>
+          <span className="gemral-toast-message">{cartToast.message}</span>
+        </div>
+      )}
 
       {/* ========== BACK TO TOP ========== */}
       <button

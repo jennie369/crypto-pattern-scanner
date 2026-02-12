@@ -112,6 +112,28 @@ export const signOut = async () => {
   }
 };
 
+/**
+ * Local-only sign out: clears session from device WITHOUT revoking on server.
+ * This keeps the refresh token valid so biometric re-login still works.
+ * Use this for intentional logout (user taps "Sign Out").
+ *
+ * supabase.auth.signOut({ scope: 'local' }) still makes an API call that
+ * revokes the session on the server. This function avoids that.
+ */
+export const localOnlySignOut = async () => {
+  try {
+    // Clear the Supabase auth session from local storage only
+    await customStorage.removeItem(AUTH_STORAGE_KEY);
+    // Also clear the code verifier if any (PKCE flow)
+    await customStorage.removeItem(`${AUTH_STORAGE_KEY}-code-verifier`);
+    console.log('[Supabase] Local-only sign out completed (server session preserved)');
+    return { error: null };
+  } catch (error) {
+    console.error('LocalOnlySignOut error:', error);
+    return { error };
+  }
+};
+
 export const getCurrentUser = async () => {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -192,11 +214,13 @@ export const updateUserProfile = async (userId, updates) => {
 };
 
 // Biometric auth helper - login with refresh token
+// Uses refreshSession() instead of setSession() because:
+// 1. setSession requires a valid access_token (empty string fails in Supabase v2+)
+// 2. refreshSession properly exchanges the refresh_token for new tokens
 export const setSessionFromToken = async (refreshToken) => {
   try {
-    const { data, error } = await supabase.auth.setSession({
+    const { data, error } = await supabase.auth.refreshSession({
       refresh_token: refreshToken,
-      access_token: '', // Supabase will generate new access token
     });
 
     // Check for invalid refresh token

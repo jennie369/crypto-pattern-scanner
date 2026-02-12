@@ -17,7 +17,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   X,
   ChevronLeft,
@@ -49,6 +49,7 @@ const InAppBrowser = ({
   onClose,
 }) => {
   // ========== STATE ==========
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
@@ -201,7 +202,7 @@ const InAppBrowser = ({
       onRequestClose={handleClose}
       statusBarTranslucent
     >
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         <StatusBar barStyle="light-content" />
 
         {/* Header */}
@@ -319,7 +320,7 @@ const InAppBrowser = ({
             </TouchableOpacity>
           </View>
         </SafeAreaView>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 };

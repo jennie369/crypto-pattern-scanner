@@ -94,10 +94,45 @@ const clearStaleCaches = () => {
 };
 
 /**
+ * Refresh Supabase auth session to prevent stale token errors
+ * CRITICAL: Without this, API calls silently fail after long background
+ */
+const refreshSupabaseSession = async () => {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      console.warn('[AppResume] Session check error:', error.message);
+      // Try to refresh the session
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        console.warn('[AppResume] Session refresh failed:', refreshError.message);
+      } else {
+        console.log('[AppResume] Session refreshed successfully');
+      }
+    } else if (data?.session) {
+      // Check if token is about to expire (within 5 minutes)
+      const expiresAt = data.session.expires_at;
+      const now = Math.floor(Date.now() / 1000);
+      if (expiresAt && (expiresAt - now) < 300) {
+        console.log('[AppResume] Token expiring soon, refreshing...');
+        await supabase.auth.refreshSession();
+      } else {
+        console.log('[AppResume] Session valid');
+      }
+    }
+  } catch (err) {
+    console.warn('[AppResume] Session refresh error:', err);
+  }
+};
+
+/**
  * Reconnect WebSocket and Supabase Realtime if needed
  */
-const reconnectWebSocket = () => {
+const reconnectWebSocket = async () => {
   console.log('[AppResume] Checking connections...');
+
+  // CRITICAL: Refresh Supabase session FIRST before any reconnection
+  await refreshSupabaseSession();
 
   // Reconnect Binance WebSocket pool
   try {

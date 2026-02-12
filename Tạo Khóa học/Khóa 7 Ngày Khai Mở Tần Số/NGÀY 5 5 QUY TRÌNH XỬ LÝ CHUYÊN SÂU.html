@@ -1,1401 +1,1837 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGÀY 5: 5 QUY TRÌNH XỬ LÝ CHUYÊN SÂU | 7 Ngày Khai Mở Tần Số Gốc</title>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Noto+Sans+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* ===== GEM COURSE TEMPLATE V5.4 - FACEBOOK STYLE ===== */
-        :root {
-            /* === CTA BUTTONS === */
-            --cta-next-day: 'https://yinyangmasters.com/a/members/9d135b73-32b5-4397-9c58-900e26d5d42e/1b5d2261-631b-4eb5-b518-6c28c89044bc';
-            --cta-prev-day: 'https://yinyangmasters.com/a/members/9d135b73-32b5-4397-9c58-900e26d5d42e/99207a4d-9251-4820-aa90-e464d534ab27';
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NGÀY 5: 5 QUY TRÌNH XỬ LÝ CHUYÊN SÂU | 7 Ngày Khai Mở Tần Số Gốc</title>
 
-            /* === V5.4 DARK THEME COLORS === */
-            --color-navy: #112250;
-            --color-navy-dark: #0A0F1A;
-            --color-burgundy: #9C0612;
-            --color-burgundy-dark: #640A0C;
-            --color-gold: #FFBD59;
-            --color-gold-light: #DEBC81;
-            --color-cyan: #00F0FF;
-            --color-purple: #6A5BFF;
-            --color-green: #10B981;
-            --color-red: #EF4444;
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Noto+Sans+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-            /* === BACKGROUNDS === */
-            --bg-primary: #0A0F1A;
-            --bg-card: rgba(17, 34, 80, 0.6);
-            --bg-glass: rgba(255, 255, 255, 0.05);
+  <style>
+/* ==========================================
+   GEM DESIGN SYSTEM - V5.4 DESIGN TOKENS
+   Facebook-Style Full-Width Layout
+   ========================================== */
+:root {
+  /* ========== CTA BUTTONS ========== */
+  --cta-next-day: 'https://yinyangmasters.com/a/members/9d135b73-32b5-4397-9c58-900e26d5d42e/1b5d2261-631b-4eb5-b518-6c28c89044bc';
+  --cta-prev-day: 'https://yinyangmasters.com/a/members/9d135b73-32b5-4397-9c58-900e26d5d42e/99207a4d-9251-4820-aa90-e464d534ab27';
 
-            /* === TEXT === */
-            --text-primary: #FFFFFF;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.5);
+  /* ========== COLORS ========== */
+  --color-navy: #112250;
+  --color-navy-dark: #0A0F1A;
+  --color-navy-light: #1a3a6e;
+  --color-gold: #FFBD59;
+  --color-gold-dark: #E5A84D;
+  --color-burgundy: #9C0612;
+  --color-cyan: #00F0FF;
+  --color-purple: #6A5BFF;
+  --color-green: #10B981;
+  --color-red: #EF4444;
+  --color-orange: #FF9800;
+  --color-white: #FFFFFF;
+  --color-text: #E8E8E8;
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-muted: rgba(255, 255, 255, 0.5);
 
-            /* === BORDERS === */
-            --border-gold: rgba(255, 189, 89, 0.3);
-            --border-glass: rgba(255, 255, 255, 0.1);
+  /* ========== BACKGROUNDS ========== */
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-hover: rgba(255, 255, 255, 0.06);
+  --bg-glass: rgba(255, 255, 255, 0.08);
+  --color-bg-dark: #0A0F1A;
 
-            /* === SPACING (V5.4 Facebook Style) === */
-            --container-padding: 0;
-            --text-padding: 16px;
-            --card-padding: 1.5rem;
-            --space-xs: 0.25rem;
-            --space-sm: 0.5rem;
-            --space-md: 1rem;
-            --space-lg: 1.5rem;
-            --space-xl: 2rem;
+  /* ========== BORDERS ========== */
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-gold: rgba(255, 189, 89, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
-            /* === RADIUS === */
-            --radius-none: 0;
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+  /* ==========================================
+     V5.4 CRITICAL: TEXT-ONLY PADDING
+     ========================================== */
+  --text-padding: 16px;
 
-            /* === FONT === */
-            --font-heading: 'Montserrat', sans-serif;
-            --font-body: 'Noto Sans Display', sans-serif;
+  /* ========== SPACING ========== */
+  --space-xs: 0.125rem;
+  --space-sm: 0.25rem;
+  --space-md: 0.5rem;
+  --space-lg: 0.75rem;
+  --space-xl: 1rem;
+  --space-2xl: 1.25rem;
+  --space-3xl: 1.5rem;
 
-            /* === HÌNH ẢNH === */
-            --hero-image: url('https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=1200&q=80');
+  /* ==========================================
+     V5.4 CRITICAL: CONTAINER PADDING = 0
+     ========================================== */
+  --container-padding: 0;
+  --card-padding: 0.75rem;
+  --table-padding: 0.375rem;
 
-            /* Legacy compatibility */
-            --primary-burgundy: #9C0612;
-            --primary-dark: #640A0C;
-            --secondary-red: #761E0B;
-            --gold-accent: #FFBD59;
-            --gold-light: #DEBC81;
-            --bg-navy: #112250;
-            --text-light: #FFFFFF;
-        }
+  /* ========== BORDER RADIUS ========== */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  /* ========== SHADOWS ========== */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+  --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
 
-        body {
-            font-family: var(--font-body);
-            line-height: 1.7;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            overflow-x: hidden;
-        }
+  /* ========== GLASSMORPHISM ========== */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(40px);
 
-        /* Bokeh background effect */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                radial-gradient(circle at 20% 80%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(106, 91, 255, 0.05) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: 0;
-        }
+  /* ========== TYPOGRAPHY ========== */
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Noto Sans Display', sans-serif;
+  --text-xs: 0.7rem;
+  --text-sm: 0.8rem;
+  --text-base: 0.9rem;
+  --text-lg: 1rem;
+  --text-xl: 1.1rem;
+  --text-2xl: 1.3rem;
+}
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-heading);
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 1rem;
-        }
+/* ==========================================
+   DESKTOP BREAKPOINT (600px+)
+   ========================================== */
+@media (min-width: 600px) {
+  :root {
+    --text-padding: 24px;
+    --container-padding: 1.5rem;
+    --card-padding: 1rem;
+    --table-padding: 0.75rem;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
 
-        p { margin-bottom: 1.2rem; }
+    --space-sm: 0.5rem;
+    --space-md: 0.75rem;
+    --space-lg: 1rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+    --space-3xl: 3rem;
 
-        /* V5.4 Container - Mobile: 0 padding, Desktop: 1.5rem */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: var(--container-padding);
-            position: relative;
-            z-index: 1;
-        }
+    --text-xs: 0.75rem;
+    --text-sm: 0.85rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+  }
+}
 
-        .content-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+/* ========== RESET & BASE ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-        /* V5.4 Text padding on mobile */
-        .container > p,
-        .container > h2,
-        .container > h3,
-        .content-container > p,
-        .content-container > h2,
-        .content-container > h3 {
-            padding-left: var(--text-padding);
-            padding-right: var(--text-padding);
-        }
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-dark) 0%,
+    var(--color-navy) 30%,
+    var(--color-navy) 70%,
+    var(--color-bg-dark) 100%
+  );
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  font-size: var(--text-base);
+}
 
-        @media (min-width: 600px) {
-            .container {
-                padding: var(--space-lg);
-            }
-            .container > p,
-            .container > h2,
-            .container > h3,
-            .content-container > p,
-            .content-container > h2,
-            .content-container > h3 {
-                padding-left: 0;
-                padding-right: 0;
-            }
-        }
-        
-        /* ===== NAVIGATION ===== */
-        .course-nav {
-            background: linear-gradient(135deg, var(--bg-navy) 0%, var(--primary-dark) 100%);
-            padding: 1.5rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        
-        .nav-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .course-title {
-            color: var(--gold-accent);
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-        
-        .day-indicator {
-            color: var(--text-light);
-            font-size: 1rem;
-            padding: 0.5rem 1.5rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50px;
-            border: 2px solid var(--gold-accent);
-        }
-        
-        .day-progress {
-            color: var(--gold-light);
-            font-size: 0.9rem;
-        }
-        
-        /* ===== HERO SECTION ===== */
-        .hero-section {
-            background: linear-gradient(135deg, 
-                rgba(17, 34, 80, 0.95) 0%, 
-                rgba(100, 10, 12, 0.9) 100%),
-                var(--hero-image);
-            background-size: cover;
-            background-position: center;
-            padding: 6rem 2rem 4rem;
-            text-align: center;
-            color: var(--text-light);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,189,89,0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-        
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .day-number {
-            font-size: 1.2rem;
-            color: var(--gold-accent);
-            font-weight: 600;
-            margin-bottom: 1rem;
-            letter-spacing: 2px;
-        }
-        
-        .hero-content h1 {
-            font-size: 3rem;
-            color: var(--text-light);
-            margin-bottom: 1.5rem;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.3rem;
-            color: var(--gold-light);
-            margin-bottom: 2rem;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .hero-highlight {
-            display: inline-block;
-            background: rgba(255,189,89,0.2);
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            border: 2px solid var(--gold-accent);
-            font-size: 1.1rem;
-            margin-top: 1rem;
-        }
-        
-        /* ===== INTRO SECTION ===== */
-        .intro-section {
-            padding: 4rem 2rem;
-            background: linear-gradient(135deg, 
-                #ffffff 0%, 
-                #fff8f0 100%);
-        }
-        
-        .intro-box {
-            background: linear-gradient(135deg, 
-                rgba(255,255,255,0.9) 0%, 
-                rgba(255,248,240,0.9) 100%);
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(156,6,18,0.1);
-            border-left: 5px solid var(--gold-accent);
-        }
-        
-        .intro-box h2 {
-            color: var(--primary-burgundy);
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .intro-box p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-        }
-        
-        .intro-box strong {
-            color: var(--primary-burgundy);
-        }
-        
-        /* ===== CONTENT SECTION ===== */
-        .content-section {
-            padding: 4rem 2rem;
-            background: var(--bg-light);
-        }
-        
-        .content-card {
-            background: #ffffff;
-            padding: 3rem;
-            border-radius: 15px;
-            margin-bottom: 3rem;
-            box-shadow: 0 5px 30px rgba(0,0,0,0.08);
-            border-top: 4px solid var(--gold-accent);
-        }
-        
-        .content-card h3 {
-            color: var(--primary-burgundy);
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .content-card h4 {
-            color: var(--primary-dark);
-            font-size: 1.3rem;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-        
-        .highlight-box {
-            background: linear-gradient(135deg, 
-                rgba(255,189,89,0.15) 0%, 
-                rgba(222,188,129,0.15) 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid var(--gold-accent);
-            margin: 1.5rem 0;
-        }
-        
-        .highlight-box h4 {
-            color: var(--primary-burgundy);
-            margin-top: 0;
-        }
-        
-        /* ===== PROTOCOL CARDS ===== */
-        .protocol-card {
-            background: linear-gradient(135deg, 
-                #ffffff 0%, 
-                #fff8f0 100%);
-            padding: 2.5rem;
-            border-radius: 15px;
-            margin-bottom: 2.5rem;
-            box-shadow: 0 8px 30px rgba(156,6,18,0.1);
-            border: 2px solid var(--gold-light);
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .protocol-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(156,6,18,0.15);
-        }
-        
-        .protocol-number {
-            position: absolute;
-            top: -20px;
-            left: 30px;
-            background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-light) 100%);
-            color: var(--primary-dark);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 15px rgba(255,189,89,0.4);
-        }
-        
-        .protocol-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-        
-        .protocol-card h3 {
-            color: var(--primary-burgundy);
-            font-size: 1.6rem;
-            margin-bottom: 1.5rem;
-            margin-top: 1rem;
-        }
-        
-        .protocol-card ul, .protocol-card ol {
-            margin-left: 1.5rem;
-            margin-top: 1rem;
-        }
-        
-        .protocol-card li {
-            margin-bottom: 0.8rem;
-            line-height: 1.7;
-        }
-        
-        .protocol-step {
-            background: rgba(255,189,89,0.1);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid var(--gold-accent);
-        }
-        
-        .protocol-step h4 {
-            color: var(--primary-burgundy);
-            font-size: 1.2rem;
-            margin-bottom: 0.8rem;
-        }
-        
-        .protocol-example {
-            background: rgba(156,6,18,0.05);
-            padding: 1.2rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 4px solid var(--primary-burgundy);
-            font-style: italic;
-        }
-        
-        /* ===== QUIZ SECTION ===== */
-        .quiz-section {
-            padding: 4rem 2rem;
-            background: linear-gradient(135deg, 
-                #f8f9fa 0%, 
-                #e9ecef 100%);
-        }
-        
-        .quiz-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .quiz-intro {
-            background: linear-gradient(135deg, 
-                rgba(255,255,255,0.95) 0%, 
-                rgba(255,248,240,0.95) 100%);
-            padding: 2.5rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            text-align: center;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-            border-top: 4px solid var(--gold-accent);
-        }
-        
-        .quiz-intro h2 {
-            color: var(--primary-burgundy);
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        
-        .quiz-question {
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--gold-accent);
-            transition: all 0.3s ease;
-        }
-        
-        .quiz-question.answered {
-            border-left-color: var(--primary-burgundy);
-        }
-        
-        .question-number {
-            color: var(--gold-accent);
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 0.8rem;
-        }
-        
-        .question-text {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 1.5rem;
-        }
-        
-        .quiz-options {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .quiz-options li {
-            background: #f8f9fa;
-            padding: 1rem 1.5rem;
-            margin-bottom: 0.8rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            font-weight: 500;
-        }
-        
-        .quiz-options li:hover {
-            background: rgba(255,189,89,0.1);
-            border-color: var(--gold-accent);
-            transform: translateX(5px);
-        }
-        
-        .quiz-options li.selected {
-            background: rgba(255,189,89,0.2);
-            border-color: var(--gold-accent);
-            font-weight: 700;
-        }
-        
-        .quiz-options li.correct {
-            background: rgba(76, 175, 80, 0.2);
-            border-color: #4CAF50;
-            color: #2E7D32;
-        }
-        
-        .quiz-options li.incorrect {
-            background: rgba(244, 67, 54, 0.2);
-            border-color: #F44336;
-            color: #C62828;
-        }
-        
-        .quiz-options li.disabled {
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        
-        .quiz-answer {
-            display: none;
-            background: rgba(76, 175, 80, 0.1);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-top: 1.5rem;
-            border-left: 4px solid #4CAF50;
-        }
-        
-        .quiz-answer.show {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* ===== QUIZ RESULT ===== */
-        .quiz-result {
-            display: none;
-            background: linear-gradient(135deg, 
-                #ffffff 0%, 
-                #fff8f0 100%);
-            padding: 3rem;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border: 3px solid var(--gold-accent);
-            animation: scaleIn 0.5s ease;
-        }
-        
-        .quiz-result.show {
-            display: block;
-        }
-        
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        #result-title {
-            color: var(--primary-burgundy);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .score {
-            font-size: 4rem;
-            font-weight: 900;
-            color: var(--gold-accent);
-            margin: 1rem 0;
-            text-shadow: 0 4px 10px rgba(255,189,89,0.3);
-        }
-        
-        .message {
-            font-size: 1.3rem;
-            color: var(--text-dark);
-            margin-bottom: 2rem;
-        }
-        
-        .pass-message {
-            background: rgba(76, 175, 80, 0.15);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 2px solid #4CAF50;
-            margin-top: 2rem;
-        }
-        
-        .pass-message strong {
-            color: #2E7D32;
-            font-size: 1.3rem;
-        }
-        
-        .fail-message {
-            background: rgba(255,152,0,0.15);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 2px solid #FF9800;
-            margin-top: 2rem;
-        }
-        
-        .fail-message strong {
-            color: #E65100;
-            font-size: 1.3rem;
-        }
-        
-        .retry-button {
-            background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-light) 100%);
-            color: var(--primary-dark);
-            padding: 1rem 2.5rem;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 1.5rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255,189,89,0.4);
-        }
-        
-        .retry-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255,189,89,0.5);
-        }
-        
-        /* ===== NEXT SECTION ===== */
-        .next-section {
-            padding: 4rem 2rem;
-            background: linear-gradient(135deg, 
-                var(--bg-navy) 0%, 
-                var(--primary-dark) 100%);
-            color: var(--text-light);
-        }
-        
-        .next-content {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        
-        .next-content h2 {
-            font-size: 2.5rem;
-            color: var(--gold-accent);
-            margin-bottom: 2rem;
-        }
-        
-        .next-preview {
-            background: rgba(255,255,255,0.05);
-            padding: 2.5rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            border: 2px solid rgba(255,189,89,0.3);
-        }
-        
-        .next-preview h3 {
-            color: var(--gold-light);
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .next-preview h4 {
-            color: var(--gold-accent);
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .next-preview p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: var(--text-light);
-        }
-        
-        /* ===== BUTTONS ===== */
-        .cta-button {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-light) 100%);
-            color: var(--primary-dark);
-            padding: 1.2rem 3rem;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-decoration: none;
-            margin: 0.5rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(255,189,89,0.4);
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(255,189,89,0.6);
-        }
-        
-        .cta-button.secondary {
-            background: rgba(255,255,255,0.1);
-            color: var(--text-light);
-            border: 2px solid var(--gold-accent);
-        }
-        
-        .cta-button.secondary:hover {
-            background: rgba(255,255,255,0.15);
-        }
-        
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .hero-content h1 {
-                font-size: 2rem;
-            }
-            
-            .hero-subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .content-card, .protocol-card {
-                padding: 1.5rem;
-            }
-            
-            .nav-content {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-    </style>
+/* Bokeh Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse 600px 600px at 20% 20%, rgba(255, 189, 89, 0.08), transparent 70%),
+    radial-gradient(ellipse 500px 500px at 80% 80%, rgba(0, 240, 255, 0.06), transparent 70%),
+    radial-gradient(ellipse 400px 400px at 50% 50%, rgba(106, 91, 255, 0.04), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+p { margin-bottom: var(--space-md); }
+p:last-child { margin-bottom: 0; }
+
+/* V5.4: Container - no padding on mobile */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+@media (min-width: 600px) {
+  .container {
+    padding: var(--container-padding);
+  }
+}
+
+/* ==========================================
+   LESSON HEADER - Full-Width Mobile
+   ========================================== */
+.lesson-header {
+  text-align: center;
+  margin-bottom: 1px;
+  padding: var(--card-padding);
+  padding-left: var(--text-padding);
+  padding-right: var(--text-padding);
+  background: var(--bg-card);
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: var(--glass-blur);
+  position: relative;
+  overflow: hidden;
+}
+
+.lesson-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+}
+
+@media (min-width: 600px) {
+  .lesson-header {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-xl);
+    padding: var(--card-padding);
+  }
+}
+
+.lesson-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  color: var(--color-navy);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 20px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
+
+.lesson-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+}
+
+.lesson-subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* ==========================================
+   SECTION - Full-Width Mobile
+   ========================================== */
+.section {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin-bottom: 1px;
+  backdrop-filter: var(--glass-blur);
+}
+
+@media (min-width: 600px) {
+  .section {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-xl);
+  }
+}
+
+.section > p,
+.section > h2,
+.section > h3,
+.section > ul,
+.section > ol {
+  padding-left: var(--text-padding);
+  padding-right: var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .section > p,
+  .section > h2,
+  .section > h3,
+  .section > ul,
+  .section > ol {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.section-title .icon {
+  font-size: 1.2em;
+}
+
+/* ==========================================
+   HIGHLIGHT BOX - Border-Left Mobile
+   ========================================== */
+.highlight-box {
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  border-radius: 0;
+  margin: var(--space-md) 0;
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+@media (min-width: 600px) {
+  .highlight-box {
+    border: 1px solid rgba(255, 189, 89, 0.3);
+    border-left: 4px solid var(--color-gold);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+}
+
+.highlight-box.cyan {
+  border-left-color: var(--color-cyan);
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+}
+
+.highlight-box.purple {
+  border-left-color: var(--color-purple);
+  background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+.highlight-box.green {
+  border-left-color: var(--color-green);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+.highlight-box.red {
+  border-left-color: var(--color-red);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(255, 189, 89, 0.05));
+}
+
+.highlight-box.orange {
+  border-left-color: var(--color-orange);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 189, 89, 0.05));
+}
+
+.highlight-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.highlight-box p {
+  margin-bottom: var(--space-sm);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+.highlight-box p:last-child {
+  margin-bottom: 0;
+}
+
+.highlight-box strong {
+  color: var(--color-gold);
+}
+
+/* ==========================================
+   PROTOCOL CARD - Full-Width Mobile
+   ========================================== */
+.protocol-card {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin-bottom: 1px;
+  backdrop-filter: var(--glass-blur);
+  position: relative;
+}
+
+@media (min-width: 600px) {
+  .protocol-card {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-xl);
+  }
+
+  .protocol-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--color-gold);
+  }
+}
+
+.protocol-card > p,
+.protocol-card > h3,
+.protocol-card > h4,
+.protocol-card > ul,
+.protocol-card > ol {
+  padding-left: var(--text-padding);
+  padding-right: var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .protocol-card > p,
+  .protocol-card > h3,
+  .protocol-card > h4,
+  .protocol-card > ul,
+  .protocol-card > ol {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.protocol-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--text-padding);
+  margin-bottom: var(--space-md);
+}
+
+@media (min-width: 600px) {
+  .protocol-header {
+    padding: 0;
+  }
+}
+
+.protocol-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  color: var(--color-navy);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-weight: 900;
+  font-size: var(--text-lg);
+  flex-shrink: 0;
+}
+
+.protocol-icon {
+  font-size: 1.5rem;
+}
+
+.protocol-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  flex: 1;
+}
+
+/* ==========================================
+   PROTOCOL STEP - Border-Left Mobile
+   ========================================== */
+.protocol-step {
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  border-radius: 0;
+  margin: var(--space-md) 0;
+  border: none;
+  border-left: 4px solid var(--color-cyan);
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(106, 91, 255, 0.03));
+}
+
+@media (min-width: 600px) {
+  .protocol-step {
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-left: 4px solid var(--color-cyan);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+}
+
+.protocol-step .step-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-cyan);
+  margin-bottom: var(--space-sm);
+}
+
+.protocol-step p {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.protocol-step p:last-child {
+  margin-bottom: 0;
+}
+
+.protocol-step ul,
+.protocol-step ol {
+  margin-left: var(--space-xl);
+  margin-bottom: var(--space-sm);
+}
+
+.protocol-step li {
+  margin-bottom: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* ==========================================
+   PROTOCOL EXAMPLE - Border-Left Mobile
+   ========================================== */
+.protocol-example {
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  border-radius: 0;
+  margin: var(--space-md) 0;
+  border: none;
+  border-left: 4px solid var(--color-purple);
+  background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+@media (min-width: 600px) {
+  .protocol-example {
+    border: 1px solid rgba(106, 91, 255, 0.3);
+    border-left: 4px solid var(--color-purple);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+}
+
+.protocol-example .example-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-purple);
+  margin-bottom: var(--space-sm);
+}
+
+.protocol-example p {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.protocol-example p:last-child {
+  margin-bottom: 0;
+}
+
+.protocol-example strong {
+  color: var(--color-gold);
+}
+
+.protocol-example ul {
+  margin-left: var(--space-xl);
+  margin-bottom: var(--space-sm);
+}
+
+.protocol-example li {
+  margin-bottom: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* ==========================================
+   IMAGE CONTAINER - Full-Width Mobile
+   ========================================== */
+.image-container {
+  margin: var(--space-md) 0;
+  text-align: center;
+}
+
+.image-container img {
+  width: 100%;
+  border-radius: 0;
+  box-shadow: var(--shadow-md);
+  display: block;
+}
+
+@media (min-width: 600px) {
+  .image-container img {
+    border-radius: var(--radius-md);
+    border: 2px solid var(--glass-border);
+  }
+}
+
+.image-caption {
+  margin-top: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-style: italic;
+  padding: 0 var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .image-caption {
+    font-size: var(--text-sm);
+    padding: 0;
+  }
+}
+
+/* ==========================================
+   QUIZ SECTION - V5.4 Facebook-Style
+   ========================================== */
+.quiz-section {
+  background: linear-gradient(135deg, rgba(156, 6, 18, 0.1), rgba(17, 34, 80, 0.3));
+  border: none;
+  border-left: 4px solid var(--color-burgundy);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .quiz-section {
+    border: 2px solid var(--color-burgundy);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.quiz-header {
+  text-align: center;
+  padding: 0 var(--text-padding);
+  margin-bottom: var(--space-lg);
+}
+
+@media (min-width: 600px) {
+  .quiz-header {
+    padding: 0;
+  }
+}
+
+.quiz-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.quiz-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.quiz-score {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+@media (min-width: 600px) {
+  .quiz-score {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+  }
+}
+
+.quiz-score .score-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.quiz-score .score-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-gold);
+}
+
+/* Quiz Question */
+.quiz-question {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--card-padding) var(--text-padding);
+  margin-bottom: 1px;
+}
+
+@media (min-width: 600px) {
+  .quiz-question {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-md);
+  }
+}
+
+.question-number {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.question-text {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+/* Quiz Options */
+.quiz-options {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0 calc(var(--text-padding) * -1);
+  background: var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .quiz-options {
+    gap: var(--space-sm);
+    margin: 0;
+    background: transparent;
+  }
+}
+
+.quiz-option {
+  background: var(--bg-card);
+  border: none;
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+@media (min-width: 600px) {
+  .quiz-option {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+
+  .quiz-option:hover:not(.answered) {
+    background: var(--bg-card-hover);
+    border-color: var(--color-gold);
+    transform: translateX(5px);
+  }
+}
+
+.quiz-option.answered {
+  cursor: not-allowed;
+}
+
+.quiz-option.correct {
+  background: rgba(16, 185, 129, 0.2);
+  border-left: 4px solid var(--color-green);
+}
+
+@media (min-width: 600px) {
+  .quiz-option.correct {
+    border: 2px solid var(--color-green);
+    border-left: 4px solid var(--color-green);
+  }
+}
+
+.quiz-option.correct::after {
+  content: '\2713';
+  position: absolute;
+  right: var(--text-padding);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--text-lg);
+  color: var(--color-green);
+  font-weight: bold;
+}
+
+.quiz-option.wrong {
+  background: rgba(239, 68, 68, 0.2);
+  border-left: 4px solid var(--color-red);
+}
+
+@media (min-width: 600px) {
+  .quiz-option.wrong {
+    border: 2px solid var(--color-red);
+    border-left: 4px solid var(--color-red);
+  }
+}
+
+.quiz-option.wrong::after {
+  content: '\2717';
+  position: absolute;
+  right: var(--text-padding);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--text-lg);
+  color: var(--color-red);
+  font-weight: bold;
+}
+
+/* Quiz Answer Explanation */
+.quiz-answer {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  margin-top: var(--space-md);
+  display: none;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+@media (min-width: 600px) {
+  .quiz-answer {
+    border: 1px solid var(--color-gold);
+    border-left: 4px solid var(--color-gold);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+}
+
+.quiz-answer.show {
+  display: block;
+  animation: fadeIn 0.4s ease;
+}
+
+.quiz-answer strong {
+  color: var(--color-gold);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Quiz Result */
+.quiz-result {
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  border: none;
+  border-radius: 0;
+  padding: var(--card-padding) var(--text-padding);
+  margin-top: var(--space-lg);
+  text-align: center;
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .quiz-result {
+    border: 3px solid var(--color-burgundy);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.quiz-result.show {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.quiz-result .result-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-navy);
+  margin-bottom: var(--space-sm);
+}
+
+.quiz-result .result-score {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--color-burgundy);
+  margin: var(--space-md) 0;
+}
+
+.quiz-result .result-message {
+  font-size: var(--text-base);
+  color: var(--color-navy);
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
+.pass-message {
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid var(--color-green);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.pass-message strong {
+  color: var(--color-green);
+}
+
+.fail-message {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid var(--color-red);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  display: none;
+}
+
+.fail-message strong {
+  color: var(--color-red);
+}
+
+.retry-button {
+  display: inline-block;
+  background: var(--color-burgundy);
+  color: white;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: 50px;
+  font-weight: 700;
+  text-decoration: none;
+  margin-top: var(--space-md);
+  cursor: pointer;
+  border: none;
+  font-size: var(--text-sm);
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 600px) {
+  .retry-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* ==========================================
+   NEXT DAY PREVIEW
+   ========================================== */
+.next-preview {
+  background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-purple);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-lg) 0;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .next-preview {
+    border: 2px solid var(--color-purple);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.next-preview .preview-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-sm);
+}
+
+.next-preview .preview-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-purple);
+  margin-bottom: var(--space-sm);
+}
+
+.next-preview .preview-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================
+   CTA BUTTONS
+   ========================================== */
+.cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 0 var(--text-padding);
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .cta-group {
+    flex-direction: row;
+    justify-content: center;
+    padding: 0;
+  }
+}
+
+.cta-button {
+  display: inline-block;
+  text-align: center;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: 50px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: var(--text-sm);
+  transition: all 0.3s ease;
+}
+
+.cta-button.primary {
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  color: var(--color-navy);
+}
+
+.cta-button.secondary {
+  background: transparent;
+  color: var(--color-text);
+  border: 2px solid var(--color-gold);
+}
+
+@media (min-width: 600px) {
+  .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow-gold);
+  }
+}
+
+/* ==========================================
+   SUMMARY BOX
+   ========================================== */
+.summary-box {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.1));
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .summary-box {
+    border: 2px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.summary-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .summary-title {
+    padding: 0;
+  }
+}
+
+.key-points {
+  list-style: none;
+}
+
+.key-point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--text-padding);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .key-point {
+    padding: var(--space-sm) 0;
+  }
+}
+
+.key-point:last-child {
+  border-bottom: none;
+}
+
+.key-point .bullet {
+  color: var(--color-cyan);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+.lesson-footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--glass-border);
+  padding: var(--space-xl) var(--text-padding);
+  text-align: center;
+  margin-top: var(--space-lg);
+}
+
+@media (min-width: 600px) {
+  .lesson-footer {
+    background: transparent;
+    border-top: none;
+    padding: var(--space-xl) 0;
+  }
+}
+
+.footer-brand {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.footer-url {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+  </style>
 </head>
 <body>
+  <div class="container">
 
-    <!-- Navigation -->
-    <nav class="course-nav">
-        <div class="container">
-            <div class="nav-content">
-                <div class="course-title">7 Ngày Khai Mở Tần Số Gốc</div>
-                <div class="day-indicator">NGÀY 5/7</div>
-                <div class="day-progress">Tiến Độ: 71% ●●●●●●○</div>
-            </div>
-        </div>
-    </nav>
+    <!-- ============================================
+         LESSON HEADER
+         ============================================ -->
+    <header class="lesson-header">
+      <div class="lesson-badge">Ngày 5 / 7</div>
+      <h1 class="lesson-title">5 QUY TRÌNH XỬ LÝ CHUYÊN SÂU</h1>
+      <p class="lesson-subtitle">Công Cụ Thực Hành Cho Các Tình Huống Thực Tế</p>
+    </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <div class="day-number">✨ NGÀY 5 ✨</div>
-                <h1>5 QUY TRÌNH XỬ LÝ CHUYÊN SÂU</h1>
-                <p class="hero-subtitle">
-                    Công Cụ Thực Hành Cho Các Tình Huống Thực Tế
-                </p>
-                <div class="hero-highlight">
-                    🎯 Từ Nghi Thức → Quy Trình Chuyên Sâu
-                </div>
-            </div>
-        </div>
+    <!-- ============================================
+         SECTION: GIOI THIEU
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">&#9889;</span> Hôm Nay Chúng Ta Đi Sâu Hơn!</h2>
+
+      <p>Trong Ngày 4, bạn đã học 7 Nghi Thức giúp duy trì tần số cao trong mỗi ngày, từ lúc thức dậy cho đến khi đi ngủ. Những nghi thức ấy giống như những bài tập thể dục hàng ngày để giữ cho cơ thể khỏe mạnh và năng lượng ổn định.</p>
+
+      <p>Hôm nay ở Ngày 5, chúng ta sẽ đi xa hơn bằng cách học 5 Quy Trình chuyên sâu để xử lý những tình huống cụ thể và phức tạp trong cuộc sống. Đây là những công cụ mạnh mẽ giúp bạn giải quyết vấn đề từ gốc rễ thay vì chỉ xử lý bề mặt.</p>
+
+      <div class="highlight-box">
+        <p class="highlight-title">Nghi Thức vs Quy Trình - Phân Biệt Quan Trọng</p>
+        <p><strong>Nghi Thức</strong> là những thói quen nhỏ thực hiện mỗi ngày để duy trì trạng thái năng lượng tốt, giống như việc bạn đánh răng mỗi sáng để giữ sức khỏe răng miệng. <strong>Quy Trình</strong> là những phương pháp xử lý chuyên sâu khi gặp vấn đề lớn, giống như việc bạn đi khám bác sĩ khi bị đau nặng. Bạn cần cả hai để có một cuộc sống cân bằng và mạnh mẽ về mặt năng lượng.</p>
+      </div>
+
+      <p><strong>Hôm nay là ngày thực hành nhiều nhất trong khóa học!</strong> Mỗi quy trình đều có ví dụ thực tế và hướng dẫn từng bước để bạn có thể áp dụng ngay vào cuộc sống của mình.</p>
     </section>
 
-    <!-- Intro Section -->
-    <section class="intro-section">
-        <div class="container">
-            <div class="content-container">
-                <div class="intro-box">
-                    <h2>⚡ Hôm Nay Chúng Ta Đi Sâu Hơn!</h2>
-                    <p><strong>Ngày 4:</strong> Bạn đã có 7 Nghi Thức để duy trì tần số hàng ngày.</p>
-                    <p><strong>Ngày 5:</strong> Bạn sẽ học 5 Quy Trình để xử lý các tình huống CỤ THỂ, PHỨC TẠP trong cuộc sống.</p>
-                    <p>Nghi Thức = Duy trì. Quy Trình = Giải quyết vấn đề GỐC RỄ.</p>
-                    <p style="margin-top: 1.5rem;"><strong>Hôm nay là ngày THỰC HÀNH nhiều nhất!</strong></p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main Content -->
-    <section class="content-section">
-        <div class="container">
-            <div class="content-container">
-                
-                <!-- Quy Trình 1: PAUSE -->
-                <div class="protocol-card">
-                    <div class="protocol-number">1</div>
-                    <span class="protocol-icon">⏸️</span>
-                    <h3>Quy Trình 1: PAUSE (Khi Bị Kích Động)</h3>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Khi Nào Dùng?</h4>
-                        <p>Khi ai đó/điều gì đó khiến bạn <strong>giận, buồn, xấu hổ, sợ hãi</strong> mạnh mẽ và bạn cảm thấy muốn phản ứng ngay lập tức.</p>
-                        <p><strong>Ví dụ:</strong> Sếp la mắng công khai, người yêu nói điều tổn thương, nhận tin xấu đột ngột.</p>
-                    </div>
-                    
-                    <h4>5 Bước PAUSE:</h4>
-                    
-                    <div class="protocol-step">
-                        <h4>P - PAUSE (Dừng Lại)</h4>
-                        <p>🚨 <strong>ĐỪNG phản ứng ngay!</strong></p>
-                        <ul>
-                            <li>Đếm ngược từ 10 → 1 (hoặc 20 nếu rất giận)</li>
-                            <li>Nếu có thể, rời khỏi tình huống: "Xin phép, tôi cần vài phút"</li>
-                            <li>Nếu không thể rời đi, im lặng và thở</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>A - AWARE (Nhận Diện)</h4>
-                        <p>Đặt tên cho cảm xúc và cảm giác cơ thể:</p>
-                        <ul>
-                            <li>Nói thầm: "Tôi đang cảm thấy <em>[giận/buồn/sợ/xấu hổ]</em>"</li>
-                            <li>Quét cơ thể: Ngực nặng? Tim đập nhanh? Cơ bắp căng?</li>
-                            <li>Ghi nhận, không phán xét</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>U - UNDERSTAND (Hiểu Rõ)</h4>
-                        <p>Hỏi bản thân:</p>
-                        <ul>
-                            <li>"Nút kích hoạt (trigger) nào bị chạm?"</li>
-                            <li>"Có phải phần nào là về TÔI, không phải về họ?"</li>
-                            <li>"Nếu tôi ở tần số cao, tôi sẽ phản ứng thế nào?"</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>S - SPACE (Tạo Khoảng Cách)</h4>
-                        <p>Tách bản thân khỏi cảm xúc:</p>
-                        <ul>
-                            <li>Hít thở sâu 3 lần (4 giây vào - 4 giây ra)</li>
-                            <li>Đặt tay lên tim, nói thầm: "Tôi không PHẢI là cảm xúc này. Tôi là Người Chứng Kiến"</li>
-                            <li>Nhìn tình huống như quan sát từ bên ngoài</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>E - EMPOWER (Chọn Phản Hồi)</h4>
-                        <p>Chủ động chọn cách phản hồi:</p>
-                        <ul>
-                            <li>Hỏi: "Tôi muốn phản hồi như thế nào để tôn trọng bản thân và người khác?"</li>
-                            <li>Chọn từ ngữ có ý thức, không tấn công</li>
-                            <li>Hoặc chọn im lặng nếu đó là lựa chọn khôn ngoan hơn</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="protocol-example">
-                        <strong>📖 Ví Dụ Thực Tế:</strong>
-                        <p><strong>Tình huống:</strong> Sếp nói trước mặt team: "Báo cáo của em làm tệ thế này sao?"</p>
-                        <p><strong>Phản ứng cũ (không PAUSE):</strong> Cãi lại hoặc khóc, mất kiểm soát.</p>
-                        <p><strong>Với PAUSE:</strong></p>
-                        <ul>
-                            <li><strong>P:</strong> Đếm ngược 10, không nói gì ngay</li>
-                            <li><strong>A:</strong> "Tôi đang xấu hổ và giận. Mặt nóng, tim đập nhanh."</li>
-                            <li><strong>U:</strong> "Trigger: Sợ bị xem thường. Nhưng có thể báo cáo của tôi thực sự chưa tốt."</li>
-                            <li><strong>S:</strong> Hít thở 3 lần. "Tôi không phải là cảm xúc xấu hổ này."</li>
-                            <li><strong>E:</strong> Trả lời: "Em hiểu. Em sẽ xem lại và làm tốt hơn. Anh có thể cho em feedback cụ thể được không?"</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Quy Trình 2: 4 CÂU HỎI -->
-                <div class="protocol-card">
-                    <div class="protocol-number">2</div>
-                    <span class="protocol-icon">❓</span>
-                    <h3>Quy Trình 2: 4 CÂU HỎI (Ra Quyết Định Lớn)</h3>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Khi Nào Dùng?</h4>
-                        <p>Khi bạn đứng trước <strong>quyết định quan trọng</strong> và không biết chọn gì.</p>
-                        <p><strong>Ví dụ:</strong> Đổi việc? Kết hôn? Mua nhà? Học thêm? Kết thúc mối quan hệ?</p>
-                    </div>
-                    
-                    <h4>4 Câu Hỏi Dẫn Đường:</h4>
-                    
-                    <ol style="margin-left: 2rem; margin-top: 1rem;">
-                        <li style="margin-bottom: 2rem;">
-                            <strong>"Quyết định này có phù hợp với giá trị cốt lõi của tôi không?"</strong>
-                            <p style="margin-top: 0.5rem;">Viết ra 3-5 giá trị quan trọng nhất của bạn (ví dụ: tự do, gia đình, trung thực, sáng tạo). Quyết định này có align với chúng?</p>
-                        </li>
-                        
-                        <li style="margin-bottom: 2rem;">
-                            <strong>"10 năm sau, tôi sẽ tự hào về quyết định này không?"</strong>
-                            <p style="margin-top: 0.5rem;">Nhìn từ tương lai về hiện tại. Bản thân 10 năm sau sẽ cảm ơn hay hối hận về quyết định này?</p>
-                        </li>
-                        
-                        <li style="margin-bottom: 2rem;">
-                            <strong>"Quyết định này xuất phát từ TÌNH YÊU hay từ SỢ HÃI?"</strong>
-                            <p style="margin-top: 0.5rem;">Tình yêu = mở rộng, phát triển, tin tưởng. Sợ hãi = co cụm, trốn tránh, nghi ngờ. Tần số cao chọn từ tình yêu.</p>
-                        </li>
-                        
-                        <li style="margin-bottom: 2rem;">
-                            <strong>"Trực giác của tôi nói gì?"</strong>
-                            <p style="margin-top: 0.5rem;">Đóng mắt, đặt tay lên bụng (năng lượng trung tâm), thở sâu 5 lần. Hỏi: "Lựa chọn nào?" Cảm giác đầu tiên xuất hiện là gì?</p>
-                        </li>
-                    </ol>
-                    
-                    <div class="highlight-box">
-                        <h4>📊 Quy Tắc:</h4>
-                        <p><strong>Nếu 3/4 câu trả lời là YES → LÀM</strong></p>
-                        <p><strong>Nếu 2/4 hoặc ít hơn → ĐỪNG (hoặc chờ)</strong></p>
-                    </div>
-                    
-                    <div class="protocol-example">
-                        <strong>📖 Ví Dụ Thực Tế:</strong>
-                        <p><strong>Tình huống:</strong> Được offer công việc lương cao hơn 50% nhưng phải làm việc đi về 70km/ngày.</p>
-                        <p><strong>Áp dụng 4 câu hỏi:</strong></p>
-                        <ul>
-                            <li><strong>Câu 1:</strong> Giá trị: Thời gian với gia đình, sức khỏe → NO (mất 3h đi lại/ngày)</li>
-                            <li><strong>Câu 2:</strong> 10 năm sau → Có thể YES (nhiều tiền) hoặc NO (hối hận vì mất thời gian)</li>
-                            <li><strong>Câu 3:</strong> Từ sợ hãi (sợ mất cơ hội, sợ không đủ tiền) → NO</li>
-                            <li><strong>Câu 4:</strong> Trực giác → Cảm giác nặng nề → NO</li>
-                        </ul>
-                        <p><strong>Kết quả:</strong> 1/4 YES → KHÔNG NÊN NHẬN</p>
-                    </div>
-                </div>
-
-                <!-- Quy Trình 3: QUẢN LÝ NĂNG LƯỢNG -->
-                <div class="protocol-card">
-                    <div class="protocol-number">3</div>
-                    <span class="protocol-icon">⚡</span>
-                    <h3>Quy Trình 3: QUẢN LÝ NĂNG LƯỢNG (Khi Mất Năng Lượng)</h3>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Nguyên Tắc Vàng</h4>
-                        <p><strong>Năng lượng quan trọng hơn thời gian.</strong></p>
-                        <p>1 giờ năng lượng cao > 10 giờ năng lượng thấp.</p>
-                        <p>Bạn không thể quản lý thời gian, nhưng bạn HOÀN TOÀN có thể quản lý năng lượng!</p>
-                    </div>
-                    
-                    <h4>4 Loại Năng Lượng Cần Quản Lý:</h4>
-                    
-                    <div class="protocol-step">
-                        <h4>1. Năng Lượng Thể Chất</h4>
-                        <p><strong>Bảo vệ:</strong></p>
-                        <ul>
-                            <li>Ngủ đủ 7-8h/đêm (không thể đổi chác)</li>
-                            <li>Ăn sạch, uống đủ nước (2 lít/ngày)</li>
-                            <li>Vận động 20-30 phút/ngày</li>
-                        </ul>
-                        <p><strong>Recharge:</strong> Nghỉ ngơi, massage, tắm nước ấm, ngủ trưa 20 phút</p>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>2. Năng Lượng Cảm Xúc</h4>
-                        <p><strong>Bảo vệ:</strong></p>
-                        <ul>
-                            <li>Nói KHÔNG với người/việc hạ tần số</li>
-                            <li>Giới hạn thời gian với người tiêu cực</li>
-                            <li>Tạo ranh giới rõ ràng</li>
-                        </ul>
-                        <p><strong>Recharge:</strong> Gặp người yêu thương, làm sở thích, cười, khóc (giải phóng)</p>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>3. Năng Lượng Tâm Trí</h4>
-                        <p><strong>Bảo vệ:</strong></p>
-                        <ul>
-                            <li>Deep work: 90-120 phút tập trung cao độ, sau đó nghỉ 15 phút</li>
-                            <li>Tắt thông báo khi làm việc quan trọng</li>
-                            <li>Một việc một lúc (no multitasking)</li>
-                        </ul>
-                        <p><strong>Recharge:</strong> Thiền, đọc sách, học điều mới, nằm không làm gì</p>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>4. Năng Lượng Tinh Thần</h4>
-                        <p><strong>Bảo vệ:</strong></p>
-                        <ul>
-                            <li>Làm việc có ý nghĩa (align với mục đích)</li>
-                            <li>Phục vụ người khác</li>
-                            <li>Kết nối với điều lớn hơn bản thân</li>
-                        </ul>
-                        <p><strong>Recharge:</strong> Thiên nhiên, nghệ thuật, cầu nguyện, viết nhật ký</p>
-                    </div>
-                    
-                    <div class="highlight-box">
-                        <h4>🚨 Dấu Hiệu Mất Năng Lượng:</h4>
-                        <ul>
-                            <li>Cảm thấy kiệt sức dù chưa làm gì nhiều</li>
-                            <li>Mất động lực, chần chừ</li>
-                            <li>Dễ cáu gắt, bực bội</li>
-                            <li>Muốn trốn tránh mọi người</li>
-                        </ul>
-                        <p><strong>→ NGỪNG LẠI NGAY. Áp dụng 1 trong 4 cách Recharge trên.</strong></p>
-                    </div>
-                    
-                    <div class="protocol-example">
-                        <strong>📖 Quy Tắc Thực Hành:</strong>
-                        <p><strong>Kiểm tra năng lượng 3 lần/ngày:</strong></p>
-                        <ul>
-                            <li>Sáng (8h): "Năng lượng tôi bây giờ: ___/10"</li>
-                            <li>Trưa (13h): "Năng lượng tôi bây giờ: ___/10"</li>
-                            <li>Tối (18h): "Năng lượng tôi bây giờ: ___/10"</li>
-                        </ul>
-                        <p><strong>Nếu < 5/10 → Recharge ngay, đừng cố gắng tiếp tục!</strong></p>
-                    </div>
-                </div>
-
-                <!-- Quy Trình 4: HÓA GIẢI NGHIỆP -->
-                <div class="protocol-card">
-                    <div class="protocol-number">4</div>
-                    <span class="protocol-icon">🔓</span>
-                    <h3>Quy Trình 4: HÓA GIẢI NGHIỆP (Phá Vòng Lặp)</h3>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Khi Nào Dùng?</h4>
-                        <p>Khi bạn nhận ra <strong>cùng một vấn đề lặp đi lặp lại</strong> trong đời mình.</p>
-                        <p><strong>Ví dụ:</strong> Cứ yêu là cứ đau, cứ làm là cứ thất bại, cứ có tiền là cứ mất, cứ kết bạn là cứ bị phản bội...</p>
-                    </div>
-                    
-                    <h4>5 Bước Hóa Giải:</h4>
-                    
-                    <div class="protocol-step">
-                        <h4>Bước 1: Nhận Diện Pattern</h4>
-                        <p>Viết ra:</p>
-                        <ul>
-                            <li>"Vấn đề lặp lại của tôi là: ___"</li>
-                            <li>"Nó đã lặp lại ___ lần" (càng nhiều = càng gốc rễ)</li>
-                            <li>"Người/tình huống khác nhau, nhưng CẢM GIÁC/KẾT QUẢ giống nhau"</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>Bước 2: Tìm Nguồn Gốc (Root Cause)</h4>
-                        <p>Hỏi ngược dòng thời gian:</p>
-                        <ul>
-                            <li>"Lần ĐẦU TIÊN tôi cảm thấy điều này là khi nào?"</li>
-                            <li>"Lúc đó tôi bao nhiêu tuổi? Chuyện gì xảy ra?"</li>
-                            <li>Thường: Tuổi thơ (0-7 tuổi) hoặc sự kiện tổn thương lớn</li>
-                        </ul>
-                        <p><strong>Ví dụ:</strong> Pattern "Không xứng đáng được yêu" → Nguồn gốc: Bố mẹ ly hôn lúc 5 tuổi, con nghĩ "do con không đủ tốt"</p>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>Bước 3: Chữa Lành Vết Thương (Healing)</h4>
-                        <p>Viết thư cho Đứa Trẻ Bên Trong:</p>
-                        <p style="font-style: italic; margin: 1rem 0;">"Em yêu, em không có lỗi. Điều đó xảy ra KHÔNG PHẢI do em. Em xứng đáng được yêu thương. Giờ đây, tôi (bản thân hiện tại) sẽ bảo vệ em."</p>
-                        <p>Làm nghi thức:</p>
-                        <ul>
-                            <li>Đốt bức thư hoặc chôn nó</li>
-                            <li>Ôm bản thân, khóc nếu cần</li>
-                            <li>Tưởng tượng ánh sáng ấm áp ôm lấy Đứa Trẻ Bên Trong</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>Bước 4: Lập Trình Lại (Reframe)</h4>
-                        <p>Thay thế niềm tin cũ:</p>
-                        <ul>
-                            <li><strong>Cũ:</strong> "Tôi không xứng đáng được yêu"</li>
-                            <li><strong>Mới:</strong> "Tôi là tình yêu. Tôi xứng đáng với tất cả điều tốt đẹp"</li>
-                        </ul>
-                        <p>Lặp lại niềm tin mới 21 ngày liên tiếp (sáng + tối) để lập trình tiềm thức.</p>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>Bước 5: Thay Đổi Hành Động (New Response)</h4>
-                        <p>Lần sau khi tình huống tương tự xuất hiện:</p>
-                        <ul>
-                            <li>Nhận ra: "Đây là pattern cũ"</li>
-                            <li>DỪNG phản ứng theo cách cũ</li>
-                            <li>Chọn phản ứng MỚI (ngược lại với cách cũ)</li>
-                        </ul>
-                        <p><strong>Ví dụ:</strong> Cách cũ: Bỏ chạy khi ai đó yêu thương → Cách mới: Ở lại, cho phép được yêu thương</p>
-                    </div>
-                    
-                    <div class="highlight-box">
-                        <h4>⏰ Thời Gian:</h4>
-                        <p>Phá một vòng lặp cần <strong>21-49 ngày thực hành kiên trì</strong>. Đừng nản nếu lần đầu chưa thành công!</p>
-                    </div>
-                </div>
-
-                <!-- Quy Trình 5: HIỆN THỰC HÓA -->
-                <div class="protocol-card">
-                    <div class="protocol-number">5</div>
-                    <span class="protocol-icon">✨</span>
-                    <h3>Quy Trình 5: HIỆN THỰC HÓA (Manifestation)</h3>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Sự Thật Về Manifestation</h4>
-                        <p>Manifestation <strong>KHÔNG PHẢI phép màu</strong>. Đó là khoa học năng lượng + tâm lý học + hành động.</p>
-                        <p>Nếu tiềm thức có <strong>resistance (kháng cự)</strong>, manifestation sẽ THẤT BẠI bất kể bạn hình dung/khẳng định như thế nào.</p>
-                    </div>
-                    
-                    <h4>4 Bước Hiện Thực Hóa:</h4>
-                    
-                    <div class="protocol-step">
-                        <h4>1. CLARIFY (Làm Rõ)</h4>
-                        <p>Bạn muốn gì? Viết cụ thể, chi tiết:</p>
-                        <ul>
-                            <li>KHÔNG: "Tôi muốn giàu" (mơ hồ)</li>
-                            <li>CÓ: "Tôi muốn thu nhập thụ động 50 triệu/tháng từ đầu tư bất động sản trong 2 năm tới"</li>
-                        </ul>
-                        <p><strong>Quy tắc:</strong> Càng cụ thể = Não càng dễ tạo blueprint.</p>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>2. EMBODY (Hiện Thân)</h4>
-                        <p>Sống như đã có (match tần số):</p>
-                        <ul>
-                            <li>Hỏi: "Người có 50 triệu thụ động/tháng sẽ CẢM THẤY, NGHĨ, HÀNH ĐỘNG thế nào?"</li>
-                            <li>Bắt đầu có cảm giác đó NGAY BÂY GIỜ</li>
-                            <li>Hành động như người đó (trong khả năng hiện tại)</li>
-                        </ul>
-                        <p><strong>Ví dụ:</strong> Ăn mặc chỉnh chu hơn, tự tin hơn, đầu tư vào kiến thức...</p>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>3. DETACH (Buông Bỏ)</h4>
-                        <p>Đây là bước khó nhất:</p>
-                        <ul>
-                            <li>Sau khi đặt ý định → BUÔNG outcome</li>
-                            <li>Tin tưởng timing của vũ trụ</li>
-                            <li>Không bám víu, không lo lắng "khi nào có?"</li>
-                        </ul>
-                        <p><strong>Nghịch lý:</strong> Càng bám víu = Càng đẩy xa. Buông bỏ = Cho phép đến.</p>
-                    </div>
-                    
-                    <div class="protocol-step">
-                        <h4>4. ACT (Hành Động)</h4>
-                        <p>Manifestation không phải ngồi không:</p>
-                        <ul>
-                            <li>Khi có <strong>inspired action</strong> (hành động được truyền cảm hứng) → LÀM NGAY</li>
-                            <li>Không suy nghĩ quá nhiều, không trì hoãn</li>
-                            <li>Tin vào intuition (trực giác)</li>
-                        </ul>
-                        <p><strong>Ví dụ:</strong> Bất chợt muốn gọi cho người bạn cũ → Gọi ngay → Họ giới thiệu cơ hội đầu tư</p>
-                    </div>
-                    
-                    <div class="highlight-box">
-                        <h4>🚨 Lưu Ý Quan Trọng:</h4>
-                        <p><strong>Nếu tiềm thức có limiting belief (niềm tin hạn chế)</strong>, bạn phải <strong>clear nó trước</strong> bằng Quy Trình 4 (Hóa Giải Nghiệp).</p>
-                        <p><strong>Ví dụ:</strong> Muốn giàu nhưng tiềm thức tin "Tiền là tội lỗi" → Sẽ tự sabotage mỗi khi gần thành công.</p>
-                    </div>
-                    
-                    <div class="protocol-example">
-                        <strong>📖 Template Manifestation:</strong>
-                        <p>Viết vào sổ mỗi sáng (3 phút):</p>
-                        <ul>
-                            <li>"Tôi biết ơn vì tôi đang/đã ___ (viết như đã có)"</li>
-                            <li>"Tôi cảm thấy ___ (cảm xúc khi có)"</li>
-                            <li>"Hôm nay tôi sẽ hành động như người ___ bằng cách ___"</li>
-                        </ul>
-                        <p>Sau đó: Buông bỏ, tin tưởng, sống cuộc đời.</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Quiz Section -->
-    <section class="quiz-section">
-        <div class="container">
-            <div class="quiz-container">
-                <div class="quiz-intro">
-                    <h2>📝 Quiz Ngày 5</h2>
-                    <p>Kiểm tra hiểu biết về 5 Quy Trình Xử Lý Chuyên Sâu</p>
-                    <p><strong>Cần 4/5 điểm để mở khóa Ngày 6</strong></p>
-                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,189,89,0.2); border-radius: 10px;">
-                        <strong>📊 Điểm của bạn: <span id="current-score">0/5</span></strong>
-                    </div>
-                </div>
-
-                <div class="quiz-question">
-                    <div class="question-number">Câu 1:</div>
-                    <div class="question-text">PAUSE là viết tắt của:</div>
-                    <ul class="quiz-options">
-                        <li data-correct="false">a) Một kỹ thuật thở</li>
-                        <li data-correct="true">b) Quy trình 5 bước xử lý khi bị kích động</li>
-                        <li data-correct="false">c) Tên một nghi thức</li>
-                        <li data-correct="false">d) Không có nghĩa gì</li>
-                    </ul>
-                    <div class="quiz-answer">
-                        <strong>Đáp án đúng: b)</strong> PAUSE là quy trình 5 bước (Pause - Aware - Understand - Space - Empower) giúp bạn xử lý cảm xúc mạnh một cách có ý thức.
-                    </div>
-                </div>
-
-                <div class="quiz-question">
-                    <div class="question-number">Câu 2:</div>
-                    <div class="question-text">Khi ra quyết định lớn, bạn nên hỏi bao nhiêu câu?</div>
-                    <ul class="quiz-options">
-                        <li data-correct="false">a) 1 câu</li>
-                        <li data-correct="false">b) 2 câu</li>
-                        <li data-correct="true">c) 4 câu</li>
-                        <li data-correct="false">d) Không cần hỏi</li>
-                    </ul>
-                    <div class="quiz-answer">
-                        <strong>Đáp án đúng: c)</strong> Quy Trình 4 Câu Hỏi giúp bạn ra quyết định từ nhiều góc độ: Giá trị - Tương lai - Động lực - Trực giác. Nếu 3/4 YES thì làm.
-                    </div>
-                </div>
-
-                <div class="quiz-question">
-                    <div class="question-number">Câu 3:</div>
-                    <div class="question-text">Năng lượng quan trọng hơn thời gian vì:</div>
-                    <ul class="quiz-options">
-                        <li data-correct="false">a) Không đúng, thời gian quan trọng hơn</li>
-                        <li data-correct="true">b) 1 giờ năng lượng cao > 10 giờ năng lượng thấp</li>
-                        <li data-correct="false">c) Năng lượng vô hạn</li>
-                        <li data-correct="false">d) Đó chỉ là lý thuyết</li>
-                    </ul>
-                    <div class="quiz-answer">
-                        <strong>Đáp án đúng: b)</strong> Bạn có thể làm việc 10 giờ năng lượng thấp mà không xong bằng 1 giờ năng lượng cao. Quản lý năng lượng = Quản lý hiệu quả.
-                    </div>
-                </div>
-
-                <div class="quiz-question">
-                    <div class="question-number">Câu 4:</div>
-                    <div class="question-text">Nghiệp thực chất là:</div>
-                    <ul class="quiz-options">
-                        <li data-correct="false">a) Hình phạt</li>
-                        <li data-correct="true">b) Tần số tích lũy tạo ra pattern lặp lại</li>
-                        <li data-correct="false">c) Không thể thay đổi</li>
-                        <li data-correct="false">d) Chỉ là mê tín</li>
-                    </ul>
-                    <div class="quiz-answer">
-                        <strong>Đáp án đúng: b)</strong> Nghiệp là tần số năng lượng tích lũy theo thời gian, tạo ra các vòng lặp. Bạn có thể phá vỡ bằng cách thay đổi tần số và phản ứng.
-                    </div>
-                </div>
-
-                <div class="quiz-question">
-                    <div class="question-number">Câu 5:</div>
-                    <div class="question-text">Manifestation thất bại thường vì:</div>
-                    <ul class="quiz-options">
-                        <li data-correct="false">a) Vũ trụ không nghe</li>
-                        <li data-correct="false">b) Không may mắn</li>
-                        <li data-correct="true">c) Có resistance (kháng cự) trong tiềm thức</li>
-                        <li data-correct="false">d) Bạn không đủ tốt</li>
-                    </ul>
-                    <div class="quiz-answer">
-                        <strong>Đáp án đúng: c)</strong> Nếu tiềm thức có limiting belief (niềm tin hạn chế), bạn sẽ tự sabotage. Phải clear resistance trước khi manifest.
-                    </div>
-                </div>
-
-                <!-- Quiz Result -->
-                <div class="quiz-result" id="quiz-result">
-                    <h3 id="result-title">🎉 Chúc Mừng!</h3>
-                    <div class="score" id="final-score">5/5</div>
-                    <p class="message" id="result-message">Xuất sắc!</p>
-                    
-                    <div class="pass-message" id="pass-msg">
-                        <strong>✅ HOÀN THÀNH NGÀY 5</strong>
-                        <p style="margin-top: 0.5rem;">Bạn đã có cả Nghi Thức lẫn Quy Trình! Mai học về Nghiệp & Luân Hồi!</p>
-                    </div>
-                    
-                    <div class="fail-message" id="fail-msg" style="display: none;">
-                        <strong>📚 HÃY XEM LẠI BÀI HỌC</strong>
-                        <p style="margin-top: 0.5rem;">Đọc lại 5 Quy Trình và thử lại quiz nhé!</p>
-                        <button class="retry-button" onclick="retryQuiz()">🔄 Làm Lại Quiz</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Next Day Preview -->
-    <section class="next-section">
-        <div class="container">
-            <div class="next-content">
-                <h2>🎉 Tuyệt Vời! Bạn Đã Có Đầy Đủ Công Cụ!</h2>
-                
-                <div class="next-preview">
-                    <h3>Mai, Chúng Ta Sẽ Học:</h3>
-                    <h4>NGÀY 6: BẢN ĐỒ NGHIỆP & LUÂN HỒI</h4>
-                    <p>Hôm nay, bạn đã học 5 Quy Trình để xử lý các tình huống cụ thể trong cuộc sống.</p>
-                    <p><strong>Thử áp dụng ít nhất 1 quy trình trong 24h tới!</strong> Bắt đầu với Quy Trình PAUSE khi bị kích động hoặc 4 Câu Hỏi cho quyết định nhỏ.</p>
-                    <p><strong>Mai, chúng ta đi sâu vào Bản Đồ Nghiệp & Luân Hồi</strong> - hiểu tại sao vấn đề lặp lại và cách thoát khỏi vòng luẩn quẩn!</p>
-                </div>
-                
-                <div style="margin-top: 2rem;">
-                    <a href="#ngay-4" class="cta-button secondary" id="btn-prev-day">← Xem Lại Ngày 4</a>
-                    <a href="#ngay-6" class="cta-button" id="btn-next-day">Tiếp Tục Đến Ngày 6 →</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <div style="background: var(--bg-navy); color: var(--text-light); padding: 2rem; text-align: center;">
-        <p style="margin: 0;">💫 5 quy trình này sẽ là bạn đồng hành suốt đời. Hãy bookmark lại!</p>
+    <!-- ============================================
+         HINH 1: TONG QUAN 5 QUY TRINH
+         ============================================ -->
+    <div class="image-container">
+      <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY5_HINH_1" alt="Tổng quan 5 quy trình xử lý chuyên sâu" loading="lazy">
+      <div class="image-caption">Hình 1: Tổng quan 5 Quy Trình Xử Lý Chuyên Sâu - Từ PAUSE đến Hiện Thực Hóa</div>
     </div>
 
-    <!-- JavaScript -->
-    <script>
-        // CTA Links Configuration
-        const root = getComputedStyle(document.documentElement);
-        const ctaNextDay = root.getPropertyValue('--cta-next-day').trim().replace(/['"]/g, '');
-        const ctaPrevDay = root.getPropertyValue('--cta-prev-day').trim().replace(/['"]/g, '');
-        
-        document.getElementById('btn-next-day').href = ctaNextDay;
-        document.getElementById('btn-prev-day').href = ctaPrevDay;
-        
-        // Quiz System with Scoring
-        let totalQuestions = 5;
-        let correctAnswers = 0;
-        let answeredQuestions = 0;
-        
-        document.querySelectorAll('.quiz-question').forEach(question => {
-            const options = question.querySelectorAll('.quiz-options li');
-            const answerDiv = question.querySelector('.quiz-answer');
-            
-            options.forEach(option => {
-                option.addEventListener('click', function() {
-                    if (question.classList.contains('answered')) {
-                        return;
-                    }
-                    
-                    question.classList.add('answered');
-                    answeredQuestions++;
-                    
-                    options.forEach(opt => {
-                        opt.classList.add('disabled');
-                    });
-                    
-                    const isCorrect = this.getAttribute('data-correct') === 'true';
-                    
-                    if (isCorrect) {
-                        this.classList.add('correct');
-                        correctAnswers++;
-                    } else {
-                        this.classList.add('incorrect');
-                        options.forEach(opt => {
-                            if (opt.getAttribute('data-correct') === 'true') {
-                                opt.classList.add('correct');
-                            }
-                        });
-                    }
-                    
-                    answerDiv.classList.add('show');
-                    
-                    document.getElementById('current-score').textContent = correctAnswers + '/' + totalQuestions;
-                    
-                    if (answeredQuestions === totalQuestions) {
-                        showQuizResult();
-                    }
-                });
-            });
+    <!-- ============================================
+         QUY TRINH 1: PAUSE
+         ============================================ -->
+    <div class="protocol-card">
+      <div class="protocol-header">
+        <span class="protocol-number">1</span>
+        <span class="protocol-icon">&#9208;&#65039;</span>
+        <span class="protocol-title">Quy Trình PAUSE (Khi Bị Kích Động)</span>
+      </div>
+
+      <div class="highlight-box">
+        <p class="highlight-title">Khi Nào Dùng Quy Trình Này?</p>
+        <p>Bạn hãy sử dụng PAUSE khi có ai đó hoặc điều gì đó khiến bạn <strong>giận, buồn, xấu hổ, sợ hãi</strong> mạnh mẽ và bạn cảm thấy muốn phản ứng ngay lập tức. Đây là quy trình cần thiết nhất trong đời sống hàng ngày vì nó giúp bạn không hành động trong lúc mất kiểm soát cảm xúc.</p>
+        <p><strong>Ví dụ cụ thể:</strong> Sếp la mắng công khai trước team, người yêu nói điều tổn thương, nhận tin xấu đột ngột, hoặc bị ai đó xử tệ trước đám đông.</p>
+      </div>
+
+      <h4 style="padding: 0 var(--text-padding); color: var(--color-cyan); margin-bottom: var(--space-md);">5 Bước PAUSE Chi Tiết:</h4>
+
+      <div class="protocol-step">
+        <div class="step-title">P - PAUSE (Dừng Lại)</div>
+        <p>Bước quan trọng nhất là <strong>dừng lại ngay lập tức</strong> và không phản ứng theo bản năng. Khi cảm xúc mạnh xuất hiện, não bộ bạn sẽ chuyển sang chế độ "chiến hay chạy" và mọi quyết định lúc này đều sẽ là quyết định tồi tệ.</p>
+        <ul>
+          <li>Đếm ngược từ 10 đến 1, hoặc từ 20 nếu bạn đang rất giận dữ, để cho cơ thể thời gian bình tĩnh trở lại</li>
+          <li>Nếu có thể, hãy rời khỏi tình huống bằng cách nói: "Xin phép, tôi cần vài phút"</li>
+          <li>Nếu không thể rời đi, hãy im lặng và tập trung vào hơi thở của mình</li>
+        </ul>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">A - AWARE (Nhận Diện)</div>
+        <p>Sau khi dừng lại, bước tiếp theo là <strong>đặt tên chính xác</strong> cho cảm xúc mà bạn đang trải qua. Nghiên cứu cho thấy rằng việc gọi tên cảm xúc giúp giảm cường độ của nó đến 50 phần trăm.</p>
+        <ul>
+          <li>Nói thầm: "Tôi đang cảm thấy <em>[giận/buồn/sợ/xấu hổ]</em>" - càng cụ thể càng tốt</li>
+          <li>Quét cơ thể: Ngực nặng? Tim đập nhanh? Cơ bắp căng? Bụng co thắt?</li>
+          <li>Ghi nhận tất cả những gì đang xảy ra mà không phán xét đúng hay sai</li>
+        </ul>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">U - UNDERSTAND (Hiểu Rõ)</div>
+        <p>Bây giờ bạn đã bình tĩnh hơn, hãy <strong>tìm hiểu nguồn gốc</strong> thực sự của phản ứng cảm xúc này. Thường thì cảm xúc mạnh không chỉ về tình huống hiện tại mà còn liên quan đến những vết thương cũ từ quá khứ.</p>
+        <ul>
+          <li>"Nút kích hoạt (trigger) nào bị chạm?" - Tìm ra điều gì thực sự khiến bạn đau</li>
+          <li>"Có phải phần nào là về TÔI, không phải về họ?" - Phân biệt giữa tình huống và cách bạn diễn giải</li>
+          <li>"Nếu tôi ở tần số cao, tôi sẽ phản ứng thế nào?" - Hình dung phiên bản tốt nhất của mình</li>
+        </ul>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">S - SPACE (Tạo Khoảng Cách)</div>
+        <p>Bước này giúp bạn <strong>tách bản thân ra khỏi cảm xúc</strong> để nhìn tình huống một cách khách quan hơn. Bạn không phải là cảm xúc của mình, bạn là người quan sát cảm xúc đó.</p>
+        <ul>
+          <li>Hít thở sâu 3 lần theo nhịp 4 giây hít vào và 4 giây thở ra để ổn định hệ thần kinh</li>
+          <li>Đặt tay lên tim, nói thầm: "Tôi không PHẢI là cảm xúc này, tôi là Người Chứng Kiến"</li>
+          <li>Nhìn tình huống như đang quan sát từ bên ngoài, giống như xem một bộ phim</li>
+        </ul>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">E - EMPOWER (Chọn Phản Hồi)</div>
+        <p>Bước cuối cùng là <strong>chủ động chọn cách phản hồi</strong> thay vì để cảm xúc điều khiển hành động của bạn. Đây là lúc bạn sử dụng quyền lựa chọn có ý thức của mình.</p>
+        <ul>
+          <li>Hỏi: "Tôi muốn phản hồi như thế nào để tôn trọng bản thân và người khác?"</li>
+          <li>Chọn từ ngữ có ý thức, không tấn công và không phòng thủ quá mức</li>
+          <li>Hoặc chọn im lặng nếu đó là lựa chọn khôn ngoan hơn trong tình huống này</li>
+        </ul>
+      </div>
+
+      <div class="protocol-example">
+        <div class="example-title">Ví Dụ Thực Tế: Bị Sếp La Trước Team</div>
+        <p><strong>Tình huống:</strong> Sếp nói trước mặt cả team: "Báo cáo của em làm tệ thế này sao?"</p>
+        <p><strong>Phản ứng cũ (không PAUSE):</strong> Cãi lại ngay hoặc khóc, mất kiểm soát cảm xúc và mất uy tín trước đồng nghiệp.</p>
+        <p><strong>Áp dụng PAUSE:</strong></p>
+        <ul>
+          <li><strong>P:</strong> Đếm ngược 10, không nói gì ngay, giữ bình tĩnh bên ngoài</li>
+          <li><strong>A:</strong> "Tôi đang xấu hổ và giận. Mặt nóng, tim đập nhanh, tay hơi run."</li>
+          <li><strong>U:</strong> "Trigger của tôi là sợ bị xem thường trước mặt người khác, nhưng có thể báo cáo của tôi thực sự chưa tốt."</li>
+          <li><strong>S:</strong> Hít thở 3 lần sâu. "Tôi không phải là cảm xúc xấu hổ này. Tôi là người có năng lực."</li>
+          <li><strong>E:</strong> Trả lời bình tĩnh: "Em hiểu. Em sẽ xem lại và làm tốt hơn. Anh có thể cho em feedback cụ thể được không?"</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ============================================
+         HINH 2: QUY TRINH XU LY CAM XUC TIEU CUC
+         ============================================ -->
+    <div class="image-container">
+      <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY5_HINH_2" alt="Quy trình xử lý cảm xúc tiêu cực - các bước thực hành" loading="lazy">
+      <div class="image-caption">Hình 2: Quy trình xử lý cảm xúc tiêu cực - 5 bước PAUSE thực hành</div>
+    </div>
+
+    <!-- ============================================
+         QUY TRINH 2: 4 CAU HOI
+         ============================================ -->
+    <div class="protocol-card">
+      <div class="protocol-header">
+        <span class="protocol-number">2</span>
+        <span class="protocol-icon">&#10067;</span>
+        <span class="protocol-title">Quy Trình 4 Câu Hỏi (Ra Quyết Định Lớn)</span>
+      </div>
+
+      <div class="highlight-box">
+        <p class="highlight-title">Khi Nào Dùng Quy Trình Này?</p>
+        <p>Bạn hãy sử dụng 4 Câu Hỏi khi đứng trước <strong>quyết định quan trọng</strong> và không biết nên chọn gì. Những quyết định lớn thường khiến chúng ta mất ngủ, lo lắng và chạy vòng vòng trong đầu mà không tìm ra lối thoát.</p>
+        <p><strong>Ví dụ cụ thể:</strong> Đổi việc? Kết hôn? Mua nhà? Học thêm? Kết thúc mối quan hệ? Chuyển thành phố? Đầu tư lớn?</p>
+      </div>
+
+      <h4 style="padding: 0 var(--text-padding); color: var(--color-cyan); margin-bottom: var(--space-md);">4 Câu Hỏi Dẫn Đường:</h4>
+
+      <div class="protocol-step">
+        <div class="step-title">Câu 1: "Quyết định này có phù hợp với giá trị cốt lõi của tôi không?"</div>
+        <p>Trước tiên, bạn cần viết ra <strong>3-5 giá trị quan trọng nhất</strong> của mình, ví dụ như tự do, gia đình, trung thực, sáng tạo, hoặc sức khỏe. Sau đó, hãy xem quyết định này có phù hợp với những giá trị đó không.</p>
+        <p>Một quyết định dù hấp dẫn đến đâu nhưng đi ngược lại giá trị cốt lõi của bạn sẽ dẫn đến cảm giác bất hòa và không hạnh phúc về lâu dài. Bạn cần sống đúng với những gì mình thực sự coi trọng.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">Câu 2: "10 năm sau, tôi sẽ tự hào về quyết định này không?"</div>
+        <p>Hãy <strong>nhìn từ tương lai về hiện tại</strong> để có góc nhìn rộng hơn. Tưởng tượng bản thân 10 năm sau nhìn lại ngày hôm nay và tự hỏi: bạn ấy sẽ cảm ơn hay hối hận về quyết định này?</p>
+        <p>Kỹ thuật này giúp bạn thoát khỏi cảm xúc nhất thời và thấy được bức tranh toàn cảnh. Những quyết định tốt thường là những quyết định mà phiên bản tương lai của bạn sẽ biết ơn.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">Câu 3: "Quyết định này xuất phát từ TÌNH YÊU hay từ SỢ HÃI?"</div>
+        <p>Đây là câu hỏi <strong>phân biệt động lực thực sự</strong> đằng sau quyết định của bạn. Tình yêu dẫn đến mở rộng, phát triển và tin tưởng vào bản thân. Sợ hãi dẫn đến co cụm, trốn tránh và nghi ngờ mọi thứ xung quanh.</p>
+        <p>Người ở tần số cao luôn chọn từ tình yêu thay vì bị sợ hãi điều khiển. Nếu bạn đang chọn vì sợ mất cơ hội, sợ không đủ tiền, hay sợ bị người khác đánh giá, đó là dấu hiệu quyết định có thể chưa đúng.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">Câu 4: "Trực giác của tôi nói gì?"</div>
+        <p>Cuối cùng, hãy <strong>lắng nghe cơ thể và trực giác</strong> của bạn. Đóng mắt lại, đặt tay lên bụng (trung tâm năng lượng), thở sâu 5 lần và hỏi: "Lựa chọn nào?" Cảm giác đầu tiên xuất hiện chính là câu trả lời từ trực giác.</p>
+        <p>Trực giác là tiếng nói của phần tiềm thức, nơi đã xử lý hàng triệu thông tin mà ý thức không nhận ra được. Khi bạn bình tĩnh và kết nối với cơ thể, trực giác sẽ cho bạn câu trả lời chính xác nhất.</p>
+      </div>
+
+      <div class="highlight-box green">
+        <p class="highlight-title">Quy Tắc Áp Dụng</p>
+        <p><strong>Nếu 3 trên 4 câu trả lời là YES thì hãy LÀM.</strong> Bạn có đủ cơ sở để tin rằng quyết định này phù hợp với con người thực của mình và sẽ mang lại kết quả tốt đẹp trong tương lai.</p>
+        <p><strong>Nếu 2 trên 4 hoặc ít hơn thì ĐỪNG LÀM hoặc CHỜ THÊM THỜI GIAN.</strong> Khi chưa đủ điều kiện, việc chờ đợi không phải là yếu đuối mà là sự khôn ngoan của người hiểu rõ bản thân mình.</p>
+      </div>
+
+      <div class="protocol-example">
+        <div class="example-title">Ví Dụ Thực Tế: Được Offer Công Việc Lương Cao</div>
+        <p><strong>Tình huống:</strong> Được offer công việc lương cao hơn 50 phần trăm nhưng phải đi làm 70km mỗi ngày.</p>
+        <p><strong>Áp dụng 4 Câu Hỏi:</strong></p>
+        <ul>
+          <li><strong>Câu 1:</strong> Giá trị cốt lõi là thời gian với gia đình và sức khỏe. Mất 3 giờ đi lại mỗi ngày sẽ đi ngược cả hai giá trị này, nên câu trả lời là NO.</li>
+          <li><strong>Câu 2:</strong> 10 năm sau có thể có nhiều tiền hơn nhưng cũng có thể hối hận vì mất thời gian với con cái, kết quả không rõ ràng.</li>
+          <li><strong>Câu 3:</strong> Động lực chính là sợ mất cơ hội và sợ không đủ tiền, đây là quyết định từ sợ hãi nên câu trả lời là NO.</li>
+          <li><strong>Câu 4:</strong> Khi lắng nghe trực giác, cảm giác nặng nề xuất hiện trong ngực, câu trả lời là NO.</li>
+        </ul>
+        <p><strong>Kết quả:</strong> Chỉ 1 trên 4 là YES nên bạn KHÔNG NÊN NHẬN công việc này và nên tìm cơ hội phù hợp hơn với giá trị của mình.</p>
+      </div>
+    </div>
+
+    <!-- ============================================
+         QUY TRINH 3: QUAN LY NANG LUONG
+         ============================================ -->
+    <div class="protocol-card">
+      <div class="protocol-header">
+        <span class="protocol-number">3</span>
+        <span class="protocol-icon">&#9889;</span>
+        <span class="protocol-title">Quy Trình Quản Lý Năng Lượng</span>
+      </div>
+
+      <div class="highlight-box cyan">
+        <p class="highlight-title">Nguyên Tắc Vàng Về Năng Lượng</p>
+        <p><strong>Năng lượng quan trọng hơn thời gian.</strong> Một giờ làm việc với năng lượng cao mang lại kết quả lớn hơn mười giờ làm việc với năng lượng thấp và tinh thần mệt mỏi.</p>
+        <p>Bạn không thể quản lý thời gian vì mỗi ngày chỉ có 24 giờ, nhưng bạn HOÀN TOÀN có thể quản lý năng lượng của mình. Khi năng lượng cao, mọi việc đều trở nên nhẹ nhàng và hiệu quả hơn gấp nhiều lần.</p>
+        <p>Quy trình này giúp bạn nhận biết, bảo vệ và nạp lại năng lượng để luôn ở trạng thái tốt nhất trong mọi tình huống của cuộc sống.</p>
+      </div>
+
+      <h4 style="padding: 0 var(--text-padding); color: var(--color-cyan); margin-bottom: var(--space-md);">4 Loại Năng Lượng Cần Quản Lý:</h4>
+
+      <div class="protocol-step">
+        <div class="step-title">1. Năng Lượng Thể Chất</div>
+        <p>Đây là nền tảng của mọi loại năng lượng khác vì khi cơ thể mệt mỏi thì tâm trí và cảm xúc đều bị ảnh hưởng tiêu cực. Bạn cần bảo vệ năng lượng thể chất bằng những thói quen cơ bản nhưng thiết yếu.</p>
+        <p><strong>Bảo vệ:</strong></p>
+        <ul>
+          <li>Ngủ đủ 7-8 giờ mỗi đêm vì giấc ngủ là thứ không thể đổi chác bằng bất cứ thứ gì khác</li>
+          <li>Ăn sạch, uống đủ 2 lít nước mỗi ngày để cơ thể có nhiên liệu chất lượng</li>
+          <li>Vận động 20-30 phút mỗi ngày, kể cả chỉ là đi bộ cũng giúp nâng cao năng lượng đáng kể</li>
+        </ul>
+        <p><strong>Nạp lại (Recharge):</strong> Nghỉ ngơi, massage, tắm nước ấm, ngủ trưa 20 phút là những cách nhanh nhất để phục hồi năng lượng thể chất.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">2. Năng Lượng Cảm Xúc</div>
+        <p>Năng lượng cảm xúc quyết định chất lượng các mối quan hệ và mức độ hạnh phúc của bạn trong cuộc sống hàng ngày. Khi năng lượng cảm xúc cạn kiệt, bạn sẽ dễ cáu gắt và không thể kết nối sâu sắc với người xung quanh.</p>
+        <p><strong>Bảo vệ:</strong></p>
+        <ul>
+          <li>Nói KHÔNG với người và việc hạ tần số của bạn, đây là quyền và trách nhiệm của bạn</li>
+          <li>Giới hạn thời gian tiếp xúc với người tiêu cực, đặc biệt những người thường than vãn và phàn nàn</li>
+          <li>Tạo ranh giới rõ ràng trong mối quan hệ để bảo vệ không gian cảm xúc của mình</li>
+        </ul>
+        <p><strong>Nạp lại (Recharge):</strong> Gặp người yêu thương, làm sở thích, cười, khóc để giải phóng cảm xúc tích tụ.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">3. Năng Lượng Tâm Trí</div>
+        <p>Năng lượng tâm trí là khả năng tập trung, suy nghĩ sáng tạo và giải quyết vấn đề của bạn. Trong thời đại thông tin tràn ngập, năng lượng tâm trí là tài nguyên quý giá nhất và cũng dễ bị tiêu hao nhất.</p>
+        <p><strong>Bảo vệ:</strong></p>
+        <ul>
+          <li>Áp dụng Deep Work: làm việc tập trung 90-120 phút rồi nghỉ 15 phút để não bộ phục hồi</li>
+          <li>Tắt thông báo điện thoại khi làm việc quan trọng vì mỗi lần bị gián đoạn cần 23 phút để lấy lại sự tập trung</li>
+          <li>Làm một việc một lúc thay vì đa nhiệm, vì bộ não con người thực ra không thể multitask hiệu quả</li>
+        </ul>
+        <p><strong>Nạp lại (Recharge):</strong> Thiền, đọc sách, học điều mới, hoặc đơn giản là nằm không làm gì để cho não bộ nghỉ ngơi.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">4. Năng Lượng Tinh Thần</div>
+        <p>Năng lượng tinh thần là cảm giác về ý nghĩa, mục đích và kết nối với điều gì đó lớn hơn bản thân mình. Khi năng lượng tinh thần mạnh mẽ, bạn sẽ có động lực bền bỉ và không dễ bị dao động bởi khó khăn.</p>
+        <p><strong>Bảo vệ:</strong></p>
+        <ul>
+          <li>Làm việc có ý nghĩa và phù hợp với mục đích sống của bạn để mỗi ngày đều có động lực</li>
+          <li>Phục vụ người khác vì khi cho đi bạn sẽ nhận lại năng lượng tinh thần gấp bội</li>
+          <li>Kết nối với điều lớn hơn bản thân qua tự nhiên, nghệ thuật, cộng đồng hoặc tâm linh</li>
+        </ul>
+        <p><strong>Nạp lại (Recharge):</strong> Đi vào thiên nhiên, thưởng thức nghệ thuật, cầu nguyện, viết nhật ký và suy ngẫm về cuộc đời.</p>
+      </div>
+
+      <div class="highlight-box red">
+        <p class="highlight-title">Dấu Hiệu Mất Năng Lượng - Nhận Biết Ngay</p>
+        <p>Khi bạn cảm thấy kiệt sức dù chưa làm gì nhiều, mất động lực và chần chừ với mọi việc, dễ cáu gắt và bực bội với người xung quanh, hoặc muốn trốn tránh mọi người và ở một mình, đó là dấu hiệu năng lượng của bạn đang ở mức thấp.</p>
+        <p><strong>Hãy NGỪNG LẠI NGAY và áp dụng một trong bốn cách Recharge ở trên.</strong> Đừng cố gắng làm việc khi năng lượng thấp vì kết quả sẽ tồi tệ và bạn sẽ tốn nhiều sức hơn để sửa chữa sai lầm.</p>
+      </div>
+
+      <div class="protocol-example">
+        <div class="example-title">Quy Tắc Thực Hành: Kiểm Tra Năng Lượng 3 Lần Mỗi Ngày</div>
+        <p>Hãy đánh giá năng lượng của bạn trên thang điểm 10 vào ba thời điểm trong ngày để nhận biết xu hướng năng lượng của mình.</p>
+        <ul>
+          <li><strong>Sáng (8h):</strong> "Năng lượng tôi bây giờ: ___/10" - Đánh giá ngay khi bắt đầu ngày mới</li>
+          <li><strong>Trưa (13h):</strong> "Năng lượng tôi bây giờ: ___/10" - Kiểm tra giữa ngày để điều chỉnh</li>
+          <li><strong>Tối (18h):</strong> "Năng lượng tôi bây giờ: ___/10" - Đánh giá cuối ngày để rút kinh nghiệm</li>
+        </ul>
+        <p><strong>Nếu dưới 5 trên 10 thì hãy Recharge ngay lập tức.</strong> Đừng cố gắng tiếp tục làm việc vì một giờ nghỉ ngơi lúc này sẽ giúp bạn làm việc hiệu quả gấp nhiều lần trong những giờ còn lại.</p>
+      </div>
+    </div>
+
+    <!-- ============================================
+         HINH 3: KY THUAT GIAI PHONG NANG LUONG
+         ============================================ -->
+    <div class="image-container">
+      <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY5_HINH_3" alt="Kỹ thuật giải phóng năng lượng tồn đọng" loading="lazy">
+      <div class="image-caption">Hình 3: Kỹ thuật giải phóng năng lượng tồn đọng - 4 loại năng lượng cần quản lý</div>
+    </div>
+
+    <!-- ============================================
+         QUY TRINH 4: HOA GIAI NGHIEP
+         ============================================ -->
+    <div class="protocol-card">
+      <div class="protocol-header">
+        <span class="protocol-number">4</span>
+        <span class="protocol-icon">&#128275;</span>
+        <span class="protocol-title">Quy Trình Hóa Giải Nghiệp (Phá Vòng Lặp)</span>
+      </div>
+
+      <div class="highlight-box orange">
+        <p class="highlight-title">Khi Nào Dùng Quy Trình Này?</p>
+        <p>Bạn hãy sử dụng quy trình này khi nhận ra <strong>cùng một vấn đề lặp đi lặp lại</strong> trong đời mình, dù người và hoàn cảnh thay đổi nhưng kết quả vẫn giống nhau. Đây là dấu hiệu của một vòng lặp nghiệp cần được hóa giải từ gốc rễ.</p>
+        <p><strong>Ví dụ cụ thể:</strong> Cứ yêu là cứ đau, cứ làm là cứ thất bại, cứ có tiền là cứ mất, cứ kết bạn là cứ bị phản bội. Những pattern này không phải do xui xẻo mà do tần số năng lượng tích lũy tạo ra.</p>
+      </div>
+
+      <h4 style="padding: 0 var(--text-padding); color: var(--color-cyan); margin-bottom: var(--space-md);">5 Bước Hóa Giải Chi Tiết:</h4>
+
+      <div class="protocol-step">
+        <div class="step-title">Bước 1: Nhận Diện Pattern (Vòng Lặp)</div>
+        <p>Bước đầu tiên là <strong>nhìn thẳng vào sự thật</strong> và thừa nhận rằng có một pattern đang lặp lại trong đời bạn. Việc thừa nhận này đòi hỏi sự dũng cảm nhưng nó là bước thiết yếu để bắt đầu quá trình hóa giải.</p>
+        <ul>
+          <li>Viết ra: "Vấn đề lặp lại của tôi là: ___" - Hãy mô tả càng cụ thể càng tốt</li>
+          <li>Ghi nhận: "Nó đã lặp lại ___ lần" - Càng nhiều lần thì càng là vấn đề gốc rễ</li>
+          <li>Nhận biết: "Người và tình huống khác nhau, nhưng CẢM GIÁC và KẾT QUẢ luôn giống nhau"</li>
+        </ul>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">Bước 2: Tìm Nguồn Gốc (Root Cause)</div>
+        <p>Hầu hết các vòng lặp đều bắt nguồn từ <strong>một sự kiện tổn thương trong quá khứ</strong>, thường là từ thời thơ ấu khi bạn chưa có khả năng xử lý cảm xúc một cách lành mạnh. Hãy hỏi ngược dòng thời gian để tìm ra gốc rễ.</p>
+        <ul>
+          <li>"Lần ĐẦU TIÊN tôi cảm thấy điều này là khi nào?" - Trí nhớ có thể sẽ dẫn bạn về tuổi thơ</li>
+          <li>"Lúc đó tôi bao nhiêu tuổi và chuyện gì đã xảy ra?" - Hãy ghi lại chi tiết mà bạn nhớ được</li>
+          <li>Thường gặp nhất là giai đoạn 0-7 tuổi hoặc một sự kiện tổn thương lớn trong đời</li>
+        </ul>
+        <p><strong>Ví dụ:</strong> Pattern "Không xứng đáng được yêu" có thể bắt nguồn từ việc bố mẹ ly hôn lúc 5 tuổi, và đứa trẻ lúc đó tin rằng "do con không đủ tốt nên bố mẹ mới bỏ nhau".</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">Bước 3: Chữa Lành Vết Thương (Healing)</div>
+        <p>Sau khi tìm ra nguồn gốc, bạn cần <strong>viết thư cho Đứa Trẻ Bên Trong</strong> của mình. Đây là phần bản thân đã bị tổn thương từ lâu và vẫn đang mang nỗi đau đó trong tiềm thức.</p>
+        <p style="font-style: italic; color: var(--color-cyan);">"Em yêu, em không có lỗi. Điều đó xảy ra KHÔNG PHẢI do em. Em xứng đáng được yêu thương. Giờ đây, tôi (bản thân hiện tại) sẽ bảo vệ em."</p>
+        <p>Sau khi viết thư, bạn có thể thực hiện nghi thức giải phóng như sau:</p>
+        <ul>
+          <li>Đốt bức thư hoặc chôn nó trong đất như một biểu tượng cho việc buông bỏ quá khứ</li>
+          <li>Ôm bản thân, khóc nếu cần thiết vì nước mắt là cách cơ thể giải phóng năng lượng tích tụ</li>
+          <li>Tưởng tượng ánh sáng ấm áp ôm lấy Đứa Trẻ Bên Trong và nói với em rằng mọi thứ sẽ ổn</li>
+        </ul>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">Bước 4: Lập Trình Lại (Reframe)</div>
+        <p>Bây giờ bạn cần <strong>thay thế niềm tin cũ bằng niềm tin mới</strong> để thay đổi cách tiềm thức vận hành. Niềm tin cũ đã tạo ra vòng lặp, nên chỉ khi thay đổi niềm tin thì vòng lặp mới bị phá vỡ.</p>
+        <ul>
+          <li><strong>Cũ:</strong> "Tôi không xứng đáng được yêu" -> <strong>Mới:</strong> "Tôi là tình yêu và tôi xứng đáng với tất cả điều tốt đẹp"</li>
+          <li><strong>Cũ:</strong> "Tiền là tội lỗi" -> <strong>Mới:</strong> "Tiền là năng lượng tốt đẹp giúp tôi phục vụ nhiều hơn"</li>
+        </ul>
+        <p>Hãy lặp lại niềm tin mới 21 ngày liên tiếp vào mỗi sáng và mỗi tối để lập trình lại tiềm thức. Nghiên cứu cho thấy cần tối thiểu 21 ngày để tạo một đường dẫn thần kinh mới trong não.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">Bước 5: Thay Đổi Hành Động (New Response)</div>
+        <p>Lần sau khi tình huống tương tự xuất hiện, bạn cần <strong>phản ứng theo cách hoàn toàn mới</strong> thay vì rơi vào vòng lặp cũ. Đây là bước quyết định để chứng minh rằng bạn đã thực sự thay đổi từ bên trong.</p>
+        <ul>
+          <li>Nhận ra: "Đây là pattern cũ đang xuất hiện lại" - Chỉ riêng việc nhận biết đã là một bước tiến lớn</li>
+          <li>DỪNG phản ứng theo cách cũ, dù nó quen thuộc và dễ dàng hơn</li>
+          <li>Chọn phản ứng MỚI, thường là ngược lại với cách cũ mà bạn đã quen làm</li>
+        </ul>
+        <p><strong>Ví dụ:</strong> Cách cũ là bỏ chạy khi ai đó yêu thương bạn. Cách mới là ở lại, cho phép mình được yêu thương và nói với đối phương rằng bạn cảm ơn sự hiện diện của họ.</p>
+      </div>
+
+      <div class="highlight-box">
+        <p class="highlight-title">Thời Gian Cần Thiết</p>
+        <p>Phá một vòng lặp cần <strong>21 đến 49 ngày thực hành kiên trì</strong>. Đừng nản nếu lần đầu chưa thành công vì mỗi vòng lặp đã tồn tại nhiều năm nên cần thời gian để hóa giải hoàn toàn. Mỗi lần bạn thực hành đúng cách là bạn đang làm yếu dần vòng lặp cũ và tạo dựng vòng lặp mới tốt đẹp hơn.</p>
+      </div>
+    </div>
+
+    <!-- ============================================
+         HINH 4: SO SANH TRUOC VA SAU KHI THUC HANH
+         ============================================ -->
+    <div class="image-container">
+      <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY5_HINH_4" alt="So sánh trước và sau khi thực hành quy trình" loading="lazy">
+      <div class="image-caption">Hình 4: So sánh trước và sau khi thực hành quy trình - Sự chuyển hóa rõ ràng</div>
+    </div>
+
+    <!-- ============================================
+         QUY TRINH 5: HIEN THUC HOA
+         ============================================ -->
+    <div class="protocol-card">
+      <div class="protocol-header">
+        <span class="protocol-number">5</span>
+        <span class="protocol-icon">&#10024;</span>
+        <span class="protocol-title">Quy Trình Hiện Thực Hóa (Manifestation)</span>
+      </div>
+
+      <div class="highlight-box purple">
+        <p class="highlight-title">Sự Thật Về Manifestation</p>
+        <p>Manifestation <strong>KHÔNG PHẢI phép màu</strong> hay suy nghĩ tích cực rồi ngồi chờ điều tốt đẹp xảy ra. Đó là sự kết hợp giữa khoa học năng lượng, tâm lý học và hành động có ý thức để tạo ra kết quả bạn mong muốn.</p>
+        <p>Điều quan trọng nhất mà bạn cần hiểu là: nếu tiềm thức có <strong>resistance (kháng cự)</strong>, manifestation sẽ THẤT BẠI bất kể bạn hình dung hay khẳng định bao nhiêu lần. Ví dụ bạn muốn giàu nhưng tiềm thức tin rằng "người giàu là người xấu" thì bạn sẽ tự sabotage mỗi lần gần thành công.</p>
+        <p>Đây là lý do tại sao Quy Trình 4 (Hóa Giải Nghiệp) phải được thực hiện TRƯỚC khi bạn bắt đầu Hiện Thực Hóa bất cứ điều gì lớn.</p>
+      </div>
+
+      <h4 style="padding: 0 var(--text-padding); color: var(--color-cyan); margin-bottom: var(--space-md);">4 Bước Hiện Thực Hóa:</h4>
+
+      <div class="protocol-step">
+        <div class="step-title">1. CLARIFY - Làm Rõ Chính Xác Bạn Muốn Gì</div>
+        <p>Bước đầu tiên là <strong>xác định cực kỳ cụ thể</strong> điều bạn muốn hiện thực hóa, vì não bộ cần một bản vẽ chi tiết để có thể tạo ra blueprint thực hiện. Càng cụ thể thì não càng dễ hình dung và hướng đến mục tiêu đó.</p>
+        <ul>
+          <li><strong>KHÔNG NÊN:</strong> "Tôi muốn giàu" - Đây là mơ hồ và não không biết phải làm gì</li>
+          <li><strong>NÊN:</strong> "Tôi muốn thu nhập thụ động 50 triệu đồng mỗi tháng từ đầu tư bất động sản trong 2 năm tới" - Đây là cụ thể và có thể đo lường được</li>
+        </ul>
+        <p>Hãy viết ra mục tiêu của bạn với đầy đủ chi tiết về số lượng, thời gian, và cách thức để não có một định hướng rõ ràng.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">2. EMBODY - Sống Như Đã Có</div>
+        <p>Bước này đòi hỏi bạn <strong>match tần số với điều bạn muốn</strong> bằng cách sống, cảm và hành động như người đã có điều đó. Đây không phải là giả vờ mà là cách bạn điều chỉnh tần số năng lượng để phù hợp với kết quả mong muốn.</p>
+        <ul>
+          <li>Hỏi: "Người có 50 triệu thụ động mỗi tháng sẽ CẢM THẤY, NGHĨ và HÀNH ĐỘNG như thế nào?"</li>
+          <li>Bắt đầu có cảm giác đó NGAY BÂY GIỜ, không chờ đến khi có kết quả rồi mới cảm thấy</li>
+          <li>Hành động như người đó trong khả năng hiện tại của bạn, ví dụ ăn mặc chỉnh chu hơn và tự tin hơn</li>
+        </ul>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">3. DETACH - Buông Bỏ Kết Quả</div>
+        <p>Đây là bước khó nhất nhưng cũng là bước quan trọng nhất trong toàn bộ quy trình. Sau khi đặt ý định rõ ràng và bắt đầu sống như đã có, bạn cần <strong>buông bỏ sự bám víu vào kết quả</strong> và tin tưởng vào timing của vũ trụ.</p>
+        <ul>
+          <li>Sau khi đặt ý định, hãy BUÔNG outcome và không kiểm tra kết quả mỗi ngày</li>
+          <li>Tin tưởng rằng mọi thứ sẽ đến vào đúng thời điểm thích hợp nhất cho bạn</li>
+          <li>Không bám víu, không lo lắng "khi nào có?" vì sự lo lắng chính là kháng cự</li>
+        </ul>
+        <p><strong>Nghịch lý của Manifestation:</strong> Càng bám víu vào kết quả thì càng đẩy nó ra xa. Buông bỏ chính là cho phép điều bạn muốn đến với bạn một cách tự nhiên.</p>
+      </div>
+
+      <div class="protocol-step">
+        <div class="step-title">4. ACT - Hành Động Được Truyền Cảm Hứng</div>
+        <p>Manifestation không phải là ngồi không và chờ đợi phép màu xảy ra. Bạn cần <strong>hành động khi có inspired action</strong>, tức là những ý tưởng và cơ hội xuất hiện một cách tự nhiên và khiến bạn cảm thấy hứng thú.</p>
+        <ul>
+          <li>Khi có hành động được truyền cảm hứng (inspired action), hãy LÀM NGAY không chần chừ</li>
+          <li>Không suy nghĩ quá nhiều và không trì hoãn vì cơ hội thường không chờ đợi</li>
+          <li>Tin vào trực giác của bạn vì nó chính là la bàn chỉ đường của tiềm thức</li>
+        </ul>
+        <p><strong>Ví dụ:</strong> Bạn bất chợt muốn gọi cho người bạn cũ đã lâu không liên lạc. Hãy gọi ngay vì có thể họ sẽ giới thiệu cho bạn một cơ hội đầu tư mà bạn không ngờ tới.</p>
+      </div>
+
+      <div class="highlight-box red">
+        <p class="highlight-title">Lưu Ý Cực Kỳ Quan Trọng</p>
+        <p><strong>Nếu tiềm thức có limiting belief (niềm tin hạn chế), bạn PHẢI clear nó trước bằng Quy Trình 4 (Hóa Giải Nghiệp).</strong> Không có bất kỳ kỹ thuật manifestation nào có thể vượt qua sự kháng cự của tiềm thức.</p>
+        <p>Ví dụ: Bạn muốn giàu nhưng tiềm thức tin rằng "Tiền là tội lỗi" thì bạn sẽ tự phá hủy thành quả của mình mỗi khi gần thành công. Hãy làm Bước Hóa Giải trước rồi mới bắt đầu Hiện Thực Hóa.</p>
+      </div>
+
+      <div class="protocol-example">
+        <div class="example-title">Template Manifestation Hàng Ngày (3 Phút Mỗi Sáng)</div>
+        <p>Viết vào sổ mỗi sáng theo mẫu sau để thực hành Hiện Thực Hóa một cách hệ thống và nhất quán:</p>
+        <ul>
+          <li>"Tôi biết ơn vì tôi đang/đã ___ (viết như đã có)" - Ví dụ: "Tôi biết ơn vì tôi đang có thu nhập thụ động ổn định"</li>
+          <li>"Tôi cảm thấy ___ (cảm xúc khi có)" - Ví dụ: "Tôi cảm thấy bình an, tự do và biết ơn"</li>
+          <li>"Hôm nay tôi sẽ hành động như người ___ bằng cách ___" - Ví dụ: "Hôm nay tôi sẽ hành động như người thành công bằng cách đọc 30 phút sách về đầu tư"</li>
+        </ul>
+        <p>Sau khi viết xong, hãy đóng mắt lại cảm nhận cảm xúc đó trong 30 giây rồi buông bỏ và sống cuộc đời một cách bình thường.</p>
+      </div>
+    </div>
+
+    <!-- ============================================
+         HINH 5: CHECKLIST THUC HANH HANG NGAY
+         ============================================ -->
+    <div class="image-container">
+      <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY5_HINH_5" alt="Checklist thực hành hàng ngày cho từng quy trình" loading="lazy">
+      <div class="image-caption">Hình 5: Checklist thực hành hàng ngày cho từng quy trình - In ra và theo dõi tiến độ</div>
+    </div>
+
+    <!-- ============================================
+         SUMMARY BOX
+         ============================================ -->
+    <div class="summary-box">
+      <div class="summary-title"><span>&#128218;</span> Tóm Tắt Ngày 5: 5 Quy Trình Xử Lý Chuyên Sâu</div>
+      <ul class="key-points">
+        <li class="key-point">
+          <span class="bullet">&#9656;</span>
+          <span><strong>Quy Trình 1 - PAUSE:</strong> Dừng lại, Nhận diện, Hiểu rõ, Tạo khoảng cách và Chọn phản hồi có ý thức khi bị kích động bởi cảm xúc mạnh.</span>
+        </li>
+        <li class="key-point">
+          <span class="bullet">&#9656;</span>
+          <span><strong>Quy Trình 2 - 4 Câu Hỏi:</strong> Giá trị cốt lõi, 10 năm sau, Tình yêu hay Sợ hãi, và Trực giác giúp bạn ra quyết định lớn một cách sáng suốt.</span>
+        </li>
+        <li class="key-point">
+          <span class="bullet">&#9656;</span>
+          <span><strong>Quy Trình 3 - Quản Lý Năng Lượng:</strong> Bảo vệ và nạp lại 4 loại năng lượng Thể Chất, Cảm Xúc, Tâm Trí và Tinh Thần mỗi ngày.</span>
+        </li>
+        <li class="key-point">
+          <span class="bullet">&#9656;</span>
+          <span><strong>Quy Trình 4 - Hóa Giải Nghiệp:</strong> Nhận diện pattern, tìm nguồn gốc, chữa lành vết thương, lập trình lại và thay đổi hành động để phá vòng lặp.</span>
+        </li>
+        <li class="key-point">
+          <span class="bullet">&#9656;</span>
+          <span><strong>Quy Trình 5 - Hiện Thực Hóa:</strong> Làm rõ, Sống như đã có, Buông bỏ kết quả và Hành động được truyền cảm hứng để tạo ra đời sống bạn mong muốn.</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ============================================
+         QUIZ SECTION
+         ============================================ -->
+    <div class="quiz-section">
+      <div class="quiz-header">
+        <h2 class="quiz-title">Quiz Ngày 5</h2>
+        <p class="quiz-desc">Kiểm tra hiểu biết của bạn về 5 Quy Trình Xử Lý Chuyên Sâu</p>
+      </div>
+
+      <div class="quiz-score">
+        <span class="score-label">Điểm của bạn: </span>
+        <span class="score-value" id="current-score">0/3</span>
+      </div>
+
+      <!-- Cau 1 -->
+      <div class="quiz-question" data-correct="1">
+        <div class="question-number">Câu 1/3</div>
+        <div class="question-text">Trong quy trình PAUSE, chữ "U" đại diện cho bước nào?</div>
+        <ul class="quiz-options">
+          <li class="quiz-option" data-index="0">a) Update - Cập nhật thông tin</li>
+          <li class="quiz-option" data-index="1">b) Understand - Hiểu rõ nguồn gốc cảm xúc và trigger</li>
+          <li class="quiz-option" data-index="2">c) Undo - Quay lại trạng thái ban đầu</li>
+          <li class="quiz-option" data-index="3">d) Unite - Kết nối với người khác</li>
+        </ul>
+        <div class="quiz-answer">
+          <strong>Đáp án đúng: b) Understand.</strong> Bước U trong PAUSE là Understand - hiểu rõ nguồn gốc của phản ứng cảm xúc, xác định trigger nào bị chạm và phân biệt giữa tình huống thực tế và cách bạn diễn giải nó.
+        </div>
+      </div>
+
+      <!-- Cau 2 -->
+      <div class="quiz-question" data-correct="2">
+        <div class="question-number">Câu 2/3</div>
+        <div class="question-text">Tại sao Manifestation thường thất bại dù bạn đã hình dung và khẳng định mỗi ngày?</div>
+        <ul class="quiz-options">
+          <li class="quiz-option" data-index="0">a) Vì vũ trụ không nghe thấy</li>
+          <li class="quiz-option" data-index="1">b) Vì bạn chưa đủ may mắn</li>
+          <li class="quiz-option" data-index="2">c) Vì tiềm thức có resistance (kháng cự) và limiting belief chưa được giải quyết</li>
+          <li class="quiz-option" data-index="3">d) Vì bạn không có khả năng</li>
+        </ul>
+        <div class="quiz-answer">
+          <strong>Đáp án đúng: c) Vì tiềm thức có resistance.</strong> Khi tiềm thức chứa niềm tin hạn chế như "tôi không xứng đáng" hoặc "tiền là tội lỗi", bạn sẽ tự sabotage mỗi khi gần thành công. Phải clear resistance trước bằng Quy Trình 4 rồi mới Hiện Thực Hóa hiệu quả.
+        </div>
+      </div>
+
+      <!-- Cau 3 -->
+      <div class="quiz-question" data-correct="1">
+        <div class="question-number">Câu 3/3</div>
+        <div class="question-text">Khi ra quyết định lớn, nếu chỉ 1 trên 4 Câu Hỏi cho kết quả YES, bạn nên làm gì?</div>
+        <ul class="quiz-options">
+          <li class="quiz-option" data-index="0">a) Vẫn làm vì có một phần tích cực</li>
+          <li class="quiz-option" data-index="1">b) Không nên làm hoặc chờ thêm thời gian để có thêm thông tin</li>
+          <li class="quiz-option" data-index="2">c) Hỏi người khác quyết định giúp</li>
+          <li class="quiz-option" data-index="3">d) Tung đồng xu</li>
+        </ul>
+        <div class="quiz-answer">
+          <strong>Đáp án đúng: b) Không nên làm hoặc chờ thêm thời gian.</strong> Theo quy tắc 4 Câu Hỏi, cần ít nhất 3 trên 4 câu trả lời là YES mới nên thực hiện. Khi chỉ có 1 trên 4, đó là dấu hiệu rõ ràng rằng quyết định này chưa phù hợp với giá trị và hướng đi của bạn.
+        </div>
+      </div>
+
+      <!-- Quiz Result -->
+      <div class="quiz-result" id="quiz-result">
+        <div class="result-title" id="result-title">Chúc Mừng!</div>
+        <div class="result-score" id="final-score">3/3</div>
+        <p class="result-message" id="result-message">Xuất sắc!</p>
+
+        <div class="pass-message" id="pass-msg">
+          <strong>HOÀN THÀNH NGÀY 5</strong>
+          <p style="margin-top: var(--space-sm);">Bạn đã có đầy đủ cả Nghi Thức lẫn Quy Trình! Mai chúng ta sẽ học về Bản Đồ Nghiệp và Luân Hồi!</p>
+        </div>
+
+        <div class="fail-message" id="fail-msg">
+          <strong>HÃY XEM LẠI BÀI HỌC</strong>
+          <p style="margin-top: var(--space-sm);">Đọc lại 5 Quy Trình và thử lại quiz nhé!</p>
+          <button class="retry-button" onclick="retryQuiz()">Làm Lại Quiz</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         NEXT DAY PREVIEW
+         ============================================ -->
+    <div class="next-preview">
+      <div class="preview-label">Ngày Tiếp Theo</div>
+      <div class="preview-title">NGÀY 6: BẢN ĐỒ NGHIỆP & LUÂN HỒI</div>
+      <p class="preview-desc">Hôm nay bạn đã học 5 Quy Trình để xử lý các tình huống cụ thể trong cuộc sống. Hãy thử áp dụng ít nhất 1 quy trình trong 24 giờ tới! Mai chúng ta đi sâu vào Bản Đồ Nghiệp và Luân Hồi để hiểu tại sao vấn đề lặp lại và cách thoát khỏi vòng luẩn quẩn.</p>
+    </div>
+
+    <!-- ============================================
+         CTA BUTTONS
+         ============================================ -->
+    <div class="cta-group">
+      <a href="#" class="cta-button secondary" id="btn-prev-day">Xem Lại Ngày 4</a>
+      <a href="#" class="cta-button primary" id="btn-next-day">Tiếp Tục Đến Ngày 6</a>
+    </div>
+
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer class="lesson-footer">
+      <div class="footer-brand">GEM Academy</div>
+      <div class="footer-url">5 quy trình này sẽ là bạn đồng hành suốt đời. Hãy bookmark lại!</div>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // CTA Links Configuration
+    const root = getComputedStyle(document.documentElement);
+    const ctaNextDay = root.getPropertyValue('--cta-next-day').trim().replace(/['"]/g, '');
+    const ctaPrevDay = root.getPropertyValue('--cta-prev-day').trim().replace(/['"]/g, '');
+
+    document.getElementById('btn-next-day').href = ctaNextDay;
+    document.getElementById('btn-prev-day').href = ctaPrevDay;
+
+    // Quiz System - Instant Feedback, No Submit Button
+    let totalQuestions = 3;
+    let correctAnswers = 0;
+    let answeredQuestions = 0;
+
+    document.querySelectorAll('.quiz-question').forEach(question => {
+      const options = question.querySelectorAll('.quiz-option');
+      const answerDiv = question.querySelector('.quiz-answer');
+      const correctIndex = parseInt(question.getAttribute('data-correct'));
+
+      options.forEach((option, index) => {
+        option.addEventListener('click', function() {
+          if (question.classList.contains('answered-q')) return;
+
+          question.classList.add('answered-q');
+          answeredQuestions++;
+
+          // Disable all options
+          options.forEach(opt => opt.classList.add('answered'));
+
+          if (index === correctIndex) {
+            this.classList.add('correct');
+            correctAnswers++;
+          } else {
+            this.classList.add('wrong');
+            // Show correct answer
+            options[correctIndex].classList.add('correct');
+          }
+
+          // Show explanation
+          answerDiv.classList.add('show');
+
+          // Update score
+          document.getElementById('current-score').textContent = correctAnswers + '/' + totalQuestions;
+
+          // Check if all questions answered
+          if (answeredQuestions === totalQuestions) {
+            setTimeout(showQuizResult, 800);
+          }
         });
-        
-        function showQuizResult() {
-            const resultDiv = document.getElementById('quiz-result');
-            const resultTitle = document.getElementById('result-title');
-            const finalScore = document.getElementById('final-score');
-            const resultMessage = document.getElementById('result-message');
-            const passMsg = document.getElementById('pass-msg');
-            const failMsg = document.getElementById('fail-msg');
-            
-            resultDiv.classList.add('show');
-            finalScore.textContent = correctAnswers + '/5';
-            
-            if (correctAnswers >= 4) {
-                resultTitle.textContent = '🎉 Chúc Mừng!';
-                resultMessage.textContent = 'Xuất sắc! Bạn đã hiểu rõ 5 Quy Trình!';
-                passMsg.style.display = 'block';
-                failMsg.style.display = 'none';
-            } else {
-                resultTitle.textContent = '📚 Cần Xem Lại Bài Học';
-                resultMessage.textContent = 'Bạn đạt ' + correctAnswers + '/5 điểm. Cần ít nhất 4/5 để tiếp tục.';
-                passMsg.style.display = 'none';
-                failMsg.style.display = 'block';
-            }
-            
-            setTimeout(() => {
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 300);
-        }
-        
-        function retryQuiz() {
-            correctAnswers = 0;
-            answeredQuestions = 0;
-            
-            document.getElementById('current-score').textContent = '0/5';
-            
-            document.querySelectorAll('.quiz-question').forEach(question => {
-                question.classList.remove('answered');
-                
-                question.querySelectorAll('.quiz-options li').forEach(option => {
-                    option.classList.remove('selected', 'correct', 'incorrect', 'disabled');
-                });
-                
-                question.querySelector('.quiz-answer').classList.remove('show');
-            });
-            
-            document.getElementById('quiz-result').classList.remove('show');
-            
-            document.querySelector('.quiz-section').scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
+      });
+    });
+
+    function showQuizResult() {
+      const resultDiv = document.getElementById('quiz-result');
+      const resultTitle = document.getElementById('result-title');
+      const finalScore = document.getElementById('final-score');
+      const resultMessage = document.getElementById('result-message');
+      const passMsg = document.getElementById('pass-msg');
+      const failMsg = document.getElementById('fail-msg');
+
+      resultDiv.classList.add('show');
+      finalScore.textContent = correctAnswers + '/' + totalQuestions;
+
+      if (correctAnswers >= 2) {
+        resultTitle.textContent = 'Chúc Mừng!';
+        resultMessage.textContent = 'Xuất sắc! Bạn đã hiểu rõ 5 Quy Trình Xử Lý Chuyên Sâu!';
+        passMsg.style.display = 'block';
+        failMsg.style.display = 'none';
+      } else {
+        resultTitle.textContent = 'Cần Xem Lại Bài Học';
+        resultMessage.textContent = 'Bạn đạt ' + correctAnswers + '/' + totalQuestions + ' điểm. Cần ít nhất 2/' + totalQuestions + ' để tiếp tục.';
+        passMsg.style.display = 'none';
+        failMsg.style.display = 'block';
+      }
+
+      setTimeout(() => {
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+
+    function retryQuiz() {
+      correctAnswers = 0;
+      answeredQuestions = 0;
+
+      document.getElementById('current-score').textContent = '0/' + totalQuestions;
+
+      document.querySelectorAll('.quiz-question').forEach(question => {
+        question.classList.remove('answered-q');
+
+        question.querySelectorAll('.quiz-option').forEach(option => {
+          option.classList.remove('correct', 'wrong', 'answered');
         });
-    </script>
+
+        question.querySelector('.quiz-answer').classList.remove('show');
+      });
+
+      document.getElementById('quiz-result').classList.remove('show');
+
+      document.querySelector('.quiz-section').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
 
 </body>
 </html>

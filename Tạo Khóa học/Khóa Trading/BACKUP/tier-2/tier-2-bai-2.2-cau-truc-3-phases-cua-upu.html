@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.2: Cấu Trúc 3 Phases Của UPU | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        .pattern-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .pattern-flow {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-phase {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-phase {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        .flow-phase.up { border-left-color: var(--success); }
+        .flow-phase.pause { border-left-color: var(--gold); }
+        .phase-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        .phase-content { flex: 1; }
+        .phase-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-phase.up .phase-title { color: var(--success); }
+        .flow-phase.pause .phase-title { color: var(--gold); }
+        .phase-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 600px) {
+            .stat-value { font-size: 1.25rem; }
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .stat-card.green .stat-value {
+            background: linear-gradient(135deg, var(--success), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card.gold .stat-value {
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: -16px;
+                margin-right: -16px;
+                margin-left: calc(-16px - 4px);
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📈</span>
+                <span>Bullish Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 3 - UPU Pattern Mastery</div>
+            <h1 class="lesson-title">Cấu Trúc 3 Phases Của UPU</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>8 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Bạn đã bao giờ tự hỏi tại sao giá đang tăng mạnh bỗng nhiên "dừng lại" rồi lại tiếp tục tăng chưa? Đó chính xác là pattern UPU - và hiểu được cấu trúc 3 phases của nó sẽ giúp bạn tìm được những điểm entry chính xác với tỷ lệ thắng cao.</p>
+
+            <p>Sau khi hoàn thành bài học này, bạn sẽ:</p>
+            <ul>
+                <li><strong>Nhận diện chính xác</strong> từng phase trong pattern UPU (UP - PAUSE - UP)</li>
+                <li><strong>Hiểu tại sao</strong> Smart Money tạo ra vùng Pause và cách họ tích lũy vị thế</li>
+                <li><strong>Xác định được</strong> vùng LFZ tiềm năng để chờ entry khi giá quay lại</li>
+                <li><strong>Phân biệt</strong> giữa vùng Pause hợp lệ và vùng đảo chiều</li>
+            </ul>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nhắc Lại Kiến Thức Cốt Lõi</div>
+                <p><strong>UPU = Up-Pause-Up</strong> là pattern tiếp diễn xu hướng tăng, một trong 4 patterns chính của hệ thống GEM Frequency. Pattern này tạo ra <strong>LFZ (Low Frequency Zone)</strong> - vùng mua tiềm năng với win rate lên đến 71%. Hiểu được cấu trúc 3 phases sẽ giúp bạn không bao giờ "đuổi theo giá" mà luôn chờ đợi được entry tại vùng tối ưu.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Thống Kê UPU Pattern</h2>
+            <p>Trước khi đi vào chi tiết, hãy nhìn vào những con số thực tế để bạn hiểu tại sao UPU là một trong những pattern đáng tin cậy nhất. Những thống kê này được tổng hợp từ hơn 2,000 giao dịch trên các cặp BTC, ETH và altcoins trong giai đoạn 2022-2024.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <div class="stat-value">71%</div>
+                    <div class="stat-label">Win Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">1:2.8</div>
+                    <div class="stat-label">R:R</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-value">4H/1D</div>
+                    <div class="stat-label">Best TF</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Giải Thích Con Số</div>
+                <p>
+                    <strong>Win Rate 71%:</strong> Có nghĩa là cứ 10 lệnh trade theo UPU pattern, trung bình 7 lệnh sẽ thắng. Đây là tỷ lệ cực kỳ cao trong trading!<br><br>
+                    <strong>R:R 1:2.8:</strong> Trung bình mỗi lệnh thắng sẽ cho lợi nhuận gấp 2.8 lần số tiền bạn rủi ro. Nếu bạn đặt Stop Loss là $100, target profit trung bình sẽ là $280.<br><br>
+                    <strong>Best Timeframe 4H/1D:</strong> Pattern hoạt động tốt nhất trên khung thời gian 4 giờ và 1 ngày. Các khung thời gian này cân bằng giữa độ chính xác và số lượng cơ hội.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Cấu Trúc 3 Phases</h2>
+            <p>Pattern UPU được chia thành 3 giai đoạn rõ ràng, giống như cách một vận động viên chạy marathon: <strong>Tăng tốc → Nghỉ ngắn → Tăng tốc tiếp</strong>. Mỗi phase có đặc điểm riêng và việc nhận diện chính xác từng phase sẽ quyết định thành công của giao dịch.</p>
+
+            <p>Hãy tưởng tượng thị trường như một cuộc chạy đua: Smart Money (những tay to, cá voi) bắt đầu mua mạnh (Phase 1), sau đó họ tạm nghỉ để tích lũy thêm vị thế mà không đẩy giá lên cao (Phase 2), và cuối cùng họ tiếp tục đẩy giá lên (Phase 3). Hiểu được logic này, bạn sẽ biết chờ đợi entry tại Phase 2 thay vì đuổi theo giá ở Phase 1 hoặc Phase 3.</p>
+
+            <div class="pattern-flow">
+                <div class="flow-phase up">
+                    <div class="phase-icon">📈</div>
+                    <div class="phase-content">
+                        <div class="phase-title">PHASE 1: UP (Tăng Mạnh)</div>
+                        <div class="phase-desc">
+                            <strong>Đây là đợt tăng đầu tiên - dấu hiệu Smart Money bắt đầu vào lệnh:</strong><br>
+                            • Ít nhất 2 nến tăng liên tiếp (thường 3-5 nến)<br>
+                            • Tăng ≥2% trong phase này (BTC thường 2-4%, altcoins có thể 5-10%)<br>
+                            • Volume cao hơn trung bình 1.5-2x (cho thấy lực mua thực sự)<br>
+                            • Nến thân lớn, bóng ngắn (buyers kiểm soát hoàn toàn)
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-phase pause">
+                    <div class="phase-icon">⏸️</div>
+                    <div class="phase-content">
+                        <div class="phase-title">PHASE 2: PAUSE (Tích Lũy)</div>
+                        <div class="phase-desc">
+                            <strong>Vùng vàng - nơi Smart Money tích lũy thêm vị thế:</strong><br>
+                            • Consolidation từ 1-5 nến (tối ưu 2-3 nến)<br>
+                            • Range &lt;1.5% (giá đi ngang trong biên độ hẹp)<br>
+                            • Nến thân nhỏ, có thể có bóng hai đầu (cho thấy sự cân bằng mua/bán)<br>
+                            • <strong style="color: var(--gold);">→ TẠO LFZ (LOW FREQUENCY ZONE) TẠI ĐÂY</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-phase up">
+                    <div class="phase-icon">📈</div>
+                    <div class="phase-content">
+                        <div class="phase-title">PHASE 3: UP (Tiếp Tục Tăng)</div>
+                        <div class="phase-desc">
+                            <strong>Xác nhận pattern hoàn chỉnh - Smart Money đẩy giá lên tiếp:</strong><br>
+                            • Tiếp tục tăng ≥2% (phá vỡ đỉnh Phase 1)<br>
+                            • Volume tăng mạnh khi breakout (xác nhận lực mua mới vào)<br>
+                            • Nến breakout thân lớn, đóng cửa gần đỉnh<br>
+                            • Đây là lúc bạn biết LFZ đã được xác nhận hợp lệ
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-1.webp" alt="UPU 3 Phases">
+            </div>
+            <div class="image-caption">Hình 1: Cấu trúc 3 phases của UPU pattern - UP (tăng) → PAUSE (tích lũy) → UP (tiếp tục tăng)</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Phase 1: UP - Chi Tiết</h2>
+            <p>Phase 1 là đợt tăng đầu tiên, thể hiện lực mua mạnh từ Smart Money. Đây là giai đoạn mà bạn cần <strong>quan sát chứ không phải entry</strong> - vì giá đã di chuyển nhanh và rủi ro cao.</p>
+
+            <p>Tại sao Phase 1 quan trọng? Vì nó cho bạn biết <strong>xu hướng đang bullish</strong> và chuẩn bị tìm kiếm điểm entry. Nếu bạn thấy một đợt tăng mạnh với volume cao, đó là tín hiệu để bắt đầu theo dõi pattern UPU.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Đặc Điểm Nhận Diện Phase 1</div>
+                <p>
+                    <strong>1. Số nến:</strong> Tối thiểu 2 nến tăng liên tiếp (tốt nhất 3-5 nến, cho thấy momentum bền vững)<br><br>
+                    <strong>2. Biên độ:</strong> Tăng ≥2% từ đáy đến đỉnh phase. Với BTC, thường là 2-4%. Với altcoins, có thể 5-15%.<br><br>
+                    <strong>3. Volume:</strong> Cao hơn trung bình 1.5x - 2x. Volume cao xác nhận đây là lực mua thực sự, không phải bẫy.<br><br>
+                    <strong>4. Hình dạng nến:</strong> Thân lớn, bóng ngắn (cho thấy buyers kiểm soát hoàn toàn, giá đóng cửa gần đỉnh)
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Ví Dụ Thực Tế: BTC Tháng 10/2023</div>
+                <p>Ngày 23-24/10/2023, BTC tăng từ $29,500 lên $31,000 (tăng 5.1%) trong 2 nến 4H. Volume tăng gấp 2.3x so với trung bình 20 ngày. Các nến có thân rất lớn, bóng dưới gần như không có. Đây là Phase 1 điển hình của pattern UPU, sau đó giá đi ngang tạo Phase 2 tại vùng $30,800-$31,000.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-2.webp" alt="Phase 1 Detail">
+            </div>
+            <div class="image-caption">Hình 2: Chi tiết Phase 1 - Đợt tăng đầu tiên với nến thân lớn và volume cao</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>⏸️</span> Phase 2: PAUSE - Vùng Vàng</h2>
+            <p>Phase 2 là giai đoạn quan trọng nhất vì đây là nơi hình thành <strong style="color: var(--gold);">LFZ (Low Frequency Zone)</strong> - vùng mà bạn sẽ chờ đợi để entry khi giá quay lại.</p>
+
+            <p>Tại sao gọi là "Low Frequency Zone"? Vì trong vùng này, giá di chuyển rất ít (frequency thấp), tạo ra một vùng cân bằng giữa mua và bán. Đây là nơi Smart Money âm thầm tích lũy thêm vị thế mà không làm giá tăng mạnh.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Tại Sao Phase 2 Là "Vùng Vàng"?</div>
+                <p>Vùng Pause là nơi Smart Money tích lũy thêm vị thế mua trước khi đẩy giá lên cao hơn. Tại đây, có rất nhiều lệnh mua chưa được khớp (unfilled orders). Khi giá quay lại kiểm tra vùng này trong tương lai, những lệnh này sẽ được kích hoạt, tạo ra lực mua mạnh đẩy giá lên. Đó là lý do tại sao LFZ là điểm entry tuyệt vời - bạn đang mua cùng với Smart Money!</p>
+            </div>
+
+            <ul>
+                <li><strong>Số nến:</strong> 1-5 nến (tối ưu 2-3 nến). Nếu ít hơn 1 nến, vùng quá mỏng. Nếu quá 5 nến, có thể đang đảo chiều.</li>
+                <li><strong>Range:</strong> &lt;1.5% (giá đi ngang trong biên độ hẹp). Với BTC, thường &lt;$500-700. Với altcoins, tính theo %.</li>
+                <li><strong>Đặc điểm nến:</strong> Thân nhỏ, có thể có bóng hai đầu (doji, spinning top, inside bars). Cho thấy sự cân bằng mua/bán.</li>
+                <li><strong>Volume:</strong> Thường giảm 50-70% so với Phase 1. Volume thấp xác nhận đây là vùng tích lũy, không phải distribution.</li>
+            </ul>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ Thực Tế: ETH Tháng 11/2023</div>
+                <p>Ngày 5-6/11/2023, ETH sau khi tăng từ $1,850 lên $1,920 (Phase 1), đã tạo vùng Pause trong 3 nến 4H tại $1,900-$1,920 (range chỉ 1.1%). Volume giảm còn 40% so với Phase 1. Đây là LFZ hoàn hảo. Sau đó giá tiếp tục tăng lên $2,050 (Phase 3). Khi giá retest vùng $1,900-$1,920, đã có phản ứng tăng mạnh, cho win rate 78%.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-3.webp" alt="Phase 2 LFZ">
+            </div>
+            <div class="image-caption">Hình 3: Phase 2 - Vùng Pause tạo thành LFZ với nến thân nhỏ và volume thấp</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Phase 3: UP - Xác Nhận Pattern</h2>
+            <p>Phase 3 xác nhận pattern UPU hoàn chỉnh khi giá tiếp tục tăng và phá vỡ đỉnh Phase 1. Đây là giai đoạn cuối cùng, cho bạn biết rằng <strong>LFZ đã được xác nhận</strong> và có thể sử dụng trong tương lai.</p>
+
+            <p>Tại sao cần Phase 3? Vì nếu không có Phase 3, pattern chưa hoàn chỉnh và LFZ chưa được "verified". Nhiều trader mới mắc lỗi entry ngay khi thấy Phase 2 mà không chờ Phase 3 xác nhận - dẫn đến thua lỗ khi giá đảo chiều thay vì tiếp tục tăng.</p>
+
+            <ul>
+                <li><strong>Breakout:</strong> Giá phá vỡ đỉnh của vùng Pause với nến thân lớn đóng cửa phía trên. Không đếm các cây nến bóng dài mà body không vượt qua.</li>
+                <li><strong>Volume:</strong> Tăng mạnh khi breakout (1.5-2x trung bình). Volume xác nhận đây là breakout thật, không phải fakeout.</li>
+                <li><strong>Biên độ:</strong> Tiếp tục tăng ≥2% sau khi phá vỡ. Đây là target tối thiểu để xác nhận momentum vẫn còn.</li>
+                <li><strong>Momentum:</strong> Nến thân lớn, đóng cửa gần đỉnh. Bóng trên nhỏ cho thấy không có lực bán đáng kể.</li>
+            </ul>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Bạn KHÔNG entry tại Phase 3 vì giá đã cao. Thay vào đó, bạn đánh dấu LFZ (Phase 2) và chờ giá quay lại test vùng này trong tương lai. Đó mới là thời điểm entry với R:R tối ưu 1:2.8 hoặc cao hơn!</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-4.webp" alt="Phase 3 Breakout">
+            </div>
+            <div class="image-caption">Hình 4: Phase 3 - Xác nhận pattern hoàn chỉnh với breakout volume cao</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Tổng Hợp So Sánh 3 Phases</h2>
+            <p>Dưới đây là bảng so sánh nhanh để bạn dễ nhớ các tiêu chí của từng phase. Hãy lưu lại hoặc screenshot để tham khảo khi practice.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <div class="stat-value">≥2%</div>
+                    <div class="stat-label">Phase 1 Tăng</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-value">&lt;1.5%</div>
+                    <div class="stat-label">Phase 2 Range</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value">≥2%</div>
+                    <div class="stat-label">Phase 3 Tăng</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ Hoàn Chỉnh: BTC Tháng 1/2024</div>
+                <p>
+                    <strong>Phase 1 (8-9/1/2024):</strong> BTC tăng từ $44,000 lên $47,500 (+7.95%) trong 4 nến 4H. Volume 2.1x trung bình.<br><br>
+                    <strong>Phase 2 (10/1/2024):</strong> BTC đi ngang 3 nến tại $47,200-$47,500 (range 0.63%). Volume giảm 60%.<br><br>
+                    <strong>Phase 3 (11-12/1/2024):</strong> BTC phá vỡ $47,500 và tăng lên $49,000 (+3.17%). Volume tăng 1.8x.<br><br>
+                    <strong>Entry Point:</strong> Khi giá retest LFZ ($47,200-$47,500) vào ngày 15/1, entry tại $47,300, SL $46,800 (dưới vùng), TP $49,500. Kết quả: +4.65% profit, R:R 1:4.4.
+                </p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-5.webp" alt="UPU Complete Example">
+            </div>
+            <div class="image-caption">Hình 5: Ví dụ hoàn chỉnh UPU pattern với cả 3 phases và điểm entry retest</div>
+        </section>
+
+        <div class="summary-box">
+            <div class="summary-title"><span>📝</span> Tóm Tắt Bài Học - Key Takeaways</div>
+            <ul class="summary-list">
+                <li><strong>UPU có 3 phases:</strong> UP (tăng mạnh ≥2%) → PAUSE (đi ngang &lt;1.5%) → UP (tiếp tục tăng ≥2%). Nhớ công thức này!</li>
+                <li><strong>Phase 1:</strong> Quan sát, không entry. Tìm nến thân lớn, volume cao (1.5-2x), tăng ≥2%.</li>
+                <li><strong>Phase 2 là "Vùng Vàng":</strong> Nơi tạo LFZ. Range &lt;1.5%, 1-5 nến, volume giảm. Đánh dấu vùng này!</li>
+                <li><strong>Phase 3:</strong> Xác nhận pattern hoàn chỉnh. Breakout volume cao, tăng ≥2%. LFZ giờ đã verified.</li>
+                <li><strong>Entry Point:</strong> KHÔNG entry tại Phase 3. Chờ giá retest LFZ (Phase 2) để entry với R:R tối ưu.</li>
+                <li><strong>Thống kê:</strong> Win rate 71%, R:R trung bình 1:2.8. Đây là một trong những pattern đáng tin cậy nhất!</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Vùng LFZ trong pattern UPU được tạo ra ở phase nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Phase 1 (UP đầu tiên)</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Phase 2 (PAUSE)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Phase 3 (UP thứ hai)</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Tất cả các phase</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Điều kiện về range của Phase 2 (PAUSE) là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Range ≥2%</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Range ≥1.5%</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Range &lt;1.5%</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Không có điều kiện</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-number">3</div>
+                <div class="question-text">Phase 3 được coi là hoàn chỉnh khi nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Giá tiếp tục tăng ≥2% với volume cao</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Giá chạm lại vùng Pause</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Giá giảm về đáy Phase 1</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Volume giảm mạnh</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = 3;
+
+            const explanations = {
+                1: {
+                    correct: '✓ Chính xác! LFZ được tạo tại Phase 2 (PAUSE) - vùng tích lũy của Smart Money.',
+                    incorrect: '✗ Sai! LFZ được tạo tại Phase 2 (PAUSE), không phải phase khác.'
+                },
+                2: {
+                    correct: '✓ Chính xác! Phase 2 phải có range <1.5% để được coi là vùng tích lũy hợp lệ.',
+                    incorrect: '✗ Sai! Phase 2 cần có range <1.5% (đi ngang trong biên độ hẹp).'
+                },
+                3: {
+                    correct: '✓ Chính xác! Phase 3 hoàn chỉnh khi giá tiếp tục tăng ≥2% với volume cao.',
+                    incorrect: '✗ Sai! Phase 3 xác nhận pattern khi giá tiếp tục tăng ≥2% với volume tăng.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = correctCount + '/' + totalQuestions;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc!';
+                            } else if (correctCount >= 2) {
+                                messageDiv.textContent = '👍 Tốt lắm!';
+                            } else {
+                                messageDiv.textContent = '📚 Xem lại bài học nhé!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,1933 +1,1803 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGÀY 3: 5 NGUYÊN LÝ VẬN HÀNH | 7 Ngày Khai Mở Tần Số Gốc</title>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Noto+Sans+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* ===== GEM COURSE TEMPLATE V5.4 - FACEBOOK STYLE ===== */
-        :root {
-            /* === CTA BUTTONS === */
-            --cta-next-day: 'https://yinyangmasters.com/a/members/9d135b73-32b5-4397-9c58-900e26d5d42e/99207a4d-9251-4820-aa90-e464d534ab27';
-            --cta-prev-day: 'https://yinyangmasters.com/a/members/9d135b73-32b5-4397-9c58-900e26d5d42e/170d4096-05e6-41be-9b9f-804f5bf6b934';
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NGÀY 3: 5 NGUYÊN LÝ VẬN HÀNH | 7 Ngày Khai Mở Tần Số Gốc</title>
 
-            /* === V5.4 DARK THEME COLORS === */
-            --color-navy: #112250;
-            --color-navy-dark: #0A0F1A;
-            --color-burgundy: #9C0612;
-            --color-burgundy-dark: #640A0C;
-            --color-gold: #FFBD59;
-            --color-gold-light: #DEBC81;
-            --color-cyan: #00F0FF;
-            --color-purple: #6A5BFF;
-            --color-green: #10B981;
-            --color-red: #EF4444;
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Noto+Sans+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-            /* === BACKGROUNDS === */
-            --bg-primary: #0A0F1A;
-            --bg-card: rgba(17, 34, 80, 0.6);
-            --bg-glass: rgba(255, 255, 255, 0.05);
+  <style>
+/* ==========================================
+   GEM DESIGN SYSTEM - V5.4 FACEBOOK STYLE
+   Full-Width Layout - Ngay 3
+   ========================================== */
+:root {
+  /* ========== COLORS ========== */
+  --color-navy: #112250;
+  --color-navy-dark: #0A0F1A;
+  --color-navy-light: #1a3a6e;
+  --color-gold: #FFBD59;
+  --color-gold-dark: #E5A84D;
+  --color-burgundy: #9C0612;
+  --color-cyan: #00F0FF;
+  --color-purple: #6A5BFF;
+  --color-green: #10B981;
+  --color-red: #EF4444;
+  --color-orange: #FF9800;
+  --color-white: #FFFFFF;
+  --color-text: #E8E8E8;
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-muted: rgba(255, 255, 255, 0.5);
 
-            /* === TEXT === */
-            --text-primary: #FFFFFF;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.5);
+  /* ========== BACKGROUNDS ========== */
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-hover: rgba(255, 255, 255, 0.06);
+  --bg-glass: rgba(255, 255, 255, 0.08);
+  --color-bg-dark: #0A0F1A;
 
-            /* === BORDERS === */
-            --border-gold: rgba(255, 189, 89, 0.3);
-            --border-glass: rgba(255, 255, 255, 0.1);
+  /* ========== BORDERS ========== */
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-gold: rgba(255, 189, 89, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
-            /* === SPACING (V5.4 Facebook Style) === */
-            --container-padding: 0;
-            --text-padding: 16px;
-            --card-padding: 1.5rem;
-            --space-xs: 0.25rem;
-            --space-sm: 0.5rem;
-            --space-md: 1rem;
-            --space-lg: 1.5rem;
-            --space-xl: 2rem;
+  /* ==========================================
+     V5.4 CRITICAL: TEXT-ONLY PADDING
+     ========================================== */
+  --text-padding: 16px;
 
-            /* === RADIUS === */
-            --radius-none: 0;
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --radius-xl: 16px;
+  /* ========== SPACING ========== */
+  --space-xs: 0.125rem;
+  --space-sm: 0.25rem;
+  --space-md: 0.5rem;
+  --space-lg: 0.75rem;
+  --space-xl: 1rem;
+  --space-2xl: 1.25rem;
+  --space-3xl: 1.5rem;
 
-            /* === FONT === */
-            --font-heading: 'Montserrat', sans-serif;
-            --font-body: 'Noto Sans Display', sans-serif;
+  /* ==========================================
+     V5.4 CRITICAL: CONTAINER PADDING = 0
+     ========================================== */
+  --container-padding: 0;
+  --card-padding: 0.75rem;
+  --table-padding: 0.375rem;
 
-            /* === HÌNH ẢNH === */
-            --hero-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=1200&q=80');
-            --stone-citrine: url('https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&q=80');
-        }
+  /* ========== BORDER RADIUS ========== */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  /* ========== SHADOWS ========== */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+  --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
 
-        body {
-            font-family: var(--font-body);
-            line-height: 1.7;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            overflow-x: hidden;
-        }
+  /* ========== GLASSMORPHISM ========== */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(40px);
 
-        /* Bokeh background effect */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                radial-gradient(circle at 20% 80%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(106, 91, 255, 0.05) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-heading);
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 1rem;
-        }
-        
-        p {
-            margin-bottom: 1.2rem;
-        }
-        
-        /* V5.4 Container - Mobile: 0 padding, Desktop: 1.5rem */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: var(--container-padding);
-            position: relative;
-            z-index: 1;
-        }
+  /* ========== TYPOGRAPHY ========== */
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Noto Sans Display', sans-serif;
+  --text-xs: 0.7rem;
+  --text-sm: 0.8rem;
+  --text-base: 0.9rem;
+  --text-lg: 1rem;
+  --text-xl: 1.1rem;
+  --text-2xl: 1.3rem;
+}
 
-        .content-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+/* ==========================================
+   DESKTOP BREAKPOINT (600px+)
+   ========================================== */
+@media (min-width: 600px) {
+  :root {
+    --text-padding: 24px;
+    --container-padding: 1.5rem;
+    --card-padding: 1rem;
+    --table-padding: 0.75rem;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
 
-        /* V5.4 Text padding on mobile */
-        .container > p,
-        .container > h2,
-        .container > h3,
-        .container > ul,
-        .container > ol,
-        .content-container > p,
-        .content-container > h2,
-        .content-container > h3,
-        .content-container > ul,
-        .content-container > ol {
-            padding-left: var(--text-padding);
-            padding-right: var(--text-padding);
-        }
+    --space-sm: 0.5rem;
+    --space-md: 0.75rem;
+    --space-lg: 1rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+    --space-3xl: 3rem;
 
-        @media (min-width: 600px) {
-            .container {
-                padding: var(--space-lg);
-            }
-            .container > p,
-            .container > h2,
-            .container > h3,
-            .container > ul,
-            .container > ol,
-            .content-container > p,
-            .content-container > h2,
-            .content-container > h3,
-            .content-container > ul,
-            .content-container > ol {
-                padding-left: 0;
-                padding-right: 0;
-            }
-        }
-        
-        /* ===== NAVIGATION ===== */
-        .course-nav {
-            background: linear-gradient(135deg, var(--bg-navy) 0%, var(--primary-dark) 100%);
-            padding: 1.5rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        
-        .nav-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .course-title {
-            color: var(--gold-accent);
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-        
-        .day-indicator {
-            color: var(--text-light);
-            font-size: 1rem;
-            padding: 0.5rem 1.5rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50px;
-            border: 2px solid var(--gold-accent);
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.2);
-            margin-top: 1rem;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--gold-accent), var(--gold-light));
-            width: 42.84%; /* 3/7 ngày */
-            transition: width 0.5s ease;
-            animation: shimmer 2s infinite;
-        }
-        
-        @keyframes shimmer {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        /* ===== HERO SECTION ===== */
-        .hero-section {
-            background: linear-gradient(135deg, 
-                var(--primary-burgundy) 0%, 
-                #8B0000 50%,
-                #5C0A0A 100%);
-            color: var(--text-light);
-            padding: 5rem 0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            bottom: -20%;
-            right: -10%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(255,189,89,0.2) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: float 12s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-50px) scale(1.1); }
-        }
-        
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-        }
-        
-        .day-badge {
-            display: inline-block;
-            background: var(--secondary-red);
-            color: var(--gold-accent);
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            border: 2px solid var(--gold-accent);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .hero-title {
-            font-size: 3.5rem;
-            color: var(--gold-accent);
-            margin-bottom: 1rem;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-            animation: fadeInDown 1s ease-out;
-        }
-        
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .hero-subtitle {
-            font-size: 1.5rem;
-            color: var(--gold-light);
-            margin-bottom: 2rem;
-            animation: fadeInUp 1s ease-out 0.3s both;
-        }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .hero-image {
-            margin: 3rem auto 0;
-            max-width: 600px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            animation: fadeInUp 1s ease-out 0.6s both;
-        }
-        
-        .hero-image img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        
-        /* ===== INTRO - V5.4 ===== */
-        .intro-section {
-            padding: var(--space-lg) 0;
-            background: transparent;
-        }
+    --text-xs: 0.75rem;
+    --text-sm: 0.85rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+  }
+}
 
-        .welcome-box {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border-left: 4px solid var(--color-burgundy);
-            padding: var(--card-padding) var(--text-padding);
-            border-radius: var(--radius-none);
-            margin-bottom: 1px;
-        }
+/* ========== RESET & BASE ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-        @media (min-width: 600px) {
-            .welcome-box {
-                padding: var(--card-padding);
-                border-radius: var(--radius-lg);
-                margin-bottom: var(--space-xl);
-                border: 1px solid rgba(156, 6, 18, 0.3);
-                border-left: 4px solid var(--color-burgundy);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            }
-        }
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-dark) 0%,
+    var(--color-navy) 30%,
+    var(--color-navy) 70%,
+    var(--color-bg-dark) 100%
+  );
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  font-size: var(--text-base);
+}
 
-        .welcome-box h2 {
-            color: var(--color-gold);
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-        
-        /* ===== PRINCIPLE CARDS - V5.4 Mobile First ===== */
-        .principle-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border-radius: var(--radius-none);
-            padding: var(--card-padding) var(--text-padding);
-            margin-bottom: 1px;
-            border: none;
-            border-left: 4px solid var(--color-gold);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
+/* Bokeh Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse 600px 600px at 20% 20%, rgba(255, 189, 89, 0.08), transparent 70%),
+    radial-gradient(ellipse 500px 500px at 80% 80%, rgba(0, 240, 255, 0.06), transparent 70%),
+    radial-gradient(ellipse 400px 400px at 50% 50%, rgba(106, 91, 255, 0.04), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
 
-        .principle-card::before {
-            display: none;
-        }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.3;
+}
 
-        @media (min-width: 600px) {
-            .principle-card {
-                border-radius: var(--radius-lg);
-                padding: var(--card-padding);
-                margin-bottom: var(--space-lg);
-                border: 1px solid var(--border-gold);
-                border-left: 4px solid var(--color-gold);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            }
+/* V5.4: Container no padding on mobile */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0;
+}
 
-            .principle-card::before {
-                display: block;
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 4px;
-                background: linear-gradient(90deg, var(--color-gold), var(--color-gold-light), var(--color-gold));
-                background-size: 200% 100%;
-                animation: shimmerTop 3s infinite;
-            }
+@media (min-width: 600px) {
+  .container {
+    padding: var(--container-padding);
+  }
+}
 
-            .principle-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 30px rgba(255, 189, 89, 0.2);
-                border-color: var(--color-gold);
-            }
-        }
+/* ==========================================
+   LESSON HEADER - Full-Width Mobile
+   ========================================== */
+.lesson-header {
+  text-align: center;
+  margin-bottom: 1px;
+  padding: var(--card-padding);
+  padding-left: var(--text-padding);
+  padding-right: var(--text-padding);
+  background: var(--bg-card);
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: var(--glass-blur);
+  position: relative;
+  overflow: hidden;
+}
 
-        @keyframes shimmerTop {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        .principle-number {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--primary-dark);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .principle-card h3 {
-            color: var(--primary-burgundy);
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            padding-right: 80px;
-        }
-        
-        .principle-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-        
-        .principle-card h4 {
-            color: var(--secondary-red);
-            font-size: 1.4rem;
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        /* ===== HIGHLIGHT BOX - V5.4 ===== */
-        .highlight-box {
-            background: rgba(255, 189, 89, 0.1);
-            color: var(--text-primary);
-            padding: var(--card-padding) var(--text-padding);
-            border-radius: var(--radius-none);
-            margin: 1px 0;
-            border: none;
-            border-left: 4px solid var(--color-gold);
-        }
+.lesson-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+}
 
-        @media (min-width: 600px) {
-            .highlight-box {
-                padding: var(--card-padding);
-                border-radius: var(--radius-md);
-                margin: var(--space-lg) 0;
-                border: 1px solid var(--border-gold);
-                border-left: 4px solid var(--color-gold);
-            }
-        }
+@media (min-width: 600px) {
+  .lesson-header {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-xl);
+    padding: var(--card-padding);
+  }
+}
 
-        .highlight-box h4 {
-            color: var(--color-gold);
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-        }
+.lesson-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  color: var(--color-navy);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 20px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
 
-        .highlight-box strong {
-            color: var(--color-gold);
-        }
-        
-        /* ===== EXAMPLE BOX - V5.4 ===== */
-        .example-box {
-            background: rgba(0, 240, 255, 0.1);
-            border-left: 4px solid var(--color-cyan);
-            padding: var(--card-padding) var(--text-padding);
-            border-radius: var(--radius-none);
-            margin: 1px 0;
-        }
+.lesson-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+}
 
-        @media (min-width: 600px) {
-            .example-box {
-                padding: var(--card-padding);
-                border-radius: var(--radius-md);
-                margin: var(--space-md) 0;
-                border: 1px solid rgba(0, 240, 255, 0.3);
-                border-left: 4px solid var(--color-cyan);
-            }
-        }
+.lesson-subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
 
-        .example-box h5 {
-            color: var(--color-cyan);
-            font-size: 1.1rem;
-            margin-bottom: 0.8rem;
-        }
+/* ==========================================
+   SECTION - Full-Width Mobile
+   ========================================== */
+.section {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin-bottom: 1px;
+  backdrop-filter: var(--glass-blur);
+}
 
-        /* ===== EXERCISE CARD - V5.4 ===== */
-        .exercise-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            padding: var(--card-padding) var(--text-padding);
-            border-radius: var(--radius-none);
-            margin: 1px 0;
-            border: none;
-            border-left: 4px solid var(--color-burgundy);
-        }
+@media (min-width: 600px) {
+  .section {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-xl);
+  }
+}
 
-        @media (min-width: 600px) {
-            .exercise-card {
-                padding: var(--card-padding);
-                border-radius: var(--radius-lg);
-                margin: var(--space-xl) 0;
-                border: 1px solid rgba(156, 6, 18, 0.3);
-                border-left: 4px solid var(--color-burgundy);
-            }
-        }
+.section > p,
+.section > h2,
+.section > h3,
+.section > ul,
+.section > ol {
+  padding-left: var(--text-padding);
+  padding-right: var(--text-padding);
+}
 
-        .exercise-header {
-            background: linear-gradient(135deg, var(--color-burgundy), var(--color-burgundy-dark));
-            color: var(--color-gold);
-            padding: 1rem var(--text-padding);
-            border-radius: var(--radius-none);
-            margin: calc(-1 * var(--card-padding)) calc(-1 * var(--text-padding)) var(--space-lg) calc(-1 * var(--text-padding));
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
+@media (min-width: 600px) {
+  .section > p,
+  .section > h2,
+  .section > h3,
+  .section > ul,
+  .section > ol {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
 
-        @media (min-width: 600px) {
-            .exercise-header {
-                padding: 1rem var(--card-padding);
-                border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-                margin: calc(-1 * var(--card-padding)) calc(-1 * var(--card-padding)) var(--space-lg) calc(-1 * var(--card-padding));
-            }
-        }
+.section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
 
-        .exercise-header h3 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
+.section-title .icon {
+  font-size: 1.2em;
+}
 
-        .exercise-time {
-            background: var(--color-gold);
-            color: var(--color-burgundy-dark);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-        
-        /* ===== TOOL CARD - V5.4 ===== */
-        .tool-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border-radius: var(--radius-none);
-            padding: var(--card-padding) var(--text-padding);
-            margin: 1px 0;
-            border: none;
-            border-left: 4px solid var(--color-purple);
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-md);
-            align-items: stretch;
-        }
+/* ==========================================
+   HIGHLIGHT BOX - Border-Left Mobile
+   ========================================== */
+.highlight-box {
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  border-radius: 0;
+  margin: var(--space-md) 0;
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.05));
+}
 
-        @media (min-width: 600px) {
-            .tool-card {
-                flex-direction: row;
-                gap: var(--space-lg);
-                align-items: center;
-                padding: var(--card-padding);
-                border-radius: var(--radius-lg);
-                margin: var(--space-lg) 0;
-                border: 1px solid rgba(106, 91, 255, 0.3);
-                border-left: 4px solid var(--color-purple);
-            }
-        }
+@media (min-width: 600px) {
+  .highlight-box {
+    border: 1px solid rgba(255, 189, 89, 0.3);
+    border-left: 4px solid var(--color-gold);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+}
 
-        .tool-image {
-            flex: 0 0 auto;
-            width: 100%;
-            max-width: 200px;
-            border-radius: var(--radius-none);
-            overflow: hidden;
-        }
-        
-        .tool-image img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        
-        .tool-content h4 {
-            color: var(--primary-burgundy);
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .tool-content .stone-name {
-            color: var(--gold-accent);
-            font-size: 1.1rem;
-            font-style: italic;
-            margin-bottom: 1rem;
-        }
-        
-        /* ===== QUIZ SECTION ===== */
-        .quiz-section {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--bg-navy) 100%);
-            color: var(--text-light);
-            padding: 4rem 0;
-            margin-top: 3rem;
-        }
-        
-        .quiz-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .quiz-intro {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .quiz-intro h2 {
-            color: var(--gold-accent);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .quiz-question {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            border: 2px solid rgba(255,189,89,0.3);
-        }
-        
-        .question-number {
-            color: var(--gold-accent);
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .question-text {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: white;
-        }
-        
-        .quiz-options {
-            list-style: none;
-            margin-left: 0;
-        }
-        
-        .quiz-options li {
-            background: rgba(255,255,255,0.05);
-            padding: 1rem 1.5rem;
-            margin-bottom: 0.8rem;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            position: relative;
-        }
-        
-        .quiz-options li:hover {
-            background: rgba(255,189,89,0.2);
-            border-color: var(--gold-accent);
-            transform: translateX(10px);
-        }
-        
-        .quiz-options li.correct {
-            background: rgba(76, 175, 80, 0.3);
-            border-color: #4CAF50;
-        }
-        
-        .quiz-options li.wrong {
-            background: rgba(244, 67, 54, 0.3);
-            border-color: #f44336;
-        }
-        
-        .quiz-options li.correct::after {
-            content: '✓';
-            position: absolute;
-            right: 1.5rem;
-            font-size: 1.5rem;
-            color: #4CAF50;
-        }
-        
-        .quiz-options li.wrong::after {
-            content: '✗';
-            position: absolute;
-            right: 1.5rem;
-            font-size: 1.5rem;
-            color: #f44336;
-        }
-        
-        .quiz-answer {
-            background: rgba(255,189,89,0.2);
-            border: 2px solid var(--gold-accent);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-top: 1rem;
-            display: none;
-            animation: fadeInUp 0.5s ease;
-        }
-        
-        .quiz-answer.show {
-            display: block;
-        }
-        
-        .quiz-answer strong {
-            color: var(--gold-accent);
-        }
-        
-        /* ===== QUIZ RESULT ===== */
-        .quiz-result {
-            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
-            color: var(--text-dark);
-            padding: 2.5rem;
-            border-radius: 20px;
-            margin-top: 3rem;
-            text-align: center;
-            display: none;
-            border: 4px solid var(--primary-burgundy);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: scaleIn 0.6s ease;
-        }
-        
-        .quiz-result.show {
-            display: block;
-        }
-        
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .quiz-result h3 {
-            font-size: 2.5rem;
-            color: var(--primary-dark);
-            margin-bottom: 1rem;
-        }
-        
-        .quiz-result .score {
-            font-size: 4rem;
-            font-weight: 900;
-            color: var(--primary-burgundy);
-            margin: 1rem 0;
-        }
-        
-        .quiz-result .message {
-            font-size: 1.3rem;
-            margin: 1.5rem 0;
-            font-weight: 600;
-        }
-        
-        .quiz-result .pass-message,
-        .quiz-result .fail-message {
-            padding: 1.5rem;
-            border-radius: 15px;
-            margin-top: 2rem;
-        }
-        
-        .quiz-result .pass-message {
-            background: rgba(76, 175, 80, 0.3);
-            border: 3px solid #4CAF50;
-        }
-        
-        .quiz-result .fail-message {
-            background: rgba(244, 67, 54, 0.3);
-            border: 3px solid #f44336;
-        }
-        
-        .quiz-result .retry-button {
-            display: inline-block;
-            background: var(--primary-burgundy);
-            color: white;
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            font-weight: 700;
-            text-decoration: none;
-            margin-top: 1.5rem;
-            cursor: pointer;
-            border: none;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .quiz-result .retry-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        /* ===== NEXT SECTION ===== */
-        .next-section {
-            background: linear-gradient(135deg, #fff8f0 0%, #ffe8e8 100%);
-            padding: 4rem 0;
-            text-align: center;
-        }
-        
-        .next-content h2 {
-            color: var(--primary-burgundy);
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .next-preview {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            max-width: 700px;
-            margin: 2rem auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
-        .cta-button {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--primary-burgundy), var(--secondary-red));
-            color: white;
-            padding: 1.2rem 3rem;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-decoration: none;
-            margin: 1rem 0.5rem;
-            box-shadow: 0 10px 30px rgba(156,6,18,0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(156,6,18,0.4);
-        }
-        
-        .cta-button.secondary {
-            background: linear-gradient(135deg, var(--bg-navy), #4A1A4F);
-        }
-        
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .tool-card {
-                flex-direction: column;
-            }
-            
-            .tool-image {
-                width: 100%;
-            }
-            
-            .exercise-header {
-                flex-direction: column;
-            }
-            
-            .principle-number {
-                top: 10px;
-                right: 10px;
-                width: 50px;
-                height: 50px;
-                font-size: 1.5rem;
-            }
-            
-            .principle-card h3 {
-                padding-right: 60px;
-                font-size: 1.6rem;
-            }
-        }
-    </style>
+.highlight-box.cyan {
+  border-left-color: var(--color-cyan);
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+}
+
+.highlight-box.purple {
+  border-left-color: var(--color-purple);
+  background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+.highlight-box.green {
+  border-left-color: var(--color-green);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+.highlight-box.red {
+  border-left-color: var(--color-red);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(255, 189, 89, 0.05));
+}
+
+.highlight-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.highlight-box p {
+  margin-bottom: var(--space-sm);
+  color: var(--color-text);
+}
+
+.highlight-box p:last-child {
+  margin-bottom: 0;
+}
+
+.highlight-box ul,
+.highlight-box ol {
+  margin-left: var(--space-xl);
+  margin-bottom: var(--space-sm);
+}
+
+.highlight-box li {
+  margin-bottom: var(--space-xs);
+  color: var(--color-text);
+}
+
+.highlight-box strong {
+  color: var(--color-gold);
+}
+
+/* ==========================================
+   DEFINITION BOX - Border-Left Mobile
+   ========================================== */
+.definition-box {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(0, 240, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-lg) 0;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .definition-box {
+    border: 2px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.definition-box .term {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.definition-box .meaning {
+  font-size: var(--text-lg);
+  color: var(--color-cyan);
+  font-weight: 600;
+}
+
+.definition-box .description {
+  margin-top: var(--space-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* ==========================================
+   PRINCIPLE CARD - V5.4 Mobile First
+   ========================================== */
+.principle-card {
+  background: var(--glass-bg);
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin-bottom: 1px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 600px) {
+  .principle-card {
+    border: 1px solid var(--border-gold);
+    border-left: 4px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-xl);
+    box-shadow: var(--shadow-card);
+  }
+
+  .principle-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow-gold);
+    border-color: var(--color-gold);
+  }
+}
+
+.principle-number {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40px;
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 900;
+  color: var(--color-navy);
+  margin-bottom: var(--space-sm);
+}
+
+.principle-card h3 {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-md);
+}
+
+.principle-card h4 {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-cyan);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.principle-card p {
+  margin-bottom: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.principle-card ul,
+.principle-card ol {
+  margin-left: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+.principle-card li {
+  margin-bottom: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* ==========================================
+   IMAGE CONTAINER - Full-Width Mobile
+   ========================================== */
+.image-container {
+  margin: var(--space-md) 0;
+  text-align: center;
+}
+
+.image-container img {
+  width: 100%;
+  border-radius: 0;
+  box-shadow: var(--shadow-md);
+  display: block;
+}
+
+@media (min-width: 600px) {
+  .image-container img {
+    border-radius: var(--radius-md);
+    border: 2px solid var(--glass-border);
+  }
+}
+
+.image-caption {
+  margin-top: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-style: italic;
+  padding: 0 var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .image-caption {
+    font-size: var(--text-sm);
+    padding: 0;
+  }
+}
+
+/* ==========================================
+   EXAMPLE BOX - Cyan variant
+   ========================================== */
+.example-box {
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  border-radius: 0;
+  margin: var(--space-md) 0;
+  border: none;
+  border-left: 4px solid var(--color-cyan);
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+}
+
+@media (min-width: 600px) {
+  .example-box {
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-left: 4px solid var(--color-cyan);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+}
+
+.example-box h5 {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-cyan);
+  margin-bottom: var(--space-sm);
+}
+
+.example-box p {
+  margin-bottom: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.example-box ul,
+.example-box ol {
+  margin-left: var(--space-xl);
+  margin-bottom: var(--space-sm);
+}
+
+.example-box li {
+  margin-bottom: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* ==========================================
+   TOOL CARD
+   ========================================== */
+.tool-card {
+  background: var(--glass-bg);
+  border: none;
+  border-left: 4px solid var(--color-purple);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-md) 0;
+}
+
+@media (min-width: 600px) {
+  .tool-card {
+    border: 2px solid var(--color-purple);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.tool-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.tool-header .tool-icon {
+  font-size: 1.5rem;
+}
+
+.tool-header .tool-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-purple);
+}
+
+.tool-name {
+  font-size: var(--text-base);
+  color: var(--color-gold);
+  font-style: italic;
+  margin-bottom: var(--space-sm);
+}
+
+.tool-effect {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.tool-usage {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================
+   EXERCISE CARD
+   ========================================== */
+.exercise-card {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(106, 91, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-cyan);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .exercise-card {
+    border: 2px solid var(--color-cyan);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.exercise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.exercise-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-cyan);
+}
+
+.exercise-time {
+  background: var(--color-cyan);
+  color: var(--color-navy);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.exercise-card p {
+  margin-bottom: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.exercise-card h4 {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.exercise-card ol {
+  margin-left: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+.exercise-card li {
+  margin-bottom: var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* ==========================================
+   SUMMARY BOX
+   ========================================== */
+.summary-box {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.1));
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .summary-box {
+    border: 2px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.summary-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .summary-title {
+    padding: 0;
+  }
+}
+
+.key-points {
+  list-style: none;
+}
+
+.key-point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--text-padding);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .key-point {
+    padding: var(--space-sm) 0;
+  }
+}
+
+.key-point:last-child {
+  border-bottom: none;
+}
+
+.key-point .bullet {
+  color: var(--color-cyan);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ==========================================
+   QUIZ SECTION - V5.4 Facebook-Style
+   ========================================== */
+.quiz-section {
+  background: linear-gradient(135deg, rgba(156, 6, 18, 0.1), rgba(17, 34, 80, 0.3));
+  border: none;
+  border-left: 4px solid var(--color-burgundy);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .quiz-section {
+    border: 2px solid var(--color-burgundy);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.quiz-header {
+  text-align: center;
+  padding: 0 var(--text-padding);
+  margin-bottom: var(--space-lg);
+}
+
+@media (min-width: 600px) {
+  .quiz-header {
+    padding: 0;
+  }
+}
+
+.quiz-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.quiz-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.quiz-score {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+@media (min-width: 600px) {
+  .quiz-score {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+  }
+}
+
+.quiz-score .score-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.quiz-score .score-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-gold);
+}
+
+/* Quiz Question */
+.quiz-question {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--card-padding) var(--text-padding);
+  margin-bottom: 1px;
+}
+
+@media (min-width: 600px) {
+  .quiz-question {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-md);
+  }
+}
+
+.question-number {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.question-text {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+/* Quiz Options */
+.quiz-options {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0 calc(var(--text-padding) * -1);
+  background: var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .quiz-options {
+    gap: var(--space-sm);
+    margin: 0;
+    background: transparent;
+  }
+}
+
+.quiz-option {
+  background: var(--bg-card);
+  border: none;
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+@media (min-width: 600px) {
+  .quiz-option {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+
+  .quiz-option:hover:not(.answered) {
+    background: var(--bg-card-hover);
+    border-color: var(--color-gold);
+    transform: translateX(5px);
+  }
+}
+
+.quiz-option.answered {
+  cursor: not-allowed;
+}
+
+.quiz-option.correct {
+  background: rgba(16, 185, 129, 0.2);
+  border-left: 4px solid var(--color-green);
+}
+
+@media (min-width: 600px) {
+  .quiz-option.correct {
+    border: 2px solid var(--color-green);
+    border-left: 4px solid var(--color-green);
+  }
+}
+
+.quiz-option.correct::after {
+  content: '\2713';
+  position: absolute;
+  right: var(--text-padding);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--text-lg);
+  color: var(--color-green);
+  font-weight: bold;
+}
+
+.quiz-option.wrong {
+  background: rgba(239, 68, 68, 0.2);
+  border-left: 4px solid var(--color-red);
+}
+
+@media (min-width: 600px) {
+  .quiz-option.wrong {
+    border: 2px solid var(--color-red);
+    border-left: 4px solid var(--color-red);
+  }
+}
+
+.quiz-option.wrong::after {
+  content: '\2717';
+  position: absolute;
+  right: var(--text-padding);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--text-lg);
+  color: var(--color-red);
+  font-weight: bold;
+}
+
+/* Quiz Answer Explanation */
+.quiz-answer {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  margin-top: var(--space-md);
+  display: none;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+@media (min-width: 600px) {
+  .quiz-answer {
+    border: 1px solid var(--color-gold);
+    border-left: 4px solid var(--color-gold);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+}
+
+.quiz-answer.show {
+  display: block;
+}
+
+.quiz-answer strong {
+  color: var(--color-gold);
+}
+
+/* Quiz Result */
+.quiz-result {
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  border: none;
+  border-radius: 0;
+  padding: var(--card-padding) var(--text-padding);
+  margin-top: var(--space-lg);
+  text-align: center;
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .quiz-result {
+    border: 3px solid var(--color-burgundy);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.quiz-result.show {
+  display: block;
+}
+
+.quiz-result .result-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-navy);
+  margin-bottom: var(--space-sm);
+}
+
+.quiz-result .result-score {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--color-burgundy);
+  margin: var(--space-md) 0;
+}
+
+.quiz-result .result-message {
+  font-size: var(--text-base);
+  color: var(--color-navy);
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
+.pass-message {
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid var(--color-green);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.pass-message strong {
+  color: var(--color-green);
+}
+
+.fail-message {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid var(--color-red);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  display: none;
+}
+
+.fail-message strong {
+  color: var(--color-red);
+}
+
+.retry-button {
+  display: inline-block;
+  background: var(--color-burgundy);
+  color: white;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: 50px;
+  font-weight: 700;
+  text-decoration: none;
+  margin-top: var(--space-md);
+  cursor: pointer;
+  border: none;
+  font-size: var(--text-sm);
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 600px) {
+  .retry-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* ==========================================
+   NEXT DAY PREVIEW
+   ========================================== */
+.next-preview {
+  background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-purple);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-lg) 0;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .next-preview {
+    border: 2px solid var(--color-purple);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.next-preview .preview-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-sm);
+}
+
+.next-preview .preview-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-purple);
+  margin-bottom: var(--space-sm);
+}
+
+.next-preview .preview-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+.lesson-footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--glass-border);
+  padding: var(--space-xl) var(--text-padding);
+  text-align: center;
+  margin-top: var(--space-lg);
+}
+
+@media (min-width: 600px) {
+  .lesson-footer {
+    background: transparent;
+    border-top: none;
+    padding: var(--space-xl) 0;
+  }
+}
+
+.footer-brand {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.footer-url {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.footer-url a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.footer-url a:hover {
+  color: var(--color-gold);
+}
+  </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="course-nav">
-        <div class="container">
-            <div class="nav-content">
-                <div class="course-title">7 NGÀY KHAI MỞ TẦN SỐ GỐC</div>
-                <div class="day-indicator">NGÀY 3/7</div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
-        </div>
-    </nav>
+  <div class="container">
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <div class="day-badge">NGÀY 3</div>
-                <h1 class="hero-title">5 NGUYÊN LÝ VẬN HÀNH</h1>
-                <p class="hero-subtitle">Quy Luật Chi Phối Năng Lượng Vũ Trụ</p>
-                <div class="hero-image">
-                    <img src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=1200&q=80" alt="5 nguyên lý vận hành">
-                </div>
-            </div>
-        </div>
+    <!-- ============================================
+         LESSON HEADER
+         ============================================ -->
+    <header class="lesson-header">
+      <div class="lesson-badge">Ngày 3 / 7</div>
+      <h1 class="lesson-title">5 NGUYÊN LÝ VẬN HÀNH</h1>
+      <p class="lesson-subtitle">Những Quy Luật Chi Phối Năng Lượng Vũ Trụ</p>
+    </header>
+
+    <!-- ============================================
+         HÌNH 1: SƠ ĐỒ TỔNG QUAN 5 NGUYÊN LÝ
+         ============================================ -->
+    <div class="image-container">
+      <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY3_HINH_1" alt="Sơ đồ tổng quan 5 nguyên lý vận hành tần số" loading="lazy">
+      <div class="image-caption">Hình 1: Sơ đồ tổng quan 5 nguyên lý vận hành tần số - khung sườn giúp bạn hiểu cách năng lượng hoạt động</div>
+    </div>
+
+    <!-- ============================================
+         SECTION 1: LỜI CHÀO
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">&#9728;&#65039;</span> Chào Buổi Sáng, Ngày 3!</h2>
+
+      <p>Đến đây, bạn đã có <strong>Sự Tỉnh Thức</strong> từ Ngày 1 và <strong>Bản Đồ Tần Số</strong> từ Ngày 2 để hiểu mình đang rung động ở đâu. Hôm nay chúng ta sẽ đi sâu hơn vào những quy luật "vô hình" nhưng chi phối tất cả mọi thứ trong cuộc sống của bạn, từ sức khỏe đến các mối quan hệ và tài chính.</p>
+
+      <div class="highlight-box">
+        <div class="highlight-title">Tại Sao Cần Hiểu 5 Nguyên Lý?</div>
+        <p>Hãy tưởng tượng bạn đang chơi một trò chơi mà không biết luật, lúc đó bạn sẽ liên tục thua mà không hiểu tại sao. <strong>5 Nguyên Lý Vận Hành</strong> chính là "luật chơi" của vũ trụ, khi bạn hiểu và tuân theo thì mọi thứ sẽ trở nên trôi chảy và nhẹ nhàng hơn rất nhiều. Ngược lại, khi bạn vô tình chống lại những quy luật này, bạn sẽ cảm thấy cuộc sống đầy khó khăn và bất công.</p>
+        <p>Mỗi nguyên lý đều là một chiếc chìa khóa giúp bạn mở ra cách nhìn mới về những vấn đề tưởng chừng không có lời giải. Chúng ta sẽ cùng tìm hiểu từng nguyên lý với tinh thần cởi mở và sẵn sàng trải nghiệm nhé.</p>
+      </div>
     </section>
 
-    <!-- Intro Section -->
-    <section class="intro-section">
-        <div class="container">
-            <div class="content-container">
-                <div class="welcome-box">
-                    <h2>Chào Buổi Sáng! Hôm Nay Học Về Quy Luật</h2>
-                    <p>Đến đây, bạn đã có Sự Tỉnh Thức (Ngày 1) và Bản Đồ (Ngày 2). Hôm nay, chúng ta học <strong>5 Nguyên Lý Vận Hành</strong> - những quy luật "vô hình" nhưng chi phối tất cả mọi thứ trong cuộc sống bạn.</p>
-                    <p>Đây giống như <strong>luật vật lý của tâm thức</strong> - nếu bạn hiểu và tuân theo, mọi thứ sẽ trôi chảy. Nếu chống lại, bạn sẽ đau khổ.</p>
-                </div>
-            </div>
+    <!-- ============================================
+         SECTION 2: NGUYÊN LÝ 1 - KHÁM NHẬN
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">&#9203;</span> Nguyên Lý 1: Khám Nhận</h2>
+
+      <div class="principle-card">
+        <div class="principle-number">1</div>
+        <h3>KHÁM NHẬN - Law of Patience</h3>
+
+        <p>Bạn có bao giờ tự hỏi tại sao mình cứ lặp đi lặp lại cùng một vấn đề, tại sao cứ gặp cùng một kiểu người độc hại, hoặc tại sao cùng một pattern drama cứ quay lại dù bạn đã đổi môi trường và mối quan hệ?</p>
+
+        <p>Nguyên lý Khám Nhận giải thích rằng <strong>vũ trụ sẽ liên tục mang đến cùng một bài học cho đến khi bạn thực sự học xong bài học đó</strong>. Đây không phải là sự trừng phạt hay xui xẻo, mà là cơ chế giúp bạn tiến hóa và trưởng thành theo cách tự nhiên nhất.</p>
+
+        <div class="definition-box">
+          <div class="term">Nguyên Lý Khám Nhận</div>
+          <div class="meaning">Vấn đề lặp lại là cơ hội để bạn học xong bài học, không phải trừng phạt</div>
+          <div class="description">Giống như học sinh chưa vượt qua kỳ thi thì phải ôn lại và thi lại, cuộc sống cũng cho bạn những cơ hội để làm lại tốt hơn</div>
         </div>
+
+        <h4>Ví Dụ Dễ Hiểu</h4>
+        <p>Hãy nghĩ về việc này giống như học toán ở trường. Khi bạn ở lớp 3 và chưa nắm vững phép nhân chia, giáo viên sẽ cho bạn làm bài kiểm tra đi kiểm tra lại cho đến khi bạn đạt. Việc phải làm lại không phải là trừng phạt, mà đơn giản là bạn chưa học xong nên cần thêm thời gian để thấu hiểu kiến thức.</p>
+
+        <div class="example-box">
+          <h5>Ví Dụ Thực Tế Trong Cuộc Sống</h5>
+          <p><strong>Pattern:</strong> Bạn cứ gặp những người lợi dụng lòng tốt của bạn trong nhiều mối quan hệ khác nhau.<br>
+          <strong>Bài học:</strong> Vũ trụ đang muốn bạn học cách thiết lập ranh giới và nói "Không" khi cần thiết, bởi vì bạn xứng đáng được tôn trọng.</p>
+
+          <p><strong>Pattern:</strong> Bạn cứ thiếu tiền cuối tháng dù thu nhập không quá thấp.<br>
+          <strong>Bài học:</strong> Vũ trụ đang nhắc nhở bạn học cách quản lý tài chính có ý thức, bởi vì sự thịnh vượng bắt đầu từ việc trân trọng những gì bạn đang có.</p>
+
+          <p><strong>Pattern:</strong> Bạn cứ bị sếp hoặc đồng nghiệp đánh giá thấp và bị mắc chỉ trích.<br>
+          <strong>Bài học:</strong> Vũ trụ đang dạy bạn xây dựng sự tự tin nội tại và đứng vững lập trường của mình, bởi vì giá trị của bạn không phụ thuộc vào sự công nhận của người khác.</p>
+        </div>
+
+        <h4>Dấu Hiệu Bạn Chưa Học Xong Bài Học</h4>
+        <p>Nếu cùng một pattern cứ lặp lại nhiều lần với những người khác nhau và hoàn cảnh khác nhau nhưng cảm giác vẫn giống nhau, đó là tín hiệu rõ ràng nhất. Bạn có thể tự hỏi "Sao tôi cứ gặp mãi chuyện này?" hoặc vẫn cảm thấy giận dữ và sợ hãi khi nghĩ về nó, đó đều là dấu hiệu bạn đang ở giữa bài học chưa hoàn thành.</p>
+
+        <h4>Dấu Hiệu Bạn Đã Học Xong</h4>
+        <p>Khi bạn đã học xong, pattern đó sẽ không còn lặp lại nữa và bạn có thể gặp lại tình huống tương tự mà không bị kích hoạt cảm xúc mạnh. Thay vì tức giận hay sợ hãi, bạn cảm thấy bình yên và thậm chí biết ơn bài học đó vì nó đã giúp bạn trưởng thành.</p>
+
+        <div class="highlight-box green">
+          <div class="highlight-title">Làm Sao Để Học Xong Bài Học Nhanh Hơn?</div>
+          <p><strong>Bước 1 - Nhận ra pattern:</strong> Hãy nói với bản thân "À, lại đây rồi, mình đang học bài gì?" thay vì phản ứng theo thói quen cũ, việc nhận diện pattern là bước đầu tiên để thoát ra.</p>
+          <p><strong>Bước 2 - Không đổ lỗi:</strong> Hãy nhớ rằng đây không phải lỗi của người khác mà là bài học dành cho chính bạn, khi bạn ngừng đổ lỗi thì năng lượng sẽ chuyển hướng vào việc học.</p>
+          <p><strong>Bước 3 - Tìm bài học:</strong> Hỏi "Vũ trụ muốn mình học gì qua việc này?" và lắng nghe câu trả lời từ bên trong, thường thì câu trả lời sẽ đến khi bạn đủ tĩnh lặng.</p>
+          <p><strong>Bước 4 - Hành động khác:</strong> Làm điều ngược lại với pattern cũ, ví dụ nếu bạn thường im lặng chịu đựng thì lần này hãy lên tiếng nói ra nhu cầu của mình.</p>
+          <p><strong>Bước 5 - Biết ơn:</strong> Nói "Cảm ơn bài học này" dù nó khó khăn, bởi vì lòng biết ơn sẽ giúp bạn nâng tần số và đóng bài học nhanh hơn.</p>
+        </div>
+      </div>
     </section>
 
-    <!-- Main Content -->
-    <section class="content-section">
-        <div class="container">
-            <div class="content-container">
-                
-                <!-- Nguyên Lý 1: KHAM NHẪN -->
-                <div class="principle-card">
-                    <div class="principle-number">1</div>
-                    <span class="principle-icon">⏳</span>
-                    <h3>Nguyên Lý 1: KHAM NHẪN (Law of Patience)</h3>
-                    
-                    <p>Bạn có bao giờ tự hỏi tại sao mình cứ lặp đi lặp lại cùng một vấn đề? Tại sao cứ gặp cùng một kiểu người độc hại? Tại sao cùng một pattern drama cứ lặp lại?</p>
-                    
-                    <p><strong>Đó là vì bạn chưa học xong bài học.</strong></p>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Quy Luật</h4>
-                        <p><strong>Vũ trụ sẽ liên tục mang đến cùng một bài học, cho đến khi bạn học xong.</strong></p>
-                    </div>
-                    
-                    <h4>Ví Dụ Dễ Hiểu</h4>
-                    <p>Nghĩ về nghiệp như <strong>học toán</strong>:</p>
-                    <ul>
-                        <li>Bạn lớp 3, chưa biết nhân chia</li>
-                        <li>Giáo viên ra bài: 3 x 4 = ?</li>
-                        <li>Bạn trả lời sai → Phải học lại</li>
-                        <li>Học lại không phải TRỪ PHẠT, mà là CƠ HỘI học đúng</li>
-                        <li>Khi học xong, lên lớp 4 → Bài mới</li>
-                    </ul>
-                    
-                    <div class="example-box">
-                        <h5>📖 Ví Dụ Thực Tế:</h5>
-                        <ul>
-                            <li><strong>Pattern:</strong> Bạn cứ gặp những người lợi dụng<br>
-                            <strong>Bài học:</strong> Thiết lập ranh giới, nói KHÔNG</li>
-                            
-                            <li><strong>Pattern:</strong> Bạn cứ thiếu tiền cuối tháng<br>
-                            <strong>Bài học:</strong> Quản lý tài chính, chi tiêu có ý thức</li>
-                            
-                            <li><strong>Pattern:</strong> Bạn cứ bị sếp mắng<br>
-                            <strong>Bài học:</strong> Tự tin, đứng vững lập trường</li>
-                        </ul>
-                    </div>
-                    
-                    <h4>Dấu Hiệu Bạn Chưa Học Xong</h4>
-                    <ul>
-                        <li>Cùng pattern lặp lại (khác người, khác hoàn cảnh, nhưng cảm giác giống nhau)</li>
-                        <li>Bạn tự hỏi: "Sao tôi cứ gặp mãi chuyện này?"</li>
-                        <li>Bạn vẫn cảm thấy giận dữ/sợ hãi khi nghĩ về nó</li>
-                    </ul>
-                    
-                    <h4>Dấu Hiệu Bạn Đã Học Xong</h4>
-                    <ul>
-                        <li>Pattern không lặp lại nữa</li>
-                        <li>Gặp lại tình huống tương tự nhưng không còn bị kích hoạt</li>
-                        <li>Bạn biết ơn bài học đó</li>
-                    </ul>
-                    
-                    <div class="highlight-box">
-                        <h4>💡 Làm Sao Để Học Xong Nhanh?</h4>
-                        <ol>
-                            <li><strong>Nhận ra pattern:</strong> "À, lại đây rồi. Tôi đang học bài gì?"</li>
-                            <li><strong>Không đổ lỗi:</strong> Không phải do người khác. Đây là bài học cho TÔI.</li>
-                            <li><strong>Tìm bài học:</strong> "Vũ trụ muốn tôi học gì qua việc này?"</li>
-                            <li><strong>Hành động khác:</strong> Làm điều NGƯỢC lại với pattern cũ</li>
-                            <li><strong>Biết ơn:</strong> "Cảm ơn bài học này"</li>
-                        </ol>
-                    </div>
-                </div>
+    <!-- ============================================
+         SECTION 3: NGUYÊN LÝ 2 - CHUYỂN HÓA
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">&#128260;</span> Nguyên Lý 2: Chuyển Hóa</h2>
 
-                <!-- Nguyên Lý 2: CHUYỂN HÓA -->
-                <div class="principle-card">
-                    <div class="principle-number">2</div>
-                    <span class="principle-icon">🔄</span>
-                    <h3>Nguyên Lý 2: CHUYỂN HÓA (Law of Transmutation)</h3>
-                    
-                    <p><strong>Năng lượng không thể bị hủy diệt, chỉ có thể chuyển hóa từ dạng này sang dạng khác.</strong></p>
-                    
-                    <p>Bạn không thể "xóa bỏ" cảm xúc tiêu cực. Nhưng bạn có thể CHUYỂN HÓA nó thành thứ khác.</p>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Quy Luật</h4>
-                        <p><strong>Mọi năng lượng đều trung lập. Chính BẠN gán nhãn "tốt" hay "xấu".</strong></p>
-                    </div>
-                    
-                    <h4>Giận Dữ Là Năng Lượng</h4>
-                    <p>Nếu bạn kìm nén giận dữ:</p>
-                    <ul>
-                        <li>Nó sẽ bùng phát mạnh hơn sau này (bạn la hét, đập phá)</li>
-                        <li>Hoặc ăn sâu vào cơ thể (bạn bị bệnh: đau đầu, dạ dày, tim mạch)</li>
-                    </ul>
-                    
-                    <p>Nhưng nếu bạn chuyển hóa, giận dữ có thể trở thành:</p>
-                    <ul>
-                        <li>Động lực để thay đổi</li>
-                        <li>Sức mạnh để đứng lên bảo vệ bản thân</li>
-                        <li>Nghệ thuật (vẽ, viết, nhảy)</li>
-                        <li>Tập luyện thể thao</li>
-                    </ul>
-                    
-                    <div class="example-box">
-                        <h5>🎨 Ví Dụ Lịch Sử:</h5>
-                        <ul>
-                            <li><strong>Van Gogh:</strong> Chuyển hóa đau khổ thành tranh</li>
-                            <li><strong>Martin Luther King:</strong> Chuyển hóa giận dữ thành phong trào dân quyền</li>
-                            <li><strong>J.K. Rowling:</strong> Chuyển hóa trầm cảm thành Harry Potter</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="highlight-box">
-                        <h4>🔧 Công Thức Chuyển Hóa</h4>
-                        <ol>
-                            <li><strong>NHẬN RA</strong> cảm xúc đang có<br>
-                            "Tôi đang giận", không phải "Người đó làm tôi giận"</li>
-                            
-                            <li><strong>CẢM NHẬN</strong> đầy đủ trong cơ thể<br>
-                            Đừng kìm nén. Để nó hiện diện 90 giây</li>
-                            
-                            <li><strong>HỎI</strong> năng lượng này muốn gì<br>
-                            "Giận dữ này đang bảo vệ cái gì?"</li>
-                            
-                            <li><strong>CHUYỂN HÓA</strong> thành hành động tích cực<br>
-                            Viết, vẽ, chạy bộ, tạo ra cái gì đó</li>
-                        </ol>
-                    </div>
-                </div>
+      <div class="principle-card">
+        <div class="principle-number">2</div>
+        <h3>CHUYỂN HÓA - Law of Transmutation</h3>
 
-                <!-- Nguyên Lý 3: HIỆN DIỆN -->
-                <div class="principle-card">
-                    <div class="principle-number">3</div>
-                    <span class="principle-icon">🎯</span>
-                    <h3>Nguyên Lý 3: HIỆN DIỆN (Law of Presence)</h3>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Quy Luật</h4>
-                        <p><strong>Sức mạnh duy nhất bạn có là ở THỜI ĐIỂM HIỆN TẠI.</strong></p>
-                    </div>
-                    
-                    <p>Quá khứ đã qua, không thể thay đổi. Tương lai chưa đến, không thể kiểm soát. Chỉ có "BÂY GIỜ" là thật.</p>
-                    
-                    <p>Nhưng 99% chúng ta KHÔNG sống trong "bây giờ":</p>
-                    <ul>
-                        <li>Hối hận về quá khứ → Trầm cảm</li>
-                        <li>Lo lắng về tương lai → Anxiety</li>
-                    </ul>
-                    
-                    <h4>Thí Nghiệm: Quyền Năng Hiện Tại</h4>
-                    <p>Hãy làm ngay bây giờ:</p>
-                    <ol>
-                        <li>Đặt 1 tay lên ngực, 1 tay lên bụng</li>
-                        <li>Cảm nhận hơi thở vào ra</li>
-                        <li>Nói: "Bây giờ, tôi đang thở"</li>
-                        <li>Cảm nhận cơ thể chạm sàn/ghế</li>
-                        <li>Nói: "Bây giờ, tôi đang ngồi đây"</li>
-                    </ol>
-                    
-                    <p><strong>Bạn có cảm thấy bình yên hơn không? Đó là quyền năng của Hiện Diện.</strong></p>
-                    
-                    <div class="highlight-box">
-                        <h4>🧘 Thực Hành Hiện Diện</h4>
-                        <p>Bất cứ lúc nào trong ngày, hỏi bản thân 3 câu:</p>
-                        <ol>
-                            <li>"Bây giờ này, tôi đang ở đâu?"</li>
-                            <li>"Bây giờ này, tôi đang làm gì?"</li>
-                            <li>"Bây giờ này, tôi cảm thấy thế nào?"</li>
-                        </ol>
-                        <p>Chỉ cần 3 câu này đã đủ kéo bạn về hiện tại.</p>
-                    </div>
-                </div>
+        <p>Nguyên lý này cho rằng <strong>năng lượng không thể bị hủy diệt mà chỉ có thể chuyển hóa từ dạng này sang dạng khác</strong>. Điều này có nghĩa là bạn không thể đơn giản "xóa bỏ" hay "nén xuống" một cảm xúc tiêu cực, nhưng bạn hoàn toàn có thể chuyển hóa nó thành một dạng năng lượng mới có ích hơn cho bạn.</p>
 
-                <!-- Nguyên Lý 4: PHẢN CHIẾU -->
-                <div class="principle-card">
-                    <div class="principle-number">4</div>
-                    <span class="principle-icon">🪞</span>
-                    <h3>Nguyên Lý 4: PHẢN CHIẾU (Law of Mirror)</h3>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Quy Luật</h4>
-                        <p><strong>Mọi thứ bên ngoài đều là phản chiếu của bên trong.</strong></p>
-                    </div>
-                    
-                    <p>Đây là nguyên lý khó chấp nhận nhất, nhưng cũng mạnh mẽ nhất.</p>
-                    
-                    <ul>
-                        <li>Người làm bạn tức giận? Họ đang phản chiếu một phần trong bạn mà bạn chưa chấp nhận.</li>
-                        <li>Người bạn ngưỡng mộ? Họ đang phản chiếu một tiềm năng trong bạn chưa được khai mở.</li>
-                    </ul>
-                    
-                    <div class="example-box">
-                        <h5>🔍 Ví Dụ Cụ Thể:</h5>
-                        <ul>
-                            <li><strong>Bạn tức người khác ích kỷ</strong><br>
-                            → Có thể bạn đang kìm nén nhu cầu của chính mình</li>
-                            
-                            <li><strong>Bạn sợ người khác phán xét</strong><br>
-                            → Có thể bạn đang tự phán xét mình quá khắt khe</li>
-                            
-                            <li><strong>Bạn ngưỡng mộ người tự tin</strong><br>
-                            → Đó là tiềm năng BẠN cũng có, chỉ cần khai mở</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="highlight-box">
-                        <h4>🔎 Làm Sao Sử Dụng Gương?</h4>
-                        <p>Mỗi khi ai đó kích hoạt bạn mạnh, hỏi:</p>
-                        <ol>
-                            <li>"Điều gì ở người này làm tôi khó chịu?"</li>
-                            <li>"Tôi có hành vi đó không? (có thể ở dạng khác)"</li>
-                            <li>"Hoặc tôi đang kìm nén nhu cầu ngược lại?"</li>
-                        </ol>
-                        
-                        <p><strong>Ví dụ:</strong> Bạn ghét sếp độc đoán<br>
-                        → Hỏi: "Tôi có độc đoán không?"<br>
-                        → Có thể bạn độc đoán với chính mình (tự ép làm quá tải)<br>
-                        → Hoặc bạn đang kìm nén nhu cầu lãnh đạo của mình</p>
-                    </div>
-                </div>
+        <p>Mọi cảm xúc mà bạn trải qua, dù là giận dữ, buồn bã hay sợ hãi, đều là năng lượng trung lập ở bản chất. Chính bạn là người gán nhãn "tốt" hay "xấu" cho những cảm xúc đó, và khi bạn hiểu điều này, bạn có thể bắt đầu chuyển hóa thay vì chống lại chúng.</p>
 
-                <!-- Nguyên Lý 5: BUÔNG BỎ -->
-                <div class="principle-card">
-                    <div class="principle-number">5</div>
-                    <span class="principle-icon">🎈</span>
-                    <h3>Nguyên Lý 5: BUÔNG BỎ (Law of Detachment)</h3>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Quy Luật</h4>
-                        <p><strong>Càng bám chặt, càng đẩy xa.</strong></p>
-                    </div>
-                    
-                    <p>Khi bạn cần một thứ QUÁ cần, bạn đang phát tín hiệu "Tôi KHÔNG có nó" ra vũ trụ. Và vũ trụ đáp ứng bằng cách cho bạn thêm sự THIẾU THỐN.</p>
-                    
-                    <h4>Nghịch Lý</h4>
-                    <ul>
-                        <li>Muốn có tiền → Càng lo thiếu tiền → Càng thiếu tiền thật</li>
-                        <li>Muốn có người yêu → Càng desperate → Càng đẩy người ta đi</li>
-                        <li>Muốn thành công → Càng lo thất bại → Càng tạo ra thất bại</li>
-                    </ul>
-                    
-                    <div class="highlight-box">
-                        <h4>⚖️ Buông Bỏ Không Phải Là...</h4>
-                        <ul>
-                            <li>❌ Bỏ cuộc, từ bỏ mục tiêu</li>
-                            <li>❌ Không quan tâm, thờ ơ</li>
-                            <li>❌ Thụ động, không hành động</li>
-                        </ul>
-                        
-                        <h4>✅ Buông Bỏ Là...</h4>
-                        <ul>
-                            <li>✓ Hành động hết mình, nhưng không bám vào kết quả</li>
-                            <li>✓ "Tôi làm hết sức, vũ trụ lo phần còn lại"</li>
-                            <li>✓ Tin tưởng thời điểm đúng sẽ đến</li>
-                        </ul>
-                    </div>
-                    
-                    <h4>💫 Thực Hành Buông Bỏ</h4>
-                    <p>Nghĩ về một điều bạn đang QUÁ cần (tiền, tình yêu, công việc...)</p>
-                    
-                    <p>Viết vào sổ:</p>
-                    <ul>
-                        <li><em>"Tôi muốn ___, nhưng tôi không cần ___ để hạnh phúc"</em></li>
-                        <li><em>"Nếu ___ không đến, tôi vẫn sẽ ___"</em></li>
-                        <li><em>"Tôi tin rằng nếu ___ dành cho tôi, nó sẽ đến đúng lúc"</em></li>
-                    </ul>
-                </div>
-
-                <!-- Bài Tập Tổng Hợp -->
-                <div class="exercise-card">
-                    <div class="exercise-header">
-                        <h3>📝 Bài Tập: Áp Dụng 5 Nguyên Lý</h3>
-                        <div class="exercise-time">⏱️ 30 phút</div>
-                    </div>
-                    
-                    <div class="tool-card">
-                        <div class="tool-image">
-                            <img src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&q=80" alt="Citrine - Thạch anh vàng">
-                        </div>
-                        <div class="tool-content">
-                            <h4>💎 Công Cụ Hôm Nay</h4>
-                            <p class="stone-name">Viên đá Ngày 3: Citrine (Thạch anh vàng)</p>
-                            <p><strong>Tác dụng:</strong> Chuyển hóa năng lượng tắc nghẽn, biểu hiện thịnh vượng</p>
-                            <p><strong>Cách dùng:</strong> Mang trong túi hoặc để bàn làm việc</p>
-                        </div>
-                    </div>
-                    
-                    <h4>Phân Tích 1 Vấn Đề Qua 5 Nguyên Lý</h4>
-                    
-                    <p>Chọn 1 vấn đề đang khiến bạn khó chịu nhất hiện tại. Trả lời:</p>
-                    
-                    <ol style="list-style: none; margin-left: 0;">
-                        <li style="margin-bottom: 2rem;">
-                            <strong>1. KHAM NHẪN:</strong> Vấn đề này đã lặp lại bao nhiêu lần? Bài học là gì?<br>
-                            <em>Trả lời: ___</em>
-                        </li>
-                        
-                        <li style="margin-bottom: 2rem;">
-                            <strong>2. CHUYỂN HÓA:</strong> Năng lượng tiêu cực này tôi có thể chuyển hóa thành gì?<br>
-                            <em>Trả lời: ___</em>
-                        </li>
-                        
-                        <li style="margin-bottom: 2rem;">
-                            <strong>3. HIỆN DIỆN:</strong> Nếu chỉ sống trong "bây giờ", vấn đề này còn đáng lo không?<br>
-                            <em>Trả lời: ___</em>
-                        </li>
-                        
-                        <li style="margin-bottom: 2rem;">
-                            <strong>4. PHẢN CHIẾU:</strong> Vấn đề này phản chiếu điều gì trong tôi?<br>
-                            <em>Trả lời: ___</em>
-                        </li>
-                        
-                        <li style="margin-bottom: 2rem;">
-                            <strong>5. BUÔNG BỎ:</strong> Nếu tôi buông bỏ nhu cầu kiểm soát, điều gì sẽ xảy ra?<br>
-                            <em>Trả lời: ___</em>
-                        </li>
-                    </ol>
-                    
-                    <div class="highlight-box">
-                        <h4>🎯 Nhiệm Vụ Trong Ngày</h4>
-                        <p><strong>Thực Hành "5 Lần Reset"</strong></p>
-                        <p>Đặt báo thức 5 lần trong ngày. Mỗi lần:</p>
-                        <ol>
-                            <li>Dừng lại</li>
-                            <li>Hít thở sâu 3 lần</li>
-                            <li>Nói 1 trong 5 nguyên lý</li>
-                        </ol>
-                        <p>Cuối ngày, viết: <em>"Nguyên lý nào khó áp dụng nhất? Tại sao?"</em></p>
-                    </div>
-                </div>
-
-            </div>
+        <div class="definition-box">
+          <div class="term">Nguyên Lý Chuyển Hóa</div>
+          <div class="meaning">Mọi năng lượng đều trung lập - chính bạn quyết định cách sử dụng nó</div>
+          <div class="description">Bạn không thể xóa bỏ cảm xúc, nhưng bạn có thể biến giận dữ thành động lực và đau khổ thành sức mạnh</div>
         </div>
+
+        <!-- HÌNH 2: NGUYÊN LÝ CỘNG HƯỞNG -->
+        <div class="image-container">
+          <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY3_HINH_2" alt="Nguyên lý cộng hưởng - minh họa cách tần số đồng điệu" loading="lazy">
+          <div class="image-caption">Hình 2: Nguyên lý cộng hưởng - khi bạn chuyển hóa cảm xúc, tần số của bạn sẽ cộng hưởng với những điều tích cực</div>
+        </div>
+
+        <h4>Giận Dữ Là Năng Lượng</h4>
+        <p>Khi bạn kìm nén giận dữ thay vì đối mặt với nó, năng lượng đó không mất đi mà sẽ tích tụ và bùng phát mạnh hơn sau này, có thể là bạn la hét hoặc đập phá đồ đạc. Hoặc nó sẽ ẩn sâu vào cơ thể và gây ra những vấn đề sức khỏe như đau đầu mãn tính, viêm loét dạ dày, hoặc các bệnh tim mạch.</p>
+
+        <p>Nhưng khi bạn biết cách chuyển hóa, giận dữ có thể trở thành động lực mạnh mẽ để thay đổi cuộc sống, sức mạnh để đứng lên bảo vệ bản thân và những người bạn yêu, nguồn cảm hứng để sáng tạo nghệ thuật như vẽ viết hay âm nhạc, hoặc năng lượng để tập luyện thể thao và cải thiện sức khỏe.</p>
+
+        <div class="example-box">
+          <h5>Ví Dụ Lịch Sử Về Chuyển Hóa</h5>
+          <p><strong>Van Gogh</strong> đã chuyển hóa nỗi đau khổ và cô đơn của cuộc đời mình thành những bức tranh đẹp nhất lịch sử nghệ thuật, chứng minh rằng đau khổ có thể là nguồn nguyên liệu cho sự sáng tạo vĩ đại.</p>
+          <p><strong>Martin Luther King</strong> đã chuyển hóa sự giận dữ trước bất công xã hội thành phong trào dân quyền lịch sử, thay vì để giận dữ hủy hoại thì ông biến nó thành sức mạnh thay đổi cả thế giới.</p>
+          <p><strong>J.K. Rowling</strong> đã chuyển hóa trầm cảm và thất bại liên tiếp thành loạt truyện Harry Potter được hàng triệu người yêu thích, chứng minh rằng những giai đoạn tối tăm nhất cũng có thể là khởi nguồn cho điều kỳ diệu.</p>
+        </div>
+
+        <div class="highlight-box cyan">
+          <div class="highlight-title">Công Thức Chuyển Hóa 4 Bước</div>
+          <p><strong>Bước 1 - NHẬN RA cảm xúc đang có:</strong> Hãy nói "Tôi đang giận" thay vì nói "Người đó làm tôi giận", bởi vì khi bạn nhận trách nhiệm về cảm xúc của mình thì bạn mới có quyền lực để thay đổi nó.</p>
+          <p><strong>Bước 2 - CẢM NHẬN đầy đủ trong cơ thể:</strong> Đừng kìm nén cảm xúc mà hãy để nó hiện diện trong khoảng 90 giây, cảm nhận nó ở đâu trong cơ thể và cho phép nó tồn tại mà không phán xét.</p>
+          <p><strong>Bước 3 - HỎI năng lượng này muốn gì:</strong> Tự hỏi "Giận dữ này đang bảo vệ cái gì? Nó đang muốn nói cho mình điều gì?" bởi vì mỗi cảm xúc đều mang một thông điệp quan trọng.</p>
+          <p><strong>Bước 4 - CHUYỂN HÓA thành hành động tích cực:</strong> Viết nhật ký, vẽ tranh, chạy bộ, hoặc tạo ra bất kỳ điều gì mang giá trị từ nguồn năng lượng đó, thay vì để nó phản hủy bạn từ bên trong.</p>
+        </div>
+      </div>
     </section>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGÀY 3: 5 NGUYÊN LÝ VẬN HÀNH - Quiz</title>
-    
-    <style>
-        /* ===== BASIC RESET - MINIMAL STYLES ===== */
-        .quiz-wrapper-day3 * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        /* ===== CONTAINER ===== */
-        .quiz-wrapper-day3 {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
-        
-        .quiz-wrapper-day3 h2 {
-            text-align: center;
-            color: #9C0612;
-            font-size: 32px;
-            margin-bottom: 15px;
-        }
-        
-        .quiz-wrapper-day3 .quiz-intro {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .quiz-wrapper-day3 .quiz-intro p {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        
-        /* ===== QUIZ QUESTION ===== */
-        .quiz-wrapper-day3 .quiz-question {
-            background: #f5f5f5;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 10px;
-            border: 2px solid #ddd;
-        }
-        
-        .quiz-wrapper-day3 .question-number {
-            color: #9C0612;
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 8px;
-            display: block;
-        }
-        
-        .quiz-wrapper-day3 .question-text {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-            display: block;
-        }
-        
-        /* ===== OPTIONS ===== */
-        .quiz-wrapper-day3 .quiz-options {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .quiz-wrapper-day3 .quiz-options li {
-            background: white;
-            padding: 15px 20px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid #ddd;
-            transition: all 0.2s ease;
-            position: relative;
-            font-size: 16px;
-            color: #333;
-        }
-        
-        .quiz-wrapper-day3 .quiz-options li:hover {
-            background: #fff8e1;
-            border-color: #FFBD59;
-            transform: translateX(5px);
-        }
-        
-        .quiz-wrapper-day3 .quiz-options li.answered {
-            cursor: not-allowed;
-            opacity: 0.9;
-        }
-        
-        .quiz-wrapper-day3 .quiz-options li.correct {
-            background: #d4edda;
-            border-color: #28a745;
-            font-weight: bold;
-        }
-        
-        .quiz-wrapper-day3 .quiz-options li.wrong {
-            background: #f8d7da;
-            border-color: #dc3545;
-        }
-        
-        .quiz-wrapper-day3 .quiz-options li.correct::after {
-            content: '✓';
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 24px;
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .quiz-wrapper-day3 .quiz-options li.wrong::after {
-            content: '✗';
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 24px;
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        /* ===== ANSWER EXPLANATION ===== */
-        .quiz-wrapper-day3 .quiz-answer {
-            background: #fff3cd;
-            border: 2px solid #FFBD59;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: none;
-            font-size: 15px;
-            line-height: 1.6;
-            color: #333;
-        }
-        
-        .quiz-wrapper-day3 .quiz-answer.show {
-            display: block;
-        }
-        
-        .quiz-wrapper-day3 .quiz-answer strong {
-            color: #9C0612;
-            font-weight: bold;
-        }
-        
-        /* ===== SCORE BOX ===== */
-        .quiz-wrapper-day3 .score-box {
-            background: #fff3cd;
-            border: 2px solid #FFBD59;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .quiz-wrapper-day3 .score-box #current-score-day3 {
-            color: #9C0612;
-            font-size: 24px;
-        }
-        
-        /* ===== RESULT ===== */
-        .quiz-wrapper-day3 .quiz-result {
-            background: #FFBD59;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            display: none;
-            margin-top: 30px;
-            border: 3px solid #9C0612;
-        }
-        
-        .quiz-wrapper-day3 .quiz-result.show {
-            display: block;
-        }
-        
-        .quiz-wrapper-day3 .quiz-result h3 {
-            font-size: 28px;
-            color: #9C0612;
-            margin-bottom: 15px;
-        }
-        
-        .quiz-wrapper-day3 .quiz-result .score {
-            font-size: 48px;
-            font-weight: 900;
-            color: #640A0C;
-            margin: 15px 0;
-        }
-        
-        .quiz-wrapper-day3 .quiz-result .message {
-            font-size: 18px;
-            margin: 15px 0;
-            color: #333;
-            font-weight: 600;
-        }
-        
-        .quiz-wrapper-day3 .pass-message,
-        .quiz-wrapper-day3 .fail-message {
-            background: white;
-            border: 3px solid #28a745;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        
-        .quiz-wrapper-day3 .fail-message {
-            border-color: #dc3545;
-        }
-        
-        .quiz-wrapper-day3 .retry-button {
-            display: inline-block;
-            background: #9C0612;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 50px;
-            font-weight: bold;
-            text-decoration: none;
-            margin-top: 15px;
-            cursor: pointer;
-            border: none;
-            font-size: 16px;
-        }
-        
-        .quiz-wrapper-day3 .retry-button:hover {
-            background: #640A0C;
-        }
-        
-        /* ===== MOBILE ===== */
-        @media (max-width: 768px) {
-            .quiz-wrapper-day3 {
-                padding: 15px;
-            }
-            
-            .quiz-wrapper-day3 h2 {
-                font-size: 26px;
-            }
-            
-            .quiz-wrapper-day3 .quiz-question {
-                padding: 20px 15px;
-            }
-            
-            .quiz-wrapper-day3 .quiz-options li {
-                padding: 12px 15px;
-                font-size: 15px;
-            }
-        }
-    </style>
-</head>
-<body>
+    <!-- ============================================
+         SECTION 4: NGUYÊN LÝ 3 - HIỆN DIỆN
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">&#127919;</span> Nguyên Lý 3: Hiện Diện</h2>
 
-<!-- ===== QUIZ SECTION - CHỈ PASTE PHẦN NÀY VÀO TEVELLO ===== -->
-<div class="quiz-wrapper-day3">
-    
-    <div class="quiz-intro">
-        <h2>📝 Quiz Ngày 3</h2>
-        <p>Kiểm tra hiểu biết về 5 Nguyên Lý Vận Hành</p>
-        <p><strong>Cần 4/5 điểm để mở khóa Ngày 4</strong></p>
-    </div>
-    
-    <div class="score-box">
-        📊 Điểm của bạn: <span id="current-score-day3">0/5</span>
+      <div class="principle-card">
+        <div class="principle-number">3</div>
+        <h3>HIỆN DIỆN - Law of Presence</h3>
+
+        <div class="definition-box">
+          <div class="term">Nguyên Lý Hiện Diện</div>
+          <div class="meaning">Sức mạnh duy nhất bạn có là ở thời điểm hiện tại</div>
+          <div class="description">Quá khứ đã qua và không thể thay đổi, tương lai chưa đến và không thể kiểm soát, chỉ có "bây giờ" là thật và là nơi bạn có quyền năng hành động</div>
+        </div>
+
+        <p>Hầu hết chúng ta không thực sự sống trong khoảnh khắc hiện tại mà luôn bị kéo về quá khứ hoặc đẩy về tương lai. Khi bạn hối hận về những việc đã qua, bạn đang tạo ra năng lượng trầm cảm và nặng nề kéo tần số xuống. Khi bạn lo lắng về những điều chưa xảy ra, bạn đang tạo ra năng lượng lo âu khiến bạn mất khả năng hành động hiệu quả.</p>
+
+        <p>Nguyên lý Hiện Diện cho rằng chỉ có "bây giờ" là thời điểm bạn thực sự có quyền năng để hành động và thay đổi mọi thứ. Quá khứ là bài học, tương lai là tiềm năng, nhưng hiện tại là nơi sức mạnh thực sự nằm ở.</p>
+
+        <!-- HÌNH 3: QUY TRÌNH THỰC HÀNH NÂNG TẦN SỐ -->
+        <div class="image-container">
+          <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY3_HINH_3" alt="Quy trình thực hành nâng tần số hàng ngày" loading="lazy">
+          <div class="image-caption">Hình 3: Quy trình thực hành nâng tần số - mỗi ngày chỉ cần vài phút hiện diện tỉnh thức để thay đổi cuộc sống</div>
+        </div>
+
+        <h4>Thí Nghiệm: Quyền Năng Hiện Tại</h4>
+        <p>Bạn có thể trải nghiệm sức mạnh của Hiện Diện ngay bây giờ bằng cách làm theo các bước đơn giản này. Hãy đặt một tay lên ngực và một tay lên bụng, rồi cảm nhận hơi thở đi vào và đi ra một cách tự nhiên. Nói thầm "Bây giờ, tôi đang thở" và cảm nhận sự sống động của cơ thể. Sau đó, cảm nhận cơ thể bạn đang chạm sàn hay ngồi trên ghế và nói "Bây giờ, tôi đang ngồi đây". Bạn có cảm thấy bình yên hơn không? Đó chính là quyền năng của Hiện Diện.</p>
+
+        <div class="highlight-box purple">
+          <div class="highlight-title">Thực Hành Hiện Diện Hàng Ngày</div>
+          <p>Bất cứ lúc nào trong ngày, khi bạn cảm thấy đầu óc quay cuồng với những suy nghĩ về quá khứ hay tương lai, hãy dừng lại và hỏi bản thân ba câu hỏi này.</p>
+          <p><strong>Câu 1:</strong> "Bây giờ này, tôi đang ở đâu?" - Hãy nhận biết không gian vật lý xung quanh bạn để neo tâm trí vào hiện tại.</p>
+          <p><strong>Câu 2:</strong> "Bây giờ này, tôi đang làm gì?" - Hãy nhận biết hành động cụ thể bạn đang thực hiện để đưa sự chú ý trở về khoảnh khắc này.</p>
+          <p><strong>Câu 3:</strong> "Bây giờ này, tôi cảm thấy thế nào?" - Hãy nhận biết cảm xúc và cảm giác trong cơ thể để hiện diện trọn vẹn với bản thân.</p>
+          <p>Chỉ cần ba câu hỏi này đã đủ để kéo bạn trở về hiện tại và giải phóng bạn khỏi những vòng xoáy lo âu vô tận của đầu óc.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 5: NGUYÊN LÝ 4 - PHẢN CHIẾU
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">&#129695;</span> Nguyên Lý 4: Phản Chiếu</h2>
+
+      <div class="principle-card">
+        <div class="principle-number">4</div>
+        <h3>PHẢN CHIẾU - Law of Mirror</h3>
+
+        <div class="definition-box">
+          <div class="term">Nguyên Lý Phản Chiếu</div>
+          <div class="meaning">Mọi thứ bên ngoài đều là phản chiếu của bên trong</div>
+          <div class="description">Thế giới xung quanh bạn giống như một chiếc gương khổng lồ, phản chiếu lại những gì đang diễn ra trong tâm hồn bạn</div>
+        </div>
+
+        <p>Đây là nguyên lý khó chấp nhận nhất nhưng cũng mang lại sức mạnh lớn nhất khi bạn thực sự hiểu và áp dụng nó. Nguyên lý Phản Chiếu cho rằng mọi người và mọi tình huống xuất hiện trong cuộc đời bạn đều là tấm gương phản chiếu những gì đang diễn ra bên trong bạn.</p>
+
+        <p>Người làm bạn tức giận có thể đang phản chiếu một phần trong bạn mà bạn chưa chấp nhận hoặc đang kìm nén. Người bạn ngưỡng mộ có thể đang phản chiếu một tiềm năng trong bạn chưa được khai mở và đang chờ bạn nhận ra nó.</p>
+
+        <!-- HÌNH 4: SO SÁNH TRƯỚC VÀ SAU -->
+        <div class="image-container">
+          <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY3_HINH_4" alt="So sánh trước và sau khi áp dụng 5 nguyên lý" loading="lazy">
+          <div class="image-caption">Hình 4: So sánh trước và sau khi áp dụng 5 nguyên lý - từ cảm xúc tiêu cực đến sự chuyển hóa tích cực</div>
+        </div>
+
+        <div class="example-box">
+          <h5>Ví Dụ Cụ Thể Về Phản Chiếu</h5>
+          <p><strong>Bạn tức giận vì người khác ích kỷ:</strong> Hãy tự hỏi liệu bạn có đang kìm nén nhu cầu của chính mình không, bởi vì nhiều khi sự tức giận với tính ích kỷ của người khác là vì bạn không cho phép mình được chăm sóc bản thân.</p>
+          <p><strong>Bạn sợ người khác phán xét mình:</strong> Hãy tự hỏi liệu bạn có đang tự phán xét mình quá khắt khe không, bởi vì khi bạn đã chấp nhận bản thân thì lời phán xét của người khác sẽ không còn khả năng làm tổn thương bạn.</p>
+          <p><strong>Bạn ngưỡng mộ người tự tin:</strong> Hãy nhận ra rằng sự tự tin đó cũng là tiềm năng BẠN đã có sẵn, chỉ cần khai mở và nuôi dưỡng nó để nó trở thành phần chính thức của bạn.</p>
+        </div>
+
+        <div class="highlight-box">
+          <div class="highlight-title">Cách Sử Dụng Chiếc Gương Phản Chiếu</div>
+          <p>Mỗi khi ai đó kích hoạt cảm xúc mạnh trong bạn, dù là tức giận, ghen tị hay ngưỡng mộ, hãy dừng lại và tự hỏi ba câu hỏi quan trọng này để khám phá bài học ẩn sau.</p>
+          <p><strong>Câu 1:</strong> "Điều gì ở người này làm tôi khó chịu hoặc ấn tượng mạnh?" - Xác định chính xác đặc điểm hoặc hành vi gây phản ứng cảm xúc.</p>
+          <p><strong>Câu 2:</strong> "Tôi có hành vi đó không, có thể ở dạng khác?" - Thành thật nhìn lại bản thân xem có phần nào tương tự đang ẩn giấu.</p>
+          <p><strong>Câu 3:</strong> "Hoặc tôi đang kìm nén nhu cầu ngược lại?" - Đôi khi bạn tức giận vì người khác làm điều bạn muốn làm nhưng không cho phép mình.</p>
+          <p><strong>Ví dụ thực tế:</strong> Bạn ghét sếp độc đoán, hãy hỏi "Mình có độc đoán không?" và có thể bạn sẽ nhận ra bạn đang độc đoán với chính mình khi tự ép làm quá tải, hoặc bạn đang kìm nén nhu cầu lãnh đạo của mình.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 6: NGUYÊN LÝ 5 - BUÔNG BỎ
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">&#127880;</span> Nguyên Lý 5: Buông Bỏ</h2>
+
+      <div class="principle-card">
+        <div class="principle-number">5</div>
+        <h3>BUÔNG BỎ - Law of Detachment</h3>
+
+        <div class="definition-box">
+          <div class="term">Nguyên Lý Buông Bỏ</div>
+          <div class="meaning">Càng bám chặt, càng đẩy xa - Hãy hành động hết mình nhưng buông kết quả</div>
+          <div class="description">Khi bạn QUÁ cần một thứ, bạn phát tín hiệu "Tôi KHÔNG có nó" ra vũ trụ và vũ trụ đáp ứng bằng cách cho bạn thêm sự thiếu thốn</div>
+        </div>
+
+        <p>Nguyên lý Buông Bỏ là một trong những nghịch lý sâu sắc nhất của cuộc sống. Khi bạn muốn một thứ quá cần thiết và bám chặt vào nó, bạn đang vô tình phát ra tín hiệu "Tôi đang thiếu" và vũ trụ sẽ đáp ứng chính xác tần số đó bằng cách mang đến cho bạn thêm sự thiếu thốn.</p>
+
+        <p>Hãy nghĩ về nó thế này: khi bạn quá muốn có tiền, bạn càng lo thiếu tiền và càng thiếu tiền thật. Khi bạn quá muốn có người yêu, bạn càng trở nên tuyệt vọng và càng đẩy người ta ra xa. Khi bạn quá muốn thành công, bạn càng lo thất bại và càng tạo ra thất bại.</p>
+
+        <div class="highlight-box red">
+          <div class="highlight-title">Buông Bỏ KHÔNG Phải Là...</div>
+          <p>Nhiều người hiểu sai về buông bỏ và nghĩ rằng nó có nghĩa là bỏ cuộc hoặc từ bỏ mục tiêu, nhưng hoàn toàn không phải vậy.</p>
+          <p>Buông bỏ <strong>KHÔNG phải</strong> là bỏ cuộc hay từ bỏ ước mơ, không phải là không quan tâm hay thờ ơ với cuộc sống, và cũng không phải là thụ động ngồi yên không làm gì chờ đời thay đổi.</p>
+        </div>
+
+        <div class="highlight-box green">
+          <div class="highlight-title">Buông Bỏ Thực Sự Là...</div>
+          <p>Buông bỏ thực sự nghĩa là <strong>bạn hành động hết mình nhưng không bám vào kết quả</strong>, giống như người nông dân gieo hạt và chăm sóc tốt nhất có thể nhưng không ngồi đó lo lắng mỗi ngày xem cây đã mọc chưa.</p>
+          <p>Buông bỏ là nói với vũ trụ "Tôi đã làm hết sức, phần còn lại tôi tin tưởng vào thời điểm đúng của nó." Buông bỏ là tin rằng những gì dành cho bạn sẽ đến đúng lúc và không cần phải ép buộc hay kiểm soát mọi thứ.</p>
+          <p>Khi bạn buông bỏ đúng cách, bạn giải phóng một lượng năng lượng khổng lồ trước đó bị khóa trong sự lo lắng, và năng lượng này sẽ giúp bạn hành động hiệu quả hơn gấp nhiều lần.</p>
+        </div>
+
+        <h4>Thực Hành Buông Bỏ</h4>
+        <p>Hãy nghĩ về một điều bạn đang QUÁ cần lúc này, có thể là tiền bạc, tình yêu, công việc hay bất kỳ điều gì khác mà bạn cảm thấy "không có nó thì không thể hạnh phúc". Sau đó, hãy viết vào sổ những câu sau và đọc to chúng lên.</p>
+        <p><em>"Tôi muốn ___, nhưng tôi không cần ___ để hạnh phúc. Hạnh phúc của tôi đến từ bên trong và không phụ thuộc vào bất kỳ điều kiện bên ngoài nào."</em></p>
+        <p><em>"Nếu ___ không đến, tôi vẫn sẽ sống trọn vẹn và tìm thấy ý nghĩa cuộc sống theo cách riêng của mình."</em></p>
+        <p><em>"Tôi tin rằng nếu ___ dành cho tôi thì nó sẽ đến đúng lúc, và tôi sẵn sàng đón nhận với trái tim rộng mở."</em></p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION 7: BÀI TẬP TỔNG HỢP
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">&#128221;</span> Bài Tập: Áp Dụng 5 Nguyên Lý</h2>
+
+      <!-- CÔNG CỤ HỖ TRỢ -->
+      <div class="tool-card" style="border-left-color: var(--color-gold);">
+        <div class="tool-header">
+          <span class="tool-icon">&#128142;</span>
+          <span class="tool-title" style="color: var(--color-gold);">Công Cụ Hôm Nay</span>
+        </div>
+        <div class="tool-name">Viên đá Ngày 3: Citrine (Thạch anh vàng)</div>
+        <div class="tool-effect"><strong>Tác dụng:</strong> Chuyển hóa năng lượng tắc nghẽn, biểu hiện thịnh vượng và thu hút sự dồi dào</div>
+        <div class="tool-usage"><strong>Cách dùng:</strong> Mang trong túi hoặc để bàn làm việc để hỗ trợ quá trình chuyển hóa năng lượng hàng ngày</div>
+      </div>
+
+      <div class="exercise-card">
+        <div class="exercise-header">
+          <span class="exercise-title">Phân Tích 1 Vấn Đề Qua 5 Nguyên Lý</span>
+          <span class="exercise-time">30 phút</span>
+        </div>
+
+        <p>Chọn 1 vấn đề đang khiến bạn khó chịu nhất hiện tại và phân tích nó qua lăng kính của từng nguyên lý. Viết câu trả lời vào sổ của bạn.</p>
+
+        <h4>5 Câu Hỏi Phân Tích</h4>
+        <ol>
+          <li>
+            <strong>KHÁM NHẬN:</strong> Vấn đề này đã lặp lại bao nhiêu lần trong cuộc đời bạn? Bài học mà vũ trụ đang muốn bạn học là gì? Hãy viết cụ thể và thành thật.
+          </li>
+          <li>
+            <strong>CHUYỂN HÓA:</strong> Năng lượng tiêu cực từ vấn đề này bạn có thể chuyển hóa thành gì có ích? Ví dụ: giận dữ thành động lực, buồn bã thành sự cảm thông, sợ hãi thành sự cẩn trọng.
+          </li>
+          <li>
+            <strong>HIỆN DIỆN:</strong> Nếu bạn chỉ sống trong khoảnh khắc "bây giờ" mà không nghĩ về quá khứ hay tương lai, vấn đề này còn đáng lo không? Hãy cảm nhận sự khác biệt.
+          </li>
+          <li>
+            <strong>PHẢN CHIẾU:</strong> Vấn đề này đang phản chiếu điều gì trong bạn? Có phải bạn đang kìm nén một nhu cầu nào đó hoặc chưa chấp nhận một phần nào đó của mình?
+          </li>
+          <li>
+            <strong>BUÔNG BỎ:</strong> Nếu bạn buông bỏ nhu cầu kiểm soát kết quả của vấn đề này thì điều gì sẽ xảy ra? Bạn có thể hành động hết mình mà không bám vào kết quả không?
+          </li>
+        </ol>
+
+        <div class="highlight-box">
+          <div class="highlight-title">Nhiệm Vụ Trong Ngày: 5 Lần Reset</div>
+          <p>Đặt báo thức 5 lần trong ngày hôm nay, mỗi lần cách nhau khoảng 2-3 tiếng. Mỗi khi báo thức kêu, hãy dừng lại mọi việc bạn đang làm và thực hiện 3 bước này.</p>
+          <p><strong>Bước 1:</strong> Hít thở sâu 3 lần để đưa bạn trở về hiện tại và bình tĩnh tâm trí.</p>
+          <p><strong>Bước 2:</strong> Nói to 1 trong 5 nguyên lý, mỗi lần chọn một nguyên lý khác nhau để bạn làm quen với tất cả.</p>
+          <p><strong>Bước 3:</strong> Tự hỏi "Nguyên lý này đang áp dụng thế nào vào tình huống của mình lúc này?"</p>
+          <p>Cuối ngày, viết vào sổ: <em>"Nguyên lý nào khó áp dụng nhất? Tại sao nó khó? Mình cần làm gì để thực hành tốt hơn?"</em></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SUMMARY BOX
+         ============================================ -->
+    <div class="summary-box">
+      <div class="summary-title">Tóm Tắt Ngày 3</div>
+      <div class="key-points">
+        <div class="key-point">
+          <span class="bullet">&#10003;</span>
+          <span><strong>Khám Nhận:</strong> Vấn đề lặp lại là cơ hội học bài học, không phải trừng phạt, khi bạn học xong thì pattern sẽ không còn quay lại</span>
+        </div>
+        <div class="key-point">
+          <span class="bullet">&#10003;</span>
+          <span><strong>Chuyển Hóa:</strong> Năng lượng không mất đi mà chỉ chuyển dạng, bạn có thể biến giận dữ thành động lực và đau khổ thành sức mạnh</span>
+        </div>
+        <div class="key-point">
+          <span class="bullet">&#10003;</span>
+          <span><strong>Hiện Diện:</strong> Sức mạnh thực sự nằm ở khoảnh khắc hiện tại, hãy dừng lại và cảm nhận "bây giờ" để giải phóng bạn khỏi lo âu</span>
+        </div>
+        <div class="key-point">
+          <span class="bullet">&#10003;</span>
+          <span><strong>Phản Chiếu:</strong> Thế giới bên ngoài là tấm gương phản chiếu bên trong, người kích hoạt bạn đang dạy bạn bài học về chính mình</span>
+        </div>
+        <div class="key-point">
+          <span class="bullet">&#10003;</span>
+          <span><strong>Buông Bỏ:</strong> Hành động hết mình nhưng không bám vào kết quả, tin tưởng vào thời điểm đúng của vũ trụ</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Câu 1 -->
-    <div class="quiz-question" data-question="1">
-        <span class="question-number">Câu 1:</span>
-        <span class="question-text">Nguyên Lý Kham Nhẫn có nghĩa:</span>
+    <!-- HÌNH 5: BẢNG TÓM TẮT 5 NGUYÊN LÝ -->
+    <div class="image-container">
+      <img src="https://via.placeholder.com/800x500/112250/FFBD59?text=NGAY3_HINH_5" alt="Bảng tóm tắt 5 nguyên lý và cách ứng dụng" loading="lazy">
+      <div class="image-caption">Hình 5: Bảng tóm tắt 5 nguyên lý và cách ứng dụng trong cuộc sống hàng ngày</div>
+    </div>
+
+    <!-- ============================================
+         QUIZ SECTION
+         ============================================ -->
+    <div class="quiz-section" id="quiz-section">
+      <div class="quiz-header">
+        <h2 class="quiz-title">Quiz Ngày 3</h2>
+        <p class="quiz-desc">Kiểm tra sự hiểu biết của bạn về 5 Nguyên Lý Vận Hành</p>
+        <p class="quiz-desc"><strong>Bạn cần trả lời đúng ít nhất 2/3 câu để hoàn thành</strong></p>
+      </div>
+
+      <div class="quiz-score">
+        <span class="score-label">Điểm của bạn: </span>
+        <span class="score-value" id="current-score">0/3</span>
+      </div>
+
+      <!-- Câu 1 -->
+      <div class="quiz-question" data-question="1">
+        <div class="question-number">Câu 1:</div>
+        <div class="question-text">Nguyên Lý Khám Nhận có nghĩa là gì?</div>
         <ul class="quiz-options">
-            <li data-correct="false">a) Phải chịu đựng mãi</li>
-            <li data-correct="true">b) Vấn đề lặp lại cho đến khi học xong bài học</li>
-            <li data-correct="false">c) Không được phàn nàn</li>
-            <li data-correct="false">d) Chấp nhận mọi thứ</li>
+          <li class="quiz-option" data-correct="false">a) Bạn phải chịu đựng tất cả mọi khó khăn mà không được than phiền</li>
+          <li class="quiz-option" data-correct="true">b) Vấn đề cứ lặp lại cho đến khi bạn học xong bài học của nó</li>
+          <li class="quiz-option" data-correct="false">c) Bạn phải chấp nhận mọi thứ và không được thay đổi bất kỳ điều gì</li>
+          <li class="quiz-option" data-correct="false">d) Vũ trụ đang trừng phạt bạn vì những lỗi lầm trong quá khứ</li>
         </ul>
         <div class="quiz-answer">
-            <strong>Đáp án đúng: b)</strong> Vũ trụ sẽ liên tục mang đến cùng một bài học cho đến khi bạn học xong. Đây không phải trừng phạt mà là cơ hội để bạn tiến hóa.
+          <strong>Đáp án đúng: b)</strong> Nguyên lý Khám Nhận cho rằng vũ trụ sẽ liên tục mang đến cùng một bài học cho đến khi bạn học xong. Đây không phải là sự trừng phạt mà là cơ hội để bạn tiến hóa và trưởng thành, giống như ở trường bạn phải vượt qua bài kiểm tra trước khi lên lớp mới.
         </div>
-    </div>
+      </div>
 
-    <!-- Câu 2 -->
-    <div class="quiz-question" data-question="2">
-        <span class="question-number">Câu 2:</span>
-        <span class="question-text">Chuyển Hóa là:</span>
+      <!-- Câu 2 -->
+      <div class="quiz-question" data-question="2">
+        <div class="question-number">Câu 2:</div>
+        <div class="question-text">Theo Nguyên Lý Chuyển Hóa, cách tốt nhất để xử lý giận dữ là gì?</div>
         <ul class="quiz-options">
-            <li data-correct="false">a) Xóa bỏ cảm xúc tiêu cực</li>
-            <li data-correct="true">b) Biến năng lượng từ dạng này sang dạng khác</li>
-            <li data-correct="false">c) Quên đi quá khứ</li>
-            <li data-correct="false">d) Kìm nén cảm xúc</li>
+          <li class="quiz-option" data-correct="false">a) Kìm nén giận dữ và giả vờ mọi thứ đều ổn</li>
+          <li class="quiz-option" data-correct="false">b) Xóa bỏ hoàn toàn cảm xúc tiêu cực khỏi tâm trí</li>
+          <li class="quiz-option" data-correct="true">c) Nhận ra giận dữ, cảm nhận nó và chuyển hóa thành hành động tích cực</li>
+          <li class="quiz-option" data-correct="false">d) Để giận dữ bùng nổ tự nhiên để giải tỏa căng thẳng</li>
         </ul>
         <div class="quiz-answer">
-            <strong>Đáp án đúng: b)</strong> Năng lượng không thể bị hủy diệt, chỉ có thể chuyển hóa. Bạn có thể chuyển giận dữ thành động lực, đau khổ thành nghệ thuật.
+          <strong>Đáp án đúng: c)</strong> Nguyên lý Chuyển Hóa dạy rằng năng lượng không thể bị hủy diệt mà chỉ có thể chuyển dạng. Cách tốt nhất là nhận ra cảm xúc, cảm nhận nó đầy đủ trong cơ thể và sau đó chuyển hóa thành hành động tích cực như sáng tạo, tập luyện hoặc xây dựng điều gì có giá trị.
         </div>
-    </div>
+      </div>
 
-    <!-- Câu 3 -->
-    <div class="quiz-question" data-question="3">
-        <span class="question-number">Câu 3:</span>
-        <span class="question-text">"Sức mạnh duy nhất là ở hiện tại" vì:</span>
+      <!-- Câu 3 -->
+      <div class="quiz-question" data-question="3">
+        <div class="question-number">Câu 3:</div>
+        <div class="question-text">"Buông bỏ" theo đúng nghĩa của Nguyên Lý thứ 5 là gì?</div>
         <ul class="quiz-options">
-            <li data-correct="false">a) Quá khứ và tương lai không tồn tại</li>
-            <li data-correct="true">b) Chỉ có "bây giờ" ta có thể hành động</li>
-            <li data-correct="false">c) Không nên nhớ quá khứ</li>
-            <li data-correct="false">d) Không nên lo tương lai</li>
+          <li class="quiz-option" data-correct="false">a) Từ bỏ mục tiêu và ngừng cố gắng</li>
+          <li class="quiz-option" data-correct="true">b) Hành động hết mình nhưng không bám vào kết quả</li>
+          <li class="quiz-option" data-correct="false">c) Không quan tâm đến bất kỳ điều gì xảy ra</li>
+          <li class="quiz-option" data-correct="false">d) Đợi vũ trụ mang đến mọi thứ mà không cần hành động</li>
         </ul>
         <div class="quiz-answer">
-            <strong>Đáp án đúng: b)</strong> Quá khứ đã qua, tương lai chưa đến. Chỉ có khoảnh khắc hiện tại là nơi bạn có quyền năng thực sự để hành động và thay đổi.
+          <strong>Đáp án đúng: b)</strong> Buông bỏ không phải là bỏ cuộc hay thờ ơ mà là hành động hết mình nhưng không bám chặt vào kết quả. Bạn làm tốt nhất có thể rồi tin tưởng rằng những gì dành cho bạn sẽ đến đúng lúc, giống như người nông dân gieo hạt và chăm sóc nhưng không ngồi lo xem cây mọc chưa.
         </div>
+      </div>
+
+      <!-- Quiz Result -->
+      <div class="quiz-result" id="quiz-result">
+        <div class="result-title" id="result-title">Xuất Sắc!</div>
+        <div class="result-score" id="final-score">3/3</div>
+        <p class="result-message" id="result-message">Hoàn hảo!</p>
+
+        <div class="pass-message" id="pass-msg">
+          <strong>HOÀN THÀNH NGÀY 3!</strong>
+          <p style="margin-top: var(--space-sm);">Bạn đã hiểu rõ 5 Nguyên Lý Vận Hành. Sẵn sàng cho Ngày 4 - 7 Nghi Thức Hàng Ngày!</p>
+        </div>
+
+        <div class="fail-message" id="fail-msg">
+          <strong>HÃY THỬ LẠI</strong>
+          <p style="margin-top: var(--space-sm);">Bạn cần 2/3 điểm để tiếp tục. Đọc lại bài học và thử lại quiz nhé!</p>
+          <button class="retry-button" onclick="retryQuiz()">Làm Lại Quiz</button>
+        </div>
+      </div>
     </div>
 
-    <!-- Câu 4 -->
-    <div class="quiz-question" data-question="4">
-        <span class="question-number">Câu 4:</span>
-        <span class="question-text">Nguyên Lý Phản Chiếu cho rằng:</span>
-        <ul class="quiz-options">
-            <li data-correct="false">a) Người khác là nguyên nhân vấn đề</li>
-            <li data-correct="true">b) Bên ngoài phản chiếu bên trong</li>
-            <li data-correct="false">c) Chỉ có bề mặt quan trọng</li>
-            <li data-correct="false">d) Không liên quan gì đến nhau</li>
-        </ul>
-        <div class="quiz-answer">
-            <strong>Đáp án đúng: b)</strong> Mọi người và tình huống bên ngoài đều là gương phản chiếu những gì đang diễn ra bên trong bạn - những phần chưa chấp nhận hoặc tiềm năng chưa khai mở.
-        </div>
+    <!-- ============================================
+         NEXT DAY PREVIEW
+         ============================================ -->
+    <div class="next-preview">
+      <div class="preview-label">Tiếp theo</div>
+      <div class="preview-title">NGÀY 4: 7 NGHI THỨC HÀNG NGÀY</div>
+      <div class="preview-desc">Hôm nay bạn đã nhận được 5 chìa khóa vàng - 5 nguyên lý vận hành của vũ trụ. Nhưng nguyên lý này không phải để "hiểu" bằng đầu mà là để SỐNG và trải nghiệm trong từng khoảnh khắc. Mai, chúng ta sẽ bắt đầu THỰC HÀNH thật sự với 7 Nghi Thức Hàng Ngày - công cụ cụ thể để nâng tần số mỗi ngày.</div>
     </div>
 
-    <!-- Câu 5 -->
-    <div class="quiz-question" data-question="5">
-        <span class="question-number">Câu 5:</span>
-        <span class="question-text">Buông bỏ là:</span>
-        <ul class="quiz-options">
-            <li data-correct="false">a) Bỏ cuộc, từ bỏ</li>
-            <li data-correct="true">b) Hành động hết mình nhưng không bám vào kết quả</li>
-            <li data-correct="false">c) Thụ động, không làm gì</li>
-            <li data-correct="false">d) Không quan tâm</li>
-        </ul>
-        <div class="quiz-answer">
-            <strong>Đáp án đúng: b)</strong> Buông bỏ nghĩa là bạn làm hết sức mình nhưng không bám chặt vào kết quả, tin tưởng rằng những gì dành cho bạn sẽ đến đúng lúc.
-        </div>
-    </div>
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer class="lesson-footer">
+      <div class="footer-brand">GEM Academy</div>
+      <div class="footer-url"><a href="https://yinyangmasters.com" target="_blank">yinyangmasters.com</a></div>
+    </footer>
 
-    <!-- Result -->
-    <div class="quiz-result" id="quiz-result-day3">
-        <h3 id="result-title-day3">🎉 Chúc Mừng!</h3>
-        <div class="score" id="final-score-day3">5/5</div>
-        <p class="message" id="result-message-day3">Xuất sắc!</p>
-        
-        <div class="pass-message" id="pass-msg-day3">
-            <strong>✅ HOÀN THÀNH NGÀY 3</strong>
-            <p style="margin-top: 10px;">Bạn đã hiểu rõ 5 Nguyên Lý! Mai chúng ta học 7 Nghi Thức Hàng Ngày!</p>
-        </div>
-        
-        <div class="fail-message" id="fail-msg-day3" style="display: none;">
-            <strong>📚 HÃY XEM LẠI BÀI HỌC</strong>
-            <p style="margin-top: 10px;">Đọc lại 5 Nguyên Lý và thử lại quiz nhé!</p>
-            <button class="retry-button" onclick="retryQuizDay3()">🔄 Làm Lại Quiz</button>
-        </div>
-    </div>
+  </div>
 
-</div>
-<!-- ===== KẾT THÚC QUIZ SECTION ===== -->
+  <!-- ============================================
+       QUIZ JAVASCRIPT - V5.4 Instant Feedback
+       ============================================ -->
+  <script>
+    (function() {
+      'use strict';
 
-<script>
-// ===== QUIZ NGÀY 3 - JAVASCRIPT VANILLA + IIFE =====
+      var totalQuestions = 3;
+      var correctAnswers = 0;
+      var answeredQuestions = new Set();
 
-(function() {
-    'use strict';
-    
-    // Variables
-    var totalQuestions = 5;
-    var correctAnswers = 0;
-    var answeredQuestions = new Set();
-    
-    // Wait for DOM
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initQuizDay3);
-    } else {
-        initQuizDay3();
-    }
-    
-    function initQuizDay3() {
-        console.log('Quiz Ngày 3 initialized');
-        
-        // Get all questions
-        var questions = document.querySelectorAll('.quiz-wrapper-day3 .quiz-question');
-        
+      document.addEventListener('DOMContentLoaded', function() {
+        var questions = document.querySelectorAll('.quiz-question');
+
         questions.forEach(function(questionEl) {
-            var questionNum = questionEl.getAttribute('data-question');
-            var options = questionEl.querySelectorAll('.quiz-options li');
-            var answerDiv = questionEl.querySelector('.quiz-answer');
-            
-            options.forEach(function(optionEl) {
-                // Add click event
-                optionEl.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    handleAnswer(optionEl, questionEl, questionNum, options, answerDiv);
-                });
+          var questionNum = questionEl.getAttribute('data-question');
+          var options = questionEl.querySelectorAll('.quiz-option');
+          var answerDiv = questionEl.querySelector('.quiz-answer');
+
+          options.forEach(function(optionEl) {
+            optionEl.addEventListener('click', function(e) {
+              e.preventDefault();
+              handleAnswer(optionEl, questionEl, questionNum, options, answerDiv);
             });
+          });
         });
-    }
-    
-    function handleAnswer(optionEl, questionEl, questionNum, allOptions, answerDiv) {
-        // Check if already answered
+      });
+
+      function handleAnswer(optionEl, questionEl, questionNum, allOptions, answerDiv) {
         if (answeredQuestions.has(questionNum)) {
-            console.log('Question already answered');
-            return;
+          return;
         }
-        
-        // Mark as answered
+
         answeredQuestions.add(questionNum);
-        
-        // Disable all options
+
         allOptions.forEach(function(opt) {
-            opt.classList.add('answered');
+          opt.classList.add('answered');
         });
-        
-        // Check if correct
+
         var isCorrect = optionEl.getAttribute('data-correct') === 'true';
-        
+
         if (isCorrect) {
-            optionEl.classList.add('correct');
-            correctAnswers++;
+          optionEl.classList.add('correct');
+          correctAnswers++;
         } else {
-            optionEl.classList.add('wrong');
-            
-            // Highlight correct answer
-            allOptions.forEach(function(opt) {
-                if (opt.getAttribute('data-correct') === 'true') {
-                    opt.classList.add('correct');
-                }
-            });
+          optionEl.classList.add('wrong');
+
+          allOptions.forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+              opt.classList.add('correct');
+            }
+          });
         }
-        
-        // Update score
-        var scoreEl = document.getElementById('current-score-day3');
+
+        var scoreEl = document.getElementById('current-score');
         if (scoreEl) {
-            scoreEl.textContent = correctAnswers + '/' + totalQuestions;
+          scoreEl.textContent = correctAnswers + '/' + totalQuestions;
         }
-        
-        // Show explanation
+
         if (answerDiv) {
-            answerDiv.classList.add('show');
+          answerDiv.classList.add('show');
         }
-        
-        // Check if all answered
+
         if (answeredQuestions.size === totalQuestions) {
-            setTimeout(showResultDay3, 1000);
+          setTimeout(showResult, 1000);
         }
-    }
-    
-    function showResultDay3() {
-        var resultDiv = document.getElementById('quiz-result-day3');
-        var resultTitle = document.getElementById('result-title-day3');
-        var finalScore = document.getElementById('final-score-day3');
-        var resultMessage = document.getElementById('result-message-day3');
-        var passMsg = document.getElementById('pass-msg-day3');
-        var failMsg = document.getElementById('fail-msg-day3');
-        
+      }
+
+      function showResult() {
+        var resultDiv = document.getElementById('quiz-result');
+        var resultTitle = document.getElementById('result-title');
+        var finalScore = document.getElementById('final-score');
+        var resultMessage = document.getElementById('result-message');
+        var passMsg = document.getElementById('pass-msg');
+        var failMsg = document.getElementById('fail-msg');
+
         if (!resultDiv) return;
-        
-        // Show result
+
         resultDiv.classList.add('show');
-        
+
         if (finalScore) {
-            finalScore.textContent = correctAnswers + '/' + totalQuestions;
+          finalScore.textContent = correctAnswers + '/' + totalQuestions;
         }
-        
-        // Check pass/fail
-        if (correctAnswers >= 4) {
-            // PASS
-            if (resultTitle) {
-                resultTitle.textContent = '🎉 Xuất Sắc!';
-                resultTitle.style.color = '#28a745';
+
+        if (correctAnswers >= 2) {
+          if (resultTitle) {
+            resultTitle.textContent = 'Xuất Sắc!';
+            resultTitle.style.color = '#10B981';
+          }
+
+          if (resultMessage) {
+            if (correctAnswers === 3) {
+              resultMessage.textContent = 'Hoàn hảo! Bạn đã trả lời đúng tất cả!';
+            } else {
+              resultMessage.textContent = 'Tuyệt vời! Bạn đạt ' + correctAnswers + '/3 điểm!';
             }
-            
-            if (resultMessage) {
-                if (correctAnswers === 5) {
-                    resultMessage.textContent = 'Hoàn hảo! Bạn đã trả lời đúng tất cả!';
-                } else {
-                    resultMessage.textContent = 'Tuyệt vời! Bạn đạt ' + correctAnswers + '/5 điểm!';
-                }
-            }
-            
-            if (passMsg) passMsg.style.display = 'block';
-            if (failMsg) failMsg.style.display = 'none';
-            
+          }
+
+          if (passMsg) passMsg.style.display = 'block';
+          if (failMsg) failMsg.style.display = 'none';
+
         } else {
-            // FAIL
-            if (resultTitle) {
-                resultTitle.textContent = '💪 Cố Gắng Lên!';
-                resultTitle.style.color = '#dc3545';
-            }
-            
-            if (resultMessage) {
-                resultMessage.textContent = 'Bạn đạt ' + correctAnswers + '/5 điểm. Cần 4/5 để tiếp tục.';
-            }
-            
-            if (passMsg) passMsg.style.display = 'none';
-            if (failMsg) failMsg.style.display = 'block';
+          if (resultTitle) {
+            resultTitle.textContent = 'Cố Gắng Lên!';
+            resultTitle.style.color = '#EF4444';
+          }
+
+          if (resultMessage) {
+            resultMessage.textContent = 'Bạn đạt ' + correctAnswers + '/3 điểm. Cần 2/3 để tiếp tục.';
+          }
+
+          if (passMsg) passMsg.style.display = 'none';
+          if (failMsg) failMsg.style.display = 'block';
         }
-        
-        // Scroll to result
+
         resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    
-    // Make retryQuizDay3 global
-    window.retryQuizDay3 = function() {
-        console.log('Retrying Quiz Ngày 3...');
-        
-        // Reset variables
+      }
+
+      window.retryQuiz = function() {
         correctAnswers = 0;
         answeredQuestions.clear();
-        
-        // Reset UI
-        var scoreEl = document.getElementById('current-score-day3');
-        if (scoreEl) scoreEl.textContent = '0/5';
-        
-        var resultDiv = document.getElementById('quiz-result-day3');
+
+        var scoreEl = document.getElementById('current-score');
+        if (scoreEl) scoreEl.textContent = '0/' + totalQuestions;
+
+        var resultDiv = document.getElementById('quiz-result');
         if (resultDiv) resultDiv.classList.remove('show');
-        
-        // Reset all questions
-        var questions = document.querySelectorAll('.quiz-wrapper-day3 .quiz-question');
+
+        var questions = document.querySelectorAll('.quiz-question');
         questions.forEach(function(questionEl) {
-            var options = questionEl.querySelectorAll('.quiz-options li');
-            options.forEach(function(opt) {
-                opt.classList.remove('correct', 'wrong', 'answered');
-            });
-            
-            var answerDiv = questionEl.querySelector('.quiz-answer');
-            if (answerDiv) answerDiv.classList.remove('show');
+          var options = questionEl.querySelectorAll('.quiz-option');
+          options.forEach(function(opt) {
+            opt.classList.remove('correct', 'wrong', 'answered');
+          });
+
+          var answerDiv = questionEl.querySelector('.quiz-answer');
+          if (answerDiv) answerDiv.classList.remove('show');
         });
-        
-        // Scroll to top
-        var quizWrapper = document.querySelector('.quiz-wrapper-day3');
-        if (quizWrapper) {
-            quizWrapper.scrollIntoView({ behavior: 'smooth' });
+
+        var quizSection = document.getElementById('quiz-section');
+        if (quizSection) {
+          quizSection.scrollIntoView({ behavior: 'smooth' });
         }
-    };
-    
-})();
-</script>
+      };
 
-</body>
-</html>
-
-    <!-- Next Day Preview -->
-    <section class="next-section">
-        <div class="container">
-            <div class="next-content">
-                <h2>🎉 Tuyệt Vời! Bạn Đã Hoàn Thành Ngày 3</h2>
-                
-                <div class="next-preview">
-                    <h3>Mai, Chúng Ta Sẽ Học:</h3>
-                    <h4>NGÀY 4: 7 NGHI THỨC HÀNG NGÀY</h4>
-                    <p>Hôm nay, bạn đã nhận được 5 chìa khóa vàng - 5 nguyên lý vận hành của vũ trụ.</p>
-                    <p>Những nguyên lý này không phải để "hiểu" bằng đầu. Chúng để SỐNG, để trải nghiệm trong từng khoảnh khắc.</p>
-                    <p><strong>Mai, chúng ta sẽ bắt đầu THỰC HÀNH thật sự</strong> với 7 Nghi Thức Hàng Ngày - công cụ cụ thể để nâng tần số.</p>
-                </div>
-                
-                <div style="margin-top: 2rem;">
-
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <div style="background: var(--bg-navy); color: var(--text-light); padding: 2rem; text-align: center;">
-        <p style="margin: 0;">💫 Giữ viên đá Citrine bên mình. Nghỉ ngơi tốt. Bạn đang tiến bộ tuyệt vời!</p>
-    </div>
-
-    <!-- JavaScript -->
-    <script>
-        // CTA Links
-        const root = getComputedStyle(document.documentElement);
-        const ctaNextDay = root.getPropertyValue('--cta-next-day').trim().replace(/['"]/g, '');
-        const ctaPrevDay = root.getPropertyValue('--cta-prev-day').trim().replace(/['"]/g, '');
-        
-        document.getElementById('btn-next-day').href = ctaNextDay;
-        document.getElementById('btn-prev-day').href = ctaPrevDay;
-        
-        // Quiz System
-        let totalQuestions = 5;
-        let correctAnswers = 0;
-        let answeredQuestions = 0;
-        
-        document.querySelectorAll('.quiz-question').forEach(question => {
-            const options = question.querySelectorAll('.quiz-options li');
-            const answer = question.querySelector('.quiz-answer');
-            
-            options.forEach(option => {
-                option.addEventListener('click', function() {
-                    if (question.classList.contains('answered')) return;
-                    
-                    const isCorrect = this.getAttribute('data-correct') === 'true';
-                    options.forEach(opt => opt.style.pointerEvents = 'none');
-                    question.classList.add('answered');
-                    answeredQuestions++;
-                    
-                    if (isCorrect) {
-                        this.classList.add('correct');
-                        correctAnswers++;
-                    } else {
-                        this.classList.add('wrong');
-                        options.forEach(opt => {
-                            if (opt.getAttribute('data-correct') === 'true') {
-                                opt.classList.add('correct');
-                            }
-                        });
-                    }
-                    
-                    document.getElementById('current-score').textContent = `${correctAnswers}/${totalQuestions}`;
-                    answer.classList.add('show');
-                    
-                    if (answeredQuestions === totalQuestions) {
-                        setTimeout(showResult, 800);
-                    }
-                });
-            });
-        });
-        
-        function showResult() {
-            const resultDiv = document.getElementById('quiz-result');
-            const resultTitle = document.getElementById('result-title');
-            const finalScore = document.getElementById('final-score');
-            const resultMessage = document.getElementById('result-message');
-            const passMsg = document.getElementById('pass-msg');
-            const failMsg = document.getElementById('fail-msg');
-            const nextDayBtn = document.getElementById('btn-next-day');
-            
-            resultDiv.classList.add('show');
-            finalScore.textContent = `${correctAnswers}/${totalQuestions}`;
-            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            if (correctAnswers >= 4) {
-                resultTitle.textContent = '🎉 Xuất Sắc!';
-                resultTitle.style.color = '#4CAF50';
-                
-                if (correctAnswers === 5) {
-                    resultMessage.textContent = 'Hoàn hảo! Bạn đã hiểu thấu 5 Nguyên Lý!';
-                } else {
-                    resultMessage.textContent = `Tuyệt vời! Bạn đạt ${correctAnswers}/5 điểm!`;
-                }
-                
-                passMsg.style.display = 'block';
-                failMsg.style.display = 'none';
-                nextDayBtn.style.opacity = '1';
-                nextDayBtn.style.pointerEvents = 'auto';
-                
-            } else {
-                resultTitle.textContent = '💪 Cố Gắng Lên!';
-                resultTitle.style.color = '#f44336';
-                resultMessage.textContent = `Bạn đạt ${correctAnswers}/5 điểm. Cần 4/5 để tiếp tục.`;
-                
-                passMsg.style.display = 'none';
-                failMsg.style.display = 'block';
-                nextDayBtn.style.opacity = '0.5';
-                nextDayBtn.style.pointerEvents = 'none';
-                nextDayBtn.onclick = (e) => {
-                    e.preventDefault();
-                    alert('Bạn cần hoàn thành quiz với ít nhất 4/5 điểm để tiếp tục!');
-                    return false;
-                };
-            }
-        }
-        
-        function retryQuiz() {
-            correctAnswers = 0;
-            answeredQuestions = 0;
-            document.getElementById('current-score').textContent = '0/5';
-            document.getElementById('quiz-result').classList.remove('show');
-            
-            document.querySelectorAll('.quiz-question').forEach(question => {
-                question.classList.remove('answered');
-                const options = question.querySelectorAll('.quiz-options li');
-                options.forEach(opt => {
-                    opt.classList.remove('correct', 'wrong');
-                    opt.style.pointerEvents = 'auto';
-                });
-                question.querySelector('.quiz-answer').classList.remove('show');
-            });
-            
-            document.querySelector('.quiz-section').scrollIntoView({ behavior: 'smooth' });
-        }
-    </script>
+    })();
+  </script>
 
 </body>
 </html>
