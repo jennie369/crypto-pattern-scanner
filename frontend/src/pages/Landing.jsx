@@ -3041,6 +3041,21 @@ export default function Landing() {
                 </div>
 
                 <div className="form-group">
+                  <label>Mã giới thiệu (nếu có)</label>
+                  <div className="input-wrapper">
+                    <Gift size={20} />
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="VD: GEM95A52"
+                      value={referralCode}
+                      onChange={e => setReferralCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20))}
+                      maxLength={20}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
                   <label>Bạn quan tâm đến</label>
                   <div className="interest-checkbox-group">
                     {[
