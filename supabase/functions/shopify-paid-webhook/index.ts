@@ -9,7 +9,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { createHmac } from 'https://deno.land/std@0.168.0/node/crypto.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -122,19 +121,30 @@ const PRODUCT_TAG_MAPPING: Record<string, { type: string; tier: number }> = {
   'gem-pack-5000': { type: 'gems', tier: 5000 },
 };
 
-// Verify Shopify webhook
-function verifyShopifyWebhook(body: string, hmacHeader: string): boolean {
+// Verify Shopify webhook using Web Crypto API (works reliably in Deno)
+async function verifyShopifyWebhook(body: string, hmacHeader: string): Promise<boolean> {
   const secret = Deno.env.get('SHOPIFY_WEBHOOK_SECRET');
   if (!secret) {
     console.error('[Shopify Paid Webhook] Missing SHOPIFY_WEBHOOK_SECRET');
     return false;
   }
 
-  const hash = createHmac('sha256', secret)
-    .update(body, 'utf8')
-    .digest('base64');
-
-  return hash === hmacHeader;
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    );
+    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
+    const computedHmac = btoa(String.fromCharCode(...new Uint8Array(signature)));
+    return computedHmac === hmacHeader;
+  } catch (err) {
+    console.error('[Shopify Paid Webhook] HMAC verification error:', err);
+    return false;
+  }
 }
 
 // Parse product tags to determine access
@@ -230,7 +240,7 @@ serve(async (req) => {
     const hmacHeader = req.headers.get('x-shopify-hmac-sha256');
     const body = await req.text();
 
-    if (!hmacHeader || !verifyShopifyWebhook(body, hmacHeader)) {
+    if (!hmacHeader || !(await verifyShopifyWebhook(body, hmacHeader))) {
       console.error('[Shopify Paid Webhook] Invalid signature');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
@@ -262,15 +272,73 @@ serve(async (req) => {
     const enrolledCourses: string[] = [];
 
     for (const item of order.line_items || []) {
-      // Try tags first
-      const productTags = item.product?.tags || item.tags || '';
-      let accessInfo = parseProductTags(productTags);
+      const variantId = item.variant_id?.toString() || '';
+      const productId = item.product_id?.toString() || '';
+      let accessInfo: { type: string; tier: number } | null = null;
 
-      // If no tags, try SKU
-      if (!accessInfo) {
-        accessInfo = parseProductSku(item.sku);
+      // ============================================================
+      // METHOD 1 (PRIMARY): Database lookup by variant_id
+      // shopify_product_variants table has tier_type and tier_level
+      // This is the most reliable method since webhook payloads
+      // do NOT include product tags in line_items
+      // ============================================================
+      if (variantId) {
+        try {
+          const { data: variantData } = await supabase
+            .from('shopify_product_variants')
+            .select('tier_type, tier_level, tier_name, course_id, sku')
+            .eq('shopify_variant_id', variantId)
+            .single();
+
+          if (variantData?.tier_type) {
+            accessInfo = { type: variantData.tier_type, tier: variantData.tier_level || 0 };
+            console.log(`[Shopify Paid Webhook] DB lookup: variant ${variantId} -> ${variantData.tier_type} tier ${variantData.tier_level} (${variantData.tier_name})`);
+          }
+        } catch (e) {
+          // Not found in DB, continue to fallback methods
+        }
+
+        // Also check gem_packs table (variant_id based, includes bonus gems)
+        if (!accessInfo) {
+          try {
+            const { data: gemPack } = await supabase
+              .from('gem_packs')
+              .select('total_gems, gems_quantity, bonus_gems')
+              .eq('shopify_variant_id', variantId)
+              .single();
+
+            if (gemPack) {
+              accessInfo = { type: 'gems', tier: gemPack.total_gems || gemPack.gems_quantity };
+              console.log(`[Shopify Paid Webhook] Gem pack DB match: variant ${variantId} -> ${gemPack.total_gems} gems (${gemPack.gems_quantity} + ${gemPack.bonus_gems} bonus)`);
+            }
+          } catch (e) {
+            // Not a gem pack variant
+          }
+        }
       }
 
+      // ============================================================
+      // METHOD 2: Try product tags (available if Shopify includes them)
+      // ============================================================
+      if (!accessInfo) {
+        const productTags = item.product?.tags || item.tags || '';
+        accessInfo = parseProductTags(productTags);
+        if (accessInfo) {
+          console.log(`[Shopify Paid Webhook] Tag match: "${productTags}" -> ${accessInfo.type} tier ${accessInfo.tier}`);
+        }
+      }
+
+      // ============================================================
+      // METHOD 3: Try SKU pattern matching
+      // ============================================================
+      if (!accessInfo) {
+        accessInfo = parseProductSku(item.sku);
+        if (accessInfo) {
+          console.log(`[Shopify Paid Webhook] SKU match: "${item.sku}" -> ${accessInfo.type} tier ${accessInfo.tier}`);
+        }
+      }
+
+      // Apply detected access info
       if (accessInfo) {
         switch (accessInfo.type) {
           case 'scanner':
@@ -279,14 +347,14 @@ serve(async (req) => {
           case 'course':
             // Trading courses: set tier AND enroll in course
             courseTier = Math.max(courseTier, accessInfo.tier);
-            if (item.product_id) {
-              enrolledCourses.push(item.product_id.toString());
+            if (productId) {
+              enrolledCourses.push(productId);
             }
             break;
           case 'individual_course':
             // Individual/mindset courses: just enroll (no tier upgrade)
-            if (item.product_id) {
-              enrolledCourses.push(item.product_id.toString());
+            if (productId) {
+              enrolledCourses.push(productId);
             }
             break;
           case 'chatbot':
@@ -298,21 +366,43 @@ serve(async (req) => {
         }
       }
 
-      // ALWAYS add product_id to enrolledCourses if it looks like a course
-      // This ensures all course purchases are tracked
-      const sku = item.sku?.toLowerCase() || '';
-      const productTitle = (item.title || '').toLowerCase();
-      const isCourseProduct = sku.includes('course') ||
-                              productTitle.includes('khóa học') ||
-                              productTitle.includes('khoa hoc');
+      // ============================================================
+      // METHOD 4: Check courses table by product_id for enrollment
+      // This catches individual/mindset courses even if tier detection fails
+      // ============================================================
+      if (productId) {
+        try {
+          const { data: courseData } = await supabase
+            .from('courses')
+            .select('id, title, shopify_product_id')
+            .eq('shopify_product_id', productId)
+            .single();
 
-      if (isCourseProduct && item.product_id) {
-        const productIdStr = item.product_id.toString();
-        if (!enrolledCourses.includes(productIdStr)) {
-          enrolledCourses.push(productIdStr);
-          console.log('[Shopify Paid Webhook] Added course to enrollment:', item.title, productIdStr);
+          if (courseData) {
+            if (!enrolledCourses.includes(productId)) {
+              enrolledCourses.push(productId);
+              console.log(`[Shopify Paid Webhook] Course DB match: ${courseData.title} (${productId})`);
+            }
+          }
+        } catch (e) {
+          // Not a course product, that's fine
         }
       }
+
+      // Fallback: title-based course detection
+      if (!accessInfo && productId) {
+        const productTitle = (item.title || item.name || '').toLowerCase();
+        const isCourseProduct = productTitle.includes('khóa học') ||
+                                productTitle.includes('khoa hoc') ||
+                                productTitle.includes('course');
+
+        if (isCourseProduct && !enrolledCourses.includes(productId)) {
+          enrolledCourses.push(productId);
+          console.log(`[Shopify Paid Webhook] Title match for course enrollment:`, item.title, productId);
+        }
+      }
+
+      console.log(`[Shopify Paid Webhook] Item processed: "${item.title}" variant=${variantId} product=${productId} -> accessInfo=${JSON.stringify(accessInfo)}`);
     }
 
     // Unlock access in database
@@ -411,7 +501,84 @@ serve(async (req) => {
           }
         }
       } else {
-        console.warn('[Shopify Paid Webhook] User not found for email:', customerEmail);
+        // User doesn't have account yet - create pending_course_access entries
+        console.log('[Shopify Paid Webhook] User not signed up yet, creating pending_course_access for:', customerEmail);
+        for (const shopifyProductId of enrolledCourses) {
+          try {
+            const { data: courseData } = await supabase
+              .from('courses')
+              .select('id')
+              .eq('shopify_product_id', shopifyProductId)
+              .single();
+
+            if (courseData?.id) {
+              const courseItem = order.line_items?.find((li: any) => li.product_id?.toString() === shopifyProductId);
+              const { error: pendingError } = await supabase.from('pending_course_access').insert({
+                email: customerEmail,
+                course_id: courseData.id,
+                shopify_order_id: order.id.toString(),
+                access_type: 'purchase',
+                price_paid: courseItem ? parseFloat(courseItem.price) * (courseItem.quantity || 1) : 0,
+              });
+              if (pendingError) console.error('[Shopify Paid Webhook] pending_course_access insert error:', pendingError);
+              else console.log('[Shopify Paid Webhook] Created pending_course_access:', courseData.id);
+            }
+          } catch (e) {
+            // Course not found
+          }
+        }
+      }
+    }
+
+    // ============================================================
+    // FALLBACK: Create pending tier/gem records if user has no account
+    // RPCs above work with user_access table, but on signup
+    // apply_all_pending_purchases() only reads pending_* tables
+    // ============================================================
+    {
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', customerEmail)
+        .single();
+
+      if (!userProfile?.id) {
+        console.log('[Shopify Paid Webhook] Creating pending tier/gem records for new user:', customerEmail);
+
+        // Pending tier upgrades
+        if (scannerTier > 0) {
+          await supabase.from('pending_tier_upgrades').insert({
+            email: customerEmail, order_id: order.id.toString(),
+            product_type: 'scanner', tier_purchased: `TIER${scannerTier}`,
+            amount: parseFloat(order.total_price) || 0,
+          }).then(({ error }) => error && console.error('[Shopify Paid Webhook] pending scanner tier error:', error));
+        }
+        if (courseTier >= 0 && (courseTier > 0 || enrolledCourses.length > 0)) {
+          // Only create course tier pending if an actual trading course tier was purchased (not just individual courses)
+          if (courseTier > 0) {
+            await supabase.from('pending_tier_upgrades').insert({
+              email: customerEmail, order_id: order.id.toString(),
+              product_type: 'course', tier_purchased: courseTier === 0 ? 'STARTER' : `TIER${courseTier}`,
+              amount: parseFloat(order.total_price) || 0,
+            }).then(({ error }) => error && console.error('[Shopify Paid Webhook] pending course tier error:', error));
+          }
+        }
+        if (chatbotTier > 0) {
+          await supabase.from('pending_tier_upgrades').insert({
+            email: customerEmail, order_id: order.id.toString(),
+            product_type: 'chatbot', tier_purchased: `TIER${chatbotTier}`,
+            amount: parseFloat(order.total_price) || 0,
+          }).then(({ error }) => error && console.error('[Shopify Paid Webhook] pending chatbot tier error:', error));
+        }
+
+        // Pending gem credits
+        if (gemsToAdd > 0) {
+          await supabase.from('pending_gem_credits').insert({
+            email: customerEmail, gems_amount: gemsToAdd,
+            order_id: order.id.toString(), status: 'pending',
+          }).then(({ error }) => error && console.error('[Shopify Paid Webhook] pending gems error:', error));
+          console.log('[Shopify Paid Webhook] Created pending gem credits:', gemsToAdd);
+        }
       }
     }
 
@@ -455,7 +622,7 @@ serve(async (req) => {
       // Find affiliate by referral_code
       const { data: affiliate, error: affError } = await supabase
         .from('affiliate_profiles')
-        .select('id, user_id, role, ctv_tier, referred_by, total_sales, monthly_sales')
+        .select('id, user_id, role, ctv_tier, referred_by, total_sales, monthly_sales, total_earnings, sub_affiliate_earnings')
         .eq('referral_code', finalReferralCode.toUpperCase())
         .eq('is_active', true)
         .single();
@@ -513,13 +680,13 @@ serve(async (req) => {
         } else {
           console.log('[Shopify Paid Webhook] Commission created:', totalCommission, 'VND for affiliate:', affiliate.id);
 
-          // Update affiliate's total_sales and monthly_sales
+          // Update affiliate's total_sales, monthly_sales, and total_earnings
           await supabase
             .from('affiliate_profiles')
             .update({
               total_sales: (affiliate.total_sales || 0) + totalOrderAmount,
               monthly_sales: (affiliate.monthly_sales || 0) + totalOrderAmount,
-              total_earnings: supabase.rpc('increment', { x: totalCommission }),
+              total_earnings: (affiliate.total_earnings || 0) + totalCommission,
             })
             .eq('id', affiliate.id);
 
@@ -528,7 +695,7 @@ serve(async (req) => {
             // Find the referrer (sub-affiliate parent)
             const { data: referrer } = await supabase
               .from('affiliate_profiles')
-              .select('id, user_id, role, ctv_tier')
+              .select('id, user_id, role, ctv_tier, sub_affiliate_earnings')
               .eq('user_id', affiliate.referred_by)
               .eq('is_active', true)
               .single();
@@ -566,7 +733,7 @@ serve(async (req) => {
               await supabase
                 .from('affiliate_profiles')
                 .update({
-                  sub_affiliate_earnings: supabase.rpc('increment', { x: subAffiliateCommission }),
+                  sub_affiliate_earnings: (referrer.sub_affiliate_earnings || 0) + subAffiliateCommission,
                 })
                 .eq('id', referrer.id);
 

@@ -100,12 +100,16 @@ serve(async (req) => {
     const rawBody = await req.text();
     console.log('[Casso Webhook] Raw body length:', rawBody.length);
 
-    // Get signature from header
+    // Get signature from header or URL query parameter
+    const url = new URL(req.url);
     const receivedSignature =
       req.headers.get('x-casso-signature') ||
       req.headers.get('X-Casso-Signature') ||
       req.headers.get('secure-token') ||
-      req.headers.get('Secure-Token');
+      req.headers.get('Secure-Token') ||
+      req.headers.get('authorization')?.replace('Bearer ', '') ||
+      url.searchParams.get('secure_token') ||
+      url.searchParams.get('token');
 
     const secretKey = Deno.env.get('CASSO_SECURE_TOKEN');
 
@@ -214,13 +218,6 @@ serve(async (req) => {
       } catch (e) {
         console.error('[Casso Webhook] HMAC verification error:', e);
       }
-    }
-
-    // Method 4: Skip verification for now (TEMPORARY for testing)
-    // TODO: Remove this after figuring out Casso's exact signature format
-    if (!isValid) {
-      console.log('[Casso Webhook] BYPASSING AUTH FOR TESTING - Remove in production!');
-      isValid = true;  // TEMPORARY
     }
 
     if (!isValid) {
@@ -390,8 +387,177 @@ serve(async (req) => {
         source: 'casso_webhook',
       });
 
-      // Mark Shopify order as paid
+      // Mark Shopify order as paid (for Shopify admin status)
       await markShopifyOrderPaid(pendingPayment.shopify_order_id);
+
+      // ============================================================
+      // DIRECT ACCESS CREATION
+      // Don't rely on Shopify webhook chain (markShopifyOrderPaid creates
+      // a capture transaction which does NOT trigger orders/paid webhook).
+      // Instead, fetch order details and create access directly.
+      // ============================================================
+      const customerEmail = pendingPayment.customer_email;
+      if (customerEmail && pendingPayment.shopify_order_id) {
+        console.log('[Casso Webhook] Creating direct access for:', customerEmail);
+
+        try {
+          // Fetch Shopify order to get line_items
+          const shopifyDomain = Deno.env.get('SHOPIFY_DOMAIN');
+          const accessToken = Deno.env.get('SHOPIFY_ACCESS_TOKEN');
+          let lineItems: any[] = [];
+
+          if (shopifyDomain && accessToken) {
+            const orderRes = await fetch(
+              `https://${shopifyDomain}/admin/api/2024-01/orders/${pendingPayment.shopify_order_id}.json?fields=line_items,email`,
+              {
+                headers: { 'X-Shopify-Access-Token': accessToken, 'Content-Type': 'application/json' },
+              }
+            );
+            if (orderRes.ok) {
+              const orderData = await orderRes.json();
+              lineItems = orderData.order?.line_items || [];
+              console.log('[Casso Webhook] Fetched', lineItems.length, 'line items from Shopify');
+            } else {
+              console.error('[Casso Webhook] Shopify order fetch failed:', orderRes.status);
+            }
+          }
+
+          // Process line items - detect products via DB lookup
+          let scannerTier = 0, courseTier = 0, chatbotTier = 0, gemsToAdd = 0;
+          const enrolledCourseIds: string[] = [];
+
+          for (const item of lineItems) {
+            const variantId = item.variant_id?.toString() || '';
+            const productId = item.product_id?.toString() || '';
+
+            // DB lookup by variant_id (most reliable)
+            if (variantId) {
+              const { data: variantData } = await supabase
+                .from('shopify_product_variants')
+                .select('tier_type, tier_level')
+                .eq('shopify_variant_id', variantId)
+                .single();
+
+              if (variantData?.tier_type) {
+                if (variantData.tier_type === 'scanner') scannerTier = Math.max(scannerTier, variantData.tier_level || 0);
+                else if (variantData.tier_type === 'course') courseTier = Math.max(courseTier, variantData.tier_level || 0);
+                else if (variantData.tier_type === 'chatbot') chatbotTier = Math.max(chatbotTier, variantData.tier_level || 0);
+                console.log(`[Casso Webhook] Variant ${variantId} -> ${variantData.tier_type} tier ${variantData.tier_level}`);
+              }
+
+              // Check gem_packs
+              if (!variantData) {
+                const { data: gemPack } = await supabase
+                  .from('gem_packs')
+                  .select('total_gems')
+                  .eq('shopify_variant_id', variantId)
+                  .single();
+                if (gemPack) {
+                  gemsToAdd += gemPack.total_gems;
+                  console.log(`[Casso Webhook] Gem pack: ${gemPack.total_gems} gems`);
+                }
+              }
+            }
+
+            // Course enrollment by product_id
+            if (productId) {
+              const { data: courseData } = await supabase
+                .from('courses')
+                .select('id')
+                .eq('shopify_product_id', productId)
+                .single();
+              if (courseData?.id && !enrolledCourseIds.includes(courseData.id)) {
+                enrolledCourseIds.push(courseData.id);
+                console.log(`[Casso Webhook] Course detected: ${courseData.id}`);
+              }
+            }
+          }
+
+          // Check if user has account
+          const { data: userProfile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('email', customerEmail)
+            .single();
+
+          if (userProfile?.id) {
+            // User exists - grant access directly
+            if (scannerTier > 0 || courseTier > 0 || chatbotTier > 0) {
+              await supabase.rpc('unlock_user_access', {
+                p_email: customerEmail,
+                p_scanner_tier: scannerTier > 0 ? scannerTier : null,
+                p_course_tier: courseTier > 0 ? courseTier : null,
+                p_chatbot_tier: chatbotTier > 0 ? chatbotTier : null,
+                p_order_id: pendingPayment.shopify_order_id,
+              });
+              console.log('[Casso Webhook] Access unlocked for existing user:', customerEmail);
+            }
+            if (gemsToAdd > 0) {
+              await supabase.rpc('add_user_gems', { p_email: customerEmail, p_amount: gemsToAdd, p_source: 'purchase' });
+            }
+            // Enroll in courses
+            for (const courseId of enrolledCourseIds) {
+              await supabase.from('course_enrollments').upsert({
+                user_id: userProfile.id, course_id: courseId,
+                enrolled_at: new Date().toISOString(), is_active: true, access_source: 'shopify_purchase',
+              }, { onConflict: 'user_id,course_id' });
+            }
+          } else {
+            // User not signed up yet - create pending records
+            console.log('[Casso Webhook] User not signed up, creating pending records for:', customerEmail);
+
+            if (scannerTier > 0) {
+              await supabase.from('pending_tier_upgrades').insert({
+                email: customerEmail, order_id: pendingPayment.shopify_order_id,
+                product_type: 'scanner', tier_purchased: `TIER${scannerTier}`, amount: amount,
+              });
+            }
+            if (courseTier > 0) {
+              await supabase.from('pending_tier_upgrades').insert({
+                email: customerEmail, order_id: pendingPayment.shopify_order_id,
+                product_type: 'course', tier_purchased: courseTier === 0 ? 'STARTER' : `TIER${courseTier}`, amount: amount,
+              });
+            }
+            if (chatbotTier > 0) {
+              await supabase.from('pending_tier_upgrades').insert({
+                email: customerEmail, order_id: pendingPayment.shopify_order_id,
+                product_type: 'chatbot', tier_purchased: `TIER${chatbotTier}`, amount: amount,
+              });
+            }
+            if (gemsToAdd > 0) {
+              await supabase.from('pending_gem_credits').insert({
+                email: customerEmail, gems_amount: gemsToAdd,
+                order_id: pendingPayment.shopify_order_id, status: 'pending',
+              });
+            }
+            for (const courseId of enrolledCourseIds) {
+              await supabase.from('pending_course_access').insert({
+                email: customerEmail, course_id: courseId,
+                shopify_order_id: pendingPayment.shopify_order_id,
+                access_type: 'purchase', price_paid: amount,
+              });
+              console.log('[Casso Webhook] Created pending_course_access:', courseId);
+            }
+          }
+
+          // Log access event
+          await supabase.from('payment_logs').insert({
+            pending_payment_id: pendingPayment.id,
+            order_number: orderNumber,
+            event_type: 'access_unlocked',
+            event_data: {
+              scanner_tier: scannerTier, course_tier: courseTier, chatbot_tier: chatbotTier,
+              gems_added: gemsToAdd, enrolled_courses: enrolledCourseIds,
+              user_exists: !!userProfile?.id,
+              line_items_count: lineItems.length,
+            },
+            source: 'casso_webhook',
+          });
+        } catch (accessError) {
+          console.error('[Casso Webhook] Direct access creation error:', accessError);
+          // Don't fail the whole payment verification if access creation fails
+        }
+      }
 
       processedOrders.push(orderNumber);
       console.log('[Casso Webhook] Payment verified for order:', orderNumber);
