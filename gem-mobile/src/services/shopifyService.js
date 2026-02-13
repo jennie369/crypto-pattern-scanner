@@ -49,7 +49,8 @@ class ShopifyService {
   /**
    * Helper: Call Supabase Edge Function
    */
-  async callEdgeFunction(functionName, body) {
+  async callEdgeFunction(functionName, body, attempt = 1) {
+    const MAX_RETRIES = 3;
     const url = `${SUPABASE_URL}/functions/v1/${functionName}`;
 
     try {
@@ -58,6 +59,14 @@ class ShopifyService {
         headers: this.headers,
         body: JSON.stringify(body),
       });
+
+      // Retry on transient server errors (502 cold-start, 503 overloaded)
+      if ((response.status === 502 || response.status === 503) && attempt < MAX_RETRIES) {
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 4000);
+        console.warn(`[Shopify] ${response.status} on attempt ${attempt}, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.callEdgeFunction(functionName, body, attempt + 1);
+      }
 
       if (!response.ok) {
         const error = await response.text();
@@ -72,7 +81,14 @@ class ShopifyService {
 
       return result;
     } catch (error) {
-      console.error(`[Shopify] Edge function error:`, error);
+      // Retry on network errors (fetch failed entirely)
+      if (attempt < MAX_RETRIES && error.message?.includes('fetch')) {
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 4000);
+        console.warn(`[Shopify] Network error on attempt ${attempt}, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.callEdgeFunction(functionName, body, attempt + 1);
+      }
+      console.error(`[Shopify] Edge function error (attempt ${attempt}/${MAX_RETRIES}):`, error);
       throw error;
     }
   }

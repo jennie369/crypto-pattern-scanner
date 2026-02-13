@@ -4,7 +4,7 @@
 
 import { Platform } from 'react-native';
 import { supabase } from './supabase';
-import DeviceInfo from 'react-native-device-info';
+import * as Application from 'expo-application';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -68,7 +68,7 @@ const getAppVersion = async (): Promise<string> => {
   if (cachedAppVersion) return cachedAppVersion;
 
   try {
-    cachedAppVersion = await DeviceInfo.getVersion();
+    cachedAppVersion = Application.nativeApplicationVersion || '1.0.0';
   } catch {
     cachedAppVersion = '1.0.0';
   }
