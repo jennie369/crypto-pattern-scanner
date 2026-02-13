@@ -21,6 +21,9 @@ try {
 const QUEUE_STORAGE_KEY = '@gem_master_offline_queue';
 const MAX_QUEUE_SIZE = 50;
 const MESSAGE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+const MAX_RETRIES = 5;
+const BASE_RETRY_DELAY_MS = 1000; // 1s base, exponential: 1s, 2s, 4s, 8s, 16s
+const MAX_RETRY_DELAY_MS = 30000; // Cap at 30s
 
 class OfflineQueueService {
   constructor() {
@@ -131,10 +134,12 @@ class OfflineQueueService {
   }
 
   /**
-   * Get all pending messages
+   * Get all retryable messages (pending or failed, under max retries)
    */
   getPendingMessages() {
-    return this.queue.filter(msg => msg.status === 'pending');
+    return this.queue.filter(
+      msg => (msg.status === 'pending' || msg.status === 'failed') && (msg.retryCount || 0) < MAX_RETRIES
+    );
   }
 
   /**
@@ -208,6 +213,21 @@ class OfflineQueueService {
   }
 
   /**
+   * Get retry delay with exponential backoff
+   * @param {number} retryCount - Number of previous retries
+   * @returns {number} Delay in ms
+   */
+  _getRetryDelay(retryCount) {
+    const delay = Math.min(
+      BASE_RETRY_DELAY_MS * Math.pow(2, retryCount),
+      MAX_RETRY_DELAY_MS
+    );
+    // Add jitter (±25%) to prevent thundering herd
+    const jitter = delay * 0.25 * (Math.random() * 2 - 1);
+    return Math.round(delay + jitter);
+  }
+
+  /**
    * Process queue - send all pending messages
    * @param {Function} sendFunction - Function to send message
    */
@@ -220,10 +240,19 @@ class OfflineQueueService {
     const pending = this.getPendingMessages();
     let processed = 0;
     let failed = 0;
+    let skipped = 0;
 
     console.log('[OfflineQueue] Processing', pending.length, 'messages');
 
     for (const message of pending) {
+      // Skip messages that have exceeded max retries
+      if (message.retryCount >= MAX_RETRIES) {
+        console.log('[OfflineQueue] Skipping message', message.id, '- max retries exceeded:', message.retryCount);
+        message.status = 'permanently_failed';
+        skipped++;
+        continue;
+      }
+
       try {
         await this.markSending(message.id);
 
@@ -247,11 +276,17 @@ class OfflineQueueService {
         failed++;
       }
 
-      // Small delay between messages to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Exponential backoff delay between messages based on retry count
+      const delay = this._getRetryDelay(message.retryCount);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
 
-    return { processed, failed };
+    // Save updated statuses (permanently_failed)
+    if (skipped > 0) {
+      await this.saveQueue();
+    }
+
+    return { processed, failed, skipped };
   }
 
   /**

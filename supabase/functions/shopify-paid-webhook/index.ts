@@ -253,6 +253,62 @@ serve(async (req) => {
 
     const customerEmail = order.email;
     const orderNumber = order.order_number.toString();
+    const shopifyOrderId = order.id.toString();
+
+    // ============================================================
+    // IDEMPOTENCY CHECK: Prevent duplicate processing on webhook retries
+    // ============================================================
+    const { data: existingLog } = await supabase
+      .from('shopify_webhook_logs')
+      .select('id, processed')
+      .eq('topic', 'orders/paid')
+      .eq('shopify_id', shopifyOrderId)
+      .eq('processed', true)
+      .maybeSingle();
+
+    if (existingLog) {
+      console.log('[Shopify Paid Webhook] Already processed, skipping:', shopifyOrderId);
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Already processed (idempotent)',
+        skipped: true,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ============================================================
+    // CROSS-WEBHOOK DEDUP: Check if shopify-webhook already processed this order
+    // Both webhooks fire for orders/paid — prevent double tier grants & commissions
+    // ============================================================
+    const { data: alreadyProcessedByMainWebhook } = await supabase
+      .from('shopify_orders')
+      .select('processed_at')
+      .eq('shopify_order_id', shopifyOrderId)
+      .maybeSingle();
+
+    if (alreadyProcessedByMainWebhook?.processed_at) {
+      console.log('[Shopify Paid Webhook] Already processed by main shopify-webhook, skipping:', shopifyOrderId);
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Already processed by main webhook (cross-dedup)',
+        skipped: true,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Log this webhook event and mark as processing
+    const { data: webhookLog } = await supabase
+      .from('shopify_webhook_logs')
+      .insert({
+        topic: 'orders/paid',
+        shopify_id: shopifyOrderId,
+        payload: { order_number: orderNumber, email: customerEmail },
+        processed: false,
+      })
+      .select('id')
+      .single();
 
     // Update pending_payment status (if exists)
     await supabase
@@ -628,6 +684,17 @@ serve(async (req) => {
         .single();
 
       if (affiliate && !affError) {
+        // SECURITY: Prevent self-referral (affiliate cannot earn commission on own purchase)
+        const buyerProfile = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', customerEmail)
+          .maybeSingle();
+
+        if (buyerProfile?.data?.id === affiliate.user_id) {
+          console.log('[Shopify Paid Webhook] Self-referral prevented:', customerEmail);
+        } else {
+
         const totalOrderAmount = parseFloat(order.total_price) || 0;
 
         // Calculate commission for each line item
@@ -653,10 +720,11 @@ serve(async (req) => {
         }
 
         // Insert commission record
+        // NOTE: Use affiliate.user_id (auth UUID) for consistency with client-side queries
         const { data: commissionRecord, error: commInsertError } = await supabase
           .from('affiliate_commissions')
           .insert({
-            affiliate_id: affiliate.id,
+            affiliate_id: affiliate.user_id,
             order_id: order.id.toString(),
             order_number: orderNumber,
             order_amount: totalOrderAmount,
@@ -706,10 +774,11 @@ serve(async (req) => {
               totalSubAffiliateCommission = subAffiliateCommission;
 
               // Insert sub-affiliate commission
+              // NOTE: Use referrer.user_id (auth UUID) for consistency with client-side queries
               await supabase
                 .from('affiliate_commissions')
                 .insert({
-                  affiliate_id: referrer.id,
+                  affiliate_id: referrer.user_id,
                   order_id: order.id.toString(),
                   order_number: orderNumber,
                   order_amount: totalOrderAmount,
@@ -747,6 +816,8 @@ serve(async (req) => {
             sub_affiliate_commission: totalSubAffiliateCommission,
           };
         }
+
+        } // end self-referral else block
       } else {
         console.log('[Shopify Paid Webhook] Affiliate not found for code:', finalReferralCode);
       }
@@ -820,6 +891,14 @@ serve(async (req) => {
 
     // Email notifications handled by Shopify automatically
     console.log('[Shopify Paid Webhook] Email handled by Shopify Notifications');
+
+    // Mark webhook as processed (idempotency)
+    if (webhookLog?.id) {
+      await supabase
+        .from('shopify_webhook_logs')
+        .update({ processed: true })
+        .eq('id', webhookLog.id);
+    }
 
     return new Response(JSON.stringify({
       success: true,

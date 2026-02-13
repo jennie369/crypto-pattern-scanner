@@ -70,8 +70,9 @@ serve(async (req) => {
     console.log(`🏅 Awarding level badge: ${newLevelBadge}`);
 
     // Update user's level_badge
+    // FIX: Was from('users') — app reads from 'profiles' table
     const { error: updateError } = await supabaseClient
-      .from('users')
+      .from('profiles')
       .update({ level_badge: newLevelBadge })
       .eq('id', userStats.user_id);
 

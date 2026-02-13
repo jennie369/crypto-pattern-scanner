@@ -77,6 +77,9 @@ const TTL_CONFIG = {
   FEATURE_USAGE: 30 * 1000,              // 30 seconds
 };
 
+// Memory cache size limit to prevent unbounded growth
+const MAX_MEMORY_CACHE_SIZE = 100;
+
 // Network state
 let isOnline = true;
 let networkListenerUnsubscribe = null;
@@ -453,12 +456,30 @@ class CacheService {
 
   /**
    * Set in memory cache (ultra-fast, no async)
+   * Evicts oldest entries when cache exceeds MAX_MEMORY_CACHE_SIZE
    * @param {string} key - Cache key
    * @param {any} data - Data to cache
    * @param {string} userId - Optional user ID
    */
   setInMemory(key, data, userId = null) {
     const cacheKey = userId ? `${key}_${userId}` : key;
+
+    // Evict oldest entries if at capacity (and not replacing existing)
+    if (!this._memoryCache.has(cacheKey) && this._memoryCache.size >= MAX_MEMORY_CACHE_SIZE) {
+      // Find and remove the oldest entry by timestamp
+      let oldestKey = null;
+      let oldestTime = Infinity;
+      for (const [k, v] of this._memoryCache) {
+        if (v.timestamp < oldestTime) {
+          oldestTime = v.timestamp;
+          oldestKey = k;
+        }
+      }
+      if (oldestKey) {
+        this._memoryCache.delete(oldestKey);
+      }
+    }
+
     this._memoryCache.set(cacheKey, {
       data,
       timestamp: Date.now(),

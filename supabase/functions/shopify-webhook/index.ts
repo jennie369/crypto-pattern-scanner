@@ -518,15 +518,41 @@ async function processGemPurchase(supabase, userId: string | null, customerEmail
     const currentBalance = profile?.gems || 0;
     const newBalance = currentBalance + totalGems;
 
-    // Update profiles.gems
-    const { error: updateError } = await supabase
+    // Update profiles.gems with OPTIMISTIC LOCKING to prevent race condition
+    // If another request changed the balance, .eq('gems', currentBalance) will match 0 rows
+    const { error: updateError, count: updateCount } = await supabase
       .from('profiles')
       .update({ gems: newBalance })
-      .eq('id', userId);
+      .eq('id', userId)
+      .eq('gems', currentBalance);
 
     if (updateError) {
       console.error('❌ Failed to update gems:', updateError);
       throw updateError;
+    }
+
+    // If optimistic lock failed (another concurrent update), retry once
+    if (updateCount === 0) {
+      console.log('⚠️ Gem balance changed concurrently, retrying...');
+      const { data: freshProfile } = await supabase
+        .from('profiles')
+        .select('gems')
+        .eq('id', userId)
+        .single();
+
+      const freshBalance = freshProfile?.gems || 0;
+      const retryBalance = freshBalance + totalGems;
+
+      const { error: retryError } = await supabase
+        .from('profiles')
+        .update({ gems: retryBalance })
+        .eq('id', userId)
+        .eq('gems', freshBalance);
+
+      if (retryError) {
+        console.error('❌ Retry failed to update gems:', retryError);
+        throw retryError;
+      }
     }
 
     // Log transaction to gems_transactions
@@ -556,21 +582,13 @@ async function processGemPurchase(supabase, userId: string | null, customerEmail
   console.log(`⏳ User not found, saving to pending_gem_credits...`);
 
   // Try new pending_gem_credits table first
+  // NOTE: Column is gems_amount (not gem_amount) per schema in 20251209_gem_economy.sql
   const { error: pendingError } = await supabase.from('pending_gem_credits').insert({
     email: customerEmail,
-    shopify_order_id: orderData.id.toString(),
+    order_id: orderData.id.toString(),
     order_number: orderData.order_number?.toString() || orderData.name,
-    gem_amount: totalGems,
-    price_paid: parseFloat(orderData.total_price) || 0,
-    currency: orderData.currency || 'VND',
-    source: 'shopify_purchase',
+    gems_amount: totalGems,
     status: 'pending',
-    created_at: new Date().toISOString(),
-    metadata: {
-      base_gems: gemAmount,
-      bonus_gems: bonusGems,
-      variant_id: variantId || null
-    }
   });
 
   if (pendingError) {
@@ -694,6 +712,33 @@ async function handleOrderPaid(supabase, orderData) {
   }
 
   // ========================================
+  // CROSS-WEBHOOK DEDUP: Check if shopify-paid-webhook already processed
+  // Both webhooks listen to orders/paid — prevent double processing
+  // ========================================
+  const { data: processedByPaidWebhook } = await supabase
+    .from('shopify_webhook_logs')
+    .select('id')
+    .eq('topic', 'orders/paid')
+    .eq('shopify_id', orderIdShopify.toString())
+    .eq('processed', true)
+    .maybeSingle();
+
+  if (processedByPaidWebhook) {
+    console.log('⚠️ Order already processed by shopify-paid-webhook, skipping (cross-dedup)');
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Already processed by paid webhook (cross-dedup)',
+      skipped: true
+    }), {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
+  }
+
+  // ========================================
   // CRITICAL: Immediately mark as processing to prevent race condition
   // ========================================
   const { error: lockError } = await supabase
@@ -735,9 +780,9 @@ async function handleOrderPaid(supabase, orderData) {
   if (individualCourses.length > 0) {
     console.log(`📚 Found ${individualCourses.length} individual course(s) in order`);
 
-    // Find user by email
+    // Find user by email (use profiles table - single source of truth)
     const { data: userData } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id')
       .eq('email', customerEmail)
       .single();
@@ -826,7 +871,7 @@ async function handleOrderPaid(supabase, orderData) {
   // Priority 1: Use user_id from note_attributes (passed from Mobile App)
   if (userIdFromOrder) {
     console.log(`📱 Looking up user by ID: ${userIdFromOrder}`);
-    const { data, error } = await supabase.from('users').select('id, email, course_tier, scanner_tier, chatbot_tier').eq('id', userIdFromOrder).single();
+    const { data, error } = await supabase.from('profiles').select('id, email, course_tier, scanner_tier, chatbot_tier').eq('id', userIdFromOrder).single();
     if (!error && data) {
       userData = data;
       console.log(`✅ Found user by ID: ${data.id} (email: ${data.email})`);
@@ -838,7 +883,7 @@ async function handleOrderPaid(supabase, orderData) {
   // Priority 2: Fallback to email lookup
   if (!userData && customerEmail) {
     console.log(`📧 Looking up user by email: ${customerEmail}`);
-    const { data, error } = await supabase.from('users').select('id, email, course_tier, scanner_tier, chatbot_tier').eq('email', customerEmail).single();
+    const { data, error } = await supabase.from('profiles').select('id, email, course_tier, scanner_tier, chatbot_tier').eq('email', customerEmail).single();
     userData = data;
     userError = error;
     if (data) {
@@ -1016,7 +1061,7 @@ async function handleOrderPaid(supabase, orderData) {
     updateData.chatbot_tier_expires_at = calculateExpiryDate(1);
   }
   if (shouldUpgradeTier) {
-    const { error: updateError } = await supabase.from('users').update(updateData).eq('id', userId);
+    const { error: updateError } = await supabase.from('profiles').update(updateData).eq('id', userId);
     if (updateError) {
       console.error('❌ Failed to update tier:', updateError);
     } else {
@@ -1052,6 +1097,12 @@ async function handleOrderPaid(supabase, orderData) {
       }
     }
     // If we have an affiliate, process commission
+    // SECURITY: Prevent self-referral (user earning commission on own purchase)
+    if (affiliateId && affiliateId === userId) {
+      console.log(`⚠️ Self-referral detected! User ${userId} cannot earn commission on own purchase.`);
+      affiliateId = null;
+    }
+
     if (affiliateId) {
       console.log(`🎉 AFFILIATE FOUND! ID: ${affiliateId}`);
       // Get affiliate profile if not already fetched
@@ -1276,6 +1327,13 @@ async function handleOrderUpdated(supabase, orderData) {
       console.log('ℹ️ Order already processed');
     }
   }
+
+  // Check if order was refunded or cancelled
+  if (orderData.financial_status === 'refunded' || orderData.financial_status === 'partially_refunded' || orderData.cancelled_at) {
+    console.log(`🔄 Order status changed to ${orderData.financial_status || 'cancelled'}, processing reversal...`);
+    return await handleOrderRefunded(supabase, orderData);
+  }
+
   // Update order record
   await supabase.from('shopify_orders').update({
     financial_status: orderData.financial_status,
@@ -1290,6 +1348,190 @@ async function handleOrderUpdated(supabase, orderData) {
       ...corsHeaders,
       'Content-Type': 'application/json'
     }
+  });
+}
+// ========================================
+// HANDLER: orders/cancelled or refunded
+// Reverses: tier upgrades, gem credits, commissions
+// ========================================
+async function handleOrderRefunded(supabase, orderData) {
+  const orderId = orderData.id.toString();
+  const customerEmail = orderData.customer?.email || orderData.email;
+  console.log(`🔴 Handling ORDER REFUND/CANCEL: ${orderId} for ${customerEmail}`);
+
+  // Check if this order was previously processed
+  const { data: existingOrder } = await supabase
+    .from('shopify_orders')
+    .select('user_id, product_type, tier_purchased, processed_at, financial_status')
+    .eq('shopify_order_id', orderId)
+    .single();
+
+  if (!existingOrder?.processed_at) {
+    console.log('ℹ️ Order was never processed, nothing to reverse');
+    // Update status anyway
+    await supabase.from('shopify_orders').update({
+      financial_status: orderData.financial_status || 'cancelled',
+    }).eq('shopify_order_id', orderId);
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Order was never processed, no reversal needed',
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
+  if (existingOrder.financial_status === 'refunded') {
+    console.log('ℹ️ Order already refunded, skipping duplicate');
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Refund already processed',
+      skipped: true,
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
+  const userId = existingOrder.user_id;
+  const productType = existingOrder.product_type;
+  const lineItems = orderData.line_items || [];
+  const results = { tier_reversed: false, gems_reversed: false, commission_reversed: false };
+
+  // ========================================
+  // REVERSAL 1: Reverse tier upgrade (reset to FREE)
+  // ========================================
+  if (userId && productType && productType !== 'gems' && productType !== 'physical') {
+    console.log(`⬇️ Reversing tier upgrade for user ${userId}, product: ${productType}`);
+
+    const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
+
+    if (productType === 'course') {
+      updateData.course_tier = 'FREE';
+      updateData.course_tier_expires_at = null;
+      updateData.scanner_tier = 'FREE';
+      updateData.scanner_tier_expires_at = null;
+      updateData.chatbot_tier = 'FREE';
+      updateData.chatbot_tier_expires_at = null;
+      updateData.tier = 'FREE';
+      updateData.tier_expires_at = null;
+    } else if (productType === 'scanner') {
+      updateData.scanner_tier = 'FREE';
+      updateData.scanner_tier_expires_at = null;
+      updateData.tier = 'FREE';
+      updateData.tier_expires_at = null;
+    } else if (productType === 'chatbot') {
+      updateData.chatbot_tier = 'FREE';
+      updateData.chatbot_tier_expires_at = null;
+    }
+
+    const { error: revertError } = await supabase
+      .from('profiles')
+      .update(updateData)
+      .eq('id', userId);
+
+    if (revertError) {
+      console.error('❌ Failed to reverse tier:', revertError);
+    } else {
+      console.log(`✅ Tier reversed to FREE for user ${userId}`);
+      results.tier_reversed = true;
+    }
+  }
+
+  // ========================================
+  // REVERSAL 2: Reverse gem credits
+  // ========================================
+  if (userId && productType === 'gems') {
+    // Find the original gem transaction for this order
+    const { data: gemTx } = await supabase
+      .from('gems_transactions')
+      .select('amount, id')
+      .eq('user_id', userId)
+      .eq('reference_id', orderId)
+      .eq('type', 'purchase')
+      .maybeSingle();
+
+    if (gemTx) {
+      const gemsToRemove = gemTx.amount;
+      console.log(`💎 Reversing ${gemsToRemove} gems for user ${userId}`);
+
+      // Get current balance
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('gems')
+        .eq('id', userId)
+        .single();
+
+      const currentBalance = profile?.gems || 0;
+      const newBalance = Math.max(0, currentBalance - gemsToRemove);
+
+      // Deduct gems with optimistic lock
+      const { error: deductError } = await supabase
+        .from('profiles')
+        .update({ gems: newBalance })
+        .eq('id', userId)
+        .eq('gems', currentBalance);
+
+      if (deductError) {
+        console.error('❌ Failed to reverse gems:', deductError);
+      } else {
+        // Log reversal transaction
+        await supabase.from('gems_transactions').insert({
+          user_id: userId,
+          type: 'refund',
+          amount: -gemsToRemove,
+          description: `Hoàn tiền đơn hàng #${orderData.order_number || orderId}`,
+          reference_type: 'shopify_refund',
+          reference_id: orderId,
+          balance_before: currentBalance,
+          balance_after: newBalance,
+        });
+        console.log(`✅ Reversed ${gemsToRemove} gems. Balance: ${currentBalance} → ${newBalance}`);
+        results.gems_reversed = true;
+      }
+    }
+
+    // Also mark any pending_gem_credits as revoked
+    await supabase.from('pending_gem_credits')
+      .update({ status: 'revoked' })
+      .eq('order_id', orderId);
+  }
+
+  // ========================================
+  // REVERSAL 3: Reverse affiliate commissions
+  // ========================================
+  // Mark commissions as 'reversed' in commission_sales
+  const { error: commRevError } = await supabase
+    .from('commission_sales')
+    .update({ status: 'reversed' })
+    .eq('shopify_order_id', orderId);
+
+  if (!commRevError) {
+    console.log('✅ Commission marked as reversed');
+    results.commission_reversed = true;
+  } else {
+    // Try affiliate_commissions fallback table
+    console.log('ℹ️ commission_sales update failed, trying affiliate_commissions...');
+  }
+
+  // Also mark pending_tier_upgrades as revoked if not yet applied
+  await supabase.from('pending_tier_upgrades')
+    .update({ applied: true })
+    .eq('order_id', orderId.toString())
+    .eq('applied', false);
+
+  // ========================================
+  // Update order record with refund status
+  // ========================================
+  await supabase.from('shopify_orders').update({
+    financial_status: orderData.financial_status || 'refunded',
+    refunded_at: new Date().toISOString(),
+  }).eq('shopify_order_id', orderId);
+
+  console.log(`✅ Refund processing complete for order ${orderId}`, results);
+
+  return new Response(JSON.stringify({
+    success: true,
+    message: 'Refund processed',
+    order_id: orderId,
+    reversals: results,
+  }), {
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
 // ========================================
@@ -1378,6 +1620,8 @@ serve(async (req)=>{
       return await handleOrderPaid(supabase, orderData);
     } else if (topic === 'orders/updated') {
       return await handleOrderUpdated(supabase, orderData);
+    } else if (topic === 'orders/cancelled' || topic === 'refunds/create') {
+      return await handleOrderRefunded(supabase, orderData);
     }
     // ========================================
     // FALLBACK: Old behavior (check financial_status)

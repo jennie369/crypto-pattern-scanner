@@ -192,6 +192,10 @@ const HelpCenterScreen = ({ navigation }) => {
           data={searchResults}
           renderItem={renderArticleCard}
           keyExtractor={(item) => item.id}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={10}
           scrollEnabled={false}
         />
       </View>
@@ -270,6 +274,10 @@ const HelpCenterScreen = ({ navigation }) => {
                   data={popularArticles}
                   renderItem={renderArticleCard}
                   keyExtractor={(item) => item.id}
+                  removeClippedSubviews={true}
+                  maxToRenderPerBatch={10}
+                  windowSize={10}
+                  initialNumToRender={10}
                   scrollEnabled={false}
                 />
               </View>

@@ -247,6 +247,10 @@ const GiftHistoryScreen = ({ navigation }) => {
             { paddingBottom: CONTENT_BOTTOM_PADDING },
           ]}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={10}
           ListEmptyComponent={renderEmpty}
           refreshControl={
             <RefreshControl

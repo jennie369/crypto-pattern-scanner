@@ -358,6 +358,10 @@ const GlobalSearchScreen = () => {
         keyExtractor={(item) => item.key}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        windowSize={10}
+        initialNumToRender={10}
         contentContainerStyle={styles.scrollContent}
       />
     </SafeAreaView>

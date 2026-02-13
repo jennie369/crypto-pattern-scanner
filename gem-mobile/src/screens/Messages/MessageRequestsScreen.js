@@ -339,6 +339,10 @@ export default function MessageRequestsScreen({ navigation }) {
           ]}
           ListEmptyComponent={renderEmptyState}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={10}
           refreshing={refreshing}
           onRefresh={handleRefresh}
         />

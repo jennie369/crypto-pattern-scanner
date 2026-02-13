@@ -30,6 +30,7 @@ import {
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { shopifyService } from '../../services/shopifyService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PRODUCTS_PER_SECTION = 10;
@@ -38,7 +39,24 @@ const INFINITE_SCROLL_BATCH = 10;
 const OrderSuccessScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const { refreshProfile } = useAuth();
   const { orderId, orderNumber, orderUrl } = route.params || {};
+
+  // Refresh profile to detect tier upgrades from webhook
+  // Webhook may have already processed by the time user sees this screen
+  useEffect(() => {
+    // Refresh profile to detect tier upgrades from webhook
+    refreshProfile?.().catch(err =>
+      console.warn('[OrderSuccess] Profile refresh error:', err)
+    );
+    // Delayed refresh (webhook may take a few seconds)
+    const timer = setTimeout(() => {
+      refreshProfile?.().catch(err =>
+        console.warn('[OrderSuccess] Delayed refresh error:', err)
+      );
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // ========================================
   // PRODUCT SECTIONS STATE

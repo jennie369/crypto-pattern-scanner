@@ -282,6 +282,10 @@ const OrdersScreen = () => {
           }
           contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 80 }]}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={10}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       </LinearGradient>

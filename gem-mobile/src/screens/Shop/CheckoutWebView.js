@@ -706,6 +706,9 @@ const CheckoutWebView = () => {
 
       console.log('[CheckoutWebView] Navigating to success screen...');
 
+      // Clear cart for ALL successful checkouts (not just regular orders)
+      completeCheckout(orderData?.orderId, orderData?.orderNumber);
+
       // Check if this is a GEM purchase
       if (productType === 'gems') {
         console.log('[CheckoutWebView] GEM purchase detected!');
@@ -723,9 +726,6 @@ const CheckoutWebView = () => {
           orderNumber: orderData?.orderNumber,
           orderUrl: orderData?.url,
         });
-
-        // Clear cart for regular shop orders
-        completeCheckout(orderData?.orderId, orderData?.orderNumber);
       }
     } catch (error) {
       console.error('[CheckoutWebView] Error navigating:', error);
@@ -897,7 +897,6 @@ const CheckoutWebView = () => {
         }}
         onError={handleError}
         injectedJavaScript={injectedJavaScript}
-        injectedJavaScriptBeforeContentLoaded={injectedJavaScript}
         style={styles.webview}
 
         // WebView configuration

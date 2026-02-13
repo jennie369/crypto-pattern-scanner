@@ -119,6 +119,10 @@ export default function SavedPostsScreen({ navigation }) {
               />
             )}
             contentContainerStyle={styles.listContent}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            initialNumToRender={10}
             ListEmptyComponent={renderEmpty}
             refreshControl={
               <RefreshControl

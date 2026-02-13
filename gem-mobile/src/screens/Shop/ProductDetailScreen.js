@@ -601,13 +601,13 @@ const ProductDetailScreen = ({ navigation, route }) => {
     }
   };
 
-  const formatPrice = (value) => {
+  const formatPrice = useCallback((value) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
       maximumFractionDigits: 0,
     }).format(value);
-  };
+  }, []);
 
   // OPTIMIZED: useCallback prevents re-creation on every render
   const handleAddToCart = useCallback(async () => {
@@ -631,21 +631,21 @@ const ProductDetailScreen = ({ navigation, route }) => {
     addItem(product, selectedVariant, quantity);
   }, [product, selectedVariant, quantity, addItem, navigation]);
 
-  const handleThumbnailPress = (index) => {
+  const handleThumbnailPress = useCallback((index) => {
     setSelectedImageIndex(index);
     imageScrollRef.current?.scrollToOffset({
       offset: index * SCREEN_WIDTH,
       animated: true,
     });
-  };
+  }, []);
 
-  const handleImageScroll = (event) => {
+  const handleImageScroll = useCallback((event) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const newIndex = Math.round(offsetX / SCREEN_WIDTH);
-    if (newIndex !== selectedImageIndex && newIndex >= 0 && newIndex < images.length) {
+    if (newIndex >= 0 && newIndex < images.length) {
       setSelectedImageIndex(newIndex);
     }
-  };
+  }, [images.length]);
 
   // Load image dimensions for dynamic aspect ratio
   useEffect(() => {
@@ -670,10 +670,10 @@ const ProductDetailScreen = ({ navigation, route }) => {
   }, [images]);
 
   // Handle tap on product image to view fullscreen
-  const handleProductImagePress = (index) => {
+  const handleProductImagePress = useCallback((index) => {
     setProductImageIndex(index);
     setProductImageViewerVisible(true);
-  };
+  }, []);
 
   // Handle scroll in product image viewer
   const handleProductImageViewerScroll = (event) => {
@@ -696,7 +696,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
     return 1; // Default square 1:1
   };
 
-  const renderImageItem = ({ item, index }) => {
+  const renderImageItem = useCallback(({ item, index }) => {
     const aspectRatio = getImageAspectRatio(item);
     return item ? (
       <TouchableOpacity
@@ -712,10 +712,10 @@ const ProductDetailScreen = ({ navigation, route }) => {
         <Text style={styles.placeholderText}>No Image</Text>
       </View>
     );
-  };
+  }, [imageDimensions]);
 
-  // FAQ Data
-  const faqData = [
+  // FAQ Data — static, memoized to prevent recreation on every render
+  const faqData = useMemo(() => [
     {
       id: 1,
       question: 'Làm sao để biết đá phù hợp với tôi?',
@@ -736,29 +736,29 @@ const ProductDetailScreen = ({ navigation, route }) => {
       question: 'Chính sách đổi trả như thế nào?',
       answer: 'Đổi trả trong 7 ngày nếu sản phẩm bị lỗi hoặc không đúng mô tả. Sản phẩm phải còn nguyên tem, chưa qua sử dụng. Phí ship đổi trả do GEM chi trả.',
     },
-  ];
+  ], []);
 
   // Get REAL reviews from Judge.me data via reviewService - EXACT MATCH ONLY
-  // Pass full product object for matching by both ID and handle
-  const reviewsData = reviewService.getProductReviews(product);
-  const reviewStats = reviewService.getReviewStats(product);
+  // Memoized to prevent re-computation on every render
+  const reviewsData = useMemo(() => reviewService.getProductReviews(product), [product]);
+  const reviewStats = useMemo(() => reviewService.getReviewStats(product), [product]);
 
   // Handle tap on review image - now supports swipe through all images
-  const handleReviewImagePress = (imageUrl, allImages, index) => {
+  const handleReviewImagePress = useCallback((imageUrl, allImages, index) => {
     setSelectedReviewImage(imageUrl);
     setReviewImages(allImages || [imageUrl]);
     setCurrentImageIndex(index || 0);
     setImageViewerVisible(true);
-  };
+  }, []);
 
   // Handle swipe in image viewer
-  const handleImageViewerScroll = (event) => {
+  const handleImageViewerScroll = useCallback((event) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const newIndex = Math.round(offsetX / SCREEN_WIDTH);
-    if (newIndex !== currentImageIndex && newIndex >= 0 && newIndex < reviewImages.length) {
+    if (newIndex >= 0) {
       setCurrentImageIndex(newIndex);
     }
-  };
+  }, []);
 
   // Submit review handler
   const handleSubmitReview = async () => {

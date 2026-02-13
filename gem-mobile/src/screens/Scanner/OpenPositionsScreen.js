@@ -1296,6 +1296,10 @@ export default function OpenPositionsScreen() {
               positions.length === 0 && styles.emptyListContent,
             ]}
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            initialNumToRender={10}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}

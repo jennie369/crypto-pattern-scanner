@@ -124,10 +124,15 @@ const LessonPlayerScreen = ({ navigation, route }) => {
   // Check completion status from context
   const isCompleted = isLessonCompleted(courseId, lessonId);
 
-  // Find adjacent lessons
-  const currentIndex = allLessons.findIndex(l => l.id === lessonId);
-  const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
-  const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
+  // Find adjacent lessons — memoized to avoid array scan on every render
+  const { currentIndex, prevLesson, nextLesson } = useMemo(() => {
+    const idx = allLessons.findIndex(l => l.id === lessonId);
+    return {
+      currentIndex: idx,
+      prevLesson: idx > 0 ? allLessons[idx - 1] : null,
+      nextLesson: idx < allLessons.length - 1 ? allLessons[idx + 1] : null,
+    };
+  }, [allLessons, lessonId]);
 
   useEffect(() => {
     // Validate required data exists
@@ -327,7 +332,7 @@ const LessonPlayerScreen = ({ navigation, route }) => {
     }
   };
 
-  const navigateToLesson = (targetLesson) => {
+  const navigateToLesson = useCallback((targetLesson) => {
     if (!targetLesson) return;
 
     navigation.replace('LessonPlayer', {
@@ -336,7 +341,7 @@ const LessonPlayerScreen = ({ navigation, route }) => {
       lesson: targetLesson,
       courseTitle,
     });
-  };
+  }, [courseId, courseTitle, navigation]);
 
   /**
    * Handle link clicks from WebView content

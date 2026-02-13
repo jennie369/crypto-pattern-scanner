@@ -361,6 +361,10 @@ const TransactionHistoryScreen = ({ navigation }) => {
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={renderEmpty}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={10}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

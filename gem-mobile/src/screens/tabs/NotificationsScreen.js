@@ -977,6 +977,10 @@ export default function NotificationsScreen() {
             ]}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={renderEmpty}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            initialNumToRender={10}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}

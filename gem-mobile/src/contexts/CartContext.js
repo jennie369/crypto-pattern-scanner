@@ -44,8 +44,16 @@ export const CartProvider = ({ children }) => {
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   // Load cart from storage on mount and when user changes
+  // Clear cart when user logs out (user?.id becomes null) to prevent cross-user cart leakage
   useEffect(() => {
-    loadCartFromStorage();
+    if (user?.id) {
+      loadCartFromStorage();
+    } else {
+      // User logged out — clear cart state
+      setItems([]);
+      setCart(null);
+      setCartId(null);
+    }
   }, [user?.id]);
 
   // Load cart - CLOUD FIRST for logged-in users

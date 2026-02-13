@@ -31,7 +31,7 @@ import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 const GemPurchasePendingScreen = ({ navigation, route }) => {
   const { gemAmount, orderNumber, packageName, checkoutUrl } = route.params || {};
   const { hideTabBar, showTabBar } = useTabBar();
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { alert, AlertComponent } = useCustomAlert();
 
   // State for polling payment status
@@ -55,6 +55,9 @@ const GemPurchasePendingScreen = ({ navigation, route }) => {
       }
     };
     getInitialBalance();
+
+    // Refresh profile to detect gem balance + tier updates from webhook
+    const refreshTimer = setTimeout(() => refreshProfile?.(), 5000);
 
     // Entrance animations
     Animated.sequence([
@@ -94,7 +97,10 @@ const GemPurchasePendingScreen = ({ navigation, route }) => {
       ])
     ).start();
 
-    return () => showTabBar();
+    return () => {
+      clearTimeout(refreshTimer);
+      showTabBar();
+    };
   }, []);
 
   // Check if payment has been completed

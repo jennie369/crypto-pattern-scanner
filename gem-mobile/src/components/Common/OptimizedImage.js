@@ -20,7 +20,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ImageOff } from 'lucide-react-native';
 import { COLORS } from '../../utils/tokens';
 
-// In-memory tracking for prefetched URLs
+// In-memory tracking for prefetched URLs (capped to prevent memory leaks)
+const MAX_PREFETCHED_URLS = 500;
+const MAX_FAILED_URLS = 200;
 const prefetchedUrls = new Set();
 const failedUrls = new Set();
 const prefetchQueue = [];
@@ -73,8 +75,17 @@ const processPrefetchQueue = async () => {
       try {
         // Use expo-image prefetch for aggressive disk caching
         await Image.prefetch(url);
+        if (prefetchedUrls.size >= MAX_PREFETCHED_URLS) {
+          // Evict oldest (first inserted) entry
+          const first = prefetchedUrls.values().next().value;
+          prefetchedUrls.delete(first);
+        }
         prefetchedUrls.add(url);
       } catch {
+        if (failedUrls.size >= MAX_FAILED_URLS) {
+          const first = failedUrls.values().next().value;
+          failedUrls.delete(first);
+        }
         failedUrls.add(url);
       }
     })
@@ -129,6 +140,10 @@ const OptimizedImage = memo(({
   const handleLoad = useCallback((event) => {
     setHasError(false);
     if (currentUri) {
+      if (prefetchedUrls.size >= MAX_PREFETCHED_URLS) {
+        const first = prefetchedUrls.values().next().value;
+        prefetchedUrls.delete(first);
+      }
       prefetchedUrls.add(currentUri);
     }
     onLoad?.(event);
@@ -137,6 +152,10 @@ const OptimizedImage = memo(({
   const handleError = useCallback((event) => {
     setHasError(true);
     if (currentUri) {
+      if (failedUrls.size >= MAX_FAILED_URLS) {
+        const first = failedUrls.values().next().value;
+        failedUrls.delete(first);
+      }
       failedUrls.add(currentUri);
     }
     onError?.(event);

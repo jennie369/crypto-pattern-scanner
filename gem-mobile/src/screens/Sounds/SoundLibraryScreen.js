@@ -338,6 +338,10 @@ const SoundLibraryScreen = ({ navigation }) => {
           ListHeaderComponent={renderHeader}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={10}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

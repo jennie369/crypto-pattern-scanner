@@ -195,6 +195,11 @@ class HybridChatService {
           this.connectWebSocket();
         }
 
+        // Auto-sync offline queue when coming back online
+        this.syncOfflineQueue().catch(err => {
+          console.error('[HybridChat] Auto-sync queue failed:', err);
+        });
+
         this.emit('onConnectionChange', {
           wsState: websocketService.getState(),
           isOnline: true,

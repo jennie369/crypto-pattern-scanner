@@ -26,19 +26,20 @@ const CHECKOUT_AFFILIATE_KEY = '@gem_checkout_affiliate';
 const WEB_URL_PATTERNS = [
   {
     // https://gemral.com/courses/{courseId}
+    // E5 FIX: Use 'Account' stack (has CourseDetail/LessonPlayer), not 'Courses' (not a tab)
     pattern: /^https?:\/\/(?:www\.)?gemral\.com\/courses\/([^\/?\s]+)(?:\/lessons\/([^\/?\s]+))?/i,
     handler: (matches) => {
       if (matches[2]) {
         // Has lessonId: /courses/{courseId}/lessons/{lessonId}
         return {
-          stack: 'Courses',
+          stack: 'Account',
           screen: 'LessonPlayer',
           params: { courseId: matches[1], lessonId: matches[2] },
         };
       }
       // Just courseId: /courses/{courseId}
       return {
-        stack: 'Courses',
+        stack: 'Account',
         screen: 'CourseDetail',
         params: { courseId: matches[1] },
       };
@@ -101,27 +102,30 @@ const DEEP_LINK_ROUTES = {
 const DYNAMIC_DEEP_LINK_PATTERNS = [
   {
     // gem://courses/{courseId}
+    // E5 FIX: Use 'Account' stack (has CourseDetail registered), not 'Courses' (not a tab)
     pattern: /^\/courses\/([^\/]+)$/,
     handler: (matches) => ({
-      stack: 'Courses',
+      stack: 'Account',
       screen: 'CourseDetail',
       params: { courseId: matches[1] },
     }),
   },
   {
     // gem://courses/{courseId}/lessons/{lessonId}
+    // E5 FIX: Use 'Account' stack
     pattern: /^\/courses\/([^\/]+)\/lessons\/([^\/]+)$/,
     handler: (matches) => ({
-      stack: 'Courses',
+      stack: 'Account',
       screen: 'LessonPlayer',
       params: { courseId: matches[1], lessonId: matches[2] },
     }),
   },
   {
     // gem://courses/{courseId}/modules/{moduleId}
+    // E5 FIX: Use 'Account' stack
     pattern: /^\/courses\/([^\/]+)\/modules\/([^\/]+)$/,
     handler: (matches) => ({
-      stack: 'Courses',
+      stack: 'Account',
       screen: 'CourseDetail',
       params: { courseId: matches[1], moduleId: matches[2], scrollToModule: true },
     }),
@@ -247,10 +251,12 @@ class DeepLinkHandler {
   /**
    * Check if URL is an affiliate link
    */
+  // E5 FIX: Was referencing non-existent 'linkGemralApp' — fixed to use actual pattern keys
   isAffiliateUrl(url) {
     if (!url) return false;
     return (
-      AFFILIATE_URL_PATTERNS.linkGemralApp.test(url) ||
+      AFFILIATE_URL_PATTERNS.gemralProducts.test(url) ||
+      AFFILIATE_URL_PATTERNS.gemralShortCode.test(url) ||
       AFFILIATE_URL_PATTERNS.yinyangMasters.test(url) ||
       AFFILIATE_URL_PATTERNS.appScheme.test(url)
     );

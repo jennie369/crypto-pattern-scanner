@@ -527,6 +527,10 @@ const AllGoalsScreen = ({ navigation, route }) => {
             contentContainerStyle={[styles.gridContainer, { paddingBottom: insets.bottom + 100 }]}
             columnWrapperStyle={styles.gridRow}
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            initialNumToRender={10}
             refreshing={refreshing}
             onRefresh={handleRefresh}
           />
