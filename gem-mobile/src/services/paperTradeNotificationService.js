@@ -114,14 +114,8 @@ const NOTIFICATION_TEMPLATES = {
  */
 export const initialize = async () => {
   try {
-    // Configure notification handler
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-      }),
-    });
+    // NOTE: setNotificationHandler is configured ONLY in InAppNotificationContext.js
+    // Do NOT add one here — multiple handlers cause the last-loaded to win.
 
     // Request permissions
     const { status: existingStatus } = await Notifications.getPermissionsAsync();

@@ -73,13 +73,18 @@ export const useWebSocketChat = (options = {}) => {
       setIsTyping(data.isTyping);
     });
 
+    // C12 FIX: Track timeout IDs for cleanup
+    let errorClearTimeout = null;
+    let syncClearTimeout = null;
+
     // Error listener
     const unsubError = hybridChatService.on('onError', (error) => {
       setLastError(error);
       setIsSending(false);
 
-      // Clear error after 5 seconds
-      setTimeout(() => setLastError(null), 5000);
+      // Clear error after 5 seconds (C12 FIX: track timeout for cleanup)
+      if (errorClearTimeout) clearTimeout(errorClearTimeout);
+      errorClearTimeout = setTimeout(() => setLastError(null), 5000);
     });
 
     // Quota warning listener
@@ -91,8 +96,9 @@ export const useWebSocketChat = (options = {}) => {
     const unsubQueueSync = hybridChatService.on('onQueueSync', (data) => {
       setQueueSyncStatus(data);
       if (data.status === 'completed') {
-        // Clear sync status after 3 seconds
-        setTimeout(() => setQueueSyncStatus(null), 3000);
+        // Clear sync status after 3 seconds (C12 FIX: track timeout for cleanup)
+        if (syncClearTimeout) clearTimeout(syncClearTimeout);
+        syncClearTimeout = setTimeout(() => setQueueSyncStatus(null), 3000);
       }
     });
 
@@ -114,6 +120,9 @@ export const useWebSocketChat = (options = {}) => {
       unsubQuota();
       unsubQueueSync();
       unsubMessage();
+      // C12 FIX: Clear pending timeouts on unmount
+      if (errorClearTimeout) clearTimeout(errorClearTimeout);
+      if (syncClearTimeout) clearTimeout(syncClearTimeout);
     };
   }, []);
 

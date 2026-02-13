@@ -23,8 +23,8 @@ import { DeviceEventEmitter } from 'react-native';
 export const RESET_LOADING_EVENT = 'GLOBAL_RESET_LOADING_STATES';
 export const FORCE_REFRESH_EVENT = 'GLOBAL_FORCE_REFRESH';
 
-// Registry of reset callbacks
-const resetCallbacks = new Map();
+// Registry of reset callbacks with registration timestamps
+const resetCallbacks = new Map(); // screenId → { resetFn, registeredAt }
 
 /**
  * Register a loading state reset callback
@@ -38,7 +38,7 @@ export const registerLoadingReset = (screenId, resetFn) => {
     return () => {};
   }
 
-  resetCallbacks.set(screenId, resetFn);
+  resetCallbacks.set(screenId, { resetFn, registeredAt: Date.now() });
   console.log(`[LoadingManager] Registered: ${screenId} (total: ${resetCallbacks.size})`);
 
   // Return unregister function
@@ -55,7 +55,7 @@ export const registerLoadingReset = (screenId, resetFn) => {
 export const resetAllLoadingStates = () => {
   console.log(`[LoadingManager] Resetting ${resetCallbacks.size} screens...`);
 
-  resetCallbacks.forEach((resetFn, screenId) => {
+  resetCallbacks.forEach(({ resetFn }, screenId) => {
     try {
       resetFn();
       console.log(`[LoadingManager] Reset: ${screenId}`);
@@ -66,6 +66,37 @@ export const resetAllLoadingStates = () => {
 
   // Also emit event for any listeners
   DeviceEventEmitter.emit(RESET_LOADING_EVENT);
+};
+
+/**
+ * A8: Reset only loading states that have been registered for longer than maxAgeMs.
+ * This prevents masking legitimate loading by only targeting stuck states.
+ * @param {number} maxAgeMs - Only reset callbacks older than this (default 15000ms)
+ * @returns {number} Number of states reset
+ */
+export const resetStuckLoadingStates = (maxAgeMs = 15000) => {
+  const now = Date.now();
+  let resetCount = 0;
+
+  resetCallbacks.forEach(({ resetFn, registeredAt }, screenId) => {
+    const age = now - registeredAt;
+    if (age > maxAgeMs) {
+      try {
+        resetFn();
+        resetCount++;
+        console.log(`[LoadingManager] Reset stuck: ${screenId} (stuck ${Math.round(age / 1000)}s)`);
+      } catch (err) {
+        console.warn(`[LoadingManager] Error resetting stuck ${screenId}:`, err.message);
+      }
+    }
+  });
+
+  if (resetCount > 0) {
+    console.log(`[LoadingManager] Reset ${resetCount} stuck states (>${Math.round(maxAgeMs / 1000)}s)`);
+    DeviceEventEmitter.emit(RESET_LOADING_EVENT);
+  }
+
+  return resetCount;
 };
 
 /**
@@ -143,6 +174,7 @@ export const clearAllStaleCaches = () => {
 export default {
   registerLoadingReset,
   resetAllLoadingStates,
+  resetStuckLoadingStates,
   forceRefreshAll,
   useLoadingReset,
   clearAllStaleCaches,

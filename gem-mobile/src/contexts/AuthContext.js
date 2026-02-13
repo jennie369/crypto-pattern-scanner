@@ -14,6 +14,9 @@ import connectionHealthMonitor from '../services/connectionHealthMonitor';
 import { websocketService } from '../services/websocketService';
 import { hybridChatService } from '../services/hybridChatService';
 import cacheService from '../services/cacheService';
+import { notificationService } from '../services/notificationService';
+import { errorService } from '../services/errorService';
+import { clearEventSession } from '../hooks/useEventTracking';
 
 // Helper: Handle invalid refresh token by clearing session
 const handleInvalidRefreshToken = async (setUser, setProfile) => {
@@ -354,6 +357,59 @@ export const AuthProvider = ({ children }) => {
     };
   }, [refreshProfile]);
 
+  // =====================================================
+  // SHARED CLEANUP: Single source of truth for logout cleanup
+  // Used by both onAuthStateChange SIGNED_OUT and intentionalLogout
+  // Fixes A3: dual logout path with duplicated cleanup code
+  // =====================================================
+  const performFullCleanup = useCallback(async (previousUserId) => {
+    console.log('[AuthContext] performFullCleanup:', { previousUserId });
+
+    userRef.current = null;
+    setUser(null);
+    setProfile(null);
+
+    // Cleanup all services
+    presenceService.cleanup();
+    QuotaService.clearCache();
+    paperTradeService.stopGlobalMonitoring();
+    connectionHealthMonitor.stop();
+    websocketService.disconnect();
+    hybridChatService.cleanup();
+
+    // Stop zone price monitor (lazy loaded to avoid circular deps)
+    try {
+      const { zonePriceMonitor } = require('../services/zonePriceMonitor');
+      zonePriceMonitor.stop();
+    } catch (e) {}
+
+    // Clear user cache
+    if (previousUserId) {
+      cacheService.clearUserCache(previousUserId).catch(() => {});
+    }
+
+    // Remove all Supabase Realtime channels
+    try {
+      supabase.getChannels().forEach(ch => supabase.removeChannel(ch));
+    } catch (e) {
+      console.warn('[AuthContext] Channel cleanup error:', e?.message);
+    }
+
+    // A7: Clear module-level caches that persist across login/logout
+    try {
+      const { clearForumCache } = require('../screens/Forum/ForumScreen');
+      clearForumCache?.();
+    } catch (e) {}
+    try {
+      const { clearNotificationsCache } = require('../screens/tabs/NotificationsScreen');
+      clearNotificationsCache?.();
+    } catch (e) {}
+
+    // C3: Clear module-level user/session state to prevent cross-user bleed
+    errorService.clearUserId();
+    clearEventSession();
+  }, []);
+
   // Load initial session
   useEffect(() => {
     const loadSession = async () => {
@@ -503,110 +559,76 @@ export const AuthProvider = ({ children }) => {
             // START PAPER TRADE MONITORING on login
             paperTradeService.startGlobalMonitoring(session.user.id, 5000);
 
-            // APPLY PENDING PURCHASES ON LOGIN
-            // This handles the case where user bought via Shopify before creating GEM account
-            supabase.rpc('apply_all_pending_purchases', { p_user_id: session.user.id })
-              .then(({ data, error }) => {
-                if (data?.success) {
-                  console.log('[AuthContext] Pending purchases applied:', data);
-                  // Refresh profile to get updated tiers
-                  if (data.tier_upgrades?.applied_count > 0 || data.gem_credits?.credits_claimed > 0) {
-                    getUserProfile(session.user.id).then(({ data: newProfile }) => {
-                      setProfile(newProfile);
-                      console.log('[AuthContext] Profile refreshed after pending claims');
-                    });
-                  }
-                } else if (error) {
-                  console.warn('[AuthContext] Apply pending failed (non-critical):', error?.message);
-                }
-              })
-              .catch((err) => {
-                console.warn('[AuthContext] Apply pending error (non-critical):', err?.message);
-              });
+            // A5: Sequential post-login operations (prevents 3 concurrent setProfile races)
+            // Run sequentially so only ONE final profile refresh happens
+            (async () => {
+              let needsProfileRefresh = false;
 
-            // LINK WAITLIST ENTRY ON SIGNUP
-            // Links Early Bird waitlist registration to user account
-            // Also applies Early Bird benefits (discount code + scanner trial)
-            supabase.rpc('link_user_to_waitlist', {
-              p_user_id: session.user.id,
-              p_email: session.user.email,
-              p_phone: session.user.user_metadata?.phone || null
-            })
-              .then(({ data, error }) => {
-                if (data?.success) {
-                  console.log('[AuthContext] Waitlist linked:', data);
-                  // Refresh profile to get queue_number, referral_code, and scanner_tier
-                  getUserProfile(session.user.id).then(({ data: newProfile }) => {
-                    setProfile(newProfile);
-                    console.log('[AuthContext] Profile refreshed with Early Bird benefits:', {
-                      queue_number: newProfile?.queue_number,
-                      scanner_tier: newProfile?.scanner_tier,
-                      scanner_trial_ends_at: newProfile?.scanner_trial_ends_at,
-                      early_bird_discount_code: newProfile?.early_bird_discount_code,
-                    });
-                  });
-                  // Note: Welcome notification will be shown by the signup screen
-                  // Store the waitlist info for display (includes is_top_100 flag)
-                  if (global.onWaitlistLinked) {
-                    global.onWaitlistLinked(data);
+              // APPLY PENDING PURCHASES ON LOGIN
+              try {
+                const { data: purchaseResult, error: purchaseError } = await supabase.rpc(
+                  'apply_all_pending_purchases',
+                  { p_user_id: session.user.id }
+                );
+                if (purchaseResult?.success) {
+                  console.log('[AuthContext] Pending purchases applied:', purchaseResult);
+                  if (purchaseResult.tier_upgrades?.applied_count > 0 || purchaseResult.gem_credits?.credits_claimed > 0) {
+                    needsProfileRefresh = true;
                   }
-                } else if (error) {
-                  // Non-critical - user just wasn't on waitlist
-                  console.log('[AuthContext] Waitlist link skipped:', error?.message || 'No waitlist entry');
+                } else if (purchaseError) {
+                  console.warn('[AuthContext] Apply pending failed (non-critical):', purchaseError?.message);
                 }
-              })
-              .catch((err) => {
-                // Non-blocking - failures don't break signup
+              } catch (err) {
+                console.warn('[AuthContext] Apply pending error (non-critical):', err?.message);
+              }
+
+              // LINK WAITLIST ENTRY ON SIGNUP
+              try {
+                const { data: waitlistResult, error: waitlistError } = await supabase.rpc(
+                  'link_user_to_waitlist',
+                  {
+                    p_user_id: session.user.id,
+                    p_email: session.user.email,
+                    p_phone: session.user.user_metadata?.phone || null,
+                  }
+                );
+                if (waitlistResult?.success) {
+                  console.log('[AuthContext] Waitlist linked:', waitlistResult);
+                  needsProfileRefresh = true;
+                  if (global.onWaitlistLinked) {
+                    global.onWaitlistLinked(waitlistResult);
+                  }
+                } else if (waitlistError) {
+                  console.log('[AuthContext] Waitlist link skipped:', waitlistError?.message || 'No waitlist entry');
+                }
+              } catch (err) {
                 console.log('[AuthContext] Waitlist link skipped:', err?.message);
-              });
+              }
+
+              // Single profile refresh at the end if anything changed
+              if (needsProfileRefresh) {
+                try {
+                  const { data: freshProfile } = await getUserProfile(session.user.id);
+                  if (freshProfile) {
+                    setProfile(freshProfile);
+                    console.log('[AuthContext] Profile refreshed after post-login operations:', {
+                      queue_number: freshProfile?.queue_number,
+                      scanner_tier: freshProfile?.scanner_tier,
+                      scanner_trial_ends_at: freshProfile?.scanner_trial_ends_at,
+                    });
+                  }
+                } catch (err) {
+                  console.warn('[AuthContext] Post-login profile refresh failed:', err?.message);
+                }
+              }
+            })();
           }
         } else {
-          // Detect involuntary sign-out (auto-refresh failed, token revoked, etc.)
-          // userRef.current is set when user was previously logged in
+          // A3: Use shared cleanup (single source of truth)
           const wasLoggedIn = !!userRef.current;
           const previousUserId = userRef.current?.id;
 
-          userRef.current = null;
-          setUser(null);
-          setProfile(null);
-
-          // Cleanup presence service on logout
-          presenceService.cleanup();
-
-          // Clear quota cache on logout
-          QuotaService.clearCache();
-
-          // STOP PAPER TRADE MONITORING on logout
-          paperTradeService.stopGlobalMonitoring();
-
-          // Stop connection health monitor
-          connectionHealthMonitor.stop();
-
-          // Stop zone price monitor (lazy loaded to avoid circular deps)
-          try {
-            const { zonePriceMonitor } = require('../services/zonePriceMonitor');
-            zonePriceMonitor.stop();
-          } catch (e) {
-            // zonePriceMonitor may not be loaded
-          }
-
-          // Disconnect WebSocket service
-          websocketService.disconnect();
-
-          // Cleanup hybrid chat service
-          hybridChatService.cleanup();
-
-          // Clear user cache
-          if (previousUserId) {
-            cacheService.clearUserCache(previousUserId).catch(() => {});
-          }
-
-          // Remove all Supabase Realtime channels
-          try {
-            supabase.getChannels().forEach(ch => supabase.removeChannel(ch));
-          } catch (e) {
-            console.warn('[AuthContext] Channel cleanup error:', e.message);
-          }
+          await performFullCleanup(previousUserId);
 
           // Distinguish manual logout from involuntary sign-out
           if (wasLoggedIn && (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESH_FAILED')) {
@@ -648,34 +670,21 @@ export const AuthProvider = ({ children }) => {
     isIntentionalLogoutRef.current = true;
     console.log('[AuthContext] Intentional logout initiated');
     try {
+      // A6: Remove push token BEFORE signout (while session is still active)
+      try {
+        await notificationService.removePushToken();
+        console.log('[AuthContext] Push token removed on logout');
+      } catch (err) {
+        console.warn('[AuthContext] Push token removal failed (non-critical):', err?.message);
+      }
+
       // Use localOnlySignOut to clear session WITHOUT revoking on server
       // This keeps the refresh token valid for biometric re-login
-      // (supabase.auth.signOut even with scope:'local' still revokes server session)
       await localOnlySignOut();
 
-      // Manually trigger state cleanup (normally done by onAuthStateChange)
+      // A3: Use shared cleanup (single source of truth)
       const previousUserId = userRef.current?.id;
-      userRef.current = null;
-      setUser(null);
-      setProfile(null);
-
-      // Cleanup services
-      presenceService.cleanup();
-      QuotaService.clearCache();
-      paperTradeService.stopGlobalMonitoring();
-      connectionHealthMonitor.stop();
-      websocketService.disconnect();
-      hybridChatService.cleanup();
-      try {
-        const { zonePriceMonitor } = require('../services/zonePriceMonitor');
-        zonePriceMonitor.stop();
-      } catch (e) {}
-      if (previousUserId) {
-        cacheService.clearUserCache(previousUserId).catch(() => {});
-      }
-      try {
-        supabase.getChannels().forEach(ch => supabase.removeChannel(ch));
-      } catch (e) {}
+      await performFullCleanup(previousUserId);
 
       // Reset the flag
       isIntentionalLogoutRef.current = false;
@@ -688,7 +697,7 @@ export const AuthProvider = ({ children }) => {
       console.error('[AuthContext] Intentional logout error:', error);
       throw error;
     }
-  }, []);
+  }, [performFullCleanup]);
 
   // ⚡ ADMIN CHECK - Critical for admin features
   const isAdmin = profile?.role === 'admin' ||

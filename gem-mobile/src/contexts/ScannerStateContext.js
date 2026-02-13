@@ -1,6 +1,11 @@
 /**
  * ScannerStateContext - Unified State Manager cho Scanner
  *
+ * @deprecated DEPRECATED as of 2026-02-13 (MASTER_FIX_PLAN B4)
+ * This 725-line useReducer-based context was never imported by any screen.
+ * The app uses ScannerContext.js (74 lines, useState-based) exclusively.
+ * This file is kept for reference but should NOT be imported.
+ *
  * FEATURES:
  * - Centralized state management
  * - Selective re-renders voi useScannerSelector

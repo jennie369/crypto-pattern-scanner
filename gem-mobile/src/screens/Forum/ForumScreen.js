@@ -49,6 +49,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { FORCE_REFRESH_EVENT, RESET_LOADING_EVENT, registerLoadingReset } from '../../utils/loadingStateManager';
+import { StateView } from '../../components/Common';
 
 // Global forum cache - persists data between tab switches
 const forumCache = {
@@ -57,6 +58,15 @@ const forumCache = {
   sessionId: null,
   lastFetch: 0,
   CACHE_DURATION: 30000, // 30 seconds cache
+};
+
+// A7: Clear forum cache on logout to prevent data leaking between users
+export const clearForumCache = () => {
+  forumCache.posts = null;
+  forumCache.feedItems = null;
+  forumCache.sessionId = null;
+  forumCache.lastFetch = 0;
+  console.log('[ForumScreen] Forum cache cleared');
 };
 
 // ============================================================
@@ -126,6 +136,7 @@ const ForumScreen = ({ navigation }) => {
   const [useHybridFeed, setUseHybridFeed] = useState(true); // Toggle for new feed algorithm
   const [loadingMore, setLoadingMore] = useState(false); // Track infinite scroll loading state
   const [showScrollToTop, setShowScrollToTop] = useState(false); // Scroll-to-top FAB visibility
+  const [feedError, setFeedError] = useState(null); // C9 FIX: Error state for feed loading failures
   const SCROLL_TO_TOP_THRESHOLD = 800; // Show button after scrolling this many pixels
   const lastPostIdRef = useRef(null);
   const lastCreatedAtRef = useRef(null); // Track last post created_at for pagination
@@ -639,6 +650,10 @@ const ForumScreen = ({ navigation }) => {
       // On error, still allow retry (only if this is still the current request)
       if (requestId === currentRequestIdRef.current) {
         setHasMore(true);
+        // C9 FIX: Show error to user if initial load fails with no cached data
+        if (reset && posts.length === 0) {
+          setFeedError(error?.message || 'Không thể tải bài viết');
+        }
       }
     } finally {
       // End performance measurement (dev only)
@@ -1359,6 +1374,22 @@ const ForumScreen = ({ navigation }) => {
           <ActivityIndicator size="large" color={COLORS.gold} />
           <Text style={styles.loadingText}>Đang tải bài viết...</Text>
         </View>
+      );
+    }
+
+    // C9 FIX: Show error state when feed loading fails
+    if (feedError) {
+      return (
+        <StateView
+          type="error"
+          compact
+          message={feedError}
+          onRetry={() => {
+            setFeedError(null);
+            loadPosts(true);
+          }}
+          style={styles.emptyState}
+        />
       );
     }
 

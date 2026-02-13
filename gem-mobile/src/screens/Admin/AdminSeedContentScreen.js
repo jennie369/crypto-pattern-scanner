@@ -353,7 +353,7 @@ const AdminSeedContentScreen = ({ navigation }) => {
                 </View>
                 <View style={styles.statCard}>
                   <View style={[styles.statIcon, { backgroundColor: 'rgba(16, 185, 129, 0.2)' }]}>
-                    <UserPlus size={20} color="#10B981" />
+                    <UserPlus size={20} color={COLORS.success} />
                   </View>
                   <Text style={styles.statValue}>{stats.real_users_total}</Text>
                   <Text style={styles.statLabel}>Real Users</Text>
@@ -376,7 +376,7 @@ const AdminSeedContentScreen = ({ navigation }) => {
                   <Text style={styles.activityLabel}>Likes</Text>
                 </View>
                 <View style={styles.activityItem}>
-                  <MessageCircle size={16} color="#10B981" />
+                  <MessageCircle size={16} color={COLORS.success} />
                   <Text style={styles.activityValue}>{stats.bot_replies_today}</Text>
                   <Text style={styles.activityLabel}>Replies</Text>
                 </View>
@@ -392,21 +392,21 @@ const AdminSeedContentScreen = ({ navigation }) => {
                   <View style={styles.controlLeft}>
                     <View style={[
                       styles.statusDot,
-                      { backgroundColor: botStatus.isRunning ? '#10B981' : '#EF4444' }
+                      { backgroundColor: botStatus.isRunning ? COLORS.success : COLORS.error }
                     ]} />
                     <Text style={styles.controlLabel}>Bot Status</Text>
                   </View>
                   <View style={styles.controlRight}>
                     <Text style={[
                       styles.statusText,
-                      { color: botStatus.isRunning ? '#10B981' : '#EF4444' }
+                      { color: botStatus.isRunning ? COLORS.success : COLORS.error }
                     ]}>
                       {botStatus.isRunning ? 'RUNNING' : 'STOPPED'}
                     </Text>
                     {botStatus.isRunning ? (
                       <Pause size={20} color="#EF4444" />
                     ) : (
-                      <Play size={20} color="#10B981" />
+                      <Play size={20} color={COLORS.success} />
                     )}
                   </View>
                 </TouchableOpacity>
@@ -521,7 +521,7 @@ const AdminSeedContentScreen = ({ navigation }) => {
 
             {/* Danger Zone */}
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: '#EF4444' }]}>Danger Zone</Text>
+              <Text style={[styles.sectionTitle, { color: COLORS.error }]}>Danger Zone</Text>
               <TouchableOpacity
                 style={styles.dangerButton}
                 onPress={handleDeleteAll}
@@ -743,14 +743,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(239, 68, 68, 0.15)',
     borderWidth: 1,
-    borderColor: '#EF4444',
+    borderColor: COLORS.error,
     borderRadius: 12,
     padding: SPACING.md,
     gap: SPACING.sm,
   },
   dangerButtonText: {
     fontSize: 14,
-    color: '#EF4444',
+    color: COLORS.error,
     fontWeight: '600',
   },
   accessDenied: {

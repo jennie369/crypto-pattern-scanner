@@ -78,6 +78,7 @@ import { useScanner } from '../../contexts/ScannerContext';
 import { useUpgrade } from '../../hooks/useUpgrade';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { formatPrice } from '../../utils/formatters';
+import { StateView } from '../../components/Common';
 import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -134,6 +135,7 @@ const ScannerScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(null);
   const [priceChange, setPriceChange] = useState(null);
+  const [scanError, setScanError] = useState(null); // C9 FIX: Error state for scan failures
 
   // Paper Trade Modal State
   const [paperTradeModalVisible, setPaperTradeModalVisible] = useState(false);
@@ -510,7 +512,11 @@ const ScannerScreen = ({ navigation }) => {
     }
 
     try {
+      // B11 FIX: Clear candle cache before new scan to ensure fresh data
+      binanceService.clearCandleCache();
+
       setScanning(true);
+      setScanError(null);               // C9 FIX: Clear error on new scan
       setSelectedPosition(null);        // Clear position when scanning
       setShowPositionZone(false);
       setZoneViewSource('scan');         // Mark source as scan
@@ -550,8 +556,9 @@ const ScannerScreen = ({ navigation }) => {
             const allPatternsForCoin = [];
 
             // OPTIMIZED: Scan timeframes in parallel for each coin
+            // B10 FIX: Pass userTier explicitly instead of relying on singleton state
             const tfResults = await Promise.allSettled(
-              timeframesToScan.map(tf => patternDetection.detectPatterns(symbol, tf))
+              timeframesToScan.map(tf => patternDetection.detectPatterns(symbol, tf, userTier))
             );
 
             tfResults.forEach(result => {
@@ -799,6 +806,7 @@ const ScannerScreen = ({ navigation }) => {
 
     } catch (error) {
       console.error('[Scanner] Scan error:', error);
+      setScanError(error?.message || 'Không thể quét. Vui lòng thử lại.');
       alertService.error('Error', 'Failed to scan. Please try again.');
     } finally {
       setScanning(false);
@@ -1631,8 +1639,21 @@ const ScannerScreen = ({ navigation }) => {
 
           {/* NOTE: Multi-TF functionality is now integrated into main scan results above */}
 
-          {/* Empty State - Only show when not scanning and no results */}
-          {!scanning && scanResults.length === 0 && (
+          {/* C9 FIX: Error State - Show when scan fails */}
+          {!scanning && scanError && scanResults.length === 0 && (
+            <StateView
+              type="error"
+              compact
+              message={scanError}
+              onRetry={() => {
+                setScanError(null);
+                handleScan();
+              }}
+            />
+          )}
+
+          {/* Empty State - Only show when not scanning, no error, and no results */}
+          {!scanning && !scanError && scanResults.length === 0 && (
             <View style={styles.emptyContainer}>
               <AlertCircle size={48} color={COLORS.textMuted} />
               <Text style={styles.emptyTitle}>Chưa Có Kết Quả</Text>

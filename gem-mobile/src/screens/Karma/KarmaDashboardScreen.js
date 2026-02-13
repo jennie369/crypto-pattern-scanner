@@ -12,6 +12,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   FlatList,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -283,7 +284,7 @@ const KarmaDashboardScreen = () => {
           )}
           {benefits.can_mentor && (
             <View style={styles.benefitItem}>
-              <Sparkles size={16} color="#FFD700" strokeWidth={2} />
+              <Sparkles size={16} color={COLORS.goldBright} strokeWidth={2} />
               <Text style={styles.benefitText}>Quyền Mentor</Text>
             </View>
           )}
@@ -418,7 +419,7 @@ const KarmaDashboardScreen = () => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <LinearGradient
-          colors={['#0F1030', '#1A1B4B', '#0F1030']}
+          colors={[COLORS.bgMid, '#1A1B4B', COLORS.bgMid]}
           style={styles.gradient}
         >
           {/* Header */}
@@ -441,7 +442,10 @@ const KarmaDashboardScreen = () => {
             </Text>
             <TouchableOpacity
               style={styles.recoveryBtn}
-              onPress={() => navigation.navigate('RecoveryQuest')}
+              onPress={() => {
+                // A4: RecoveryQuest screen doesn't exist — show alert until implemented
+                Alert.alert('Sắp ra mắt', 'Tính năng phục hồi Karma đang được phát triển.');
+              }}
             >
               <LinearGradient
                 colors={[COLORS.purple, COLORS.cyan]}
@@ -463,7 +467,7 @@ const KarmaDashboardScreen = () => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <LinearGradient
-          colors={['#0F1030', '#1A1B4B', '#0F1030']}
+          colors={[COLORS.bgMid, '#1A1B4B', COLORS.bgMid]}
           style={styles.gradient}
         >
           <View style={styles.loadingContainer}>
@@ -480,7 +484,7 @@ const KarmaDashboardScreen = () => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <LinearGradient
-          colors={['#0F1030', '#1A1B4B', '#0F1030']}
+          colors={[COLORS.bgMid, '#1A1B4B', COLORS.bgMid]}
           style={styles.gradient}
         >
           <View style={styles.errorContainer}>
@@ -502,7 +506,7 @@ const KarmaDashboardScreen = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <LinearGradient
-        colors={['#0F1030', '#1A1B4B', '#0F1030']}
+        colors={[COLORS.bgMid, '#1A1B4B', COLORS.bgMid]}
         style={styles.gradient}
       >
         {/* Header */}
@@ -577,7 +581,7 @@ const KarmaDashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F1030',
+    backgroundColor: COLORS.bgMid,
   },
   gradient: {
     flex: 1,

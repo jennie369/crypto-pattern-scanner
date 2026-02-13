@@ -98,7 +98,8 @@ const SuggestedUsersDropdown = ({
   };
 
   const handleViewAll = () => {
-    navigation.navigate('SuggestedUsers');
+    // A4: SuggestedUsers screen doesn't exist — no-op until implemented
+    console.warn('[SuggestedUsersDropdown] SuggestedUsers screen not yet implemented');
     if (onClose) onClose();
   };
 

@@ -155,7 +155,7 @@ const PATTERN_SIGNALS = {
     avgRR: 2.2,
   },
   'Descending Triangle': {
-    name: 'DT',
+    name: 'DscT',
     fullName: 'Descending Triangle',
     direction: 'SHORT',
     type: 'continuation',

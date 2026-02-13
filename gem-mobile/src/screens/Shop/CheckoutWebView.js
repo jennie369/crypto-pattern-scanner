@@ -575,7 +575,8 @@ const CheckoutWebView = () => {
 
       // Method 4: URL change detection (for SPA navigation)
       let lastUrl = window.location.href;
-      setInterval(() => {
+      const urlCheckInterval = setInterval(() => {
+        if (successDetected) { clearInterval(urlCheckInterval); return; }
         const currentUrl = window.location.href;
         if (currentUrl !== lastUrl) {
           console.log('[WebView] URL changed:', currentUrl);
@@ -625,7 +626,8 @@ const CheckoutWebView = () => {
       // PART 4: KEEP-ALIVE PING
       // ============================================
 
-      setInterval(() => {
+      const pingInterval = setInterval(() => {
+        if (successDetected) { clearInterval(pingInterval); return; }
         if (window.ReactNativeWebView) {
           window.ReactNativeWebView.postMessage(JSON.stringify({
             type: 'PING',

@@ -12,3 +12,4 @@ export { default as OfflineBanner } from './OfflineBanner';
 export { default as ProgressBar } from './ProgressBar';
 export { default as CircularProgress } from './CircularProgress';
 export { default as InAppBrowser } from './InAppBrowser';
+export { default as StateView } from './StateView';

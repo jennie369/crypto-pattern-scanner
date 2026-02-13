@@ -8,6 +8,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { AlertTriangle, RefreshCw, Home, ChevronLeft } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../utils/tokens';
+import { errorService } from '../services/errorService';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -31,8 +32,13 @@ class ErrorBoundary extends React.Component {
 
     this.setState({ errorInfo });
 
-    // You can also log to an error reporting service here
-    // e.g., Sentry, Firebase Crashlytics, etc.
+    // C10 FIX: Report to error tracking service
+    try {
+      errorService.reportRenderError(error, this.props.name || 'Unknown', errorInfo);
+    } catch (reportErr) {
+      // Don't let error reporting crash the boundary
+      console.warn('[ErrorBoundary] Failed to report error:', reportErr);
+    }
   }
 
   handleRetry = () => {

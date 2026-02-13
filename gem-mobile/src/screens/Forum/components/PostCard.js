@@ -1972,7 +1972,7 @@ const styles = StyleSheet.create({
   },
   // Active state for liked count
   actionCountActive: {
-    color: '#FF6B6B',
+    color: COLORS.error,
   },
   // Tappable likes count - shows underline hint
   likesCountTappable: {
@@ -2009,7 +2009,7 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   actionTextActive: {
-    color: '#FF6B6B',
+    color: COLORS.error,
   },
   actionTextRepost: {
     color: COLORS.success,

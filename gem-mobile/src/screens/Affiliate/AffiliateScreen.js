@@ -39,6 +39,7 @@ import { orderTrackingService } from '../../services/orderTrackingService';
 import affiliateService from '../../services/affiliateService';
 import { supabase } from '../../services/supabase';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { StateView } from '../../components/Common';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -55,10 +56,12 @@ const AffiliateScreen = ({ navigation }) => {
   const [productLinks, setProductLinks] = useState([]);
   const [productLinkStats, setProductLinkStats] = useState(null);
   const [copiedLinkId, setCopiedLinkId] = useState(null);
+  const [error, setError] = useState(null); // C9 FIX: Error state
 
   // Load data
   const loadData = useCallback(async () => {
     try {
+      setError(null);
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -96,6 +99,7 @@ const AffiliateScreen = ({ navigation }) => {
 
     } catch (error) {
       console.error('[AffiliateScreen] Load error:', error);
+      setError(error?.message || 'Không thể tải dữ liệu đối tác');
     } finally {
       setLoading(false);
     }
@@ -193,6 +197,25 @@ const AffiliateScreen = ({ navigation }) => {
         <SafeAreaView style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.gold} />
           <Text style={styles.loadingText}>Loading...</Text>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
+  // C9 FIX: Show error state when data loading fails
+  if (error && !partnerProfile) {
+    return (
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.gradient}
+      >
+        <SafeAreaView style={styles.loadingContainer}>
+          <StateView
+            type="error"
+            message={error}
+            onRetry={loadData}
+          />
         </SafeAreaView>
       </LinearGradient>
     );
@@ -457,7 +480,7 @@ const AffiliateScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Recent Orders</Text>
               <TouchableOpacity
                 style={styles.seeAllButton}
-                onPress={() => navigation.navigate('OrderHistory')}
+                onPress={() => navigation.navigate('MyOrders')}
               >
                 <Text style={styles.seeAllText}>See All</Text>
                 <ChevronRight size={16} color={COLORS.gold} />

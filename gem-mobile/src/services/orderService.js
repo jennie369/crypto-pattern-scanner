@@ -580,12 +580,12 @@ export const verifyEmailOTP = async (userId, email, otp, purpose = 'link_email')
       };
     }
 
-    // If purpose is link_email, apply ALL pending purchases (tiers, gems, courses)
-    if (purpose === 'link_email') {
-      await applyAllPendingPurchases(userId);
-      // Keep legacy course access for backwards compatibility
-      await applyPendingCourseAccess(userId, email);
-    }
+    // Apply ALL pending purchases after ANY successful OTP verification
+    // DB function verify_email_otp() already calls apply_all_pending_purchases(),
+    // but we call it again client-side to ensure cache/state is fresh
+    await applyAllPendingPurchases(userId);
+    // Keep legacy course access for backwards compatibility
+    await applyPendingCourseAccess(userId, email);
 
     return {
       success: true,
@@ -821,7 +821,11 @@ export const linkOrderAfterVerification = async (userId, orderNumber, email) => 
       };
     }
 
-    // Apply pending course access
+    // Apply ALL pending purchases (tiers, gems, courses) after order linking
+    // DB function link_order_after_verification() already calls apply_all_pending_purchases(),
+    // but we call client-side too to ensure state is fresh
+    await applyAllPendingPurchases(userId);
+    // Keep legacy course access for backwards compatibility
     await applyPendingCourseAccess(userId, email);
 
     return {

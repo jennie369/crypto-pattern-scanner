@@ -5,6 +5,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppState } from 'react-native';
 import { supabase } from './supabase';
 import { formatError } from '../utils/errorUtils';
 import 'react-native-get-random-values'; // Required for uuid
@@ -53,6 +54,10 @@ class PaperTradeService {
     this.monitoringInterval = null;
     this.isMonitoring = false;
     this.lastMonitorCheck = null;
+    // B5 FIX: Concurrency guard + AppState tracking
+    this.isChecking = false;
+    this.appStateSubscription = null;
+    this.isAppActive = true;
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -81,11 +86,30 @@ class PaperTradeService {
 
     console.log('[PaperTrade] Starting global TP/SL monitoring (interval:', intervalMs, 'ms)');
 
+    // B5 FIX: AppState listener — pause monitoring when app is in background
+    this.isAppActive = AppState.currentState === 'active';
+    this.appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
+      const wasInactive = !this.isAppActive;
+      this.isAppActive = nextAppState === 'active';
+      // When coming back to foreground, trigger immediate check
+      if (wasInactive && this.isAppActive) {
+        console.log('[PaperTrade] App resumed — triggering immediate check');
+        this.checkAllOpenPositions(userId);
+      }
+    });
+
     // Initial check
     this.checkAllOpenPositions(userId);
 
-    // Set up interval
+    // Set up interval with concurrency and AppState guards
     this.monitoringInterval = setInterval(() => {
+      // B5 FIX: Skip if app is in background
+      if (!this.isAppActive) return;
+      // B5 FIX: Skip if a previous check is still running (concurrency guard)
+      if (this.isChecking) return;
+      // B5 FIX: Skip if no open positions or pending orders to monitor
+      if (this.openPositions.length === 0 && this.pendingOrders.length === 0) return;
+
       this.checkAllOpenPositions(userId);
     }, intervalMs);
   }
@@ -98,7 +122,13 @@ class PaperTradeService {
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
     }
+    // B5 FIX: Clean up AppState listener
+    if (this.appStateSubscription) {
+      this.appStateSubscription.remove();
+      this.appStateSubscription = null;
+    }
     this.isMonitoring = false;
+    this.isChecking = false;
     console.log('[PaperTrade] Global monitoring stopped');
   }
 
@@ -108,6 +138,12 @@ class PaperTradeService {
    * @param {string} userId - User ID
    */
   async checkAllOpenPositions(userId) {
+    // B5 FIX: Concurrency guard — prevent overlapping checks
+    if (this.isChecking) {
+      console.log('[PaperTrade] Skipping check — previous check still running');
+      return { closed: [], filled: [], updated: [] };
+    }
+    this.isChecking = true;
     try {
       await this.init(userId);
 
@@ -149,6 +185,9 @@ class PaperTradeService {
     } catch (error) {
       console.log('[PaperTrade] checkAllOpenPositions error:', error.message);
       return { closed: [], filled: [], updated: [] };
+    } finally {
+      // B5 FIX: Always release concurrency guard
+      this.isChecking = false;
     }
   }
 
@@ -162,18 +201,33 @@ class PaperTradeService {
     const prices = {};
 
     try {
-      // Use Binance ticker/price endpoint
-      const response = await fetch('https://api.binance.com/api/v3/ticker/price');
-      if (!response.ok) {
-        throw new Error('Failed to fetch prices');
-      }
-
-      const data = await response.json();
-
-      // Filter to only requested symbols
-      for (const item of data) {
-        if (symbols.includes(item.symbol)) {
+      // B7 FIX: Only fetch prices for needed symbols instead of ALL ~2000 tickers
+      // B8 FIX: Use Futures API (fapi) to match candle data source, not Spot (api)
+      if (symbols.length === 1) {
+        // Single symbol — use direct endpoint
+        const response = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbols[0]}`);
+        if (!response.ok) throw new Error('Failed to fetch price');
+        const data = await response.json();
+        prices[data.symbol] = parseFloat(data.price);
+      } else if (symbols.length <= 20) {
+        // Small batch — use symbols[] parameter
+        const symbolsParam = encodeURIComponent(JSON.stringify(symbols));
+        const response = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbols=${symbolsParam}`);
+        if (!response.ok) throw new Error('Failed to fetch prices');
+        const data = await response.json();
+        for (const item of data) {
           prices[item.symbol] = parseFloat(item.price);
+        }
+      } else {
+        // Large batch — fetch all (rare edge case with 20+ open positions)
+        const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
+        if (!response.ok) throw new Error('Failed to fetch prices');
+        const data = await response.json();
+        const symbolSet = new Set(symbols);
+        for (const item of data) {
+          if (symbolSet.has(item.symbol)) {
+            prices[item.symbol] = parseFloat(item.price);
+          }
         }
       }
     } catch (error) {
@@ -1074,7 +1128,7 @@ class PaperTradeService {
       : position.entryPrice - exitPrice;
 
     const realizedPnL = priceDiff * position.quantity;
-    const realizedPnLPercent = (priceDiff / position.entryPrice) * 100;
+    const realizedPnLPercent = (priceDiff / position.entryPrice) * (position.leverage || 1) * 100;
 
     // Create closed trade record
     // IMPORTANT: Prioritize currentUserId to ensure stats filter AND Supabase sync work correctly
@@ -1110,25 +1164,42 @@ class PaperTradeService {
 
     console.log('[PaperTrade] Creating closed trade with userId:', closedTrade.userId, 'currentUserId:', this.currentUserId);
 
-    // Return position size + P&L to balance
-    this.balance += position.positionSize + realizedPnL;
+    // B6 FIX: Atomic close — snapshot state, mutate, persist. Rollback on failure.
+    const previousBalance = this.balance;
+    const previousHistory = [...this.tradeHistory];
 
-    // Remove from open positions
-    this.openPositions.splice(positionIndex, 1);
+    try {
+      // Return position size + P&L to balance
+      this.balance += position.positionSize + realizedPnL;
 
-    // Add to history (at beginning)
-    this.tradeHistory.unshift(closedTrade);
+      // Remove from open positions
+      this.openPositions.splice(positionIndex, 1);
 
-    // Keep only last 100 trades in history
-    if (this.tradeHistory.length > 100) {
-      this.tradeHistory = this.tradeHistory.slice(0, 100);
+      // Add to history (at beginning)
+      this.tradeHistory.unshift(closedTrade);
+
+      // Keep only last 100 trades in history
+      if (this.tradeHistory.length > 100) {
+        this.tradeHistory = this.tradeHistory.slice(0, 100);
+      }
+
+      // Save to storage — if this fails, rollback
+      await this.saveAll();
+
+      // Sync to Supabase (best-effort, don't rollback for cloud sync failure)
+      try {
+        await this.syncPositionToSupabase(closedTrade, 'UPDATE');
+      } catch (syncError) {
+        console.warn('[PaperTrade] Supabase sync failed (local state is correct):', syncError.message);
+      }
+    } catch (error) {
+      // Rollback all in-memory mutations
+      console.error('[PaperTrade] Position close failed — rolling back:', error.message);
+      this.balance = previousBalance;
+      this.openPositions.splice(positionIndex, 0, position);
+      this.tradeHistory = previousHistory;
+      throw error;
     }
-
-    // Save to storage
-    await this.saveAll();
-
-    // Sync to Supabase
-    await this.syncPositionToSupabase(closedTrade, 'UPDATE');
 
     console.log('[PaperTrade] Position closed:', {
       id: closedTrade.id,
@@ -1413,7 +1484,7 @@ class PaperTradeService {
 
       position.currentPrice = currentPrice;
       position.unrealizedPnL = priceDiff * position.quantity;
-      position.unrealizedPnLPercent = (priceDiff / position.entryPrice) * 100;
+      position.unrealizedPnLPercent = (priceDiff / position.entryPrice) * (position.leverage || 1) * 100;
       position.updatedAt = new Date().toISOString();
 
       updatedPositions.push(position);

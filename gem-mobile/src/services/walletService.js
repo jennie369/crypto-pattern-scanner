@@ -385,13 +385,22 @@ export const walletService = {
         return { success: false, error: 'Không đủ gems' };
       }
 
-      // Deduct from profiles.gems
-      const { error: updateError } = await supabase
+      // C2 FIX: Use optimistic locking to prevent double-spend race condition.
+      // The .eq('gems', currentBalance) ensures the update only succeeds if
+      // no other transaction modified the balance between our read and write.
+      const { data: updateResult, error: updateError } = await supabase
         .from('profiles')
         .update({ gems: currentBalance - amount })
-        .eq('id', userId);
+        .eq('id', userId)
+        .eq('gems', currentBalance) // Optimistic lock: only if balance unchanged
+        .select('gems')
+        .single();
 
-      if (updateError) throw updateError;
+      if (updateError || !updateResult) {
+        // Balance changed between read and write (concurrent transaction)
+        console.warn('[Wallet] Optimistic lock failed - concurrent spend detected');
+        return { success: false, error: 'Giao dịch bị xung đột, vui lòng thử lại' };
+      }
 
       // Also try to update user_wallets for backwards compatibility
       await supabase
@@ -462,7 +471,7 @@ export const walletService = {
         wallet = newWallet;
       }
 
-      // Update balance
+      // C2 FIX: Use optimistic locking for receive too
       const { data: updatedWallet, error: updateError } = await supabase
         .from('user_wallets')
         .update({
@@ -471,10 +480,35 @@ export const walletService = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', wallet.id)
+        .eq('gem_balance', wallet.gem_balance) // Optimistic lock
         .select()
         .single();
 
-      if (updateError) throw updateError;
+      if (updateError || !updatedWallet) {
+        // Concurrent modification - retry by re-reading wallet
+        console.warn('[Wallet] receiveGems optimistic lock failed, retrying...');
+        const { data: freshWallet } = await supabase
+          .from('user_wallets')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        if (freshWallet) {
+          const { data: retryResult, error: retryError } = await supabase
+            .from('user_wallets')
+            .update({
+              gem_balance: freshWallet.gem_balance + amount,
+              total_earned: freshWallet.total_earned + amount,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', freshWallet.id)
+            .select()
+            .single();
+          if (retryError) throw retryError;
+          // Fall through to record transaction with retryResult
+        } else {
+          throw new Error('Could not re-read wallet for retry');
+        }
+      }
 
       // Record transaction
       await supabase.from('wallet_transactions').insert({

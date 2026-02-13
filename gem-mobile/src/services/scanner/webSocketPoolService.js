@@ -446,20 +446,27 @@ class WebSocketPoolService {
 
     if (Object.keys(updates).length === 0) return;
 
-    // Notify subscribers
+    // C4 FIX: Snapshot callbacks before iterating to prevent race conditions
+    // If a callback triggers unsubscribe, the live Set would be modified during iteration
     Object.entries(updates).forEach(([symbol, data]) => {
-      const callbacks = this.subscriptions.get(symbol);
-      if (callbacks) {
-        callbacks.forEach(cb => {
+      const callbackSet = this.subscriptions.get(symbol);
+      if (callbackSet && callbackSet.size > 0) {
+        // Snapshot: copy callbacks to array before iterating
+        const callbacksSnapshot = [...callbackSet];
+        callbacksSnapshot.forEach(cb => {
           try {
-            cb(data);
-            this.metrics.updatesSent++;
-          } catch (err) {
-            if (this.DEBUG) {
-              console.error('[WSPool] Callback error:', err);
+            // Validate callback still exists in subscriptions before invoking
+            if (this.subscriptions.has(symbol) && this.subscriptions.get(symbol).has(cb)) {
+              cb(data);
+              this.metrics.updatesSent++;
             }
+          } catch (err) {
+            console.warn('[WSPool] Callback error for', symbol, ':', err?.message || err);
           }
         });
+      } else {
+        // C4 FIX: Clear price buffer for unsubscribed symbols
+        delete this.priceBuffer[symbol];
       }
     });
   }

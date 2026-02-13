@@ -100,8 +100,7 @@ const ZONE_EXPIRY_DAYS = 30;
 
 class ZoneManager {
   constructor() {
-    this.activeZonesCache = new Map();
-    this.lastCacheUpdate = null;
+    this.activeZonesCache = new Map(); // key -> { zones, timestamp }
     this.cacheExpiryMs = 60000; // 1 minute cache
   }
 
@@ -442,11 +441,11 @@ class ZoneManager {
    */
   async getActiveZones(symbol, timeframe, userId) {
     try {
-      // Check cache first
+      // Check cache first (C8 FIX: per-entry timestamps instead of global)
       const cacheKey = `${symbol}_${timeframe}_${userId}`;
       const cached = this.activeZonesCache.get(cacheKey);
-      if (cached && (Date.now() - this.lastCacheUpdate) < this.cacheExpiryMs) {
-        return cached;
+      if (cached && (Date.now() - cached.timestamp) < this.cacheExpiryMs) {
+        return cached.zones;
       }
 
       const { data, error } = await supabase
@@ -861,8 +860,8 @@ class ZoneManager {
    */
   _updateCache(symbol, timeframe, userId, zones) {
     const cacheKey = `${symbol}_${timeframe}_${userId}`;
-    this.activeZonesCache.set(cacheKey, zones);
-    this.lastCacheUpdate = Date.now();
+    // C8 FIX: Store timestamp per entry instead of globally
+    this.activeZonesCache.set(cacheKey, { zones, timestamp: Date.now() });
   }
 
   /**
@@ -879,7 +878,6 @@ class ZoneManager {
    */
   clearAllCaches() {
     this.activeZonesCache.clear();
-    this.lastCacheUpdate = null;
   }
 }
 

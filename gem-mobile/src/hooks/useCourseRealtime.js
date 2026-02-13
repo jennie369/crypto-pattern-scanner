@@ -8,10 +8,22 @@ import { supabase } from '../services/supabase';
 
 /**
  * Generic realtime subscription hook
+ * C7 FIX: Use refs for callbacks to avoid stale closures without causing
+ * subscription churn when callbacks change identity on re-renders
  */
 export function useRealtimeSubscription(table, options = {}) {
   const { filter, event = '*', onInsert, onUpdate, onDelete, onChange, enabled = true } = options;
   const channelRef = useRef(null);
+
+  // C7 FIX: Store callbacks in refs to always invoke latest version
+  const onInsertRef = useRef(onInsert);
+  const onUpdateRef = useRef(onUpdate);
+  const onDeleteRef = useRef(onDelete);
+  const onChangeRef = useRef(onChange);
+  useEffect(() => { onInsertRef.current = onInsert; }, [onInsert]);
+  useEffect(() => { onUpdateRef.current = onUpdate; }, [onUpdate]);
+  useEffect(() => { onDeleteRef.current = onDelete; }, [onDelete]);
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -34,18 +46,18 @@ export function useRealtimeSubscription(table, options = {}) {
       .on('postgres_changes', subscriptionConfig, (payload) => {
         console.log(`[Realtime] ${table} ${payload.eventType}:`, payload);
 
-        // Call specific handlers
-        if (payload.eventType === 'INSERT' && onInsert) {
-          onInsert(payload.new, payload);
-        } else if (payload.eventType === 'UPDATE' && onUpdate) {
-          onUpdate(payload.new, payload.old, payload);
-        } else if (payload.eventType === 'DELETE' && onDelete) {
-          onDelete(payload.old, payload);
+        // Call specific handlers via refs (always latest callback)
+        if (payload.eventType === 'INSERT' && onInsertRef.current) {
+          onInsertRef.current(payload.new, payload);
+        } else if (payload.eventType === 'UPDATE' && onUpdateRef.current) {
+          onUpdateRef.current(payload.new, payload.old, payload);
+        } else if (payload.eventType === 'DELETE' && onDeleteRef.current) {
+          onDeleteRef.current(payload.old, payload);
         }
 
-        // Call generic onChange handler
-        if (onChange) {
-          onChange(payload);
+        // Call generic onChange handler via ref
+        if (onChangeRef.current) {
+          onChangeRef.current(payload);
         }
       })
       .subscribe((status) => {
@@ -126,6 +138,9 @@ export function useLessonsRealtime(moduleId, callbacks = {}) {
  */
 export function useCourseLessonsRealtime(courseId, callback, enabled = true) {
   const channelRef = useRef(null);
+  // C7 FIX: Use ref for callback to avoid stale closure
+  const callbackRef = useRef(callback);
+  useEffect(() => { callbackRef.current = callback; }, [callback]);
 
   useEffect(() => {
     if (!enabled || !courseId) return;
@@ -152,7 +167,7 @@ export function useCourseLessonsRealtime(courseId, callback, enabled = true) {
 
           if (module?.course_id === courseId) {
             console.log(`[Realtime] Lesson change for course ${courseId}:`, payload);
-            if (callback) callback(payload);
+            if (callbackRef.current) callbackRef.current(payload);
           }
         }
       })

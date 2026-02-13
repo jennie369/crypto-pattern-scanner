@@ -228,7 +228,8 @@ const CourseCheckout = () => {
 
       // URL change detection
       let lastUrl = window.location.href;
-      setInterval(() => {
+      const urlCheckInterval = setInterval(() => {
+        if (successDetected) { clearInterval(urlCheckInterval); return; }
         const currentUrl = window.location.href;
         if (currentUrl !== lastUrl) {
           lastUrl = currentUrl;

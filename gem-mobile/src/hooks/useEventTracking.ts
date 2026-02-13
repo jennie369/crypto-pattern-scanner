@@ -69,6 +69,12 @@ const getOrCreateSession = (): string => {
   return currentSessionId;
 };
 
+// C3 FIX: Clear session on logout to prevent state bleed across user sessions
+export const clearEventSession = (): void => {
+  currentSessionId = null;
+  sessionStartTime = 0;
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // DEVICE INFO
 // ═══════════════════════════════════════════════════════════════════════════

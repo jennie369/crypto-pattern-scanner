@@ -37,6 +37,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/token
 import { SHOP_SECTIONS, SHOP_CATEGORIES } from '../../utils/shopConfig';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import useScrollToTop from '../../hooks/useScrollToTop';
+import { StateView } from '../../components/Common';
 
 // Shop Enhancement Components
 import PromoBar from '../../components/shop/PromoBar';
@@ -107,6 +108,7 @@ const ShopScreen = ({ navigation }) => {
   const [exploreLoading, setExploreLoading] = useState(false);
   const [exploreLoadingMore, setExploreLoadingMore] = useState(false);
   const [exploreHasMore, setExploreHasMore] = useState(true);
+  const [error, setError] = useState(null); // C9 FIX: Error state for load failures
   const exploreOffsetRef = useRef(0);
   const EXPLORE_LIMIT = 12;
 
@@ -291,6 +293,7 @@ const ShopScreen = ({ navigation }) => {
 
   const loadInitialData = async () => {
     setLoading(true);
+    setError(null); // C9 FIX: Clear error on retry
     try {
       // Load tất cả sản phẩm và section banners in parallel
       const [productsData, sectionBannersResult] = await Promise.all([
@@ -338,6 +341,7 @@ const ShopScreen = ({ navigation }) => {
       shopCache.lastFetch = Date.now();
     } catch (error) {
       console.error('Error loading shop data:', error);
+      setError(error?.message || 'Không thể tải sản phẩm');
     } finally {
       setLoading(false);
     }
@@ -599,6 +603,23 @@ const ShopScreen = ({ navigation }) => {
       >
         <ActivityIndicator size="large" color={COLORS.purple} />
         <Text style={styles.loadingText}>Đang tải sản phẩm...</Text>
+      </LinearGradient>
+    );
+  }
+
+  // C9 FIX: Show error state when product loading fails
+  if (error && allProducts.length === 0) {
+    return (
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.loadingContainer}
+      >
+        <StateView
+          type="error"
+          message={error}
+          onRetry={loadInitialData}
+        />
       </LinearGradient>
     );
   }

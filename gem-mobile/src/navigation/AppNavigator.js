@@ -152,10 +152,10 @@ export default function AppNavigator() {
   const [welcomeChecked, setWelcomeChecked] = useState(false);
   const appStateRef = useRef(AppState.currentState);
 
-  // CRITICAL: Activate global recovery system
-  // - Resets stuck loading states every 30s
-  // - Clears stale caches on background resume
-  // - Reconnects WebSocket/Supabase on foreground
+  // C14: Unified resume system (AppResumeManager)
+  // - Single AppState listener for all resume operations
+  // - Deterministic sequence: session → loading → cache → WS → health
+  // - Stuck-state detection (15s) + health checks (60s)
   useGlobalAppResume();
 
   // Check welcome completion on mount

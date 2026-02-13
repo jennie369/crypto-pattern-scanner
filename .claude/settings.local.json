@@ -156,10 +156,35 @@
       "mcp__supabase__list_tables",
       "mcp__supabase__get_project_url",
       "mcp__supabase__get_publishable_keys",
-      "mcp__supabase__search_docs"
+      "mcp__supabase__search_docs",
+      "Bash(ANON_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnZmtiY256cW96emtvaHdiZ2JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNzc1MzYsImV4cCI6MjA3Nzc1MzUzNn0.1De0-m3GhFHUrKl-ViqX_r6bydVFoWDaW8DsxhhbjEc\")",
+      "Bash(gh api:*)",
+      "Bash(vercel ls:*)",
+      "Bash(vercel:*)",
+      "mcp__supabase__get_edge_function",
+      "mcp__supabase__deploy_edge_function",
+      "mcp__supabase__list_edge_functions",
+      "mcp__supabase__get_logs",
+      "Bash(del \"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\\\\fix-unicode.ps1\")",
+      "WebFetch(domain:docs.expo.dev)",
+      "WebFetch(domain:github.com)",
+      "Bash(wsl --list:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(nslookup:*)",
+      "Bash(dig:*)",
+      "Bash(host:*)",
+      "WebFetch(domain:dns.google)",
+      "Bash(export PATH=\"/mnt/c/Program Files/nodejs:$PATH\")",
+      "Bash(pip3:*)",
+      "Bash(uv:*)",
+      "Bash(sh:*)",
+      "WebFetch(domain:www.npmjs.com)"
     ],
     "deny": [],
     "ask": []
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "true"
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [

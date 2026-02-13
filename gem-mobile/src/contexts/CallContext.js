@@ -65,6 +65,13 @@ export function CallProvider({ children }) {
   const navigatedCallIdsRef = useRef(new Set());
   // Track last navigation timestamp to debounce
   const lastNavigationTimeRef = useRef(0);
+  // Ref for incomingCall to avoid stale closures in async callbacks (C1 fix)
+  const incomingCallRef = useRef(null);
+
+  // Keep incomingCallRef in sync with state (C1 fix - prevents stale closures)
+  useEffect(() => {
+    incomingCallRef.current = incomingCall;
+  }, [incomingCall]);
 
   // ========== RINGTONE MANAGEMENT ==========
 
@@ -247,9 +254,10 @@ export function CallProvider({ children }) {
       }
     }
 
-    // GUARD 2: Don't show if already handling a DIFFERENT call
-    if (incomingCall && incomingCall.id !== callId) {
-      console.log('[CallProvider] Already handling different call', incomingCall.id, '- SKIPPING');
+    // GUARD 2: Don't show if already handling a DIFFERENT call (use ref to avoid stale closure)
+    const currentIncoming = incomingCallRef.current;
+    if (currentIncoming && currentIncoming.id !== callId) {
+      console.log('[CallProvider] Already handling different call', currentIncoming.id, '- SKIPPING');
       return;
     }
 
@@ -298,7 +306,7 @@ export function CallProvider({ children }) {
         navigateToCallScreen(call, caller);
       }, 500);
     }
-  }, [incomingCall, playRingtone, navigateToCallScreen, callKeepReady]);
+  }, [playRingtone, navigateToCallScreen, callKeepReady]);
 
   const handleCallEnded = useCallback((call) => {
     console.log('[CallProvider] Call ended:', call?.id);
@@ -309,13 +317,13 @@ export function CallProvider({ children }) {
       console.log('[CallProvider] Cleared navigation tracking for call:', call.id);
     }
 
-    // If this is the incoming call we're showing, hide overlay
-    if (incomingCall?.id === call?.id) {
+    // If this is the incoming call we're showing, hide overlay (use ref to avoid stale closure)
+    if (incomingCallRef.current?.id === call?.id) {
       stopRingtone();
       setShowOverlay(false);
       setIncomingCall(null);
     }
-  }, [incomingCall, stopRingtone]);
+  }, [stopRingtone]);
 
   const handleAccept = useCallback(async () => {
     if (!incomingCall) return;
@@ -394,7 +402,7 @@ export function CallProvider({ children }) {
           // Mark as navigated to prevent IncomingCallScreen from showing
           navigatedCallIdsRef.current.add(callUUID);
 
-          let callToUse = incomingCall;
+          let callToUse = incomingCallRef.current; // Use ref to avoid stale closure
           let callerToUse = null;
 
           // If we don't have call info yet, fetch it
@@ -449,8 +457,8 @@ export function CallProvider({ children }) {
           // Stop ringtone
           await stopRingtone();
 
-          // If this matches our incoming call, decline it
-          if (incomingCall && incomingCall.id === callUUID) {
+          // If this matches our incoming call, decline it (use ref to avoid stale closure)
+          if (incomingCallRef.current && incomingCallRef.current.id === callUUID) {
             await callService.declineCall(callUUID);
             setShowOverlay(false);
             setIncomingCall(null);
@@ -484,7 +492,7 @@ export function CallProvider({ children }) {
       console.log('[CallProvider] Cleaning up CallKeep');
       callKeepService.cleanup();
     };
-  }, [isAuthenticated, user?.id, incomingCall, stopRingtone, navigateToCallScreen]);
+  }, [isAuthenticated, user?.id, stopRingtone, navigateToCallScreen]);
 
   // ========== SUBSCRIBE TO INCOMING CALLS ==========
 
@@ -547,11 +555,11 @@ export function CallProvider({ children }) {
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
-      // When app goes to background during incoming call
+      // When app goes to background during incoming call (use ref to avoid stale closure)
       if (
         appStateRef.current === 'active' &&
         nextAppState.match(/inactive|background/) &&
-        incomingCall
+        incomingCallRef.current
       ) {
         // Stop ringtone (keep vibration for background awareness)
         if (ringtoneRef.current) {
@@ -575,8 +583,8 @@ export function CallProvider({ children }) {
       ) {
         console.log('[CallProvider] App coming to foreground');
 
-        // Resume ringtone if incoming call
-        if (incomingCall && ringtoneRef.current) {
+        // Resume ringtone if incoming call (use ref to avoid stale closure)
+        if (incomingCallRef.current && ringtoneRef.current) {
           await ringtoneRef.current.playAsync();
         }
 
@@ -623,7 +631,7 @@ export function CallProvider({ children }) {
     return () => {
       subscription?.remove();
     };
-  }, [incomingCall, user?.id, handleIncomingCall]);
+  }, [user?.id, handleIncomingCall]);
 
   // ========== MONITOR INCOMING CALL STATUS ==========
   // Check if call still exists in database (handles cleanup/delete)

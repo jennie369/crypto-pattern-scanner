@@ -39,6 +39,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/token
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import shopifyService from '../../services/shopifyService';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
+import { StateView } from '../../components/Common';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -81,6 +82,7 @@ const CourseDetailScreen = ({ navigation, route }) => {
   const [enrolling, setEnrolling] = useState(false);
   const [expandedModules, setExpandedModules] = useState({});
   const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [loadError, setLoadError] = useState(null); // C9 FIX: Error state
 
   // Animation values
   const thumbnailScaleAnim = useRef(new Animated.Value(1.1)).current;
@@ -105,6 +107,8 @@ const CourseDetailScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     const loadCourseData = async () => {
+      setLoadError(null); // C9 FIX: Clear error on load
+      try {
       if (course) {
         // Check if course has modules loaded - if not, fetch them
         if (!course.modules || course.modules.length === 0) {
@@ -162,6 +166,11 @@ const CourseDetailScreen = ({ navigation, route }) => {
         // Course not found, might need to refresh
         console.log('[CourseDetail] Course not found, refreshing...');
         await refresh();
+        setLoading(false);
+      }
+      } catch (err) {
+        console.error('[CourseDetail] Load error:', err);
+        setLoadError(err?.message || 'Không thể tải khóa học');
         setLoading(false);
       }
     };
@@ -566,6 +575,27 @@ const CourseDetailScreen = ({ navigation, route }) => {
       >
         <ActivityIndicator size="large" color={COLORS.gold} />
         <Text style={styles.loadingText}>Đang tải khóa học...</Text>
+      </LinearGradient>
+    );
+  }
+
+  // C9 FIX: Show error state when course loading fails
+  if (loadError) {
+    return (
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.loadingContainer}
+      >
+        <StateView
+          type="error"
+          message={loadError}
+          onRetry={() => {
+            setLoading(true);
+            setLoadError(null);
+            refresh();
+          }}
+        />
       </LinearGradient>
     );
   }

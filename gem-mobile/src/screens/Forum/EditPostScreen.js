@@ -36,16 +36,17 @@ import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../cons
 import ProductPicker from '../../components/ProductPicker';
 import MentionInput from '../../components/MentionInput';
 
+// C13 FIX: Use design tokens instead of hardcoded hex colors
 // Main topic selections - CHỈ 3 TOPIC CHÍNH cho user thường
 const MAIN_TOPICS = [
-  { id: 'giao-dich', name: 'GIAO DỊCH', color: '#00F0FF', icon: '🎯' },
-  { id: 'tinh-than', name: 'TINH THẦN', color: '#6A5BFF', icon: '☯️' },
-  { id: 'thinh-vuong', name: 'THỊNH VƯỢNG', color: '#FFBD59', icon: '🌟' },
+  { id: 'giao-dich', name: 'GIAO DỊCH', color: COLORS.cyan, icon: '🎯' },
+  { id: 'tinh-than', name: 'TINH THẦN', color: COLORS.purple, icon: '☯️' },
+  { id: 'thinh-vuong', name: 'THỊNH VƯỢNG', color: COLORS.gold, icon: '🌟' },
 ];
 
 // Admin-only topics
 const ADMIN_TOPICS = [
-  { id: 'affiliate', name: 'AFFILIATE', color: '#FF6B6B', icon: '💰', feedType: 'affiliate' },
+  { id: 'affiliate', name: 'AFFILIATE', color: COLORS.error, icon: '💰', feedType: 'affiliate' },
   { id: 'tin-tuc', name: 'TIN TỨC', color: '#4ECDC4', icon: '📰', feedType: 'news' },
   { id: 'thong-bao', name: 'THÔNG BÁO', color: '#FFE66D', icon: '📢', feedType: 'announcement' },
   { id: 'academy', name: 'ACADEMY', color: '#A855F7', icon: '🎓', feedType: 'academy' },

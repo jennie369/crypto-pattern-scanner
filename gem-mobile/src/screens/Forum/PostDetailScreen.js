@@ -988,7 +988,7 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   actionCountActive: {
-    color: '#FF6B6B',
+    color: COLORS.error,
   },
   commentsSection: {
     paddingHorizontal: SPACING.lg,

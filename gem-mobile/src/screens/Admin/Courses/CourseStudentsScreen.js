@@ -269,14 +269,15 @@ const CourseStudentsScreen = () => {
     return labels[type] || type;
   };
 
+  // C13 FIX: Use design tokens for access type colors
   const getAccessTypeColor = (type) => {
     const colors = {
-      purchase: '#10B981',
+      purchase: COLORS.success,
       admin_grant: '#8B5CF6',
-      gift: '#F59E0B',
-      trial: '#6B7280',
+      gift: COLORS.warning,
+      trial: COLORS.lightTextSecondary,
     };
-    return colors[type] || '#6B7280';
+    return colors[type] || COLORS.lightTextSecondary;
   };
 
   const isExpired = (expiresAt) => {

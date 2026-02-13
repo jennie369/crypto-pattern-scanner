@@ -25,7 +25,7 @@ import { AppState, DeviceEventEmitter } from 'react-native';
 import { patternCache } from '../services/scanner/patternCacheService';
 import { binanceService } from '../services/binanceService';
 import { wsPool } from '../services/scanner/webSocketPoolService';
-import { resetAllLoadingStates, clearAllStaleCaches, FORCE_REFRESH_EVENT } from '../utils/loadingStateManager';
+import { resetAllLoadingStates, resetStuckLoadingStates, clearAllStaleCaches, FORCE_REFRESH_EVENT } from '../utils/loadingStateManager';
 import { supabase } from '../services/supabase';
 
 // Global stale timestamp tracker
@@ -285,70 +285,30 @@ export const useAppResume = (options = {}) => {
 
 /**
  * Global app resume handler - use in App.js or main navigator
- * Automatically clears caches and reconnects when app resumes after being idle
  *
- * CRITICAL FIX: Prevents app from getting stuck in loading states
- * - Resets all loading states immediately
- * - Clears stale caches
- * - Reconnects WebSocket and Supabase Realtime
- * - Emits force refresh event for screens to refetch data
- * - NEW: Periodic idle timer resets loading states even when app stays active
+ * C14 FIX: Now delegates to unified AppResumeManager instead of running
+ * its own AppState listener + stuck-state timer + cache/WS recovery.
+ * This eliminates race conditions between 4 independent resume systems.
+ *
+ * The AppResumeManager handles:
+ * - Single AppState listener (replaces 3 separate ones)
+ * - Deterministic sequence: session → loading → cache → WS → health
+ * - Stuck-state detection (15s interval, 15s threshold)
+ * - Health checks (60s interval, 3-strike recovery)
  */
 export const useGlobalAppResume = () => {
-  const idleTimerRef = useRef(null);
-  const appStateRef = useRef(AppState.currentState);
-
-  // CRITICAL: Periodic loading state reset every 30 seconds while app is active
-  // This GUARANTEES loading states never stay stuck for more than 30s
-  // No user activity tracking needed - just unconditionally reset
   useEffect(() => {
-    const PERIODIC_RESET_INTERVAL = 30 * 1000; // 30 seconds
+    // Import dynamically to avoid circular deps
+    const { appResumeManager } = require('../services/AppResumeManager');
+    appResumeManager.start();
 
-    // Start periodic reset timer
-    idleTimerRef.current = setInterval(() => {
-      // Only reset if app is active (not in background)
-      if (appStateRef.current === 'active') {
-        console.log('[GlobalAppResume] Periodic loading state reset (30s)');
-        resetAllLoadingStates();
-      }
-    }, PERIODIC_RESET_INTERVAL);
-
-    console.log('[GlobalAppResume] Periodic reset timer started (30s interval)');
+    console.log('[GlobalAppResume] Delegating to unified AppResumeManager');
 
     return () => {
-      if (idleTimerRef.current) {
-        clearInterval(idleTimerRef.current);
-        idleTimerRef.current = null;
-      }
+      // Don't stop on unmount — manager is a singleton that lives for the app lifetime.
+      // It gets stopped explicitly on logout via performFullCleanup.
     };
   }, []);
-
-  // Track app state for the periodic timer
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      appStateRef.current = nextAppState;
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  return useAppResume({
-    staleThreshold: 60 * 1000, // 1 minute - be aggressive to prevent stuck states
-    clearCacheOnResume: true,
-    reconnectWS: true,
-    onResume: (timeInBg) => {
-      console.log(`[GlobalAppResume] App resumed after ${Math.round(timeInBg / 1000)}s`);
-
-      // Always reset loading states to prevent stuck UI
-      resetAllLoadingStates();
-
-      // For longer idle times, emit force refresh event
-      if (timeInBg > 60 * 1000) { // > 1 minute
-        console.log('[GlobalAppResume] Emitting force refresh event...');
-        DeviceEventEmitter.emit(FORCE_REFRESH_EVENT);
-      }
-    },
-  });
 };
 
 export default useAppResume;

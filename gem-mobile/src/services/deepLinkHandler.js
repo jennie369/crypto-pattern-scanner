@@ -78,16 +78,17 @@ const AFFILIATE_URL_PATTERNS = {
 
 // ========== DEEP LINK ROUTES ==========
 // Map deep link paths to navigation targets (for push notifications)
+// A4: Fixed deep link routes — stack = Tab name, screen = Stack.Screen name
 const DEEP_LINK_ROUTES = {
-  '/gemmaster': { stack: 'Home', screen: 'GemMaster' },
-  '/scanner': { stack: 'Home', screen: 'Scanner' },
+  '/gemmaster': { stack: 'GemMaster', screen: 'GemMasterMain' },
+  '/scanner': { stack: 'Trading', screen: 'ScannerMain' },
   '/visionboard': { stack: 'Account', screen: 'VisionBoard' },
-  '/shop': { stack: 'Shop', screen: 'ShopHome' },
-  '/courses': { stack: 'Courses', screen: 'CourseList' },
-  '/forum': { stack: 'Home', screen: 'Forum' },
-  '/tarot': { stack: 'Home', screen: 'GemMaster', params: { action: 'tarot_reading' } },
-  '/iching': { stack: 'Home', screen: 'GemMaster', params: { action: 'iching_reading' } },
-  '/frequency': { stack: 'Home', screen: 'GemMaster', params: { action: 'frequency_reading' } },
+  '/shop': { stack: 'Shop', screen: 'ShopMain' },
+  '/courses': { stack: 'Account', screen: 'CourseList' },
+  '/forum': { stack: 'Home', screen: 'ForumFeed' },
+  '/tarot': { stack: 'GemMaster', screen: 'GemMasterMain', params: { action: 'tarot_reading' } },
+  '/iching': { stack: 'GemMaster', screen: 'GemMasterMain', params: { action: 'iching_reading' } },
+  '/frequency': { stack: 'GemMaster', screen: 'GemMasterMain', params: { action: 'frequency_reading' } },
   '/wallet': { stack: 'Account', screen: 'Wallet' },
   '/portfolio': { stack: 'Account', screen: 'Portfolio' },
   '/earnings': { stack: 'Account', screen: 'Earnings' },

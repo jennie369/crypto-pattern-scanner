@@ -18,11 +18,34 @@ import GemMasterStack from './GemMasterStack';
 import NotificationsScreen from '../screens/tabs/NotificationsScreen';
 import AccountStack from './AccountStack';
 
+// C10 FIX: ErrorBoundary prevents tab crashes from taking down the whole app
+import ErrorBoundary from '../components/ErrorBoundary';
+
 // Custom Tab Bar
 import GlassBottomTab from '../components/GlassBottomTab';
 
 // Preload services for instant tab switching
 import { preloadAllShopData } from '../services/shopifyService';
+
+// C10 FIX: Wrap each tab stack in ErrorBoundary for crash isolation
+const SafeHomeStack = (props) => (
+  <ErrorBoundary navigation={props.navigation}><HomeStack {...props} /></ErrorBoundary>
+);
+const SafeShopStack = (props) => (
+  <ErrorBoundary navigation={props.navigation}><ShopStack {...props} /></ErrorBoundary>
+);
+const SafeScannerStack = (props) => (
+  <ErrorBoundary navigation={props.navigation}><ScannerStack {...props} /></ErrorBoundary>
+);
+const SafeGemMasterStack = (props) => (
+  <ErrorBoundary navigation={props.navigation}><GemMasterStack {...props} /></ErrorBoundary>
+);
+const SafeNotificationsScreen = (props) => (
+  <ErrorBoundary navigation={props.navigation}><NotificationsScreen {...props} /></ErrorBoundary>
+);
+const SafeAccountStack = (props) => (
+  <ErrorBoundary navigation={props.navigation}><AccountStack {...props} /></ErrorBoundary>
+);
 
 const Tab = createBottomTabNavigator();
 
@@ -44,23 +67,23 @@ export default function TabNavigator() {
       }}
       backBehavior="history"
     >
-      {/* TAB 1: HOME (Forum) */}
-      <Tab.Screen name="Home" component={HomeStack} />
+      {/* TAB 1: HOME (Forum) — C10: wrapped in ErrorBoundary */}
+      <Tab.Screen name="Home" component={SafeHomeStack} />
 
       {/* TAB 2: SHOP */}
-      <Tab.Screen name="Shop" component={ShopStack} />
+      <Tab.Screen name="Shop" component={SafeShopStack} />
 
       {/* TAB 3: GIAO DỊCH */}
-      <Tab.Screen name="Trading" component={ScannerStack} />
+      <Tab.Screen name="Trading" component={SafeScannerStack} />
 
       {/* TAB 4: Gemral */}
-      <Tab.Screen name="GemMaster" component={GemMasterStack} />
+      <Tab.Screen name="GemMaster" component={SafeGemMasterStack} />
 
       {/* TAB 5: THÔNG BÁO */}
-      <Tab.Screen name="Notifications" component={NotificationsScreen} />
+      <Tab.Screen name="Notifications" component={SafeNotificationsScreen} />
 
       {/* TAB 6: TÀI SẢN */}
-      <Tab.Screen name="Account" component={AccountStack} />
+      <Tab.Screen name="Account" component={SafeAccountStack} />
     </Tab.Navigator>
   );
 }

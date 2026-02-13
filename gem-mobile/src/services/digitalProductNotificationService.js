@@ -24,15 +24,10 @@ class DigitalProductNotificationService {
 
   /**
    * Setup notification handler
+   * NOTE: setNotificationHandler is configured ONLY in InAppNotificationContext.js
    */
   _setupHandler() {
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-      }),
-    });
+    // No-op: handler is centralized in InAppNotificationContext.js
   }
 
   // ═══════════════════════════════════════════════════════════

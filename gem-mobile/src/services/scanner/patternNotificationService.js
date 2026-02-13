@@ -32,16 +32,8 @@ try {
   console.log('[PatternNotif] expo-notifications not available');
 }
 
-// Configure notification handler
-if (Notifications) {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-  });
-}
+// NOTE: setNotificationHandler is configured ONLY in InAppNotificationContext.js
+// Do NOT add one here — multiple handlers cause the last-loaded to win.
 
 class PatternNotificationService {
   constructor() {

@@ -274,19 +274,19 @@ const StudentProgressScreen = () => {
                 </View>
 
                 <View style={styles.statItem}>
-                  <Clock size={20} color="#6A5BFF" />
+                  <Clock size={20} color={COLORS.purple} />
                   <Text style={styles.statValue}>{formatDuration(totalWatchTime)}</Text>
                   <Text style={styles.statLabel}>Thoi gian hoc</Text>
                 </View>
 
                 <View style={styles.statItem}>
-                  <Award size={20} color="#10B981" />
+                  <Award size={20} color={COLORS.success} />
                   <Text style={styles.statValue}>{quizAttempts.filter(q => q.passed).length}</Text>
                   <Text style={styles.statLabel}>Quiz dat</Text>
                 </View>
 
                 <View style={styles.statItem}>
-                  <TrendingUp size={20} color="#F59E0B" />
+                  <TrendingUp size={20} color={COLORS.warning} />
                   <Text style={styles.statValue}>
                     {quizAttempts.length > 0
                       ? `${Math.round(quizAttempts.reduce((sum, q) => sum + (q.score_percentage || 0), 0) / quizAttempts.length)}%`
@@ -319,7 +319,7 @@ const StudentProgressScreen = () => {
                           lesson.completed && styles.lessonStatusCompleted
                         ]}>
                           {lesson.completed ? (
-                            <CheckCircle size={18} color="#10B981" />
+                            <CheckCircle size={18} color={COLORS.success} />
                           ) : (
                             <Circle size={18} color={COLORS.textMuted} />
                           )}
@@ -366,7 +366,7 @@ const StudentProgressScreen = () => {
                 {quizAttempts.map((attempt) => (
                   <View key={attempt.id} style={styles.quizItem}>
                     <View style={styles.quizHeader}>
-                      <HelpCircle size={18} color="#6A5BFF" />
+                      <HelpCircle size={18} color={COLORS.purple} />
                       <Text style={styles.quizTitle}>{attempt.quizzes?.title || 'Quiz'}</Text>
                       <View style={[
                         styles.quizBadge,
@@ -394,7 +394,7 @@ const StudentProgressScreen = () => {
                           styles.quizProgressFill,
                           {
                             width: `${attempt.score_percentage}%`,
-                            backgroundColor: attempt.passed ? '#10B981' : '#EF4444',
+                            backgroundColor: attempt.passed ? COLORS.success : COLORS.error,
                           }
                         ]}
                       />
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   },
   completedAt: {
     fontSize: TYPOGRAPHY.fontSize.xs,
-    color: '#10B981',
+    color: COLORS.success,
   },
 
   // Quiz List
@@ -679,10 +679,10 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
   quizBadgeTextPassed: {
-    color: '#10B981',
+    color: COLORS.success,
   },
   quizBadgeTextFailed: {
-    color: '#EF4444',
+    color: COLORS.error,
   },
   quizDetails: {
     flexDirection: 'row',

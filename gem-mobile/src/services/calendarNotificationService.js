@@ -32,14 +32,8 @@ export const DEFAULT_TIMES = {
 
 // ==================== CONFIGURATION ====================
 
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// NOTE: setNotificationHandler is configured ONLY in InAppNotificationContext.js
+// Do NOT add one here — multiple handlers cause the last-loaded to win.
 
 // ==================== FUNCTIONS ====================
 

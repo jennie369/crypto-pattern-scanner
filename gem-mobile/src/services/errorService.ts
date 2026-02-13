@@ -58,6 +58,12 @@ const setCurrentUserId = (userId: string | null) => {
   currentUserId = userId;
 };
 
+// C3 FIX: Clear user ID on logout to prevent state bleed across sessions
+const clearUserId = () => {
+  currentUserId = null;
+  cachedAppVersion = null; // Also clear cached version in case of app update
+};
+
 const getAppVersion = async (): Promise<string> => {
   if (cachedAppVersion) return cachedAppVersion;
 
@@ -400,6 +406,7 @@ const trackedFetch = async (
 export const errorService = {
   // Configuration
   setCurrentUserId,
+  clearUserId,
 
   // Reporting
   reportError,

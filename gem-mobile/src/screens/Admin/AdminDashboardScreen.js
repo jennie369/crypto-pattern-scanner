@@ -426,7 +426,7 @@ const AdminDashboardScreen = ({ navigation }) => {
                   onPress={() => navigation.navigate('AdminInstructors')}
                   activeOpacity={0.7}
                 >
-                  <GraduationCap size={20} color="#10B981" />
+                  <GraduationCap size={20} color={COLORS.success} />
                   <Text style={styles.statValue}>{stats.totalInstructors}</Text>
                   <Text style={styles.statLabel}>Giảng viên</Text>
                   {stats.pendingInstructors > 0 && (
@@ -443,7 +443,7 @@ const AdminDashboardScreen = ({ navigation }) => {
                   onPress={() => navigation.navigate('AdminUsers', { filter: 'staff' })}
                   activeOpacity={0.7}
                 >
-                  <Users size={20} color="#3B82F6" />
+                  <Users size={20} color={COLORS.info} />
                   <Text style={styles.statValue}>{stats.totalStaff}</Text>
                   <Text style={styles.statLabel}>Staff</Text>
                   <ChevronRight size={14} color={COLORS.textMuted} style={styles.statChevron} />
@@ -928,7 +928,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   managerBadge: {
-    backgroundColor: '#3B82F6', // Blue for Manager
+    backgroundColor: COLORS.info, // Blue for Manager
   },
   adminBadgeText: {
     fontSize: 12,

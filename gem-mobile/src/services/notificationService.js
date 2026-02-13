@@ -14,14 +14,9 @@ const NOTIFICATION_SETTINGS_KEY = '@gem_notification_settings';
 const PUSH_TOKEN_KEY = '@gem_push_token';
 const VISION_BOARD_REMINDER_KEY = '@gem_vision_board_reminder';
 
-// Configure notification handling
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// NOTE: setNotificationHandler is configured ONLY in InAppNotificationContext.js
+// Do NOT add one here — multiple handlers cause the last-loaded to win,
+// overriding the incoming-call suppression logic.
 
 // Notification categories for filtering
 export const NOTIFICATION_CATEGORIES = {
@@ -154,7 +149,7 @@ class NotificationService {
         });
 
         // Incoming call channel (high priority for heads-up display)
-        await Notifications.setNotificationChannelAsync('incoming_calls', {
+        await Notifications.setNotificationChannelAsync('incoming_call', {
           name: 'Cuộc gọi đến',
           description: 'Thông báo cuộc gọi đến',
           importance: Notifications.AndroidImportance.MAX,
@@ -1343,7 +1338,7 @@ class NotificationService {
           priority: 'max',
           sticky: true, // Keep notification until answered/declined
           ...(Platform.OS === 'android' && {
-            channelId: 'incoming_calls',
+            channelId: 'incoming_call',
             categoryIdentifier: 'incoming_call',
           }),
         },

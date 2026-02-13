@@ -174,10 +174,13 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   // Also refresh when navigating to notifications tab
   useEffect(() => {
     const currentRoute = state.routes[state.index]?.name;
+    let timer;
     if (currentRoute === 'Notifications') {
       // Small delay to let notifications screen update first
-      setTimeout(fetchUnreadCount, 500);
+      // C12 FIX: Track timeout for cleanup on unmount/re-render
+      timer = setTimeout(fetchUnreadCount, 500);
     }
+    return () => { if (timer) clearTimeout(timer); };
   }, [state.index, fetchUnreadCount]);
 
   const items = [

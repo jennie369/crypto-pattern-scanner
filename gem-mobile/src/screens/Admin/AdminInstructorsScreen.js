@@ -40,12 +40,13 @@ import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
+// C13 FIX: Use design tokens for status colors
 const STATUS_CONFIG = {
-  pending: { label: 'Chờ duyệt', color: '#F59E0B', icon: Clock },
-  reviewing: { label: 'Đang xem', color: '#3B82F6', icon: Clock },
+  pending: { label: 'Chờ duyệt', color: COLORS.warning, icon: Clock },
+  reviewing: { label: 'Đang xem', color: COLORS.info, icon: Clock },
   interview_scheduled: { label: 'Lịch phỏng vấn', color: '#8B5CF6', icon: Calendar },
-  approved: { label: 'Đã duyệt', color: '#10B981', icon: CheckCircle },
-  rejected: { label: 'Từ chối', color: '#EF4444', icon: XCircle },
+  approved: { label: 'Đã duyệt', color: COLORS.success, icon: CheckCircle },
+  rejected: { label: 'Từ chối', color: COLORS.error, icon: XCircle },
 };
 
 const FILTER_TABS = [
@@ -206,7 +207,7 @@ const AdminInstructorsScreen = ({ navigation }) => {
         >
           <View style={styles.applicationInfo}>
             <View style={styles.avatarCircle}>
-              <GraduationCap size={24} color="#10B981" />
+              <GraduationCap size={24} color={COLORS.success} />
             </View>
             <View style={styles.applicationMeta}>
               <Text style={styles.applicationName}>{app.full_name}</Text>
@@ -369,7 +370,7 @@ const AdminInstructorsScreen = ({ navigation }) => {
           </TouchableOpacity>
           <View style={styles.headerContent}>
             <View style={styles.headerTitleRow}>
-              <GraduationCap size={24} color="#10B981" />
+              <GraduationCap size={24} color={COLORS.success} />
               <Text style={styles.headerTitle}>Giảng Viên</Text>
             </View>
             <Text style={styles.headerSubtitle}>

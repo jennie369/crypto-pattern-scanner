@@ -85,6 +85,15 @@ const saveLocalReadIds = async () => {
 
 // Local deleted IDs cache - persists deleted state even if DB delete fails
 let localDeletedIds = new Set();
+
+// A7: Clear all notification caches on logout to prevent data leaking between users
+export const clearNotificationsCache = () => {
+  notificationsCache.data = null;
+  notificationsCache.lastFetch = 0;
+  localReadIds = new Set();
+  localDeletedIds = new Set();
+  console.log('[NotificationsScreen] Notifications cache cleared');
+};
 const loadLocalDeletedIds = async () => {
   try {
     const stored = await AsyncStorage.getItem(DELETED_NOTIFICATIONS_KEY);

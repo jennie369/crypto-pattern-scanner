@@ -105,7 +105,7 @@ const AuthGate = ({
               style={[styles.button, styles.loginButton]}
               onPress={() => {
                 setShowModal(false);
-                navigation.navigate('Auth', { screen: 'Login' });
+                navigation.navigate('Login');
               }}
             >
               <LogIn size={20} color="#FFFFFF" />
@@ -117,7 +117,7 @@ const AuthGate = ({
               style={[styles.button, styles.signupButton]}
               onPress={() => {
                 setShowModal(false);
-                navigation.navigate('Auth', { screen: 'SignUp' });
+                navigation.navigate('Signup');
               }}
             >
               <UserPlus size={20} color={COLORS.gold} />

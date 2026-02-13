@@ -69,14 +69,8 @@ class LivestreamNotificationService {
       // Save token to user profile
       await this.saveToken(this.expoPushToken);
 
-      // Configure notification handling
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: true,
-          shouldSetBadge: true,
-        }),
-      });
+      // NOTE: setNotificationHandler is configured ONLY in InAppNotificationContext.js
+      // Do NOT add one here — multiple handlers cause the last-loaded to win.
 
       this.isInitialized = true;
       return true;

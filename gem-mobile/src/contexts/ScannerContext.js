@@ -13,10 +13,25 @@ export const ScannerProvider = ({ children }) => {
   const [patterns, setPatterns] = useState([]);
   const [lastScanTime, setLastScanTime] = useState(null);
   const [selectedCoins, setSelectedCoins] = useState(['BTCUSDT']);
-  const [selectedTimeframe, setSelectedTimeframe] = useState('4h');
+  const [selectedTimeframe, setSelectedTimeframeRaw] = useState('4h');
   const [multiTFResults, setMultiTFResults] = useState(null);
   // Zone state - persisted across tab navigation
   const [zones, setZones] = useState([]);
+
+  // B3 FIX: Clear stale patterns when timeframe changes to prevent cross-TF leakage
+  const setSelectedTimeframe = useCallback((newTf) => {
+    setSelectedTimeframeRaw(prev => {
+      if (prev !== newTf) {
+        // Timeframe changed — clear old results immediately
+        setScanResults([]);
+        setPatterns([]);
+        setLastScanTime(null);
+        setMultiTFResults(null);
+        setZones([]);
+      }
+      return newTf;
+    });
+  }, []);
 
   // Update scan results
   const updateScanResults = useCallback((results, allPatterns, time) => {

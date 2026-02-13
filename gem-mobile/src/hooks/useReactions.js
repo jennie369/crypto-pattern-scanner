@@ -94,9 +94,9 @@ export const useReactions = (conversationId) => {
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
-          // Fetch user data for the new reaction
+          // C15 FIX: Use 'profiles' instead of deprecated 'users' table
           const { data: userData } = await supabase
-            .from('users')
+            .from('profiles')
             .select('id, display_name, avatar_url')
             .eq('id', payload.new.user_id)
             .single();
