@@ -3553,6 +3553,13 @@ const TradingChart = ({
     setActiveTimeframe(newTimeframe);
     onTimeframeChange?.(newTimeframe);
 
+    // Reset flag after React batch flush — if onTimeframeChange syncs the parent's
+    // timeframe prop, the useEffect guard (timeframe !== activeTimeframe) won't enter
+    // its body, leaving the flag stale. This ensures parent-initiated changes still work.
+    queueMicrotask(() => {
+      isProgrammaticChange.current = false;
+    });
+
     // If chart is ready, change timeframe without reloading WebView
     // This preserves the scroll position
     if (chartReady && webViewRef.current) {

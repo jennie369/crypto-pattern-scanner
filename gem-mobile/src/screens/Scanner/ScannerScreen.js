@@ -1208,6 +1208,12 @@ const ScannerScreen = ({ navigation }) => {
             symbol={displayCoin}
             timeframe={selectedTimeframe}
             height={CHART_HEIGHT}
+            onTimeframeChange={(newTf) => {
+              // P6 FIX #1b: Sync context when user changes TF via chart toolbar.
+              // clearResults: false — multi-TF scan results stay; zone filter at
+              // line ~1403 already filters by selectedTimeframe.
+              setSelectedTimeframe(newTf, { clearResults: false });
+            }}
             onSymbolPress={() => {/* Could open coin selector */}}
             selectedPattern={selectedPattern}
             patterns={scanResults.find(r => r.symbol === displayCoin)?.patterns || []}
