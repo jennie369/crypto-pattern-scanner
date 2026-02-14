@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './supabase';
+import { generateSmartLink } from '../utils/constants';
 
 export const partnershipService = {
   /**
@@ -552,7 +553,7 @@ export const partnershipService = {
    * Get referral link for app
    */
   getAppReferralLink(affiliateCode) {
-    return `https://gemral.com/?ref=${affiliateCode}`;
+    return generateSmartLink(`/?ref=${affiliateCode}`);
   },
 
   /**

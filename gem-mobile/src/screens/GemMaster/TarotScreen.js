@@ -28,6 +28,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, LAYOUT } from '../../uti
 // Bottom padding to avoid tab bar overlap (increased for buttons)
 const BOTTOM_PADDING = 140;
 import { useTabBar } from '../../contexts/TabBarContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Services for tier/quota checking
 import TierService from '../../services/tierService';
@@ -120,9 +121,10 @@ const TarotScreen = ({ navigation, route }) => {
   const [widgetTrigger, setWidgetTrigger] = useState(null);
   const [showWidgetForm, setShowWidgetForm] = useState(false);
 
+  // User & Tier from AuthContext — reactive to profile changes + app resume
+  const { user, userTier, isAdmin } = useAuth();
+
   // Quota state
-  const [user, setUser] = useState(null);
-  const [userTier, setUserTier] = useState('FREE');
   const [quota, setQuota] = useState(null);
   const [isLoadingQuota, setIsLoadingQuota] = useState(true);
 
@@ -155,24 +157,21 @@ const TarotScreen = ({ navigation, route }) => {
     return () => showTabBar();
   }, [hideTabBar, showTabBar]);
 
-  // Load user tier and quota on mount
+  // Load quota reactively when user/tier changes (tier from AuthContext)
   useEffect(() => {
     const loadUserQuota = async () => {
+      if (!user?.id) {
+        setQuota(QuotaService.getDefaultQuota());
+        setIsLoadingQuota(false);
+        return;
+      }
+
       try {
         setIsLoadingQuota(true);
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        setUser(currentUser);
-
-        if (currentUser) {
-          const tier = await TierService.getUserTier(currentUser.id);
-          setUserTier(tier);
-          const quotaData = await QuotaService.checkQuota(currentUser.id, tier);
-          setQuota(quotaData);
-          console.log('[TarotScreen] User tier:', tier, 'Quota:', quotaData);
-        } else {
-          setUserTier('FREE');
-          setQuota(QuotaService.getDefaultQuota());
-        }
+        QuotaService.clearCache();
+        const quotaData = await QuotaService.checkQuota(user.id, userTier);
+        setQuota(quotaData);
+        console.log('[TarotScreen] Tier (from AuthContext):', userTier, 'Quota:', quotaData);
       } catch (error) {
         console.error('[TarotScreen] Error loading quota:', error);
         setQuota(QuotaService.getDefaultQuota());
@@ -182,7 +181,7 @@ const TarotScreen = ({ navigation, route }) => {
     };
 
     loadUserQuota();
-  }, []);
+  }, [user?.id, userTier]);
 
   // Check if user can perform divination (has quota remaining)
   const canDivine = useCallback(() => {

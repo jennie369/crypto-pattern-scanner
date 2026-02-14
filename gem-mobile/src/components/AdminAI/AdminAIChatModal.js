@@ -29,6 +29,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AdminAIContextBar from './AdminAIContextBar';
 import AdminAIQuickActions from './AdminAIQuickActions';
 import AdminAIMessageBubble from './AdminAIMessageBubble';
+import TypingIndicator from '../../screens/GemMaster/components/TypingIndicator';
 
 import { adminAIChatService, adminAIContextService } from '../../services/adminAI';
 import { getSession, SUPABASE_URL } from '../../services/supabase';
@@ -515,6 +516,15 @@ const AdminAIChatModal = ({
     }
   }, [messages]);
 
+  // Scroll to end when loading starts (typing indicator appears)
+  useEffect(() => {
+    if (loading) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 150);
+    }
+  }, [loading]);
+
   // Determine which button to show on the right
   const showSendButton = inputText.trim().length > 0;
   const canSend = inputText.trim().length > 0 && !loading;
@@ -585,6 +595,7 @@ const AdminAIChatModal = ({
               onContentSizeChange={() => {
                 flatListRef.current?.scrollToEnd({ animated: true });
               }}
+              ListFooterComponent={loading ? <TypingIndicator /> : null}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
                   <Brain size={48} color={COLORS.gold} style={{ opacity: 0.5 }} />

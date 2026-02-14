@@ -29,6 +29,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, LAYOUT } from '../../uti
 const BOTTOM_PADDING = 140;
 
 import { useTabBar } from '../../contexts/TabBarContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { getHexagramImage, getCardBack, ICHING_BACKGROUND } from '../../assets/iching';
 
 // Services for tier/quota checking
@@ -106,9 +107,10 @@ const IChingScreen = ({ navigation, route }) => {
   // Inline Vision Board form state (shows below guidance section)
   const [showInlineVBForm, setShowInlineVBForm] = useState(false);
 
+  // User & Tier from AuthContext — reactive to profile changes + app resume
+  const { user, userTier, isAdmin } = useAuth();
+
   // Quota state
-  const [user, setUser] = useState(null);
-  const [userTier, setUserTier] = useState('FREE');
   const [quota, setQuota] = useState(null);
   const [isLoadingQuota, setIsLoadingQuota] = useState(true);
 
@@ -141,26 +143,23 @@ const IChingScreen = ({ navigation, route }) => {
     return () => showTabBar();
   }, [hideTabBar, showTabBar]);
 
-  // Load user tier and quota on mount
+  // Load quota reactively when user/tier changes (tier from AuthContext)
   useEffect(() => {
     const loadUserQuota = async () => {
+      if (!user?.id) {
+        setQuota(QuotaService.getDefaultQuota());
+        setIsLoadingQuota(false);
+        return;
+      }
+
       try {
         setIsLoadingQuota(true);
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        setUser(currentUser);
-
-        if (currentUser) {
-          const tier = await TierService.getUserTier(currentUser.id);
-          setUserTier(tier);
-          const quotaData = await QuotaService.checkQuota(currentUser.id, tier);
-          setQuota(quotaData);
-          // Debug: console.log('[IChingScreen] User tier:', tier, 'Quota:', quotaData);
-        } else {
-          setUserTier('FREE');
-          setQuota(QuotaService.getDefaultQuota());
-        }
+        QuotaService.clearCache();
+        const quotaData = await QuotaService.checkQuota(user.id, userTier);
+        setQuota(quotaData);
+        console.log('[IChingScreen] Tier (from AuthContext):', userTier, 'Quota:', quotaData);
       } catch (error) {
-        // Debug: console.error('[IChingScreen] Error loading quota:', error);
+        console.error('[IChingScreen] Error loading quota:', error);
         setQuota(QuotaService.getDefaultQuota());
       } finally {
         setIsLoadingQuota(false);
@@ -168,7 +167,7 @@ const IChingScreen = ({ navigation, route }) => {
     };
 
     loadUserQuota();
-  }, []);
+  }, [user?.id, userTier]);
 
   // Check if user can perform divination (has quota remaining)
   const canDivine = useCallback(() => {

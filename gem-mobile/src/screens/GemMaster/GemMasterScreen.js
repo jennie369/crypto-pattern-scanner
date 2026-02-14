@@ -51,6 +51,7 @@ import {
   SCROLL_BUTTON_KEYBOARD_OFFSET,
   INPUT_AREA_BACKGROUND,
 } from '../../constants/gemMasterLayout';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTabBar } from '../../contexts/TabBarContext';
 import { useCart } from '../../contexts/CartContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -189,8 +190,8 @@ const GemMasterScreen = ({ navigation, route }) => {
     getConnectionStatusColor,
   } = useWebSocketChat({ autoConnect: true });
 
-  // User state (moved up for hook dependencies)
-  const [user, setUser] = useState(null);
+  // User & Tier from AuthContext — reactive to profile changes + app resume
+  const { user, profile: authProfile, isAdmin, userTier, refreshProfile } = useAuth();
 
   // Smart Triggers Hook (Day 25) - proactive AI engagement
   const {
@@ -222,8 +223,7 @@ const GemMasterScreen = ({ navigation, route }) => {
     disableAutoHide,
   } = useTabBar();
 
-  // User & Tier state (user is declared above for hook dependencies)
-  const [userTier, setUserTier] = useState('FREE');
+  // Quota state (tier comes from AuthContext, reactive to profile changes)
   const [quota, setQuota] = useState(null);
   const [isLoadingTier, setIsLoadingTier] = useState(true);
 
@@ -351,65 +351,64 @@ const GemMasterScreen = ({ navigation, route }) => {
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisInfo, setCrisisInfo] = useState(null);
 
-  // Fetch user and tier on mount
+  // Fetch quota when user or tier changes (tier comes from AuthContext, reactive to profile)
   useEffect(() => {
-    const fetchUserAndTier = async () => {
+    const fetchQuota = async () => {
+      if (!user?.id) {
+        setQuota(QuotaService.getDefaultQuota());
+        setVoiceQuota(TierService.getVoiceQuotaInfo('FREE', 0));
+        setIsLoadingTier(false);
+        return;
+      }
+
       try {
         setIsLoadingTier(true);
 
-        // Get current user
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        setUser(currentUser);
+        // Force fresh quota using AuthContext's reactive userTier
+        QuotaService.clearCache();
+        const quotaData = await QuotaService.checkQuota(user.id, userTier);
+        setQuota(quotaData);
 
-        if (currentUser) {
-          // Get user tier
-          const tier = await TierService.getUserTier(currentUser.id);
-          setUserTier(tier);
+        // Voice quota
+        const voiceQuotaData = await voiceService.getVoiceQuotaInfo(user.id, userTier);
+        setVoiceQuota(voiceQuotaData);
 
-          // Get quota
-          const quotaData = await QuotaService.checkQuota(currentUser.id, tier);
-          setQuota(quotaData);
-
-          // Get voice quota (Day 11-12)
-          const voiceQuotaData = await voiceService.getVoiceQuotaInfo(currentUser.id, tier);
-          setVoiceQuota(voiceQuotaData);
-
-          console.log('[GemMaster] User tier:', tier, 'Quota:', quotaData, 'Voice:', voiceQuotaData);
-        } else {
-          // Not logged in - use default
-          setUserTier('FREE');
-          setQuota(QuotaService.getDefaultQuota());
-          setVoiceQuota(TierService.getVoiceQuotaInfo('FREE', 0));
-        }
+        console.log('[GemMaster] Tier (from AuthContext):', userTier, 'isAdmin:', isAdmin, 'Quota:', quotaData);
       } catch (error) {
-        console.error('[GemMaster] Error fetching user/tier:', error);
+        console.error('[GemMaster] Error fetching quota:', error);
         setQuota(QuotaService.getDefaultQuota());
       } finally {
         setIsLoadingTier(false);
       }
     };
 
-    fetchUserAndTier();
+    fetchQuota();
+  }, [user?.id, userTier, isAdmin]);
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user);
-        const tier = await TierService.getUserTier(session.user.id);
-        setUserTier(tier);
-        const quotaData = await QuotaService.checkQuota(session.user.id, tier);
-        setQuota(quotaData);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setUserTier('FREE');
-        setQuota(QuotaService.getDefaultQuota());
-      }
-    });
+  // Refresh quota on screen focus (tab switch back to GemMaster)
+  useFocusEffect(
+    useCallback(() => {
+      if (!user?.id) return;
 
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, []);
+      const refreshTierAndQuota = async () => {
+        try {
+          console.log('[GemMaster] Screen focused — refreshing quota, tier:', userTier);
+          QuotaService.clearCache();
+          const quotaData = await QuotaService.checkQuota(user.id, userTier);
+          setQuota(quotaData);
+
+          const voiceQuotaData = await voiceService.getVoiceQuotaInfo(user.id, userTier);
+          setVoiceQuota(voiceQuotaData);
+        } catch (error) {
+          console.error('[GemMaster] Focus refresh error:', error);
+        }
+      };
+
+      // Small delay to let AuthContext.refreshProfile() finish first on app resume
+      const timer = setTimeout(refreshTierAndQuota, 300);
+      return () => clearTimeout(timer);
+    }, [user?.id, userTier])
+  );
 
   // ===== CHATBOT UPGRADE: Load Personalized Data =====
   useEffect(() => {
@@ -839,6 +838,18 @@ const GemMasterScreen = ({ navigation, route }) => {
   const detectGoalAffirmationIntent = useCallback((text) => {
     const lowerText = text.toLowerCase();
 
+    // COURSE INTENT EXCLUSION: Don't trigger goal/form when user is asking about courses.
+    // Course names often contain "manifest", "triệu phú", "mục tiêu" that falsely match goal keywords.
+    const coursePatterns = [
+      'giới thiệu khóa', 'gioi thieu khoa', 'khóa học', 'khoa hoc', 'course',
+      'khóa tư duy', 'khoa tu duy', 'khóa trading', 'khóa kích hoạt',
+      'khóa 7 ngày', 'khóa tần số', 'so sánh tier', 'so sanh tier',
+      'so sánh khóa', 'so sanh khoa',
+    ];
+    if (coursePatterns.some(p => lowerText.includes(p))) {
+      return { shouldShowForm: false, formType: null, preSelectedArea: null, userInput: null };
+    }
+
     // Life area detection mapping
     const lifeAreaMapping = {
       finance: ['tiền', 'tiền bạc', 'tài chính', 'giàu', 'thu nhập', 'lương', 'đầu tư', 'money', 'finance', 'wealth', 'rich'],
@@ -929,8 +940,9 @@ const GemMasterScreen = ({ navigation, route }) => {
   }, []);
 
   // Handle send message
+  // options.skipFormDetection: skip template/goal form detection (for FAQ course_detail, courses_overview, etc.)
   const handleSend = useCallback(
-    async (text) => {
+    async (text, options = {}) => {
       // Check quota first
       if (!canQuery()) {
         setShowUpgradeModal(true);
@@ -987,6 +999,7 @@ const GemMasterScreen = ({ navigation, route }) => {
 
       // ========== CENTRALIZED TEMPLATES: Intent Detection ==========
       // Check for template-specific intents FIRST (fear_setting, think_day, gratitude, etc.)
+      // SKIP when called from FAQ panel with known intent (course_detail, courses_overview, etc.)
       let templateIntent = null;
       try {
         console.log('[GemMaster] === TEMPLATE DETECTION START ===');
@@ -997,7 +1010,7 @@ const GemMasterScreen = ({ navigation, route }) => {
       } catch (templateError) {
         console.error('[GemMaster] Template detection error:', templateError);
       }
-      if (templateIntent && templateIntent.confidence > 0.6) {
+      if (templateIntent && templateIntent.confidence > 0.6 && !options.skipFormDetection) {
         console.log('[GemMaster] Detected template intent:', templateIntent.templateId, 'confidence:', templateIntent.confidence);
 
         // Check access control
@@ -1118,7 +1131,10 @@ const GemMasterScreen = ({ navigation, route }) => {
       }
 
       // NEW: Detect goal/affirmation intent → show INLINE form instead of modal
-      const intentDetection = detectGoalAffirmationIntent(text);
+      // SKIP when called from FAQ panel with known intent (course_detail, courses_overview, etc.)
+      const intentDetection = options.skipFormDetection
+        ? { shouldShowForm: false }
+        : detectGoalAffirmationIntent(text);
       if (intentDetection.shouldShowForm) {
         console.log('[GemMaster] Detected goal/affirmation intent:', intentDetection.formType, 'preSelectedArea:', intentDetection.preSelectedArea);
 
@@ -1659,8 +1675,9 @@ const GemMasterScreen = ({ navigation, route }) => {
 
       case 'message_crystal':
         // Message + crystal products → send to AI (products auto-attached)
+        // skipFormDetection: crystal queries should not trigger goal/template forms
         if (question.prompt) {
-          handleSend(question.prompt);
+          handleSend(question.prompt, { skipFormDetection: true });
         }
         break;
 
@@ -1762,22 +1779,26 @@ const GemMasterScreen = ({ navigation, route }) => {
 
       case 'courses_overview':
         // AI response + course products → send message that triggers course recommendation
+        // skipFormDetection: course queries contain keywords like "manifest", "triệu phú"
+        // that would falsely trigger template/goal forms instead of course recommendations
         if (question.prompt) {
-          handleSend(question.prompt);
+          handleSend(question.prompt, { skipFormDetection: true });
         }
         break;
 
       case 'course_detail':
         // AI response + specific course → send message with course tags
+        // skipFormDetection: prevent "Khóa Tư Duy Triệu Phú - Manifest Tiền Bạc"
+        // from triggering prosperity_frequency template or goal form
         if (question.prompt) {
-          handleSend(question.prompt);
+          handleSend(question.prompt, { skipFormDetection: true });
         }
         break;
 
       case 'affiliate_info':
         // AI response + affiliate CTA → send message then show affiliate promo
         if (question.prompt) {
-          handleSend(question.prompt);
+          handleSend(question.prompt, { skipFormDetection: true });
         }
         // Show affiliate promo after a delay
         setTimeout(() => {
@@ -1790,24 +1811,44 @@ const GemMasterScreen = ({ navigation, route }) => {
         break;
 
       case 'navigate_ritual':
-        // Brief message then navigate to ritual screen
-        if (question.briefMessage) {
-          // Add brief AI message first
-          const briefMsg = {
-            id: `brief_${Date.now()}`,
-            type: 'assistant',
-            text: question.briefMessage,
+        // FIXED: Show chat message with inline CTA button instead of direct navigation.
+        // Navigate within GemMaster stack so back button returns to chat.
+        {
+          // Add user message to show what they selected
+          const ritualUserMsg = {
+            id: `user_${Date.now()}`,
+            type: 'user',
+            text: question.text,
             timestamp: new Date().toISOString(),
-            source: 'faq',
           };
-          setMessages(prev => [...prev, briefMsg]);
+          setMessages(prev => [...prev, ritualUserMsg]);
+
+          // Add AI message with CTA button
+          const ritualBriefMsg = {
+            id: `ritual_brief_${Date.now()}`,
+            type: 'assistant',
+            text: question.briefMessage || 'Nghi thức này sẽ giúp bạn kết nối với năng lượng vũ trụ và gửi ý định manifest của bạn.',
+            timestamp: new Date().toISOString(),
+            source: 'faq_ritual',
+            // Inline CTA button — navigates within GemMaster stack
+            actionButtons: [
+              {
+                id: `ritual_cta_${Date.now()}`,
+                label: 'Bắt đầu Nghi thức',
+                icon: 'target',
+                action: 'navigate',
+                screen: question.screen || 'LetterToUniverseRitual',
+                params: { source: 'gemmaster' },
+              },
+            ],
+          };
+          setMessages(prev => [...prev, ritualBriefMsg]);
+
+          // Auto-scroll to show the CTA
+          setTimeout(() => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          }, 100);
         }
-        // Navigate to ritual screen - rituals are in AccountStack, not VisionBoard
-        setTimeout(() => {
-          navigation.navigate('Account', {
-            screen: question.screen || 'LetterToUniverseRitual',
-          });
-        }, 1000);
         break;
 
       case 'navigate_partnership':

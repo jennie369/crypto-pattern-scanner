@@ -366,6 +366,29 @@ export const detectTemplateIntent = (message, options = {}) => {
 
   console.log(`${SERVICE_NAME} Detecting intent - original: "${normalizedMessage}", stripped: "${strippedMessage}"`);
 
+  // COURSE INTENT EXCLUSION: If user is asking about courses/products, don't trigger template forms.
+  // Course names often contain keywords like "manifest", "triệu phú", "mục tiêu" that falsely
+  // match prosperity_frequency or goal_basic templates.
+  const courseExclusionPatterns = [
+    /gi[oớ]i\s*thi[eệ]u\s*(kh[oó]a|khoa)/i,  // "giới thiệu khóa"
+    /kh[oó]a\s*h[oọ]c/i,                        // "khóa học"
+    /khoa\s*hoc/i,                                // "khoa hoc" (no diacritics)
+    /so\s*s[aá]nh\s*(kh[oó]a|tier|các)/i,        // "so sánh khóa/tier"
+    /\bcourse\b/i,                                // "course"
+    /kh[oó]a\s*t[uư]\s*duy/i,                    // "khóa tư duy"
+    /khoa\s*tu\s*duy/i,                           // "khoa tu duy" (no diacritics)
+    /kh[oó]a\s*trading/i,                         // "khóa trading"
+    /kh[oó]a\s*kích\s*ho[aạ]t/i,                 // "khóa kích hoạt"
+    /kh[oó]a\s*7\s*ng[aà]y/i,                    // "khóa 7 ngày"
+    /kh[oó]a\s*t[aầ]n\s*s[oố]/i,                 // "khóa tần số"
+  ];
+
+  const isCourseQuery = courseExclusionPatterns.some(p => p.test(normalizedMessage) || p.test(strippedMessage));
+  if (isCourseQuery) {
+    console.log(`${SERVICE_NAME} Course intent detected — skipping template form detection`);
+    return null;
+  }
+
   // Track best match
   let bestMatch = null;
   let bestConfidence = 0;

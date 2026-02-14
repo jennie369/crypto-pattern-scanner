@@ -22,6 +22,9 @@ import ReadingDetailScreen from '../screens/GemMaster/ReadingDetailScreen';
 import RitualsScreen from '../screens/GemMaster/RitualsScreen';
 import GamificationScreen from '../screens/GemMaster/GamificationScreen';
 
+// Ritual screens (for in-stack navigation from GemMaster chat CTA buttons)
+import LetterToUniverseRitual from '../screens/VisionBoard/rituals/LetterToUniverseRitual';
+
 // Shop screens (for crystal/product recommendations without cross-tab navigation)
 import { ProductDetailScreen } from '../screens/Shop';
 
@@ -61,6 +64,9 @@ export default function GemMasterStack() {
       {/* Chatbot Upgrade - Rituals & Gamification */}
       <Stack.Screen name="Rituals" component={RitualsScreen} />
       <Stack.Screen name="Gamification" component={GamificationScreen} />
+
+      {/* Ritual screens - accessible from chat CTA buttons, back returns to GemMaster chat */}
+      <Stack.Screen name="LetterToUniverseRitual" component={LetterToUniverseRitual} />
     </Stack.Navigator>
   );
 }

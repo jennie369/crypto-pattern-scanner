@@ -13,6 +13,17 @@ import * as Sharing from 'expo-sharing';
 const APP_SCHEME = 'gem://';
 const WEB_BASE_URL = 'https://gemral.com';
 
+// Smart links: import from centralized constants
+import { generateSmartLink as _generateSmartLink } from '../utils/constants';
+
+/**
+ * Generate a smart share URL that goes through Supabase og-meta function.
+ * This ensures rich previews in social apps AND smart redirect for users.
+ * @param {string} path - Content path (e.g., '/courses/123', '/forum/thread/456')
+ * @returns {string} Smart link URL
+ */
+export const generateSmartLink = _generateSmartLink;
+
 /**
  * Generate a shareable link for a post
  * @param {string} postId - Post ID
@@ -21,7 +32,7 @@ const WEB_BASE_URL = 'https://gemral.com';
 export const generatePostLinks = (postId) => {
   return {
     deepLink: `${APP_SCHEME}forum/thread/${postId}`,
-    webLink: `${WEB_BASE_URL}/forum/thread/${postId}`,
+    webLink: generateSmartLink(`/forum/thread/${postId}`),
   };
 };
 
@@ -373,16 +384,17 @@ const AFFILIATE_BASE_URL = 'https://gemral.com';
 
 /**
  * Generate affiliate referral link
+ * Uses smart link for proper OG previews + app redirect
  * @param {string} referralCode - User's referral code
  * @param {string} productType - Optional product type
  * @returns {string} Referral URL
  */
 export const generateAffiliateLink = (referralCode, productType = null) => {
-  let link = `${AFFILIATE_BASE_URL}/?ref=${referralCode}`;
+  let path = `/?ref=${referralCode}`;
   if (productType) {
-    link += `&product=${productType}`;
+    path += `&product=${productType}`;
   }
-  return link;
+  return generateSmartLink(path);
 };
 
 /**
@@ -512,6 +524,8 @@ export const parseAffiliateLink = (url) => {
 };
 
 export default {
+  // Smart links
+  generateSmartLink,
   // Post sharing
   generatePostLinks,
   generateShareContent,

@@ -5,7 +5,7 @@
  * WITH Welcome screens for first-time users
  */
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, StyleSheet, AppState } from 'react-native';
@@ -158,6 +158,85 @@ export default function AppNavigator() {
   // - Stuck-state detection (15s) + health checks (60s)
   useGlobalAppResume();
 
+  // React Navigation linking configuration for deep links
+  // Handles gem:// scheme and gemral.com universal links automatically
+  const linking = useMemo(() => ({
+    prefixes: [
+      Linking.createURL('/'),             // gem:// scheme
+      'gem://',                           // explicit scheme
+      'https://gemral.com',              // universal links
+      'https://www.gemral.com',          // www variant
+    ],
+    config: {
+      screens: {
+        MainTabs: {
+          screens: {
+            Home: {
+              screens: {
+                ForumFeed: 'forum',
+                PostDetail: 'forum/thread/:postId',
+              },
+            },
+            Shop: {
+              screens: {
+                ShopMain: 'shop',
+                ProductDetail: 'shop/product/:productId',
+              },
+            },
+            Trading: {
+              screens: {
+                ScannerMain: 'scanner',
+              },
+            },
+            GemMaster: {
+              screens: {
+                GemMasterMain: 'gemmaster',
+              },
+            },
+            Account: {
+              screens: {
+                VisionBoard: 'visionboard',
+                CourseList: 'courses',
+                CourseDetail: 'courses/:courseId',
+                LessonPlayer: 'courses/:courseId/lessons/:lessonId',
+                Wallet: 'wallet',
+                Portfolio: 'portfolio',
+                Earnings: 'earnings',
+                AffiliateDashboard: 'affiliate',
+              },
+            },
+          },
+        },
+      },
+    },
+    // Custom URL parsing: let deepLinkHandler handle affiliate URLs
+    // and Supabase og-meta redirect URLs (gem:// scheme from smart links)
+    async getInitialURL() {
+      // Check for initial URL from deep link
+      const url = await Linking.getInitialURL();
+      if (url) {
+        // Affiliate URLs and web URLs are handled by deepLinkHandler
+        if (deepLinkHandler.isAffiliateUrl(url) || deepLinkHandler.isGemralWebUrl(url)) {
+          // deepLinkHandler will process these in onNavigationReady
+          return null;
+        }
+      }
+      return url;
+    },
+    subscribe(listener) {
+      const subscription = Linking.addEventListener('url', ({ url }) => {
+        // Let affiliate/web URLs go through deepLinkHandler
+        if (deepLinkHandler.isAffiliateUrl(url) || deepLinkHandler.isGemralWebUrl(url)) {
+          deepLinkHandler.handleExternalUrl(url);
+          return;
+        }
+        // Let React Navigation handle gem:// scheme URLs natively
+        listener(url);
+      });
+      return () => subscription?.remove();
+    },
+  }), []);
+
   // Global startup timeout - prevents permanent black screen if auth + welcome both stall
   useEffect(() => {
     const startupTimer = setTimeout(() => {
@@ -194,12 +273,17 @@ export default function AppNavigator() {
     setIsNavigationReady(true);
     console.log('[AppNavigator] Navigation ready, deep link handler initialized');
 
-    // Handle initial URL (app opened via deep link)
+    // Handle initial URL for affiliate/web links ONLY
+    // (gem:// scheme URLs are handled automatically by the `linking` config above)
     try {
       const initialUrl = await Linking.getInitialURL();
       if (initialUrl) {
-        console.log('[AppNavigator] Initial URL:', initialUrl);
-        await deepLinkHandler.handleExternalUrl(initialUrl);
+        const isAffiliate = deepLinkHandler.isAffiliateUrl(initialUrl);
+        const isWebUrl = deepLinkHandler.isGemralWebUrl(initialUrl);
+        if (isAffiliate || isWebUrl) {
+          console.log('[AppNavigator] Initial URL (affiliate/web):', initialUrl);
+          await deepLinkHandler.handleExternalUrl(initialUrl);
+        }
       }
     } catch (error) {
       console.error('[AppNavigator] Error getting initial URL:', error);
@@ -220,20 +304,8 @@ export default function AppNavigator() {
     }
   }, []);
 
-  // Listen for deep link URL events while app is running
-  useEffect(() => {
-    // Subscribe to URL events
-    const subscription = Linking.addEventListener('url', async (event) => {
-      console.log('[AppNavigator] URL event:', event.url);
-      if (event.url) {
-        await deepLinkHandler.handleExternalUrl(event.url);
-      }
-    });
-
-    return () => {
-      subscription?.remove();
-    };
-  }, []);
+  // NOTE: URL event listening is now handled by the `linking` config's `subscribe` method
+  // above (passed to NavigationContainer). No duplicate listener needed here.
 
   // Handle app state changes (for syncing when coming back online)
   useEffect(() => {
@@ -270,7 +342,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer ref={navigationRef} onReady={onNavigationReady}>
+    <NavigationContainer ref={navigationRef} linking={linking} onReady={onNavigationReady}>
       <InAppNotificationProvider>
         {isAuthenticated ? (
           <CallProvider>

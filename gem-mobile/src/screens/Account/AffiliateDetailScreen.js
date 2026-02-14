@@ -32,6 +32,7 @@ import {
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { generateSmartLink } from '../../utils/constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../services/supabase';
 import {
@@ -204,7 +205,7 @@ export default function AffiliateDetailScreen({ route, navigation }) {
       const { affiliateService } = require('../../services/affiliateService');
       const code = await affiliateService.getReferralCode(user?.id);
       if (!code) throw new Error('No code');
-      const link = `https://gemral.com/?ref=${code}`;
+      const link = generateSmartLink(`/?ref=${code}`);
       await Clipboard.setStringAsync(link);
       alertService.success('Thành công', 'Đã sao chép link giới thiệu!');
     } catch (error) {

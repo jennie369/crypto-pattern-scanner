@@ -1,6 +1,6 @@
 # Troubleshooting Tips
 
-Generalized engineering rules extracted from real bugs found during Phase 1-6 audits.
+Generalized engineering rules extracted from real bugs found during Phase 1-7 audits.
 
 ---
 
@@ -1012,6 +1012,184 @@ const dailyStats = last7Days.map(date => ({
 
 ---
 
+## Rule 23: Local State Diverges from Context on App Resume
+**Source:** Phase 7 — Admin role lost after app returns from background
+
+### When to apply
+When a screen caches auth/tier/role data in local state instead of subscribing to the shared context that refreshes on app resume.
+
+### Symptoms
+- User's role/tier shows incorrectly after resuming from background
+- "Quota exhausted" for admin/paid user after re-opening app
+- First load is correct, but returning later shows stale data
+- Only the screen with local state is wrong; other screens using context are fine
+
+### Root cause pattern
+Screen calls `TierService.getUserTier()` once on mount and stores in local `useState`. AuthContext refreshes profile on app resume, but the screen never re-reads it:
+
+```javascript
+// DANGEROUS: Local state diverges from context
+const [userTier, setUserTier] = useState('FREE');
+useEffect(() => {
+  TierService.getUserTier(userId).then(setUserTier);
+}, []); // Only runs once on mount — never updates on resume
+
+// SAFE: Derive from context (auto-updates on profile refresh)
+const { userTier, isAdmin } = useAuth();
+```
+
+### Investigation steps
+1. Grep for `TierService.getUserTier` in screens (NOT services/contexts)
+2. Grep for `setUserTier` — find screens with local tier state
+3. Check if the screen uses `useAuth()` or fetches tier independently
+4. Check if screen has `navigation.addListener('focus', ...)` to refresh
+
+### Preventive measures
+- **Single source of truth**: Use `useAuth()` for role/tier, never cache locally in screens
+- **Focus listener**: If local fetch is needed, add `useFocusEffect` to refresh
+- **useEffect on profile**: Watch `[profile?.chatbot_tier, profile?.is_admin]` to re-sync
+
+### Code smell indicators
+- `const [userTier, setUserTier] = useState(...)` in a screen file
+- `TierService.getUserTier()` in a screen's `useEffect([], [])`
+- No `useFocusEffect` or `navigation.addListener('focus', ...)`
+- Screen imports `supabase.auth.getUser()` directly instead of using AuthContext
+
+---
+
+## Rule 24: Keyword Collision in Intent Detection
+**Source:** Phase 7 — Course query triggers journal form because "manifest" matches prosperity widget
+
+### When to apply
+When a user query about one feature (courses, products) accidentally triggers a different feature (forms, widgets) due to overlapping keywords.
+
+### Symptoms
+- Asking about a course → opens a form instead of showing course info
+- Product names containing trigger words activate wrong handlers
+- Works for simple queries but breaks for queries with "loaded" keywords
+- Widget/form appears when user expected informational response
+
+### Root cause pattern
+Intent detection uses flat keyword matching without priority or context:
+
+```javascript
+// DANGEROUS: "manifest tiền" matches prosperity_frequency template
+const KEYWORDS = { prosperity_frequency: [/manifest.*tiền/i, /mục tiêu/i] };
+// User says "Giới thiệu Khóa Manifest Tiền Bạc" → triggers form!
+
+// SAFE: Exclude course/product context before keyword matching
+const COURSE_EXCLUSIONS = [/khóa học/i, /giới thiệu khóa/i, /course/i];
+if (COURSE_EXCLUSIONS.some(p => p.test(message))) return null; // Skip form detection
+```
+
+### Investigation steps
+1. Map ALL keywords that trigger widgets/forms
+2. Cross-check against course names, product names, and FAQ labels
+3. Test each FAQ quick select → verify response type
+4. Check if detection has priority system (course > form > default)
+
+### Preventive measures
+- **Priority chain**: Course/product intent checked BEFORE form/widget detection
+- **Exclusion patterns**: Course-related phrases bypass form triggers entirely
+- **skipFormDetection flag**: FAQ handlers pass explicit flag to skip form detection
+- **Test matrix**: Every quick select mapped to expected response type
+
+### Code smell indicators
+- Flat keyword regex without exclusions
+- No priority ordering in intent detection pipeline
+- FAQ handler calls same `handleSend()` as free-text input without flags
+- Course/product names containing words like "manifest", "goal", "challenge"
+
+---
+
+## Rule 25: Direct Navigation vs Chat-First Flow
+**Source:** Phase 7 — Ritual quick select navigates directly without chat message or CTA
+
+### When to apply
+When a chatbot quick action bypasses the conversation flow and navigates directly to a screen.
+
+### Symptoms
+- Tapping quick action jumps to a screen without any chat response
+- No "Bắt đầu" / "Open" CTA button in chat — user has no choice
+- Back button goes to wrong tab (different stack)
+- Feature screen stuck in wrong tab
+
+### Root cause pattern
+Quick select handler calls `navigation.navigate()` directly instead of adding a chat message with an inline CTA:
+
+```javascript
+// DANGEROUS: Direct navigation — no chat message, wrong stack
+if (action === 'navigate_ritual') {
+  navigation.navigate('Account', { screen: 'LetterToUniverseRitual' });
+}
+
+// SAFE: Chat message + CTA button within correct stack
+addBotMessage({
+  text: 'Description of the ritual...',
+  actionButtons: [{ label: 'Bắt đầu', screen: 'LetterToUniverseRitual' }],
+});
+```
+
+### Investigation steps
+1. Grep for `navigation.navigate` inside chatbot quick select handlers
+2. Check if navigated screen is in the same navigation stack
+3. Verify back button behavior from the target screen
+4. Check if a chat message is added before navigation
+
+### Preventive measures
+- **Chat-first**: Always add bot message before any navigation
+- **Inline CTA**: Use actionButtons in message bubble for navigation triggers
+- **Same stack**: Register target screens in the chatbot's stack, not Account/Home
+- **Back handler**: Ensure `navigation.goBack()` returns to chat
+
+### Code smell indicators
+- `navigation.navigate('Account', { screen: ... })` from GemMaster handler
+- `setTimeout(() => navigation.navigate(...), ...)` after quick select
+- Target screen not registered in GemMasterStack
+- No `addBotMessage` before `navigation.navigate`
+
+---
+
+## Rule 26: Deep Link Blank Page (Missing Server-Side Routing)
+**Source:** Phase 7 — Shared URL shows blank page because domain doesn't serve OG/redirect
+
+### When to apply
+When shared app links open a blank page in mobile browsers instead of showing content or redirecting to the app.
+
+### Symptoms
+- Shared URL opens blank page in Messenger/Telegram in-app browser
+- No rich preview (title, image) when sharing link on social media
+- App doesn't open when tapping shared link
+- Works on device with app installed but not in browser
+
+### Root cause pattern
+The domain (e.g., gemral.com) is managed by a platform (Shopify) that can't serve custom routes. There's no server-side handler to:
+1. Return OG meta tags for social crawlers
+2. Redirect mobile users to the app
+3. Show fallback content if app not installed
+
+### Investigation steps
+1. Open shared URL in browser — check if HTML has OG tags
+2. Check DNS: who manages the domain? (Shopify, Vercel, Supabase?)
+3. Check if edge function (og-meta) is deployed and accessible
+4. Check AASA file: `/.well-known/apple-app-site-association`
+5. Check assetlinks: `/.well-known/assetlinks.json`
+
+### Preventive measures
+- **Smart link proxy**: Route share URLs through edge function that serves OG tags + app redirect
+- **Bot detection**: Serve clean HTML for crawlers, JS redirect for humans
+- **Fallback page**: Show content preview + App Store/Play Store links if app not installed
+- **AASA + assetlinks**: Deploy well-known files for iOS Universal Links / Android App Links
+- **Test in social apps**: Verify preview and tap behavior in Messenger, Telegram, SMS
+
+### Code smell indicators
+- Share URLs point to Shopify domain with custom paths Shopify doesn't know
+- No edge function serving OG meta tags
+- Missing `apple-app-site-association` / `assetlinks.json`
+- `meta http-equiv="refresh"` redirecting back to the same domain (loop)
+
+---
+
 # SECTION G: SUGGESTED AUTOMATED TESTS
 
 ---
@@ -1060,6 +1238,48 @@ test('adminAIMarketService uses Futures API, not Spot', () => {
   const source = fs.readFileSync('services/adminAI/adminAIMarketService.js', 'utf8');
   expect(source).not.toContain('api.binance.com/api/v3');
   expect(source).toContain('fapi.binance.com/fapi/v1');
+});
+```
+
+## Phase 7 Tests
+
+### Local State Diverges (Rule 23)
+```javascript
+test('GemMasterScreen tier reacts to AuthContext profile changes', () => {
+  // Setup: render GemMasterScreen with profile.chatbot_tier = 'FREE'
+  // Action: update AuthContext profile to { is_admin: true, role: 'admin' }
+  // Assert: screen shows ADMIN badge, not FREE
+  // Assert: quota shows unlimited, not "Hết lượt"
+});
+```
+
+### Keyword Collision (Rule 24)
+```javascript
+test('course query does not trigger form widget', async () => {
+  const response = await handleSend('Giới thiệu Khóa Tư Duy Triệu Phú - Manifest Tiền Bạc');
+  expect(response.type).not.toBe('template_form');
+  expect(response.type).toBe('course_recommendation');
+});
+```
+
+### Chat-First Ritual Flow (Rule 25)
+```javascript
+test('ritual quick select adds chat message before navigation', () => {
+  // Action: trigger 'navigate_ritual' quick select
+  // Assert: bot message added to messages array with actionButtons
+  // Assert: navigation.navigate NOT called (user must tap CTA)
+});
+```
+
+### Deep Link OG Tags (Rule 26)
+```javascript
+test('og-meta returns OG tags for course URL', async () => {
+  const res = await fetch('/functions/v1/og-meta?path=/courses/123', {
+    headers: { 'User-Agent': 'facebookexternalhit/1.1' },
+  });
+  const html = await res.text();
+  expect(html).toContain('og:title');
+  expect(html).toContain('og:image');
 });
 ```
 
@@ -1162,3 +1382,7 @@ test('binanceService throws on HTTP 200 with error code', async () => {
 | 20 | Multiple Systems for Same Purpose (Drift) | F: Architecture | 1, 5 |
 | 21 | Missing Timeout on Network Operations | F: Architecture | 5 |
 | 22 | Fabricated/Mock Data Left in Production | F: Architecture | 5 |
+| 23 | Local State Diverges from Context on App Resume | A: State | 7 |
+| 24 | Keyword Collision in Intent Detection | B: API | 7 |
+| 25 | Direct Navigation vs Chat-First Flow | E: UI | 7 |
+| 26 | Deep Link Blank Page (Missing Server-Side Routing) | F: Architecture | 7 |

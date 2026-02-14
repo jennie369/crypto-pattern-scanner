@@ -39,6 +39,7 @@ import { orderTrackingService } from '../../services/orderTrackingService';
 import affiliateService from '../../services/affiliateService';
 import { supabase } from '../../services/supabase';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { generateSmartLink } from '../../utils/constants';
 import { StateView } from '../../components/Common';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -120,7 +121,7 @@ const AffiliateScreen = ({ navigation }) => {
   const copyReferralLink = async () => {
     if (!partnerProfile?.referral_code) return;
 
-    const link = `https://gemral.com/?ref=${partnerProfile.referral_code}`;
+    const link = generateSmartLink(`/?ref=${partnerProfile.referral_code}`);
     await Clipboard.setStringAsync(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

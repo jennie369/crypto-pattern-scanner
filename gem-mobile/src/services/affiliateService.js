@@ -35,7 +35,10 @@ import {
 // CONSTANTS & CONFIGURATION
 // ========================================
 
-// Base URL for referral links (Shopify domain)
+// Smart links: import from centralized constants
+import { generateSmartLink } from '../utils/constants';
+
+// Base URL for referral links (for legacy compatibility)
 const REFERRAL_BASE_URL = 'https://gemral.com';
 
 // App scheme for deep links
@@ -365,18 +368,18 @@ class AffiliateService {
 
   /**
    * Generate referral link
-   * Format: https://gemral.com/?ref={code}&product={type}
+   * Routes through Supabase og-meta for OG previews + smart redirect
    */
   async generateReferralLink(productType = null) {
     try {
       const code = await this.getReferralCode();
       if (!code) return null;
 
-      let link = `${REFERRAL_BASE_URL}?ref=${code.code}`;
+      let path = `/?ref=${code.code}`;
       if (productType) {
-        link += `&product=${productType}`;
+        path += `&product=${productType}`;
       }
-      return link;
+      return generateSmartLink(path);
     } catch (error) {
       console.error('[Affiliate] generateReferralLink error:', error);
       return null;
@@ -785,23 +788,21 @@ class AffiliateService {
 
   /**
    * Generate product URL from short code and affiliate code
-   * New format: https://gemral.com/products/{productHandle}?ref={affiliateCode}&pid={productId}
-   * Fallback: https://gemral.com/?ref={affiliateCode}&pid={productId} if no handle
+   * Routes through Supabase og-meta for OG previews + smart redirect
    */
   generateProductUrl(shortCode, affiliateCode, productId = null, productHandle = null) {
-    // Use Shopify's product URL structure when handle is available
-    let url;
+    let path;
     if (productHandle) {
-      url = `${REFERRAL_BASE_URL}/products/${encodeURIComponent(productHandle)}?ref=${affiliateCode}`;
+      path = `/products/${encodeURIComponent(productHandle)}?ref=${affiliateCode}`;
     } else {
-      // Fallback to short code path if no handle
-      url = `${REFERRAL_BASE_URL}/p/${shortCode}?ref=${affiliateCode}`;
+      path = `/p/${shortCode}?ref=${affiliateCode}`;
     }
 
     if (productId) {
-      url += `&pid=${encodeURIComponent(productId)}`;
+      path += `&pid=${encodeURIComponent(productId)}`;
     }
-    return url;
+
+    return generateSmartLink(path);
   }
 
   /**

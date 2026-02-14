@@ -34,10 +34,9 @@ import {
   CheckCircle,
 } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { generateSmartLink } from '../../utils/constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../services/supabase';
-
-const AFFILIATE_LINK_BASE = 'https://gemral.com/r/';
 
 export default function AffiliateWelcomeScreen({ navigation, route }) {
   const { user, profile, refreshProfile } = useAuth();
@@ -97,7 +96,7 @@ export default function AffiliateWelcomeScreen({ navigation, route }) {
     }
   };
 
-  const affiliateLink = affiliateCode ? `${AFFILIATE_LINK_BASE}${affiliateCode}` : '';
+  const affiliateLink = affiliateCode ? generateSmartLink(`/r/${affiliateCode}`) : '';
 
   const handleCopyCode = async () => {
     if (!affiliateCode) return;
