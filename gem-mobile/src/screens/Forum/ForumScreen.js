@@ -99,10 +99,11 @@ const MAX_CACHE_SIZE = 300;
 const MAX_TRACKED_POSTS = 500;
 
 // Feed loading timeout - prevents infinite spinner
-// Individual Supabase DB queries now abort at 8s (see supabase.js global.fetch),
-// so 10s is enough headroom for 3 parallel queries + processing.
-const FEED_LOAD_TIMEOUT = 10000; // 10 seconds
-const FEED_LOADMORE_TIMEOUT = 8000; // 8 seconds for pagination
+// Individual Supabase DB queries abort at 8s (see supabase.js global.fetch).
+// feedService now uses Promise.allSettled so slow optional queries (follows, profiles)
+// don't block the critical posts query. 15s gives headroom for retry/fallback.
+const FEED_LOAD_TIMEOUT = 15000; // 15 seconds
+const FEED_LOADMORE_TIMEOUT = 10000; // 10 seconds for pagination
 const TIMEOUT_RETRY_COOLDOWN = 3000; // 3 second cooldown between retries after timeout
 
 // Helper: wrap a promise with timeout

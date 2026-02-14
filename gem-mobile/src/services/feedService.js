@@ -275,21 +275,22 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
     // 3. Get user's likes/saves for these posts
     // ============================================
 
-    // Run queries in parallel for speed
-    const [postsResult, followingResult, userPrefsResult] = await Promise.all([
-      // Query 1: Recent posts with minimal joins
+    // Run queries in parallel — use allSettled so a slow/failed query
+    // doesn't block the entire feed (posts are critical, others are optional)
+    const [postsSettled, followingSettled, userPrefsSettled] = await Promise.allSettled([
+      // Query 1: Recent posts with minimal joins (CRITICAL)
       supabase
         .from('forum_posts')
         .select(POST_SELECT_FAST)
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(limit + 10), // Get extra for personalization sorting
-      // Query 2: User's following list
+      // Query 2: User's following list (OPTIONAL — degrades to no personalization)
       supabase
         .from('follows')
         .select('following_id')
         .eq('follower_id', userId),
-      // Query 3: User preferences (for tier check - ads)
+      // Query 3: User preferences for tier check (OPTIONAL — degrades to FREE tier ads)
       supabase
         .from('profiles')
         .select('scanner_tier, chatbot_tier')
@@ -297,9 +298,18 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
         .single(),
     ]);
 
+    // Extract results — only posts query is critical
+    const postsResult = postsSettled.status === 'fulfilled' ? postsSettled.value : { data: null, error: postsSettled.reason };
+    const followingResult = followingSettled.status === 'fulfilled' ? followingSettled.value : { data: null, error: followingSettled.reason };
+    const userPrefsResult = userPrefsSettled.status === 'fulfilled' ? userPrefsSettled.value : { data: null, error: userPrefsSettled.reason };
+
     if (postsResult.error) {
       console.error('[FeedService] Fast posts query error:', postsResult.error);
       throw postsResult.error;
+    }
+
+    if (followingResult.error) {
+      console.warn('[FeedService] Following query failed (feed will skip personalization):', followingResult.error?.message);
     }
 
     const recentPosts = postsResult.data || [];
