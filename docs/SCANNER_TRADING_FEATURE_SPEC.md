@@ -1,8 +1,8 @@
 # GEM Mobile - Scanner/Trading Tab
 # COMPLETE FEATURE SPECIFICATION
 
-**Version:** 4.0
-**Last Updated:** 2026-02-06
+**Version:** 4.1
+**Last Updated:** 2026-02-14
 **Platform:** React Native (Expo)
 **Author:** GEM Development Team
 
@@ -1680,6 +1680,14 @@ gem-mobile/src/
 - P&L real-time sync via onPriceUpdate callback
 - MindsetCheckModal integration
 - Vietnamese number formatting (formatters.js)
+
+### Version 4.1 (2026-02-14) — Phase 6 Scanner + PaperTrade Engine Fix
+- **Scanner state wipe fix**: `setSelectedTimeframe()` accepts `{ clearResults }` flag. Pattern selection no longer wipes scan results when crossing timeframes.
+- **PENDING order fix**: Breakout entries (LONG above market / SHORT below market) now create PENDING orders instead of MARKET. Uses `createdAtMarketPrice` field for fill direction.
+- **TP value consistency**: Zone Manager uses detector's R:R multiplier instead of hardcoded 1:2. ScannerScreen reordered TP priority (detection target > zone target_1).
+- **PNL accuracy**: Entry price always uses pattern entry (no override to market). `mapFromSupabase` no longer copies `entry_price` into `currentPrice`. NaN guard on PNL calculation.
+- **AdminAI Futures API**: All market data endpoints changed from Spot (`api.binance.com`) to Futures (`fapi.binance.com`).
+- See `docs/feature-scanner-papertrade-engine.md` for architectural decisions.
 
 ### Version 3.0 (2025-12-20)
 - Added 6 drawing tools with Supabase persistence
