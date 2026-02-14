@@ -152,7 +152,9 @@ export default function BoostAnalyticsScreen({ navigation, route }) {
 
           {/* Daily Stats */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Thống kê theo ngày</Text>
+            <Text style={styles.sectionTitle}>
+              Thống kê theo ngày{campaign?.dailyStatsEstimated ? ' (Ước tính)' : ''}
+            </Text>
             {campaign?.daily_stats?.map((day, index) => (
               <View key={index} style={styles.dayRow}>
                 <Text style={styles.dayLabel}>{day.date}</Text>
@@ -190,7 +192,9 @@ export default function BoostAnalyticsScreen({ navigation, route }) {
           <View style={styles.tipsCard}>
             <Zap size={20} color={COLORS.gold} />
             <Text style={styles.tipsText}>
-              Bài viết của bạn đang hoạt động tốt! Lượt tương tác cao hơn trung bình 15%.
+              {(campaign?.engagement_rate || 0) >= 5
+                ? 'Bài viết của bạn đang hoạt động tốt! Tỷ lệ tương tác cao.'
+                : 'Thử thêm hình ảnh hoặc nội dung hấp dẫn hơn để tăng tương tác.'}
             </Text>
           </View>
 

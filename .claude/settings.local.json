@@ -209,7 +209,8 @@
       "Bash(else)",
       "Bash(fi)",
       "Bash(/mnt/c/Program Files/Git/cmd/git.exe -C \"C:/Users/Jennie Chu/Desktop/Projects/crypto-pattern-scanner\" push origin main)",
-      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" -C \"C:/Users/Jennie Chu/Desktop/Projects/crypto-pattern-scanner\" push origin main)"
+      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" -C \"C:/Users/Jennie Chu/Desktop/Projects/crypto-pattern-scanner\" push origin main)",
+      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" push origin main)"
     ],
     "deny": [],
     "ask": []

@@ -514,9 +514,10 @@ export const boostService = {
       const realComments = commentsCount || 0;
       const realReach = Math.floor(realImpressions * 0.7); // Estimate unique reach as 70% of views
 
-      // Calculate engagement rate from actual clicks only (not reactions/comments)
+      // Engagement rate: all interactions (clicks + reactions + comments) / impressions
+      const totalEngagement = realClicks + realReactions + realComments;
       const engagementRate = realImpressions > 0
-        ? ((realClicks / realImpressions) * 100).toFixed(1)
+        ? ((totalEngagement / realImpressions) * 100).toFixed(1)
         : 0;
 
       // Try to fetch real daily stats from boost_daily_stats table
@@ -530,6 +531,8 @@ export const boostService = {
       const now = new Date();
       let daily_stats;
 
+      let dailyStatsEstimated = false;
+
       if (realDailyStats && realDailyStats.length > 0) {
         // Use real tracked daily stats
         daily_stats = realDailyStats.map(row => ({
@@ -540,6 +543,7 @@ export const boostService = {
           comments: row.comments || 0,
         }));
       } else {
+        dailyStatsEstimated = true;
         // Fallback: distribute totals evenly across days (no random variance)
         const startDate = new Date(campaign.created_at);
         const endDate = new Date(campaign.expires_at || Date.now());
@@ -599,6 +603,7 @@ export const boostService = {
           reachEstimated: true,
           engagement_rate: parseFloat(engagementRate),
           daily_stats,
+          dailyStatsEstimated,
           post: postStats ? {
             id: postStats.id,
             content: postStats.content,
