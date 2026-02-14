@@ -20,8 +20,8 @@ const WEB_BASE_URL = 'https://gemral.com';
  */
 export const generatePostLinks = (postId) => {
   return {
-    deepLink: `${APP_SCHEME}post/${postId}`,
-    webLink: `${WEB_BASE_URL}/post/${postId}`,
+    deepLink: `${APP_SCHEME}forum/thread/${postId}`,
+    webLink: `${WEB_BASE_URL}/forum/thread/${postId}`,
   };
 };
 
@@ -332,6 +332,9 @@ export const parseDeepLink = (url) => {
     const path = url.replace(APP_SCHEME, '');
     const parts = path.split('/');
 
+    if (parts[0] === 'forum' && parts[1] === 'thread' && parts[2]) {
+      return { type: 'post', id: parts[2] };
+    }
     if (parts[0] === 'post' && parts[1]) {
       return { type: 'post', id: parts[1] };
     }
@@ -348,6 +351,9 @@ export const parseDeepLink = (url) => {
     const path = url.replace(WEB_BASE_URL, '');
     const parts = path.split('/').filter(Boolean);
 
+    if (parts[0] === 'forum' && parts[1] === 'thread' && parts[2]) {
+      return { type: 'post', id: parts[2] };
+    }
     if (parts[0] === 'post' && parts[1]) {
       return { type: 'post', id: parts[1] };
     }

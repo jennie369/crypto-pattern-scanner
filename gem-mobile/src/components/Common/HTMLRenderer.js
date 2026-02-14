@@ -43,6 +43,8 @@ const HTMLRenderer = ({ html, style }) => {
           background-color: transparent;
           padding: 0;
           margin: 0;
+          overflow-x: hidden;
+          word-wrap: break-word;
         }
         p {
           margin-bottom: 12px;
@@ -80,11 +82,13 @@ const HTMLRenderer = ({ html, style }) => {
         /* Table Styles */
         table {
           width: 100%;
+          max-width: 100%;
           border-collapse: collapse;
           margin: 16px 0;
           background: rgba(106, 91, 255, 0.08);
           border-radius: 12px;
-          overflow: hidden;
+          overflow-x: auto;
+          display: block;
           border: 1px solid rgba(106, 91, 255, 0.3);
         }
         thead {
@@ -201,7 +205,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   webview: {
-    width: SCREEN_WIDTH - 64, // Account for section padding
+    width: '100%',
     backgroundColor: 'transparent',
   },
 });

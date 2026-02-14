@@ -158,6 +158,18 @@ export default function AppNavigator() {
   // - Stuck-state detection (15s) + health checks (60s)
   useGlobalAppResume();
 
+  // Global startup timeout - prevents permanent black screen if auth + welcome both stall
+  useEffect(() => {
+    const startupTimer = setTimeout(() => {
+      if (!initialized) {
+        console.warn('[AppNavigator] Startup timeout - forcing initialization');
+        setInitialized(true);
+        setWelcomeChecked(true);
+      }
+    }, 15000);
+    return () => clearTimeout(startupTimer);
+  }, [initialized]);
+
   // Check welcome completion on mount
   useEffect(() => {
     const checkWelcome = async () => {

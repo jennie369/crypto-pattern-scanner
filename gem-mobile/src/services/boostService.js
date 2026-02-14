@@ -507,39 +507,68 @@ export const boostService = {
         ultra: 'Siêu cấp',
       };
 
-      // Use real data: impressions from views_count, reach from unique viewers
+      // Use real data: impressions from views_count, clicks from RPC counter
       const realImpressions = postStats?.views_count || campaign.impressions || 0;
-      const realClicks = (reactionsCount || 0) + (commentsCount || 0) + (campaign.clicks || 0);
+      const realClicks = campaign.clicks || 0;
+      const realReactions = reactionsCount || 0;
+      const realComments = commentsCount || 0;
       const realReach = Math.floor(realImpressions * 0.7); // Estimate unique reach as 70% of views
 
-      // Calculate engagement rate from real data
+      // Calculate engagement rate from actual clicks only (not reactions/comments)
       const engagementRate = realImpressions > 0
         ? ((realClicks / realImpressions) * 100).toFixed(1)
         : 0;
 
-      // Generate daily stats from date range
-      const startDate = new Date(campaign.created_at);
-      const endDate = new Date(campaign.expires_at || Date.now());
+      // Try to fetch real daily stats from boost_daily_stats table
+      const { data: realDailyStats } = await supabase
+        .from('boost_daily_stats')
+        .select('stat_date, impressions, clicks, reactions, comments')
+        .eq('boost_id', campaignId)
+        .order('stat_date', { ascending: true })
+        .limit(7);
+
       const now = new Date();
-      const actualEndDate = endDate > now ? now : endDate;
-      const daysDiff = Math.ceil((actualEndDate - startDate) / (1000 * 60 * 60 * 24));
-      const daysToShow = Math.min(Math.max(daysDiff, 1), 7);
+      let daily_stats;
 
-      const avgImpressions = Math.floor(realImpressions / Math.max(daysToShow, 1));
-      const avgClicks = Math.floor(realClicks / Math.max(daysToShow, 1));
+      if (realDailyStats && realDailyStats.length > 0) {
+        // Use real tracked daily stats
+        daily_stats = realDailyStats.map(row => ({
+          date: new Date(row.stat_date).toLocaleDateString('vi-VN', { weekday: 'short' }),
+          impressions: row.impressions || 0,
+          clicks: row.clicks || 0,
+          reactions: row.reactions || 0,
+          comments: row.comments || 0,
+        }));
+      } else {
+        // Fallback: distribute totals evenly across days (no random variance)
+        const startDate = new Date(campaign.created_at);
+        const endDate = new Date(campaign.expires_at || Date.now());
+        const actualEndDate = endDate > now ? now : endDate;
+        const daysDiff = Math.ceil((actualEndDate - startDate) / (1000 * 60 * 60 * 24));
+        const daysToShow = Math.min(Math.max(daysDiff, 1), 7);
 
-      const daily_stats = [];
-      for (let i = 0; i < daysToShow; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        // Add some variance to make it look more natural
-        const variance = Math.floor(Math.random() * Math.max(avgImpressions * 0.2, 10)) - 5;
-        const clickVariance = Math.floor(Math.random() * Math.max(avgClicks * 0.2, 3)) - 1;
-        daily_stats.push({
-          date: date.toLocaleDateString('vi-VN', { weekday: 'short' }),
-          impressions: Math.max(0, avgImpressions + variance),
-          clicks: Math.max(0, avgClicks + clickVariance),
-        });
+        const avgImpressions = Math.floor(realImpressions / Math.max(daysToShow, 1));
+        const avgClicks = Math.floor(realClicks / Math.max(daysToShow, 1));
+        const avgReactions = Math.floor(realReactions / Math.max(daysToShow, 1));
+        const avgComments = Math.floor(realComments / Math.max(daysToShow, 1));
+        const remainderImpressions = realImpressions - avgImpressions * daysToShow;
+        const remainderClicks = realClicks - avgClicks * daysToShow;
+        const remainderReactions = realReactions - avgReactions * daysToShow;
+        const remainderComments = realComments - avgComments * daysToShow;
+
+        daily_stats = [];
+        for (let i = 0; i < daysToShow; i++) {
+          const date = new Date(startDate);
+          date.setDate(date.getDate() + i);
+          const isLast = i === daysToShow - 1;
+          daily_stats.push({
+            date: date.toLocaleDateString('vi-VN', { weekday: 'short' }),
+            impressions: avgImpressions + (isLast ? remainderImpressions : 0),
+            clicks: avgClicks + (isLast ? remainderClicks : 0),
+            reactions: avgReactions + (isLast ? remainderReactions : 0),
+            comments: avgComments + (isLast ? remainderComments : 0),
+          });
+        }
       }
 
       // Check if boost has expired and update status if needed
@@ -564,7 +593,10 @@ export const boostService = {
           expires_at: campaign.expires_at,
           impressions: realImpressions,
           clicks: realClicks,
+          reactions: realReactions,
+          comments: realComments,
           reach: realReach,
+          reachEstimated: true,
           engagement_rate: parseFloat(engagementRate),
           daily_stats,
           post: postStats ? {
@@ -572,9 +604,6 @@ export const boostService = {
             content: postStats.content,
             media_urls: postStats.media_urls,
           } : null,
-          // Additional real-time stats
-          reactions_count: reactionsCount || 0,
-          comments_count: commentsCount || 0,
         },
       };
     } catch (error) {

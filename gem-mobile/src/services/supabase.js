@@ -66,9 +66,9 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   },
   global: {
     fetch: (url, options = {}) => {
-      // Only add timeout for PostgREST API calls (database queries)
-      // Skip for storage (/storage/v1/), auth (/auth/v1/), edge functions (/functions/v1/)
-      const isDataQuery = typeof url === 'string' && url.includes('/rest/v1/');
+      // Add timeout for PostgREST API calls (database queries) and auth endpoints
+      // Skip for storage (/storage/v1/), edge functions (/functions/v1/)
+      const isDataQuery = typeof url === 'string' && (url.includes('/rest/v1/') || url.includes('/auth/v1/'));
 
       if (!isDataQuery || options.signal) {
         return fetch(url, options);

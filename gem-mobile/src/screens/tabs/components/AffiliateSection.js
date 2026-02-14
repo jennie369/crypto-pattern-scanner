@@ -88,8 +88,11 @@ export default function AffiliateSection({ user, navigation }) {
     }
   };
 
-  const handleCopyCode = async (code) => {
+  const handleCopyCode = async (displayCode) => {
     try {
+      // Use centralized getReferralCode for actual copy value
+      const { affiliateService } = require('../../../services/affiliateService');
+      const code = await affiliateService.getReferralCode(user?.id) || displayCode;
       await Clipboard.setStringAsync(code);
       alert({ type: 'success', title: 'Thành công', message: `Đã sao chép mã giới thiệu: ${code}` });
     } catch (error) {
@@ -97,8 +100,10 @@ export default function AffiliateSection({ user, navigation }) {
     }
   };
 
-  const handleCopyLink = async (code) => {
+  const handleCopyLink = async (displayCode) => {
     try {
+      const { affiliateService } = require('../../../services/affiliateService');
+      const code = await affiliateService.getReferralCode(user?.id) || displayCode;
       const link = partnershipService.getReferralLink(code);
       await Clipboard.setStringAsync(link);
       alert({ type: 'success', title: 'Thành công', message: 'Đã sao chép link giới thiệu!' });
@@ -153,7 +158,8 @@ export default function AffiliateSection({ user, navigation }) {
     const tierName = isKol ? 'KOL' : `${tierConfig.icon} ${tierConfig.name}`;
     const tierColor = isKol ? '#9C27B0' : tierConfig.color;
 
-    // Generate fallback affiliate code if not set
+    // Use affiliate code from partnership status; centralized getReferralCode
+    // is used for copy/share actions, this is just for display
     const affiliateCode = partnershipStatus.affiliate_code ||
                           `GEM${user?.id?.slice(0, 6)?.toUpperCase() || 'USER'}`;
 

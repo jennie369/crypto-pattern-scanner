@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, Zap, Eye, TrendingUp, Clock, Target, Users, MousePointer } from 'lucide-react-native';
+import { ArrowLeft, Zap, Eye, TrendingUp, Clock, Target, Users, MousePointer, Heart, MessageCircle } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import boostService from '../../services/boostService';
@@ -129,9 +129,19 @@ export default function BoostAnalyticsScreen({ navigation, route }) {
               <Text style={styles.statLabel}>Lượt click</Text>
             </View>
             <View style={styles.statCard}>
+              <Heart size={24} color={COLORS.gold} />
+              <Text style={styles.statValue}>{campaign?.reactions?.toLocaleString() || 0}</Text>
+              <Text style={styles.statLabel}>Reactions</Text>
+            </View>
+            <View style={styles.statCard}>
+              <MessageCircle size={24} color={COLORS.gold} />
+              <Text style={styles.statValue}>{campaign?.comments?.toLocaleString() || 0}</Text>
+              <Text style={styles.statLabel}>Comments</Text>
+            </View>
+            <View style={styles.statCard}>
               <Users size={24} color={COLORS.gold} />
               <Text style={styles.statValue}>{campaign?.reach?.toLocaleString() || 0}</Text>
-              <Text style={styles.statLabel}>Reach</Text>
+              <Text style={styles.statLabel}>{campaign?.reachEstimated ? 'Reach (Ước tính)' : 'Reach'}</Text>
             </View>
             <View style={styles.statCard}>
               <TrendingUp size={24} color={COLORS.gold} />
@@ -155,12 +165,20 @@ export default function BoostAnalyticsScreen({ navigation, route }) {
                     <MousePointer size={14} color={COLORS.textMuted} />
                     <Text style={styles.dayStatValue}>{day.clicks}</Text>
                   </View>
+                  <View style={styles.dayStat}>
+                    <Heart size={14} color={COLORS.textMuted} />
+                    <Text style={styles.dayStatValue}>{day.reactions}</Text>
+                  </View>
+                  <View style={styles.dayStat}>
+                    <MessageCircle size={14} color={COLORS.textMuted} />
+                    <Text style={styles.dayStatValue}>{day.comments}</Text>
+                  </View>
                 </View>
                 <View style={styles.progressBar}>
                   <View
                     style={[
                       styles.progressFill,
-                      { width: `${(day.impressions / 500) * 100}%` },
+                      { width: `${Math.min((day.impressions / Math.max(campaign?.impressions || 1, 1)) * 100 * (campaign?.daily_stats?.length || 1), 100)}%` },
                     ]}
                   />
                 </View>

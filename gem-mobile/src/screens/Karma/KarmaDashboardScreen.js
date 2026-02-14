@@ -76,8 +76,8 @@ const KarmaDashboardScreen = () => {
     try {
       if (!user?.id) return;
 
-      const data = await karmaService.getUserKarma(user.id, forceRefresh);
-      setKarmaData(data);
+      const result = await karmaService.getUserKarma(user.id, forceRefresh);
+      setKarmaData(result?.data || null);
       setError(null);
     } catch (err) {
       console.error('Error loading karma data:', err);
@@ -111,8 +111,8 @@ const KarmaDashboardScreen = () => {
   // Load leaderboard
   const loadLeaderboard = useCallback(async () => {
     try {
-      const data = await karmaService.getLeaderboard(20);
-      setLeaderboard(data || []);
+      const result = await karmaService.getLeaderboard(20);
+      setLeaderboard(result?.data || []);
     } catch (err) {
       console.error('Error loading leaderboard:', err);
     }
@@ -202,13 +202,13 @@ const KarmaDashboardScreen = () => {
         <View style={styles.nextLevelCard}>
           <View style={styles.nextLevelHeader}>
             <Text style={styles.nextLevelTitle}>Cấp tiếp theo</Text>
-            <KarmaLevelBadge level={nextLevelInfo.level} size="small" showLabel={false} />
+            <KarmaLevelBadge level={nextLevelInfo.id} size="small" showLabel={false} />
           </View>
           <Text style={[styles.nextLevelName, { color: nextLevelInfo.color }]}>
             {nextLevelInfo.name}
           </Text>
           <Text style={styles.nextLevelPoints}>
-            Còn {nextLevelInfo.pointsNeeded - (karmaData?.karma_points || 0)} Karma
+            Còn {nextLevelInfo.min - (karmaData?.karma_points || 0)} Karma
           </Text>
         </View>
       )}

@@ -58,6 +58,7 @@ const forumCache = {
   sessionId: null,
   lastFetch: 0,
   CACHE_DURATION: 30000, // 30 seconds cache
+  feed: null, // Track active feed for cache invalidation on feed switch
 };
 
 // A7: Clear forum cache on logout to prevent data leaking between users
@@ -66,6 +67,7 @@ export const clearForumCache = () => {
   forumCache.feedItems = null;
   forumCache.sessionId = null;
   forumCache.lastFetch = 0;
+  forumCache.feed = null;
   console.log('[ForumScreen] Forum cache cleared');
 };
 
@@ -489,9 +491,10 @@ const ForumScreen = ({ navigation }) => {
   useEffect(() => {
     const now = Date.now();
     const cacheExpired = now - forumCache.lastFetch > forumCache.CACHE_DURATION;
+    const feedChanged = forumCache.feed !== selectedFeed;
 
-    // Only load if cache expired or feed/topic changed
-    if (cacheExpired || !forumCache.posts || forumCache.posts.length === 0) {
+    // Only load if cache expired, feed changed, or no cached data
+    if (cacheExpired || feedChanged || !forumCache.posts || forumCache.posts.length === 0) {
       setPage(1);
       setHasMore(true);
       loadPosts(true);
@@ -622,6 +625,7 @@ const ForumScreen = ({ navigation }) => {
         forumCache.feedItems = feedData;
         forumCache.sessionId = newSessionId;
         forumCache.lastFetch = Date.now();
+        forumCache.feed = selectedFeed;
         trimCache(); // Prevent memory overflow
       } else {
         // Dedupe before appending
@@ -720,6 +724,7 @@ const ForumScreen = ({ navigation }) => {
         forumCache.feedItems = result.feed;
         forumCache.sessionId = result.sessionId;
         forumCache.lastFetch = Date.now();
+        forumCache.feed = selectedFeed;
         trimCache(); // Prevent memory overflow
 
         console.log('[ForumScreen] Hybrid feed loaded:', result.feed.length, 'items');
@@ -842,6 +847,7 @@ const ForumScreen = ({ navigation }) => {
         forumCache.feedItems = feedData;
         forumCache.sessionId = result.sessionId;
         forumCache.lastFetch = Date.now();
+        forumCache.feed = selectedFeed;
         trimCache(); // Prevent memory overflow
       } else {
         // Dedupe before appending
@@ -1106,6 +1112,9 @@ const ForumScreen = ({ navigation }) => {
       flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
       return;
     }
+
+    // Invalidate cache so feed switch forces reload
+    forumCache.lastFetch = 0;
 
     // Reset pagination state but DON'T clear posts/feedItems
     // Old data will be replaced when loadPosts completes with reset=true

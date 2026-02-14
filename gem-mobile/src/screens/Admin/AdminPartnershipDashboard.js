@@ -34,7 +34,7 @@ import {
   Wifi,
 } from 'lucide-react-native';
 
-import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { CTV_TIER_CONFIG, formatCurrency } from '../../constants/partnershipConstants';
 import ADMIN_PARTNERSHIP_SERVICE from '../../services/adminPartnershipService';
@@ -532,7 +532,9 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     minWidth: '45%',
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: GLASS?.card || 'rgba(30, 30, 60, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
     borderRadius: 12,
     padding: SPACING.md,
     alignItems: 'center',
@@ -563,7 +565,9 @@ const styles = StyleSheet.create({
   pendingTypeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: GLASS?.card || 'rgba(30, 30, 60, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
     borderRadius: 12,
     padding: SPACING.md,
   },
@@ -617,7 +621,9 @@ const styles = StyleSheet.create({
   tierDistribution: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: GLASS?.card || 'rgba(30, 30, 60, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
     borderRadius: 12,
     padding: SPACING.md,
   },
@@ -647,7 +653,9 @@ const styles = StyleSheet.create({
 
   // Empty state
   emptyCard: {
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: GLASS?.card || 'rgba(30, 30, 60, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
     borderRadius: 12,
     padding: SPACING.xl,
     alignItems: 'center',
@@ -662,7 +670,9 @@ const styles = StyleSheet.create({
   applicationCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: GLASS?.card || 'rgba(30, 30, 60, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
     borderRadius: 12,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
@@ -720,7 +730,9 @@ const styles = StyleSheet.create({
     minWidth: '45%',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: GLASS?.card || 'rgba(30, 30, 60, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
     borderRadius: 12,
     padding: SPACING.md,
     gap: SPACING.sm,
@@ -734,7 +746,9 @@ const styles = StyleSheet.create({
   jobButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
+    backgroundColor: GLASS?.card || 'rgba(30, 30, 60, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
     borderRadius: 12,
     padding: SPACING.md,
     marginBottom: SPACING.sm,

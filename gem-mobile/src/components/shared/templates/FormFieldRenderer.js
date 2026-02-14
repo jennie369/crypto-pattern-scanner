@@ -430,16 +430,33 @@ const FormFieldRenderer = ({
     case FIELD_TYPES.SELECT:
       return (
         <View style={styles.fieldContainer}>
-          <SelectInput
-            value={value}
-            onChange={onChange}
-            options={field.options || []}
-            placeholder={field.placeholder}
+          <LabelWithTooltip
             label={field.label}
             required={field.required}
-            disabled={disabled}
-            error={error}
+            tooltip={tooltip}
           />
+          <View style={styles.selectContainer}>
+            {field.options?.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.selectChip,
+                  value === option.value && styles.selectChipActive,
+                  disabled && styles.inputDisabled,
+                ]}
+                onPress={() => !disabled && onChange(option.value)}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.selectChipText,
+                  value === option.value && styles.selectChipTextActive,
+                ]}>
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {error && <Text style={styles.error}>{error}</Text>}
         </View>
       );
 
@@ -459,11 +476,12 @@ const FormFieldRenderer = ({
         </View>
       );
 
-    case FIELD_TYPES.CHECKLIST:
+    case FIELD_TYPES.CHECKLIST: {
+      const items = value?.length > 0 ? value : (field.defaultItems || []).map(item => ({ ...item, checked: false }));
       return (
         <View style={styles.fieldContainer}>
           <ChecklistInput
-            value={value || []}
+            value={items}
             onChange={onChange}
             label={field.label}
             placeholder={field.placeholder}
@@ -475,6 +493,7 @@ const FormFieldRenderer = ({
           />
         </View>
       );
+    }
 
     case FIELD_TYPES.ACTION_LIST:
       // Get suggested actions for this field
@@ -1196,6 +1215,33 @@ const styles = StyleSheet.create({
     color: COSMIC_COLORS.text.secondary,
     textAlign: 'center',
   },
+  // Select chips (inline)
+  selectContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: COSMIC_SPACING.xs,
+  },
+  selectChip: {
+    paddingHorizontal: COSMIC_SPACING.md,
+    paddingVertical: COSMIC_SPACING.sm,
+    backgroundColor: COSMIC_COLORS.glass.bgDark,
+    borderRadius: COSMIC_RADIUS.sm,
+    borderWidth: 1.5,
+    borderColor: COSMIC_COLORS.glass.border,
+  },
+  selectChipActive: {
+    backgroundColor: COSMIC_COLORS.glow.gold + '20',
+    borderColor: COSMIC_COLORS.glow.gold,
+  },
+  selectChipText: {
+    fontSize: COSMIC_TYPOGRAPHY.fontSize.base,
+    color: COSMIC_COLORS.text.secondary,
+  },
+  selectChipTextActive: {
+    color: COSMIC_COLORS.glow.gold,
+    fontWeight: '600',
+  },
+
   appRitualCheck: {
     position: 'absolute',
     top: 4,

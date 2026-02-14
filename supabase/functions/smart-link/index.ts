@@ -23,7 +23,7 @@ const corsHeaders = {
 };
 
 // App Store URLs
-const APP_STORE_IOS = 'https://apps.apple.com/app/gemral/id123456789'; // TODO: Update with real App Store ID
+const APP_STORE_IOS = 'https://apps.apple.com/app/gemral/id6738421498';
 const APP_STORE_ANDROID = 'https://play.google.com/store/apps/details?id=com.gemral.mobile';
 
 // App scheme

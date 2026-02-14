@@ -42,7 +42,7 @@ const REFERRAL_BASE_URL = 'https://gemral.com';
 const APP_SCHEME = 'gem';
 
 // App Store links
-const APP_STORE_IOS = 'https://apps.apple.com/app/gemral/id123456789'; // TODO: Update with real App Store ID
+const APP_STORE_IOS = 'https://apps.apple.com/app/gemral/id6738421498';
 const APP_STORE_ANDROID = 'https://play.google.com/store/apps/details?id=com.gemral.mobile';
 
 // Product Types
@@ -302,24 +302,63 @@ class AffiliateService {
   }
 
   /**
-   * Get referral code for current user
+   * Get referral code for a user (centralized single source of truth)
+   * Priority: 1. affiliate_codes (product_id IS NULL, active)
+   *           2. profiles.affiliate_code
+   *           3. Generate fallback + persist
+   * @param {string} userId - User ID (optional, uses current user if not provided)
+   * @returns {Promise<string|null>} The referral code string
    */
-  async getReferralCode() {
+  async getReferralCode(userId = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      let uid = userId;
+      if (!uid) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+        uid = user.id;
+      }
 
-      const { data, error } = await supabase
+      // 1. Try affiliate_codes table (main referral code, no product)
+      const { data: codeRow } = await supabase
         .from('affiliate_codes')
-        .select('*')
-        .eq('user_id', user.id)
+        .select('code')
+        .eq('user_id', uid)
+        .is('product_id', null)
         .eq('is_active', true)
+        .maybeSingle();
+
+      if (codeRow?.code) return codeRow.code;
+
+      // 2. Fallback: profiles.affiliate_code
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('affiliate_code')
+        .eq('id', uid)
         .single();
 
-      if (error) throw error;
-      return data;
+      if (profile?.affiliate_code) return profile.affiliate_code;
+
+      // 3. Final fallback: generate, persist, and return
+      const generatedCode = 'GEM' + uid.slice(0, 6).toUpperCase();
+
+      // Insert into affiliate_codes
+      await supabase
+        .from('affiliate_codes')
+        .insert({ user_id: uid, code: generatedCode, is_active: true })
+        .select()
+        .maybeSingle();
+
+      // Also update profiles.affiliate_code
+      await supabase
+        .from('profiles')
+        .update({ affiliate_code: generatedCode })
+        .eq('id', uid);
+
+      return generatedCode;
     } catch (error) {
       console.error('[Affiliate] getReferralCode error:', error);
+      // Ultra-fallback: return generated code without persisting
+      if (userId) return 'GEM' + userId.slice(0, 6).toUpperCase();
       return null;
     }
   }
@@ -353,11 +392,17 @@ class AffiliateService {
         code_param: referralCode,
       });
 
-      // Fallback if RPC doesn't exist
+      // Fallback if RPC doesn't exist: read current value, increment, update
       if (error) {
+        const { data: current } = await supabase
+          .from('affiliate_codes')
+          .select('clicks')
+          .eq('code', referralCode)
+          .single();
+
         const { error: updateError } = await supabase
           .from('affiliate_codes')
-          .update({ clicks: supabase.sql`clicks + 1` })
+          .update({ clicks: (current?.clicks || 0) + 1 })
           .eq('code', referralCode);
 
         if (updateError) throw updateError;
@@ -1307,11 +1352,17 @@ class AffiliateService {
         code_id: link.id,
       });
 
-      // Fallback to direct update
+      // Fallback to direct update: read + increment
       if (rpcError) {
+        const { data: currentLink } = await supabase
+          .from('affiliate_codes')
+          .select('clicks')
+          .eq('id', link.id)
+          .single();
+
         await supabase
           .from('affiliate_codes')
-          .update({ clicks: supabase.sql`COALESCE(clicks, 0) + 1` })
+          .update({ clicks: (currentLink?.clicks || 0) + 1 })
           .eq('id', link.id);
       }
 

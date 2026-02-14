@@ -55,6 +55,15 @@ const WEB_URL_PATTERNS = [
     }),
   },
   {
+    // https://gemral.com/post/{postId} (legacy alias)
+    pattern: /^https?:\/\/(?:www\.)?gemral\.com\/post\/([^\/?\s]+)/i,
+    handler: (matches) => ({
+      stack: 'Home',
+      screen: 'PostDetail',
+      params: { postId: matches[1] },
+    }),
+  },
+  {
     // https://gemral.com/shop/product/{productId}
     pattern: /^https?:\/\/(?:www\.)?gemral\.com\/shop\/product\/([^\/?\s]+)/i,
     handler: (matches) => ({
@@ -133,6 +142,15 @@ const DYNAMIC_DEEP_LINK_PATTERNS = [
   {
     // gem://forum/thread/{postId}
     pattern: /^\/forum\/thread\/([^\/]+)$/,
+    handler: (matches) => ({
+      stack: 'Home',
+      screen: 'PostDetail',
+      params: { postId: matches[1] },
+    }),
+  },
+  {
+    // gem://post/{postId} (legacy alias for /forum/thread/{postId})
+    pattern: /^\/post\/([^\/]+)$/,
     handler: (matches) => ({
       stack: 'Home',
       screen: 'PostDetail',

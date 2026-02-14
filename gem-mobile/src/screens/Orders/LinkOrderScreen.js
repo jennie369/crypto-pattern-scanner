@@ -497,7 +497,7 @@ const LinkOrderScreen = () => {
                         style={styles.input}
                         value={orderNumber}
                         onChangeText={setOrderNumber}
-                        placeholder="VD: 1001"
+                        placeholder="VD: 1001 hoặc #1001 hoặc GEM-1001"
                         placeholderTextColor={COLORS.textMuted}
                         keyboardType="default"
                         autoCapitalize="none"
@@ -505,7 +505,7 @@ const LinkOrderScreen = () => {
                       />
                     </View>
                     <Text style={styles.inputHint}>
-                      Tìm số đơn hàng trong email xác nhận từ Shopify
+                      Nhập số đơn hàng từ email Shopify (VD: 1001, #1001, GEM-1001)
                     </Text>
                   </View>
                 )}

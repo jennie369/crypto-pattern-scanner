@@ -47,6 +47,7 @@ import {
   TrendSparkline,
 } from '../../../components/Admin/Analytics';
 import { COLORS, GRADIENTS, SPACING, GLASS } from '../../../utils/tokens';
+import { supabase } from '../../../services/supabase';
 
 const AffiliateAnalyticsScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false) // Never blocks UI;
@@ -60,44 +61,146 @@ const AffiliateAnalyticsScreen = ({ navigation }) => {
     dailyClicks: [],
   });
 
+  const getDateRange = useCallback(() => {
+    const now = new Date();
+    const ranges = {
+      LAST_7_DAYS: 7,
+      LAST_30_DAYS: 30,
+      LAST_90_DAYS: 90,
+    };
+    const days = ranges[dateRange] || 30;
+    const start = new Date(now);
+    start.setDate(start.getDate() - days);
+    const prevStart = new Date(start);
+    prevStart.setDate(prevStart.getDate() - days);
+    return {
+      start: start.toISOString(),
+      prevStart: prevStart.toISOString(),
+      now: now.toISOString(),
+      startDate: start,
+      days,
+    };
+  }, [dateRange]);
+
   const fetchData = useCallback(async () => {
     try {
+      const { start, prevStart, now, startDate, days } = getDateRange();
+      const rankColors = [COLORS.gold, COLORS.purple, COLORS.cyan, COLORS.success, '#FF6B9D'];
+
+      // Parallel queries
+      const [
+        affiliatesRes,
+        prevAffiliatesRes,
+        clicksRes,
+        prevClicksRes,
+        conversionsRes,
+        prevConversionsRes,
+        commissionRes,
+        prevCommissionRes,
+        topPerformersRes,
+        tierCountsRes,
+      ] = await Promise.all([
+        // Active affiliates (current period)
+        supabase.from('affiliate_profiles').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('created_at', start),
+        // Active affiliates (previous period)
+        supabase.from('affiliate_profiles').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('created_at', prevStart).lt('created_at', start),
+        // Total clicks (current)
+        supabase.from('affiliate_codes').select('clicks').gte('last_clicked_at', start),
+        // Total clicks (previous)
+        supabase.from('affiliate_codes').select('clicks').gte('last_clicked_at', prevStart).lt('last_clicked_at', start),
+        // Conversions (current)
+        supabase.from('affiliate_referrals').select('id', { count: 'exact', head: true }).gte('created_at', start),
+        // Conversions (previous)
+        supabase.from('affiliate_referrals').select('id', { count: 'exact', head: true }).gte('created_at', prevStart).lt('created_at', start),
+        // Commission (current)
+        supabase.from('commission_sales').select('commission_amount').gte('created_at', start),
+        // Commission (previous)
+        supabase.from('commission_sales').select('commission_amount').gte('created_at', prevStart).lt('created_at', start),
+        // Top performers by commission
+        supabase.from('commission_sales').select('affiliate_user_id, commission_amount, affiliate_profiles!inner(display_name)').gte('created_at', start),
+        // Tier counts
+        supabase.from('affiliate_profiles').select('tier').eq('status', 'active'),
+      ]);
+
+      // Calculate overview
+      const activeAffiliates = affiliatesRes.count || 0;
+      const prevActiveAffiliates = prevAffiliatesRes.count || 0;
+      const totalClicks = (clicksRes.data || []).reduce((sum, r) => sum + (r.clicks || 0), 0);
+      const prevTotalClicks = (prevClicksRes.data || []).reduce((sum, r) => sum + (r.clicks || 0), 0);
+      const conversions = conversionsRes.count || 0;
+      const prevConversions = prevConversionsRes.count || 0;
+      const totalCommission = (commissionRes.data || []).reduce((sum, r) => sum + (r.commission_amount || 0), 0);
+      const prevTotalCommission = (prevCommissionRes.data || []).reduce((sum, r) => sum + (r.commission_amount || 0), 0);
+
+      const pctChange = (curr, prev) => prev > 0 ? ((curr - prev) / prev * 100) : (curr > 0 ? 100 : 0);
+
+      // Aggregate top performers
+      const performerMap = {};
+      (topPerformersRes.data || []).forEach((row) => {
+        const uid = row.affiliate_user_id;
+        if (!performerMap[uid]) {
+          performerMap[uid] = {
+            id: uid,
+            label: row.affiliate_profiles?.display_name || uid.slice(0, 8),
+            value: 0,
+            conversions: 0,
+          };
+        }
+        performerMap[uid].value += row.commission_amount || 0;
+        performerMap[uid].conversions += 1;
+      });
+      const topAffiliates = Object.values(performerMap)
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5)
+        .map((item, i) => ({
+          ...item,
+          subtitle: `${item.conversions} conversions`,
+          color: rankColors[i] || COLORS.textMuted,
+        }));
+
+      // Tier stats
+      const tierCounts = {};
+      (tierCountsRes.data || []).forEach((row) => {
+        const t = row.tier || 'bronze';
+        tierCounts[t] = (tierCounts[t] || 0) + 1;
+      });
+
+      const tierOrder = ['diamond', 'platinum', 'gold', 'silver', 'bronze'];
+      const tierLabels = { diamond: 'Diamond', platinum: 'Platinum', gold: 'Gold', silver: 'Silver', bronze: 'Bronze' };
+      const tierColors = { diamond: '#B9F2FF', platinum: '#E5E4E2', gold: COLORS.gold, silver: '#C0C0C0', bronze: '#CD7F32' };
+
+      const conversionByTier = tierOrder
+        .filter((t) => tierCounts[t] > 0)
+        .map((t) => ({ label: `${tierLabels[t]} Affiliates`, value: tierCounts[t], color: tierColors[t] }));
+
+      const tierStats = tierOrder
+        .filter((t) => tierCounts[t] > 0)
+        .map((t) => ({
+          tier: tierLabels[t],
+          affiliates: tierCounts[t],
+          conversionRate: 0,
+          avgCommission: 0,
+        }));
+
+      // Placeholder daily clicks (7 data points)
+      const dailyClicks = Array.from({ length: 7 }, () => Math.round(totalClicks / 7 + (Math.random() - 0.5) * totalClicks / 14));
+
       setData({
         overview: {
-          activeAffiliates: 234,
-          activeAffiliatesChange: 15.2,
-          totalClicks: 45678,
-          totalClicksChange: 22.5,
-          conversions: 567,
-          conversionsChange: 18.3,
-          totalCommission: 125000000,
-          totalCommissionChange: 28.5,
+          activeAffiliates,
+          activeAffiliatesChange: Math.round(pctChange(activeAffiliates, prevActiveAffiliates) * 10) / 10,
+          totalClicks,
+          totalClicksChange: Math.round(pctChange(totalClicks, prevTotalClicks) * 10) / 10,
+          conversions,
+          conversionsChange: Math.round(pctChange(conversions, prevConversions) * 10) / 10,
+          totalCommission,
+          totalCommissionChange: Math.round(pctChange(totalCommission, prevTotalCommission) * 10) / 10,
         },
-        topAffiliates: [
-          { id: '1', label: 'Crypto_King_VN', value: 2345000, conversions: 45, subtitle: '45 conversions', color: COLORS.gold },
-          { id: '2', label: 'TradingMaster99', value: 1890000, conversions: 38, subtitle: '38 conversions', color: COLORS.purple },
-          { id: '3', label: 'GemLover2024', value: 1456000, conversions: 32, subtitle: '32 conversions', color: COLORS.cyan },
-          { id: '4', label: 'BitcoinViet', value: 1234000, conversions: 28, subtitle: '28 conversions', color: COLORS.success },
-          { id: '5', label: 'CryptoDaily', value: 987000, conversions: 22, subtitle: '22 conversions', color: '#FF6B9D' },
-        ],
-        trafficSources: [
-          { label: 'Social Media', value: 18765 },
-          { label: 'Website/Blog', value: 12456 },
-          { label: 'YouTube', value: 8234 },
-          { label: 'Telegram', value: 4567 },
-          { label: 'Other', value: 1656 },
-        ],
-        conversionByTier: [
-          { label: 'Gold Affiliates', value: 234, color: COLORS.gold },
-          { label: 'Silver Affiliates', value: 189, color: '#C0C0C0' },
-          { label: 'Bronze Affiliates', value: 144, color: '#CD7F32' },
-        ],
-        dailyClicks: [1200, 1456, 1389, 1567, 1823, 1956, 2134],
-        tierStats: [
-          { tier: 'Gold', affiliates: 12, conversionRate: 4.2, avgCommission: 8500000 },
-          { tier: 'Silver', affiliates: 45, conversionRate: 2.8, avgCommission: 3200000 },
-          { tier: 'Bronze', affiliates: 177, conversionRate: 1.5, avgCommission: 890000 },
-        ],
+        topAffiliates,
+        trafficSources: [],
+        conversionByTier,
+        dailyClicks,
+        tierStats,
       });
     } catch (error) {
       console.error('[AffiliateAnalytics] Fetch error:', error);
@@ -105,7 +208,7 @@ const AffiliateAnalyticsScreen = ({ navigation }) => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dateRange]);
+  }, [dateRange, getDateRange]);
 
   useEffect(() => {
     fetchData();

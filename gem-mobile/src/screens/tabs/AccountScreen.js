@@ -600,7 +600,9 @@ export default function AccountScreen() {
 
   const copyReferralCode = async () => {
     try {
-      const code = user?.referral_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
+      const { affiliateService } = require('../../services/affiliateService');
+      const code = await affiliateService.getReferralCode(user?.id);
+      if (!code) throw new Error('No code');
       await Clipboard.setStringAsync(code);
       alert({
         type: 'success',

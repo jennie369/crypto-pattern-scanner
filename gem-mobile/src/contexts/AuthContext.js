@@ -18,6 +18,13 @@ import { notificationService } from '../services/notificationService';
 import { errorService } from '../services/errorService';
 import { clearEventSession } from '../hooks/useEventTracking';
 
+// Auth startup timeout - prevents black screen if Supabase is unreachable
+const AUTH_TIMEOUT = 10000; // 10 seconds
+const withAuthTimeout = (promise, ms) => Promise.race([
+  promise,
+  new Promise((_, reject) => setTimeout(() => reject(new Error('Auth timeout')), ms))
+]);
+
 // Helper: Handle invalid refresh token by clearing session
 const handleInvalidRefreshToken = async (setUser, setProfile) => {
   console.warn('[AuthContext] ⚠️ Invalid refresh token detected, clearing session...');
@@ -414,7 +421,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const { user, error } = await getCurrentUser();
+        const { user, error } = await withAuthTimeout(getCurrentUser(), AUTH_TIMEOUT);
 
         // Check for invalid refresh token error
         if (error?.isInvalidRefreshToken || error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
@@ -474,8 +481,14 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Error loading session:', error);
+        // Handle auth timeout - fall through to login screen
+        if (error?.message === 'Auth timeout') {
+          console.warn('[AuthContext] Auth timeout - clearing session, showing login');
+          setUser(null);
+          setProfile(null);
+        }
         // Handle invalid refresh token in catch block
-        if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
+        else if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
           await handleInvalidRefreshToken(setUser, setProfile);
         }
       } finally {

@@ -61,7 +61,7 @@ class PatternEnricherService {
    */
   generateId(pattern, symbol) {
     // ⚠️ CRITICAL: Use patternType (e.g., 'DPU', 'UPU') not generic type (e.g., 'reversal')
-    const patternType = pattern?.patternType || pattern?.pattern_type || pattern?.type || 'unknown';
+    const patternType = pattern?.patternType || pattern?.pattern || pattern?.pattern_type || pattern?.type || 'unknown';
     const timeframe = pattern?.timeframe || pattern?.tf || '1h';
     const entry = pattern?.entry || pattern?.entry_price || 0;
     const timestamp = pattern?.formation_time || pattern?.timestamp || pattern?.detectedAt || Date.now();
@@ -130,8 +130,8 @@ class PatternEnricherService {
     const isBullish = direction === 'LONG';
 
     // Parse prices with fallbacks
-    const entry = this._parsePrice(pattern.entry || pattern.entry_price || pattern.price_level);
-    const stopLoss = this._parsePrice(pattern.stopLoss || pattern.stop_loss || pattern.sl);
+    const entry = this._parsePrice(pattern.entry || pattern.entry_price || pattern.entryPrice || pattern.price_level);
+    const stopLoss = this._parsePrice(pattern.stopLoss || pattern.stop_loss || pattern.sl || pattern.stopPrice || pattern.stopLossPrice);
     const takeProfit = this._parsePrice(pattern.takeProfit || pattern.take_profit || pattern.tp || pattern.target);
 
     // Zone bounds
@@ -155,11 +155,11 @@ class PatternEnricherService {
       // ⚠️ CRITICAL: patternType is the REAL pattern name (e.g., 'DPD', 'Head & Shoulders')
       // pattern.type might be category like 'reversal', 'continuation' - NOT the pattern name!
       // Priority: patternType > pattern_name > name > type > pattern_type
-      patternType: pattern.patternType || pattern.pattern_name || pattern.name || pattern.type || pattern.pattern_type || 'Zone',
-      type: pattern.patternType || pattern.pattern_name || pattern.name || pattern.type || pattern.pattern_type || 'Zone',
-      pattern_type: pattern.patternType || pattern.pattern_name || pattern.name || pattern.type || pattern.pattern_type || 'Zone',
-      pattern_name: pattern.patternType || pattern.pattern_name || pattern.name || pattern.type || 'Zone',
-      name: pattern.patternType || pattern.pattern_name || pattern.name || pattern.type || 'Zone',
+      patternType: pattern.patternType || pattern.pattern || pattern.pattern_name || pattern.name || pattern.type || pattern.pattern_type || 'Zone',
+      type: pattern.patternType || pattern.pattern || pattern.pattern_name || pattern.name || pattern.type || pattern.pattern_type || 'Zone',
+      pattern_type: pattern.patternType || pattern.pattern || pattern.pattern_name || pattern.name || pattern.type || pattern.pattern_type || 'Zone',
+      pattern_name: pattern.patternType || pattern.pattern || pattern.pattern_name || pattern.name || pattern.type || 'Zone',
+      name: pattern.patternType || pattern.pattern || pattern.pattern_name || pattern.name || pattern.type || 'Zone',
       direction: direction,
       isBullish: isBullish,
       isBearish: !isBullish && direction !== 'NEUTRAL',
@@ -366,6 +366,11 @@ class PatternEnricherService {
       return 'SHORT';
     }
 
+    // Check tradingBias field (some detectors use BUY/SELL instead of LONG/SHORT)
+    const bias = (dir || pattern?.tradingBias || '').toString().toUpperCase();
+    if (bias === 'BUY') return 'LONG';
+    if (bias === 'SELL') return 'SHORT';
+
     // Infer from entry vs stopLoss
     const entry = this._parsePrice(pattern?.entry || pattern?.entry_price);
     const sl = this._parsePrice(pattern?.stopLoss || pattern?.stop_loss);
@@ -418,7 +423,7 @@ class PatternEnricherService {
 
   _getDisplayName(pattern) {
     // ⚠️ CRITICAL: patternType is the REAL pattern name from detector
-    const name = pattern?.patternType || pattern?.pattern_name || pattern?.name || pattern?.type || 'Zone';
+    const name = pattern?.patternType || pattern?.pattern || pattern?.pattern_name || pattern?.name || pattern?.type || 'Zone';
 
     // Vietnamese translations
     const translations = {

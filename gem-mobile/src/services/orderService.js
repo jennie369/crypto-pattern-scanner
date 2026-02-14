@@ -709,6 +709,10 @@ export const linkOrderByNumber = async (userId, orderNumber, email) => {
   try {
     const normalizedEmail = email.toLowerCase();
 
+    // Normalize order number: strip leading #, spaces, "GEM-" prefix
+    const normalizeOrderNumber = (num) => num.replace(/^[#\s]*(?:GEM-?)?/i, '').trim();
+    const normalizedOrderNum = normalizeOrderNumber(orderNumber);
+
     // 1. Check if email is verified for this user
     const { data: profile } = await supabase
       .from('profiles')
@@ -740,15 +744,38 @@ export const linkOrderByNumber = async (userId, orderNumber, email) => {
       }
     }
 
-    // 2. Find order in shopify_orders
-    const { data: order, error: findError } = await supabase
+    // 2. Find order in shopify_orders — try multiple formats
+    // Try exact match with normalized number first
+    let { data: order } = await supabase
       .from('shopify_orders')
       .select('*')
-      .eq('order_number', orderNumber)
+      .eq('order_number', normalizedOrderNum)
       .eq('email', normalizedEmail)
-      .single();
+      .maybeSingle();
 
-    if (findError || !order) {
+    // Try with '#' prefix
+    if (!order) {
+      const { data: orderWithHash } = await supabase
+        .from('shopify_orders')
+        .select('*')
+        .eq('order_number', '#' + normalizedOrderNum)
+        .eq('email', normalizedEmail)
+        .maybeSingle();
+      order = orderWithHash;
+    }
+
+    // Last resort: ILIKE for partial match
+    if (!order) {
+      const { data: orderIlike } = await supabase
+        .from('shopify_orders')
+        .select('*')
+        .ilike('order_number', `%${normalizedOrderNum}`)
+        .eq('email', normalizedEmail)
+        .maybeSingle();
+      order = orderIlike;
+    }
+
+    if (!order) {
       return {
         success: false,
         message: 'Không tìm thấy đơn hàng. Vui lòng kiểm tra lại số đơn hàng và email.',
@@ -772,11 +799,28 @@ export const linkOrderByNumber = async (userId, orderNumber, email) => {
 
     // 5. Add email to verified_linked_emails if not already
     if (!profile?.verified_linked_emails?.includes(normalizedEmail)) {
+      // Read current arrays, append, then update (avoids supabase.sql)
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('linked_emails, verified_linked_emails')
+        .eq('id', userId)
+        .single();
+
+      const linkedEmails = currentProfile?.linked_emails || [];
+      const verifiedEmails = currentProfile?.verified_linked_emails || [];
+
+      if (!linkedEmails.includes(normalizedEmail)) {
+        linkedEmails.push(normalizedEmail);
+      }
+      if (!verifiedEmails.includes(normalizedEmail)) {
+        verifiedEmails.push(normalizedEmail);
+      }
+
       await supabase
         .from('profiles')
         .update({
-          linked_emails: supabase.sql`array_append(COALESCE(linked_emails, '{}'), ${normalizedEmail})`,
-          verified_linked_emails: supabase.sql`array_append(COALESCE(verified_linked_emails, '{}'), ${normalizedEmail})`,
+          linked_emails: linkedEmails,
+          verified_linked_emails: verifiedEmails,
         })
         .eq('id', userId);
     }

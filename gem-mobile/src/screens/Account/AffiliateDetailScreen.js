@@ -188,8 +188,10 @@ export default function AffiliateDetailScreen({ route, navigation }) {
   };
 
   const copyReferralCode = async () => {
-    const code = profile?.referral_code || user?.referral_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
     try {
+      const { affiliateService } = require('../../services/affiliateService');
+      const code = await affiliateService.getReferralCode(user?.id);
+      if (!code) throw new Error('No code');
       await Clipboard.setStringAsync(code);
       alertService.success('Thành công', `Đã sao chép mã giới thiệu: ${code}`);
     } catch (error) {
@@ -198,9 +200,11 @@ export default function AffiliateDetailScreen({ route, navigation }) {
   };
 
   const copyReferralLink = async () => {
-    const code = profile?.referral_code || user?.referral_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
-    const link = `https://gemral.com/?ref=${code}`;
     try {
+      const { affiliateService } = require('../../services/affiliateService');
+      const code = await affiliateService.getReferralCode(user?.id);
+      if (!code) throw new Error('No code');
+      const link = `https://gemral.com/?ref=${code}`;
       await Clipboard.setStringAsync(link);
       alertService.success('Thành công', 'Đã sao chép link giới thiệu!');
     } catch (error) {
@@ -219,12 +223,12 @@ export default function AffiliateDetailScreen({ route, navigation }) {
   };
 
   const getCurrentTier = () => {
-    return profile?.ctv_tier || 'beginner';
+    return profile?.ctv_tier || 'bronze';
   };
 
   const getNextTier = () => {
     const current = getCurrentTier();
-    const tiers = ['beginner', 'growing', 'master', 'grand'];
+    const tiers = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
     const idx = tiers.indexOf(current);
     return idx < tiers.length - 1 ? tiers[idx + 1] : null;
   };
@@ -234,36 +238,22 @@ export default function AffiliateDetailScreen({ route, navigation }) {
     const nextTier = getNextTier();
     if (!nextTier) return 100;
 
-    const currentThreshold = TIER_THRESHOLDS[getCurrentTier()];
+    const currentThreshold = TIER_THRESHOLDS[getCurrentTier()] || 0;
     const nextThreshold = TIER_THRESHOLDS[nextTier];
+    if (!nextThreshold) return 100;
     const progress = ((totalSales - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
     return Math.min(Math.max(progress, 0), 100);
   };
 
   const getCommissionRate = () => {
-    const role = profile?.role || 'affiliate';
+    const role = profile?.role || 'ctv';
     const tier = getCurrentTier();
-
-    // Map tier names to commission keys (beginner/growing/master/grand → bronze/silver/gold/platinum)
-    const tierMapping = {
-      beginner: 'bronze',
-      growing: 'silver',
-      master: 'gold',
-      grand: 'platinum',
-      // Also support direct tier names
-      bronze: 'bronze',
-      silver: 'silver',
-      gold: 'gold',
-      platinum: 'platinum',
-      diamond: 'diamond',
-    };
 
     if (role === 'kol') {
       return COMMISSION_RATES.kol;
     }
 
-    const mappedTier = tierMapping[tier] || 'bronze';
-    return COMMISSION_RATES.ctv[mappedTier] || COMMISSION_RATES.ctv.bronze;
+    return COMMISSION_RATES.ctv[tier] || COMMISSION_RATES.ctv.bronze;
   };
 
   if (loading) {
@@ -276,7 +266,8 @@ export default function AffiliateDetailScreen({ route, navigation }) {
     );
   }
 
-  const referralCode = profile?.referral_code || user?.referral_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
+  // Referral code display - uses profile data if available, fallback for render
+  const referralCode = profile?.referral_code || profile?.affiliate_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
   const currentTier = getCurrentTier();
   const nextTier = getNextTier();
   const tierProgress = getTierProgress();

@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "gem",
     "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -15,6 +16,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.gemral.mobile",
       "buildNumber": "3",
+      "associatedDomains": ["applinks:gemral.com", "applinks:www.gemral.com"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
