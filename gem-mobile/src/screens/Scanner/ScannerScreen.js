@@ -856,11 +856,13 @@ const ScannerScreen = ({ navigation }) => {
           endTime: matchingZone.endTime || matchingZone.end_time,
           formation_time: matchingZone.formation_time || matchingZone.formationTime || matchingZone.start_time,
           formationTime: matchingZone.formationTime || matchingZone.formation_time || matchingZone.startTime,
-          // Also ensure entry/SL/TP from zone are available
+          // P6 FIX #3: Prefer detection target (correct R:R) over zone target_1
+          // Also set canonical takeProfit field so V2 modal finds it first
           entry_price: matchingZone.entry_price || enrichedPattern.entry,
           stop_loss: matchingZone.stop_loss || enrichedPattern.stopLoss,
           target_1: matchingZone.target_1 || enrichedPattern.target,
-          take_profit: matchingZone.take_profit || matchingZone.target_1 || enrichedPattern.target,
+          take_profit: enrichedPattern.target || matchingZone.target_1 || enrichedPattern.takeProfit,
+          takeProfit: enrichedPattern.target || matchingZone.target_1 || enrichedPattern.takeProfit,
         };
       } else {
         console.log('[PaperTrade] No matching zone found for pattern:', patternId);
@@ -1494,9 +1496,9 @@ const ScannerScreen = ({ navigation }) => {
                   console.log('[PATTERN-SELECT] pattern.pattern_id:', pattern.pattern_id);
                   console.log('[PATTERN-SELECT] pattern.entry:', pattern.entry, 'entryPrice:', pattern.entryPrice);
                   setSelectedCoins([pattern.symbol]);
-                  // Don't call subscribeToPrice - useEffect handles it
+                  // P6 FIX #1: Don't clear results when selecting a cross-TF pattern
                   if (pattern.timeframe) {
-                    setSelectedTimeframe(pattern.timeframe);
+                    setSelectedTimeframe(pattern.timeframe, { clearResults: false });
                   }
                   setSelectedPattern(pattern);
                   setSelectedPosition(null);
@@ -1571,9 +1573,9 @@ const ScannerScreen = ({ navigation }) => {
                   console.log('[PATTERN-SELECT] pattern.pattern_id:', pattern.pattern_id);
                   console.log('[PATTERN-SELECT] pattern.entry:', pattern.entry, 'entryPrice:', pattern.entryPrice);
                   setSelectedCoins([pattern.symbol]);
-                  // Don't call subscribeToPrice - useEffect handles it
+                  // P6 FIX #1: Don't clear results when selecting a cross-TF pattern
                   if (pattern.timeframe) {
-                    setSelectedTimeframe(pattern.timeframe);
+                    setSelectedTimeframe(pattern.timeframe, { clearResults: false });
                   }
                   setSelectedPattern(pattern);
                   setSelectedPosition(null);

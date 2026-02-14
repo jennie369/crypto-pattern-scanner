@@ -19,15 +19,19 @@ export const ScannerProvider = ({ children }) => {
   const [zones, setZones] = useState([]);
 
   // B3 FIX: Clear stale patterns when timeframe changes to prevent cross-TF leakage
-  const setSelectedTimeframe = useCallback((newTf) => {
+  // P6 FIX #1: Add clearResults flag — pattern selection should NOT wipe results
+  const setSelectedTimeframe = useCallback((newTf, { clearResults = true } = {}) => {
     setSelectedTimeframeRaw(prev => {
-      if (prev !== newTf) {
-        // Timeframe changed — clear old results immediately
-        setScanResults([]);
-        setPatterns([]);
-        setLastScanTime(null);
-        setMultiTFResults(null);
-        setZones([]);
+      if (prev !== newTf && clearResults) {
+        // User-initiated timeframe change — clear old results
+        // P6 FIX: Use queueMicrotask to avoid setState-inside-setState anti-pattern
+        queueMicrotask(() => {
+          setScanResults([]);
+          setPatterns([]);
+          setLastScanTime(null);
+          setMultiTFResults(null);
+          setZones([]);
+        });
       }
       return newTf;
     });

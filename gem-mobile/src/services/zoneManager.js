@@ -265,14 +265,15 @@ class ZoneManager {
     const entryPrice = pattern.entry || (zoneType === ZONE_TYPE.LFZ ? zoneLow : zoneHigh);
     const stopPrice = pattern.stopLoss || (zoneType === ZONE_TYPE.LFZ ? zoneLow * 0.98 : zoneHigh * 1.02);
 
-    // Calculate target prices (1:2 and 1:3 R:R)
+    // P6 FIX #3: Use detector's R:R instead of hardcoded 1:2
     const riskAmount = Math.abs(entryPrice - stopPrice);
+    const rrMultiplier = pattern.riskReward || pattern.rrMultiplier || pattern.rr || 2.0;
     const target1 = zoneType === ZONE_TYPE.LFZ
-      ? entryPrice + (riskAmount * 2)
-      : entryPrice - (riskAmount * 2);
+      ? entryPrice + (riskAmount * rrMultiplier)
+      : entryPrice - (riskAmount * rrMultiplier);
     const target2 = zoneType === ZONE_TYPE.LFZ
-      ? entryPrice + (riskAmount * 3)
-      : entryPrice - (riskAmount * 3);
+      ? entryPrice + (riskAmount * (rrMultiplier + 1))
+      : entryPrice - (riskAmount * (rrMultiplier + 1));
 
     // ⚠️ CRITICAL: Extract time and candle index data for zone width calculation
     // Don't fallback to Date.now() - if no time data, let chart handle positioning

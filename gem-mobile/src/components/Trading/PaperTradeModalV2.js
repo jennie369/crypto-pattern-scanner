@@ -558,12 +558,10 @@ const PaperTradeModalV2 = ({
         // Use pattern entry price if in Pattern mode, otherwise use user input
         const limitPriceNum = patternLimitPrice || parseFloat(price);
 
-        // Check if limit order should be pending
-        // LONG limit: pending if limitPrice < market (waiting for dip)
-        // SHORT limit: pending if limitPrice > market (waiting for pump)
-        const shouldBePending = direction === 'LONG'
-          ? limitPriceNum < currentPrice
-          : limitPriceNum > currentPrice;
+        // P6 FIX #2: ANY entry that differs from market price should be pending
+        // Supports both limit orders (buy dip/sell pump) AND stop orders (breakout/breakdown)
+        const priceTolerance = currentPrice * 0.001;
+        const shouldBePending = Math.abs(limitPriceNum - currentPrice) > priceTolerance;
 
         if (shouldBePending) {
           // Create pending limit order

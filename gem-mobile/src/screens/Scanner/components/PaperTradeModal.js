@@ -114,8 +114,9 @@ const PaperTradeContent = ({ pattern, onClose, onSuccess }) => {
       if (!pattern?.symbol) return;
 
       try {
+        // P6 FIX #5: Use Futures API — Spot returns 400 for futures-only symbols
         const response = await fetch(
-          `https://api.binance.com/api/v3/ticker/price?symbol=${pattern.symbol}`
+          `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${pattern.symbol}`
         );
         const data = await response.json();
         if (data?.price) {

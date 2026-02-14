@@ -3292,13 +3292,14 @@ class PatternDetectionService {
     const stopLoss = result.stopLossPrice || result.zone?.stopLossPrice || currentPrice;
     // ✅ FIX: Calculate proper target when detector doesn't set targetPrice
     // DP and FL detectors don't provide targetPrice → was falling back to currentPrice
-    // causing dynamic R:R that changes with price and mismatches chart TP
+    // P6 FIX #3: Use PATTERN_SIGNALS avgRR instead of hardcoded 1:2
     let target = result.targetPrice || 0;
     if (!target || target <= 0) {
       const risk = Math.abs(stopLoss - entry);
+      const defaultRR = signal.avgRR || 2.0;
       target = signal.direction === 'SHORT'
-        ? entry - (risk * 2)  // SHORT: TP below entry (1:2 R:R)
-        : entry + (risk * 2); // LONG: TP above entry (1:2 R:R)
+        ? entry - (risk * defaultRR)
+        : entry + (risk * defaultRR);
     }
     const riskAmount = Math.abs(stopLoss - entry);
     const rr = riskAmount > 0 ? Math.abs(target - entry) / riskAmount : 2.0;

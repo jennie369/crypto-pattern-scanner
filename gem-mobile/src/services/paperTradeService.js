@@ -716,39 +716,37 @@ class PaperTradeService {
     const actualPositionValue = positionValue || (positionSize * leverage);
 
     // Get market price (required for proper order handling)
-    const marketPrice = currentMarketPrice || pattern.entry;
+    // P6 FIX #2: Don't fallback to pattern.entry — that makes isSamePrice always true
+    const marketPrice = currentMarketPrice || 0;
 
     // ═══════════════════════════════════════════════════════════
-    // LIMIT ORDER DETECTION - For BOTH Pattern Mode and Custom Mode
+    // P6 FIX #2: PENDING ORDER DETECTION — supports BOTH limit AND stop orders
     // ═══════════════════════════════════════════════════════════
-    // Valid LIMIT: LONG entry < market (buy low) OR SHORT entry > market (sell high)
-    // Invalid entry: LONG entry > market OR SHORT entry < market
-    // If entry == market price → MARKET order (instant fill)
-    // If entry != market price AND valid direction → LIMIT order (pending)
-    // In case of invalid entry, execute as MARKET order at current market price
+    // MARKET: entry ≈ market price (within 0.1%) → instant fill
+    // PENDING: entry ≠ market price → wait for price to reach entry
+    //   - Limit: LONG entry < market (buy dip) / SHORT entry > market (sell pump)
+    //   - Stop:  LONG entry > market (breakout) / SHORT entry < market (breakdown)
+    // Fill direction is determined by createdAtMarketPrice stored on the order
     const dir = (pattern.direction || '').toUpperCase();
 
     // Check if prices are essentially the same (within 0.1% tolerance)
-    const priceTolerance = marketPrice * 0.001;
-    const isSamePrice = Math.abs(pattern.entry - marketPrice) <= priceTolerance;
+    const priceTolerance = (marketPrice || pattern.entry) * 0.001;
+    const isSamePrice = marketPrice > 0
+      ? Math.abs(pattern.entry - marketPrice) <= priceTolerance
+      : false; // If no market price, never treat as same → create PENDING
 
-    // Check valid limit order conditions (for BOTH pattern and custom mode)
-    const isValidLimit = !isSamePrice && this.isLimitOrder(dir, pattern.entry, marketPrice);
-
-    // Check invalid entry (wrong direction for limit)
-    const isInvalidEntry = !isSamePrice && !isValidLimit && (
-      dir === 'LONG' ? pattern.entry > marketPrice : pattern.entry < marketPrice
-    );
-
-    // Determine final entry price and order type
-    // - If same price: MARKET order at current price
-    // - If valid limit order: LIMIT order (pending), use pattern.entry
-    // - If invalid entry: MARKET order at current market price (safety)
-    const finalEntryPrice = isSamePrice ? marketPrice : (isInvalidEntry ? marketPrice : pattern.entry);
-    const isLimitOrder = isValidLimit && !isInvalidEntry && !isSamePrice;
+    // P6 FIX #2: ALL non-same entries are PENDING — no "invalid entry" concept
+    // pattern.entry is authoritative (from zone/detector analysis)
+    const finalEntryPrice = pattern.entry;
+    const isLimitOrder = !isSamePrice;
 
     // Calculate quantity based on position value and FINAL entry price
     const quantity = actualPositionValue / finalEntryPrice;
+
+    // P6 FIX #4: Validate quantity
+    if (!isFinite(quantity) || quantity <= 0) {
+      throw new Error(`Invalid quantity: ${quantity} (positionValue=${actualPositionValue}, entry=${finalEntryPrice})`);
+    }
 
     // Debug: Log order type detection
     console.log('[PaperTrade] openPosition - Order type check:', {
@@ -757,10 +755,9 @@ class PaperTradeService {
       requestedEntry: pattern.entry,
       marketPrice,
       finalEntryPrice,
-      isValidLimit,
-      isInvalidEntry,
+      isSamePrice,
       isLimitOrder,
-      orderType: isLimitOrder ? 'LIMIT (PENDING)' : isInvalidEntry ? 'MARKET (fixed invalid)' : 'MARKET',
+      orderType: isLimitOrder ? 'PENDING' : 'MARKET',
     });
 
     // Create position object
@@ -779,10 +776,11 @@ class PaperTradeService {
       timeframe: pattern.timeframe,
       confidence: pattern.confidence,
 
-      // Prices - USE finalEntryPrice instead of pattern.entry
+      // Prices - USE finalEntryPrice (always = pattern.entry after P6 fix)
       entryPrice: finalEntryPrice,
       requestedEntryPrice: pattern.entry,  // Store original requested entry for reference
-      entryWasCorrected: isInvalidEntry,   // Flag if entry was corrected to market price
+      createdAtMarketPrice: marketPrice,   // P6 FIX #2: For fill direction detection
+      entryWasCorrected: false,            // P6 FIX #2: Entry is never force-corrected now
       stopLoss: pattern.stopLoss,
       takeProfit: pattern.targets?.[0] || pattern.target1 || finalEntryPrice * (pattern.direction === 'LONG' ? 1.02 : 0.98),
       takeProfit2: pattern.targets?.[1] || pattern.target2,
@@ -929,33 +927,33 @@ class PaperTradeService {
   // ═══════════════════════════════════════════════════════════
 
   /**
-   * Determine if an order should be a limit order based on entry vs market price
-   * LONG limit: entry below market (waiting for dip)
-   * SHORT limit: entry above market (waiting for pump)
+   * P6 FIX #2: Determine if an order should be pending (any entry ≠ market)
+   * Replaces old isLimitOrder() which only handled limit orders, not stop/breakout orders
    */
   isLimitOrder(direction, entryPrice, marketPrice) {
-    const dir = (direction || '').toUpperCase();
-    if (dir === 'LONG') {
-      // LONG limit: entry below market (waiting for price to drop)
-      return entryPrice < marketPrice;
-    } else {
-      // SHORT limit: entry above market (waiting for price to rise)
-      return entryPrice > marketPrice;
-    }
+    if (!marketPrice || marketPrice <= 0) return true; // No market price → pending
+    const tolerance = marketPrice * 0.001;
+    return Math.abs(entryPrice - marketPrice) > tolerance;
   }
 
   /**
-   * Check if a pending order should fill based on current market price
-   * LONG limit fills when market drops to or below entry
-   * SHORT limit fills when market rises to or above entry
+   * P6 FIX #2: Check if a pending order should fill based on current market price
+   * Uses createdAtMarketPrice to determine fill direction:
+   * - Limit (entry was below market): fill when price DROPS to entry
+   * - Stop  (entry was above market): fill when price RISES to entry
    */
   shouldFillOrder(order, marketPrice) {
-    const dir = (order.direction || '').toUpperCase();
-    if (dir === 'LONG') {
-      // LONG limit fills when market drops to or below entry
+    const createdAt = order.createdAtMarketPrice || 0;
+    if (createdAt > 0 && order.entryPrice > createdAt) {
+      // Stop order: entry was above market → fill when price RISES to entry
+      return marketPrice >= order.entryPrice;
+    } else if (createdAt > 0 && order.entryPrice < createdAt) {
+      // Limit order: entry was below market → fill when price DROPS to entry
       return marketPrice <= order.entryPrice;
     } else {
-      // SHORT limit fills when market rises to or above entry
+      // No createdAtMarketPrice (legacy orders) — fallback to old direction-based logic
+      const dir = (order.direction || '').toUpperCase();
+      if (dir === 'LONG') return marketPrice <= order.entryPrice;
       return marketPrice >= order.entryPrice;
     }
   }
@@ -1483,8 +1481,14 @@ class PaperTradeService {
         : position.entryPrice - currentPrice;
 
       position.currentPrice = currentPrice;
-      position.unrealizedPnL = priceDiff * position.quantity;
-      position.unrealizedPnLPercent = (priceDiff / position.entryPrice) * (position.leverage || 1) * 100;
+      // P6 FIX #4: Guard against NaN/Infinity quantity
+      if (!isFinite(position.quantity) || position.quantity <= 0) {
+        position.unrealizedPnL = 0;
+        position.unrealizedPnLPercent = 0;
+      } else {
+        position.unrealizedPnL = priceDiff * position.quantity;
+        position.unrealizedPnLPercent = (priceDiff / position.entryPrice) * (position.leverage || 1) * 100;
+      }
       position.updatedAt = new Date().toISOString();
 
       updatedPositions.push(position);
@@ -2609,9 +2613,11 @@ class PaperTradeService {
       realizedPnLPercent: parseFloat(data.realized_pnl_percent) || 0,
       result: data.result,
       holdingTime: data.holding_time,
-      currentPrice: parseFloat(data.entry_price) || 0,
-      unrealizedPnL: 0,
-      unrealizedPnLPercent: 0,
+      // P6 FIX #4: Don't set currentPrice to entryPrice — causes $0 PNL flash on restart
+      // Leave at 0, monitoring will update within 5s
+      currentPrice: parseFloat(data.current_price) || 0,
+      unrealizedPnL: parseFloat(data.unrealized_pnl) || 0,
+      unrealizedPnLPercent: parseFloat(data.unrealized_pnl_percent) || 0,
       // Dual Mode fields
       tradeMode: data.trade_mode || 'pattern',
       patternEntryOriginal: parseFloat(data.pattern_entry) || null,
