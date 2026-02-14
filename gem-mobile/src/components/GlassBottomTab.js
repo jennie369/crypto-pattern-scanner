@@ -184,10 +184,10 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   }, [state.index, fetchUnreadCount]);
 
   const items = [
-    { key: 'Home', label: t('tabs.home', 'Home'), Icon: Home },
-    { key: 'Shop', label: t('tabs.shop', 'Shop'), Icon: ShoppingCart },
+    { key: 'Home', label: t('tabs.home', 'Trang Chủ'), Icon: Home },
+    { key: 'Shop', label: t('tabs.shop', 'Cửa Hàng'), Icon: ShoppingCart },
     { key: 'Trading', label: t('tabs.trading', 'Giao Dịch'), Icon: BarChart2 },
-    { key: 'GemMaster', label: t('tabs.gemMaster', 'Gem Mast...'), Icon: Star },
+    { key: 'GemMaster', label: t('tabs.gemMaster', 'Gem Master'), Icon: Star },
     { key: 'Notifications', label: t('tabs.notifications', 'Thông Báo'), Icon: Bell, badge: unreadCount },
     { key: 'Account', label: t('tabs.account', 'Tài Sản'), Icon: Box },
   ];

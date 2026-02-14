@@ -493,8 +493,9 @@ class WebSocketPoolService {
       return;
     }
 
-    // Don't reconnect if no subscriptions
-    if (this.subscriptions.size === 0) {
+    const symbolsSnapshot = Array.from(this.subscriptions.keys());
+
+    if (symbolsSnapshot.length === 0) {
       if (this.DEBUG) {
         console.log('[WSPool] No subscriptions, skipping reconnect');
       }
@@ -505,9 +506,20 @@ class WebSocketPoolService {
     this.reconnectAttempts++;
     this.metrics.reconnects++;
 
-    console.log(`[WSPool] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+    console.log(`[WSPool] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}), symbols: ${symbolsSnapshot.length}`);
+
+    this._pendingReconnectSymbols = symbolsSnapshot;
 
     setTimeout(() => {
+      if (this.subscriptions.size === 0 && this._pendingReconnectSymbols?.length > 0) {
+        this._pendingReconnectSymbols.forEach(symbol => {
+          if (!this.subscriptions.has(symbol)) {
+            this.subscriptions.set(symbol, new Set());
+          }
+        });
+        console.log(`[WSPool] Restored ${this._pendingReconnectSymbols.length} subscriptions from snapshot`);
+      }
+      this._pendingReconnectSymbols = null;
       this._connect();
     }, delay);
   }

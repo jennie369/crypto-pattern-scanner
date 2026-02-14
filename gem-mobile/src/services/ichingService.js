@@ -5,7 +5,7 @@
  */
 
 import { supabase } from './supabase';
-import { GEMINI_CONFIG } from '../config/gemini.config';
+import geminiService from './geminiService';
 import HEXAGRAM_DATABASE, { getHexagramByNumber, getTradingInterpretation, getAllHexagrams } from '../data/ichingHexagrams';
 
 // ============ TRIGRAMS (8 Quái) ============
@@ -160,35 +160,25 @@ QUAN TRỌNG:
 - Nếu câu hỏi về trading/crypto, ưu tiên góc nhìn thị trường
 - Dùng → để bullet point`;
 
-    const apiKey = GEMINI_CONFIG.apiKey;
-
-    if (!apiKey) {
-      console.warn('[ichingService] No Gemini API key found');
-      return {
-        interpretation: 'Chưa có API key để giải quẻ. Vui lòng cấu hình GEMINI_CONFIG.apiKey.',
-        hexagram,
-        question,
-        timestamp: new Date().toISOString(),
-      };
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    let text;
+    try {
+      const response = await geminiService.callEdgeFunction({
+        feature: 'i_ching',
+        messages: [
+          { role: 'user', parts: [{ text: prompt }] },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1500,
+        },
+        metadata: { requestType: 'i_ching' },
+      });
+      text = response?.text || 'Không thể giải quẻ lúc này.';
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1500,
-          },
-        }),
-      }
-    );
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Không thể giải quẻ lúc này.';
 
     return {
       interpretation: text,

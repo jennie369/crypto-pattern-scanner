@@ -19,7 +19,7 @@ import {
   getUpgradeBenefits,
 } from '../config/tierAccess';
 import { TIER_FEATURES } from '../constants/tierFeatures';
-import QuotaService from './quotaService';
+import QuotaService, { clearQuotaCache } from './quotaService';
 
 class TierAccessService {
   constructor() {
@@ -36,10 +36,14 @@ class TierAccessService {
    */
   setTier(tier, userId = null) {
     const validTier = TIER_ACCESS[tier] ? tier : 'FREE';
+    const tierChanged = this.userTier !== validTier;
     this.userTier = validTier;
     this.tierConfig = TIER_ACCESS[validTier];
     if (userId) {
       this.userId = userId;
+    }
+    if (tierChanged) {
+      clearQuotaCache();
     }
     console.log(`[TierAccessService] Set tier to: ${validTier}, userId: ${userId || 'N/A'}`);
     return this.tierConfig;
@@ -163,14 +167,12 @@ class TierAccessService {
       };
     } catch (error) {
       console.error('[TierAccessService] Error checking scan limit:', error);
-      // Fallback to tier config
-      const limit = this.tierConfig.limits.scansPerDay;
       return {
-        allowed: true,
-        remaining: limit === -1 ? Infinity : limit,
-        limit: limit === -1 ? -1 : limit,
+        allowed: false,
+        remaining: 0,
+        limit: 5,
         used: 0,
-        unlimited: limit === -1,
+        unlimited: false,
       };
     }
   }

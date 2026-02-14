@@ -53,7 +53,7 @@ export const TIER_ACCESS = {
   },
 
   TIER1: {
-    name: 'Tier 1 - Basic',
+    name: 'Tier 1 - Pro',
     price: 11000000, // 11M VND
     coins: {
       max: 50,
@@ -91,7 +91,7 @@ export const TIER_ACCESS = {
   },
 
   TIER2: {
-    name: 'Tier 2 - Pro',
+    name: 'Tier 2 - Premium',
     price: 21000000, // 21M VND
     coins: {
       max: 200,
@@ -129,7 +129,7 @@ export const TIER_ACCESS = {
   },
 
   TIER3: {
-    name: 'Tier 3 - Elite',
+    name: 'Tier 3 - VIP',
     price: 68000000, // 68M VND
     coins: {
       max: -1, // Unlimited (all 437+)

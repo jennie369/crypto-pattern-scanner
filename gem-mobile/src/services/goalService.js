@@ -292,6 +292,9 @@ export const updateGoal = async (goalId, updates) => {
 };
 
 // ============ COVER IMAGE ============
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
 /**
  * Upload cover image for a goal
  * @param {string} userId - User ID
@@ -301,20 +304,28 @@ export const updateGoal = async (goalId, updates) => {
  */
 export const uploadGoalCoverImage = async (userId, goalId, imageUri) => {
   try {
-    const fileExt = imageUri.split('.').pop() || 'jpg';
+    const fileExt = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
     const fileName = `${goalId}.${fileExt}`;
     const filePath = `${userId}/${fileName}`;
 
-    // Read the file as base64
     const response = await fetch(imageUri);
     const blob = await response.blob();
 
-    // Upload to Supabase Storage
+    const mimeType = blob.type || `image/${fileExt}`;
+    if (!ALLOWED_IMAGE_TYPES.includes(mimeType)) {
+      throw new Error(`Loại tệp không được hỗ trợ: ${mimeType}. Chỉ chấp nhận JPEG, PNG, WebP, GIF.`);
+    }
+
+    if (blob.size > MAX_IMAGE_SIZE) {
+      const sizeMB = (blob.size / (1024 * 1024)).toFixed(1);
+      throw new Error(`Tệp quá lớn (${sizeMB}MB). Kích thước tối đa cho phép là 5MB.`);
+    }
+
     const { data, error } = await supabase.storage
       .from('vision-board')
       .upload(filePath, blob, {
-        contentType: `image/${fileExt}`,
-        upsert: true, // Replace if exists
+        contentType: mimeType,
+        upsert: true,
       });
 
     if (error) throw error;
@@ -370,7 +381,20 @@ export const removeGoalCoverImage = async (userId, goalId) => {
 // ============ DELETE ============
 export const deleteGoal = async (goalId) => {
   try {
-    // Cascade delete handles relations
+    const goal = await getGoalById(goalId);
+
+    if (goal?.cover_image) {
+      try {
+        const urlParts = goal.cover_image.split('/vision-board/');
+        if (urlParts.length > 1) {
+          const filePath = urlParts[1];
+          await supabase.storage.from('vision-board').remove([filePath]);
+        }
+      } catch (storageErr) {
+        console.warn('[goalService] Storage cleanup failed for goal', goalId, ':', storageErr?.message || storageErr);
+      }
+    }
+
     const { error } = await supabase
       .from('vision_goals')
       .delete()

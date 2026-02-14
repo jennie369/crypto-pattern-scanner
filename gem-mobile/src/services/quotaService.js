@@ -102,7 +102,7 @@ class QuotaService {
 
     } catch (error) {
       console.error('[QuotaService] Error checking quotas:', error);
-      return this.getDefaultAllQuotas();
+      return this.getDeniedQuotas();
     }
   }
 
@@ -283,6 +283,9 @@ class QuotaService {
 
   /**
    * Manual decrement fallback
+   * NOTE: This SELECT-then-UPDATE is not atomic. For production, create a
+   * database RPC (e.g. increment_quota_atomic) that performs the upsert in
+   * a single statement to prevent race conditions with concurrent requests.
    */
   static async decrementQuotaManual(userId, type = 'chatbot') {
     const today = this.getVietnamDate();
@@ -506,6 +509,31 @@ class QuotaService {
   }
 
   /**
+   * Get denied quotas (returned on error -- fail closed, not open)
+   */
+  static getDeniedQuotas() {
+    const resetAt = this.getNextResetTime().toISOString();
+    return {
+      chatbot: {
+        tier: 'FREE',
+        limit: 5,
+        used: 5,
+        remaining: 0,
+        unlimited: false,
+      },
+      scanner: {
+        tier: 'FREE',
+        limit: 5,
+        used: 5,
+        remaining: 0,
+        unlimited: false,
+      },
+      todayDate: this.getVietnamDate(),
+      resetAt,
+    };
+  }
+
+  /**
    * Get default chatbot quota (for backward compatibility)
    */
   static getDefaultQuota() {
@@ -553,5 +581,7 @@ class QuotaService {
     console.log('[QuotaService] Cache cleared');
   }
 }
+
+export const clearQuotaCache = () => QuotaService.clearCache();
 
 export default QuotaService;

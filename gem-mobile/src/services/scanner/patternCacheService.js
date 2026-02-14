@@ -31,10 +31,10 @@ class PatternCacheService {
     this.cache = new Map();
     this.pendingRequests = new Map(); // For deduplication
 
-    // Config - OPTIMIZED for faster scanning
-    this.DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes (extended for speed)
-    this.MAX_CACHE_SIZE = 1000; // Max cached entries (increased)
-    this.STALE_WHILE_REVALIDATE = 2 * 60 * 1000; // 2 minutes (extended)
+    this.DEFAULT_TTL = 5 * 60 * 1000;
+    this.SCANNER_TTL = 60 * 1000;
+    this.MAX_CACHE_SIZE = 1000;
+    this.STALE_WHILE_REVALIDATE = 2 * 60 * 1000;
 
     // Debug
     this.DEBUG = __DEV__ || false;
@@ -172,8 +172,14 @@ class PatternCacheService {
    * @param {object} options - { forceRefresh, ttl }
    * @returns {Promise<array>} Patterns
    */
+  getTTLForType(dataType) {
+    if (dataType === 'scanner') return this.SCANNER_TTL;
+    return this.DEFAULT_TTL;
+  }
+
   async getOrFetch(symbol, timeframe, fetchFn, options = {}) {
-    const { forceRefresh = false, ttl = this.DEFAULT_TTL } = options;
+    const { forceRefresh = false, dataType } = options;
+    const ttl = options.ttl ?? this.getTTLForType(dataType);
     const key = this._getKey(symbol, timeframe);
 
     // Check cache first (unless forceRefresh)
@@ -351,6 +357,9 @@ class PatternCacheService {
   setConfig(config) {
     if (config.defaultTTL) {
       this.DEFAULT_TTL = config.defaultTTL;
+    }
+    if (config.scannerTTL) {
+      this.SCANNER_TTL = config.scannerTTL;
     }
     if (config.maxCacheSize) {
       this.MAX_CACHE_SIZE = config.maxCacheSize;

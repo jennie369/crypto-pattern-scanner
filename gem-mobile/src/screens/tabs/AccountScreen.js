@@ -82,6 +82,7 @@ import {
   Building2,
 } from 'lucide-react-native';
 import { Switch } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -120,6 +121,7 @@ export default function AccountScreen() {
   const route = useRoute();
   const { user, profile: authProfile, isAdmin, intentionalLogout } = useAuth();
   const { alert, AlertComponent } = useCustomAlert();
+  const { t } = useTranslation();
 
   // State - initialize from cache for instant display
   const [profile, setProfile] = useState(() => accountCache.profile);
@@ -429,12 +431,12 @@ export default function AccountScreen() {
       // Muốn tắt → confirm và disable
       alert({
         type: 'warning',
-        title: 'Tắt đăng nhập sinh trắc học?',
-        message: 'Bạn sẽ cần nhập email và mật khẩu để đăng nhập lần sau.',
+        title: t('account.disableBiometricTitle', 'Tắt đăng nhập sinh trắc học?'),
+        message: t('account.disableBiometricMessage', 'Bạn sẽ cần nhập email và mật khẩu để đăng nhập lần sau.'),
         buttons: [
-          { text: 'Huỷ', style: 'cancel' },
+          { text: t('account.disableBiometricCancel', 'Huỷ'), style: 'cancel' },
           {
-            text: 'Tắt',
+            text: t('account.disableBiometricConfirm', 'Tắt'),
             style: 'destructive',
             onPress: async () => {
               const result = await biometricService.disable();
@@ -443,8 +445,8 @@ export default function AccountScreen() {
               } else {
                 alert({
                   type: 'error',
-                  title: 'Lỗi',
-                  message: result.error || 'Không thể tắt sinh trắc học',
+                  title: t('common.error', 'Lỗi'),
+                  message: result.error || t('account.disableBiometricError', 'Không thể tắt sinh trắc học'),
                 });
               }
             },
@@ -497,7 +499,7 @@ export default function AccountScreen() {
         >
           <View style={styles.adminButtonContent}>
             <Settings size={18} color={COLORS.textPrimary} />
-            <Text style={styles.adminButtonText}>Quản Lý Hệ Thống</Text>
+            <Text style={styles.adminButtonText}>{t('account.adminSystemManagement', 'Quản Lý Hệ Thống')}</Text>
           </View>
           <ChevronRight size={18} color={COLORS.textMuted} />
         </TouchableOpacity>
@@ -509,7 +511,7 @@ export default function AccountScreen() {
             onPress={() => navigation.navigate('AdminApplications')}
           >
             <FileText size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Đơn đăng ký</Text>
+            <Text style={styles.adminQuickText}>{t('account.adminApplications', 'Đơn đăng ký')}</Text>
             {adminStats.pendingApplications > 0 && (
               <View style={styles.adminBadgeCount}>
                 <Text style={styles.adminBadgeCountText}>{adminStats.pendingApplications}</Text>
@@ -522,7 +524,7 @@ export default function AccountScreen() {
             onPress={() => navigation.navigate('AdminWithdrawals')}
           >
             <CreditCard size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Rút tiền</Text>
+            <Text style={styles.adminQuickText}>{t('account.adminWithdrawals', 'Rút tiền')}</Text>
             {adminStats.pendingWithdrawals > 0 && (
               <View style={styles.adminBadgeCount}>
                 <Text style={styles.adminBadgeCountText}>{adminStats.pendingWithdrawals}</Text>
@@ -546,7 +548,7 @@ export default function AccountScreen() {
             onPress={() => navigation.navigate('AdminCourses')}
           >
             <GraduationCap size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Quản lý khóa học</Text>
+            <Text style={styles.adminQuickText}>{t('account.adminCourseManagement', 'Quản lý khóa học')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -554,7 +556,7 @@ export default function AccountScreen() {
             onPress={() => navigation.navigate('GrantAccess')}
           >
             <UserCheck size={18} color={COLORS.gold} />
-            <Text style={styles.adminQuickText}>Cấp quyền truy cập</Text>
+            <Text style={styles.adminQuickText}>{t('account.adminGrantAccess', 'Cấp quyền truy cập')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -575,12 +577,12 @@ export default function AccountScreen() {
   const handleLogout = () => {
     alert({
       type: 'warning',
-      title: 'Đăng xuất',
-      message: 'Bạn có chắc muốn đăng xuất?',
+      title: t('account.logoutTitle', 'Đăng xuất'),
+      message: t('account.logoutConfirm', 'Bạn có chắc muốn đăng xuất?'),
       buttons: [
-        { text: 'Hủy', style: 'cancel' },
+        { text: t('common.cancel', 'Hủy'), style: 'cancel' },
         {
-          text: 'Đăng xuất',
+          text: t('auth.logout', 'Đăng xuất'),
           style: 'destructive',
           onPress: async () => {
             console.log('[AccountScreen] Logout button pressed, calling intentionalLogout...');
@@ -602,14 +604,14 @@ export default function AccountScreen() {
       await Clipboard.setStringAsync(code);
       alert({
         type: 'success',
-        title: 'Thành công',
-        message: `Đã sao chép mã giới thiệu: ${code}`,
+        title: t('common.success', 'Thành công'),
+        message: `${t('account.referralCopySuccess', 'Đã sao chép mã giới thiệu')}: ${code}`,
       });
     } catch (error) {
       alert({
         type: 'error',
-        title: 'Lỗi',
-        message: 'Không thể sao chép mã giới thiệu',
+        title: t('common.error', 'Lỗi'),
+        message: t('account.referralCopyError', 'Không thể sao chép mã giới thiệu'),
       });
     }
   };
@@ -629,9 +631,9 @@ export default function AccountScreen() {
         <SafeAreaView style={styles.container} edges={['top']}>
           <View style={styles.notLoggedIn}>
             <User size={60} color={COLORS.textMuted} />
-            <Text style={styles.notLoggedInTitle}>Chưa đăng nhập</Text>
+            <Text style={styles.notLoggedInTitle}>{t('account.notLoggedInTitle', 'Chưa đăng nhập')}</Text>
             <Text style={styles.notLoggedInText}>
-              Đăng nhập để quản lý tài khoản của bạn
+              {t('account.notLoggedInText', 'Đăng nhập để quản lý tài khoản của bạn')}
             </Text>
             <TouchableOpacity
               style={styles.loginButton}
@@ -641,7 +643,7 @@ export default function AccountScreen() {
                 colors={GRADIENTS.primaryButton}
                 style={styles.loginButtonGradient}
               >
-                <Text style={styles.loginButtonText}>Đăng Nhập</Text>
+                <Text style={styles.loginButtonText}>{t('account.loginButton', 'Đăng Nhập')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -655,7 +657,7 @@ export default function AccountScreen() {
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
   const username = profile?.username || user?.email?.split('@')[0] || '';
-  const bio = profile?.bio || 'Chưa có tiểu sử';
+  const bio = profile?.bio || t('account.noBio', 'Chưa có tiểu sử');
   const avatarUrl = profile?.avatar_url;
 
   return (
@@ -718,7 +720,7 @@ export default function AccountScreen() {
               onPress={() => setEditModalVisible(true)}
             >
               <Edit2 size={16} color={COLORS.gold} />
-              <Text style={styles.editButtonText}>Sửa</Text>
+              <Text style={styles.editButtonText}>{t('account.edit', 'Sửa')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -728,7 +730,7 @@ export default function AccountScreen() {
             onPress={() => navigation.navigate('ProfileFull')}
           >
             <User size={18} color={COLORS.purple} />
-            <Text style={styles.viewProfileText}>Xem trang cá nhân đầy đủ</Text>
+            <Text style={styles.viewProfileText}>{t('account.viewFullProfile', 'Xem trang cá nhân đầy đủ')}</Text>
             <ChevronRight size={18} color={COLORS.textMuted} />
           </TouchableOpacity>
 
@@ -757,7 +759,7 @@ export default function AccountScreen() {
                   <Sparkles size={14} color={COLORS.gold} style={{ marginLeft: 6 }} />
                 </View>
                 <Text style={styles.visionBoardTitle}>Vision Board</Text>
-                <Text style={styles.visionBoardSubtitle}>Mục tiêu & Affirmations</Text>
+                <Text style={styles.visionBoardSubtitle}>{t('account.visionBoardSubtitle', 'Mục tiêu & Affirmations')}</Text>
               </View>
               <View style={styles.visionBoardRight}>
                 <View style={styles.visionBoardStats}>
@@ -797,7 +799,7 @@ export default function AccountScreen() {
                   </View>
                 </View>
                 <Text style={styles.livestreamTitle}>AI Livestream</Text>
-                <Text style={styles.livestreamSubtitle}>Avatar AI bán hàng tự động</Text>
+                <Text style={styles.livestreamSubtitle}>{t('account.livestreamSubtitle', 'Avatar AI bán hàng tự động')}</Text>
               </View>
               <View style={styles.livestreamRight}>
                 <ChevronRight size={20} color={COLORS.textMuted} />
@@ -810,9 +812,9 @@ export default function AccountScreen() {
           {/* ═══════════════════════════════════════════ */}
           <UpgradeBanner
             banner={{
-              title: 'Nâng cấp tài khoản',
-              subtitle: 'Mở khóa tất cả tính năng premium',
-              cta_text: 'Xem các gói',
+              title: t('account.upgradeBannerTitle', 'Nâng cấp tài khoản'),
+              subtitle: t('account.upgradeBannerSubtitle', 'Mở khóa tất cả tính năng premium'),
+              cta_text: t('account.upgradeBannerCta', 'Xem các gói'),
               icon_name: 'sparkles',
               trigger_screen: 'account_screen',
             }}
@@ -862,8 +864,8 @@ export default function AccountScreen() {
                     : assetStats.earnings.toLocaleString()
                   : '0'}
               </Text>
-              <Text style={styles.assetStatLabel}>Thu nhập</Text>
-              <Text style={styles.assetStatSubtitle}>Tháng này</Text>
+              <Text style={styles.assetStatLabel}>{t('account.income', 'Thu nhập')}</Text>
+              <Text style={styles.assetStatSubtitle}>{t('account.thisMonth', 'Tháng này')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -882,14 +884,14 @@ export default function AccountScreen() {
                   : '0'}
               </Text>
               <Text style={styles.assetStatLabel}>Affiliate</Text>
-              <Text style={styles.assetStatSubtitle}>Hoa hồng</Text>
+              <Text style={styles.assetStatSubtitle}>{t('account.commission', 'Hoa hồng')}</Text>
             </TouchableOpacity>
           </View>
 
           {/* ═══════════════════════════════════════════ */}
           {/* QUICK ACTIONS GRID - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
-          <Text style={styles.quickActionsSectionTitle}>Quản lý tài sản</Text>
+          <Text style={styles.quickActionsSectionTitle}>{t('account.manageAssets', 'Quản lý tài sản')}</Text>
           <View style={styles.actionsGrid}>
             <TouchableOpacity
               style={styles.actionCard}
@@ -899,8 +901,8 @@ export default function AccountScreen() {
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
                 <Gem size={24} color={COLORS.gold} />
               </View>
-              <Text style={styles.actionTitle}>Ví Gems</Text>
-              <Text style={styles.actionSubtitle}>Mua & quản lý</Text>
+              <Text style={styles.actionTitle}>{t('account.gemWallet', 'Ví Gems')}</Text>
+              <Text style={styles.actionSubtitle}>{t('account.gemWalletSub', 'Mua & quản lý')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -911,8 +913,8 @@ export default function AccountScreen() {
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
                 <DollarSign size={24} color={COLORS.gold} />
               </View>
-              <Text style={styles.actionTitle}>Thu Nhập</Text>
-              <Text style={styles.actionSubtitle}>Xem & rút tiền</Text>
+              <Text style={styles.actionTitle}>{t('account.income', 'Thu nhập')}</Text>
+              <Text style={styles.actionSubtitle}>{t('account.incomeSub', 'Xem & rút tiền')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -923,8 +925,8 @@ export default function AccountScreen() {
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
                 <TrendingUp size={24} color={COLORS.gold} />
               </View>
-              <Text style={styles.actionTitle}>Giao Dịch</Text>
-              <Text style={styles.actionSubtitle}>Lịch sử chi tiêu</Text>
+              <Text style={styles.actionTitle}>{t('account.transactions', 'Giao Dịch')}</Text>
+              <Text style={styles.actionSubtitle}>{t('account.transactionsSub', 'Lịch sử chi tiêu')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -935,8 +937,8 @@ export default function AccountScreen() {
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
                 <Rocket size={24} color={COLORS.gold} />
               </View>
-              <Text style={styles.actionTitle}>Boost</Text>
-              <Text style={styles.actionSubtitle}>Quảng cáo bài</Text>
+              <Text style={styles.actionTitle}>{t('account.boost', 'Boost')}</Text>
+              <Text style={styles.actionSubtitle}>{t('account.boostSub', 'Quảng cáo bài')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -948,7 +950,7 @@ export default function AccountScreen() {
                 <BarChart3 size={24} color={COLORS.gold} />
               </View>
               <Text style={styles.actionTitle}>Portfolio</Text>
-              <Text style={styles.actionSubtitle}>Thống kê</Text>
+              <Text style={styles.actionSubtitle}>{t('account.portfolioSub', 'Thống kê')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -959,8 +961,8 @@ export default function AccountScreen() {
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
                 <Music size={24} color={COLORS.gold} />
               </View>
-              <Text style={styles.actionTitle}>Âm Thanh</Text>
-              <Text style={styles.actionSubtitle}>Thư viện</Text>
+              <Text style={styles.actionTitle}>{t('account.soundLibrary', 'Âm Thanh')}</Text>
+              <Text style={styles.actionSubtitle}>{t('account.soundLibrarySub', 'Thư viện')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -968,7 +970,7 @@ export default function AccountScreen() {
           {/* SECTION: GEM ECONOMY - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Gem Economy</Text>
+            <Text style={styles.sectionTitle}>{t('account.gemEconomy', 'Gem Economy')}</Text>
 
             <TouchableOpacity
               style={styles.menuItem}
@@ -978,8 +980,8 @@ export default function AccountScreen() {
                 <Gem size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Mua Gems</Text>
-                <Text style={styles.menuSubtext}>Nạp Gems để sử dụng dịch vụ</Text>
+                <Text style={styles.menuText}>{t('account.buyGems', 'Mua Gems')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.buyGemsSub', 'Nạp Gems để sử dụng dịch vụ')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -992,8 +994,8 @@ export default function AccountScreen() {
                 <Clock size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Điểm danh</Text>
-                <Text style={styles.menuSubtext}>Nhận 5 Gems miễn phí mỗi ngày</Text>
+                <Text style={styles.menuText}>{t('account.dailyCheckin', 'Điểm danh')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.dailyCheckinSub', 'Nhận 5 Gems miễn phí mỗi ngày')}</Text>
               </View>
               <View style={styles.gemBadge}>
                 <Gift size={12} color={COLORS.gold} />
@@ -1007,7 +1009,7 @@ export default function AccountScreen() {
           {/* SECTION: ĐƠN HÀNG CỦA TÔI - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Đơn Hàng Của Tôi</Text>
+            <Text style={styles.sectionTitle}>{t('account.myOrders', 'Đơn Hàng Của Tôi')}</Text>
 
             <TouchableOpacity
               style={styles.menuItem}
@@ -1017,8 +1019,8 @@ export default function AccountScreen() {
                 <Package size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Tất cả đơn hàng</Text>
-                <Text style={styles.menuSubtext}>Theo dõi đơn hàng từ Shopify</Text>
+                <Text style={styles.menuText}>{t('account.allOrders', 'Tất cả đơn hàng')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.allOrdersSub', 'Theo dõi đơn hàng từ Shopify')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1032,8 +1034,8 @@ export default function AccountScreen() {
                 <Link2 size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Liên kết đơn hàng</Text>
-                <Text style={styles.menuSubtext}>Liên kết đơn mua bằng email khác</Text>
+                <Text style={styles.menuText}>{t('account.linkOrder', 'Liên kết đơn hàng')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.linkOrderSub', 'Liên kết đơn mua bằng email khác')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1048,7 +1050,7 @@ export default function AccountScreen() {
           {/* SECTION: PORTFOLIO / TÀI SẢN - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tài Sản</Text>
+            <Text style={styles.sectionTitle}>{t('account.assets', 'Tài Sản')}</Text>
 
             <TouchableOpacity
               style={styles.menuItem}
@@ -1058,8 +1060,8 @@ export default function AccountScreen() {
                 <Wallet size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Portfolio</Text>
-                <Text style={styles.menuSubtext}>Quản lý tài sản crypto</Text>
+                <Text style={styles.menuText}>{t('account.portfolioManage', 'Portfolio')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.portfolioManageSub', 'Quản lý tài sản crypto')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1072,8 +1074,8 @@ export default function AccountScreen() {
                 <Building2 size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Tài khoản sàn</Text>
-                <Text style={styles.menuSubtext}>Đăng ký & quản lý sàn giao dịch</Text>
+                <Text style={styles.menuText}>{t('account.exchangeAccounts', 'Tài khoản sàn')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.exchangeAccountsSub', 'Đăng ký & quản lý sàn giao dịch')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1086,8 +1088,8 @@ export default function AccountScreen() {
                 <TrendingUp size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Paper Trade History</Text>
-                <Text style={styles.menuSubtext}>Lịch sử giao dịch giả lập</Text>
+                <Text style={styles.menuText}>{t('account.paperTradeHistory', 'Paper Trade History')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.paperTradeHistorySub', 'Lịch sử giao dịch giả lập')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1100,8 +1102,8 @@ export default function AccountScreen() {
                 <Sparkles size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Karma Dashboard</Text>
-                <Text style={styles.menuSubtext}>Điểm karma & level của bạn</Text>
+                <Text style={styles.menuText}>{t('account.karmaDashboard', 'Karma Dashboard')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.karmaDashboardSub', 'Điểm karma & level của bạn')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1113,7 +1115,7 @@ export default function AccountScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeaderRow}>
               <Settings size={18} color={COLORS.gold} />
-              <Text style={[styles.sectionTitle, { marginBottom: 0, marginLeft: SPACING.sm }]}>Cài Đặt</Text>
+              <Text style={[styles.sectionTitle, { marginBottom: 0, marginLeft: SPACING.sm }]}>{t('account.settingsSection', 'Cài Đặt')}</Text>
             </View>
 
             <TouchableOpacity
@@ -1124,7 +1126,7 @@ export default function AccountScreen() {
                 <User size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Thông tin cá nhân</Text>
+                <Text style={styles.menuText}>{t('account.personalInfo', 'Thông tin cá nhân')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1137,7 +1139,7 @@ export default function AccountScreen() {
                 <Lock size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Đổi mật khẩu</Text>
+                <Text style={styles.menuText}>{t('account.changePassword', 'Đổi mật khẩu')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1153,9 +1155,9 @@ export default function AccountScreen() {
                   )}
                 </View>
                 <View style={styles.menuContent}>
-                  <Text style={styles.menuText}>Đăng nhập bằng {biometricType}</Text>
+                  <Text style={styles.menuText}>{t('account.biometricLogin', 'Đăng nhập bằng')} {biometricType}</Text>
                   <Text style={styles.menuSubtext}>
-                    {biometricEnabled ? 'Đã bật' : 'Chưa bật'}
+                    {biometricEnabled ? t('account.biometricEnabled', 'Đã bật') : t('account.biometricDisabled', 'Chưa bật')}
                   </Text>
                 </View>
                 {biometricLoading ? (
@@ -1179,7 +1181,7 @@ export default function AccountScreen() {
                 <Bell size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Cài đặt thông báo</Text>
+                <Text style={styles.menuText}>{t('account.notificationSettings', 'Cài đặt thông báo')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1192,8 +1194,8 @@ export default function AccountScreen() {
                 <Shield size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Cài đặt quyền riêng tư</Text>
-                <Text style={styles.menuSubtext}>Ai có thể xem bài viết của bạn</Text>
+                <Text style={styles.menuText}>{t('account.privacySettings', 'Cài đặt quyền riêng tư')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.privacySettingsSub', 'Ai có thể xem bài viết của bạn')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1206,8 +1208,8 @@ export default function AccountScreen() {
                 <UserCheck size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Bạn thân</Text>
-                <Text style={styles.menuSubtext}>Quản lý danh sách bạn thân</Text>
+                <Text style={styles.menuText}>{t('account.closeFriends', 'Bạn thân')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.closeFriendsSub', 'Quản lý danh sách bạn thân')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1220,8 +1222,8 @@ export default function AccountScreen() {
                 <Bookmark size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Bài viết đã lưu</Text>
-                <Text style={styles.menuSubtext}>Các bài viết bạn đã bookmark</Text>
+                <Text style={styles.menuText}>{t('account.savedPosts', 'Bài viết đã lưu')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.savedPostsSub', 'Các bài viết bạn đã bookmark')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1234,8 +1236,8 @@ export default function AccountScreen() {
                 <Globe size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Cài đặt ứng dụng</Text>
-                <Text style={styles.menuSubtext}>Ngôn ngữ, tiền tệ, giao diện</Text>
+                <Text style={styles.menuText}>{t('account.appSettings', 'Cài đặt ứng dụng')}</Text>
+                <Text style={styles.menuSubtext}>{t('account.appSettingsSub', 'Ngôn ngữ, tiền tệ, giao diện')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1245,7 +1247,7 @@ export default function AccountScreen() {
           {/* SECTION: KHÁC - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Khác</Text>
+            <Text style={styles.sectionTitle}>{t('account.otherSection', 'Khác')}</Text>
 
             <TouchableOpacity
               style={styles.menuItem}
@@ -1255,7 +1257,7 @@ export default function AccountScreen() {
                 <HelpCircle size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Trợ giúp & Hỗ trợ</Text>
+                <Text style={styles.menuText}>{t('account.helpSupport', 'Trợ giúp & Hỗ trợ')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1268,7 +1270,7 @@ export default function AccountScreen() {
                 <FileText size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Điều khoản sử dụng</Text>
+                <Text style={styles.menuText}>{t('account.termsOfService', 'Điều khoản sử dụng')}</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1281,7 +1283,7 @@ export default function AccountScreen() {
                 <LogOut size={20} color={COLORS.error} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={[styles.menuText, { color: COLORS.error }]}>Đăng xuất</Text>
+                <Text style={[styles.menuText, { color: COLORS.error }]}>{t('auth.logout', 'Đăng xuất')}</Text>
               </View>
             </TouchableOpacity>
           </View>

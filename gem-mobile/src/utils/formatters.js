@@ -140,6 +140,33 @@ export const formatPriceWithCurrency = (price, currency = '$') => {
 };
 
 /**
+ * Format amount as locale-aware currency (for shop/store contexts)
+ * Uses Intl.NumberFormat for proper locale formatting
+ * @param {number} amount - Amount value
+ * @param {string} currency - Currency code (default: 'VND')
+ * @param {string} locale - Locale string (default: 'vi-VN')
+ * @returns {string} Formatted currency string
+ */
+export const formatLocaleCurrency = (amount, currency = 'VND', locale = 'vi-VN') => {
+  if (amount === null || amount === undefined || typeof amount !== 'number' || isNaN(amount)) {
+    return currency === 'VND' ? '0₫' : '$0.00';
+  }
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: currency === 'VND' ? 0 : 2,
+      maximumFractionDigits: currency === 'VND' ? 0 : 2,
+    }).format(amount);
+  } catch (e) {
+    // Fallback if Intl is not available
+    return currency === 'VND'
+      ? `${formatNumberVI(amount, 0)}₫`
+      : `$${formatNumberVI(amount, 2)}`;
+  }
+};
+
+/**
  * Format percentage change
  * @param {number} value - Percentage change value
  * @returns {string} Formatted percentage with sign
@@ -226,13 +253,14 @@ export const calculateRR = (pattern) => {
 /**
  * Format timestamp to locale string
  * @param {string|number|Date} timestamp - Timestamp to format
+ * @param {string} locale - Locale string (default: 'vi-VN')
  * @returns {string} Formatted date string
  */
-export const formatTimestamp = (timestamp) => {
+export const formatTimestamp = (timestamp, locale = 'vi-VN') => {
   if (!timestamp) return '';
 
   const date = new Date(timestamp);
-  return date.toLocaleString('vi-VN', {
+  return date.toLocaleString(locale, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -242,12 +270,58 @@ export const formatTimestamp = (timestamp) => {
 };
 
 /**
+ * Format date only (no time)
+ * @param {string|number|Date} timestamp - Timestamp to format
+ * @param {string} locale - Locale string (default: 'vi-VN')
+ * @param {object} options - Intl.DateTimeFormat options
+ * @returns {string} Formatted date string
+ */
+export const formatDate = (timestamp, locale = 'vi-VN', options = {}) => {
+  if (!timestamp) return '';
+
+  const date = new Date(timestamp);
+  const defaultOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    ...options,
+  };
+  return date.toLocaleDateString(locale, defaultOptions);
+};
+
+/**
+ * Format number with locale awareness
+ * @param {number} value - Number to format
+ * @param {string} locale - Locale string (default: 'vi-VN')
+ * @param {object} options - Intl.NumberFormat options
+ * @returns {string} Formatted number string
+ */
+export const formatNumber = (value, locale = 'vi-VN', options = {}) => {
+  if (value === null || value === undefined || isNaN(value)) return '0';
+  try {
+    return new Intl.NumberFormat(locale, options).format(value);
+  } catch (e) {
+    return formatNumberVI(value, options.maximumFractionDigits ?? 2);
+  }
+};
+
+// Relative time labels per locale
+const RELATIVE_TIME_LABELS = {
+  'vi-VN': { justNow: 'Vừa xong', minute: 'phút trước', hour: 'giờ trước', day: 'ngày trước' },
+  'en-US': { justNow: 'Just now', minute: 'min ago', hour: 'hr ago', day: 'days ago' },
+  'zh-CN': { justNow: '刚刚', minute: '分钟前', hour: '小时前', day: '天前' },
+};
+
+/**
  * Format relative time (e.g., "2 giờ trước")
  * @param {string|number|Date} timestamp - Timestamp to format
+ * @param {string} locale - Locale string (default: 'vi-VN')
  * @returns {string} Relative time string
  */
-export const formatRelativeTime = (timestamp) => {
+export const formatRelativeTime = (timestamp, locale = 'vi-VN') => {
   if (!timestamp) return '';
+
+  const labels = RELATIVE_TIME_LABELS[locale] || RELATIVE_TIME_LABELS['vi-VN'];
 
   const now = new Date();
   const date = new Date(timestamp);
@@ -257,12 +331,12 @@ export const formatRelativeTime = (timestamp) => {
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffSecs < 60) return 'Vừa xong';
-  if (diffMins < 60) return `${diffMins} phút trước`;
-  if (diffHours < 24) return `${diffHours} giờ trước`;
-  if (diffDays < 7) return `${diffDays} ngày trước`;
+  if (diffSecs < 60) return labels.justNow;
+  if (diffMins < 60) return `${diffMins} ${labels.minute}`;
+  if (diffHours < 24) return `${diffHours} ${labels.hour}`;
+  if (diffDays < 7) return `${diffDays} ${labels.day}`;
 
-  return formatTimestamp(timestamp);
+  return formatTimestamp(timestamp, locale);
 };
 
 export default {
@@ -271,6 +345,7 @@ export default {
   formatDecimal,
   formatPrice,
   formatCurrency,
+  formatLocaleCurrency,
   formatPriceWithCurrency,
   formatPercentChange,
   formatLargeNumber,
@@ -279,5 +354,7 @@ export default {
   formatRiskReward,
   calculateRR,
   formatTimestamp,
+  formatDate,
+  formatNumber,
   formatRelativeTime,
 };

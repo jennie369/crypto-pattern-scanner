@@ -8,9 +8,12 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BarChart2, TrendingUp } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 export default function ScannerScreen() {
+  const { t } = useTranslation();
+
   return (
     <LinearGradient
       colors={GRADIENTS.background}
@@ -18,19 +21,19 @@ export default function ScannerScreen() {
       style={styles.gradient}
     >
       <SafeAreaView style={styles.container} edges={['top']}>
-        {/* ✅ Header with dark blue background like Thong Bao */}
+        {/* Header with dark blue background like Thong Bao */}
         <View style={styles.header}>
-          <Text style={styles.title}>Giao Dich</Text>
-          <Text style={styles.subtitle}>Pattern Scanner</Text>
+          <Text style={styles.title}>{t('scanner.title', 'Giao Dịch')}</Text>
+          <Text style={styles.subtitle}>{t('scanner.subtitle', 'Pattern Scanner')}</Text>
         </View>
 
         <ScrollView style={styles.scrollView}>
           {/* Glass Card Placeholder */}
           <View style={styles.glassCard}>
             <BarChart2 size={48} color={COLORS.gold} strokeWidth={1.5} />
-            <Text style={styles.cardTitle}>Scanner Screen</Text>
+            <Text style={styles.cardTitle}>{t('scanner.screenTitle', 'Scanner Screen')}</Text>
             <Text style={styles.cardDesc}>
-              Pattern scanning with Liquid Glass UI coming in Week 3+
+              {t('scanner.comingSoon', 'Pattern scanning with Liquid Glass UI coming in Week 3+')}
             </Text>
           </View>
 

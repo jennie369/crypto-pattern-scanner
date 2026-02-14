@@ -8,9 +8,12 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingBag } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 export default function ShopScreen() {
+  const { t } = useTranslation();
+
   return (
     <LinearGradient
       colors={GRADIENTS.background}
@@ -20,14 +23,14 @@ export default function ShopScreen() {
       <SafeAreaView style={styles.container} edges={['top']}>
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>Shop</Text>
-            <Text style={styles.subtitle}>Crystals & Subscriptions</Text>
+            <Text style={styles.title}>{t('shopScreen.title', 'Shop')}</Text>
+            <Text style={styles.subtitle}>{t('shopScreen.subtitle', 'Crystals & Subscriptions')}</Text>
           </View>
 
           <View style={styles.placeholder}>
             <ShoppingBag size={64} color={COLORS.textMuted} strokeWidth={1.5} />
-            <Text style={styles.placeholderText}>Shop Screen</Text>
-            <Text style={styles.placeholderDesc}>Crystal shop & tier upgrades coming in Week 3+</Text>
+            <Text style={styles.placeholderText}>{t('shopScreen.screenTitle', 'Shop Screen')}</Text>
+            <Text style={styles.placeholderDesc}>{t('shopScreen.comingSoon', 'Crystal shop & tier upgrades coming in Week 3+')}</Text>
           </View>
         </ScrollView>
       </SafeAreaView>

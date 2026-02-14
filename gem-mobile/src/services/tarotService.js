@@ -5,7 +5,7 @@
  */
 
 import { supabase } from './supabase';
-import { GEMINI_CONFIG } from '../config/gemini.config';
+import geminiService from './geminiService';
 
 // ============ TAROT CARDS - MAJOR ARCANA ============
 export const MAJOR_ARCANA = [
@@ -133,36 +133,25 @@ Hãy đưa ra:
 
 Trả lời bằng tiếng Việt, giọng văn thân thiện nhưng sâu sắc. Sử dụng emoji phù hợp.`;
 
-    const apiKey = GEMINI_CONFIG.apiKey;
-
-    if (!apiKey) {
-      console.warn('[tarotService] No Gemini API key found');
-      return {
-        interpretation: 'Chưa có API key để giải bài. Vui lòng cấu hình GEMINI_CONFIG.apiKey.',
-        cards,
-        question,
-        spreadType,
-        timestamp: new Date().toISOString(),
-      };
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    let text;
+    try {
+      const response = await geminiService.callEdgeFunction({
+        feature: 'tarot',
+        messages: [
+          { role: 'user', parts: [{ text: prompt }] },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1500,
+        },
+        metadata: { requestType: 'tarot' },
+      });
+      text = response?.text || 'Không thể giải bài lúc này.';
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1500,
-          },
-        }),
-      }
-    );
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Không thể giải bài lúc này.';
 
     return {
       interpretation: text,

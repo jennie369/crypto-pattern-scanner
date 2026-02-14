@@ -4,10 +4,26 @@
  * Uses Binance FUTURES API (fapi.binance.com) for coin list to ensure all coins are tradeable
  */
 
+const RATE_LIMIT = 1200;
+const RATE_WINDOW = 60000;
+let requestTimestamps = [];
+
+const checkRateLimit = () => {
+  const now = Date.now();
+  requestTimestamps = requestTimestamps.filter(t => now - t < RATE_WINDOW);
+  if (requestTimestamps.length >= RATE_LIMIT * 0.8) {
+    console.warn(`[Binance] Rate limit warning: ${requestTimestamps.length}/${RATE_LIMIT} requests in last minute`);
+  }
+  if (requestTimestamps.length >= RATE_LIMIT) {
+    throw new Error('Binance API rate limit reached. Please wait before making more requests.');
+  }
+  requestTimestamps.push(now);
+};
+
 class BinanceService {
   constructor() {
     this.ws = null;
-    this.singleSymbolWs = null; // Single symbol WebSocket for detail screens
+    this.singleSymbolWs = null;
     this.currentWsSymbol = null;
     this.subscribers = new Map();
     this.prices = new Map();
@@ -18,11 +34,10 @@ class BinanceService {
     this.futuresBaseUrl = 'https://fapi.binance.com/fapi/v1';
     this.allCoins = [];
     this.coinsCacheTime = 0;
-    this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    this.CACHE_DURATION = 5 * 60 * 1000;
 
-    // CANDLE CACHE - stores candles by symbol:interval key
     this.candleCache = new Map();
-    this.CANDLE_CACHE_DURATION = 60 * 1000; // 1 minute cache for candles
+    this.CANDLE_CACHE_DURATION = 60 * 1000;
   }
 
   /**
@@ -31,19 +46,21 @@ class BinanceService {
    */
   async getAllCoins() {
     try {
-      // Check cache
       if (this.allCoins.length > 0 && Date.now() - this.coinsCacheTime < this.CACHE_DURATION) {
         console.log('[Binance] Using cached Futures coins:', this.allCoins.length);
         return this.allCoins;
       }
 
+      checkRateLimit();
       console.log('[Binance] Fetching all coins from FUTURES exchange info...');
 
       const response = await fetch(`${this.futuresBaseUrl}/exchangeInfo`);
       const data = await response.json();
 
-      // Filter USDT perpetual pairs only, trading status
-      // Include both PERPETUAL and TRADIFI_PERPETUAL (for gold, silver, stocks etc.)
+      if (data && typeof data.code === 'number' && data.code < 0) {
+        throw new Error(`Binance API error ${data.code}: ${data.msg}`);
+      }
+
       const usdtPairs = data.symbols
         .filter(symbol =>
           symbol.quoteAsset === 'USDT' &&
@@ -98,11 +115,16 @@ class BinanceService {
    */
   async get24hTickers(symbols) {
     try {
+      checkRateLimit();
       const symbolsParam = JSON.stringify(symbols);
       const response = await fetch(
         `${this.baseUrl}/ticker/24hr?symbols=${encodeURIComponent(symbolsParam)}`
       );
       const data = await response.json();
+
+      if (data && typeof data.code === 'number' && data.code < 0) {
+        throw new Error(`Binance API error ${data.code}: ${data.msg}`);
+      }
 
       return data.map(ticker => ({
         symbol: ticker.symbol,
@@ -126,16 +148,19 @@ class BinanceService {
    */
   async getAllFuturesTickers(silent = false) {
     try {
-      // Use cached data if recent (< 800ms) to prevent rate limiting
       const now = Date.now();
       if (this._tickerCache && (now - this._tickerCacheTime) < 800) {
         return this._tickerCache;
       }
 
+      checkRateLimit();
       const response = await fetch(`${this.futuresBaseUrl}/ticker/24hr`);
       const data = await response.json();
 
-      // Convert array to map for fast lookup
+      if (data && typeof data.code === 'number' && data.code < 0) {
+        throw new Error(`Binance API error ${data.code}: ${data.msg}`);
+      }
+
       const tickerMap = {};
       data.forEach(ticker => {
         tickerMap[ticker.symbol] = {
@@ -270,9 +295,14 @@ class BinanceService {
    */
   async fetchAndNotifyPrice(symbol, callback) {
     try {
+      checkRateLimit();
       const url = `${this.futuresBaseUrl}/ticker/24hr?symbol=${symbol}`;
       const response = await fetch(url);
       const data = await response.json();
+
+      if (data && typeof data.code === 'number' && data.code < 0) {
+        throw new Error(`Binance API error ${data.code}: ${data.msg}`);
+      }
 
       if (data && data.lastPrice) {
         const priceData = {
@@ -396,21 +426,19 @@ class BinanceService {
    */
   async getCandles(symbol, interval = '1h', limit = 100) {
     try {
-      // Check cache first
       const cacheKey = `${symbol}:${interval}:${limit}`;
       const cached = this.candleCache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < this.CANDLE_CACHE_DURATION) {
         return cached.data;
       }
 
+      checkRateLimit();
       const url = `${this.futuresBaseUrl}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
       const response = await fetch(url);
       const data = await response.json();
 
-      // Check if response is an error
-      if (data.code && data.msg) {
-        console.error('[Binance] Futures klines error:', data.msg);
-        return [];
+      if (data && typeof data.code === 'number' && data.code < 0) {
+        throw new Error(`Binance API error ${data.code}: ${data.msg}`);
       }
 
       const candles = data.map(candle => ({
@@ -452,9 +480,16 @@ class BinanceService {
    */
   async get24hrTicker(symbol) {
     try {
+      checkRateLimit();
       const url = `${this.futuresBaseUrl}/ticker/24hr?symbol=${symbol}`;
       const response = await fetch(url);
-      return await response.json();
+      const data = await response.json();
+
+      if (data && typeof data.code === 'number' && data.code < 0) {
+        throw new Error(`Binance API error ${data.code}: ${data.msg}`);
+      }
+
+      return data;
     } catch (error) {
       console.error('[Binance] Error fetching ticker:', error);
       return null;
@@ -467,16 +502,19 @@ class BinanceService {
    */
   async getCurrentPrice(symbol) {
     try {
-      // First check WebSocket cache
       const cachedPrice = this.prices.get(symbol);
       if (cachedPrice && Date.now() - cachedPrice.timestamp < 60000) {
         return cachedPrice.price;
       }
 
-      // Fetch from REST API
+      checkRateLimit();
       const url = `${this.futuresBaseUrl}/ticker/price?symbol=${symbol}`;
       const response = await fetch(url);
       const data = await response.json();
+
+      if (data && typeof data.code === 'number' && data.code < 0) {
+        throw new Error(`Binance API error ${data.code}: ${data.msg}`);
+      }
 
       if (data && data.price) {
         const price = parseFloat(data.price);

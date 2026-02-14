@@ -169,7 +169,7 @@ export const useOptimizedScan = () => {
 
           // Check cache first (if enabled and not forcing refresh)
           if (cacheEnabled && !forceRefresh) {
-            const cached = await patternCache.get(coin, tf);
+            const cached = await patternCache.get(coin, tf, patternCache.SCANNER_TTL);
             if (cached) {
               console.log(`[Scan] Cache hit: ${coin}@${tf}`);
               allPatterns.push(...cached);

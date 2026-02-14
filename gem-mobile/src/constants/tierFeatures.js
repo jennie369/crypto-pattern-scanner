@@ -70,7 +70,7 @@ export const TIER_FEATURES = {
     minPatternScore: 40,
     maxPatterns: 7,
     maxZonesDisplayed: 3,
-    scanLabel: 'Basic Scan'
+    scanLabel: 'Pro Scan'
   },
 
   TIER2: {
@@ -96,7 +96,7 @@ export const TIER_FEATURES = {
     minPatternScore: 50,       // Higher quality threshold
     maxPatterns: 15,
     maxZonesDisplayed: 10,
-    scanLabel: 'Enhanced Scan'
+    scanLabel: 'Premium Scan'
   },
 
   TIER3: {
@@ -122,7 +122,7 @@ export const TIER_FEATURES = {
     minPatternScore: 45,       // Show slightly more for analysis
     maxPatterns: 50,
     maxZonesDisplayed: 20,
-    scanLabel: 'Elite Scan'
+    scanLabel: 'VIP Scan'
   },
 
   // Admin tier for testing
@@ -503,21 +503,21 @@ export function getTierDisplayInfo(tier) {
       patternCount: 3
     },
     TIER1: {
-      label: 'BASIC',
+      label: 'PRO',
       color: '#17A2B8',
       bgColor: 'rgba(23, 162, 184, 0.15)',
       icon: '🥉',
       patternCount: 7
     },
     TIER2: {
-      label: 'PRO',
+      label: 'PREMIUM',
       color: '#FFC107',
       bgColor: 'rgba(255, 193, 7, 0.15)',
       icon: '🥈',
       patternCount: 15
     },
     TIER3: {
-      label: 'ELITE',
+      label: 'VIP',
       color: '#FF6B6B',
       bgColor: 'rgba(255, 107, 107, 0.15)',
       icon: '🥇',
