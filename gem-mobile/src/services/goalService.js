@@ -7,6 +7,7 @@
 
 import { supabase } from './supabase';
 import TierService from './tierService';
+import * as Notifications from 'expo-notifications';
 
 // ============ ERROR LOGGING HELPER ============
 // Supabase errors are objects that don't serialize well in React Native console
@@ -254,14 +255,25 @@ export const createGoal = async (userId, goalData, options = {}) => {
 
     if (error) throw error;
 
-    // Award XP for creating goal
-    await addXPToUser(userId, XP_REWARDS.add_goal);
+    // P2-3: Post-insert side effects wrapped in individual try/catch
+    // so partial failure doesn't lose the successfully created goal
+    try {
+      await addXPToUser(userId, XP_REWARDS.add_goal);
+    } catch (xpErr) {
+      console.warn('[goalService] createGoal: XP award failed (goal still created):', xpErr?.message || xpErr);
+    }
 
-    // Create default milestones (25%, 50%, 75%, 100%)
-    await createDefaultMilestones(data.id);
+    try {
+      await createDefaultMilestones(data.id);
+    } catch (msErr) {
+      console.warn('[goalService] createGoal: Milestone creation failed (goal still created):', msErr?.message || msErr);
+    }
 
-    // Update goals_created count
-    await updateUserStats(userId, { goals_created: 1 });
+    try {
+      await updateUserStats(userId, { goals_created: 1 });
+    } catch (statsErr) {
+      console.warn('[goalService] createGoal: Stats update failed (goal still created):', statsErr?.message || statsErr);
+    }
 
     return data;
   } catch (err) {
@@ -772,6 +784,48 @@ export const updateDailySummary = async (userId, updates) => {
   }
 };
 
+// ============ GOAL REMINDERS ============
+/**
+ * Schedule a local notification reminder for a vision board goal.
+ * @param {string} goalId - The goal ID (stored in notification data for deep-link)
+ * @param {string} title - Reminder body text (goal title)
+ * @param {Date|string} reminderDate - When to fire the reminder
+ * @returns {Promise<string|null>} - Expo notification ID, or null if date is in the past
+ */
+export const scheduleGoalReminder = async (goalId, title, reminderDate) => {
+  try {
+    const trigger = new Date(reminderDate);
+    if (trigger <= new Date()) return null;
+
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Vision Board Reminder',
+        body: title,
+        data: { goalId, type: 'vision_board_reminder' },
+      },
+      trigger,
+    });
+    return id;
+  } catch (err) {
+    console.error('[goalService] scheduleGoalReminder error:', err?.message || err);
+    return null;
+  }
+};
+
+/**
+ * Cancel a previously scheduled goal reminder.
+ * @param {string} notificationId - The ID returned by scheduleGoalReminder
+ */
+export const cancelGoalReminder = async (notificationId) => {
+  try {
+    if (notificationId) {
+      await Notifications.cancelScheduledNotificationAsync(notificationId);
+    }
+  } catch (err) {
+    console.error('[goalService] cancelGoalReminder error:', err?.message || err);
+  }
+};
+
 export default {
   LIFE_AREAS,
   XP_REWARDS,
@@ -798,4 +852,7 @@ export default {
   addXPToUser,
   updateUserStats,
   updateDailySummary,
+  // Reminders
+  scheduleGoalReminder,
+  cancelGoalReminder,
 };

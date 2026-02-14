@@ -2,9 +2,14 @@
  * VisionBoardContext - Vision Board 2.0
  * Centralized state management for Vision Board features
  * Created: December 10, 2025
+ *
+ * P1-10/P1-11: GoalContext merged back — it was a strict subset that duplicated
+ * goals/actions state. This is now the SINGLE context for all Vision Board data.
+ * Unique features from GoalContext (deleteGoal, activeGoals, completedGoals, actionProgress)
+ * have been added here.
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 
 // Import all services
@@ -121,6 +126,11 @@ export const VisionBoardProvider = ({ children }) => {
     return updated;
   }, []);
 
+  const deleteGoal = useCallback(async (goalId) => {
+    await goalService.deleteGoal(goalId);
+    setGoals(prev => prev.filter(g => g.id !== goalId));
+  }, []);
+
   const completeGoal = useCallback(async (goalId) => {
     if (!userId) return null;
     const result = await goalService.completeGoal(goalId, userId);
@@ -201,7 +211,25 @@ export const VisionBoardProvider = ({ children }) => {
     return result;
   }, [userId]);
 
-  // ============ COMPUTED VALUES ============
+  // ============ COMPUTED VALUES (includes merged GoalContext features) ============
+
+  // P1-10: Merged from GoalContext — filtered goal lists
+  const activeGoals = useMemo(() =>
+    goals.filter(g => g.status === 'active'),
+  [goals]);
+
+  const completedGoals = useMemo(() =>
+    goals.filter(g => g.status === 'completed'),
+  [goals]);
+
+  // P1-10: Merged from GoalContext — action completion progress
+  const actionProgress = useMemo(() => ({
+    completed: todayActions.filter(a => a.isCompletedToday).length,
+    total: todayActions.length,
+    percentage: todayActions.length > 0
+      ? Math.round((todayActions.filter(a => a.isCompletedToday).length / todayActions.length) * 100)
+      : 0,
+  }), [todayActions]);
 
   const todayProgress = {
     actions: {
@@ -233,8 +261,11 @@ export const VisionBoardProvider = ({ children }) => {
 
     // Goals
     goals,
+    activeGoals,
+    completedGoals,
     addGoal,
     updateGoal,
+    deleteGoal,
     completeGoal,
 
     // Today's items
@@ -252,11 +283,12 @@ export const VisionBoardProvider = ({ children }) => {
     addAffirmation,
     completeRitual,
 
-    // Stats
+    // Stats & computed
     stats,
     dailyScore,
     userLevel,
     todayProgress,
+    actionProgress,
 
     // Divination
     recentReadings,

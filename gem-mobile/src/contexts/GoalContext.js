@@ -1,5 +1,17 @@
 /**
- * GoalContext - Goal State Management
+ * @deprecated P1-10/P1-11: MERGED BACK INTO VisionBoardContext
+ *
+ * GoalContext was a strict subset of VisionBoardContext (goals + todayActions only).
+ * Having both caused duplicate data fetches and potential state divergence.
+ * All unique features (deleteGoal, activeGoals, completedGoals, actionProgress)
+ * have been moved to VisionBoardContext.
+ *
+ * USE: import { useVisionBoard } from './VisionBoardContext' instead.
+ *
+ * This file is preserved for reference only. It is NOT imported anywhere.
+ * Safe to delete in a future cleanup pass.
+ *
+ * GoalContext - Goal State Management (DEPRECATED)
  * Split from VisionBoardContext for better performance
  * Created: January 27, 2026
  */

@@ -139,6 +139,9 @@ import { checkTemplateAccess, getUpgradePromptForTemplate } from '../../config/t
 import { getTemplate } from '../../services/templates/journalTemplates';
 import TemplateInlineForm from '../../components/GemMaster/TemplateInlineForm';
 
+// Chat message pagination - show last N messages, load more on scroll
+const MESSAGES_PAGE_SIZE = 50;
+
 // Simple UUID generator for session tracking
 const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -245,6 +248,9 @@ const GemMasterScreen = ({ navigation, route }) => {
   // Chat history state
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Chat pagination — messages holds ALL messages, visibleCount controls what's rendered
+  const [visibleMessageCount, setVisibleMessageCount] = useState(MESSAGES_PAGE_SIZE);
 
   // SmartFormCard state - for user input forms (legacy)
   const [showSmartForm, setShowSmartForm] = useState(false);
@@ -633,6 +639,23 @@ const GemMasterScreen = ({ navigation, route }) => {
 
     loadRecentConversation();
   }, [user]);
+
+  // Chat pagination: derive visible messages from full messages array
+  const visibleMessages = React.useMemo(() => {
+    if (messages.length <= visibleMessageCount) return messages;
+    // Always include welcome message (index 0) + last N messages
+    const startIndex = Math.max(1, messages.length - visibleMessageCount);
+    return [messages[0], ...messages.slice(startIndex)];
+  }, [messages, visibleMessageCount]);
+
+  const hasOlderMessages = messages.length > visibleMessageCount;
+
+  // Load more older messages when user scrolls to top (inverted list: onEndReached = top)
+  const handleLoadMoreMessages = useCallback(() => {
+    if (!hasOlderMessages) return;
+    setVisibleMessageCount(prev => prev + MESSAGES_PAGE_SIZE);
+    console.log('[GemMaster] Loading more messages, new visible count:', visibleMessageCount + MESSAGES_PAGE_SIZE);
+  }, [hasOlderMessages, visibleMessageCount]);
 
   // Check if user can query (has remaining quota)
   const canQuery = useCallback(() => {
@@ -1881,6 +1904,7 @@ const GemMasterScreen = ({ navigation, route }) => {
 
     // Reset UI
     setMessages([WELCOME_MESSAGE]);
+    setVisibleMessageCount(MESSAGES_PAGE_SIZE);
     gemMasterService.clearHistory();
     setSuggestedWidgets(null);
     setCrystalRec({ show: false, context: '' });
@@ -1904,6 +1928,7 @@ const GemMasterScreen = ({ navigation, route }) => {
       if (conversation && conversation.messages) {
         setCurrentConversationId(conversation.id);
         setMessages([WELCOME_MESSAGE, ...conversation.messages]);
+        setVisibleMessageCount(MESSAGES_PAGE_SIZE);
         // Clear history - gemMasterService will sync from messages state when next message is sent
         gemMasterService.clearHistory();
       }
@@ -2576,7 +2601,7 @@ const GemMasterScreen = ({ navigation, route }) => {
           {/* Chat Messages - INVERTED for instant bottom display like Messenger */}
           <FlatList
             ref={flatListRef}
-            data={[...messages].reverse()}
+            data={[...visibleMessages].reverse()}
             renderItem={renderMessage}
             keyExtractor={keyExtractor}
             inverted={true}
@@ -2598,6 +2623,8 @@ const GemMasterScreen = ({ navigation, route }) => {
             removeClippedSubviews={false}
             maxToRenderPerBatch={10}
             windowSize={10}
+            onEndReached={handleLoadMoreMessages}
+            onEndReachedThreshold={0.3}
           />
 
           {/* Scroll to Bottom Button - positioned above input area (smaller) */}

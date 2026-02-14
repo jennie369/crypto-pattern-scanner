@@ -1,8 +1,13 @@
 /**
  * GEM Mobile - Binance Service
- * WebSocket connection for real-time prices + REST API for candles
+ * REST API for candles + real-time prices via WebSocket pool
  * Uses Binance FUTURES API (fapi.binance.com) for coin list to ensure all coins are tradeable
+ *
+ * P1-8: WebSocket consolidated — delegates to webSocketPoolService (single pooled connection)
+ * P2-5: Ticker updates throttled to max 1 per second per symbol
  */
+
+import { wsPool } from './scanner/webSocketPoolService';
 
 const RATE_LIMIT = 1200;
 const RATE_WINDOW = 60000;
@@ -22,22 +27,22 @@ const checkRateLimit = () => {
 
 class BinanceService {
   constructor() {
-    this.ws = null;
-    this.singleSymbolWs = null;
-    this.currentWsSymbol = null;
-    this.subscribers = new Map();
-    this.prices = new Map();
-    this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
-    this.reconnectDelay = 3000;
     this.baseUrl = 'https://api.binance.com/api/v3';
     this.futuresBaseUrl = 'https://fapi.binance.com/fapi/v1';
     this.allCoins = [];
     this.coinsCacheTime = 0;
     this.CACHE_DURATION = 5 * 60 * 1000;
 
+    this.prices = new Map(); // Local price cache (binanceService format)
+
     this.candleCache = new Map();
     this.CANDLE_CACHE_DURATION = 60 * 1000;
+
+    // WebSocket: delegates to wsPool with per-symbol subscriber fan-out + throttle
+    this._symbolSubscribers = new Map(); // symbol -> Set<callback>
+    this._poolUnsubscribes = new Map();  // symbol -> unsubscribe function from wsPool
+    this._lastNotifyTime = new Map();    // symbol -> timestamp (throttle tracking)
+    this._THROTTLE_MS = 1000;            // P2-5: Max 1 update per second per symbol
   }
 
   /**
@@ -191,107 +196,103 @@ class BinanceService {
   }
 
   /**
-   * Connect to Binance WebSocket for real-time prices
+   * Subscribe to real-time price updates for a symbol.
+   * Delegates to webSocketPoolService (single pooled connection) with:
+   * - Per-symbol fan-out to multiple subscribers
+   * - 1s throttle per symbol (P2-5)
+   * - Data format adaptation (wsPool format -> binanceService format)
+   *
+   * @param {string} symbol - Trading symbol (e.g., 'BTCUSDT')
+   * @param {function} callback - Called with { symbol, price, priceChange, priceChangePercent, high, low, volume, timestamp }
+   * @returns {function} Unsubscribe function
    */
-  connect(symbols) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.log('[Binance] WebSocket already connected');
-      return;
-    }
-
-    const streams = symbols
-      .map(symbol => `${symbol.toLowerCase()}@ticker`)
-      .join('/');
-
-    const wsUrl = `wss://stream.binance.com:9443/stream?streams=${streams}`;
-    console.log('[Binance] Connecting to WebSocket...');
-
-    this.ws = new WebSocket(wsUrl);
-
-    this.ws.onopen = () => {
-      console.log('[Binance] WebSocket connected');
-      this.reconnectAttempts = 0;
-    };
-
-    this.ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        if (message.stream && message.data) {
-          const ticker = message.data;
-          const symbol = ticker.s;
-
-          const priceData = {
-            symbol: symbol,
-            price: parseFloat(ticker.c),
-            priceChange: parseFloat(ticker.p),
-            priceChangePercent: parseFloat(ticker.P),
-            high: parseFloat(ticker.h),
-            low: parseFloat(ticker.l),
-            volume: parseFloat(ticker.v),
-            timestamp: ticker.E,
-          };
-
-          this.prices.set(symbol, priceData);
-          this.notifySubscribers(symbol, priceData);
-        }
-      } catch (error) {
-        console.error('[Binance] Parse error:', error);
-      }
-    };
-
-    this.ws.onerror = (error) => {
-      // WebSocket errors in React Native don't have detailed messages
-      const readyState = this.ws?.readyState;
-      if (readyState !== WebSocket.CLOSING && readyState !== WebSocket.CLOSED) {
-        console.warn('[Binance] WebSocket error (state:', readyState, ')');
-      }
-    };
-
-    this.ws.onclose = (event) => {
-      // Only log if unexpected close
-      if (event?.code && event.code !== 1000 && event.code !== 1001) {
-        console.log('[Binance] WebSocket closed (code:', event.code, ')');
-      }
-      this.attemptReconnect(symbols);
-    };
-  }
-
-  attemptReconnect(symbols) {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      console.log(`[Binance] Reconnecting... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-      setTimeout(() => this.connect(symbols), this.reconnectDelay);
-    }
-  }
-
   subscribe(symbol, callback) {
-    if (!this.subscribers.has(symbol)) {
-      this.subscribers.set(symbol, []);
-    }
-    this.subscribers.get(symbol).push(callback);
+    if (!symbol || typeof callback !== 'function') return () => {};
 
-    // If we have cached price, send immediately
-    if (this.prices.has(symbol)) {
-      callback(this.prices.get(symbol));
+    // Ensure wsPool is initialized
+    wsPool.init();
+
+    // First subscriber for this symbol: create the single wsPool subscription
+    if (!this._symbolSubscribers.has(symbol)) {
+      this._symbolSubscribers.set(symbol, new Set());
+
+      // Single wsPool subscription per symbol — handles WS lifecycle
+      const poolUnsub = wsPool.subscribe(symbol, (data) => {
+        // P2-5: Throttle — max 1 update per second per symbol
+        const now = Date.now();
+        const lastTime = this._lastNotifyTime.get(symbol) || 0;
+        if (now - lastTime < this._THROTTLE_MS) return;
+        this._lastNotifyTime.set(symbol, now);
+
+        // Adapt wsPool format to binanceService format
+        const priceData = {
+          symbol: data.symbol,
+          price: data.price,
+          priceChange: 0,
+          priceChangePercent: data.change24h || 0,
+          high: data.high24h || 0,
+          low: data.low24h || 0,
+          volume: data.volume || 0,
+          timestamp: data.timestamp || Date.now(),
+        };
+
+        // Update local cache
+        this.prices.set(symbol, priceData);
+
+        // Fan-out: notify all subscribers for this symbol
+        // C4 pattern: snapshot before iterating to prevent race conditions
+        const callbacks = this._symbolSubscribers.get(symbol);
+        if (callbacks && callbacks.size > 0) {
+          const snapshot = [...callbacks];
+          snapshot.forEach(cb => {
+            try {
+              if (this._symbolSubscribers.has(symbol) && this._symbolSubscribers.get(symbol).has(cb)) {
+                cb(priceData);
+              }
+            } catch (err) {
+              console.warn('[Binance] Subscriber callback error:', err?.message || err);
+            }
+          });
+        }
+      });
+
+      this._poolUnsubscribes.set(symbol, poolUnsub);
+    }
+
+    // Add this callback to the per-symbol subscriber set
+    this._symbolSubscribers.get(symbol).add(callback);
+
+    // Send cached price immediately if available, otherwise fetch via REST
+    const cachedPrice = this.prices.get(symbol);
+    if (cachedPrice) {
+      callback(cachedPrice);
     } else {
-      // Fetch initial price via REST API immediately (don't wait for WebSocket)
       this.fetchAndNotifyPrice(symbol, callback);
     }
 
-    // Auto-connect WebSocket for this symbol if not connected
-    this.ensureWebSocketForSymbol(symbol);
-
+    // Return unsubscribe function
     return () => {
-      const callbacks = this.subscribers.get(symbol);
+      const callbacks = this._symbolSubscribers.get(symbol);
       if (callbacks) {
-        const index = callbacks.indexOf(callback);
-        if (index > -1) callbacks.splice(index, 1);
+        callbacks.delete(callback);
+
+        // If no more subscribers for this symbol, clean up pool subscription
+        if (callbacks.size === 0) {
+          this._symbolSubscribers.delete(symbol);
+          const poolUnsub = this._poolUnsubscribes.get(symbol);
+          if (poolUnsub) {
+            poolUnsub();
+            this._poolUnsubscribes.delete(symbol);
+          }
+          this._lastNotifyTime.delete(symbol);
+        }
       }
     };
   }
 
   /**
    * Fetch price via REST API and notify callback immediately
+   * Used for initial price when no cached data available
    */
   async fetchAndNotifyPrice(symbol, callback) {
     try {
@@ -325,98 +326,43 @@ class BinanceService {
   }
 
   /**
-   * Ensure WebSocket is connected for a specific symbol
-   * Creates a dedicated connection for single symbol real-time updates
+   * Get cached price for a symbol
+   * Checks local cache first, then wsPool
    */
-  ensureWebSocketForSymbol(symbol) {
-    // If main WebSocket is already handling this symbol, skip
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      return;
-    }
-
-    // Create/update single symbol WebSocket connection
-    if (!this.singleSymbolWs || this.singleSymbolWs.readyState !== WebSocket.OPEN || this.currentWsSymbol !== symbol) {
-      // Close existing single symbol connection
-      if (this.singleSymbolWs) {
-        this.singleSymbolWs.close();
-      }
-
-      this.currentWsSymbol = symbol;
-      const wsUrl = `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`;
-      console.log(`[Binance] Connecting single symbol WebSocket for ${symbol}...`);
-
-      this.singleSymbolWs = new WebSocket(wsUrl);
-
-      this.singleSymbolWs.onopen = () => {
-        console.log(`[Binance] Single symbol WebSocket connected for ${symbol}`);
-      };
-
-      this.singleSymbolWs.onmessage = (event) => {
-        try {
-          const ticker = JSON.parse(event.data);
-          if (ticker.s) {
-            const priceData = {
-              symbol: ticker.s,
-              price: parseFloat(ticker.c),
-              priceChange: parseFloat(ticker.p),
-              priceChangePercent: parseFloat(ticker.P),
-              high: parseFloat(ticker.h),
-              low: parseFloat(ticker.l),
-              volume: parseFloat(ticker.v),
-              timestamp: ticker.E,
-            };
-
-            this.prices.set(ticker.s, priceData);
-            this.notifySubscribers(ticker.s, priceData);
-          }
-        } catch (error) {
-          console.error('[Binance] Single WS parse error:', error);
-        }
-      };
-
-      this.singleSymbolWs.onerror = (error) => {
-        // WebSocket errors in React Native don't have detailed messages
-        // Only log if it's unexpected (not during intentional close)
-        const readyState = this.singleSymbolWs?.readyState;
-        if (readyState !== WebSocket.CLOSING && readyState !== WebSocket.CLOSED) {
-          console.warn(`[Binance] WebSocket error for ${symbol} (state: ${readyState})`);
-        }
-      };
-
-      this.singleSymbolWs.onclose = (event) => {
-        // Only log if unexpected close (code 1000 = normal, 1001 = going away)
-        if (event?.code && event.code !== 1000 && event.code !== 1001) {
-          console.log(`[Binance] WebSocket closed for ${symbol} (code: ${event.code})`);
-        }
-        // Reconnect after delay if still subscribed
-        if (this.subscribers.has(symbol) && this.subscribers.get(symbol).length > 0) {
-          setTimeout(() => this.ensureWebSocketForSymbol(symbol), 3000);
-        }
-      };
-    }
-  }
-
-  notifySubscribers(symbol, priceData) {
-    const callbacks = this.subscribers.get(symbol);
-    if (callbacks) {
-      callbacks.forEach(cb => cb(priceData));
-    }
-  }
-
   getPrice(symbol) {
-    return this.prices.get(symbol);
+    const local = this.prices.get(symbol);
+    if (local) return local;
+
+    // Fallback: check wsPool buffer and adapt format
+    const poolPrice = wsPool.getCurrentPrice(symbol);
+    if (poolPrice) {
+      return {
+        symbol: poolPrice.symbol,
+        price: poolPrice.price,
+        priceChange: 0,
+        priceChangePercent: poolPrice.change24h || 0,
+        high: poolPrice.high24h || 0,
+        low: poolPrice.low24h || 0,
+        volume: poolPrice.volume || 0,
+        timestamp: poolPrice.timestamp || Date.now(),
+      };
+    }
+
+    return null;
   }
 
+  /**
+   * Clear local state. wsPool lifecycle is managed separately.
+   */
   disconnect() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
-    if (this.singleSymbolWs) {
-      this.singleSymbolWs.close();
-      this.singleSymbolWs = null;
-      this.currentWsSymbol = null;
-    }
+    // Unsubscribe all pool subscriptions
+    this._poolUnsubscribes.forEach(unsub => {
+      try { unsub(); } catch (e) { /* ignore */ }
+    });
+    this._poolUnsubscribes.clear();
+    this._symbolSubscribers.clear();
+    this._lastNotifyTime.clear();
+    this.prices.clear();
   }
 
   /**

@@ -6,6 +6,14 @@
 
 import { supabase } from './supabase';
 import geminiService from './geminiService';
+import * as Crypto from 'expo-crypto';
+
+// Cryptographically uniform random [0, 1) — eliminates modulo bias for 78-card deck
+const getSecureRandom = () => {
+  const randomBytes = Crypto.getRandomBytes(4);
+  const view = new DataView(randomBytes.buffer);
+  return view.getUint32(0) / (0xFFFFFFFF + 1);
+};
 
 // ============ TAROT CARDS - MAJOR ARCANA ============
 export const MAJOR_ARCANA = [
@@ -92,12 +100,17 @@ export const SPREAD_TYPES = {
 
 // ============ DRAW RANDOM CARDS ============
 export const drawCards = (count, allowReversed = true) => {
-  const shuffled = [...TAROT_CARDS].sort(() => Math.random() - 0.5);
-  const drawn = shuffled.slice(0, count);
+  // Fisher-Yates shuffle with cryptographically secure random
+  const deck = [...TAROT_CARDS];
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(getSecureRandom() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  const drawn = deck.slice(0, count);
 
   return drawn.map(card => ({
     ...card,
-    isReversed: allowReversed ? Math.random() > 0.5 : false,
+    isReversed: allowReversed ? getSecureRandom() > 0.5 : false,
   }));
 };
 

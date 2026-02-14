@@ -20,6 +20,7 @@ class GeminiService {
     this.maxRetries = 3;
     this.retryDelay = 1000; // 1 second
     this.rateLimitInfo = null; // Store rate limit info from last request
+    this.requestTimeout = 60000; // 60 seconds — AI responses can be long
   }
 
   /**
@@ -83,9 +84,30 @@ class GeminiService {
       parts: [{ text: 'Ta đã hiểu. Ta là GEM Master. Ta sẽ tuân theo hướng dẫn. Bạn cần điều gì?' }],
     });
 
-    // Add conversation history (last 10 messages)
-    const recentHistory = history.slice(-10);
-    for (const msg of recentHistory) {
+    // Add conversation history with token-aware truncation
+    // Rough token estimate: 1 token ≈ 4 characters (conservative for Vietnamese)
+    const MAX_HISTORY_TOKENS = 4000;
+    const MAX_HISTORY_MESSAGES = 20;
+
+    const recentHistory = history.slice(-MAX_HISTORY_MESSAGES);
+    let totalTokens = 0;
+    const truncatedHistory = [];
+
+    // Walk backwards to prioritize most recent messages
+    for (let i = recentHistory.length - 1; i >= 0; i--) {
+      const msg = recentHistory[i];
+      const contentLength = (msg.content || '').length;
+      const estimatedTokens = Math.ceil(contentLength / 4);
+
+      if (totalTokens + estimatedTokens > MAX_HISTORY_TOKENS) {
+        break; // Stop adding older messages to stay within token budget
+      }
+
+      totalTokens += estimatedTokens;
+      truncatedHistory.unshift(msg); // Prepend to maintain chronological order
+    }
+
+    for (const msg of truncatedHistory) {
       messages.push({
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text: msg.content }],
@@ -107,6 +129,9 @@ class GeminiService {
    * @returns {Promise<Object>}
    */
   async callEdgeFunction(params, attempt = 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
+
     try {
       // Get current session for JWT token
       const { session, error: sessionError } = await getSession();
@@ -125,6 +150,7 @@ class GeminiService {
           'x-request-feature': params.feature,
         },
         body: JSON.stringify(params),
+        signal: controller.signal,
       });
 
       // Store rate limit info from headers
@@ -158,6 +184,18 @@ class GeminiService {
         rateLimit: data.rateLimit,
       };
     } catch (error) {
+      // Convert AbortError to a more descriptive timeout error
+      if (error.name === 'AbortError') {
+        const timeoutError = new Error('REQUEST_TIMEOUT');
+        // Retry logic for timeout errors
+        if (attempt < this.maxRetries) {
+          console.log(`[Gemini] Timeout, retry attempt ${attempt + 1}/${this.maxRetries}`);
+          await this.delay(this.retryDelay * attempt);
+          return this.callEdgeFunction(params, attempt + 1);
+        }
+        throw timeoutError;
+      }
+
       // Retry logic for transient errors
       if (attempt < this.maxRetries && this.shouldRetry(error)) {
         console.log(`[Gemini] Retry attempt ${attempt + 1}/${this.maxRetries}`);
@@ -166,6 +204,8 @@ class GeminiService {
       }
 
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -179,6 +219,7 @@ class GeminiService {
       'ECONNRESET',
       'ETIMEDOUT',
       'ENOTFOUND',
+      'REQUEST_TIMEOUT',
       'network',
       'fetch',
       '500',
@@ -236,6 +277,13 @@ Vui lòng thử lại sau.`;
       text = `Phiên đăng nhập đã hết hạn.
 
 Vui lòng đăng xuất và đăng nhập lại để tiếp tục sử dụng.`;
+    } else if (errorMsg.includes('REQUEST_TIMEOUT') || errorMsg.includes('timeout')) {
+      text = `Yêu cầu đã hết thời gian chờ (60 giây).
+
+Câu hỏi của bạn có thể quá phức tạp. Vui lòng thử:
+- Đặt câu hỏi ngắn gọn hơn
+- Chia thành nhiều câu hỏi nhỏ
+- Thử lại sau vài giây`;
     } else if (errorMsg.includes('network') || errorMsg.includes('fetch') || errorMsg.includes('ECONNRESET')) {
       text = `Không thể kết nối server.
 
