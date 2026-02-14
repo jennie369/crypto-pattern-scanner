@@ -8,11 +8,24 @@ import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 
+/**
+ * Strip markdown syntax from text for clean display
+ */
+const stripMarkdown = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\*\*\*([^*]+?)\*\*\*/g, '$1')
+    .replace(/\*\*([^*]+?)\*\*/g, '$1')
+    .replace(/\*([^*]+?)\*/g, '$1')
+    .replace(/^\*{3,}$/gm, '')
+    .trim();
+};
+
 const TextResponse = memo(({ text, isAI = true }) => {
   return (
     <View style={[styles.container, isAI ? styles.aiContainer : styles.userContainer]}>
       <Text style={[styles.text, isAI ? styles.aiText : styles.userText]}>
-        {text || ''}
+        {isAI ? stripMarkdown(text) : (text || '')}
       </Text>
     </View>
   );

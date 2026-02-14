@@ -38,6 +38,69 @@ import {
   TOUCH,
 } from '../../../utils/tokens';
 
+/**
+ * Format message preview - handles call events stored as JSON
+ */
+const formatMessagePreview = (message) => {
+  if (!message?.content) return 'No messages yet';
+
+  // Handle call event messages
+  if (message.message_type === 'call') {
+    try {
+      const callData = typeof message.content === 'string'
+        ? JSON.parse(message.content)
+        : message.content;
+
+      if (callData?.call_id || callData?.call_type || callData?.call_status) {
+        const isVideo = callData.call_type === 'video';
+        const callLabel = isVideo ? 'Cuộc gọi video' : 'Cuộc gọi';
+
+        if (callData.call_status === 'missed' || callData.call_status === 'cancelled') {
+          return `${callLabel} nhỡ`;
+        }
+        if (callData.call_status === 'declined') {
+          return `${callLabel} bị từ chối`;
+        }
+        if (callData.duration && callData.duration > 0) {
+          const mins = Math.floor(callData.duration / 60);
+          const secs = callData.duration % 60;
+          const durationStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+          return `${callLabel} ${durationStr}`;
+        }
+        return callLabel;
+      }
+    } catch (e) {
+      // Not JSON, fall through
+    }
+  }
+
+  // Detect JSON strings that look like call events (fallback for missing message_type)
+  const content = message.content;
+  if (typeof content === 'string' && content.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.call_id || parsed.call_type) {
+        const isVideo = parsed.call_type === 'video';
+        const callLabel = isVideo ? 'Cuộc gọi video' : 'Cuộc gọi';
+        if (parsed.call_status === 'missed' || parsed.call_status === 'cancelled') {
+          return `${callLabel} nhỡ`;
+        }
+        if (parsed.duration && parsed.duration > 0) {
+          const mins = Math.floor(parsed.duration / 60);
+          const secs = parsed.duration % 60;
+          const durationStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+          return `${callLabel} ${durationStr}`;
+        }
+        return callLabel;
+      }
+    } catch (e) {
+      // Not JSON, fall through
+    }
+  }
+
+  return content;
+};
+
 const ConversationItem = memo(({ conversation, currentUserId, onPress, index, isPinned }) => {
   // Get other participant info
   const otherParticipant = conversation.other_participant ||
@@ -56,9 +119,9 @@ const ConversationItem = memo(({ conversation, currentUserId, onPress, index, is
   // Unread count
   const unreadCount = conversation.my_unread_count || 0;
 
-  // Latest message
+  // Latest message - format preview (handles call events, JSON, etc.)
   const latestMessage = conversation.latest_message;
-  const messagePreview = latestMessage?.content || 'No messages yet';
+  const messagePreview = formatMessagePreview(latestMessage);
   const isOwnMessage = latestMessage?.sender_id === currentUserId;
 
   // Time formatting

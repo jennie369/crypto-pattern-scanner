@@ -42,6 +42,35 @@ import {
 // Utils
 import { formatRelativeTime } from '../../utils/formatters';
 
+/**
+ * Format message preview - handles call events stored as JSON
+ */
+const formatCallMessagePreview = (message) => {
+  if (!message?.content) return null;
+  const content = message.content;
+
+  // Check message_type or detect JSON call data
+  if (message.message_type === 'call' || (typeof content === 'string' && content.startsWith('{'))) {
+    try {
+      const parsed = typeof content === 'string' ? JSON.parse(content) : content;
+      if (parsed?.call_id || parsed?.call_type) {
+        const isVideo = parsed.call_type === 'video';
+        const callLabel = isVideo ? 'Cuộc gọi video' : 'Cuộc gọi';
+        if (parsed.call_status === 'missed' || parsed.call_status === 'cancelled') {
+          return `${callLabel} nhỡ`;
+        }
+        if (parsed.duration && parsed.duration > 0) {
+          const mins = Math.floor(parsed.duration / 60);
+          const secs = parsed.duration % 60;
+          return `${callLabel} ${mins > 0 ? `${mins}m ${secs}s` : `${secs}s`}`;
+        }
+        return callLabel;
+      }
+    } catch (e) { /* not JSON */ }
+  }
+  return content;
+};
+
 export default function ArchivedChatsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
@@ -169,7 +198,7 @@ export default function ArchivedChatsScreen({ navigation }) {
     const isSelected = selectedIds.includes(item.id);
     const displayName = getDisplayName(item);
     const avatarUrl = getAvatar(item);
-    const lastMessage = item.latest_message?.content || 'Không có tin nhắn';
+    const lastMessage = formatCallMessagePreview(item.latest_message) || 'Không có tin nhắn';
     const archivedAt = item.archived_at ? formatRelativeTime(item.archived_at) : '';
 
     return (

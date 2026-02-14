@@ -9,6 +9,20 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { TrendingUp, ExternalLink } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 
+/**
+ * Strip markdown syntax from text for clean display
+ * Handles: ***text*** → text, **text** → text, *text* → text
+ */
+const stripMarkdown = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\*\*\*([^*]+?)\*\*\*/g, '$1') // ***bold italic***
+    .replace(/\*\*([^*]+?)\*\*/g, '$1')     // **bold**
+    .replace(/\*([^*]+?)\*/g, '$1')          // *italic*
+    .replace(/^\*{3,}$/gm, '')               // standalone *** dividers
+    .trim();
+};
+
 const ChartHintResponse = memo(({
   symbol,
   pattern,
@@ -27,7 +41,7 @@ const ChartHintResponse = memo(({
         )}
       </View>
 
-      <Text style={styles.message}>{message || ''}</Text>
+      <Text style={styles.message}>{stripMarkdown(message)}</Text>
 
       <TouchableOpacity
         style={styles.viewButton}

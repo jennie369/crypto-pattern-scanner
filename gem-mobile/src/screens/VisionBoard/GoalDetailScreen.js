@@ -98,6 +98,19 @@ const THEME = {
   dangerLight: 'rgba(239, 68, 68, 0.15)',
 };
 
+// Strip markdown artifacts (**, *, #, -, numbered lists prefix) from display text
+const stripMarkdown = (text) => {
+  if (!text || typeof text !== 'string') return text || '';
+  return text
+    .replace(/\*\*\*/g, '')    // bold-italic ***
+    .replace(/\*\*/g, '')       // bold **
+    .replace(/\*/g, '')         // italic *
+    .replace(/^#{1,6}\s+/gm, '') // headings # ## ###
+    .replace(/^[-•]\s+/gm, '')  // bullet points - •
+    .replace(/^\d+\.\s+/gm, '') // numbered lists 1. 2.
+    .trim();
+};
+
 // Life area configuration
 const LIFE_AREA_CONFIG = {
   finance: { label: 'Tài chính', icon: Wallet },
@@ -176,9 +189,8 @@ const SwipeableActionItem = ({
         </View>
         <Text
           style={[styles.actionText, isCompleted && styles.actionTextCompleted]}
-          numberOfLines={2}
         >
-          {action.title}
+          {stripMarkdown(action.title)}
         </Text>
       </TouchableOpacity>
     </Swipeable>
@@ -246,7 +258,7 @@ const SwipeableAffirmationItem = ({
     >
       <View style={styles.affirmationItem}>
         <Quote size={16} color={THEME.accent} style={styles.quoteIcon} />
-        <Text style={styles.affirmationText}>{affirmation.text}</Text>
+        <Text style={styles.affirmationText}>{stripMarkdown(affirmation.text)}</Text>
         <TouchableOpacity
           style={styles.inlinePlayBtn}
           onPress={() => onPlay(affirmation)}
@@ -1416,7 +1428,7 @@ const GoalDetailScreen = () => {
                     </TouchableOpacity>
                   </View>
                 ) : (
-                  <Text style={styles.goalTitle}>{goal.title || 'Mục tiêu'}</Text>
+                  <Text style={styles.goalTitle}>{stripMarkdown(goal.title) || 'Mục tiêu'}</Text>
                 )}
               </View>
             </View>

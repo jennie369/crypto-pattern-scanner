@@ -173,24 +173,29 @@ export default function ConversationsListScreen({ navigation }) {
     fetchConversations(false); // Show refresh indicator
   }, [fetchConversations]);
 
+  // Navigate to Messages stack screens (works from both HomeStack and MessagesStack)
+  const navigateToMessages = useCallback((screen, params) => {
+    navigation.navigate('Messages', { screen, params });
+  }, [navigation]);
+
   const handleConversationPress = useCallback((conversation) => {
-    navigation.navigate('Chat', {
+    navigateToMessages('Chat', {
       conversationId: conversation.id,
       conversation,
     });
-  }, [navigation]);
+  }, [navigateToMessages]);
 
   const handleNewConversation = useCallback(() => {
-    navigation.navigate('NewConversation');
-  }, [navigation]);
+    navigateToMessages('NewConversation');
+  }, [navigateToMessages]);
 
   const handleCreateGroup = useCallback(() => {
-    navigation.navigate('CreateGroup');
-  }, [navigation]);
+    navigateToMessages('CreateGroup');
+  }, [navigateToMessages]);
 
   const handleSearch = useCallback(() => {
-    navigation.navigate('MessageSearch');
-  }, [navigation]);
+    navigateToMessages('MessageSearch');
+  }, [navigateToMessages]);
 
   // Swipe actions
   const handleArchive = useCallback(async (conversationId) => {
@@ -206,8 +211,8 @@ export default function ConversationsListScreen({ navigation }) {
 
   // Navigate to archived chats
   const handleOpenArchived = useCallback(() => {
-    navigation.navigate('ArchivedChats');
-  }, [navigation]);
+    navigateToMessages('ArchivedChats');
+  }, [navigateToMessages]);
 
   const handleDelete = useCallback(async (conversationId) => {
     try {
@@ -310,7 +315,7 @@ export default function ConversationsListScreen({ navigation }) {
       {messageRequestsCount > 0 && (
         <TouchableOpacity
           style={styles.archivedRow}
-          onPress={() => navigation.navigate('MessageRequests')}
+          onPress={() => navigateToMessages('MessageRequests')}
           activeOpacity={0.7}
         >
           <View style={[styles.archivedIcon, { backgroundColor: 'rgba(255, 215, 0, 0.15)' }]}>
@@ -408,14 +413,14 @@ export default function ConversationsListScreen({ navigation }) {
           <View style={styles.headerActions}>
             {/* Call History */}
             <TouchableOpacity
-              onPress={() => navigation.navigate('CallHistory')}
+              onPress={() => navigateToMessages('CallHistory')}
               style={styles.headerAction}
             >
               <Ionicons name="call-outline" size={22} color={COLORS.textPrimary} />
             </TouchableOpacity>
             {/* Privacy Settings */}
             <TouchableOpacity
-              onPress={() => navigation.navigate('PrivacySettings')}
+              onPress={() => navigateToMessages('PrivacySettings')}
               style={styles.headerAction}
             >
               <Ionicons name="shield-outline" size={22} color={COLORS.textPrimary} />
@@ -465,7 +470,7 @@ export default function ConversationsListScreen({ navigation }) {
 
       {/* Floating Action Button - New Message */}
       <TouchableOpacity
-        style={[styles.fab, { bottom: insets.bottom + 80 }]}
+        style={[styles.fab, { bottom: insets.bottom + 100 }]}
         onPress={handleNewConversation}
         activeOpacity={0.9}
       >
@@ -601,9 +606,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // List
+  // List - extra padding for tab bar (now visible since screen is inside tab navigator)
   listContent: {
-    paddingBottom: SPACING.huge,
+    paddingBottom: 120,
   },
   listContentEmpty: {
     flex: 1,

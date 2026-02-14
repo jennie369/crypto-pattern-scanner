@@ -31,6 +31,17 @@ import {
   ChevronUp,
   Filter,
   Wifi,
+  ExternalLink,
+  Users,
+  Youtube,
+  Facebook,
+  Instagram,
+  Twitter,
+  MessageCircle as DiscordIcon,
+  Send as TelegramIcon,
+  Music,
+  Gem,
+  Shield,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
@@ -296,6 +307,34 @@ const AdminApplicationsScreen = ({ navigation }) => {
     }
   };
 
+  // Platform icons for KOL social media
+  const PLATFORM_ICONS = {
+    youtube: Youtube,
+    facebook: Facebook,
+    instagram: Instagram,
+    tiktok: Music,
+    twitter: Twitter,
+    discord: DiscordIcon,
+    telegram: TelegramIcon,
+  };
+
+  const renderSocialPlatforms = (platforms) => {
+    if (!platforms) return null;
+    return Object.entries(platforms)
+      .filter(([, count]) => parseInt(count) > 0)
+      .map(([platform, count]) => {
+        const Icon = PLATFORM_ICONS[platform] || Users;
+        return (
+          <View key={platform} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
+            <Icon size={13} color={COLORS.gold} />
+            <Text style={[styles.detailValue, { fontSize: 11 }]}>
+              {platform.charAt(0).toUpperCase() + platform.slice(1)}: {parseInt(count || 0).toLocaleString()}
+            </Text>
+          </View>
+        );
+      });
+  };
+
   const renderApplication = (app) => {
     const isExpanded = expandedId === app.id;
 
@@ -372,6 +411,82 @@ const AdminApplicationsScreen = ({ navigation }) => {
               <Text style={styles.detailText}>Ngày gửi: {formatDate(app.created_at)}</Text>
             </View>
 
+            {/* Account info from profiles */}
+            {app.profiles && (
+              <>
+                {app.profiles.avatar_url && (
+                  <View style={styles.detailRow}>
+                    <User size={16} color={COLORS.textMuted} />
+                    <Text style={styles.detailText}>
+                      Tài khoản: {app.profiles.full_name || app.full_name}
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+
+            {/* CTV was already a partner */}
+            {app.is_ctv_member && (
+              <View style={styles.detailSection}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Shield size={14} color={COLORS.gold} />
+                  <Text style={[styles.detailLabel, { color: COLORS.gold, marginBottom: 0 }]}>
+                    Đã là CTV (Tier: {app.ctv_tier_at_application || 'N/A'})
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* KOL specific fields — Social Media & Followers */}
+            {app.application_type === 'kol' && (
+              <>
+                {/* Total followers summary */}
+                {(app.total_followers || 0) > 0 && (
+                  <View style={[styles.detailSection, { backgroundColor: 'rgba(106, 91, 255, 0.1)' }]}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Users size={14} color={COLORS.purple} />
+                      <Text style={[styles.detailLabel, { color: COLORS.purple, marginBottom: 0, fontWeight: '700' }]}>
+                        Tổng followers: {(app.total_followers || 0).toLocaleString()}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Social platforms breakdown */}
+                {app.social_platforms && Object.keys(app.social_platforms).length > 0 && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Mạng xã hội:</Text>
+                    {renderSocialPlatforms(app.social_platforms)}
+                  </View>
+                )}
+
+                {/* Social proof URLs */}
+                {app.social_proof_urls && app.social_proof_urls.length > 0 && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Link social ({app.social_proof_urls.length}):</Text>
+                    {app.social_proof_urls.slice(0, 3).map((url, i) => (
+                      <Text key={i} style={[styles.detailValue, { color: '#4FC3F7', fontSize: 11 }]} numberOfLines={1}>
+                        {url}
+                      </Text>
+                    ))}
+                    {app.social_proof_urls.length > 3 && (
+                      <Text style={[styles.detailValue, { color: COLORS.textMuted, fontSize: 10 }]}>
+                        +{app.social_proof_urls.length - 3} link khác
+                      </Text>
+                    )}
+                  </View>
+                )}
+
+                {/* Referral code used */}
+                {app.referred_by_code && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Mã giới thiệu:</Text>
+                    <Text style={styles.detailValue}>{app.referred_by_code}</Text>
+                  </View>
+                )}
+              </>
+            )}
+
             {/* CTV specific fields */}
             {app.application_type === 'ctv' && (
               <>
@@ -392,7 +507,11 @@ const AdminApplicationsScreen = ({ navigation }) => {
                 {app.marketing_channels && (
                   <View style={styles.detailSection}>
                     <Text style={styles.detailLabel}>Kênh marketing:</Text>
-                    <Text style={styles.detailValue}>{app.marketing_channels}</Text>
+                    <Text style={styles.detailValue}>
+                      {Array.isArray(app.marketing_channels)
+                        ? app.marketing_channels.join(', ')
+                        : app.marketing_channels}
+                    </Text>
                   </View>
                 )}
                 {app.estimated_monthly_sales && (
@@ -411,6 +530,19 @@ const AdminApplicationsScreen = ({ navigation }) => {
                 <Text style={styles.rejectionText}>{app.rejection_reason}</Text>
               </View>
             )}
+
+            {/* View Full Details button — navigates to AdminApplicationDetail */}
+            <TouchableOpacity
+              style={styles.viewDetailBtn}
+              onPress={() => navigation.navigate('AdminApplicationDetail', {
+                applicationId: app.id,
+                application: app,
+              })}
+              activeOpacity={0.7}
+            >
+              <ExternalLink size={14} color={COLORS.gold} />
+              <Text style={styles.viewDetailBtnText}>Xem chi tiết đầy đủ</Text>
+            </TouchableOpacity>
 
             {/* Actions for pending applications */}
             {app.status === 'pending' && (
@@ -764,6 +896,25 @@ const styles = StyleSheet.create({
   },
   rejectionText: {
     color: '#FF8A80',
+  },
+
+  // View Detail Button
+  viewDetailBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    marginTop: SPACING.xs,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+    backgroundColor: 'rgba(255, 215, 0, 0.05)',
+  },
+  viewDetailBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.gold,
   },
 
   // Action Buttons

@@ -264,10 +264,18 @@ const PulsingCircle = ({
     startPhase(0);
   }, [startPhase]);
 
-  // Effect to start/stop
+  // Store startBreathing in ref so the effect doesn't depend on it.
+  // Without this, callback prop changes → startPhase recreated → startBreathing
+  // recreated → useEffect cleanup cancels all animations → cycle resets to 1.
+  const startBreathingRef = useRef(startBreathing);
+  useEffect(() => {
+    startBreathingRef.current = startBreathing;
+  }, [startBreathing]);
+
+  // Effect to start/stop — only depends on isActive (NOT startBreathing)
   useEffect(() => {
     if (isActive && !isRunningRef.current) {
-      startBreathing();
+      startBreathingRef.current();
     } else if (!isActive) {
       isRunningRef.current = false;
       cancelAnimation(scale);
@@ -281,7 +289,7 @@ const PulsingCircle = ({
       cancelAnimation(glowOpacity);
       cancelAnimation(phaseProgress);
     };
-  }, [isActive, startBreathing]);
+  }, [isActive]);
 
   // Animated reaction to update timer display
   useAnimatedReaction(

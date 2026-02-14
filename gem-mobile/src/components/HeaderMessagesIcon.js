@@ -4,19 +4,22 @@
  *
  * Features:
  * - Unread count badge with animation
- * - Real-time badge updates
+ * - Real-time badge updates via Supabase subscription
+ * - Polling fallback (30s) in case realtime fails
+ * - Refresh on screen focus (useFocusEffect)
  * - Navigate to Messages screen
  */
 
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Animated,
+  AppState,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { MessageCircle } from 'lucide-react-native';
 
 // Services
@@ -32,6 +35,8 @@ import {
   TYPOGRAPHY,
 } from '../utils/tokens';
 
+const POLL_INTERVAL = 30000; // 30 seconds fallback polling
+
 const HeaderMessagesIcon = memo(({ size = 22, color = COLORS.textPrimary }) => {
   const navigation = useNavigation();
   const { user } = useAuth();
@@ -42,46 +47,88 @@ const HeaderMessagesIcon = memo(({ size = 22, color = COLORS.textPrimary }) => {
   // Animation
   const badgeScale = useRef(new Animated.Value(1)).current;
 
-  // Subscription ref
+  // Refs
   const subscription = useRef(null);
+  const pollInterval = useRef(null);
+  const mountedRef = useRef(true);
 
-  // Fetch initial unread count and subscribe to updates
-  useEffect(() => {
-    const fetchUnread = async () => {
-      if (!user?.id) return;
+  // Fetch unread count
+  const fetchUnread = useCallback(async () => {
+    if (!user?.id || !mountedRef.current) return;
 
-      try {
-        const count = await messagingService.getTotalUnreadCount();
-        setUnreadCount(count);
-      } catch (error) {
-        console.error('Error fetching unread count:', error);
+    try {
+      const count = await messagingService.getTotalUnreadCount();
+      if (mountedRef.current) {
+        setUnreadCount(prev => {
+          if (count > prev && count > 0) {
+            animateBadge();
+          }
+          return count;
+        });
       }
-    };
+    } catch (error) {
+      console.error('[HeaderMessagesIcon] Error fetching unread count:', error);
+    }
+  }, [user?.id]);
 
+  // Setup subscription + polling on mount
+  useEffect(() => {
+    mountedRef.current = true;
+
+    if (!user?.id) return;
+
+    // Initial fetch
     fetchUnread();
 
-    // Subscribe to unread count changes
-    if (user?.id) {
-      subscription.current = messagingService.subscribeToUnreadCount(
-        user.id,
-        (count) => {
+    // Subscribe to conversation_participants changes (realtime)
+    subscription.current = messagingService.subscribeToUnreadCount(
+      user.id,
+      (count) => {
+        if (mountedRef.current) {
           setUnreadCount(prev => {
-            // Animate badge when count increases
-            if (count > prev) {
+            if (count > prev && count > 0) {
               animateBadge();
             }
             return count;
           });
         }
-      );
-    }
+      }
+    );
+
+    // Polling fallback in case realtime subscription doesn't fire
+    pollInterval.current = setInterval(fetchUnread, POLL_INTERVAL);
 
     return () => {
+      mountedRef.current = false;
       if (subscription.current) {
         messagingService.unsubscribe(subscription.current);
+        subscription.current = null;
+      }
+      if (pollInterval.current) {
+        clearInterval(pollInterval.current);
+        pollInterval.current = null;
       }
     };
-  }, [user?.id]);
+  }, [user?.id, fetchUnread]);
+
+  // Refresh count when screen gains focus (e.g., returning from Messages)
+  useFocusEffect(
+    useCallback(() => {
+      fetchUnread();
+    }, [fetchUnread])
+  );
+
+  // Refresh count when app returns from background
+  useEffect(() => {
+    const handleAppState = (nextState) => {
+      if (nextState === 'active') {
+        fetchUnread();
+      }
+    };
+
+    const sub = AppState.addEventListener('change', handleAppState);
+    return () => sub?.remove();
+  }, [fetchUnread]);
 
   // Badge animation
   const animateBadge = () => {
@@ -100,9 +147,9 @@ const HeaderMessagesIcon = memo(({ size = 22, color = COLORS.textPrimary }) => {
     ]).start();
   };
 
-  // Navigate to messages
+  // Navigate to messages - uses Home tab's ConversationsList so bottom tab stays visible
   const handlePress = () => {
-    navigation.navigate('Messages');
+    navigation.navigate('Home', { screen: 'ConversationsList' });
   };
 
   return (

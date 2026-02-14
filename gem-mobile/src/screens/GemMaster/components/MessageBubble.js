@@ -93,11 +93,19 @@ const renderIconSegment = (text, keyPrefix) => {
 /**
  * Render inline markdown (bold, icons) using split approach
  * More reliable than regex while-loop for bold detection
+ * Handles: ***text*** (bold+italic), **text** (bold), [icon:Name]
  */
 const renderInlineMarkdown = (text, baseStyle) => {
   if (!text) return text;
 
-  const normalized = normalizeMarkdown(text);
+  let normalized = normalizeMarkdown(text);
+
+  // Pre-process: Convert ***text*** (bold+italic) to **text** (bold only)
+  // Must come BEFORE the **...** split
+  normalized = normalized.replace(/\*\*\*([^*]+?)\*\*\*/g, '**$1**');
+
+  // Handle standalone *** or more (horizontal divider) on its own line
+  normalized = normalized.replace(/^\*{3,}$/gm, '───────');
 
   // Split by bold markers **...** using capture group
   // Result: [plainText, boldContent, plainText, boldContent, ...]

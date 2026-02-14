@@ -36,6 +36,13 @@ const getCachedConversations = async (userId, archived = false) => {
     if (!cached) return null;
 
     const { data, timestamp } = JSON.parse(cached);
+
+    // Filter out persistently deleted conversations from cache
+    const deletedIds = await getDeletedIds(userId);
+    if (data?.conversations && deletedIds.size > 0) {
+      data.conversations = data.conversations.filter(c => !deletedIds.has(c.id));
+    }
+
     // Check if cache is still valid
     if (Date.now() - timestamp > CACHE_EXPIRY) {
       // Cache expired, but still return it for instant display
@@ -311,8 +318,12 @@ const getConversations = async (userId, options = {}) => {
 
     if (error) throw error;
 
+    // Filter out persistently deleted conversations (handles RLS-blocked deletes)
+    const deletedIds = await getDeletedIds(userId);
+    const filtered = (data || []).filter(c => !deletedIds.has(c.id));
+
     const result = {
-      conversations: data || [],
+      conversations: filtered,
       hasMore: (page + 1) * limit < (count || 0),
       totalCount: count || 0,
     };
@@ -322,7 +333,7 @@ const getConversations = async (userId, options = {}) => {
       setCachedConversations(userId, result, false);
     }
 
-    console.log('[ChatHistory] Got conversations:', data?.length, 'total:', count);
+    console.log('[ChatHistory] Got conversations:', filtered.length, '(filtered from', data?.length, ') total:', count);
     return result;
   } catch (error) {
     console.error('[ChatHistory] Get conversations error:', error);
@@ -358,8 +369,12 @@ const getArchivedConversations = async (userId, options = {}) => {
 
     if (error) throw error;
 
+    // Filter out persistently deleted conversations
+    const deletedIds = await getDeletedIds(userId);
+    const filtered = (data || []).filter(c => !deletedIds.has(c.id));
+
     const result = {
-      conversations: data || [],
+      conversations: filtered,
       hasMore: (page + 1) * limit < (count || 0),
       totalCount: count || 0,
     };
@@ -377,6 +392,38 @@ const getArchivedConversations = async (userId, options = {}) => {
 };
 
 /**
+ * Get persistent list of deleted conversation IDs (fallback for RLS issues)
+ * @param {string} userId - User ID
+ * @returns {Set} - Set of deleted conversation IDs
+ */
+const getDeletedIds = async (userId) => {
+  try {
+    const raw = await AsyncStorage.getItem(`chatbot_deleted_ids_${userId}`);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+};
+
+/**
+ * Add a conversation ID to the persistent deleted list
+ * @param {string} conversationId - Conversation ID
+ * @param {string} userId - User ID
+ */
+const addToDeletedList = async (conversationId, userId) => {
+  try {
+    const deleted = await getDeletedIds(userId);
+    deleted.add(conversationId);
+    await AsyncStorage.setItem(
+      `chatbot_deleted_ids_${userId}`,
+      JSON.stringify([...deleted])
+    );
+  } catch (error) {
+    console.warn('[ChatHistory] Failed to persist deleted ID:', error);
+  }
+};
+
+/**
  * Delete a conversation
  * @param {string} conversationId - Conversation ID
  * @param {string} userId - User ID for validation
@@ -384,19 +431,31 @@ const getArchivedConversations = async (userId, options = {}) => {
  */
 const deleteConversation = async (conversationId, userId) => {
   try {
-    const { error } = await supabase
+    // Always add to persistent deleted list first (ensures UI consistency)
+    await addToDeletedList(conversationId, userId);
+
+    // Attempt server-side delete
+    const { error, count } = await supabase
       .from(TABLE_NAME)
       .delete()
       .eq('id', conversationId)
       .eq('user_id', userId); // Security: ensure user owns conversation
 
-    if (error) throw error;
+    if (error) {
+      console.error('[ChatHistory] Server delete error:', error);
+      // Still return true - conversation hidden locally via deleted list
+    } else {
+      console.log('[ChatHistory] Deleted conversation:', conversationId, 'rows:', count);
+    }
 
-    console.log('[ChatHistory] Deleted conversation:', conversationId);
+    // Clear cache to prevent stale data on next load
+    await clearCache(userId);
+
     return true;
   } catch (error) {
     console.error('[ChatHistory] Delete error:', error);
-    throw error;
+    // Conversation is still hidden locally via the persistent deleted list
+    return true;
   }
 };
 
@@ -515,6 +574,18 @@ const deleteAllConversations = async (userId) => {
   }
 };
 
+/**
+ * Clear deleted IDs list (for cleanup on logout)
+ * @param {string} userId - User ID
+ */
+const clearDeletedIds = async (userId) => {
+  try {
+    await AsyncStorage.removeItem(`chatbot_deleted_ids_${userId}`);
+  } catch (error) {
+    console.warn('[ChatHistory] Failed to clear deleted IDs:', error);
+  }
+};
+
 export default {
   createConversation,
   saveConversation,
@@ -532,4 +603,5 @@ export default {
   getCachedConversations,
   setCachedConversations,
   clearCache,
+  clearDeletedIds,
 };

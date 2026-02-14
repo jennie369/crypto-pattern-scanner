@@ -50,25 +50,69 @@ interface NotificationPayload {
 
 /**
  * Get all admin push tokens
+ * Queries user_push_tokens table first, falls back to profiles.expo_push_token
  */
 async function getAdminPushTokens(supabase: any): Promise<{ user_id: string; push_token: string }[]> {
   try {
-    const { data: admins, error } = await supabase
+    // Step 1: Get admin user IDs from profiles
+    const { data: admins, error: adminError } = await supabase
       .from('profiles')
-      .select('id, push_token, expo_push_token')
+      .select('id')
       .or('role.eq.admin,is_admin.eq.true');
 
-    if (error) {
-      console.error('[NotifyAdmins] Error fetching admin tokens:', error);
+    if (adminError) {
+      console.error('[NotifyAdmins] Error fetching admins:', adminError);
       return [];
     }
 
-    return (admins || [])
-      .filter((a: any) => a.push_token || a.expo_push_token)
-      .map((a: any) => ({
-        user_id: a.id,
-        push_token: a.push_token || a.expo_push_token,
-      }));
+    if (!admins || admins.length === 0) {
+      console.log('[NotifyAdmins] No admin users found');
+      return [];
+    }
+
+    const adminIds = admins.map((a: any) => a.id);
+
+    // Step 2: Get tokens from user_push_tokens table (primary source)
+    const { data: tokenRows, error: tokenError } = await supabase
+      .from('user_push_tokens')
+      .select('user_id, token')
+      .in('user_id', adminIds)
+      .eq('is_active', true);
+
+    if (tokenError) {
+      console.error('[NotifyAdmins] Error fetching push tokens:', tokenError);
+    }
+
+    const tokenMap = new Map<string, string>();
+    (tokenRows || []).forEach((row: any) => {
+      if (row.token) {
+        tokenMap.set(row.user_id, row.token);
+      }
+    });
+
+    // Step 3: For admins without tokens in user_push_tokens, fallback to profiles.expo_push_token
+    const adminsWithoutTokens = adminIds.filter((id: string) => !tokenMap.has(id));
+    if (adminsWithoutTokens.length > 0) {
+      const { data: profileTokens } = await supabase
+        .from('profiles')
+        .select('id, expo_push_token')
+        .in('id', adminsWithoutTokens)
+        .not('expo_push_token', 'is', null);
+
+      (profileTokens || []).forEach((p: any) => {
+        if (p.expo_push_token) {
+          tokenMap.set(p.id, p.expo_push_token);
+        }
+      });
+    }
+
+    const result = Array.from(tokenMap.entries()).map(([user_id, push_token]) => ({
+      user_id,
+      push_token,
+    }));
+
+    console.log(`[NotifyAdmins] Found ${result.length} admin push tokens from ${adminIds.length} admins`);
+    return result;
   } catch (err) {
     console.error('[NotifyAdmins] Error:', err);
     return [];

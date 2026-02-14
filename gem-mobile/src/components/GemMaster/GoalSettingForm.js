@@ -386,22 +386,23 @@ const GoalSettingForm = ({
   }, [selectedArea, goalText, selectedTimeframe, selectedMotivation, selectedAffirmations, fadeAnim]);
 
   // Generate goal analysis text (local, no AI call for irrelevant content)
+  // Uses plain text — no markdown ** formatting (was causing raw ** artifacts in display)
   const generateGoalAnalysis = (areaLabel, goal, timeframe, motivation, affirmations, actionSteps) => {
-    return `**Phân tích mục tiêu: ${areaLabel}**
+    return `Phân tích mục tiêu: ${areaLabel}
 
-**Mục tiêu của bạn:**
+Mục tiêu của bạn:
 "${goal}"
 
-**Thời gian:** ${timeframe}
-**Mức độ quyết tâm:** ${motivation}
+Thời gian: ${timeframe}
+Mức độ quyết tâm: ${motivation}
 
-**3 bước hành động đề xuất:**
+3 bước hành động đề xuất:
 ${actionSteps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
 
-**Affirmations hàng ngày:**
+Affirmations hàng ngày:
 ${affirmations.map(aff => `• "${aff}"`).join('\n')}
 
-**Lời khuyên:** Hãy đọc affirmations mỗi sáng khi thức dậy và tối trước khi ngủ. Theo dõi tiến độ hàng tuần để duy trì động lực!`;
+Lời khuyên: Hãy đọc affirmations mỗi sáng khi thức dậy và tối trước khi ngủ. Theo dõi tiến độ hàng tuần để duy trì động lực!`;
   };
 
   // Get action steps based on life area

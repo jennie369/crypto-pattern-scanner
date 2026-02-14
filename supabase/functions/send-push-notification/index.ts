@@ -198,7 +198,7 @@ serve(async (req) => {
       await supabase
         .from('user_push_tokens')
         .update({ is_active: false })
-        .in('push_token', invalidTokens);
+        .in('token', invalidTokens);
 
       // Clear from profiles
       await supabase

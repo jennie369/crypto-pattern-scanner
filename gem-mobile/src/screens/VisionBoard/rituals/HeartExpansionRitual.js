@@ -161,7 +161,7 @@ const HeartExpansionRitual = ({ navigation }) => {
   // ===== STATE =====
   const [phase, setPhase] = useState('intro'); // intro, breath, expansion, completion
   const [breathCycle, setBreathCycle] = useState(0);
-  const [breathPhase, setBreathPhase] = useState('idle'); // idle, inhale, hold, exhale
+  // breathPhase removed — PulsingCircle manages breath phases internally
   const [energyLevel, setEnergyLevel] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(CONFIG.expansionDuration);
   const [isSoundOn, setIsSoundOn] = useState(true);
@@ -174,7 +174,7 @@ const HeartExpansionRitual = ({ navigation }) => {
   const [showCelebration, setShowCelebration] = useState(false);
 
   // ===== REFS =====
-  const breathTimerRef = useRef(null);
+  // breathTimerRef removed — PulsingCircle manages breath timing
   const expansionTimerRef = useRef(null);
   const energyLevelRef = useRef(0); // Track energyLevel for interval
 
@@ -190,7 +190,6 @@ const HeartExpansionRitual = ({ navigation }) => {
   // ===== CLEANUP =====
   useEffect(() => {
     return () => {
-      if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
       if (expansionTimerRef.current) clearInterval(expansionTimerRef.current);
     };
   }, []);
@@ -216,39 +215,22 @@ const HeartExpansionRitual = ({ navigation }) => {
   }, [phase, isSoundOn]);
 
   // ===== BREATH LOGIC =====
-  const runBreathPhase = useCallback((phaseType) => {
-    setBreathPhase(phaseType);
-    HAPTIC_PATTERNS.breath[phaseType === 'hold' ? 'hold' : phaseType === 'inhale' ? 'inhale' : 'exhale']();
+  // PulsingCircle manages the entire breath cycle (phases + timer + animation).
+  // HeartExpansionRitual only tracks the cycle count for the completion report.
+  // REMOVED: runBreathPhase setTimeout chain — it competed with PulsingCircle,
+  // causing re-renders that cancelled animations and reset cycleRef to 1.
 
-    const duration = CONFIG.breathPattern[phaseType] || CONFIG.breathPattern.inhale;
+  // Memoize callbacks to prevent PulsingCircle's useEffect from restarting
+  const handleCycleComplete = useCallback((cycle) => {
+    setBreathCycle(cycle);
+  }, []);
 
-    breathTimerRef.current = setTimeout(() => {
-      if (phaseType === 'inhale') {
-        runBreathPhase('hold');
-      } else if (phaseType === 'hold') {
-        runBreathPhase('exhale');
-      } else if (phaseType === 'exhale') {
-        // Cycle complete
-        HAPTIC_PATTERNS.breath.cycleComplete();
-        setBreathCycle(prev => {
-          const newCycle = prev + 1;
-          if (newCycle >= CONFIG.breathCycles) {
-            // Move to expansion phase
-            setTimeout(() => {
-              contentOpacity.value = withTiming(0, { duration: 300 });
-              setTimeout(() => {
-                setPhase('expansion');
-                contentOpacity.value = withTiming(1, { duration: 400 });
-              }, 300);
-            }, 500);
-          } else {
-            // Next cycle
-            setTimeout(() => runBreathPhase('inhale'), 800);
-          }
-          return newCycle;
-        });
-      }
-    }, duration);
+  const handleBreathComplete = useCallback(() => {
+    contentOpacity.value = withTiming(0, { duration: 300 });
+    setTimeout(() => {
+      setPhase('expansion');
+      contentOpacity.value = withTiming(1, { duration: 400 });
+    }, 300);
   }, []);
 
   // ===== START BREATH =====
@@ -259,9 +241,9 @@ const HeartExpansionRitual = ({ navigation }) => {
       setPhase('breath');
       setBreathCycle(0);
       contentOpacity.value = withTiming(1, { duration: 400 });
-      setTimeout(() => runBreathPhase('inhale'), 500);
+      // PulsingCircle with autoStart={true} handles the rest
     }, 300);
-  }, [runBreathPhase]);
+  }, []);
 
   // ===== EXPANSION TIMER =====
   useEffect(() => {
@@ -345,7 +327,6 @@ const HeartExpansionRitual = ({ navigation }) => {
 
   // ===== NAVIGATION HANDLERS =====
   const handleBack = useCallback(() => {
-    if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
     if (expansionTimerRef.current) clearInterval(expansionTimerRef.current);
     navigation.goBack();
   }, [navigation]);
@@ -356,7 +337,6 @@ const HeartExpansionRitual = ({ navigation }) => {
 
   // ===== SKIP BREATH =====
   const handleSkipBreath = useCallback(() => {
-    if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
     contentOpacity.value = withTiming(0, { duration: 300 });
     setTimeout(() => {
       setPhase('expansion');
@@ -430,14 +410,8 @@ const HeartExpansionRitual = ({ navigation }) => {
         showTimer={true}
         showPhaseIndicators={true}
         hapticFeedback={true}
-        onCycleComplete={(cycle) => setBreathCycle(cycle)}
-        onComplete={() => {
-          contentOpacity.value = withTiming(0, { duration: 300 });
-          setTimeout(() => {
-            setPhase('expansion');
-            contentOpacity.value = withTiming(1, { duration: 400 });
-          }, 300);
-        }}
+        onCycleComplete={handleCycleComplete}
+        onComplete={handleBreathComplete}
         autoStart={true}
       />
 

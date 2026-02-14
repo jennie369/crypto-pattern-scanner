@@ -51,6 +51,7 @@ import {
   formatCurrency,
 } from '../../constants/partnershipConstants';
 import ADMIN_PARTNERSHIP_SERVICE from '../../services/adminPartnershipService';
+import { supabase } from '../../services/supabase';
 
 // Platform icons mapping
 const PLATFORM_ICONS = {
@@ -71,6 +72,7 @@ const AdminApplicationDetail = () => {
   const [loading, setLoading] = useState(true);
   const [application, setApplication] = useState(passedApplication || null);
   const [verification, setVerification] = useState(null);
+  const [applicantProfile, setApplicantProfile] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectInput, setShowRejectInput] = useState(false);
@@ -84,14 +86,30 @@ const AdminApplicationDetail = () => {
       setLoading(true);
 
       // Get application details if not passed
-      if (!application && applicationId) {
-        const appData = await ADMIN_PARTNERSHIP_SERVICE.getApplicationById(applicationId);
-        setApplication(appData);
+      let app = application;
+      if (!app && applicationId) {
+        app = await ADMIN_PARTNERSHIP_SERVICE.getApplicationById(applicationId);
+        setApplication(app);
+      }
+
+      if (!app) return;
+
+      // Load applicant profile stats (gems, tiers, created_at)
+      if (app.user_id) {
+        try {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('gems, scanner_tier, chatbot_tier, course_tier, created_at, full_name, avatar_url, email')
+            .eq('id', app.user_id)
+            .single();
+          setApplicantProfile(profileData);
+        } catch (profileErr) {
+          console.log('[AdminApplicationDetail] Profile fetch error:', profileErr);
+        }
       }
 
       // Load KOL verification if KOL application
-      const app = application || (await ADMIN_PARTNERSHIP_SERVICE.getApplicationById(applicationId));
-      if (app?.application_type === 'kol') {
+      if (app.application_type === 'kol') {
         const verificationData = await ADMIN_PARTNERSHIP_SERVICE.getKOLVerification(app.id);
         setVerification(verificationData);
       }
@@ -330,6 +348,51 @@ const AdminApplicationDetail = () => {
               </View>
             )}
           </View>
+
+          {/* Account Stats Section */}
+          {applicantProfile && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Thông tin tài khoản</Text>
+
+              <View style={styles.infoRow}>
+                <Calendar size={18} color={COLORS.textMuted} />
+                <Text style={styles.infoLabel}>Tạo TK:</Text>
+                <Text style={styles.infoValue}>{formatDate(applicantProfile.created_at)}</Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Users size={18} color={COLORS.textMuted} />
+                <Text style={styles.infoLabel}>Gems:</Text>
+                <Text style={[styles.infoValue, { color: COLORS.gold }]}>
+                  {(applicantProfile.gems ?? 0).toLocaleString()}
+                </Text>
+              </View>
+
+              {applicantProfile.scanner_tier && applicantProfile.scanner_tier !== 'FREE' && (
+                <View style={styles.infoRow}>
+                  <AlertCircle size={18} color={COLORS.textMuted} />
+                  <Text style={styles.infoLabel}>Scanner:</Text>
+                  <Text style={styles.infoValue}>{applicantProfile.scanner_tier}</Text>
+                </View>
+              )}
+
+              {applicantProfile.course_tier && applicantProfile.course_tier !== 'FREE' && (
+                <View style={styles.infoRow}>
+                  <AlertCircle size={18} color={COLORS.textMuted} />
+                  <Text style={styles.infoLabel}>Course:</Text>
+                  <Text style={styles.infoValue}>{applicantProfile.course_tier}</Text>
+                </View>
+              )}
+
+              {applicantProfile.chatbot_tier && applicantProfile.chatbot_tier !== 'FREE' && (
+                <View style={styles.infoRow}>
+                  <AlertCircle size={18} color={COLORS.textMuted} />
+                  <Text style={styles.infoLabel}>Chatbot:</Text>
+                  <Text style={styles.infoValue}>{applicantProfile.chatbot_tier}</Text>
+                </View>
+              )}
+            </View>
+          )}
 
           {/* Marketing Channels */}
           {application.marketing_channels && application.marketing_channels.length > 0 && (

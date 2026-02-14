@@ -178,6 +178,21 @@ const CourseDetailScreen = ({ navigation, route }) => {
     loadCourseData();
   }, [courseId, course?.id]);
 
+  // Safety net: ensure CTA button is always visible after loading completes.
+  // The entrance animation (buttonSlideAnim) starts at 100 (offscreen) and only
+  // animates to 0 inside the loadCourseData effect when course exists on first render.
+  // If course loads via refresh() (initially null), the animation never fires — CTA stays cut off.
+  useEffect(() => {
+    if (!loading && course) {
+      Animated.spring(buttonSlideAnim, {
+        toValue: 0,
+        tension: 50,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [loading, course?.id]);
+
   const handleEnroll = async () => {
     setEnrolling(true);
     try {

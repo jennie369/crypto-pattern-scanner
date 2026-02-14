@@ -29,6 +29,9 @@ import FollowingListScreen from '../screens/Profile/FollowingListScreen';
 // Shop screen (for viewing products from posts without cross-tab navigation)
 import { ProductDetailScreen } from '../screens/Shop';
 
+// Messages screen (rendered in Home tab so bottom tab bar stays visible)
+import ConversationsListScreen from '../screens/Messages/ConversationsListScreen';
+
 // Course screens (for viewing courses without cross-tab navigation)
 import CoursesScreen from '../screens/Courses/CoursesScreen';
 import CourseDetailScreen from '../screens/Courses/CourseDetailScreen';
@@ -154,6 +157,15 @@ export default function HomeStack() {
         options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
       />
       <Stack.Screen name="CourseAchievements" component={CourseAchievementsScreen} />
+
+      {/* Messages Conversations List - inside Home tab so bottom tab bar stays visible */}
+      <Stack.Screen
+        name="ConversationsList"
+        component={ConversationsListScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
     </Stack.Navigator>
   );
 }

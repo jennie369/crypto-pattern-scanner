@@ -131,13 +131,14 @@ const CallMessageBubble = memo(({
 
   // Handle tap to call back
   const handlePress = useCallback(() => {
-    if (onCallBack && (call_status === 'missed' || call_status === 'declined' || call_status === 'cancelled')) {
+    if (onCallBack) {
       onCallBack(call_type);
     }
-  }, [onCallBack, call_status, call_type]);
+  }, [onCallBack, call_type]);
 
   const isMissedOrDeclined = call_status === 'missed' || call_status === 'declined' || call_status === 'cancelled';
-  const showCallBack = isMissedOrDeclined && !wasCaller && onCallBack;
+  // Show call back button for ALL call events (like Facebook Messenger)
+  const showCallBack = !!onCallBack;
 
   return (
     <View style={styles.container}>
@@ -147,8 +148,8 @@ const CallMessageBubble = memo(({
           isMissedOrDeclined && styles.callBubbleMissed,
         ]}
         onPress={handlePress}
-        activeOpacity={showCallBack ? 0.7 : 1}
-        disabled={!showCallBack}
+        activeOpacity={onCallBack ? 0.7 : 1}
+        disabled={!onCallBack}
       >
         {/* Call Icon */}
         <View style={[
@@ -185,15 +186,21 @@ const CallMessageBubble = memo(({
           {formatTime(message.created_at)}
         </Text>
 
-        {/* Call back button for missed calls */}
+        {/* Call back button - shows for ALL call events (like Facebook) */}
         {showCallBack && (
-          <View style={styles.callBackButton}>
+          <TouchableOpacity
+            style={styles.callBackButton}
+            onPress={() => onCallBack?.(call_type)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            activeOpacity={0.7}
+          >
             <Ionicons
               name={call_type === 'video' ? 'videocam' : 'call'}
               size={16}
               color={COLORS.cyan}
             />
-          </View>
+            <Text style={styles.callBackText}>Gọi lại</Text>
+          </TouchableOpacity>
         )}
       </TouchableOpacity>
     </View>
@@ -281,12 +288,19 @@ const styles = StyleSheet.create({
   },
 
   callBackButton: {
-    width: 32,
-    height: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     borderRadius: 16,
     backgroundColor: 'rgba(0, 188, 212, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginLeft: SPACING.xs,
+  },
+
+  callBackText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.cyan,
   },
 });
