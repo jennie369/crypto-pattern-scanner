@@ -16,7 +16,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.gemral.mobile",
       "buildNumber": "3",
-      "associatedDomains": ["applinks:gemral.com", "applinks:www.gemral.com"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
