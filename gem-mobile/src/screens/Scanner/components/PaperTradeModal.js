@@ -50,6 +50,23 @@ import PatternModeFields from '../../../components/Trading/PatternModeFields';
 import CustomModeFields from '../../../components/Trading/CustomModeFields';
 import AIAssessmentSection from '../../../components/Trading/AIAssessmentSection';
 
+// Fetch with timeout to prevent hanging requests on stalled mobile connections
+const fetchWithTimeout = async (url, timeoutMs = 10000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+};
+
 /**
  * Inner content component - wrapped by ErrorBoundary
  */
@@ -115,7 +132,7 @@ const PaperTradeContent = ({ pattern, onClose, onSuccess }) => {
 
       try {
         // P6 FIX #5: Use Futures API — Spot returns 400 for futures-only symbols
-        const response = await fetch(
+        const response = await fetchWithTimeout(
           `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${pattern.symbol}`
         );
         const data = await response.json();

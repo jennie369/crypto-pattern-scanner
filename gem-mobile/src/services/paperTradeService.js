@@ -18,6 +18,24 @@ import {
   notifyLiquidation,
 } from './paperTradeNotificationService';
 
+// Fetch with timeout to prevent hanging requests on stalled mobile connections
+const FETCH_TIMEOUT = 10000;
+const fetchWithTimeout = async (url, timeoutMs = FETCH_TIMEOUT) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Binance API request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+};
+
 // Helper to get user-specific storage keys
 const getStorageKeys = (userId) => ({
   POSITIONS: userId ? `gem_paper_positions_${userId}` : 'gem_paper_positions',
@@ -205,14 +223,14 @@ class PaperTradeService {
       // B8 FIX: Use Futures API (fapi) to match candle data source, not Spot (api)
       if (symbols.length === 1) {
         // Single symbol — use direct endpoint
-        const response = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbols[0]}`);
+        const response = await fetchWithTimeout(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbols[0]}`);
         if (!response.ok) throw new Error('Failed to fetch price');
         const data = await response.json();
         prices[data.symbol] = parseFloat(data.price);
       } else if (symbols.length <= 20) {
         // Small batch — use symbols[] parameter
         const symbolsParam = encodeURIComponent(JSON.stringify(symbols));
-        const response = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbols=${symbolsParam}`);
+        const response = await fetchWithTimeout(`https://fapi.binance.com/fapi/v1/ticker/price?symbols=${symbolsParam}`);
         if (!response.ok) throw new Error('Failed to fetch prices');
         const data = await response.json();
         for (const item of data) {
@@ -220,7 +238,7 @@ class PaperTradeService {
         }
       } else {
         // Large batch — fetch all (rare edge case with 20+ open positions)
-        const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
+        const response = await fetchWithTimeout('https://fapi.binance.com/fapi/v1/ticker/price');
         if (!response.ok) throw new Error('Failed to fetch prices');
         const data = await response.json();
         const symbolSet = new Set(symbols);

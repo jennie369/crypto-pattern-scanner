@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -33,6 +34,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import shadowModeService from '../../services/shadowModeService';
 import binanceApiService from '../../services/binanceApiService';
 import { AIAvatarOrb } from '../../components/AITrader';
@@ -64,20 +66,44 @@ const ShadowModeScreen = () => {
   }, [user?.id]);
 
   // Initial load
+  // Issue 2 Fix: Wrap in try/finally to guarantee setLoading(false)
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      await loadData();
-      setLoading(false);
+      try {
+        await loadData();
+      } catch (err) {
+        console.error('[ShadowMode] Init error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     init();
   }, [loadData]);
 
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ShadowMode] Force refresh event received - resetting all states');
+      setLoading(false);
+      setRefreshing(false);
+      setSyncing(false);
+      loadData();
+    });
+    return () => listener.remove();
+  }, [loadData]);
+
   // Refresh
+  // Issue 2 Fix: Wrap in try/finally to guarantee setRefreshing(false)
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
+    try {
+      await loadData();
+    } catch (err) {
+      console.error('[ShadowMode] Refresh error:', err);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // Sync trades

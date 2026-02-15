@@ -26,6 +26,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -34,6 +35,7 @@ import * as Icons from 'lucide-react-native';
 
 // Design tokens
 import { COLORS, TYPOGRAPHY, SPACING, GLASS, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // Services
 import { supabase } from '../../services/supabase';
@@ -283,16 +285,33 @@ const VisionBoardScreen = () => {
   );
 
   // Initial load
+  // Issue 2 Fix: Wrap in try/finally to guarantee setLoading(false)
   useEffect(() => {
     const initLoad = async () => {
       setLoading(true);
-      await loadDashboardData();
-      setLoading(false);
+      try {
+        await loadDashboardData();
+      } catch (err) {
+        console.error('[VisionBoard] Init error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (userId) {
       initLoad();
     }
+  }, [userId, loadDashboardData]);
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[VisionBoard] Force refresh event received - resetting all states');
+      setLoading(false);
+      setRefreshing(false);
+      loadDashboardData();
+    });
+    return () => listener.remove();
   }, [userId, loadDashboardData]);
 
   // Refresh handler

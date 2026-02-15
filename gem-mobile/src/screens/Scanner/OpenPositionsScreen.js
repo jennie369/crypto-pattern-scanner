@@ -13,6 +13,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   TextInput,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -42,10 +43,11 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import paperTradeService from '../../services/paperTradeService';
 import { supabase } from '../../services/supabase';
-import { getPendingOrders as fetchPendingOrders, cancelPendingOrder } from '../../services/pendingOrderService';
+import { getPendingOrders as fetchPendingOrders, cancelPendingOrder, checkAndTriggerOrders as checkPendingOrderTriggers } from '../../services/pendingOrderService';
 import { binanceService } from '../../services/binanceService';
 import notificationService from '../../services/notificationService';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { formatPrice, formatCurrency } from '../../utils/formatters';
 import SponsorBannerSection from '../../components/SponsorBannerSection';
 import { PendingOrdersSection } from '../../components/Trading';
@@ -82,6 +84,9 @@ export default function OpenPositionsScreen() {
   // Real-time price subscriptions ref
   const wsUnsubscribesRef = useRef([]);
   const pricesRef = useRef({}); // Store latest prices for all symbols
+  const pendingOrdersRef = useRef([]); // [PendingOrders] Ref to track pending orders from pendingOrderService (paper_pending_orders table)
+  const lastPendingCheckRef = useRef(0); // [PendingOrders] Throttle: last time we checked pending orders (ms)
+  const PENDING_CHECK_INTERVAL_MS = 3000; // [PendingOrders] Only check pending order fills every 3 seconds
 
   // Custom Alert state
   const [alertConfig, setAlertConfig] = useState({
@@ -138,27 +143,78 @@ export default function OpenPositionsScreen() {
     });
   }, [cleanupSubscriptions]);
 
+  // [PendingOrders] Reload pending orders from pendingOrderService (paper_pending_orders table)
+  // This is the SINGLE SOURCE OF TRUTH for pending orders
+  const reloadPendingOrdersFromDB = useCallback(async () => {
+    if (!user?.id) return [];
+    try {
+      const { data: pendingData, error: pendingError } = await fetchPendingOrders(user?.id);
+      if (pendingError) {
+        console.warn('[PendingOrders] reloadPendingOrdersFromDB error:', pendingError);
+        return pendingOrdersRef.current; // keep existing on error
+      }
+      const mapped = (pendingData || []).map(order => ({
+        ...order,
+        entryPrice: order.limit_price || order.stop_price || 0,
+        positionSize: order.initial_margin || order.position_size || 0,
+        margin: order.initial_margin || 0,
+        pendingAt: order.created_at,
+      }));
+      console.log('[PendingOrders] Reloaded from DB:', mapped.length, 'orders');
+      pendingOrdersRef.current = mapped;
+      return mapped;
+    } catch (err) {
+      console.warn('[PendingOrders] reloadPendingOrdersFromDB exception:', err);
+      return pendingOrdersRef.current;
+    }
+  }, [user?.id]);
+
   // Handle real-time price update for a single symbol
   const handlePriceUpdate = useCallback(async (symbol, price) => {
     try {
       // Update all prices from ref
       const prices = { ...pricesRef.current, [symbol]: price };
 
-      // Check pending orders for fills
-      const pendingResult = await paperTradeService.checkPendingOrders(prices);
+      // [PendingOrders] FIX: Check pending orders via pendingOrderService (paper_pending_orders table)
+      // NOT via paperTradeService.checkPendingOrders() which reads from paper_trades table
+      // Throttled to avoid excessive Supabase queries on every WebSocket tick
+      let pendingFillOccurred = false;
+      const now = Date.now();
+      const shouldCheckPending = (now - lastPendingCheckRef.current) >= PENDING_CHECK_INTERVAL_MS
+        && pendingOrdersRef.current.length > 0;
 
-      // Show alerts and notifications for filled orders
-      if (pendingResult.filled.length > 0) {
-        for (const filled of pendingResult.filled) {
-          showAlert(
-            'Lệnh Đã Khớp!',
-            `${filled.symbol} ${filled.direction}\n` +
-              `Giá vào: $${formatPrice(filled.entryPrice)}\n` +
-              `Số lượng: ${formatCurrency(filled.positionSize)} USDT`,
-            [{ text: 'OK' }],
-            'success'
-          );
-          await notificationService.sendLimitOrderFilledNotification(filled, user?.id);
+      if (shouldCheckPending) {
+        lastPendingCheckRef.current = now;
+        try {
+          const pricesForCheck = {};
+          for (const [sym, p] of Object.entries(prices)) {
+            pricesForCheck[sym] = { last: p, mark: p };
+          }
+          const triggerResult = await checkPendingOrderTriggers(pricesForCheck, user?.id);
+          if (triggerResult.executed > 0) {
+            pendingFillOccurred = true;
+            console.log('[PendingOrders] Orders filled via pendingOrderService:', triggerResult.executed);
+          }
+        } catch (triggerErr) {
+          console.log('[PendingOrders] checkPendingOrderTriggers error:', triggerErr);
+        }
+
+        // Also check paperTradeService pending orders (paper_trades table, status=PENDING)
+        // for backward compatibility with legacy orders that may exist there
+        const pendingResult = await paperTradeService.checkPendingOrders(prices);
+        if (pendingResult.filled.length > 0) {
+          pendingFillOccurred = true;
+          for (const filled of pendingResult.filled) {
+            showAlert(
+              'Lệnh Đã Khớp!',
+              `${filled.symbol} ${filled.direction}\n` +
+                `Giá vào: $${formatPrice(filled.entryPrice)}\n` +
+                `Số lượng: ${formatCurrency(filled.positionSize)} USDT`,
+              [{ text: 'OK' }],
+              'success'
+            );
+            await notificationService.sendLimitOrderFilledNotification(filled, user?.id);
+          }
         }
       }
 
@@ -183,14 +239,22 @@ export default function OpenPositionsScreen() {
         }
       }
 
-      // Update state
+      // Update open positions state (always safe — from paperTradeService in-memory)
       setPositions(paperTradeService.getOpenPositions(user?.id));
-      setPendingOrders(paperTradeService.getPendingOrders(user?.id));
       setStats(paperTradeService.getStats(user?.id));
+
+      // [PendingOrders] FIX: Only update pendingOrders state if a fill/cancel actually happened
+      // Do NOT blindly overwrite with paperTradeService.getPendingOrders() which reads from wrong table
+      if (pendingFillOccurred || result.closed.length > 0) {
+        console.log('[PendingOrders] Fill/close occurred — refreshing pending orders from DB');
+        const freshPending = await reloadPendingOrdersFromDB();
+        setPendingOrders(freshPending);
+      }
+      // Otherwise: keep existing pendingOrders state intact (loaded from paper_pending_orders)
     } catch (error) {
       console.log('[OpenPositions] handlePriceUpdate error:', error);
     }
-  }, [user?.id]);
+  }, [user?.id, reloadPendingOrdersFromDB]);
 
   // Load positions when userId becomes available (handles initial auth delay)
   useEffect(() => {
@@ -212,6 +276,22 @@ export default function OpenPositionsScreen() {
       return () => cleanupSubscriptions();
     }, [cleanupSubscriptions, user?.id])
   );
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  // CRITICAL: Reset stuck loading states and re-load positions data
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[OpenPositions] Force refresh event received - resetting all states');
+
+      // CRITICAL: Reset stuck loading states FIRST
+      setLoading(false);
+      setRefreshing(false);
+
+      // Re-load data from scratch
+      loadData(true);
+    });
+    return () => listener.remove();
+  }, [user?.id]);
 
   const loadData = async (forceRefresh = false) => {
     try {
@@ -275,7 +355,9 @@ export default function OpenPositionsScreen() {
           margin: order.initial_margin || 0,
           pendingAt: order.created_at,
         }));
-        console.log('[OpenPositions] Mapped pending orders:', pending.length);
+        // [PendingOrders] Sync ref so handlePriceUpdate and updatePrices use correct data
+        pendingOrdersRef.current = pending;
+        console.log('[PendingOrders] loadData: synced pendingOrdersRef with', pending.length, 'orders');
       } catch (pendingFetchError) {
         console.warn('[OpenPositions] Pending orders load error:', pendingFetchError);
       }
@@ -317,7 +399,8 @@ export default function OpenPositionsScreen() {
   const updatePrices = async () => {
     try {
       const currentPositions = paperTradeService.getOpenPositions(user?.id);
-      const currentPending = paperTradeService.getPendingOrders(user?.id);
+      // [PendingOrders] FIX: Use ref for current pending orders, NOT paperTradeService.getPendingOrders()
+      const currentPending = pendingOrdersRef.current;
 
       // Collect all symbols from positions AND pending orders
       const allSymbols = [
@@ -342,11 +425,26 @@ export default function OpenPositionsScreen() {
         }
       }
 
-      // Check pending orders for fills
-      const pendingResult = await paperTradeService.checkPendingOrders(prices);
+      // [PendingOrders] FIX: Check pending orders via pendingOrderService (paper_pending_orders table)
+      let pendingFillOccurred = false;
+      try {
+        const pricesForCheck = {};
+        for (const [sym, p] of Object.entries(prices)) {
+          pricesForCheck[sym] = { last: p, mark: p };
+        }
+        const triggerResult = await checkPendingOrderTriggers(pricesForCheck, user?.id);
+        if (triggerResult.executed > 0) {
+          pendingFillOccurred = true;
+          console.log('[PendingOrders] Manual refresh: orders filled:', triggerResult.executed);
+        }
+      } catch (triggerErr) {
+        console.log('[PendingOrders] Manual refresh trigger check error:', triggerErr);
+      }
 
-      // Show alerts and notifications for filled orders
+      // Also check legacy pending orders from paper_trades
+      const pendingResult = await paperTradeService.checkPendingOrders(prices);
       if (pendingResult.filled.length > 0) {
+        pendingFillOccurred = true;
         for (const filled of pendingResult.filled) {
           showAlert(
             'Lệnh Đã Khớp!',
@@ -381,10 +479,15 @@ export default function OpenPositionsScreen() {
         }
       }
 
-      // Update all state
+      // Update open positions and stats
       setPositions(paperTradeService.getOpenPositions(user?.id));
-      setPendingOrders(paperTradeService.getPendingOrders(user?.id));
       setStats(paperTradeService.getStats(user?.id));
+
+      // [PendingOrders] FIX: Refresh pending orders from DB (not from paperTradeService)
+      if (pendingFillOccurred || result.closed.length > 0) {
+        const freshPending = await reloadPendingOrdersFromDB();
+        setPendingOrders(freshPending);
+      }
 
       // Re-setup WebSocket subscriptions in case symbols changed
       setupPriceSubscriptions(currentPositions, currentPending);

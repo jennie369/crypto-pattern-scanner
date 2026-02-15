@@ -3,7 +3,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { Alert, AppState, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import { supabase, getCurrentUser, getUserProfile, signOut, localOnlySignOut } from '../services/supabase';
 import presenceService from '../services/presenceService';
 import biometricService from '../services/biometricService';
@@ -225,11 +225,8 @@ export const AuthProvider = ({ children }) => {
   // Fixes: stale auth, missing avatar, role not recognized,
   // quota not loaded after app idle/background
   // =====================================================
-  const appStateRef = useRef(AppState.currentState);
-  const lastResumeRef = useRef(Date.now());
+  // appStateRef and lastResumeRef removed — AppState listener consolidated into AppResumeManager
   const isRefreshingRef = useRef(false);
-  // Minimum time in background before triggering refresh (60 seconds)
-  const RESUME_REFRESH_THRESHOLD = 60 * 1000;
 
   /**
    * Refresh user profile, role, and quota from database.
@@ -322,47 +319,18 @@ export const AuthProvider = ({ children }) => {
   }, [user?.id]);
 
   // =====================================================
-  // APP STATE LISTENER: Refresh on foreground resume
-  // Handles background -> foreground transition on both
-  // iOS and Android to re-hydrate stale auth/profile data
+  // APP STATE LISTENER: REMOVED (Issue 2 Fix)
+  //
+  // Previously, AuthContext had its own AppState listener that
+  // raced with AppResumeManager (3 listeners firing simultaneously).
+  // Now AppResumeManager is the SOLE resume handler and calls
+  // refreshProfile() directly via the registered callback.
+  //
+  // The refreshProfile() function is still available for:
+  // - AppResumeManager to call on resume (via registered callback)
+  // - Manual calls from screens (e.g. after purchase)
+  // - SIGNED_IN auth event post-login operations
   // =====================================================
-  useEffect(() => {
-    const handleAppStateChange = (nextAppState) => {
-      const previousState = appStateRef.current;
-
-      // App coming back to foreground from background/inactive
-      if (
-        previousState.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        const now = Date.now();
-        const timeSinceLastResume = now - lastResumeRef.current;
-
-        console.log(`[AuthContext] App resumed after ${Math.round(timeSinceLastResume / 1000)}s`);
-
-        // Only refresh if enough time has passed to avoid excessive API calls
-        if (timeSinceLastResume >= RESUME_REFRESH_THRESHOLD) {
-          lastResumeRef.current = now;
-          // Non-blocking refresh - don't await
-          refreshProfile().then((result) => {
-            if (result.success) {
-              console.log('[AuthContext] App resume profile refresh completed');
-            } else {
-              console.log('[AuthContext] App resume refresh skipped:', result.reason);
-            }
-          });
-        }
-      }
-
-      appStateRef.current = nextAppState;
-    };
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-
-    return () => {
-      subscription?.remove();
-    };
-  }, [refreshProfile]);
 
   // =====================================================
   // SHARED CLEANUP: Single source of truth for logout cleanup

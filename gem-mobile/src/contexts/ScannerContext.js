@@ -3,7 +3,7 @@
  * Persists scan results across tab navigation
  */
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 const ScannerContext = createContext(null);
 
@@ -53,7 +53,7 @@ export const ScannerProvider = ({ children }) => {
     setZones([]);
   }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     // State
     scanResults,
     patterns,
@@ -72,7 +72,11 @@ export const ScannerProvider = ({ children }) => {
     setZones,
     updateScanResults,
     clearScanResults,
-  };
+  }), [
+    scanResults, patterns, lastScanTime, selectedCoins,
+    selectedTimeframe, multiTFResults, zones,
+    setSelectedTimeframe, updateScanResults, clearScanResults,
+  ]);
 
   return (
     <ScannerContext.Provider value={value}>

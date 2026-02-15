@@ -1386,3 +1386,339 @@ test('binanceService throws on HTTP 200 with error code', async () => {
 | 24 | Keyword Collision in Intent Detection | B: API | 7 |
 | 25 | Direct Navigation vs Chat-First Flow | E: UI | 7 |
 | 26 | Deep Link Blank Page (Missing Server-Side Routing) | F: Architecture | 7 |
+| 27 | Two-Table State Overwrite on High-Frequency Events | A: State | 7.75 |
+| 28 | Loading State Must ALWAYS Clear in Finally Block | A: State | 7.75 |
+| 29 | Timeoutless fetch() = Permanent Deadlock After Background | C: Concurrency | 7.8 |
+| 30 | Recovery Event Must Be Unconditional | F: Architecture | 7.8 |
+| 31 | Every Screen With Loading State Needs Recovery Listener | A: State | 7.8 |
+
+---
+
+# RULE 27: Two-Table State Overwrite on High-Frequency Events
+
+## Pattern
+Two database tables store overlapping data (e.g., `paper_pending_orders` vs `paper_trades` with `status='PENDING'`). A high-frequency event handler (WebSocket price tick) blindly overwrites React state with data from the WRONG table, wiping correct data loaded from the right table.
+
+## Symptom
+Data appears briefly on screen (from correct initial load), then vanishes ~1 second later when the first WS tick fires.
+
+## Root Cause
+```javascript
+// BAD: Called every WS tick, reads from wrong table
+const handlePriceUpdate = (symbol, price) => {
+  setPendingOrders(paperTradeService.getPendingOrders()); // paper_trades = empty
+};
+```
+
+## Fix
+1. Use a **ref** to track data from the correct source
+2. **Throttle** DB queries on high-frequency events (3s+ intervals)
+3. Only update state on **actual events** (fill, cancel), not on every tick
+```javascript
+// GOOD: Only update on events, not on every tick
+const handlePriceUpdate = async (symbol, price) => {
+  const now = Date.now();
+  if (now - lastCheckRef.current < 3000) return; // throttle
+  lastCheckRef.current = now;
+  const result = await checkAndTriggerOrders(prices);
+  if (result.executed > 0) {
+    const fresh = await reloadFromDB();
+    setPendingOrders(fresh);
+  }
+};
+```
+
+## Prevention
+- Document which table is the **single source of truth** for each entity
+- Never call `setState(serviceB.getData())` in a handler that runs on every frame/tick
+- Use refs for high-frequency data, only sync to state on discrete events
+
+---
+
+# RULE 28: Loading State Must ALWAYS Clear in Finally Block
+
+## Pattern
+`setLoading(true)` is called before an async operation, but `setLoading(false)` is placed outside a `finally` block, or gated on conditions (stale requestId, error type).
+
+## Symptom
+Screen shows infinite loading spinner after network error, app resume, or race condition.
+
+## Root Cause
+```javascript
+// BAD: setLoading(false) skipped if error thrown
+setLoading(true);
+const data = await fetchData(); // throws!
+setLoading(false); // never reached
+
+// BAD: setLoading(false) gated on stale check
+finally {
+  if (requestId === currentRef.current) {
+    setLoading(false); // skipped for stale requests
+  }
+}
+```
+
+## Fix
+```javascript
+// GOOD: try/finally guarantees loading always clears
+setLoading(true);
+try {
+  const data = await fetchData();
+  // use data...
+} catch (err) {
+  console.error(err);
+} finally {
+  setLoading(false); // ALWAYS runs
+}
+```
+
+## Prevention
+- Every `setLoading(true)` must have a `finally { setLoading(false) }`
+- Data can be discarded (stale requestId), but UI loading state must ALWAYS clear
+- Grep for `setLoading(true).*await.*setLoading(false)` without `finally` wrapper
+
+---
+
+# RULE 29: Timeoutless fetch() = Permanent Deadlock After Background
+**Source:** Phase 7.8 — Scanner stuck "Dang quet", 17 Binance fetch calls with no AbortController
+
+## What Failed
+After user backgrounded the app for 10+ seconds and returned, the Scanner screen showed "Dang quet pattern..." permanently. The scan could never complete, and `setScanning(false)` in the `finally` block never executed. Killing the app was the only recovery.
+
+## Why It Failed
+`binanceService.getCandles()` used raw `fetch(url)` with **no AbortController and no timeout**. When the OS backgrounds the app, it kills TCP connections. On resume, the `fetch()` promise hangs on a dead socket — it **never resolves AND never rejects**. Since the promise never settles:
+1. `Promise.allSettled()` waiting for batch results never completes
+2. The `try` block never finishes
+3. The `finally { setScanning(false) }` block **never executes**
+4. The UI stays stuck permanently
+
+This is fundamentally different from Rule 28 (loading state in finally). Rule 28 handles promises that **reject** (errors). Rule 29 handles promises that **never settle** (hanging forever). `try/finally` is useless against promises that never settle.
+
+```javascript
+// BAD: fetch hangs forever on dead TCP socket — try/finally CANNOT help
+try {
+  setScanning(true);
+  const response = await fetch(url);  // HANGS FOREVER after resume
+  // ... process data ...
+} finally {
+  setScanning(false);  // NEVER REACHED — promise never settled
+}
+```
+
+## What Guard Was Added
+AbortController with 10s timeout on ALL 17 Binance API fetch calls across 8 files:
+
+```javascript
+// GOOD: AbortController guarantees fetch settles within 10s
+async function fetchWithTimeout(url, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    return response;
+  } catch (e) {
+    clearTimeout(timeout);
+    throw e;  // AbortError after 10s — catch/finally CAN now run
+  }
+}
+```
+
+Files fixed: `binanceService.js` (7), `binanceApiService.js` (3), `paperTradeService.js` (3), `ScannerScreen.js` (1), `TradingChart.js` (4), `PaperTradeModal.js` (1), `portfolioService.js` (2), `adminAIMarketService.js` (2).
+
+## How to Detect Similar Issues
+1. **Grep for raw fetch**: `grep -rn "await fetch(" src/ --include="*.js"` — every result MUST have AbortController or go through a timeout wrapper
+2. **Check for AbortController**: `grep -rn "AbortController" src/ --include="*.js"` — count should match fetch count
+3. **Test**: Start an operation that fetches external API → background app for 30s → return. Does the screen recover? Does the loading spinner clear?
+4. **Check Supabase client**: `supabase.js` should have a global fetch wrapper with timeout for `/rest/v1/` and `/auth/v1/` URLs
+5. **Ignore internal fetches**: `file://` URIs and localhost calls are safe (no TCP stale socket issue)
+
+### Code smell indicators
+- `await fetch(url)` without `{ signal: controller.signal }` parameter
+- No `AbortController` anywhere in the same function or file
+- `try/finally` around a fetch that has no timeout (gives false sense of safety)
+- `Promise.all` or `Promise.allSettled` with fetch calls that have no individual timeout
+- External API service files with zero imports of `AbortController`
+
+---
+
+# RULE 30: Recovery Event Must Be Unconditional
+**Source:** Phase 7.8 — FORCE_REFRESH_EVENT only fired for backgrounds >60s, leaving 10-59s gap
+
+## What Failed
+After the Phase 7.75 fix added `FORCE_REFRESH_EVENT` listeners to screens, the recovery system appeared complete. But screens still froze after short backgrounds (10-59 seconds). The `FORCE_REFRESH_EVENT` was the only way for stuck screens to recover, but it never fired.
+
+## Why It Failed
+`AppResumeManager._onResume()` gated the event emission on a staleness check:
+
+```javascript
+// BAD: Recovery event only fires for >60s background
+const isStale = timeInBackground > 60000;
+if (isStale) {
+  DeviceEventEmitter.emit(FORCE_REFRESH_EVENT);  // Skipped for 10-59s backgrounds!
+}
+```
+
+A user who backgrounds the app for 30 seconds during an active scan returns to find the Scanner stuck. AppResumeManager runs the resume sequence (session refresh, etc.) but since `isStale = false`, the FORCE_REFRESH_EVENT never fires. The Scanner's listener that would reset `setScanning(false)` never triggers.
+
+The 60s threshold was originally designed to avoid unnecessary work (cache clearing, profile refresh). But the recovery event was incorrectly included inside the stale-only block.
+
+## What Guard Was Added
+Separated the stale-gated operations from the always-needed recovery event:
+
+```javascript
+// GOOD: Expensive operations gated by staleness, recovery event ALWAYS fires
+if (isStale) {
+  this._clearCaches();          // Only when stale — expensive
+  await this._profileRefreshFn(); // Only when stale — network call
+}
+
+// ALWAYS emit — any background duration can leave screens stuck
+DeviceEventEmitter.emit(FORCE_REFRESH_EVENT);
+```
+
+## How to Detect Similar Issues
+1. **Find the recovery event emission**: `grep -rn "emit.*FORCE_REFRESH\|emit.*RECOVERY\|emit.*RESET" src/`
+2. **Check if gated by condition**: Is the emit inside an `if` block? What condition? Can that condition be false when screens are stuck?
+3. **Test all background durations**: 10s, 30s, 60s, 120s — does recovery work for ALL?
+4. **Separate concerns**: "Should we clear caches?" is a different question from "Should we tell screens to recover?"
+5. **Check the resume sequence**: If Steps 1-6 run but Step 7 (recovery event) is conditional, the sequence has a gap
+
+### Code smell indicators
+- Recovery event emission inside `if (isStale)` or `if (timeInBackground > threshold)` block
+- A threshold value that leaves a gap between "screen can get stuck" and "recovery fires"
+- Resume sequence where early steps run unconditionally but the critical recovery step is conditional
+- Multiple conditions ANDed together for event emission (any `false` skips recovery)
+
+---
+
+# RULE 31: Every Screen With Loading State Needs Recovery Listener
+**Source:** Phase 7.8 — GemMaster, OpenPositions, and 11 other screens had ZERO recovery mechanism
+
+## What Failed
+After resume, ForumScreen recovered perfectly (it had a FORCE_REFRESH_EVENT listener). But GemMasterScreen showed "3/3 FREE" for an ADMIN user, OpenPositionsScreen stayed on infinite loading spinner, and 11 other screens were stuck in various loading states. There was no mechanism to reset them.
+
+## Why It Failed
+Only 2 out of 15 screens with loading states had FORCE_REFRESH_EVENT listeners:
+- **ForumScreen**: Full recovery (reset states + reload data)
+- **ScannerScreen**: Partial recovery (reset states only)
+
+The other 13 screens had `setLoading(true)` + async fetch, but **no way to detect app resume and reset**. When data was fetching during background and the fetch failed/hung, the loading state was set to `true` permanently. Even with try/finally (Rule 28), if the screen doesn't know about resume, it can't re-trigger the fetch.
+
+GemMasterScreen specifically showed "3/3 FREE" because:
+1. `isLoadingTier` initialized as `useState(true)` — starts loading
+2. `useEffect([user?.id, userTier])` fetches quota on mount
+3. After resume with stale session, the effect's dependencies don't change
+4. No FORCE_REFRESH_EVENT listener → no re-fetch triggered
+5. Voice quota stays at initial default: `{ limit: 3, remaining: 3 }`
+
+```javascript
+// BAD: Screen has loading state but no recovery listener
+const [loading, setLoading] = useState(true);
+useEffect(() => {
+  loadData().finally(() => setLoading(false));
+}, [userId]); // Only fires when userId changes — NOT on resume
+
+// GOOD: Screen resets and reloads on resume
+useEffect(() => {
+  const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+    setLoading(false);  // Reset stuck state FIRST
+    loadData();         // Re-fetch data
+  });
+  return () => listener.remove();
+}, []);
+```
+
+## What Guard Was Added
+FORCE_REFRESH_EVENT listeners added to all 13 screens that were missing them. Each listener follows the same pattern:
+1. **Reset ALL loading states** immediately (`setLoading(false)`, `setRefreshing(false)`, etc.)
+2. **Re-fetch data** from scratch (`loadData()`, `loadPosts()`, etc.)
+3. **Proper cleanup** in useEffect return (`listener.remove()`)
+
+Screens fixed: GemMasterScreen, OpenPositionsScreen, HomeScreen, NotificationsScreen, AccountScreen, ProfileFullScreen, VisionBoardScreen_NEW, KarmaDashboardScreen, WalletScreen, ShadowModeScreen, CalendarScreen, DailyRecapScreen, AchievementsScreen.
+
+## How to Detect Similar Issues
+1. **Find all loading states**: `grep -rn "setLoading(true)\|setIsLoading(true)\|setScanning(true)" src/screens/ --include="*.js"`
+2. **For each screen with loading state, check for recovery**: `grep -l "FORCE_REFRESH_EVENT" <file>` — if no match, screen is vulnerable
+3. **Coverage audit**: Count screens with loading states vs screens with FORCE_REFRESH_EVENT listeners — they should match
+4. **Test**: Background app during data load → return → does every screen recover within 5s?
+5. **Check initial state**: `useState(true)` for loading is extra dangerous — screen starts stuck and relies entirely on useEffect to clear it
+
+### The recovery listener template
+```javascript
+// Add to EVERY screen that has setLoading(true) + async fetch
+import { DeviceEventEmitter } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
+
+useEffect(() => {
+  const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+    console.log('[ScreenName] Force refresh received');
+    setLoading(false);     // Reset stuck loading states FIRST
+    setRefreshing(false);  // Reset any other loading states
+    loadData();            // Re-fetch all data from scratch
+  });
+  return () => listener.remove();
+}, [/* deps for loadData if needed */]);
+```
+
+### Code smell indicators
+- Screen has `setLoading(true)` but no `FORCE_REFRESH_EVENT` in the same file
+- `useState(true)` for loading state with no FORCE_REFRESH_EVENT safety net
+- Screen only loads data on mount (`useEffect([], [])`) with no resume/focus handler
+- Screen registers with `loadingStateManager` but ALSO needs its own FORCE_REFRESH_EVENT listener for data reload (reset alone is not enough — data must also refresh)
+
+---
+
+## Phase 7.8 Tests
+
+### Timeoutless Fetch Deadlock (Rule 29)
+```javascript
+test('binanceService.getCandles uses AbortController timeout', () => {
+  const source = fs.readFileSync('services/binanceService.js', 'utf8');
+  // Every fetch call should use fetchWithTimeout, not raw fetch
+  const rawFetchCount = (source.match(/await fetch\(/g) || []).length;
+  expect(rawFetchCount).toBe(0); // No raw fetch() calls
+});
+
+test('scan does not hang permanently when fetch times out', async () => {
+  // Mock fetch to never resolve (simulating dead TCP socket)
+  jest.spyOn(global, 'fetch').mockReturnValue(new Promise(() => {}));
+  const scanPromise = handleScan();
+  // With AbortController, should reject within 15s (not hang forever)
+  await expect(
+    Promise.race([scanPromise, delay(15000).then(() => 'COMPLETED')])
+  ).resolves.toBe('COMPLETED');
+});
+```
+
+### Unconditional Recovery Event (Rule 30)
+```javascript
+test('FORCE_REFRESH_EVENT fires for short backgrounds (< 60s)', () => {
+  const emitSpy = jest.spyOn(DeviceEventEmitter, 'emit');
+  appResumeManager._onResume(30000); // 30 seconds background
+  expect(emitSpy).toHaveBeenCalledWith('GLOBAL_FORCE_REFRESH');
+});
+
+test('FORCE_REFRESH_EVENT fires for long backgrounds (> 60s)', () => {
+  const emitSpy = jest.spyOn(DeviceEventEmitter, 'emit');
+  appResumeManager._onResume(120000); // 2 minutes background
+  expect(emitSpy).toHaveBeenCalledWith('GLOBAL_FORCE_REFRESH');
+});
+```
+
+### Screen Recovery Listener Coverage (Rule 31)
+```javascript
+test('every screen with loading state has FORCE_REFRESH_EVENT listener', () => {
+  const screenFiles = glob.sync('screens/**/*.js', { cwd: 'src' });
+  const missing = [];
+  for (const file of screenFiles) {
+    const source = fs.readFileSync(`src/${file}`, 'utf8');
+    const hasLoadingState = /set(Is)?Loading\(true\)|setScanning\(true\)/i.test(source);
+    const hasRecovery = /FORCE_REFRESH_EVENT/.test(source);
+    if (hasLoadingState && !hasRecovery) {
+      missing.push(file);
+    }
+  }
+  expect(missing).toEqual([]); // No screen with loading state missing recovery
+});
+```

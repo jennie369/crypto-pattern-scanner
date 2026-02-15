@@ -9,6 +9,28 @@
 
 import { wsPool } from './scanner/webSocketPoolService';
 
+/**
+ * Fetch with timeout using AbortController.
+ * Prevents hanging requests on stalled mobile connections (root cause of app resume deadlock).
+ */
+const FETCH_TIMEOUT = 10000; // 10 seconds
+
+const fetchWithTimeout = async (url, timeoutMs = FETCH_TIMEOUT) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Binance API request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+};
+
 const RATE_LIMIT = 1200;
 const RATE_WINDOW = 60000;
 let requestTimestamps = [];
@@ -59,7 +81,7 @@ class BinanceService {
       checkRateLimit();
       console.log('[Binance] Fetching all coins from FUTURES exchange info...');
 
-      const response = await fetch(`${this.futuresBaseUrl}/exchangeInfo`);
+      const response = await fetchWithTimeout(`${this.futuresBaseUrl}/exchangeInfo`, 15000);
       const data = await response.json();
 
       if (data && typeof data.code === 'number' && data.code < 0) {
@@ -122,7 +144,7 @@ class BinanceService {
     try {
       checkRateLimit();
       const symbolsParam = JSON.stringify(symbols);
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${this.baseUrl}/ticker/24hr?symbols=${encodeURIComponent(symbolsParam)}`
       );
       const data = await response.json();
@@ -159,7 +181,7 @@ class BinanceService {
       }
 
       checkRateLimit();
-      const response = await fetch(`${this.futuresBaseUrl}/ticker/24hr`);
+      const response = await fetchWithTimeout(`${this.futuresBaseUrl}/ticker/24hr`);
       const data = await response.json();
 
       if (data && typeof data.code === 'number' && data.code < 0) {
@@ -298,7 +320,7 @@ class BinanceService {
     try {
       checkRateLimit();
       const url = `${this.futuresBaseUrl}/ticker/24hr?symbol=${symbol}`;
-      const response = await fetch(url);
+      const response = await fetchWithTimeout(url);
       const data = await response.json();
 
       if (data && typeof data.code === 'number' && data.code < 0) {
@@ -380,7 +402,7 @@ class BinanceService {
 
       checkRateLimit();
       const url = `${this.futuresBaseUrl}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
-      const response = await fetch(url);
+      const response = await fetchWithTimeout(url);
       const data = await response.json();
 
       if (data && typeof data.code === 'number' && data.code < 0) {
@@ -428,7 +450,7 @@ class BinanceService {
     try {
       checkRateLimit();
       const url = `${this.futuresBaseUrl}/ticker/24hr?symbol=${symbol}`;
-      const response = await fetch(url);
+      const response = await fetchWithTimeout(url);
       const data = await response.json();
 
       if (data && typeof data.code === 'number' && data.code < 0) {
@@ -455,7 +477,7 @@ class BinanceService {
 
       checkRateLimit();
       const url = `${this.futuresBaseUrl}/ticker/price?symbol=${symbol}`;
-      const response = await fetch(url);
+      const response = await fetchWithTimeout(url);
       const data = await response.json();
 
       if (data && typeof data.code === 'number' && data.code < 0) {

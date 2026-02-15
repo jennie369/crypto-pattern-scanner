@@ -29,6 +29,7 @@ import {
   Animated,
   LayoutAnimation,
   UIManager,
+  DeviceEventEmitter,
 } from 'react-native';
 
 // Enable LayoutAnimation on Android
@@ -123,6 +124,7 @@ import proactiveAIService from '../../services/proactiveAIService';
 import accessControlService from '../../services/accessControlService';
 import ritualTrackingService from '../../services/ritualTrackingService';
 import { isFeatureEnabled, FEATURES } from '../../config/featureFlags';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 // NEW: Widget and Crystal services
 import { detectWidgetTrigger } from '../../services/widgetDetectionService';
 import { shouldShowCrystalRecommendations, extractShopifyTags } from '../../services/crystalTagMappingService';
@@ -409,6 +411,37 @@ const GemMasterScreen = ({ navigation, route }) => {
       return () => clearTimeout(timer);
     }, [user?.id, userTier])
   );
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  // CRITICAL: Reset stuck loading states and re-fetch quota data
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[GemMaster] Force refresh event received - resetting all states');
+
+      // CRITICAL: Reset stuck loading states FIRST
+      setIsLoadingTier(false);
+
+      // Re-fetch quota from scratch
+      if (user?.id) {
+        QuotaService.clearCache();
+        const fetchQuota = async () => {
+          try {
+            setIsLoadingTier(true);
+            const quotaData = await QuotaService.checkQuota(user.id, userTier);
+            setQuota(quotaData);
+            const voiceInfo = await voiceService.getVoiceQuotaInfo(user.id, userTier);
+            setVoiceQuota(voiceInfo);
+          } catch (e) {
+            console.warn('[GemMaster] Force refresh quota error:', e);
+          } finally {
+            setIsLoadingTier(false);
+          }
+        };
+        fetchQuota();
+      }
+    });
+    return () => listener.remove();
+  }, [user?.id, userTier]);
 
   // ===== CHATBOT UPGRADE: Load Personalized Data =====
   useEffect(() => {

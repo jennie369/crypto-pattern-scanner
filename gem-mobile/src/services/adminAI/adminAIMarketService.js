@@ -12,6 +12,24 @@
 
 import { binanceService } from '../binanceService';
 
+// Fetch with timeout to prevent hanging requests on stalled mobile connections
+const FETCH_TIMEOUT = 10000;
+const fetchWithTimeout = async (url, options = {}, timeoutMs = FETCH_TIMEOUT) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Binance API request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+};
+
 // ═══════════════════════════════════════════════════════════
 // CANDLE PATTERN DEFINITIONS
 // ═══════════════════════════════════════════════════════════
@@ -123,7 +141,7 @@ class AdminAIMarketService {
 
     try {
       // P6 FIX #5: Use Futures API — coin list comes from Futures, Spot returns 400 for futures-only symbols
-      const response = await fetch(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${symbol}`, {
+      const response = await fetchWithTimeout(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${symbol}`, {
         headers: { 'Accept': 'application/json' },
       });
 
@@ -168,7 +186,7 @@ class AdminAIMarketService {
 
     try {
       // P6 FIX #5: Use Futures API — coin list comes from Futures, Spot returns 400 for futures-only symbols
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${timeframe}&limit=${count}`,
         { headers: { 'Accept': 'application/json' } }
       );

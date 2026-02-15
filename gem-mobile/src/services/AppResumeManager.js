@@ -1,29 +1,34 @@
 /**
  * AppResumeManager - Unified App Resume Handler
  *
- * C14 FIX: Consolidates 4 overlapping resume systems into 1 deterministic manager.
+ * C14 FIX: Consolidates overlapping resume systems into 1 deterministic manager.
+ * Issue 2 FIX: Now the SOLE resume handler. AuthContext's AppState listener removed.
  *
- * BEFORE: 4 independent AppState listeners racing each other:
- *   1. useAppResume (cache + WS recovery, 5min threshold)
- *   2. useGlobalAppResume (stuck state timer + force refresh)
- *   3. connectionHealthMonitor (60s health checks + 3-strike recovery)
- *   4. AuthContext (session + profile refresh, 60s threshold) — KEPT SEPARATE
+ * BEFORE (Issue 2 root cause): 3 AppState listeners racing each other:
+ *   1. AppResumeManager (session + cache + WS)
+ *   2. AuthContext (profile refresh, 60s threshold)
+ *   3. useAppResume hook (only if used by a screen)
  *
  * AFTER: 1 unified manager with deterministic sequence:
- *   Session refresh → Loading reset → Cache clear → WS reconnect → Health resume
+ *   Session refresh (await) -> Profile refresh (await) -> Cache clear -> WS reconnect -> Force refresh event
+ *
+ * KEY FIX: resetAllLoadingStates() is NO LONGER called on resume.
+ * Previously it fired BEFORE screens set loading=true for their data fetches,
+ * creating a race where loading was cleared before it was set, causing stuck UIs.
+ * Now screens manage their own loading states via FORCE_REFRESH_EVENT listeners.
  *
  * What this manager handles:
  * - Single AppState listener for resume detection
  * - Deterministic operation sequence on resume
- * - Stuck-state detection timer (15s interval)
- * - Coordination with connectionHealthMonitor (pause/resume)
- * - Session refresh with cooldown to prevent races with AuthContext
+ * - Stuck-state detection timer (15s interval) — catches genuine stuck states
+ * - Session AND profile refresh (centralized, no duplicate in AuthContext)
+ * - WebSocket + Realtime reconnection
+ * - Health checks (60s interval, 3-strike recovery)
  *
  * What this manager does NOT handle:
- * - Auth profile/quota refresh (stays in AuthContext)
- * - paperTradeService lifecycle (has its own AppState listener)
+ * - paperTradeService lifecycle (has its own AppState listener, separate concern)
  * - Offline affiliate sync (stays in AppNavigator — minimal)
- * - Feature-specific AppState listeners (presence, biometric, etc.)
+ * - Feature-specific AppState listeners (presence, biometric, video pause, etc.)
  */
 
 import { AppState, DeviceEventEmitter } from 'react-native';
@@ -32,7 +37,6 @@ import { wsPool } from './scanner/webSocketPoolService';
 import { patternCache } from './scanner/patternCacheService';
 import { binanceService } from './binanceService';
 import {
-  resetAllLoadingStates,
   resetStuckLoadingStates,
   clearAllStaleCaches,
   FORCE_REFRESH_EVENT,
@@ -40,7 +44,6 @@ import {
 
 // Thresholds
 const STALE_THRESHOLD = 60 * 1000;        // 1 minute — data considered stale
-const SESSION_COOLDOWN = 10 * 1000;        // 10s — prevents double session refresh with AuthContext
 const STUCK_CHECK_INTERVAL = 15 * 1000;    // 15s — check for stuck loading states
 const STUCK_THRESHOLD = 15 * 1000;         // 15s — only reset states stuck longer than this
 const HEALTH_CHECK_INTERVAL = 60 * 1000;   // 60s — periodic health checks
@@ -57,6 +60,8 @@ class AppResumeManager {
     this._lastSessionRefresh = 0;
     this._consecutiveHealthFailures = 0;
     this._resumeCallbacks = new Set();
+    // Profile refresh function — set by AuthContext via setProfileRefreshFn()
+    this._profileRefreshFn = null;
   }
 
   /**
@@ -66,7 +71,7 @@ class AppResumeManager {
     if (this._isRunning) return;
     this._isRunning = true;
 
-    console.log('[AppResumeManager] Starting unified resume manager');
+    console.log('[AppResumeManager] Starting unified resume manager (sole handler)');
 
     // 1. Single AppState listener
     this._appStateSubscription = AppState.addEventListener('change', this._handleAppStateChange);
@@ -124,6 +129,7 @@ class AppResumeManager {
 
     this._consecutiveHealthFailures = 0;
     this._resumeCallbacks.clear();
+    this._profileRefreshFn = null;
 
     console.log('[AppResumeManager] Stopped');
   }
@@ -136,6 +142,16 @@ class AppResumeManager {
   registerResumeCallback(callback) {
     this._resumeCallbacks.add(callback);
     return () => this._resumeCallbacks.delete(callback);
+  }
+
+  /**
+   * Set the profile refresh function from AuthContext.
+   * Called by useGlobalAppResume after AuthContext is available.
+   * @param {function} refreshFn - AuthContext's refreshProfile()
+   */
+  setProfileRefreshFn(refreshFn) {
+    this._profileRefreshFn = refreshFn;
+    console.log('[AppResumeManager] Profile refresh function registered');
   }
 
   // ========== PRIVATE ==========
@@ -169,33 +185,48 @@ class AppResumeManager {
   };
 
   /**
-   * Deterministic resume sequence:
-   * 1. Session refresh (with cooldown)
-   * 2. Loading state reset
-   * 3. Cache clear (if stale)
+   * Deterministic resume sequence (Issue 2 Fix):
+   *
+   * 1. Session refresh (AWAIT — must complete before data fetches)
+   * 2. Profile refresh (AWAIT — refreshes user/profile/quota in AuthContext)
+   * 3. Cache clear (if stale >60s)
    * 4. WebSocket reconnection
    * 5. Realtime channel recovery
-   * 6. Health check
-   * 7. User callbacks + force refresh event
+   * 6. Health check (non-blocking)
+   * 7. Emit FORCE_REFRESH_EVENT (screens reload with fresh auth)
+   * 8. User callbacks
+   *
+   * NOTE: resetAllLoadingStates() is NOT called here anymore.
+   * It was causing a race condition where loading states were cleared
+   * BEFORE screens set loading=true for their data fetches triggered
+   * by FORCE_REFRESH_EVENT. Screens now manage their own loading
+   * via their FORCE_REFRESH_EVENT listeners (which reset loading
+   * before calling loadPosts/loadData). The stuck-state timer
+   * (15s interval) still catches genuinely stuck states.
    */
   async _onResume(timeInBackground) {
     const isStale = timeInBackground > STALE_THRESHOLD;
 
-    // Step 1: Session refresh (with cooldown to avoid racing AuthContext)
-    const now = Date.now();
-    if (now - this._lastSessionRefresh > SESSION_COOLDOWN) {
-      this._lastSessionRefresh = now;
-      await this._refreshSession();
-    } else {
-      console.log('[AppResumeManager] Session refresh skipped (cooldown)');
-    }
+    // Step 1: Session refresh — MUST complete before any data fetches
+    console.log('[AppResumeManager] Step 1: Refreshing session...');
+    await this._refreshSession();
 
-    // Step 2: Reset ALL loading states immediately (prevents stuck UI)
-    try {
-      resetAllLoadingStates();
-      console.log('[AppResumeManager] Loading states reset');
-    } catch (err) {
-      console.warn('[AppResumeManager] Loading reset error:', err);
+    // Step 2: Profile refresh — updates AuthContext state (user, profile, quota)
+    // This replaces the removed AuthContext AppState listener
+    if (isStale && this._profileRefreshFn) {
+      console.log('[AppResumeManager] Step 2: Refreshing profile...');
+      try {
+        const result = await this._profileRefreshFn();
+        if (result?.success) {
+          console.log('[AppResumeManager] Profile refresh completed');
+        } else {
+          console.log('[AppResumeManager] Profile refresh skipped:', result?.reason);
+        }
+      } catch (err) {
+        console.warn('[AppResumeManager] Profile refresh error:', err?.message);
+      }
+    } else if (!isStale) {
+      console.log('[AppResumeManager] Step 2: Profile refresh skipped (not stale)');
     }
 
     // Step 3: Clear caches if data is stale
@@ -209,14 +240,14 @@ class AppResumeManager {
     // Step 5: Realtime channel recovery
     this._recoverRealtimeChannels();
 
-    // Step 6: Run health check (resets consecutive failure counter)
+    // Step 6: Run health check (non-blocking, resets consecutive failure counter)
     this._runHealthCheck();
 
-    // Step 7: Emit force refresh for screens (only if stale)
-    if (isStale) {
-      console.log('[AppResumeManager] Emitting force refresh event');
-      DeviceEventEmitter.emit(FORCE_REFRESH_EVENT);
-    }
+    // Step 7: ALWAYS emit force refresh for screens
+    // Even non-stale resumes (10-59s) need this to recover screens stuck during background
+    // Auth is now guaranteed fresh at this point
+    console.log(`[AppResumeManager] Step 7: Emitting FORCE_REFRESH_EVENT (stale=${isStale}, auth is fresh)`);
+    DeviceEventEmitter.emit(FORCE_REFRESH_EVENT);
 
     // Step 8: User callbacks
     this._resumeCallbacks.forEach(cb => {
@@ -226,6 +257,8 @@ class AppResumeManager {
         console.warn('[AppResumeManager] Callback error:', err);
       }
     });
+
+    console.log(`[AppResumeManager] Resume sequence complete (stale=${isStale})`);
   }
 
   /**
@@ -248,7 +281,11 @@ class AppResumeManager {
         if (expiresAt && (expiresAt - nowSec) < 300) {
           console.log('[AppResumeManager] Token expiring soon, refreshing...');
           await supabase.auth.refreshSession();
+        } else {
+          console.log('[AppResumeManager] Session valid');
         }
+      } else {
+        console.log('[AppResumeManager] No session (user not logged in)');
       }
     } catch (err) {
       console.warn('[AppResumeManager] Session refresh error:', err);
@@ -368,11 +405,13 @@ class AppResumeManager {
 
   /**
    * Full recovery — nuclear option after persistent failures
+   * NOTE: Even in full recovery, we do NOT call resetAllLoadingStates().
+   * Instead we emit FORCE_REFRESH_EVENT which lets each screen
+   * properly reset its own loading + reload data in one atomic operation.
    */
   _triggerFullRecovery() {
     console.log('[AppResumeManager] === FULL RECOVERY ===');
 
-    try { resetAllLoadingStates(); } catch (e) {}
     this._clearCaches();
     this._reconnectWebSockets();
 
@@ -382,6 +421,13 @@ class AppResumeManager {
         try { channel.subscribe(); } catch (e) {}
       });
     } catch (e) {}
+
+    // Profile refresh if available
+    if (this._profileRefreshFn) {
+      this._profileRefreshFn().catch(err => {
+        console.warn('[AppResumeManager] Recovery profile refresh error:', err?.message);
+      });
+    }
 
     DeviceEventEmitter.emit(FORCE_REFRESH_EVENT);
     console.log('[AppResumeManager] === FULL RECOVERY COMPLETE ===');

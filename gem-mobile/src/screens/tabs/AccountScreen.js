@@ -22,6 +22,7 @@ import {
   Dimensions,
   Modal,
   InteractionManager,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -88,6 +89,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { useAuth } from '../../contexts/AuthContext';
 import useScrollToTop from '../../hooks/useScrollToTop';
 import { forumService } from '../../services/forumService';
@@ -205,6 +207,18 @@ export default function AccountScreen() {
       }
     }, [user?.id, isAdmin])
   );
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[AccountScreen] Force refresh event received - resetting all states');
+      setLoading(false);
+      setRefreshing(false);
+      accountCache.lastFetch = 0;
+      loadData();
+    });
+    return () => listener.remove();
+  }, [user?.id]);
 
   // Handle deep link from notification - navigate to VisionBoard
   useEffect(() => {

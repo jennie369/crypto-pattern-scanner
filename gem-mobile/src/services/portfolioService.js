@@ -6,6 +6,24 @@
 import { supabase } from './supabase';
 import { binanceService } from './binanceService';
 
+// Fetch with timeout to prevent hanging requests on stalled mobile connections
+const FETCH_TIMEOUT = 10000;
+const fetchWithTimeout = async (url, timeoutMs = FETCH_TIMEOUT) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Binance API request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+};
+
 class PortfolioService {
   /**
    * Get user's portfolio with current prices
@@ -58,7 +76,7 @@ class PortfolioService {
 
     try {
       // Fetch all tickers at once
-      const response = await fetch('https://api.binance.com/api/v3/ticker/price');
+      const response = await fetchWithTimeout('https://api.binance.com/api/v3/ticker/price');
       const tickers = await response.json();
 
       // Create a map for faster lookup
@@ -198,7 +216,7 @@ class PortfolioService {
    */
   async searchCoin(query) {
     try {
-      const response = await fetch('https://api.binance.com/api/v3/exchangeInfo');
+      const response = await fetchWithTimeout('https://api.binance.com/api/v3/exchangeInfo', 15000);
       const data = await response.json();
 
       const usdtPairs = data.symbols.filter(s =>

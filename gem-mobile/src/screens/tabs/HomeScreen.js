@@ -4,19 +4,21 @@
  * Now with Sponsor Banner support
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   RefreshControl,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Home } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useTabBar } from '../../contexts/TabBarContext';
@@ -71,6 +73,16 @@ export default function HomeScreen({ navigation }) {
     await refreshBanners();
     setRefreshing(false);
   });
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[HomeScreen] Force refresh event received - resetting all states');
+      setRefreshing(false);
+      refreshBanners();
+    });
+    return () => listener.remove();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);

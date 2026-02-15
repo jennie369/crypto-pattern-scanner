@@ -16,6 +16,24 @@ const ENCRYPTION_PREFIX = 'GEM_SHADOW_';
 const BINANCE_API = 'https://api.binance.com';
 const BINANCE_TESTNET = 'https://testnet.binance.vision';
 
+// Fetch with timeout to prevent hanging requests on stalled mobile connections
+const FETCH_TIMEOUT = 10000;
+const fetchWithTimeout = async (url, options = {}, timeoutMs = FETCH_TIMEOUT) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Binance API request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+};
+
 // Required permissions for Shadow Mode (READ-ONLY only)
 const REQUIRED_PERMISSIONS = ['SPOT_READ', 'USER_DATA_READ'];
 
@@ -166,7 +184,7 @@ class BinanceApiService {
       const signature = await this.createSignature(queryString, apiSecret);
 
       // Test with account info endpoint
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${baseUrl}/api/v3/account?${queryString}&signature=${signature}`,
         {
           headers: {
@@ -332,7 +350,7 @@ class BinanceApiService {
       const signature = await this.createSignature(queryString, apiSecret);
 
       // Fetch trades
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${BINANCE_API}/api/v3/myTrades?${queryString}&signature=${signature}`,
         {
           headers: {
@@ -474,7 +492,7 @@ class BinanceApiService {
       const signature = await this.createSignature(queryString, apiSecret);
 
       // Fetch account
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${BINANCE_API}/api/v3/account?${queryString}&signature=${signature}`,
         {
           headers: {

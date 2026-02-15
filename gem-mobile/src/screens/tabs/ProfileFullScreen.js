@@ -13,6 +13,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   StyleSheet,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,6 +21,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, FileText, Image as ImageIcon, Video } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { useAuth } from '../../contexts/AuthContext';
 import { forumService } from '../../services/forumService';
 
@@ -91,12 +93,18 @@ const ProfileFullScreen = () => {
   }, [user?.id]);
 
   // Initial load
+  // Issue 2 Fix: Wrap in try/finally to guarantee setLoading(false)
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await loadProfile();
-      await loadPosts();
-      setLoading(false);
+      try {
+        await loadProfile();
+        await loadPosts();
+      } catch (err) {
+        console.error('[ProfileFull] Initial load error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (user?.id) {
@@ -104,12 +112,30 @@ const ProfileFullScreen = () => {
     }
   }, [user?.id]);
 
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ProfileFull] Force refresh event received - resetting all states');
+      setLoading(false);
+      setRefreshing(false);
+      setContentLoading(false);
+      loadProfile();
+    });
+    return () => listener.remove();
+  }, [user?.id]);
+
   // Refresh handler
+  // Issue 2 Fix: Wrap in try/finally to guarantee setRefreshing(false)
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadProfile();
-    await loadPosts();
-    setRefreshing(false);
+    try {
+      await loadProfile();
+      await loadPosts();
+    } catch (err) {
+      console.error('[ProfileFull] Refresh error:', err);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // Handle post press

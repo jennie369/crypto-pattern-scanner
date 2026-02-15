@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   FlatList,
   Alert,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -35,6 +36,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // Import Karma components
 import {
@@ -119,28 +121,51 @@ const KarmaDashboardScreen = () => {
   }, []);
 
   // Initial load
+  // Issue 2 Fix: Wrap in try/finally to guarantee setLoading(false)
   useEffect(() => {
     const init = async () => {
       setLoading(true);
+      try {
+        await Promise.all([
+          loadKarmaData(true),
+          loadHistory(0),
+          loadLeaderboard(),
+        ]);
+      } catch (err) {
+        console.error('[KarmaDashboard] Init error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, [loadKarmaData, loadHistory, loadLeaderboard]);
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[KarmaDashboard] Force refresh event received - resetting all states');
+      setLoading(false);
+      setRefreshing(false);
+      Promise.all([loadKarmaData(true), loadHistory(0), loadLeaderboard()]).catch(() => {});
+    });
+    return () => listener.remove();
+  }, [loadKarmaData, loadHistory, loadLeaderboard]);
+
+  // Refresh handler
+  // Issue 2 Fix: Wrap in try/finally to guarantee setRefreshing(false)
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
       await Promise.all([
         loadKarmaData(true),
         loadHistory(0),
         loadLeaderboard(),
       ]);
-      setLoading(false);
-    };
-    init();
-  }, [loadKarmaData, loadHistory, loadLeaderboard]);
-
-  // Refresh handler
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await Promise.all([
-      loadKarmaData(true),
-      loadHistory(0),
-      loadLeaderboard(),
-    ]);
-    setRefreshing(false);
+    } catch (err) {
+      console.error('[KarmaDashboard] Refresh error:', err);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // Load more history

@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -48,6 +49,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import useScrollToTop from '../../hooks/useScrollToTop';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -208,6 +210,18 @@ export default function NotificationsScreen() {
       }
     }, [isAuthenticated])
   );
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[Notifications] Force refresh event received - resetting all states');
+      setLoading(false);
+      setRefreshing(false);
+      notificationsCache.lastFetch = 0;
+      loadNotifications();
+    });
+    return () => listener.remove();
+  }, [isAuthenticated, user?.id]);
 
   // Helper to set notifications and update cache
   const updateNotifications = (data) => {

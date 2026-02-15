@@ -549,6 +549,7 @@ const ForumScreen = ({ navigation }) => {
 
   // Load posts using hybrid feed algorithm or legacy method
   // INFINITE SCROLL: Always try to load more, never set hasMore to false permanently
+  // Issue 2 Fix: ALWAYS set loading at start, ALWAYS clear in finally
   const loadPosts = async (reset = false) => {
     // Prevent double loading
     if (loadingMore && !reset) return;
@@ -557,6 +558,8 @@ const ForumScreen = ({ navigation }) => {
     // Generate unique request ID for this load to handle race conditions
     // When user switches tabs quickly, older requests will be ignored
     const requestId = reset ? ++currentRequestIdRef.current : currentRequestIdRef.current;
+
+    console.log(`[ForumScreen] loadPosts(reset=${reset}) requestId=${requestId}`);
 
     // Track load performance (dev only)
     performanceService.startMeasure(`loadPosts.${reset ? 'reset' : 'page'}`);
@@ -568,9 +571,17 @@ const ForumScreen = ({ navigation }) => {
       );
     }
 
-    try {
-      if (!reset) setLoadingMore(true);
+    // Issue 2 Fix: ALWAYS set loading state at the start
+    // Previously, reset=true never set loading, so the finally block's
+    // setLoading(false) was a no-op, and if any intermediate state
+    // set loading=true, it would get stuck.
+    if (reset) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
 
+    try {
       // Use new hybrid feed algorithm for "explore" tab
       if (useHybridFeed && selectedFeed === 'explore' && user?.id) {
         await loadHybridFeed(reset, requestId);
@@ -663,23 +674,24 @@ const ForumScreen = ({ navigation }) => {
     } finally {
       // End performance measurement (dev only)
       performanceService.endMeasure(`loadPosts.${reset ? 'reset' : 'page'}`, 2500);
-      // Only update loading states if this is still the current request
-      if (requestId === currentRequestIdRef.current) {
-        setLoading(false);
-        setLoadingMore(false);
-        loadMoreStartTimeRef.current = null;
-      }
+      // Issue 2 Fix: ALWAYS clear loading states, even for stale requests.
+      // Previously, stale requests skipped this, leaving loading stuck.
+      // The data was already ignored (stale response discarded above),
+      // but loading states MUST still be cleared to prevent stuck UI.
+      setLoading(false);
+      setLoadingMore(false);
+      loadMoreStartTimeRef.current = null;
     }
   };
 
   // New: Load feed using hybrid algorithm with ads
   // INFINITE SCROLL: Always allow more loading
+  // Issue 2 Fix: Loading states set by parent loadPosts(), cleared in its finally
   const loadHybridFeed = async (reset = false, requestId) => {
     // Track hybrid feed load performance (dev only)
     performanceService.startMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`);
 
     try {
-      if (!reset) setLoadingMore(true);
       console.log('[ForumScreen] Loading hybrid feed...', reset ? 'RESET' : `page after ${lastPostIdRef.current}`, `requestId: ${requestId}`);
 
       if (reset) {
@@ -808,9 +820,7 @@ const ForumScreen = ({ navigation }) => {
           console.log('[ForumScreen] Timeout - keeping cached data, retry after cooldown');
           lastTimeoutRef.current = Date.now();
           setHasMore(true);
-          setLoadingMore(false);
-          setLoading(false);
-          loadMoreStartTimeRef.current = null;
+          // Loading states cleared by loadPosts finally block
           return;
         }
         // First load with no cache: fall through to legacy fallback below
@@ -873,12 +883,9 @@ const ForumScreen = ({ navigation }) => {
     } finally {
       // End performance measurement (dev only)
       performanceService.endMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`, 2500);
-      // Only update loading states if this is still the current request
-      if (requestId === currentRequestIdRef.current) {
-        setLoading(false);
-        setLoadingMore(false);
-        loadMoreStartTimeRef.current = null;
-      }
+      // Issue 2 Fix: Loading states are cleared by loadPosts() finally block,
+      // which always runs after loadHybridFeed returns/throws.
+      // No need to clear here — prevents double-clearing race conditions.
     }
   };
 

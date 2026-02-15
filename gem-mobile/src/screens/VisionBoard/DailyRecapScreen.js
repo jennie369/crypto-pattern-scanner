@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Share,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -22,6 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Icons from 'lucide-react-native';
 
 import { COLORS, TYPOGRAPHY, SPACING, GLASS, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { supabase } from '../../services/supabase';
 import { ScoreRing, RadarChartCompact, LevelBadge } from '../../components/Charts';
 import progressCalculator from '../../services/progressCalculator';
@@ -183,14 +185,30 @@ const DailyRecapScreen = () => {
   }, [userId, recapDate]);
 
   // Initial load
+  // Issue 2 Fix: Wrap in try/finally to guarantee setLoading(false)
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      await loadRecapData();
-      setLoading(false);
+      try {
+        await loadRecapData();
+      } catch (err) {
+        console.error('[DailyRecap] Init error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     if (userId) init();
   }, [userId, loadRecapData]);
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[DailyRecap] Force refresh event received - resetting all states');
+      setLoading(false);
+      loadRecapData();
+    });
+    return () => listener.remove();
+  }, [loadRecapData]);
 
   // Share recap
   const handleShare = async () => {

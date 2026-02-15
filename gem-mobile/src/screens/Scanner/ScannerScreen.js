@@ -84,6 +84,23 @@ import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_HEIGHT = 320;
 
+// Fetch with timeout to prevent hanging requests on stalled mobile connections
+const fetchWithTimeout = async (url, timeoutMs = 10000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+};
+
 const ScannerScreen = ({ navigation }) => {
   // Get user and tier from Auth Context
   const { user, userTier, isAdmin } = useAuth();
@@ -360,7 +377,7 @@ const ScannerScreen = ({ navigation }) => {
 
     // FIRST: Fetch initial price via REST API immediately (don't wait for WebSocket)
     try {
-      const response = await fetch(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${targetSymbol}`);
+      const response = await fetchWithTimeout(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${targetSymbol}`);
       const data = await response.json();
 
       // CRITICAL: Check if we're still expecting this symbol (prevents stale REST response)

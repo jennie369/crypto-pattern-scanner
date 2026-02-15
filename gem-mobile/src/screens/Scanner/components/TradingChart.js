@@ -196,8 +196,11 @@ const TradingChart = ({
       // The timeframe_changed message will set it back to true
       setChartReady(false);
 
-      // Use injection method if chart was ready, otherwise reload
-      if (webViewRef.current) {
+      // Use injection method if chart is ready, otherwise reload WebView with correct TF
+      // CRITICAL: Must check chartReady — if WebView is still initializing,
+      // window.changeTimeframe doesn't exist yet and injection silently fails,
+      // causing permanent desync (chart shows old TF, React state says new TF)
+      if (chartReady && webViewRef.current) {
         webViewRef.current.injectJavaScript(`
           if (window.changeTimeframe) {
             window.changeTimeframe('${binanceInterval}');
@@ -205,11 +208,12 @@ const TradingChart = ({
           true;
         `);
       } else {
-        htmlTimeframeRef.current = timeframe; // Sync ref before reload
+        // Reload WebView with correct TF baked into HTML
+        htmlTimeframeRef.current = timeframe;
         setWebViewKey(prev => prev + 1);
       }
     }
-  }, [timeframe, chartReady]);
+  }, [timeframe]); // chartReady removed — effect should only fire on timeframe changes
 
   // Pattern price data
   const displayPattern = selectedPattern || (patterns.length > 0 ? patterns[0] : null);
@@ -823,6 +827,23 @@ const TradingChart = ({
     const INTERVAL = '${interval}';
     const SHOW_VOLUME = ${showVolume};
     const DARK_THEME = ${darkTheme};
+
+    // Fetch with timeout to prevent hanging requests on stalled mobile connections
+    const fetchWithTimeout = async (url, options = {}, timeoutMs = 15000) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          throw new Error('Binance API request timeout');
+        }
+        throw error;
+      }
+    };
     const ENTRY_PRICE = ${entryPrice};
     const SL_PRICE = ${slPrice};
     const TP_PRICE = ${tpPrice};
@@ -978,7 +999,7 @@ const TradingChart = ({
         // Try Futures API first (use _cb for cache busting, not timestamp)
         const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=1500&_cb=' + cacheBuster;
         console.log('Fetching Futures:', futuresUrl);
-        const futuresResponse = await fetch(futuresUrl, {
+        const futuresResponse = await fetchWithTimeout(futuresUrl, {
           cache: 'no-store',
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1004,7 +1025,7 @@ const TradingChart = ({
           // Fallback to Spot API
           const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=1500&_cb=' + cacheBuster;
           console.log('Fetching Spot:', spotUrl);
-          const spotResponse = await fetch(spotUrl, {
+          const spotResponse = await fetchWithTimeout(spotUrl, {
             cache: 'no-store',
             headers: {
               'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1295,7 +1316,7 @@ const TradingChart = ({
         // Use _cb (cache buster) instead of timestamp to avoid Binance API confusion
         const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + interval + '&limit=1500&_cb=' + cacheBuster;
         debugLog('Fetching Futures', { url: futuresUrl });
-        const futuresResponse = await fetch(futuresUrl, {
+        const futuresResponse = await fetchWithTimeout(futuresUrl, {
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
         });
@@ -1317,7 +1338,7 @@ const TradingChart = ({
           // Fallback to Spot API
           const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + interval + '&limit=1500&_cb=' + cacheBuster;
           debugLog('Trying Spot fallback', { url: spotUrl });
-          const spotResponse = await fetch(spotUrl, {
+          const spotResponse = await fetchWithTimeout(spotUrl, {
             cache: 'no-store',
             headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
           });

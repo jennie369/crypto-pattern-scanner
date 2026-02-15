@@ -146,17 +146,18 @@ function MainStack() {
 }
 
 export default function AppNavigator() {
-  const { loading, initialized, isAuthenticated, upgradeState, closeUpgradeModal } = useAuth();
+  const { loading, initialized, isAuthenticated, upgradeState, closeUpgradeModal, refreshProfile } = useAuth();
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const [hasCompletedWelcome, setHasCompletedWelcome] = useState(null);
   const [welcomeChecked, setWelcomeChecked] = useState(false);
   const appStateRef = useRef(AppState.currentState);
 
-  // C14: Unified resume system (AppResumeManager)
-  // - Single AppState listener for all resume operations
-  // - Deterministic sequence: session → loading → cache → WS → health
+  // C14 + Issue 2 Fix: Unified resume system (AppResumeManager)
+  // - SOLE AppState listener for all resume operations (AuthContext listener removed)
+  // - Deterministic sequence: session → profile → cache → WS → health → force refresh
   // - Stuck-state detection (15s) + health checks (60s)
-  useGlobalAppResume();
+  // - Profile refresh passed in so AppResumeManager can refresh auth state on resume
+  useGlobalAppResume(refreshProfile);
 
   // React Navigation linking configuration for deep links
   // Handles gem:// scheme and gemral.com universal links automatically

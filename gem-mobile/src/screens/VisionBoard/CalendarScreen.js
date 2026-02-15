@@ -19,6 +19,7 @@ import {
   Pressable,
   Alert,
   Platform,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
@@ -26,6 +27,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Icons from 'lucide-react-native';
 
 import { COLORS, TYPOGRAPHY, SPACING, GLASS, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { supabase } from '../../services/supabase';
 import calendarService from '../../services/calendarService';
 import calendarJournalService from '../../services/calendarJournalService';
@@ -120,20 +122,43 @@ const CalendarScreen = () => {
   }, [selectedDate, events]);
 
   // Initial load
+  // Issue 2 Fix: Wrap in try/finally to guarantee setLoading(false)
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      await loadEvents();
-      setLoading(false);
+      try {
+        await loadEvents();
+      } catch (err) {
+        console.error('[CalendarScreen] Init error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     if (userId) init();
   }, [userId, loadEvents]);
 
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[CalendarScreen] Force refresh event received - resetting all states');
+      setLoading(false);
+      setRefreshing(false);
+      loadEvents();
+    });
+    return () => listener.remove();
+  }, [loadEvents]);
+
   // Refresh
+  // Issue 2 Fix: Wrap in try/finally to guarantee setRefreshing(false)
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadEvents();
-    setRefreshing(false);
+    try {
+      await loadEvents();
+    } catch (err) {
+      console.error('[CalendarScreen] Refresh error:', err);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // Refresh data when screen gains focus (e.g., after completing a ritual)

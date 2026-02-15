@@ -13,6 +13,7 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,6 +30,7 @@ import {
   Sparkles,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import walletService from '../../services/walletService';
 import gemEconomyService from '../../services/gemEconomyService';
@@ -51,10 +53,16 @@ const WalletScreen = ({ navigation }) => {
     loadData();
   }, []);
 
+  // Issue 2 Fix: Wrap in try/finally to guarantee setLoading(false)
   const loadData = async () => {
     setLoading(true);
-    await Promise.all([loadBalance(), loadTransactions()]);
-    setLoading(false);
+    try {
+      await Promise.all([loadBalance(), loadTransactions()]);
+    } catch (err) {
+      console.error('[WalletScreen] Load data error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadBalance = async () => {
@@ -83,6 +91,17 @@ const WalletScreen = ({ navigation }) => {
       setTransactions(data);
     }
   };
+
+  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[WalletScreen] Force refresh event received - resetting all states');
+      setLoading(false);
+      setRefreshing(false);
+      loadData();
+    });
+    return () => listener.remove();
+  }, [user?.id]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
