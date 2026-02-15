@@ -30,10 +30,9 @@ const corsHeaders = {
 
 // App identifiers
 const IOS_BUNDLE_ID = 'com.gemral.mobile';
-const IOS_TEAM_ID = 'XXXXXXXXXX'; // TODO: Replace with actual Apple Team ID from developer account
+const IOS_TEAM_ID = 'XLB789JKY6';
 const ANDROID_PACKAGE = 'com.gemral.mobile';
-// TODO: Replace with actual SHA-256 certificate fingerprint from `keytool -list -v -keystore your.keystore`
-const ANDROID_SHA256 = 'XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX';
+const ANDROID_SHA256 = 'DE:94:98:34:39:FC:59:F3:A0:52:74:BF:31:51:B7:64:79:2D:B5:D9:C8:9F:D0:1C:A2:C2:9E:E0:B5:02:17:9A';
 
 /**
  * Apple App Site Association file

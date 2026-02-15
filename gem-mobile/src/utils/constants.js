@@ -9,17 +9,20 @@ export const APP_VERSION = '1.0.0';
 export const SUPABASE_URL = 'https://pgfkbcnzqozzkohwbgbk.supabase.co';
 export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnZmtiY256cW96emtvaHdiZ2JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNzc1MzYsImV4cCI6MjA3Nzc1MzUzNn0.1De0-m3GhFHUrKl-ViqX_r6bydVFoWDaW8DsxhhbjEc';
 
-// Smart Link base URL — routes through Supabase og-meta edge function
-// so that shared URLs show OG previews + smart redirect (app → store fallback).
-// gemral.com is on Shopify which can't serve custom server-side logic.
-export const SMART_LINK_BASE = `${SUPABASE_URL}/functions/v1/og-meta`;
+// Smart Link base URL — Vercel rewrites gemral.com/s/* to Supabase og-meta edge function.
+// This gives clean share URLs with OG previews + smart redirect (app → store fallback).
+export const SMART_LINK_BASE = 'https://gemral.com/s';
 
 /**
- * Generate a smart share URL that goes through Supabase og-meta function.
+ * Generate a smart share URL routed through Vercel → Supabase og-meta function.
  * @param {string} path - Content path (e.g., '/courses/123', '/?ref=CODE')
  * @returns {string} Smart link URL with OG preview + smart redirect
  */
-export const generateSmartLink = (path) => `${SMART_LINK_BASE}?path=${encodeURIComponent(path)}`;
+export const generateSmartLink = (path) => {
+  // path already starts with / (e.g., '/courses/123')
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${SMART_LINK_BASE}${cleanPath}`;
+};
 
 // Screen Names
 export const SCREENS = {

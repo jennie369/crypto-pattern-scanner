@@ -5,6 +5,20 @@
   "installCommand": "npm install --legacy-peer-deps",
   "routes": [
     {
+      "src": "/.well-known/apple-app-site-association",
+      "dest": "https://pgfkbcnzqozzkohwbgbk.supabase.co/functions/v1/well-known?file=apple-app-site-association",
+      "headers": { "Content-Type": "application/json" }
+    },
+    {
+      "src": "/.well-known/assetlinks.json",
+      "dest": "https://pgfkbcnzqozzkohwbgbk.supabase.co/functions/v1/well-known?file=assetlinks.json",
+      "headers": { "Content-Type": "application/json" }
+    },
+    {
+      "src": "/s/(.*)",
+      "dest": "https://pgfkbcnzqozzkohwbgbk.supabase.co/functions/v1/og-meta?path=/$1"
+    },
+    {
       "src": "/assets/(.*)",
       "dest": "/assets/$1"
     },

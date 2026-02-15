@@ -125,6 +125,26 @@
               "pathPrefix": "/products/"
             },
             {
+              "scheme": "https",
+              "host": "gemral.com",
+              "pathPrefix": "/s/"
+            },
+            {
+              "scheme": "https",
+              "host": "www.gemral.com",
+              "pathPrefix": "/s/"
+            },
+            {
+              "scheme": "https",
+              "host": "gemral.com",
+              "pathPrefix": "/p/"
+            },
+            {
+              "scheme": "https",
+              "host": "www.gemral.com",
+              "pathPrefix": "/p/"
+            },
+            {
               "scheme": "gem"
             }
           ],
