@@ -801,15 +801,20 @@ const ForumScreen = ({ navigation }) => {
         return;
       }
 
-      // On timeout: keep existing posts visible, allow retry after cooldown
+      // On timeout: keep existing posts visible if we have cached data
       if (isTimeout) {
-        console.log('[ForumScreen] Timeout - keeping cached data, retry after cooldown');
-        lastTimeoutRef.current = Date.now(); // Set cooldown to prevent rapid retry loop
-        setHasMore(true); // Allow retry (after cooldown)
-        setLoadingMore(false);
-        setLoading(false);
-        loadMoreStartTimeRef.current = null;
-        return;
+        // If we already have posts cached, keep them visible and allow retry
+        if (feedItems.length > 0) {
+          console.log('[ForumScreen] Timeout - keeping cached data, retry after cooldown');
+          lastTimeoutRef.current = Date.now();
+          setHasMore(true);
+          setLoadingMore(false);
+          setLoading(false);
+          loadMoreStartTimeRef.current = null;
+          return;
+        }
+        // First load with no cache: fall through to legacy fallback below
+        console.log('[ForumScreen] Timeout on first load with no cache - trying legacy fallback');
       }
 
       // Fallback to legacy loading with new return format

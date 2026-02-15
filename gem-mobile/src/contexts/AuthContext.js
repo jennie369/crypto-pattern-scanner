@@ -434,7 +434,22 @@ export const AuthProvider = ({ children }) => {
         if (user) {
           userRef.current = user;
           setUser(user);
-          const { data: profileData } = await getUserProfile(user.id);
+
+          // Fetch profile with error handling + retry
+          let profileData = null;
+          const { data: firstTry, error: firstError } = await getUserProfile(user.id);
+          if (firstError || !firstTry) {
+            console.warn('[AuthContext] loadSession: profile fetch failed, retrying in 1s...', firstError?.message);
+            await new Promise(r => setTimeout(r, 1000));
+            const { data: retryData, error: retryError } = await getUserProfile(user.id);
+            if (retryData) {
+              profileData = retryData;
+            } else {
+              console.error('[AuthContext] loadSession: profile retry also failed:', retryError?.message);
+            }
+          } else {
+            profileData = firstTry;
+          }
           setProfile(profileData);
 
           // ⚡ DEBUG: Log admin fields
@@ -444,6 +459,7 @@ export const AuthProvider = ({ children }) => {
             is_admin: profileData?.is_admin,
             scanner_tier: profileData?.scanner_tier,
             chatbot_tier: profileData?.chatbot_tier,
+            loaded: !!profileData,
           });
 
           // Initialize presence service for real-time messaging
@@ -528,7 +544,22 @@ export const AuthProvider = ({ children }) => {
         if (session?.user) {
           userRef.current = session.user;
           setUser(session.user);
-          const { data: profileData } = await getUserProfile(session.user.id);
+
+          // Fetch profile with error handling + retry
+          let profileData = null;
+          const { data: firstTry, error: firstError } = await getUserProfile(session.user.id);
+          if (firstError || !firstTry) {
+            console.warn('[AuthContext] onAuthStateChange: profile fetch failed, retrying in 1s...', firstError?.message);
+            await new Promise(r => setTimeout(r, 1000));
+            const { data: retryData, error: retryError } = await getUserProfile(session.user.id);
+            if (retryData) {
+              profileData = retryData;
+            } else {
+              console.error('[AuthContext] onAuthStateChange: profile retry also failed:', retryError?.message);
+            }
+          } else {
+            profileData = firstTry;
+          }
           setProfile(profileData);
 
           // ⚡ DEBUG: Log admin fields on auth change
@@ -538,6 +569,7 @@ export const AuthProvider = ({ children }) => {
             is_admin: profileData?.is_admin,
             scanner_tier: profileData?.scanner_tier,
             chatbot_tier: profileData?.chatbot_tier,
+            loaded: !!profileData,
           });
 
           // Initialize presence service for real-time messaging

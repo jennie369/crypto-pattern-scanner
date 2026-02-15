@@ -270,27 +270,23 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
 
     // ============================================
     // FAST MODE v2: Parallel queries for speed + features
-    // 1. Get recent posts (minimal joins)
-    // 2. Get user's following list (for personalization)
-    // 3. Get user's likes/saves for these posts
+    // 1. Get recent posts (minimal joins) — CRITICAL
+    // 2. Get user preferences for tier check — OPTIONAL
+    // NOTE: `follows` table does not exist yet, so personalization
+    //       is skipped. When follows is added, re-enable Query 2.
     // ============================================
 
     // Run queries in parallel — use allSettled so a slow/failed query
     // doesn't block the entire feed (posts are critical, others are optional)
-    const [postsSettled, followingSettled, userPrefsSettled] = await Promise.allSettled([
+    const [postsSettled, userPrefsSettled] = await Promise.allSettled([
       // Query 1: Recent posts with minimal joins (CRITICAL)
       supabase
         .from('forum_posts')
         .select(POST_SELECT_FAST)
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-        .limit(limit + 10), // Get extra for personalization sorting
-      // Query 2: User's following list (OPTIONAL — degrades to no personalization)
-      supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', userId),
-      // Query 3: User preferences for tier check (OPTIONAL — degrades to FREE tier ads)
+        .limit(limit + 10), // Get extra for sorting
+      // Query 2: User preferences for tier check (OPTIONAL — degrades to FREE tier ads)
       supabase
         .from('profiles')
         .select('scanner_tier, chatbot_tier')
@@ -300,7 +296,6 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
 
     // Extract results — only posts query is critical
     const postsResult = postsSettled.status === 'fulfilled' ? postsSettled.value : { data: null, error: postsSettled.reason };
-    const followingResult = followingSettled.status === 'fulfilled' ? followingSettled.value : { data: null, error: followingSettled.reason };
     const userPrefsResult = userPrefsSettled.status === 'fulfilled' ? userPrefsSettled.value : { data: null, error: userPrefsSettled.reason };
 
     if (postsResult.error) {
@@ -308,12 +303,8 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
       throw postsResult.error;
     }
 
-    if (followingResult.error) {
-      console.warn('[FeedService] Following query failed (feed will skip personalization):', followingResult.error?.message);
-    }
-
     const recentPosts = postsResult.data || [];
-    const followingIds = new Set((followingResult.data || []).map(f => f.following_id));
+    const followingIds = new Set(); // Empty until follows table is created
     const userTier = userPrefsResult.data?.scanner_tier || userPrefsResult.data?.chatbot_tier || 'FREE';
 
     console.log(`[FeedService] ⚡ Loaded ${recentPosts.length} posts, following ${followingIds.size} users, tier: ${userTier}`);
