@@ -350,17 +350,26 @@ const kolVerificationService = {
    */
   async getVerificationStatus(userId) {
     try {
-      // First try kol_verification table
-      const { data: verification, error: verError } = await supabase
-        .from('kol_verification')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // First try kol_verification table (may not exist)
+      let verification = null;
+      try {
+        const { data: verData, error: verError } = await supabase
+          .from('kol_verification')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!verError || verError.code === 'PGRST205') {
+          verification = verData || null;
+        }
+      } catch (_) {
+        // kol_verification table may not exist — non-critical
+      }
 
       // Then get application status
-      const { data: application, error: appError } = await supabase
+      const { data: application } = await supabase
         .from('partnership_applications')
         .select('id, status, rejection_reason, reviewed_at')
         .eq('user_id', userId)
@@ -409,15 +418,19 @@ const kolVerificationService = {
 
       if (appError) throw appError;
 
-      // Update verification status
-      await supabase
-        .from('kol_verification')
-        .update({
-          verification_status: 'verified',
-          verified_by: adminId,
-          verified_at: new Date().toISOString(),
-        })
-        .eq('application_id', applicationId);
+      // Update verification status (table may not exist yet)
+      try {
+        await supabase
+          .from('kol_verification')
+          .update({
+            verification_status: 'verified',
+            verified_by: adminId,
+            verified_at: new Date().toISOString(),
+          })
+          .eq('application_id', applicationId);
+      } catch (_) {
+        // kol_verification table may not exist — non-critical
+      }
 
       // Find referrer if exists
       let referrerId = null;
@@ -504,14 +517,18 @@ const kolVerificationService = {
 
       if (error) throw error;
 
-      // Update verification status
-      await supabase
-        .from('kol_verification')
-        .update({
-          verification_status: 'rejected',
-          rejection_reason: reason,
-        })
-        .eq('application_id', applicationId);
+      // Update verification status (table may not exist yet)
+      try {
+        await supabase
+          .from('kol_verification')
+          .update({
+            verification_status: 'rejected',
+            rejection_reason: reason,
+          })
+          .eq('application_id', applicationId);
+      } catch (_) {
+        // kol_verification table may not exist — non-critical
+      }
 
       // Create notification
       await supabase.from('partner_notifications').insert({

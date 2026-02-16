@@ -416,88 +416,89 @@ const AdminApplicationDetail = () => {
             </View>
           )}
 
-          {/* KOL Verification Section */}
+          {/* KOL ID Verification Section (only when verification data exists) */}
           {isKOL && verification && (
-            <>
-              {/* ID Verification */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Xác minh danh tính</Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Xác minh danh tính</Text>
 
-                <View style={styles.infoRow}>
-                  <CreditCard size={18} color={COLORS.textMuted} />
-                  <Text style={styles.infoLabel}>Số CCCD:</Text>
-                  <Text style={styles.infoValue}>{verification.id_number}</Text>
+              <View style={styles.infoRow}>
+                <CreditCard size={18} color={COLORS.textMuted} />
+                <Text style={styles.infoLabel}>Số CCCD:</Text>
+                <Text style={styles.infoValue}>{verification.id_number}</Text>
+              </View>
+
+              <Text style={styles.imageLabel}>Ảnh CCCD mặt trước:</Text>
+              {verification.id_front_image_url ? (
+                <TouchableOpacity onPress={() => Linking.openURL(verification.id_front_image_url)}>
+                  <Image source={{ uri: verification.id_front_image_url }} style={styles.verificationImage} />
+                  <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.noImagePlaceholder}>
+                  <Text style={styles.noImageText}>Chưa có ảnh</Text>
                 </View>
+              )}
 
-                <Text style={styles.imageLabel}>Ảnh CCCD mặt trước:</Text>
-                {verification.id_front_image_url ? (
-                  <TouchableOpacity onPress={() => Linking.openURL(verification.id_front_image_url)}>
-                    <Image source={{ uri: verification.id_front_image_url }} style={styles.verificationImage} />
-                    <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <View style={styles.noImagePlaceholder}>
-                    <Text style={styles.noImageText}>Chưa có ảnh</Text>
-                  </View>
-                )}
+              <Text style={styles.imageLabel}>Ảnh CCCD mặt sau:</Text>
+              {verification.id_back_image_url ? (
+                <TouchableOpacity onPress={() => Linking.openURL(verification.id_back_image_url)}>
+                  <Image source={{ uri: verification.id_back_image_url }} style={styles.verificationImage} />
+                  <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.noImagePlaceholder}>
+                  <Text style={styles.noImageText}>Chưa có ảnh</Text>
+                </View>
+              )}
 
-                <Text style={styles.imageLabel}>Ảnh CCCD mặt sau:</Text>
-                {verification.id_back_image_url ? (
-                  <TouchableOpacity onPress={() => Linking.openURL(verification.id_back_image_url)}>
-                    <Image source={{ uri: verification.id_back_image_url }} style={styles.verificationImage} />
-                    <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <View style={styles.noImagePlaceholder}>
-                    <Text style={styles.noImageText}>Chưa có ảnh</Text>
-                  </View>
-                )}
+              <Text style={styles.imageLabel}>Ảnh chân dung:</Text>
+              {verification.portrait_image_url ? (
+                <TouchableOpacity onPress={() => Linking.openURL(verification.portrait_image_url)}>
+                  <Image source={{ uri: verification.portrait_image_url }} style={styles.portraitImage} />
+                  <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.noImagePlaceholder}>
+                  <Text style={styles.noImageText}>Chưa có ảnh</Text>
+                </View>
+              )}
+            </View>
+          )}
 
-                <Text style={styles.imageLabel}>Ảnh chân dung:</Text>
-                {verification.portrait_image_url ? (
-                  <TouchableOpacity onPress={() => Linking.openURL(verification.portrait_image_url)}>
-                    <Image source={{ uri: verification.portrait_image_url }} style={styles.portraitImage} />
-                    <Text style={styles.tapToViewText}>Nhấn để xem ảnh gốc</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <View style={styles.noImagePlaceholder}>
-                    <Text style={styles.noImageText}>Chưa có ảnh</Text>
-                  </View>
-                )}
-              </View>
+          {/* KOL Social Media Section (always shown for KOL — uses application data as fallback) */}
+          {isKOL && (application.social_platforms || application.social_proof_urls) && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                Mạng xã hội ({(application.total_followers || 0).toLocaleString()} followers)
+              </Text>
 
-              {/* Social Media */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>
-                  Mạng xã hội ({(application.total_followers || 0).toLocaleString()} followers)
-                </Text>
+              {Object.entries(application.social_platforms || {}).map(([platform, count]) => {
+                const Icon = PLATFORM_ICONS[platform] || Users;
+                // Prefer verification URL, fall back to social_proof_urls array
+                const url = verification?.[`${platform}_url`]
+                  || (application.social_proof_urls || []).find(u => u && u.toLowerCase().includes(platform));
 
-                {Object.entries(application.social_platforms || {}).map(([platform, count]) => {
-                  const Icon = PLATFORM_ICONS[platform] || Users;
-                  const url = verification[`${platform}_url`];
+                if (!count && !url) return null;
 
-                  if (!count && !url) return null;
-
-                  return (
-                    <View key={platform} style={styles.socialRow}>
-                      <Icon size={20} color={COLORS.gold} />
-                      <View style={styles.socialInfo}>
-                        <Text style={styles.socialName}>{platform.charAt(0).toUpperCase() + platform.slice(1)}</Text>
-                        <Text style={styles.socialCount}>{parseInt(count || 0).toLocaleString()} followers</Text>
-                      </View>
-                      {url && (
-                        <TouchableOpacity
-                          style={styles.socialLink}
-                          onPress={() => Linking.openURL(url)}
-                        >
-                          <ExternalLink size={18} color={COLORS.info} />
-                        </TouchableOpacity>
-                      )}
+                return (
+                  <View key={platform} style={styles.socialRow}>
+                    <Icon size={20} color={COLORS.gold} />
+                    <View style={styles.socialInfo}>
+                      <Text style={styles.socialName}>{platform.charAt(0).toUpperCase() + platform.slice(1)}</Text>
+                      <Text style={styles.socialCount}>{parseInt(count || 0).toLocaleString()} followers</Text>
                     </View>
-                  );
-                })}
-              </View>
-            </>
+                    {url && (
+                      <TouchableOpacity
+                        style={styles.socialLink}
+                        onPress={() => Linking.openURL(url)}
+                      >
+                        <ExternalLink size={18} color={COLORS.info} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
           )}
 
           {/* Rejection reason (if rejected) */}

@@ -283,8 +283,9 @@ const ADMIN_PARTNERSHIP_SERVICE = {
         .eq('application_id', applicationId)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      // PGRST116 = no rows, PGRST205 = table not found
+      if (error && error.code !== 'PGRST116' && error.code !== 'PGRST205') throw error;
+      return data || null;
     } catch (err) {
       console.error('[AdminPartnershipService] getKOLVerification error:', err);
       return null;
@@ -377,15 +378,19 @@ const ADMIN_PARTNERSHIP_SERVICE = {
         })
         .eq('id', applicationId);
 
-      // If KOL, update verification status
+      // If KOL, update verification status (table may not exist yet)
       if (app.application_type === 'kol') {
-        await supabase
-          .from('kol_verification')
-          .update({
-            verification_status: 'rejected',
-            rejection_reason: reason,
-          })
-          .eq('application_id', applicationId);
+        try {
+          await supabase
+            .from('kol_verification')
+            .update({
+              verification_status: 'rejected',
+              rejection_reason: reason,
+            })
+            .eq('application_id', applicationId);
+        } catch (_) {
+          // kol_verification table may not exist — non-critical
+        }
       }
 
       // Send notification to user

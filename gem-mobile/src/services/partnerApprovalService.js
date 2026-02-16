@@ -152,15 +152,19 @@ const PARTNER_APPROVAL_SERVICE = {
         })
         .eq('id', applicationId);
 
-      // 3. Update KOL verification
-      await supabase
-        .from('kol_verification')
-        .update({
-          verification_status: 'verified',
-          verified_by: adminId,
-          verified_at: new Date().toISOString(),
-        })
-        .eq('application_id', applicationId);
+      // 3. Update KOL verification (table may not exist yet)
+      try {
+        await supabase
+          .from('kol_verification')
+          .update({
+            verification_status: 'verified',
+            verified_by: adminId,
+            verified_at: new Date().toISOString(),
+          })
+          .eq('application_id', applicationId);
+      } catch (_) {
+        // kol_verification table may not exist — non-critical
+      }
 
       // 4. Check if already CTV
       const { data: existingProfile } = await supabase
