@@ -1942,3 +1942,46 @@ if (!userRef.current) {
 - `withAuthTimeout` or `Promise.race` around auth calls in `loadSession`
 - Catch block that clears state without checking if another handler already set it
 - "First launch fails, second launch works" pattern (cold start vs warm cache)
+
+---
+
+# RULE 36: Single Notification Source Per Event
+**Source:** Phase 10 — Liquidation push notifications duplicated 3-4x
+
+## What Failed
+A single liquidation (or SL/TP hit) event produced up to **4 push notifications**:
+1. `paperTradeService.updatePrices()` → `paperTradeNotificationService.notifyLiquidation()` → LOCAL + REMOTE push
+2. `OpenPositionsScreen` → `notificationService.sendStopLossHitNotification()` → another LOCAL push
+3. Server cron → `send-paper-trade-push` edge function → another REMOTE push
+
+Two separate notification services (`paperTradeNotificationService` and `notificationService`) and two separate detection systems (client monitoring + server cron) all fired independently for the same event.
+
+## What Guard Was Added
+- **Single source**: Only `paperTradeNotificationService` sends trade notifications (removed calls from `OpenPositionsScreen`)
+- **Client LOCAL only**: Client sends local push only; remote push is handled solely by server cron
+- **Position-ID dedup**: `sendNotification()` uses an in-memory Set keyed by `positionId_type` with 60s TTL
+- **Service-level dedup**: `paperTradeService._notifiedPositionIds` Set prevents duplicate calls per position
+- **Atomic DB close**: Server cron uses `.eq('status', 'OPEN')` — returns 0 rows if already closed
+
+## Code smell indicators
+- Two different notification services handling the same event type
+- Screen component sending push notifications (should only show UI alerts)
+- Client + server both sending remote push for the same event
+- DB update without checking current status (non-atomic close)
+
+---
+
+# RULE 37: Client vs Server Notification Responsibility
+**Source:** Phase 10 — Notifications only appear when app opens
+
+## What Failed
+Client-side monitoring (`paperTradeService.startGlobalMonitoring()`) is ACTIVE-ONLY — pauses when `!this.isAppActive`. Server cron runs every 60s but client also sent remote push, causing duplicates when both ran.
+
+## Architecture After Fix
+```
+CLIENT (app active):     LOCAL push only → immediate banner
+SERVER CRON (always):    REMOTE push only → FCM/APNs delivery
+```
+- Client handles foreground/in-app notifications (local `scheduleNotificationAsync`)
+- Server cron handles background/closed-app notifications (remote push via edge function)
+- Neither sends both types → zero duplication

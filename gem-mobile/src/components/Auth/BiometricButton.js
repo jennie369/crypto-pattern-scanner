@@ -25,6 +25,13 @@ import biometricService from '../../services/biometricService';
  * @param {Function} signInWithToken - Function để đăng nhập với refresh token
  * @param {boolean} disabled - Disable button
  */
+const maskEmail = (email) => {
+  if (!email || !email.includes('@')) return email;
+  const [local, domain] = email.split('@');
+  if (local.length <= 2) return `${local[0]}***@${domain}`;
+  return `${local.slice(0, 2)}${'*'.repeat(Math.min(local.length - 2, 4))}@${domain}`;
+};
+
 const BiometricButton = ({
   onSuccess,
   onError,
@@ -38,6 +45,7 @@ const BiometricButton = ({
     enabled: false,
     typeName: 'Sinh trắc học',
   });
+  const [storedEmail, setStoredEmail] = useState(null);
   const [error, setError] = useState(null);
   const [scaleAnim] = useState(new Animated.Value(1));
 
@@ -69,6 +77,19 @@ const BiometricButton = ({
         enabled,
         typeName: typeName || support.typeName,
       });
+
+      // Fetch stored email to show account identity on biometric button
+      if (enabled) {
+        try {
+          const credentials = await biometricService.getStoredCredentials();
+          setStoredEmail(credentials?.email || null);
+        } catch (credErr) {
+          console.warn('[BiometricButton] Could not read stored email:', credErr.message);
+          setStoredEmail(null);
+        }
+      } else {
+        setStoredEmail(null);
+      }
     } catch (err) {
       console.error('[BiometricButton] checkStatus error:', err);
     }
@@ -161,11 +182,16 @@ const BiometricButton = ({
             <IconComponent size={24} color={COLORS.gold} />
           )}
 
-          <Text style={styles.buttonText}>
-            {loading
-              ? 'Đang xác thực...'
-              : `Đăng nhập bằng ${biometricInfo.typeName}`}
-          </Text>
+          <View style={styles.buttonTextContainer}>
+            <Text style={styles.buttonText}>
+              {loading
+                ? 'Đang xác thực...'
+                : `Đăng nhập bằng ${biometricInfo.typeName}`}
+            </Text>
+            {!loading && storedEmail && (
+              <Text style={styles.emailText}>{maskEmail(storedEmail)}</Text>
+            )}
+          </View>
         </TouchableOpacity>
       </Animated.View>
 
@@ -215,10 +241,18 @@ const styles = StyleSheet.create({
   buttonError: {
     borderColor: 'rgba(255, 107, 107, 0.3)',
   },
+  buttonTextContainer: {
+    alignItems: 'center',
+  },
   buttonText: {
     fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.gold,
+  },
+  emailText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginTop: 2,
   },
   errorContainer: {
     flexDirection: 'row',

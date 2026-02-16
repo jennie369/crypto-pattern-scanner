@@ -76,6 +76,8 @@ class PaperTradeService {
     this.isChecking = false;
     this.appStateSubscription = null;
     this.isAppActive = true;
+    // Phase 10 Fix A: Track notified position IDs to prevent duplicate notifications
+    this._notifiedPositionIds = new Set();
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -147,6 +149,7 @@ class PaperTradeService {
     }
     this.isMonitoring = false;
     this.isChecking = false;
+    this._notifiedPositionIds.clear();
     console.log('[PaperTrade] Global monitoring stopped');
   }
 
@@ -1419,13 +1422,16 @@ class PaperTradeService {
         closedPositions.push(closed);
 
         // ═══════════════════════════════════════════════════════════
-        // PUSH NOTIFICATION - Stop Loss Hit
+        // PUSH NOTIFICATION - Stop Loss Hit (Phase 10 Fix A: dedup)
         // ═══════════════════════════════════════════════════════════
-        try {
-          const roe = ((closed.realizedPnL || 0) / (position.positionSize || 1)) * 100;
-          await notifySLHit(position, closed.realizedPnL || 0, roe, position.userId);
-        } catch (notifyError) {
-          console.log('[PaperTrade] Notification error (SL hit):', notifyError.message);
+        if (!this._notifiedPositionIds.has(position.id)) {
+          this._notifiedPositionIds.add(position.id);
+          try {
+            const roe = ((closed.realizedPnL || 0) / (position.positionSize || 1)) * 100;
+            await notifySLHit(position, closed.realizedPnL || 0, roe, position.userId);
+          } catch (notifyError) {
+            console.log('[PaperTrade] Notification error (SL hit):', notifyError.message);
+          }
         }
         continue;
       }
@@ -1444,13 +1450,16 @@ class PaperTradeService {
         closedPositions.push(closed);
 
         // ═══════════════════════════════════════════════════════════
-        // PUSH NOTIFICATION - Take Profit Hit
+        // PUSH NOTIFICATION - Take Profit Hit (Phase 10 Fix A: dedup)
         // ═══════════════════════════════════════════════════════════
-        try {
-          const roe = ((closed.realizedPnL || 0) / (position.positionSize || 1)) * 100;
-          await notifyTPHit(position, closed.realizedPnL || 0, roe, position.userId);
-        } catch (notifyError) {
-          console.log('[PaperTrade] Notification error (TP hit):', notifyError.message);
+        if (!this._notifiedPositionIds.has(position.id)) {
+          this._notifiedPositionIds.add(position.id);
+          try {
+            const roe = ((closed.realizedPnL || 0) / (position.positionSize || 1)) * 100;
+            await notifyTPHit(position, closed.realizedPnL || 0, roe, position.userId);
+          } catch (notifyError) {
+            console.log('[PaperTrade] Notification error (TP hit):', notifyError.message);
+          }
         }
         continue;
       }
@@ -1483,12 +1492,15 @@ class PaperTradeService {
         closedPositions.push(closed);
 
         // ═══════════════════════════════════════════════════════════
-        // PUSH NOTIFICATION - Liquidation
+        // PUSH NOTIFICATION - Liquidation (Phase 10 Fix A: dedup)
         // ═══════════════════════════════════════════════════════════
-        try {
-          await notifyLiquidation(position, liquidationPrice, closed.realizedPnL || 0, position.userId);
-        } catch (notifyError) {
-          console.log('[PaperTrade] Notification error (liquidation):', notifyError.message);
+        if (!this._notifiedPositionIds.has(position.id)) {
+          this._notifiedPositionIds.add(position.id);
+          try {
+            await notifyLiquidation(position, liquidationPrice, closed.realizedPnL || 0, position.userId);
+          } catch (notifyError) {
+            console.log('[PaperTrade] Notification error (liquidation):', notifyError.message);
+          }
         }
         continue;
       }

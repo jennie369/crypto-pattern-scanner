@@ -306,14 +306,30 @@ const shouldSendNotification = async (userId, type) => {
   }
 };
 
+// Phase 10 Fix C: Position-ID dedup — prevents duplicate notifications for same position/order
+const _notifiedKeys = new Set();
+const DEDUP_TTL_MS = 60000; // Auto-clear dedup keys after 60s
+
 /**
- * Send local notification
+ * Send local notification (client-side only — remote push handled by server cron)
  * @param {string} type - Notification type
  * @param {Object} data - Notification data
  * @param {string} userId - User ID (optional)
  */
 export const sendNotification = async (type, data, userId = null) => {
   try {
+    // Phase 10 Fix C: Dedup by positionId/orderId + type
+    const entityId = data.positionId || data.orderId || null;
+    if (entityId) {
+      const dedupKey = `${entityId}_${type}`;
+      if (_notifiedKeys.has(dedupKey)) {
+        console.log('[notificationService] Dedup: skipping duplicate', dedupKey);
+        return { sent: false, reason: 'duplicate' };
+      }
+      _notifiedKeys.add(dedupKey);
+      setTimeout(() => _notifiedKeys.delete(dedupKey), DEDUP_TTL_MS);
+    }
+
     // Check if should send
     if (!(await shouldSendNotification(userId, type))) {
       console.log('[notificationService] Notification suppressed:', type);
@@ -341,19 +357,12 @@ export const sendNotification = async (type, data, userId = null) => {
       badge: 1,
     };
 
-    // Send local notification (for foreground)
+    // Send local notification only — remote push is handled by server cron
+    // (Phase 10 Fix E: removed client-side sendRemotePush to prevent duplicate remote notifications)
     const notificationId = await Notifications.scheduleNotificationAsync({
       content,
       trigger: null, // Immediate
     });
-
-    // Also send remote push (for background/closed app)
-    // This runs in parallel, don't await to avoid blocking
-    if (userId) {
-      sendRemotePush(userId, type, title, body, data).catch((err) => {
-        console.warn('[notificationService] Remote push failed:', err);
-      });
-    }
 
     console.log('[notificationService] Sent notification:', type, notificationId);
     return { sent: true, notificationId };

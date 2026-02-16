@@ -118,6 +118,7 @@ User clicks "Paper Trade" on pattern
 | 7.75 | — | Pending orders disappearing fix (paper_pending_orders as single source of truth) | `docs/feature-phase7.75-resume-pending-fix.md` |
 | 7.8 | `5966896` | App resume deadlock definitive fix: 27 files, 3 root causes, AbortController on 17 Binance fetches, FORCE_REFRESH on 15 screens | `docs/feature-phase7.8-resume-deadlock-fix.md` |
 | 9 | — | Startup freeze fix: broken watchdog, edge function timeout, resume sequence timeout, defensive cleanup (6 files, 4 root causes) | `docs/feature-phase9-startup-freeze-fix.md` |
+| 10 | — | Biometric identity display + push notification dedup (5 files, 5 root causes) | `docs/feature-phase10-biometric-push-fix.md` |
 
 ## Documentation
 
@@ -127,7 +128,8 @@ User clicks "Paper Trade" on pattern
 | `docs/feature-phase7-fixes.md` | Phase 7 architectural decisions and fix details |
 | `docs/feature-phase7.8-resume-deadlock-fix.md` | Phase 7.8 resume deadlock fix (27 files, 3 root causes) |
 | `docs/feature-phase9-startup-freeze-fix.md` | Phase 9 startup freeze fix (6 files, 4 root causes) |
-| `docs/Troubleshooting_Tips.md` | 34 generalized engineering rules from Phase 1-9 bugs |
+| `docs/feature-phase10-biometric-push-fix.md` | Phase 10 biometric identity + push dedup (5 files, 5 root causes) |
+| `docs/Troubleshooting_Tips.md` | 37 generalized engineering rules from Phase 1-10 bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
 
 ## Important Conventions

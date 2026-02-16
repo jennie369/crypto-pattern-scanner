@@ -116,8 +116,8 @@ async function closePosition(
     const pnl = priceDiff * position.quantity;
     const roe = (pnl / position.margin) * 100;
 
-    // Update position to closed in paper_trades table
-    const { error: updateError } = await supabase
+    // Phase 10 Fix D: Atomic close — only close if still OPEN (prevents duplicate close + notification)
+    const { data: updated, error: updateError } = await supabase
       .from('paper_trades')
       .update({
         status: 'CLOSED',
@@ -129,10 +129,18 @@ async function closePosition(
         closed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', position.id);
+      .eq('id', position.id)
+      .eq('status', 'OPEN')
+      .select('id');
 
     if (updateError) {
       console.error('[Monitor] Close position error:', updateError);
+      return { success: false, pnl: 0 };
+    }
+
+    // If no rows updated, position was already closed (by client or previous cron run)
+    if (!updated || updated.length === 0) {
+      console.log(`[Monitor] Position already closed (skipping): ${position.symbol}`);
       return { success: false, pnl: 0 };
     }
 

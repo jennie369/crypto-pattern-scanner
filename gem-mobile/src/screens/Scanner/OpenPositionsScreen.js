@@ -45,7 +45,8 @@ import paperTradeService from '../../services/paperTradeService';
 import { supabase } from '../../services/supabase';
 import { getPendingOrders as fetchPendingOrders, cancelPendingOrder, checkAndTriggerOrders as checkPendingOrderTriggers } from '../../services/pendingOrderService';
 import { binanceService } from '../../services/binanceService';
-import notificationService from '../../services/notificationService';
+// notificationService import removed — push notifications are now sent solely by
+// paperTradeService → paperTradeNotificationService (single notification source)
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { formatPrice, formatCurrency } from '../../utils/formatters';
@@ -213,7 +214,7 @@ export default function OpenPositionsScreen() {
               [{ text: 'OK' }],
               'success'
             );
-            await notificationService.sendLimitOrderFilledNotification(filled, user?.id);
+            // Push notification already sent by paperTradeService.checkPendingOrders() → notifyOrderFilled()
           }
         }
       }
@@ -221,7 +222,8 @@ export default function OpenPositionsScreen() {
       // Update positions with new prices (includes SL/TP checks)
       const result = await paperTradeService.updatePrices(prices);
 
-      // Show alerts and notifications for closed positions (SL/TP hit)
+      // Show UI alerts for closed positions (SL/TP hit)
+      // Push notifications already sent by paperTradeService.updatePrices() → notifySLHit/notifyTPHit/notifyLiquidation
       if (result.closed.length > 0) {
         for (const closed of result.closed) {
           showAlert(
@@ -231,11 +233,6 @@ export default function OpenPositionsScreen() {
             [{ text: 'OK' }],
             closed.result === 'WIN' ? 'success' : 'error'
           );
-          if (closed.result === 'WIN') {
-            await notificationService.sendTakeProfitHitNotification(closed, user?.id);
-          } else {
-            await notificationService.sendStopLossHitNotification(closed, user?.id);
-          }
         }
       }
 
@@ -454,14 +451,15 @@ export default function OpenPositionsScreen() {
             [{ text: 'OK' }],
             'success'
           );
-          await notificationService.sendLimitOrderFilledNotification(filled, user?.id);
+          // Push notification already sent by paperTradeService.checkPendingOrders() → notifyOrderFilled()
         }
       }
 
       // Update positions with new prices (includes SL/TP checks)
       const result = await paperTradeService.updatePrices(prices);
 
-      // Show alerts and notifications for closed positions (SL/TP hit)
+      // Show UI alerts for closed positions (SL/TP hit)
+      // Push notifications already sent by paperTradeService.updatePrices() → notifySLHit/notifyTPHit/notifyLiquidation
       if (result.closed.length > 0) {
         for (const closed of result.closed) {
           showAlert(
@@ -471,11 +469,6 @@ export default function OpenPositionsScreen() {
             [{ text: 'OK' }],
             closed.result === 'WIN' ? 'success' : 'error'
           );
-          if (closed.result === 'WIN') {
-            await notificationService.sendTakeProfitHitNotification(closed, user?.id);
-          } else {
-            await notificationService.sendStopLossHitNotification(closed, user?.id);
-          }
         }
       }
 
