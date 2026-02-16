@@ -152,6 +152,11 @@ export default function AppNavigator() {
   const [welcomeChecked, setWelcomeChecked] = useState(false);
   const appStateRef = useRef(AppState.currentState);
 
+  // Phase 9 Fix: Force-ready safety net for startup deadlock
+  // Previous watchdog was broken (setInitialized didn't exist in this scope).
+  // This bypasses ALL three gate conditions after 15s to prevent permanent black screen.
+  const [forceReady, setForceReady] = useState(false);
+
   // C14 + Issue 2 Fix: Unified resume system (AppResumeManager)
   // - SOLE AppState listener for all resume operations (AuthContext listener removed)
   // - Deterministic sequence: session → profile → cache → WS → health → force refresh
@@ -238,17 +243,25 @@ export default function AppNavigator() {
     },
   }), []);
 
-  // Global startup timeout - prevents permanent black screen if auth + welcome both stall
+  // Phase 9 Fix: Global startup watchdog — prevents permanent black screen
+  // Previous code called setInitialized(true) which doesn't exist in this scope
+  // (initialized comes from useAuth, not local state). Now uses forceReady to
+  // bypass ALL three gate conditions (!initialized || loading || !welcomeChecked).
   useEffect(() => {
+    // Don't start timer if already ready
+    if (initialized && !loading && welcomeChecked) return;
+
     const startupTimer = setTimeout(() => {
-      if (!initialized) {
-        console.warn('[AppNavigator] Startup timeout - forcing initialization');
-        setInitialized(true);
-        setWelcomeChecked(true);
+      if (!initialized || loading || !welcomeChecked) {
+        console.error('[AppNavigator] 🚨 STARTUP WATCHDOG: Force-ready after 15s', {
+          initialized, loading, welcomeChecked,
+        });
+        setForceReady(true);
+        if (!welcomeChecked) setWelcomeChecked(true);
       }
     }, 15000);
     return () => clearTimeout(startupTimer);
-  }, [initialized]);
+  }, [initialized, loading, welcomeChecked]);
 
   // Check welcome completion on mount
   useEffect(() => {
@@ -338,7 +351,8 @@ export default function AppNavigator() {
   }, []);
 
   // Show loading while initializing or checking welcome
-  if (!initialized || loading || !welcomeChecked) {
+  // Phase 9 Fix: forceReady bypasses all three conditions after 15s watchdog
+  if (!forceReady && (!initialized || loading || !welcomeChecked)) {
     return <LoadingScreen />;
   }
 

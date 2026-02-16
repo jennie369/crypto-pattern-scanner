@@ -114,6 +114,10 @@ User clicks "Paper Trade" on pattern
 | 5 | `49399e7` | 13 critical: black screen, boost analytics, referral codes, scanner crash | `PHASE_5_MASTER_PLAN.md` |
 | 6 | `075aa4c` | 5 fixes: scanner state wipe, PENDING orders, TP mismatch, PNL, API URL | `gem-mobile/PHASE_6_MASTER_PLAN.md` |
 | 7 | — | 5 fixes: admin tier on resume, AI typing dots, chatbot keyword collision, ritual nav, deep links | `PHASE_7_MASTER_PLAN.md` |
+| 7.5 | `e0633bd` | Auth profile fetch error handling + retry to prevent silent null cascade | `docs/feature-phase7.5-auth-profile-fix.md` |
+| 7.75 | — | Pending orders disappearing fix (paper_pending_orders as single source of truth) | `docs/feature-phase7.75-resume-pending-fix.md` |
+| 7.8 | `5966896` | App resume deadlock definitive fix: 27 files, 3 root causes, AbortController on 17 Binance fetches, FORCE_REFRESH on 15 screens | `docs/feature-phase7.8-resume-deadlock-fix.md` |
+| 9 | — | Startup freeze fix: broken watchdog, edge function timeout, resume sequence timeout, defensive cleanup (6 files, 4 root causes) | `docs/feature-phase9-startup-freeze-fix.md` |
 
 ## Documentation
 
@@ -121,7 +125,9 @@ User clicks "Paper Trade" on pattern
 |-----|-------------|
 | `docs/feature-scanner-papertrade-engine.md` | Phase 6 architectural decisions and trade-offs |
 | `docs/feature-phase7-fixes.md` | Phase 7 architectural decisions and fix details |
-| `docs/Troubleshooting_Tips.md` | 26 generalized engineering rules from Phase 1-7 bugs |
+| `docs/feature-phase7.8-resume-deadlock-fix.md` | Phase 7.8 resume deadlock fix (27 files, 3 root causes) |
+| `docs/feature-phase9-startup-freeze-fix.md` | Phase 9 startup freeze fix (6 files, 4 root causes) |
+| `docs/Troubleshooting_Tips.md` | 34 generalized engineering rules from Phase 1-9 bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
 
 ## Important Conventions

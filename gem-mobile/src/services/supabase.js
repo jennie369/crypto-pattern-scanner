@@ -51,12 +51,14 @@ const customStorage = {
   },
 };
 
-// Per-request timeout for database (PostgREST) queries.
-// Prevents individual HTTP requests from hanging indefinitely on stalled mobile connections.
-// Only applies to /rest/v1/ endpoints — auth, storage, realtime, edge functions are unaffected.
-const DB_QUERY_TIMEOUT = 8000; // 8 seconds
+// Per-request timeout for Supabase API calls.
+// Prevents HTTP requests from hanging indefinitely on stalled mobile connections.
+// Phase 9 Fix: Extended to cover edge functions (28 call sites were unprotected).
+const DB_QUERY_TIMEOUT = 8000;         // 8s for DB queries + auth calls
+const EDGE_FUNCTION_TIMEOUT = 30000;   // 30s for edge functions (AI/TTS can be slow)
+// Storage (/storage/v1/) has NO timeout — file uploads can be large
 
-// Create Supabase client with custom storage and fetch timeout
+// Create Supabase client with custom storage and tiered fetch timeout
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: customStorage,
@@ -66,16 +68,29 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   },
   global: {
     fetch: (url, options = {}) => {
-      // Add timeout for PostgREST API calls (database queries) and auth endpoints
-      // Skip for storage (/storage/v1/), edge functions (/functions/v1/)
-      const isDataQuery = typeof url === 'string' && (url.includes('/rest/v1/') || url.includes('/auth/v1/'));
+      // Skip if caller already set their own AbortController signal
+      if (options.signal) {
+        return fetch(url, options);
+      }
 
-      if (!isDataQuery || options.signal) {
+      // Determine timeout based on endpoint type
+      let timeout = 0;
+      if (typeof url === 'string') {
+        if (url.includes('/rest/v1/') || url.includes('/auth/v1/')) {
+          timeout = DB_QUERY_TIMEOUT;        // 8s for DB + auth
+        } else if (url.includes('/functions/v1/')) {
+          timeout = EDGE_FUNCTION_TIMEOUT;   // 30s for edge functions
+        }
+        // /storage/v1/ — no timeout (file uploads)
+        // /realtime/v1/ — no timeout (WebSocket upgrade)
+      }
+
+      if (!timeout) {
         return fetch(url, options);
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), DB_QUERY_TIMEOUT);
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
       return fetch(url, {
         ...options,
         signal: controller.signal,

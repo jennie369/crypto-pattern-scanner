@@ -208,15 +208,29 @@ class AppResumeManager {
     const isStale = timeInBackground > STALE_THRESHOLD;
 
     // Step 1: Session refresh — MUST complete before any data fetches
+    // Phase 9 Fix: Overall timeout for the entire resume sequence
+    // Individual Supabase calls have 8s timeout via global fetch wrapper,
+    // but we also guard the overall step to prevent cascade delays.
     console.log('[AppResumeManager] Step 1: Refreshing session...');
-    await this._refreshSession();
+    try {
+      await Promise.race([
+        this._refreshSession(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Resume session timeout')), 10000)),
+      ]);
+    } catch (err) {
+      console.warn('[AppResumeManager] Step 1 failed/timed out:', err?.message);
+    }
 
     // Step 2: Profile refresh — updates AuthContext state (user, profile, quota)
     // This replaces the removed AuthContext AppState listener
+    // Phase 9 Fix: Added 10s timeout to prevent profile refresh from blocking FORCE_REFRESH_EVENT
     if (isStale && this._profileRefreshFn) {
       console.log('[AppResumeManager] Step 2: Refreshing profile...');
       try {
-        const result = await this._profileRefreshFn();
+        const result = await Promise.race([
+          this._profileRefreshFn(),
+          new Promise((resolve) => setTimeout(() => resolve({ success: false, reason: 'timeout' }), 10000)),
+        ]);
         if (result?.success) {
           console.log('[AppResumeManager] Profile refresh completed');
         } else {

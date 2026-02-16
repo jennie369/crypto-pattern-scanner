@@ -4,7 +4,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { supabase, getCurrentUser, getUserProfile, signOut, localOnlySignOut } from '../services/supabase';
+import { supabase, getUserProfile, signOut, localOnlySignOut } from '../services/supabase';
 import presenceService from '../services/presenceService';
 import biometricService from '../services/biometricService';
 import notificationScheduler from '../services/notificationScheduler';
@@ -18,8 +18,8 @@ import { notificationService } from '../services/notificationService';
 import { errorService } from '../services/errorService';
 import { clearEventSession } from '../hooks/useEventTracking';
 
-// Auth startup timeout - prevents black screen if Supabase is unreachable
-const AUTH_TIMEOUT = 10000; // 10 seconds
+// Auth operation timeout - used for resume-triggered profile refresh (refreshProfile)
+// NOT used for startup (loadSession uses getSession() which reads from local storage)
 const withAuthTimeout = (promise, ms) => Promise.race([
   promise,
   new Promise((_, reject) => setTimeout(() => reject(new Error('Auth timeout')), ms))
@@ -254,7 +254,11 @@ export const AuthProvider = ({ children }) => {
       // Step 1: Re-validate Supabase auth session
       // getUser() calls the Supabase API server to verify the JWT is still valid
       // and refreshes the token if needed
-      const { data: { user: freshUser }, error: authError } = await supabase.auth.getUser();
+      // Note: supabase.auth.getUser() already has 8s timeout via global fetch wrapper,
+      // but we add an explicit 10s guard for defense-in-depth
+      const { data: { user: freshUser }, error: authError } = await withAuthTimeout(
+        supabase.auth.getUser(), 10000
+      );
 
       if (authError) {
         // Check for invalid refresh token
@@ -344,13 +348,14 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setProfile(null);
 
-    // Cleanup all services
-    presenceService.cleanup();
-    QuotaService.clearCache();
-    paperTradeService.stopGlobalMonitoring();
-    connectionHealthMonitor.stop();
-    websocketService.disconnect();
-    hybridChatService.cleanup();
+    // Cleanup all services — Phase 9 Fix: individual try/catch prevents
+    // one service crash from blocking all cleanup (and setLoading(false))
+    try { presenceService.cleanup(); } catch (e) { console.warn('[AuthContext] presenceService cleanup error:', e?.message); }
+    try { QuotaService.clearCache(); } catch (e) { console.warn('[AuthContext] QuotaService cleanup error:', e?.message); }
+    try { paperTradeService.stopGlobalMonitoring(); } catch (e) { console.warn('[AuthContext] paperTradeService cleanup error:', e?.message); }
+    try { connectionHealthMonitor.stop(); } catch (e) { console.warn('[AuthContext] connectionHealthMonitor cleanup error:', e?.message); }
+    try { websocketService.disconnect(); } catch (e) { console.warn('[AuthContext] websocketService cleanup error:', e?.message); }
+    try { hybridChatService.cleanup(); } catch (e) { console.warn('[AuthContext] hybridChatService cleanup error:', e?.message); }
 
     // Stop zone price monitor (lazy loaded to avoid circular deps)
     try {
@@ -381,29 +386,41 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {}
 
     // C3: Clear module-level user/session state to prevent cross-user bleed
-    errorService.clearUserId();
-    clearEventSession();
+    try { errorService.clearUserId(); } catch (e) {}
+    try { clearEventSession(); } catch (e) {}
   }, []);
 
   // Load initial session
   useEffect(() => {
     const loadSession = async () => {
+      console.time('[AUTH] Total startup');
       try {
-        const { user, error } = await withAuthTimeout(getCurrentUser(), AUTH_TIMEOUT);
+        // Phase 9b Fix: Use getSession() instead of getCurrentUser()
+        // getSession() reads from AsyncStorage (INSTANT, no network call).
+        // getCurrentUser() called supabase.auth.getUser() which makes an API call
+        // to /auth/v1/user — this hangs on cold Supabase / slow network, causing
+        // "Auth timeout" after 10s and cascade failure (user=null → profile=null → FREE tier).
+        // Token verification is handled by onAuthStateChange (INITIAL_SESSION event).
+        console.time('[AUTH] getSession');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.timeEnd('[AUTH] getSession');
 
         // Check for invalid refresh token error
-        if (error?.isInvalidRefreshToken || error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
+        if (sessionError?.isInvalidRefreshToken || sessionError?.message?.includes('Refresh Token') || sessionError?.message?.includes('refresh_token') || sessionError?.code === 'invalid_grant') {
           await handleInvalidRefreshToken(setUser, setProfile);
           setLoading(false);
           setInitialized(true);
           return;
         }
 
+        const user = session?.user ?? null;
+
         if (user) {
           userRef.current = user;
           setUser(user);
 
           // Fetch profile with error handling + retry
+          console.time('[AUTH] getUserProfile');
           let profileData = null;
           const { data: firstTry, error: firstError } = await getUserProfile(user.id);
           if (firstError || !firstTry) {
@@ -419,6 +436,7 @@ export const AuthProvider = ({ children }) => {
             profileData = firstTry;
           }
           setProfile(profileData);
+          console.timeEnd('[AUTH] getUserProfile');
 
           // ⚡ DEBUG: Log admin fields
           console.log('[AuthContext] Profile loaded:', {
@@ -465,19 +483,25 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Error loading session:', error);
-        // Handle auth timeout - fall through to login screen
-        if (error?.message === 'Auth timeout') {
-          console.warn('[AuthContext] Auth timeout - clearing session, showing login');
+        // Handle invalid refresh token in catch block
+        if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
+          await handleInvalidRefreshToken(setUser, setProfile);
+        }
+        // Phase 9b Fix: Do NOT blindly set user=null on error.
+        // onAuthStateChange (INITIAL_SESSION) may have already set user + profile.
+        // Only clear if we genuinely have no session (userRef is empty).
+        else if (!userRef.current) {
+          console.warn('[AuthContext] loadSession error and no user found — clearing state');
           setUser(null);
           setProfile(null);
-        }
-        // Handle invalid refresh token in catch block
-        else if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
-          await handleInvalidRefreshToken(setUser, setProfile);
+        } else {
+          console.warn('[AuthContext] loadSession error but user exists via onAuthStateChange — keeping state');
         }
       } finally {
         setLoading(false);
         setInitialized(true);
+        console.timeEnd('[AUTH] Total startup');
+        console.log('[AUTH] ✅ loadSession complete — initialized=true, loading=false');
       }
     };
 

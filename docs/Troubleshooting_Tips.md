@@ -1722,3 +1722,223 @@ test('every screen with loading state has FORCE_REFRESH_EVENT listener', () => {
   expect(missing).toEqual([]); // No screen with loading state missing recovery
 });
 ```
+
+---
+
+# RULE 32: Startup Watchdog Must Use Local State, Not Context Setters
+**Source:** Phase 9 — Broken watchdog called `setInitialized(true)` which didn't exist in scope
+
+## What Failed
+After Phase 7.8 fixed resume deadlocks, the app still froze on first launch. A 15-second startup watchdog existed in AppNavigator, but it was completely non-functional — it called `setInitialized(true)` which is defined inside AuthContext's `useState`, NOT exported to child components.
+
+## Why It Failed
+AppNavigator destructures `{ initialized }` from `useAuth()` (read-only). The setter `setInitialized` lives inside AuthProvider and is never exposed. When the watchdog timer fired:
+```javascript
+setTimeout(() => {
+  if (!initialized) {
+    setInitialized(true);  // ReferenceError: setInitialized is not defined
+    setWelcomeChecked(true);
+  }
+}, 15000);
+```
+`setInitialized(true)` threw a silent `ReferenceError` inside the setTimeout callback. The error was swallowed by the global error handler. `setWelcomeChecked(true)` was never reached. The watchdog was a complete no-op.
+
+## What Guard Was Added
+Replaced with `forceReady` local state that AppNavigator owns and can set:
+```javascript
+const [forceReady, setForceReady] = useState(false);
+
+// Watchdog: forceReady bypasses ALL three gate conditions
+useEffect(() => {
+  if (initialized && !loading && welcomeChecked) return;
+  const timer = setTimeout(() => {
+    if (!initialized || loading || !welcomeChecked) {
+      setForceReady(true);
+    }
+  }, 15000);
+  return () => clearTimeout(timer);
+}, [initialized, loading, welcomeChecked]);
+
+// Gate: forceReady overrides everything
+if (!forceReady && (!initialized || loading || !welcomeChecked)) {
+  return <LoadingScreen />;
+}
+```
+
+## How to Detect Similar Issues
+1. **Find all watchdog/timeout callbacks**: `grep -rn "setTimeout.*set[A-Z]" src/ --include="*.js"`
+2. **For each setter call in a timeout**: verify the setter is defined in the SAME component's scope
+3. **Check if the setter comes from a context**: `const { value } = useContext(...)` gives read-only access; setters must come from `useState()` in the SAME component
+4. **Test the watchdog**: Add `console.log` inside the timeout callback and wait for it to fire. Does it actually change state?
+
+### Code smell indicators
+- `setTimeout(() => { setSomething(true) }, ...)` where `setSomething` comes from a parent context
+- A startup watchdog that has never been observed firing in production logs
+- No `const [x, setX] = useState()` matching the `setX()` call in the same file
+- Watchdog that should prevent black screen but black screen still happens
+
+---
+
+# RULE 33: Global Fetch Wrapper Must Cover All Endpoint Types
+**Source:** Phase 9 — 28 edge function calls with no timeout despite global wrapper existing
+
+## What Failed
+The Supabase client had a global fetch wrapper with 8s timeout, but it explicitly excluded `/functions/v1/` (edge functions) and `/storage/v1/` (file uploads). 28 edge function call sites across 21 service files were completely unprotected.
+
+## Why It Failed
+The original wrapper was scoped only to "data queries":
+```javascript
+const isDataQuery = url.includes('/rest/v1/') || url.includes('/auth/v1/');
+if (!isDataQuery || options.signal) return fetch(url, options); // NO TIMEOUT
+```
+Edge functions were excluded because "they're not data queries." But edge functions also use HTTP fetch, and on backgrounded mobile apps, their TCP connections die just like any other fetch call.
+
+## What Guard Was Added
+Tiered timeout based on endpoint type:
+```javascript
+if (url.includes('/rest/v1/') || url.includes('/auth/v1/')) timeout = 8000;
+else if (url.includes('/functions/v1/')) timeout = 30000;
+// /storage/v1/ — no timeout (file uploads can be large)
+```
+
+## How to Detect Similar Issues
+1. **Check global wrapper coverage**: Read the `createClient()` config. List ALL URL patterns the API client uses.
+2. **For each pattern**: Is it covered by the timeout wrapper?
+3. **Count call sites per pattern**: `grep -c "functions.invoke\|from(\|auth\." src/services/`
+4. **Test**: Call each endpoint type during airplane mode. Does it timeout or hang?
+
+### Code smell indicators
+- Global fetch wrapper with explicit exclusions (`if (!isDataQuery)`)
+- Comment saying "skip for X" without explaining why X doesn't need timeout
+- Different endpoint types with different timeout requirements but only one timeout value
+
+---
+
+# RULE 34: Resume Sequence Needs Overall Time Budget
+**Source:** Phase 9 — Steps 1-2 of AppResumeManager could take 20s+ before FORCE_REFRESH_EVENT
+
+## What Failed
+AppResumeManager's resume sequence awaited Steps 1 and 2 (session refresh + profile refresh) sequentially. Even with 8s timeout per Supabase call, each step could involve multiple calls, and the overall sequence had no time budget. FORCE_REFRESH_EVENT (Step 7) was delayed by the cumulative timeout of earlier steps.
+
+## Why It Failed
+```javascript
+async _onResume(timeInBackground) {
+  await this._refreshSession();     // Could take 8-16s on timeout
+  await this._profileRefreshFn();   // Could take 8-16s on timeout
+  // ... more steps ...
+  DeviceEventEmitter.emit(FORCE_REFRESH_EVENT); // Delayed by 20-30s!
+}
+```
+
+## What Guard Was Added
+10s `Promise.race` timeout around each critical step:
+```javascript
+await Promise.race([
+  this._refreshSession(),
+  new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+]);
+```
+
+## How to Detect Similar Issues
+1. **Find sequential await chains in critical paths**: `grep -A5 "await this\._" src/services/ --include="*.js"`
+2. **Calculate worst-case total time**: If each step has timeout T and there are N steps, worst case = N × T
+3. **Check if critical events are at the END**: If the most important action (like FORCE_REFRESH_EVENT) is the last step, it's blocked by ALL previous steps
+4. **Add step-level timing**: `console.time` for each step to see actual durations
+
+### Code smell indicators
+- Critical recovery event at the END of a multi-step sequential await chain
+- Individual step timeouts but no overall sequence timeout
+- "Step 7: Emit event" that depends on Steps 1-6 all completing first
+- Resume sequence that takes 20+ seconds in degraded conditions
+
+---
+
+## Phase 9 Tests
+
+### Broken Watchdog (Rule 32)
+```javascript
+test('startup watchdog forces past loading screen after 15s', async () => {
+  // Mock AuthContext to never set initialized=true
+  jest.spyOn(AuthContext, 'initialized').mockReturnValue(false);
+  const { queryByTestId } = render(<AppNavigator />);
+
+  // After 15s, watchdog should force-ready
+  jest.advanceTimersByTime(15000);
+  expect(queryByTestId('loading-screen')).toBeNull(); // Loading screen gone
+});
+```
+
+### Edge Function Timeout (Rule 33)
+```javascript
+test('supabase.functions.invoke has 30s timeout', async () => {
+  // Mock fetch to never resolve
+  jest.spyOn(global, 'fetch').mockReturnValue(new Promise(() => {}));
+
+  const promise = supabase.functions.invoke('test-function', { body: {} });
+  await expect(
+    Promise.race([promise, delay(35000).then(() => 'TIMEOUT')])
+  ).resolves.not.toBe('TIMEOUT'); // Should abort before 35s
+});
+```
+
+### Resume Sequence Timeout (Rule 34)
+```javascript
+test('FORCE_REFRESH_EVENT fires within 25s even if session refresh hangs', async () => {
+  const emitSpy = jest.spyOn(DeviceEventEmitter, 'emit');
+  // Mock session refresh to hang
+  jest.spyOn(supabase.auth, 'getSession').mockReturnValue(new Promise(() => {}));
+
+  appResumeManager._onResume(120000);
+  await delay(25000);
+
+  expect(emitSpy).toHaveBeenCalledWith('GLOBAL_FORCE_REFRESH');
+});
+```
+
+---
+
+# RULE 35: Use getSession() Not getUser() for Startup
+**Source:** Phase 9b — `getCurrentUser()` API call hung on cold Supabase, causing auth timeout cascade
+
+## What Failed
+After Phase 9 fixed the broken watchdog, the app no longer froze on the loading screen — but ALL tabs showed errors after loading. Admin account appeared as "FREE" user. Error: `Auth timeout` after 10s.
+
+The startup flow called `getCurrentUser()` → `supabase.auth.getUser()` → HTTP call to `/auth/v1/user`. On cold Supabase (free tier wakeup) or slow mobile network, this call hung beyond the 8s fetch timeout and 10s auth timeout. The catch block then set `user=null, profile=null`, causing cascade failure.
+
+**Race condition**: `onAuthStateChange(INITIAL_SESSION)` fired during the timeout window and correctly set user + profile. But loadSession's catch block at 10s **overwrote** everything to null.
+
+## Why It Failed
+```javascript
+// getCurrentUser() makes an API call — CAN TIMEOUT
+const { user, error } = await withAuthTimeout(getCurrentUser(), 10000);
+// If timeout fires → catch block runs:
+setUser(null);    // ← OVERWRITES what onAuthStateChange set!
+setProfile(null); // ← admin → FREE tier → all screens fail
+```
+
+## What Guard Was Added
+```javascript
+// getSession() reads from AsyncStorage — INSTANT, no network call
+const { data: { session } } = await supabase.auth.getSession();
+const user = session?.user ?? null;
+
+// Catch block: only clear state if no user exists anywhere
+if (!userRef.current) {
+  setUser(null);     // Genuinely no session
+  setProfile(null);
+} else {
+  // onAuthStateChange already set user — keep it!
+}
+```
+
+## How to Detect Similar Issues
+1. **Audit startup for API calls**: `grep -n "getUser\|getCurrentUser\|auth\.user" src/contexts/`
+2. **Check if local-first alternatives exist**: Supabase has `getSession()` (local) vs `getUser()` (API). Most auth libraries have similar pairs.
+3. **Watch for catch blocks that overwrite context state**: `grep -n "setUser(null)\|setProfile(null)" src/contexts/`
+4. **Test with slow network**: Throttle to 3G and verify startup completes without errors
+
+### Code smell indicators
+- `await supabase.auth.getUser()` on the startup path (blocks on network)
+- `withAuthTimeout` or `Promise.race` around auth calls in `loadSession`
+- Catch block that clears state without checking if another handler already set it
+- "First launch fails, second launch works" pattern (cold start vs warm cache)
