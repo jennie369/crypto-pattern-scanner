@@ -1,6 +1,6 @@
 # Troubleshooting Tips
 
-Generalized engineering rules extracted from real bugs found during Phase 1-7 audits.
+Generalized engineering rules extracted from real bugs found during Phase 1-11 audits.
 
 ---
 
@@ -1391,6 +1391,15 @@ test('binanceService throws on HTTP 200 with error code', async () => {
 | 29 | Timeoutless fetch() = Permanent Deadlock After Background | C: Concurrency | 7.8 |
 | 30 | Recovery Event Must Be Unconditional | F: Architecture | 7.8 |
 | 31 | Every Screen With Loading State Needs Recovery Listener | A: State | 7.8 |
+| 32 | Startup Watchdog Must Use Local State, Not Context Setters | F: Architecture | 9 |
+| 33 | Global Fetch Wrapper Must Cover All Endpoint Types | C: Concurrency | 9 |
+| 34 | Resume Sequence Needs Overall Time Budget | F: Architecture | 9 |
+| 35 | Use getSession() Not getUser() for Startup | F: Architecture | 9b |
+| 36 | Single Notification Source Per Event | F: Architecture | 10 |
+| 37 | Client vs Server Notification Responsibility | F: Architecture | 10 |
+| 38 | RLS Policy `TO` Clause Defaults to `{public}` | D: Security | 11 |
+| 39 | Tables Without RLS Enabled Are Fully Open | D: Security | 11 |
+| 40 | Same Fix Must Apply to ALL Code Paths | F: Architecture | 11 |
 
 ---
 
@@ -1985,3 +1994,294 @@ SERVER CRON (always):    REMOTE push only → FCM/APNs delivery
 - Client handles foreground/in-app notifications (local `scheduleNotificationAsync`)
 - Server cron handles background/closed-app notifications (remote push via edge function)
 - Neither sends both types → zero duplication
+
+---
+
+# RULE 38: RLS Policy `TO` Clause Defaults to `{public}` — Not `service_role`
+**Source:** Phase 11 — 24 policies on 23 tables had `TO {public}` instead of `TO service_role`
+
+## What Failed
+A security audit found 24 RLS policies across 23 tables that were named "Service role full access ..." but actually granted `USING(true)` access to `{public}` — meaning **any authenticated or anonymous user** could read/write ALL data in those tables (user_purchases, gems_transactions, pending_payments, payment_logs, rate_limit_tracking, etc.).
+
+The policies appeared safe by name (e.g., "Service role full access gems_transactions") and in the Supabase dashboard. But the actual SQL was:
+```sql
+CREATE POLICY "Service role full access gems_transactions" ON gems_transactions
+  FOR ALL USING (true) WITH CHECK (true);
+-- Missing: TO service_role
+-- PostgreSQL defaults TO to {public} when omitted!
+```
+
+## Why It Failed
+PostgreSQL `CREATE POLICY` defaults the `TO` clause to `public` (ALL roles) if not explicitly specified. When writing migration SQL by hand, it's easy to forget `TO service_role`. The policy name suggests it's service-role-only, but the database doesn't enforce naming — only the `TO` clause matters.
+
+This went undetected because:
+1. Policy names in the Supabase dashboard showed "Service role full access" — looked correct
+2. The app worked correctly for normal users (they could read their own data via other policies)
+3. The vulnerability was only exploitable by someone crafting custom Supabase client queries
+4. No automated audit checked the `roles` column in `pg_policies`
+
+## What Guard Was Added
+For each of the 24 policies:
+1. `DROP POLICY IF EXISTS "old name"` — removed the `{public}` policy
+2. `CREATE POLICY "new_name" ... TO service_role` — explicitly restricted to service_role
+3. Added user-facing policies where client code needs access (e.g., `authenticated SELECT WHERE user_id = auth.uid()`)
+
+Two migrations deployed:
+- `20260217_rls_fix_service_role_policies` — Fixed 24 policies on 23 tables
+- `20260217_rls_enable_missing_tables` — Enabled RLS on 20 tables (see Rule 39)
+
+## How to Detect Similar Issues
+1. **Audit query** (run periodically):
+   ```sql
+   SELECT tablename, policyname, roles, cmd, qual
+   FROM pg_policies
+   WHERE schemaname = 'public'
+   AND qual = 'true'
+   AND roles = '{public}'
+   AND cmd IN ('ALL', 'UPDATE', 'INSERT', 'DELETE');
+   ```
+   Should return 0 rows. Any result is a vulnerability.
+
+2. **Check every `CREATE POLICY` in migration files**:
+   ```bash
+   grep -n "CREATE POLICY" supabase/migrations/*.sql | grep -v "TO service_role\|TO authenticated"
+   ```
+   Any `CREATE POLICY` without explicit `TO` clause defaults to `{public}`.
+
+3. **Review policy names vs roles**: `pg_policies.policyname` can say anything — only `pg_policies.roles` matters.
+
+4. **Test**: As an authenticated non-admin user, try:
+   ```javascript
+   const { data } = await supabase.from('payment_logs').select('*');
+   // Should return [] (no access), not all records
+   ```
+
+### Code smell indicators
+- `CREATE POLICY "Service role ..." ON table FOR ALL USING (true)` — missing `TO service_role`
+- Policy name contains "service" but `pg_policies.roles` shows `{public}`
+- Migration SQL with `USING (true) WITH CHECK (true)` but no `TO` clause
+- Tables with sensitive financial data (payments, transactions, purchases) having `{public}` write policies
+
+### Prevention checklist for new migrations
+- [ ] Every `CREATE POLICY` has explicit `TO` clause (`service_role` or `authenticated`)
+- [ ] Backend-only tables: `FOR ALL TO service_role USING (true)`
+- [ ] User tables: `FOR SELECT TO authenticated USING (user_id = auth.uid())`
+- [ ] Catalog tables: `FOR SELECT TO authenticated USING (is_active = true)` or `USING (true)`
+- [ ] No `USING (true)` to `{public}` on tables with user data
+
+---
+
+# RULE 39: Tables Without RLS Enabled Are Fully Open
+**Source:** Phase 11 — 20 tables had `rowsecurity = false` — zero access control
+
+## What Failed
+20 tables in production had Row Level Security completely disabled. This means **any user with the Supabase anon key** (which is public in the mobile app bundle) could read/write ALL data in these tables — no policies apply at all when RLS is off.
+
+High-risk tables included:
+- `push_notification_queue` — attacker could read all users' push tokens
+- `user_profiles` — attacker could read/modify any user's profile
+- `analytics_events` — attacker could inject fake analytics
+- `chatbot_history` — attacker could read any user's AI conversations
+- `gem_packs` — attacker could modify gem pack prices
+
+## Why It Failed
+Tables created in different migration files at different times by different developers. Some migrations included `ENABLE ROW LEVEL SECURITY`, others did not. There was no automated check to verify all tables have RLS enabled. PostgreSQL creates tables with RLS **disabled** by default.
+
+```sql
+-- This migration creates a table but forgets RLS
+CREATE TABLE push_notification_queue (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  title TEXT,
+  body TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+-- Missing: ALTER TABLE push_notification_queue ENABLE ROW LEVEL SECURITY;
+-- Missing: CREATE POLICY ... TO service_role ...;
+-- Result: ANY user can read/write ALL push notifications
+```
+
+## What Guard Was Added
+For each of the 20 tables:
+1. `ALTER TABLE x ENABLE ROW LEVEL SECURITY` — activates policy enforcement
+2. `CREATE POLICY "service_role_all_x" ... TO service_role` — backend access
+3. User-facing policies where client code needs access (SELECT own data, INSERT own data)
+
+Three categories:
+- **Backend-only** (9 tables): `service_role ALL` only (calls, job_logs, system_logs, etc.)
+- **User-accessible** (7 tables): `service_role ALL` + `authenticated SELECT/INSERT WHERE user_id = auth.uid()`
+- **Catalogs** (4 tables): `service_role ALL` + `authenticated SELECT` (public read)
+
+## How to Detect Similar Issues
+1. **Audit query** (run after every migration):
+   ```sql
+   SELECT tablename FROM pg_tables
+   WHERE schemaname = 'public' AND rowsecurity = false;
+   ```
+   Should return 0 rows. Any result is a table with no access control.
+
+2. **Migration template enforcement**: Every `CREATE TABLE` migration should include:
+   ```sql
+   CREATE TABLE my_table (...);
+   ALTER TABLE my_table ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "service_role_all_my_table" ON my_table
+     FOR ALL TO service_role USING (true) WITH CHECK (true);
+   ```
+
+3. **CI check** (recommended):
+   ```bash
+   # After applying migrations, verify no tables without RLS
+   psql -c "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND rowsecurity=false;"
+   # Should output: 0
+   ```
+
+4. **Test new tables**: After creating any table, verify:
+   ```javascript
+   // As anonymous/unauthenticated user:
+   const { data } = await supabase.from('new_table').select('*');
+   // Should return error or empty array, NOT all rows
+   ```
+
+### Code smell indicators
+- `CREATE TABLE` with no `ENABLE ROW LEVEL SECURITY` in the same migration
+- New table has no policies at all (check `pg_policies` for the table name)
+- Table with user data (has `user_id` column) but no policy with `auth.uid()`
+- Migration file has table creation but no `CREATE POLICY` statements
+- `rowsecurity = false` for any table in `pg_tables`
+
+### Migration template for new tables
+```sql
+-- Always include these 3 statements for every new table:
+
+-- 1. Create table
+CREATE TABLE IF NOT EXISTS my_table (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  ...
+);
+
+-- 2. Enable RLS (NEVER skip this)
+ALTER TABLE my_table ENABLE ROW LEVEL SECURITY;
+
+-- 3. Add policies
+-- Backend access:
+CREATE POLICY "service_role_all_my_table" ON my_table
+  FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- User access (choose based on table type):
+-- For user-owned data:
+CREATE POLICY "users_select_own_my_table" ON my_table
+  FOR SELECT TO authenticated USING (user_id = auth.uid());
+-- For public catalogs:
+CREATE POLICY "users_select_my_table" ON my_table
+  FOR SELECT TO authenticated USING (is_active = true);
+```
+
+---
+
+## Phase 11 Tests
+
+### RLS Policy TO Clause (Rule 38)
+```javascript
+test('no {public} policies with USING(true) on write operations', async () => {
+  const { data } = await supabaseAdmin.rpc('raw_sql', {
+    query: `SELECT tablename, policyname FROM pg_policies
+            WHERE schemaname='public' AND qual='true'
+            AND roles='{public}' AND cmd IN ('ALL','UPDATE','INSERT','DELETE')`
+  });
+  expect(data).toHaveLength(0);
+});
+
+test('user cannot read other users gem transactions', async () => {
+  const { data } = await supabaseAsUserA
+    .from('gems_transactions')
+    .select('*')
+    .eq('user_id', userB_id);
+  expect(data).toHaveLength(0);
+});
+```
+
+### Tables Without RLS (Rule 39)
+```javascript
+test('all public tables have RLS enabled', async () => {
+  const { data } = await supabaseAdmin.rpc('raw_sql', {
+    query: `SELECT tablename FROM pg_tables
+            WHERE schemaname='public' AND rowsecurity=false`
+  });
+  expect(data).toHaveLength(0);
+});
+
+test('anonymous user cannot read push_notification_queue', async () => {
+  const { data, error } = await supabaseAnon
+    .from('push_notification_queue')
+    .select('*');
+  expect(data).toHaveLength(0); // RLS blocks anonymous access
+});
+```
+
+---
+
+# RULE 40: Same Fix Must Apply to ALL Code Paths (Not Just the One That Broke)
+**Source:** Phase 11 — `refreshProfile()` still used `getUser()` after Phase 9b fixed `loadSession()` to use `getSession()`
+
+## What Failed
+After Phase 9b fixed `loadSession()` to use `getSession()` (local, instant) instead of `getUser()` (API call), the exact same bug remained in `refreshProfile()`. On app resume, `refreshProfile()` called `supabase.auth.getUser()` with a 10s timeout. On cold Supabase or slow network, the API call hung, the 10s timer fired, and the error `Auth timeout` was thrown. Profile refresh silently failed.
+
+## Why It Failed
+Phase 9b correctly identified `getUser()` as the problem and fixed `loadSession()`. But `refreshProfile()` is a **different code path** that also calls `getUser()`. The fix was applied narrowly — only to the function that was actively crashing at the time.
+
+The two code paths serve different purposes but share the same anti-pattern:
+- `loadSession()` — startup: reads auth session → loads profile
+- `refreshProfile()` — app resume: re-validates auth → refreshes profile
+
+Both paths had the same vulnerability: `getUser()` → API call → hangs → timeout.
+
+```javascript
+// loadSession (FIXED in Phase 9b):
+const { data: { session } } = await supabase.auth.getSession(); // ← instant, local
+
+// refreshProfile (NOT FIXED until Phase 11):
+const { data: { user } } = await withAuthTimeout(
+  supabase.auth.getUser(), 10000  // ← API call, can hang 10s+
+);
+```
+
+The `withAuthTimeout` wrapper gave a false sense of safety — it prevented infinite hang, but a 10s timeout on every resume is still terrible UX.
+
+## What Guard Was Added
+Replaced `supabase.auth.getUser()` with `supabase.auth.getSession()` in `refreshProfile()`:
+
+```javascript
+// BEFORE (Phase 9b left this unfixed):
+const { data: { user: freshUser }, error } = await withAuthTimeout(
+  supabase.auth.getUser(), 10000  // Network call — can timeout
+);
+
+// AFTER (Phase 11 fix):
+const { data: { session }, error } = await supabase.auth.getSession(); // Local — instant
+const freshUser = session?.user ?? null;
+```
+
+Removed the now-unused `withAuthTimeout` helper entirely.
+
+Session validation is already handled by:
+1. AppResumeManager Step 1 (`_refreshSession()` → `getSession()` + `refreshSession()`)
+2. `onAuthStateChange` (automatic token refresh on `TOKEN_REFRESHED` event)
+3. The profile fetch at Step 3 (`getUserProfile()`) will fail with auth error if session is truly invalid
+
+## How to Detect Similar Issues
+1. **After fixing a bug, grep for the same pattern**: `grep -rn "getUser\|getCurrentUser" src/` — fix ALL call sites, not just the crashing one
+2. **Map all code paths that do the same thing**: "What other functions also validate auth?" / "What other functions also call this API?"
+3. **Search by the root cause, not the symptom**: If `getUser()` is the problem, search for `getUser()` everywhere — don't just fix the function that crashed
+4. **Audit the "fixed" function's callers and siblings**: If `loadSession` was fixed, check `refreshProfile`, `validateSession`, and any other auth-related function
+
+### Code smell indicators
+- A fix applied to only one of several functions that share the same pattern
+- Comments like "Phase X fixed this" in one function, but sibling functions have no such fix
+- Timeout wrapper (`withAuthTimeout`, `Promise.race`) around an API call that has a local alternative
+- Two functions doing similar operations (load vs refresh) using different underlying APIs
+
+### Prevention
+- When fixing a bug, run: `grep -rn "THE_PROBLEMATIC_PATTERN" src/` and fix ALL occurrences
+- Create a checklist: "This pattern exists in N places. Fixed M/N."
+- Add the fix as a Troubleshooting Rule with grep command to detect recurrence

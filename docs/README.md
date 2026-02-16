@@ -119,6 +119,7 @@ User clicks "Paper Trade" on pattern
 | 7.8 | `5966896` | App resume deadlock definitive fix: 27 files, 3 root causes, AbortController on 17 Binance fetches, FORCE_REFRESH on 15 screens | `docs/feature-phase7.8-resume-deadlock-fix.md` |
 | 9 | — | Startup freeze fix: broken watchdog, edge function timeout, resume sequence timeout, defensive cleanup (6 files, 4 root causes) | `docs/feature-phase9-startup-freeze-fix.md` |
 | 10 | — | Biometric identity display + push notification dedup (5 files, 5 root causes) | `docs/feature-phase10-biometric-push-fix.md` |
+| 11 | — | RLS vulnerability fix: 24 misconfigured policies + 20 tables without RLS (43 tables, 2 migrations) | `supabase/migrations/20260217_rls_fix_service_role_policies.sql` |
 
 ## Documentation
 
@@ -129,8 +130,30 @@ User clicks "Paper Trade" on pattern
 | `docs/feature-phase7.8-resume-deadlock-fix.md` | Phase 7.8 resume deadlock fix (27 files, 3 root causes) |
 | `docs/feature-phase9-startup-freeze-fix.md` | Phase 9 startup freeze fix (6 files, 4 root causes) |
 | `docs/feature-phase10-biometric-push-fix.md` | Phase 10 biometric identity + push dedup (5 files, 5 root causes) |
-| `docs/Troubleshooting_Tips.md` | 37 generalized engineering rules from Phase 1-10 bugs |
+| `docs/Troubleshooting_Tips.md` | 40 generalized engineering rules from Phase 1-11 bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
+
+## Database Migrations
+
+### RLS Security Fix (2026-02-17)
+
+Two migrations were deployed to fix critical RLS vulnerabilities:
+
+1. **`20260217_rls_fix_service_role_policies`** — Fixed 24 policies on 23 tables that had `TO {public}` instead of `TO service_role`, allowing any user to read/write all data. Added user-facing policies where missing.
+
+2. **`20260217_rls_enable_missing_tables`** — Enabled RLS on 20 tables that had zero access control. Added `service_role ALL` + user policies (own-data SELECT/INSERT) + catalog policies (authenticated SELECT).
+
+**Verification queries** (should both return 0 rows):
+```sql
+-- No {public} write policies with USING(true)
+SELECT tablename, policyname FROM pg_policies
+WHERE schemaname='public' AND qual='true'
+AND roles='{public}' AND cmd IN ('ALL','UPDATE','INSERT','DELETE');
+
+-- All tables have RLS enabled
+SELECT tablename FROM pg_tables
+WHERE schemaname='public' AND rowsecurity=false;
+```
 
 ## Important Conventions
 
@@ -139,3 +162,4 @@ User clicks "Paper Trade" on pattern
 - **Affiliate ID**: Use `affiliate.user_id` (auth UUID), not `affiliate.id` (table UUID)
 - **Notifications**: Only ONE `setNotificationHandler` call (in InAppNotificationContext)
 - **Module caches**: Must clear on logout (forumCache, notificationsCache, etc.)
+- **RLS**: Every table must have RLS enabled + `service_role ALL` policy + user policies for client-accessible tables

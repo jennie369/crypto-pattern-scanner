@@ -18,12 +18,10 @@ import { notificationService } from '../services/notificationService';
 import { errorService } from '../services/errorService';
 import { clearEventSession } from '../hooks/useEventTracking';
 
-// Auth operation timeout - used for resume-triggered profile refresh (refreshProfile)
-// NOT used for startup (loadSession uses getSession() which reads from local storage)
-const withAuthTimeout = (promise, ms) => Promise.race([
-  promise,
-  new Promise((_, reject) => setTimeout(() => reject(new Error('Auth timeout')), ms))
-]);
+// withAuthTimeout REMOVED (Phase 11 Fix):
+// refreshProfile() now uses getSession() (local storage, instant) instead of
+// getUser() (API call that hung on cold Supabase / slow network).
+// loadSession() was already fixed in Phase 9b. Both paths are now instant.
 
 // Helper: Handle invalid refresh token by clearing session
 const handleInvalidRefreshToken = async (setUser, setProfile) => {
@@ -249,16 +247,17 @@ export const AuthProvider = ({ children }) => {
     isRefreshingRef.current = true;
 
     try {
-      console.log('[AuthContext] refreshProfile: re-validating session and profile...');
+      console.log('[AuthContext] refreshProfile: reading session and refreshing profile...');
 
-      // Step 1: Re-validate Supabase auth session
-      // getUser() calls the Supabase API server to verify the JWT is still valid
-      // and refreshes the token if needed
-      // Note: supabase.auth.getUser() already has 8s timeout via global fetch wrapper,
-      // but we add an explicit 10s guard for defense-in-depth
-      const { data: { user: freshUser }, error: authError } = await withAuthTimeout(
-        supabase.auth.getUser(), 10000
-      );
+      // Step 1: Read session from local storage (INSTANT, no network call)
+      // Phase 11 Fix: Changed from getUser() (API call → /auth/v1/user) to getSession() (local).
+      // getUser() hung on cold Supabase / slow network, causing "Auth timeout" after 10s.
+      // Session validation & token refresh is already handled by:
+      //   - AppResumeManager Step 1 (_refreshSession → getSession + refreshSession)
+      //   - onAuthStateChange (auto token refresh on TOKEN_REFRESHED event)
+      // The profile fetch at Step 3 will naturally fail with auth error if session is invalid.
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      const freshUser = session?.user ?? null;
 
       if (authError) {
         // Check for invalid refresh token
@@ -274,7 +273,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (!freshUser) {
-        console.warn('[AuthContext] refreshProfile: no user returned from auth');
+        console.warn('[AuthContext] refreshProfile: no user in session');
         return { success: false, reason: 'no_user_returned' };
       }
 

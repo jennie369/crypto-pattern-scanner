@@ -1,5 +1,5 @@
 # Gemral - Database Schema & Tier System
-## MASTER REFERENCE - Updated: 2026-02-04 (Added Vision Board, Calendar, Calls, Messages Privacy, Chatbot Memory)
+## MASTER REFERENCE - Updated: 2026-02-17 (RLS Security Fix: 24 policies fixed + 20 tables enabled)
 
 > **IMPORTANT**: Tất cả code phải sử dụng CHÍNH XÁC các table, column và values trong file này.
 > **PRIMARY TABLE**: `profiles` - Sử dụng cho TẤT CẢ user data
@@ -6088,3 +6088,47 @@ CREATE OR REPLACE FUNCTION get_emotional_journey(
 | `chat_memories` | Semantic memories |
 | `emotional_states` | Emotion history |
 | `proactive_messages` | Scheduled messages |
+
+---
+
+## RLS SECURITY STATUS (Updated: 2026-02-17)
+
+> **All public tables now have RLS enabled and proper policies.**
+
+### Migrations Applied
+1. `20260217_rls_fix_service_role_policies` — Fixed 24 policies with `TO {public}` → `TO service_role`
+2. `20260217_rls_enable_missing_tables` — Enabled RLS on 20 tables + added policies
+
+### Policy Categories
+
+| Category | Pattern | Example Tables |
+|----------|---------|----------------|
+| **Backend-only** | `FOR ALL TO service_role USING (true)` | `push_notification_queue`, `system_logs`, `job_logs`, `rate_limit_tracking` |
+| **User-owned data** | `FOR SELECT TO authenticated USING (user_id = auth.uid())` | `gems_transactions`, `user_purchases`, `user_access`, `chatbot_history` |
+| **Admin read** | `FOR SELECT TO authenticated USING (is_admin_user())` | `gems_transactions`, `analytics_events`, `payment_logs`, `user_profiles` |
+| **Public catalog** | `FOR SELECT TO authenticated USING (true)` or `USING (is_active = true)` | `upgrade_tiers`, `upgrade_banners`, `gem_packs`, `vision_rituals` |
+| **Email-based** | `FOR SELECT TO authenticated USING (customer_email = auth.jwt()->>'email')` | `pending_payments` |
+
+### Required Template for New Tables
+```sql
+CREATE TABLE IF NOT EXISTS new_table (...);
+ALTER TABLE new_table ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_role_all_new_table" ON new_table
+  FOR ALL TO service_role USING (true) WITH CHECK (true);
+-- Add user policies as needed (SELECT/INSERT/UPDATE)
+```
+
+### Verification Queries
+```sql
+-- Should return 0 rows:
+SELECT tablename FROM pg_tables WHERE schemaname='public' AND rowsecurity=false;
+
+-- Should return 0 rows:
+SELECT tablename, policyname FROM pg_policies
+WHERE schemaname='public' AND qual='true'
+AND roles='{public}' AND cmd IN ('ALL','UPDATE','INSERT','DELETE');
+```
+
+### Helper Functions
+- `is_admin_user()` — Returns true if `auth.uid()` is an admin (checks `profiles.role`)
+- `is_user_admin(user_id)` — Returns true if given UUID is an admin
