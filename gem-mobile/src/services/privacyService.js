@@ -214,13 +214,8 @@ export const privacyService = {
 
       const closeFriendIds = closeFriends?.map(cf => cf.friend_id) || [];
 
-      // Search in followers
-      const { data: followers } = await supabase
-        .from('follows')
-        .select('follower_id')
-        .eq('following_id', user.id);
-
-      const followerIds = followers?.map(f => f.follower_id) || [];
+      // 'follows' table does not exist — return empty follower list
+      const followerIds = [];
 
       // Get follower profiles
       let profileQuery = supabase
@@ -268,14 +263,8 @@ export const privacyService = {
       // Check based on visibility
       switch (post.visibility) {
         case 'followers':
-          // Check if user follows the author
-          const { data: followData } = await supabase
-            .from('follows')
-            .select('id')
-            .eq('follower_id', user.id)
-            .eq('following_id', post.user_id)
-            .single();
-          return !!followData;
+          // 'follows' table does not exist — treat as not following
+          return false;
 
         case 'close_friends':
           // Check if user is in author's close friends

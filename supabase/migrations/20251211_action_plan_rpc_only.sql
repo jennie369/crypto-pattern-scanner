@@ -30,7 +30,7 @@ BEGIN
     IF (v_action.action_type = 'daily' AND v_days_since_reset >= 1) OR
        (v_action.action_type = 'weekly' AND v_days_since_reset >= 7) OR
        (v_action.action_type = 'monthly' AND v_days_since_reset >= 30) OR
-       (v_action.action_type = 'custom' AND v_days_since_reset >= COALESCE(v_action.recurrence_days, 1))
+       (v_action.action_type = 'custom' AND v_days_since_reset >= COALESCE(v_action.recurrence_days[1], 1))
     THEN
       -- Reset the action
       UPDATE vision_actions

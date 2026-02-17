@@ -59,12 +59,20 @@ const LinkPreview = memo(({
 
         // In production, this would call a backend service to fetch metadata
         // For now, we'll use basic extraction
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; GEM-LinkPreview/1.0)',
-          },
-        });
+        const controller = new AbortController();
+        const fetchTimeout = setTimeout(() => controller.abort(), 5000);
+        let response;
+        try {
+          response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; GEM-LinkPreview/1.0)',
+            },
+            signal: controller.signal,
+          });
+        } finally {
+          clearTimeout(fetchTimeout);
+        }
 
         if (!response.ok) throw new Error('Failed to fetch');
 

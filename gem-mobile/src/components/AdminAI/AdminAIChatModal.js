@@ -361,13 +361,21 @@ const AdminAIChatModal = ({
 
       console.log('[AdminAIChat] Sending audio to Whisper API...');
 
-      const response = await fetch(TRANSCRIBE_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: formData,
-      });
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 15000);
+      let response;
+      try {
+        response = await fetch(TRANSCRIBE_URL, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: formData,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(fetchTimeout);
+      }
 
       const data = await response.json();
 

@@ -120,7 +120,14 @@ export const getPaymentStatusPublic = async (orderNumber, email = null) => {
       url += `&email=${encodeURIComponent(email)}`;
     }
 
-    const response = await fetch(url);
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => controller.abort(), 10000);
+    let response;
+    try {
+      response = await fetch(url, { signal: controller.signal });
+    } finally {
+      clearTimeout(fetchTimeout);
+    }
     const result = await response.json();
 
     if (!response.ok || !result.success) {

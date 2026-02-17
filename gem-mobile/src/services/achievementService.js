@@ -351,11 +351,10 @@ export const awardAchievementXP = async (userId, achievementId) => {
 
   try {
     // Add XP to user
-    const { error } = await supabase.rpc('add_xp_to_user', {
+    const { error } = await supabase.rpc('add_xp', {
       p_user_id: userId,
       p_xp_amount: achievement.xpReward,
       p_source: 'achievement',
-      p_source_id: achievementId,
     });
 
     if (error) throw error;

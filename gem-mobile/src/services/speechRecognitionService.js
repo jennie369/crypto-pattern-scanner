@@ -488,13 +488,21 @@ class SpeechRecognitionService {
 
       const startTime = Date.now();
 
-      const response = await fetch(edgeFunctionUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: formData,
-      });
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 15000);
+      let response;
+      try {
+        response = await fetch(edgeFunctionUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: formData,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(fetchTimeout);
+      }
 
       const processingTime = Date.now() - startTime;
       console.log(`[SpeechRecognition] Response time: ${processingTime}ms`);

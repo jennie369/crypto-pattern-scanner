@@ -253,8 +253,8 @@ export const LivestreamProvider = ({ children }) => {
    */
   const incrementViewerCount = async (sessionId) => {
     try {
-      const { data, error } = await supabase.rpc('increment_viewer_count', {
-        session_id: sessionId,
+      const { data, error } = await supabase.rpc('increment_stream_viewers', {
+        p_stream_id: sessionId,
       });
 
       if (error) {
@@ -297,8 +297,8 @@ export const LivestreamProvider = ({ children }) => {
    */
   const decrementViewerCount = async (sessionId) => {
     try {
-      await supabase.rpc('decrement_viewer_count', {
-        session_id: sessionId,
+      await supabase.rpc('decrement_stream_viewers', {
+        p_stream_id: sessionId,
       });
     } catch (err) {
       console.error('[LivestreamContext] Decrement viewer error:', err);

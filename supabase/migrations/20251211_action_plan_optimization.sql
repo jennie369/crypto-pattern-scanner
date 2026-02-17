@@ -11,9 +11,9 @@ ALTER TABLE vision_actions
 ADD COLUMN IF NOT EXISTS action_type TEXT DEFAULT 'daily'
   CHECK (action_type IN ('one_time', 'daily', 'weekly', 'monthly', 'custom'));
 
--- Add recurrence_days for custom recurrence
+-- Add recurrence_days for custom recurrence (INTEGER[] to match 20251210_vision_board_complete.sql)
 ALTER TABLE vision_actions
-ADD COLUMN IF NOT EXISTS recurrence_days INTEGER DEFAULT 1;
+ADD COLUMN IF NOT EXISTS recurrence_days INTEGER[];
 
 -- Add last_reset_date to track when action was last reset
 ALTER TABLE vision_actions
@@ -101,7 +101,7 @@ BEGIN
     IF (v_action.action_type = 'daily' AND v_days_since_reset >= 1) OR
        (v_action.action_type = 'weekly' AND v_days_since_reset >= 7) OR
        (v_action.action_type = 'monthly' AND v_days_since_reset >= 30) OR
-       (v_action.action_type = 'custom' AND v_days_since_reset >= COALESCE(v_action.recurrence_days, 1))
+       (v_action.action_type = 'custom' AND v_days_since_reset >= COALESCE(v_action.recurrence_days[1], 1))
     THEN
       -- Reset the action
       UPDATE vision_actions

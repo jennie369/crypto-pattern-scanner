@@ -22,8 +22,7 @@ serve(async (req) => {
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
     // Build system prompt
@@ -110,13 +109,21 @@ Mỗi response PHẢI có ít nhất 3 action items CỤ THỂ mà user có th�
       }
     ]
 
-    // Call Gemini API
+    // Call Gemini API with timeout
     console.log('🔄 Calling Gemini API...')
-    const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents })
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30000)
+    let response: Response
+    try {
+      response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents }),
+        signal: controller.signal,
+      })
+    } finally {
+      clearTimeout(timeout)
+    }
 
     console.log('📥 Gemini response status:', response.status, response.statusText)
 

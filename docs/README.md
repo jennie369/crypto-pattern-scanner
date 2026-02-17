@@ -120,6 +120,7 @@ User clicks "Paper Trade" on pattern
 | 9 | — | Startup freeze fix: broken watchdog, edge function timeout, resume sequence timeout, defensive cleanup (6 files, 4 root causes) | `docs/feature-phase9-startup-freeze-fix.md` |
 | 10 | — | Biometric identity display + push notification dedup (5 files, 5 root causes) | `docs/feature-phase10-biometric-push-fix.md` |
 | 11 | — | RLS vulnerability fix: 24 misconfigured policies + 20 tables without RLS (43 tables, 2 migrations) | `supabase/migrations/20260217_rls_fix_service_role_policies.sql` |
+| 12 | — | 62 fixes: COALESCE type mismatch, 5 RPC name mismatches, AbortController on 38 fetch calls, `follows` table cleanup in 4 services, edge function auth+SDK updates (8 functions), 2 missing SQL functions created | `docs/Troubleshooting_Tips.md` Rules 42-46 |
 
 ## Documentation
 
@@ -130,7 +131,7 @@ User clicks "Paper Trade" on pattern
 | `docs/feature-phase7.8-resume-deadlock-fix.md` | Phase 7.8 resume deadlock fix (27 files, 3 root causes) |
 | `docs/feature-phase9-startup-freeze-fix.md` | Phase 9 startup freeze fix (6 files, 4 root causes) |
 | `docs/feature-phase10-biometric-push-fix.md` | Phase 10 biometric identity + push dedup (5 files, 5 root causes) |
-| `docs/Troubleshooting_Tips.md` | 40 generalized engineering rules from Phase 1-11 bugs |
+| `docs/Troubleshooting_Tips.md` | 46 generalized engineering rules from Phase 1-12 bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
 
 ## Database Migrations
@@ -163,3 +164,7 @@ WHERE schemaname='public' AND rowsecurity=false;
 - **Notifications**: Only ONE `setNotificationHandler` call (in InAppNotificationContext)
 - **Module caches**: Must clear on logout (forumCache, notificationsCache, etc.)
 - **RLS**: Every table must have RLS enabled + `service_role ALL` policy + user policies for client-accessible tables
+- **RPC names**: App code must call exact function names from live DB — verify with `SELECT proname FROM pg_proc`
+- **AbortController**: EVERY `fetch()` to external API must have AbortController timeout — not just Binance
+- **Edge functions**: Use `SERVICE_ROLE_KEY` (not `ANON_KEY`) and `@supabase/supabase-js@2` (not pinned versions)
+- **`follows` table**: Does NOT exist. Use `user_follows` or degrade gracefully with empty arrays

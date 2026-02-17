@@ -61,11 +61,14 @@ class RestreamService {
       return [];
     }
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`${RESTREAM_API_BASE}/user/channel/all`, {
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
         },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -88,6 +91,8 @@ class RestreamService {
     } catch (error) {
       console.error('[Restream] Get channels error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -97,6 +102,8 @@ class RestreamService {
    * @param {boolean} enabled - Enable or disable
    */
   async toggleChannel(channelId, enabled) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(
         `${RESTREAM_API_BASE}/user/channel/${channelId}`,
@@ -107,6 +114,7 @@ class RestreamService {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ enabled }),
+          signal: controller.signal,
         }
       );
 
@@ -126,6 +134,8 @@ class RestreamService {
     } catch (error) {
       console.error('[Restream] Toggle channel error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -133,11 +143,14 @@ class RestreamService {
    * Get current stream status
    */
   async getStreamStatus() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`${RESTREAM_API_BASE}/user/stream`, {
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
         },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -166,6 +179,8 @@ class RestreamService {
     } catch (error) {
       console.error('[Restream] Get stream status error:', error);
       return { active: false, error: error.message };
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -175,6 +190,8 @@ class RestreamService {
    * @param {string} description - Stream description
    */
   async updateStreamInfo(title, description = '') {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`${RESTREAM_API_BASE}/user/stream/meta`, {
         method: 'PUT',
@@ -183,6 +200,7 @@ class RestreamService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ title, description }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -193,6 +211,8 @@ class RestreamService {
     } catch (error) {
       console.error('[Restream] Update stream info error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -200,11 +220,14 @@ class RestreamService {
    * Get stream events/alerts
    */
   async getStreamEvents() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`${RESTREAM_API_BASE}/user/stream/events`, {
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
         },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -215,6 +238,8 @@ class RestreamService {
     } catch (error) {
       console.error('[Restream] Get stream events error:', error);
       return [];
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -222,6 +247,8 @@ class RestreamService {
    * Get chat from all platforms (Restream Chat)
    */
   async getChatMessages(limit = 50) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(
         `${RESTREAM_API_BASE}/user/chat/messages?limit=${limit}`,
@@ -229,6 +256,7 @@ class RestreamService {
           headers: {
             Authorization: `Bearer ${this.accessToken}`,
           },
+          signal: controller.signal,
         }
       );
 
@@ -240,6 +268,8 @@ class RestreamService {
     } catch (error) {
       console.error('[Restream] Get chat messages error:', error);
       return [];
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -248,6 +278,8 @@ class RestreamService {
    * @param {string} message - Message to send
    */
   async sendChatMessage(message) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`${RESTREAM_API_BASE}/user/chat/messages`, {
         method: 'POST',
@@ -256,6 +288,7 @@ class RestreamService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -266,6 +299,8 @@ class RestreamService {
     } catch (error) {
       console.error('[Restream] Send chat message error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 

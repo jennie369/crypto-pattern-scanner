@@ -511,21 +511,29 @@ export const requestEmailVerification = async (userId, email, purpose = 'link_em
     }
 
     // Call Edge Function to send OTP
-    const response = await fetch(
-      `${supabase.supabaseUrl}/functions/v1/send-verification-email`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          email: email.toLowerCase(),
-          purpose,
-          order_number: orderNumber,
-        }),
-      }
-    );
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => controller.abort(), 10000);
+    let response;
+    try {
+      response = await fetch(
+        `${supabase.supabaseUrl}/functions/v1/send-verification-email`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            email: email.toLowerCase(),
+            purpose,
+            order_number: orderNumber,
+          }),
+          signal: controller.signal,
+        }
+      );
+    } finally {
+      clearTimeout(fetchTimeout);
+    }
 
     const result = await response.json();
 

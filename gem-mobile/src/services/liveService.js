@@ -114,13 +114,8 @@ export const liveService = {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // Get followed user IDs
-      const { data: following } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', user.id);
-
-      const followingIds = (following || []).map(f => f.following_id);
+      // 'follows' table does not exist — return empty (no follow system yet)
+      const followingIds = [];
 
       if (followingIds.length === 0) return [];
 

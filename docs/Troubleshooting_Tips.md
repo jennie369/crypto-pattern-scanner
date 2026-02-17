@@ -1,6 +1,6 @@
 # Troubleshooting Tips
 
-Generalized engineering rules extracted from real bugs found during Phase 1-11 audits.
+Generalized engineering rules extracted from real bugs found during Phase 1-12 audits.
 
 ---
 
@@ -2285,3 +2285,488 @@ Session validation is already handled by:
 - When fixing a bug, run: `grep -rn "THE_PROBLEMATIC_PATTERN" src/` and fix ALL occurrences
 - Create a checklist: "This pattern exists in N places. Fixed M/N."
 - Add the fix as a Troubleshooting Rule with grep command to detect recurrence
+
+---
+
+# RULE 41: Auth Token Storage Must Be Encrypted At Rest
+**Source:** Security audit — auth tokens (access_token, refresh_token, user object) stored in plaintext AsyncStorage
+
+## What Failed
+On Android, AsyncStorage is backed by unencrypted SQLite. Any app with root access or device backup extraction could read Supabase auth tokens in plaintext, enabling session hijacking without credentials.
+
+## Why It Failed
+The default Supabase storage adapter writes session JSON directly to AsyncStorage with no encryption layer. SecureStore has a ~2048 byte limit per value, so storing the full session (2-5KB JWT + user object) directly in SecureStore would silently fail for larger sessions (OAuth users, rich metadata).
+
+## What Guard Was Added
+Hybrid AES-encrypted storage adapter in `supabase.js`:
+
+1. **AES-256-CTR encryption key** (32 bytes → 64 hex chars) stored in SecureStore (hardware-backed keychain, well under 2KB limit)
+2. **Encrypted session ciphertext** stored in AsyncStorage (no size limit)
+3. **Auto-migration**: Existing unencrypted sessions are detected (no SecureStore key exists for that AsyncStorage key) and encrypted in place on first read
+4. **Graceful fallback**: If SecureStore is unavailable (Expo Go, web), falls back to plain AsyncStorage
+
+```javascript
+// BEFORE (plaintext):
+const customStorage = {
+  setItem: (key, value) => AsyncStorage.setItem(key, value),  // JSON in plain text!
+};
+
+// AFTER (encrypted):
+class SecureStorageAdapter {
+  async setItem(key, value) {
+    const encrypted = await this._encrypt(key, value);  // AES-256-CTR
+    await AsyncStorage.setItem(key, encrypted);          // hex ciphertext only
+  }
+}
+```
+
+Key implementation details:
+- `expo-crypto.getRandomValues()` generates cryptographically secure random AES keys
+- Key is written to SecureStore BEFORE ciphertext to AsyncStorage (safer crash ordering)
+- Each `setItem` generates a fresh AES key (token refresh every ~55min re-encrypts)
+- `removeItem` cleans both AsyncStorage ciphertext AND SecureStore key
+
+## How to Detect Similar Issues
+1. **Grep for raw AsyncStorage writes of sensitive data**: `grep -rn "AsyncStorage.setItem" src/ | grep -i "token\|session\|secret\|key"`
+2. **Check SecureStore limits**: Any value > 2KB needs the hybrid approach (encrypt + store ciphertext elsewhere)
+3. **Verify encryption key source**: Must use `expo-crypto.getRandomValues()` — not `Math.random()`
+
+### Test Plan
+```javascript
+// After sign-in, verify AsyncStorage contains hex (not JSON):
+const raw = await AsyncStorage.getItem('sb-PROJECT-auth-token');
+expect(raw).toMatch(/^[0-9a-f]+$/);  // hex ciphertext, not { "access_token": "..." }
+expect(JSON.parse.bind(null, raw)).toThrow();  // cannot parse as JSON
+
+// Verify SecureStore has the encryption key:
+const key = await SecureStore.getItemAsync('sb-PROJECT-auth-token');
+expect(key).toMatch(/^[0-9a-f]{64}$/);  // 256-bit key as 64 hex chars
+
+// Verify existing users auto-migrate without re-login
+// (pre-migration: no SecureStore key → getItem detects, encrypts in place, returns original value)
+```
+
+---
+
+# RULE 42: Migration Column Type Must Match Live Database Schema
+**Source:** Phase 12 — `COALESCE(recurrence_days, 1)` failed with error 42804 because `recurrence_days` is `INTEGER[]` but COALESCE compared it to plain `INTEGER`
+
+## What Failed
+The `reset_user_actions` RPC function crashed at runtime with PostgreSQL error `42804`: "COALESCE types integer[] and integer cannot be matched". The `checkAndResetActions` call from `actionService.js` triggered the error on every app launch.
+
+## Why It Failed
+The `vision_actions.recurrence_days` column was created as `INTEGER[]` (array) in the database, but the migration SQL used `COALESCE(v_action.recurrence_days, 1)` — comparing an array type to a scalar integer. PostgreSQL's `COALESCE` requires all arguments to share a compatible type.
+
+Additionally, a second migration file declared the column as `INTEGER DEFAULT 1` (scalar), which was a no-op because the column already existed as `INTEGER[]`. This type mismatch between migration files and live DB went undetected.
+
+```sql
+-- BAD: COALESCE cannot compare INTEGER[] with INTEGER
+COALESCE(v_action.recurrence_days, 1)  -- error 42804
+
+-- GOOD: subscript extracts first element (INTEGER) before COALESCE
+COALESCE(v_action.recurrence_days[1], 1)  -- returns INTEGER
+```
+
+## What Guard Was Added
+1. Fixed `COALESCE(v_action.recurrence_days[1], 1)` in both migration files
+2. Fixed column type declaration from `INTEGER DEFAULT 1` to `INTEGER[]`
+3. Patched live DB via `execute_sql` with corrected function
+
+## How to Detect Similar Issues
+1. **Grep for COALESCE with array columns**: `grep -n "COALESCE" supabase/migrations/*.sql` — check if any argument is an array column
+2. **Compare migration types to live DB**: `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'X'` — do types match migration `ADD COLUMN` statements?
+3. **Test all RPC functions**: Call each RPC at least once — type mismatches only surface at runtime
+4. **Watch for error 42804**: This specific error code always means COALESCE/CASE/UNION type mismatch
+
+### Code smell indicators
+- `COALESCE(array_column, scalar_value)` — must subscript first: `array_column[1]`
+- `ADD COLUMN IF NOT EXISTS x INTEGER` when column already exists as `INTEGER[]` — silent no-op
+- Migration files with different type declarations for the same column
+- RPC functions that are never called during development/testing
+
+### Future bugs this prevents
+- Runtime crashes on any RPC that uses COALESCE with array columns
+- Silent type mismatches between migration files and live DB schema
+- Features that appear to work in development (where the column doesn't exist yet) but crash in production
+
+---
+
+# RULE 43: RPC Function Names in App Code Must Match Database Exactly
+**Source:** Phase 12 — `increment_viewer_count`, `add_xp_to_user`, `record_course_enrollment` called in app but didn't exist in DB under those names
+
+## What Failed
+Five app-side RPC calls referenced functions that didn't exist in the database:
+1. `supabase.rpc('increment_viewer_count')` — actual name: `increment_stream_viewers`
+2. `supabase.rpc('decrement_viewer_count')` — actual name: `decrement_stream_viewers`
+3. `supabase.rpc('add_xp_to_user')` — actual name: `add_xp`
+4. `supabase.rpc('increment_chatbot_usage')` — function didn't exist at all
+5. `supabase.rpc('record_course_enrollment')` — function didn't exist at all
+
+These calls silently failed (Supabase returns error object, but the services swallowed it in catch blocks).
+
+## Why It Failed
+RPC function names were written in app code based on assumed conventions or copy-pasted from design docs, but the actual SQL `CREATE FUNCTION` used different names. There was no compile-time or startup-time verification that RPC function names match the database.
+
+Additionally, parameter names must also match exactly:
+```javascript
+// BAD: wrong function name + wrong parameter name
+supabase.rpc('increment_viewer_count', { session_id: sessionId })
+
+// GOOD: matches CREATE FUNCTION increment_stream_viewers(p_stream_id UUID)
+supabase.rpc('increment_stream_viewers', { p_stream_id: sessionId })
+```
+
+## What Guard Was Added
+1. Renamed 3 RPC calls to match existing DB functions
+2. Created 2 missing SQL functions on live DB (`increment_chatbot_usage`, `record_course_enrollment`)
+3. Cross-referenced all 220+ `supabase.rpc()` calls against live DB `pg_proc`
+
+## How to Detect Similar Issues
+1. **Extract all RPC names from app code**:
+   ```bash
+   grep -rn "supabase\.rpc(" src/ --include="*.js" | sed "s/.*rpc('//" | sed "s/'.*//" | sort -u
+   ```
+2. **Compare against live DB**:
+   ```sql
+   SELECT proname FROM pg_proc
+   WHERE pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')
+   ORDER BY proname;
+   ```
+3. **Check parameter names**: `SELECT proname, proargnames FROM pg_proc WHERE proname = 'function_name'`
+4. **Look for swallowed errors**: RPC calls in `try/catch` that return `[]` or `null` on error hide the failure
+
+### Code smell indicators
+- `supabase.rpc('function_name')` where `function_name` doesn't appear in any migration SQL
+- Parameter names that don't match the function signature (e.g., `session_id` vs `p_stream_id`)
+- Catch blocks that return empty arrays/null without logging the actual error
+- RPC calls added during UI development before the backend function was created
+
+### Future bugs this prevents
+- Silent feature failures where RPC calls error but the UI shows empty/default state
+- Viewer counts that never increment/decrement (broken live streaming)
+- XP/achievement rewards that never get applied
+- Course enrollments that never get recorded
+
+---
+
+# RULE 44: AbortController Required on ALL External API Fetches (Not Just Binance)
+**Source:** Phase 12 — 42 fetch calls across 17 services had no AbortController, expanding on Rule 29 which only covered Binance
+
+## What Failed
+Rule 29 (Phase 7.8) added AbortController to 17 Binance API fetch calls. But the codebase had **42 additional fetch calls** to other external APIs — Restream, Giphy, Facebook, payment gateways, TTS services, health checks — all without any timeout protection.
+
+After app background, ANY of these fetches could hang forever on dead TCP sockets, causing the same permanent deadlock that Rule 29 fixed for Binance.
+
+## Why It Failed
+Rule 29's fix was scoped to "Binance fetches" because Binance was the service that triggered the bug report. The root cause — dead TCP sockets after backgrounding — affects ALL external fetch calls equally, but the fix wasn't applied universally.
+
+Services affected included:
+- `restreamService.js` (7 fetch calls) — streaming platform API
+- `giphyService.js` (6 fetch calls) — GIF search API
+- `facebookService.js` (5 fetch calls) — Facebook Graph API
+- `exchangeAPIService.js` (3 fetch calls) — exchange API keys
+- `avatarService.js` (3 fetch calls) — AI avatar generation
+- `paymentService.js` (1) — payment processing
+- `healthCheckService.js` (2) — uptime monitoring
+- Plus 9 more service/component files
+
+## What Guard Was Added
+AbortController with appropriate timeouts added to all 38 external fetch calls across 17 files:
+- Short-lived API calls (search, status): 5-10s timeout
+- Media generation (avatar, TTS): 15-30s timeout
+- Payment processing: 20-30s timeout
+
+```javascript
+// Pattern applied to every external fetch:
+const controller = new AbortController();
+const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+try {
+  const response = await fetch(url, { ...options, signal: controller.signal });
+  return response;
+} finally {
+  clearTimeout(timeout);
+}
+```
+
+## How to Detect Similar Issues
+1. **Comprehensive fetch audit**:
+   ```bash
+   grep -rn "await fetch(" src/ --include="*.js" --include="*.ts" | grep -v "node_modules"
+   ```
+   Every result MUST have `signal: controller.signal` or go through a timeout wrapper.
+
+2. **Check for AbortController in same function**:
+   ```bash
+   # Files with fetch but no AbortController — all are vulnerable
+   for f in $(grep -rl "await fetch(" src/ --include="*.js"); do
+     grep -q "AbortController" "$f" || echo "MISSING: $f"
+   done
+   ```
+
+3. **Exclude safe fetches**: `file://` URIs, `localhost`, and Supabase client calls (already wrapped by global fetch in `supabase.js`) are safe.
+
+4. **Test**: Start any external API call → background app 30s → return. Does the operation complete or hang?
+
+### Code smell indicators
+- `await fetch(url)` without `{ signal: ... }` in any service file
+- Service file with zero imports/usage of `AbortController`
+- `try/finally` around a fetch with no timeout (false safety — Rule 29)
+- New service added that copies fetch pattern from pre-fix code
+
+### Future bugs this prevents
+- GIF search hanging forever after background (Giphy API)
+- Payment processing hanging on dead socket (payment gateway)
+- Facebook post API hanging (Graph API)
+- Health check reporting false "unhealthy" because the check itself hung
+- Any new external API integration inheriting the same vulnerability
+
+---
+
+# RULE 45: Non-Existent Table References Silently Fail
+**Source:** Phase 12 — 5 queries across 4 services referenced `.from('follows')` but the table doesn't exist (real table is `user_follows`)
+
+## What Failed
+Four services contained queries against a `follows` table that doesn't exist in the database:
+- `storyService.getFollowingStories()` — tried to get followed users' story list
+- `liveService.getFollowingStreams()` — tried to get followed users' live streams
+- `repostService.getFeedWithReposts()` — tried to get followed users' reposts
+- `privacyService.searchFollowersForCloseFriends()` — tried to get user's followers
+- `privacyService.canViewPost()` (followers visibility) — tried to check follow status
+
+Each query always returned an error (caught by catch blocks) or empty results, making these features silently non-functional.
+
+## Why It Failed
+The `follows` table was referenced in early service code but was later renamed to `user_follows` (or was designed but never created). The services were written against a planned schema, not the actual database. Because all queries were wrapped in `try/catch` with fallback empty arrays, no runtime errors were visible — the features simply returned no data.
+
+```javascript
+// SILENT FAILURE: table doesn't exist, catch returns []
+try {
+  const { data } = await supabase.from('follows').select('following_id').eq('follower_id', user.id);
+  return data?.map(f => f.following_id) || [];
+} catch (error) {
+  console.error('[Service] Error:', error);  // Logged but never noticed
+  return [];  // Feature silently broken
+}
+```
+
+## What Guard Was Added
+For each service:
+- Replaced dead `.from('follows')` queries with hardcoded empty arrays + comment explaining no follow system exists yet
+- `storyService`: shows only own stories (`followingIds = [user.id]`)
+- `liveService`: returns empty (`followingIds = []`)
+- `repostService`: shows own reposts only (`followingIds = [user.id]`)
+- `privacyService`: returns empty followers, `'followers'` visibility treated as private
+
+## How to Detect Similar Issues
+1. **Cross-reference all table names in code against live DB**:
+   ```bash
+   grep -rn "\.from('" src/services/ --include="*.js" | sed "s/.*\.from('//" | sed "s/'.*//" | sort -u > code_tables.txt
+   ```
+   ```sql
+   SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;
+   ```
+   Diff the two lists — any table in code but not in DB is a silent failure.
+
+2. **Check for catch blocks that return empty arrays**:
+   ```bash
+   grep -B5 "return \[\]" src/services/*.js | grep "catch"
+   ```
+   These may be hiding real failures, not just "no data" conditions.
+
+3. **Monitor Supabase logs**: `relation "follows" does not exist` errors in PostgREST logs
+
+### Code smell indicators
+- `.from('table_name')` where `table_name` doesn't appear in any migration file
+- `catch { return [] }` hiding the difference between "no data" and "table doesn't exist"
+- Service file referencing a table that no other service file uses
+- Comments like "TODO: create follows table" that were never actioned
+
+### Future bugs this prevents
+- "Following stories" feature showing nothing even when users have followers
+- "Following streams" section always empty
+- Feed missing reposts from followed users
+- Privacy "followers only" posts being invisible to actual followers
+- New features built on top of the `follows` table inheriting the silent failure
+
+---
+
+# RULE 46: Edge Function SDK Version Pinning and Auth Key Hygiene
+**Source:** Phase 12 — `chatbot-gemini` used `ANON_KEY` instead of `SERVICE_ROLE_KEY`; 8 edge functions pinned to outdated supabase-js versions
+
+## What Failed
+Two issues found across edge functions:
+
+**1. Wrong auth key**: `chatbot-gemini` used `SUPABASE_ANON_KEY` to create its Supabase client, then forwarded the user's `Authorization` header. This meant:
+- RLS policies applied as the end user (intended for client, not server-side)
+- Write operations to `chatbot_history` could silently fail if RLS blocked them
+- No service-level access for admin operations
+
+**2. Outdated SDK versions**: 8 edge functions imported specific pinned versions of `@supabase/supabase-js`:
+- `@2.7.1` (2 functions) — 18+ months old, missing bug fixes
+- `@2.38.4` (4 functions) — missing security patches
+- `@2.39.3` (2 functions) — minor version behind
+
+These pinned versions could have known vulnerabilities, missing features, or incompatibilities with the current Supabase project version.
+
+## Why It Failed
+Edge functions were written at different times by different developers. Each copied the import pattern from wherever they found it, including the specific version string. There was no convention or lint rule enforcing:
+- Which auth key to use (ANON vs SERVICE_ROLE)
+- What SDK version to import
+
+```typescript
+// BAD: ANON_KEY + user auth header forwarding (client-level access)
+const supabase = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
+  global: { headers: { Authorization: req.headers.get('Authorization')! } }
+});
+
+// GOOD: SERVICE_ROLE_KEY (full server-level access, bypasses RLS)
+const supabase = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+```
+
+```typescript
+// BAD: pinned to specific old version
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+
+// GOOD: latest within major version
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+```
+
+## What Guard Was Added
+1. `chatbot-gemini`: `ANON_KEY` → `SERVICE_ROLE_KEY`, removed user auth header forwarding, added 30s AbortController timeout on Gemini API fetch
+2. All 8 functions: pinned versions → `@2` (latest stable within major version)
+
+## How to Detect Similar Issues
+1. **Grep edge functions for ANON_KEY**:
+   ```bash
+   grep -rn "SUPABASE_ANON_KEY" supabase/functions/ --include="*.ts"
+   ```
+   Server-side functions should use `SERVICE_ROLE_KEY`. ANON_KEY is only appropriate if the function explicitly needs to act as the client user.
+
+2. **Check for pinned versions**:
+   ```bash
+   grep -rn "@supabase/supabase-js@2\." supabase/functions/ --include="*.ts"
+   ```
+   Any result with a specific patch version (e.g., `@2.7.1`) should be updated to `@2`.
+
+3. **Verify secrets are set**: List required vs actual secrets for each function:
+   ```bash
+   grep -rn "Deno.env.get(" supabase/functions/ --include="*.ts" | sed "s/.*get('//" | sed "s/'.*//" | sort -u
+   ```
+
+### Code smell indicators
+- Edge function importing `SUPABASE_ANON_KEY` while also performing write operations
+- `global: { headers: { Authorization: ... } }` in server-side function (client pattern used server-side)
+- `@supabase/supabase-js@2.X.Y` where X.Y is more than 3 minor versions behind latest
+- Different edge functions importing different SDK versions
+- Edge function with no AbortController on external API calls (same as Rule 44)
+
+### Future bugs this prevents
+- Server-side operations silently blocked by RLS (wrong auth key)
+- SDK version with known security vulnerabilities running in production
+- Inconsistent behavior between edge functions using different SDK versions
+- New edge functions copying bad patterns from existing ones
+
+---
+
+## Phase 12 Tests
+
+### COALESCE Type Mismatch (Rule 42)
+```javascript
+test('reset_user_actions handles INTEGER[] recurrence_days without type error', async () => {
+  // Insert a vision_action with recurrence_days as array
+  await supabaseAdmin.from('vision_actions').insert({
+    user_id: testUserId,
+    goal_id: testGoalId,
+    name: 'Test action',
+    recurrence_days: [1, 3, 5],
+    current_count: 5,
+  });
+
+  // Should not throw error 42804
+  const { error } = await supabaseAdmin.rpc('reset_user_actions');
+  expect(error).toBeNull();
+});
+```
+
+### RPC Function Name Match (Rule 43)
+```javascript
+test('all supabase.rpc() calls reference existing database functions', async () => {
+  // Extract all RPC names from source code
+  const sourceFiles = glob.sync('src/**/*.js');
+  const rpcNames = new Set();
+  for (const file of sourceFiles) {
+    const content = fs.readFileSync(file, 'utf8');
+    const matches = content.matchAll(/supabase\.rpc\(['"](\w+)['"]/g);
+    for (const m of matches) rpcNames.add(m[1]);
+  }
+
+  // Get all functions from DB
+  const { data: dbFunctions } = await supabaseAdmin.rpc('raw_sql', {
+    query: `SELECT proname FROM pg_proc
+            WHERE pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')`
+  });
+  const dbNames = new Set(dbFunctions.map(f => f.proname));
+
+  // Every RPC name in code must exist in DB
+  for (const name of rpcNames) {
+    expect(dbNames.has(name)).toBe(true); // `${name} called in code but not in DB`
+  }
+});
+```
+
+### AbortController Coverage (Rule 44)
+```javascript
+test('every external fetch() has AbortController', () => {
+  const serviceFiles = glob.sync('src/services/**/*.js');
+  const violations = [];
+
+  for (const file of serviceFiles) {
+    const content = fs.readFileSync(file, 'utf8');
+    const fetchMatches = [...content.matchAll(/await fetch\(/g)];
+    if (fetchMatches.length === 0) continue;
+
+    const hasAbortController = content.includes('AbortController');
+    if (!hasAbortController) {
+      violations.push(file);
+    }
+  }
+
+  expect(violations).toHaveLength(0);
+});
+```
+
+### Non-Existent Table References (Rule 45)
+```javascript
+test('no service references non-existent tables', async () => {
+  // Get all table names from code
+  const serviceFiles = glob.sync('src/services/**/*.js');
+  const codeTableNames = new Set();
+  for (const file of serviceFiles) {
+    const content = fs.readFileSync(file, 'utf8');
+    const matches = content.matchAll(/\.from\(['"](\w+)['"]\)/g);
+    for (const m of matches) codeTableNames.add(m[1]);
+  }
+
+  // Get all tables from live DB
+  const { data: dbTables } = await supabaseAdmin.rpc('raw_sql', {
+    query: `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`
+  });
+  const dbTableNames = new Set(dbTables.map(t => t.tablename));
+
+  // Every table referenced in code must exist in DB
+  for (const name of codeTableNames) {
+    expect(dbTableNames.has(name)).toBe(true); // `${name} referenced in code but not in DB`
+  }
+});
+```
+
+### Edge Function Auth Key (Rule 46)
+```bash
+# No edge function should use ANON_KEY for server-side operations
+test_count=$(grep -rl "SUPABASE_ANON_KEY" supabase/functions/ --include="*.ts" | wc -l)
+# Expected: 0 (all server-side functions use SERVICE_ROLE_KEY)
+
+# No pinned supabase-js minor/patch versions
+pinned_count=$(grep -rn "@supabase/supabase-js@2\." supabase/functions/ --include="*.ts" | wc -l)
+# Expected: 0 (all use @2 for latest stable)
+```

@@ -1566,16 +1566,24 @@ class NotificationService {
         priority: 'high',
       }));
 
-      const response = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(messages),
-      });
+      const pushController = new AbortController();
+      const pushTimeout = setTimeout(() => pushController.abort(), 10000);
+      let result;
+      try {
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(messages),
+          signal: pushController.signal,
+        });
 
-      const result = await response.json();
+        result = await response.json();
+      } finally {
+        clearTimeout(pushTimeout);
+      }
 
       // Check for errors
       const errors = result.data?.filter(r => r.status === 'error') || [];
@@ -2327,26 +2335,34 @@ class NotificationService {
       }
 
       // Send single notification via Expo
-      const response = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: token,
-          title: `[TEST] ${notificationData.title}`,
-          body: notificationData.body,
-          data: {
-            deep_link: notificationData.deep_link,
-            is_test: true,
+      const pushController = new AbortController();
+      const pushTimeout = setTimeout(() => pushController.abort(), 10000);
+      let result;
+      try {
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
           },
-          sound: 'default',
-          badge: 1,
-        }),
-      });
+          body: JSON.stringify({
+            to: token,
+            title: `[TEST] ${notificationData.title}`,
+            body: notificationData.body,
+            data: {
+              deep_link: notificationData.deep_link,
+              is_test: true,
+            },
+            sound: 'default',
+            badge: 1,
+          }),
+          signal: pushController.signal,
+        });
 
-      const result = await response.json();
+        result = await response.json();
+      } finally {
+        clearTimeout(pushTimeout);
+      }
 
       if (result.data?.[0]?.status === 'error') {
         throw new Error(result.data[0].message);

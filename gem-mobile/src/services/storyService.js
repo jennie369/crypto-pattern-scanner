@@ -54,14 +54,8 @@ export const storyService = {
 
       const now = new Date().toISOString();
 
-      // Get followed user IDs
-      const { data: following } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', user.id);
-
-      const followingIds = (following || []).map(f => f.following_id);
-      followingIds.push(user.id); // Include own stories
+      // 'follows' table does not exist — show own stories only
+      const followingIds = [user.id];
 
       if (followingIds.length === 0) return [];
 

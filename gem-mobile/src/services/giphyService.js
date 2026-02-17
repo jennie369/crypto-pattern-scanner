@@ -36,6 +36,8 @@ class GiphyService {
    * @returns {Promise<Array>} GIF results
    */
   async search(query, limit = 25, offset = 0) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       if (!query || query.length < 2) return [];
 
@@ -47,7 +49,7 @@ class GiphyService {
         `rating=pg-13&` +
         `lang=vi`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
 
       if (!response.ok) {
         throw new Error(`GIPHY API error: ${response.status}`);
@@ -64,6 +66,8 @@ class GiphyService {
       }
 
       return [];
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -74,6 +78,8 @@ class GiphyService {
    * @returns {Promise<Array>} Trending GIFs
    */
   async getTrending(limit = 25, forceRefresh = false) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       // Check cache
       if (!forceRefresh && this.trendingCache && this.trendingCacheTime) {
@@ -88,7 +94,7 @@ class GiphyService {
         `limit=${Math.min(limit, 50)}&` +
         `rating=pg-13`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
 
       if (!response.ok) {
         throw new Error(`GIPHY API error: ${response.status}`);
@@ -111,6 +117,8 @@ class GiphyService {
       }
 
       return [];
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -119,6 +127,8 @@ class GiphyService {
    * @returns {Promise<Array>} Categories
    */
   async getCategories() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       // Check cache
       if (this.categoriesCache) {
@@ -126,7 +136,7 @@ class GiphyService {
       }
 
       const url = `https://api.giphy.com/v1/gifs/categories?api_key=${GIPHY_API_KEY}`;
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
 
       if (!response.ok) {
         throw new Error(`GIPHY API error: ${response.status}`);
@@ -151,6 +161,8 @@ class GiphyService {
     } catch (error) {
       console.error('[GiphyService] getCategories error:', error);
       return [];
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -160,11 +172,13 @@ class GiphyService {
    * @returns {Promise<Object|null>}
    */
   async getById(giphyId) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       if (!giphyId) return null;
 
       const url = `${GIPHY_BASE_URL}/${giphyId}?api_key=${GIPHY_API_KEY}`;
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
 
       if (!response.ok) {
         throw new Error(`GIPHY API error: ${response.status}`);
@@ -181,6 +195,8 @@ class GiphyService {
     } catch (error) {
       console.error('[GiphyService] getById error:', error);
       return null;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -261,6 +277,8 @@ class GiphyService {
    * @returns {Promise<Array>} GIF results
    */
   async searchTenor(query, limit = 25) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       if (!TENOR_API_KEY || !query) return [];
 
@@ -271,7 +289,7 @@ class GiphyService {
         `contentfilter=medium&` +
         `media_filter=gif,tinygif,nanogif`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
 
       if (!response.ok) {
         throw new Error(`Tenor API error: ${response.status}`);
@@ -282,6 +300,8 @@ class GiphyService {
     } catch (error) {
       console.error('[GiphyService] searchTenor error:', error);
       return [];
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -291,6 +311,8 @@ class GiphyService {
    * @returns {Promise<Array>}
    */
   async getTrendingTenor(limit = 25) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       if (!TENOR_API_KEY) return [];
 
@@ -300,7 +322,7 @@ class GiphyService {
         `contentfilter=medium&` +
         `media_filter=gif,tinygif`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
 
       if (!response.ok) {
         throw new Error(`Tenor API error: ${response.status}`);
@@ -311,6 +333,8 @@ class GiphyService {
     } catch (error) {
       console.error('[GiphyService] getTrendingTenor error:', error);
       return [];
+    } finally {
+      clearTimeout(timeout);
     }
   }
 

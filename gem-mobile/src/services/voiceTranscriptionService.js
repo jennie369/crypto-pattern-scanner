@@ -214,19 +214,27 @@ class VoiceTranscriptionService {
       const extension = audioUri.split('.').pop() || 'm4a';
 
       // Send to backend for transcription
-      const response = await fetch(`${BACKEND_URL}/api/transcribe`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          audio_base64: base64Audio,
-          file_extension: extension,
-          language: 'vi', // Vietnamese
-          prompt: 'GEM Master, trading, crypto, Bitcoin, Ethereum, tarot, kinh dịch, phong thủy, đá quý',
-        }),
-      });
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 15000);
+      let response;
+      try {
+        response = await fetch(`${BACKEND_URL}/api/transcribe`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            audio_base64: base64Audio,
+            file_extension: extension,
+            language: 'vi', // Vietnamese
+            prompt: 'GEM Master, trading, crypto, Bitcoin, Ethereum, tarot, kinh dịch, phong thủy, đá quý',
+          }),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(fetchTimeout);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();

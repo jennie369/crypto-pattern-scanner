@@ -193,37 +193,44 @@ export async function testBinanceAPI(apiKey, secretKey) {
     const queryString = `timestamp=${timestamp}`;
     const signature = createSignature(secretKey, queryString);
 
-    const response = await fetch(
-      `${BINANCE_API.BASE_URL}${BINANCE_API.ENDPOINTS.ACCOUNT}?${queryString}&signature=${signature}`,
-      {
-        headers: {
-          'X-MBX-APIKEY': apiKey,
-        },
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(
+        `${BINANCE_API.BASE_URL}${BINANCE_API.ENDPOINTS.ACCOUNT}?${queryString}&signature=${signature}`,
+        {
+          headers: {
+            'X-MBX-APIKEY': apiKey,
+          },
+          signal: controller.signal,
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        return {
+          success: false,
+          error: error.msg || 'API test failed',
+          code: error.code,
+          status: API_TEST_STATUS.FAILED,
+        };
       }
-    );
 
-    if (!response.ok) {
-      const error = await response.json();
+      const data = await response.json();
+
       return {
-        success: false,
-        error: error.msg || 'API test failed',
-        code: error.code,
-        status: API_TEST_STATUS.FAILED,
+        success: true,
+        status: API_TEST_STATUS.SUCCESS,
+        permissions: {
+          enableReading: permissions.enableReading,
+          enableSpotAndMarginTrading: permissions.enableSpotAndMarginTrading,
+          enableFutures: permissions.enableFutures,
+        },
+        accountType: data.accountType,
       };
+    } finally {
+      clearTimeout(fetchTimeout);
     }
-
-    const data = await response.json();
-
-    return {
-      success: true,
-      status: API_TEST_STATUS.SUCCESS,
-      permissions: {
-        enableReading: permissions.enableReading,
-        enableSpotAndMarginTrading: permissions.enableSpotAndMarginTrading,
-        enableFutures: permissions.enableFutures,
-      },
-      accountType: data.accountType,
-    };
   } catch (error) {
     console.error('[ExchangeAPI] Binance test error:', error);
     return {
@@ -241,6 +248,8 @@ export async function testBinanceAPI(apiKey, secretKey) {
  * @returns {Promise<Object>} Permissions
  */
 async function getBinanceAPIPermissions(apiKey, secretKey) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
   try {
     const timestamp = Date.now();
     const queryString = `timestamp=${timestamp}`;
@@ -252,6 +261,7 @@ async function getBinanceAPIPermissions(apiKey, secretKey) {
         headers: {
           'X-MBX-APIKEY': apiKey,
         },
+        signal: controller.signal,
       }
     );
 
@@ -264,6 +274,8 @@ async function getBinanceAPIPermissions(apiKey, secretKey) {
   } catch (error) {
     console.error('[ExchangeAPI] Permissions error:', error);
     return { error: error.message };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -274,6 +286,8 @@ async function getBinanceAPIPermissions(apiKey, secretKey) {
  * @returns {Promise<Object>} Balance data
  */
 export async function fetchBinanceBalance(apiKey, secretKey) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
   try {
     const timestamp = Date.now();
     const queryString = `timestamp=${timestamp}`;
@@ -285,6 +299,7 @@ export async function fetchBinanceBalance(apiKey, secretKey) {
         headers: {
           'X-MBX-APIKEY': apiKey,
         },
+        signal: controller.signal,
       }
     );
 
@@ -328,6 +343,8 @@ export async function fetchBinanceBalance(apiKey, secretKey) {
       success: false,
       error: error.message,
     };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

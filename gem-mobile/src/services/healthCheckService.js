@@ -184,15 +184,23 @@ class HealthCheckService {
   createTTSChecker() {
     return async () => {
       // Check FPT TTS health endpoint
-      const response = await fetch(
-        'https://api.fpt.ai/hmi/tts/v5/healthz',
-        {
-          method: 'GET',
-          headers: {
-            'api-key': process.env.EXPO_PUBLIC_FPT_AI_API_KEY || '',
-          },
-        }
-      );
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 5000);
+      let response;
+      try {
+        response = await fetch(
+          'https://api.fpt.ai/hmi/tts/v5/healthz',
+          {
+            method: 'GET',
+            headers: {
+              'api-key': process.env.EXPO_PUBLIC_FPT_AI_API_KEY || '',
+            },
+            signal: controller.signal,
+          }
+        );
+      } finally {
+        clearTimeout(fetchTimeout);
+      }
 
       if (!response.ok) {
         throw new Error(`TTS API returned ${response.status}`);
@@ -209,7 +217,14 @@ class HealthCheckService {
         return { metadata: { status: 'not_configured' } };
       }
 
-      const response = await fetch(`${museTalkUrl}/health`);
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 5000);
+      let response;
+      try {
+        response = await fetch(`${museTalkUrl}/health`, { signal: controller.signal });
+      } finally {
+        clearTimeout(fetchTimeout);
+      }
       if (!response.ok) {
         throw new Error(`MuseTalk returned ${response.status}`);
       }

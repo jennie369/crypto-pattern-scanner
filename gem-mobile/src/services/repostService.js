@@ -242,14 +242,8 @@ export const repostService = {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // Get user's following list
-      const { data: following } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', user.id);
-
-      const followingIds = following?.map(f => f.following_id) || [];
-      followingIds.push(user.id); // Include own posts
+      // 'follows' table does not exist — show own posts only
+      const followingIds = [user.id];
 
       // Get reposts from followed users
       const { data: reposts, error } = await supabase

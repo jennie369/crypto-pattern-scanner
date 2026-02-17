@@ -213,6 +213,8 @@ class AvatarService {
       `[AvatarService] Generating video: avatar=${avatarId}, expression=${expression}`
     );
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`${MUSETALK_API_URL}/generate`, {
         method: 'POST',
@@ -224,6 +226,7 @@ class AvatarService {
           avatar_id: avatarId,
           expression: expression,
         }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -254,6 +257,8 @@ class AvatarService {
     } catch (error) {
       console.error('[AvatarService] Generation error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -300,10 +305,12 @@ class AvatarService {
    * Check if MuseTalk API is healthy
    */
   async healthCheck() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`${MUSETALK_API_URL}/health`, {
         method: 'GET',
-        timeout: 5000,
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -327,6 +334,8 @@ class AvatarService {
         healthy: false,
         error: error.message,
       };
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -334,14 +343,18 @@ class AvatarService {
    * Get list of avatars from server
    */
   async getServerAvatars() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
-      const response = await fetch(`${MUSETALK_API_URL}/avatars`);
+      const response = await fetch(`${MUSETALK_API_URL}/avatars`, { signal: controller.signal });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       return data.avatars;
     } catch (error) {
       console.error('[AvatarService] Failed to get server avatars:', error);
       return [];
+    } finally {
+      clearTimeout(timeout);
     }
   }
 

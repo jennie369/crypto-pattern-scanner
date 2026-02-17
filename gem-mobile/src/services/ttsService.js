@@ -324,19 +324,27 @@ class TTSService {
       throw new Error('FPT.AI API key not configured');
     }
 
-    const response = await fetch(FPT_AI_API_URL, {
-      method: 'POST',
-      headers: {
-        'api-key': apiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text,
-        voice: options.voice,
-        speed: options.speed,
-        format: options.format || 'mp3',
-      }),
-    });
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => controller.abort(), 15000);
+    let response;
+    try {
+      response = await fetch(FPT_AI_API_URL, {
+        method: 'POST',
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          voice: options.voice,
+          speed: options.speed,
+          format: options.format || 'mp3',
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(fetchTimeout);
+    }
 
     if (!response.ok) {
       const errorText = await response.text();

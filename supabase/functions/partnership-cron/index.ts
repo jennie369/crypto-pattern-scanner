@@ -12,7 +12,7 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -174,10 +174,51 @@ serve(async (req) => {
         console.log(`✅ Reset monthly sales for ${resetResult} affiliates`);
         break;
 
+      case 'verify_kol': {
+        // Re-verify KOL profiles that haven't been checked in 30 days
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: staleResults, error: staleError } = await supabase
+          .from('kol_verification_results')
+          .select('application_id')
+          .lt('last_checked_at', thirtyDaysAgo)
+          .eq('verification_status', 'verified')
+          .limit(10);
+
+        if (staleError) {
+          return new Response(JSON.stringify({
+            success: false,
+            error: 'Failed to query stale KOL verification results',
+            details: staleError.message,
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Deduplicate application IDs
+        const uniqueAppIds = [...new Set((staleResults || []).map(r => r.application_id))];
+
+        let reverifiedCount = 0;
+        for (const applicationId of uniqueAppIds) {
+          try {
+            await supabase.functions.invoke('kol-intelligence-crawl', {
+              body: { application_id: applicationId, force: true },
+            });
+            reverifiedCount++;
+          } catch (err) {
+            console.error(`[Cron] Re-verify failed for ${applicationId}:`, err);
+          }
+        }
+
+        result = { action: 'verify_kol', reverified: reverifiedCount, stale_found: uniqueAppIds.length };
+        console.log(`✅ Re-verified ${reverifiedCount}/${uniqueAppIds.length} stale KOL profiles`);
+        break;
+      }
+
       default:
         return new Response(JSON.stringify({
           error: 'Invalid action',
-          valid_actions: ['test', 'auto_approve', 'weekly_upgrade', 'monthly_downgrade', 'reset_monthly_sales']
+          valid_actions: ['test', 'auto_approve', 'weekly_upgrade', 'monthly_downgrade', 'reset_monthly_sales', 'verify_kol']
         }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -54,11 +54,19 @@ class ShopifyService {
     const url = `${SUPABASE_URL}/functions/v1/${functionName}`;
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify(body),
-      });
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 10000);
+      let response;
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: this.headers,
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(fetchTimeout);
+      }
 
       // Retry on transient server errors (502 cold-start, 503 overloaded)
       if ((response.status === 502 || response.status === 503) && attempt < MAX_RETRIES) {

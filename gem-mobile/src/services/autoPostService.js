@@ -342,14 +342,22 @@ export const triggerManualPost = async (contentId) => {
     }
 
     // Call the auto-post-scheduler edge function directly
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/auto-post-scheduler`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ content_id: contentId, manual: true }),
-    });
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => controller.abort(), 15000);
+    let response;
+    try {
+      response = await fetch(`${SUPABASE_URL}/functions/v1/auto-post-scheduler`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ content_id: contentId, manual: true }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(fetchTimeout);
+    }
 
     const result = await response.json();
 

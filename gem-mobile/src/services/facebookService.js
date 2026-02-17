@@ -81,6 +81,8 @@ class FacebookService {
    * @param {string} description - Live video description
    */
   async createLiveVideo(title, description = '') {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(
         `${GRAPH_API_BASE}/${this.pageId}/live_videos`,
@@ -93,6 +95,7 @@ class FacebookService {
             description,
             status: 'LIVE_NOW',
           }),
+          signal: controller.signal,
         }
       );
 
@@ -122,6 +125,8 @@ class FacebookService {
       console.error('[Facebook] Create live video failed:', error);
       this._emit(FACEBOOK_EVENTS.ERROR, { error });
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -173,6 +178,8 @@ class FacebookService {
   async _fetchComments() {
     if (!this.liveVideoId) return;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const params = new URLSearchParams({
         access_token: this.accessToken,
@@ -188,7 +195,8 @@ class FacebookService {
       }
 
       const response = await fetch(
-        `${GRAPH_API_BASE}/${this.liveVideoId}/comments?${params}`
+        `${GRAPH_API_BASE}/${this.liveVideoId}/comments?${params}`,
+        { signal: controller.signal }
       );
       const data = await response.json();
 
@@ -221,6 +229,8 @@ class FacebookService {
       }
     } catch (error) {
       console.error('[Facebook] Fetch comments error:', error);
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -230,6 +240,8 @@ class FacebookService {
   async _fetchViewerCount() {
     if (!this.liveVideoId) return;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const params = new URLSearchParams({
         access_token: this.accessToken,
@@ -237,7 +249,8 @@ class FacebookService {
       });
 
       const response = await fetch(
-        `${GRAPH_API_BASE}/${this.liveVideoId}?${params}`
+        `${GRAPH_API_BASE}/${this.liveVideoId}?${params}`,
+        { signal: controller.signal }
       );
       const data = await response.json();
 
@@ -259,6 +272,8 @@ class FacebookService {
       });
     } catch (error) {
       console.error('[Facebook] Fetch viewer count error:', error);
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -311,6 +326,8 @@ class FacebookService {
   async getLiveStatus() {
     if (!this.liveVideoId) return null;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const params = new URLSearchParams({
         access_token: this.accessToken,
@@ -318,7 +335,8 @@ class FacebookService {
       });
 
       const response = await fetch(
-        `${GRAPH_API_BASE}/${this.liveVideoId}?${params}`
+        `${GRAPH_API_BASE}/${this.liveVideoId}?${params}`,
+        { signal: controller.signal }
       );
       const data = await response.json();
 
@@ -336,6 +354,8 @@ class FacebookService {
     } catch (error) {
       console.error('[Facebook] Get live status error:', error);
       return null;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -345,6 +365,8 @@ class FacebookService {
   async endLiveVideo() {
     if (!this.liveVideoId) return;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       await fetch(`${GRAPH_API_BASE}/${this.liveVideoId}`, {
         method: 'POST',
@@ -353,6 +375,7 @@ class FacebookService {
           access_token: this.accessToken,
           end_live_video: true,
         }),
+        signal: controller.signal,
       });
 
       this.disconnect();
@@ -361,6 +384,8 @@ class FacebookService {
     } catch (error) {
       console.error('[Facebook] End live error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
