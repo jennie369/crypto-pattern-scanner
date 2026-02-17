@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   TextInput,
   Modal,
+  Linking,
 } from 'react-native';
 import CustomAlert from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -465,9 +466,11 @@ const AdminApplicationsScreen = ({ navigation }) => {
                   <View style={styles.detailSection}>
                     <Text style={styles.detailLabel}>Link social ({app.social_proof_urls.length}):</Text>
                     {app.social_proof_urls.slice(0, 3).map((url, i) => (
-                      <Text key={i} style={[styles.detailValue, { color: '#4FC3F7', fontSize: 11 }]} numberOfLines={1}>
-                        {url}
-                      </Text>
+                      <TouchableOpacity key={i} onPress={() => Linking.openURL(url)}>
+                        <Text style={[styles.detailValue, { color: '#4FC3F7', fontSize: 11, textDecorationLine: 'underline' }]} numberOfLines={1}>
+                          {url}
+                        </Text>
+                      </TouchableOpacity>
                     ))}
                     {app.social_proof_urls.length > 3 && (
                       <Text style={[styles.detailValue, { color: COLORS.textMuted, fontSize: 10 }]}>
