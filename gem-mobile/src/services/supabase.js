@@ -5,7 +5,16 @@
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import * as aesjs from 'aes-js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../utils/constants';
+
+// Lazy-load SecureStore (prevents crash if unavailable, e.g. Expo Go)
+let SecureStore = null;
+try {
+  SecureStore = require('expo-secure-store');
+} catch (e) {
+  console.warn('[Supabase] SecureStore not available, falling back to AsyncStorage');
+}
 
 // Re-export for use in other services
 export { SUPABASE_URL, SUPABASE_ANON_KEY };
@@ -14,42 +23,94 @@ export { SUPABASE_URL, SUPABASE_ANON_KEY };
 const PROJECT_REF = SUPABASE_URL.match(/https:\/\/([^.]+)/)?.[1] ?? 'pgfkbcnzqozzkohwbgbk';
 const AUTH_STORAGE_KEY = `sb-${PROJECT_REF}-auth-token`;
 
-// Custom storage adapter that works on both web and native
-const customStorage = {
-  getItem: async (key) => {
+/**
+ * Hybrid AES-encrypted storage adapter (Supabase-recommended pattern).
+ *
+ * - AES-256-CTR encryption key stored in SecureStore (hardware-backed keychain)
+ * - Encrypted session ciphertext stored in AsyncStorage (no size limit)
+ * - Auto-migrates existing unencrypted sessions on first read
+ * - Falls back to plain AsyncStorage if SecureStore unavailable
+ */
+class SecureStorageAdapter {
+  async _encrypt(key, value) {
+    const encryptionKey = new Uint8Array(32);
+    require('expo-crypto').getRandomValues(encryptionKey);
+    const cipher = new aesjs.ModeOfOperation.ctr(encryptionKey, new aesjs.Counter(1));
+    const encryptedBytes = cipher.encrypt(aesjs.utils.utf8.toBytes(value));
+    const keyHex = aesjs.utils.hex.fromBytes(encryptionKey);
+    // Write key to SecureStore FIRST (safer crash ordering)
+    await SecureStore.setItemAsync(key, keyHex);
+    return aesjs.utils.hex.fromBytes(encryptedBytes);
+  }
+
+  async _decrypt(key, value) {
+    const keyHex = await SecureStore.getItemAsync(key);
+    if (!keyHex) return null;
+    const cipher = new aesjs.ModeOfOperation.ctr(
+      aesjs.utils.hex.toBytes(keyHex), new aesjs.Counter(1)
+    );
+    return aesjs.utils.utf8.fromBytes(cipher.decrypt(aesjs.utils.hex.toBytes(value)));
+  }
+
+  async getItem(key) {
     try {
-      if (Platform.OS === 'web') {
-        return localStorage.getItem(key);
+      if (Platform.OS === 'web') return localStorage.getItem(key);
+      if (!SecureStore) return await AsyncStorage.getItem(key);
+
+      const rawValue = await AsyncStorage.getItem(key);
+      if (!rawValue) return null;
+
+      const hasKey = await SecureStore.getItemAsync(key);
+      if (hasKey) {
+        // Encrypted — decrypt
+        try {
+          return await this._decrypt(key, rawValue);
+        } catch (e) {
+          // Decrypt failed — maybe data was rewritten unencrypted by fallback
+          console.warn('[SecureStorage] Decrypt failed, trying as raw JSON');
+        }
       }
-      return await AsyncStorage.getItem(key);
+
+      // No encryption key or decrypt failed → unencrypted data (pre-migration)
+      // Auto-migrate: encrypt in place
+      try {
+        const encrypted = await this._encrypt(key, rawValue);
+        await AsyncStorage.setItem(key, encrypted);
+        console.log('[SecureStorage] Migrated key:', key);
+      } catch (migrationErr) {
+        console.warn('[SecureStorage] Migration failed:', migrationErr);
+      }
+      return rawValue;
     } catch (error) {
-      console.error('Storage getItem error:', error);
-      return null;
+      console.error('[SecureStorage] getItem error:', error);
+      try { return await AsyncStorage.getItem(key); } catch { return null; }
     }
-  },
-  setItem: async (key, value) => {
+  }
+
+  async setItem(key, value) {
     try {
-      if (Platform.OS === 'web') {
-        localStorage.setItem(key, value);
-      } else {
-        await AsyncStorage.setItem(key, value);
-      }
+      if (Platform.OS === 'web') { localStorage.setItem(key, value); return; }
+      if (!SecureStore) { await AsyncStorage.setItem(key, value); return; }
+      const encrypted = await this._encrypt(key, value);
+      await AsyncStorage.setItem(key, encrypted);
     } catch (error) {
-      console.error('Storage setItem error:', error);
+      console.error('[SecureStorage] setItem error:', error);
+      try { await AsyncStorage.setItem(key, value); } catch {}
     }
-  },
-  removeItem: async (key) => {
+  }
+
+  async removeItem(key) {
     try {
-      if (Platform.OS === 'web') {
-        localStorage.removeItem(key);
-      } else {
-        await AsyncStorage.removeItem(key);
-      }
+      if (Platform.OS === 'web') { localStorage.removeItem(key); return; }
+      await AsyncStorage.removeItem(key);
+      if (SecureStore) await SecureStore.deleteItemAsync(key).catch(() => {});
     } catch (error) {
-      console.error('Storage removeItem error:', error);
+      console.error('[SecureStorage] removeItem error:', error);
     }
-  },
-};
+  }
+}
+
+const secureStorage = new SecureStorageAdapter();
 
 // Per-request timeout for Supabase API calls.
 // Prevents HTTP requests from hanging indefinitely on stalled mobile connections.
@@ -61,7 +122,7 @@ const EDGE_FUNCTION_TIMEOUT = 30000;   // 30s for edge functions (AI/TTS can be 
 // Create Supabase client with custom storage and tiered fetch timeout
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: customStorage,
+    storage: secureStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: Platform.OS === 'web',
@@ -161,9 +222,9 @@ export const signOut = async () => {
 export const localOnlySignOut = async () => {
   try {
     // Clear the Supabase auth session from local storage only
-    await customStorage.removeItem(AUTH_STORAGE_KEY);
+    await secureStorage.removeItem(AUTH_STORAGE_KEY);
     // Also clear the code verifier if any (PKCE flow)
-    await customStorage.removeItem(`${AUTH_STORAGE_KEY}-code-verifier`);
+    await secureStorage.removeItem(`${AUTH_STORAGE_KEY}-code-verifier`);
     console.log('[Supabase] Local-only sign out completed (server session preserved)');
     return { error: null };
   } catch (error) {
@@ -180,7 +241,7 @@ export const getCurrentUser = async () => {
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
       console.warn('[Supabase] Invalid refresh token detected');
       // Clear stored session
-      await customStorage.removeItem(AUTH_STORAGE_KEY);
+      await secureStorage.removeItem(AUTH_STORAGE_KEY);
       return { user: null, error: { ...error, isInvalidRefreshToken: true } };
     }
 
@@ -189,7 +250,7 @@ export const getCurrentUser = async () => {
     console.error('GetCurrentUser error:', error);
     // Check for invalid refresh token in catch
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
-      await customStorage.removeItem(AUTH_STORAGE_KEY);
+      await secureStorage.removeItem(AUTH_STORAGE_KEY);
       return { user: null, error: { message: error.message, isInvalidRefreshToken: true } };
     }
     return { user: null, error };
@@ -203,7 +264,7 @@ export const getSession = async () => {
     // Check for invalid refresh token error
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
       console.warn('[Supabase] Invalid refresh token in getSession');
-      await customStorage.removeItem(AUTH_STORAGE_KEY);
+      await secureStorage.removeItem(AUTH_STORAGE_KEY);
       return { session: null, error: { ...error, isInvalidRefreshToken: true } };
     }
 
@@ -211,7 +272,7 @@ export const getSession = async () => {
   } catch (error) {
     console.error('GetSession error:', error);
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
-      await customStorage.removeItem(AUTH_STORAGE_KEY);
+      await secureStorage.removeItem(AUTH_STORAGE_KEY);
       return { session: null, error: { message: error.message, isInvalidRefreshToken: true } };
     }
     return { session: null, error };
@@ -264,7 +325,7 @@ export const setSessionFromToken = async (refreshToken) => {
     // Check for invalid refresh token
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token') || error?.code === 'invalid_grant') {
       console.warn('[Supabase] Biometric login failed - invalid refresh token');
-      await customStorage.removeItem(AUTH_STORAGE_KEY);
+      await secureStorage.removeItem(AUTH_STORAGE_KEY);
       return { data: null, error: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại bằng email/mật khẩu.', isInvalidRefreshToken: true } };
     }
 
@@ -272,7 +333,7 @@ export const setSessionFromToken = async (refreshToken) => {
   } catch (error) {
     console.error('SetSessionFromToken error:', error);
     if (error?.message?.includes('Refresh Token') || error?.message?.includes('refresh_token')) {
-      await customStorage.removeItem(AUTH_STORAGE_KEY);
+      await secureStorage.removeItem(AUTH_STORAGE_KEY);
       return { data: null, error: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', isInvalidRefreshToken: true } };
     }
     return { data: null, error: { message: error.message || 'Lỗi khôi phục phiên đăng nhập' } };
