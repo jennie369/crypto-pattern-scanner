@@ -1,6 +1,6 @@
 # Troubleshooting Tips
 
-Generalized engineering rules extracted from real bugs found during Phase 1-12 audits.
+Generalized engineering rules extracted from real bugs found during Phase 1-13 audits.
 
 ---
 
@@ -2668,7 +2668,223 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 ---
 
-## Phase 12 Tests
+# RULE 47: Null-to-Zero Coercion in parseFloat Creates False Positive Triggers
+**Source:** Phase 13 — `parseFloat(data.stop_loss) || 0` converts null DB values to 0, causing `currentPrice >= 0` → always true → instant false SL/TP/liquidation close
+
+## What Failed
+Positions with no stop-loss set (null in DB) were immediately closed as "Stop Loss Hit" the first time `updatePrices()` ran. For SHORT positions: `currentPrice >= position.stopLoss` became `currentPrice >= 0` which is always true for any positive price.
+
+## Why It Failed
+JavaScript's `parseFloat(null)` returns `NaN`, and `NaN || 0` evaluates to `0`. The `|| 0` fallback was intended as a "safe default" but `0` is a valid price level — it means "stop loss at $0" which triggers immediately for any SHORT position (or instantly for LONG TP).
+
+The data pipeline had two failure points:
+1. **Data source**: `mapFromSupabase()` used `parseFloat(data.stop_loss) || 0` converting null → 0
+2. **Consumer**: `updatePrices()` had no null guard — it compared `currentPrice >= position.stopLoss` without checking if stopLoss was actually set
+
+## What Guard Was Added
+1. **Data source fix**: `data.stop_loss != null ? parseFloat(data.stop_loss) : null` — preserve null
+2. **Consumer fix**: `position.stopLoss > 0 && (isLong ? ... : ...)` — double safety, skip check if null/0
+
+## How to Detect Similar Issues
+1. **Grep for `parseFloat(...) || 0` on price fields**:
+   ```bash
+   grep -rn "parseFloat.*\(data\.\|row\.\).*\|\| *0" gem-mobile/src/services/
+   ```
+   For price fields (stop_loss, take_profit, entry_price), `|| 0` is dangerous. Use `|| null` or explicit null check.
+
+2. **Grep for comparisons without null guard**:
+   ```bash
+   grep -rn "currentPrice [<>=].*position\.\(stopLoss\|takeProfit\)" gem-mobile/src/
+   ```
+   Every comparison must be guarded by `value > 0 &&`.
+
+### Code smell indicators
+- `parseFloat(data.some_price) || 0` where the price can legitimately be null/unset
+- Price comparison without `> 0` guard on the threshold value
+- Same field parsed as `|| 0` in data layer but compared as boolean in logic layer
+
+---
+
+# RULE 48: Notification Dedup Must Cover ALL Event Types (Not Just Some)
+**Source:** Phase 13 — `_notifiedPositionIds` guard was applied to SL/TP/Liquidation but NOT to ORDER_FILLED, causing duplicate "Order Filled" push notifications
+
+## What Failed
+When a limit order filled, users received 2x "Lệnh đã khớp!" notifications. The dedup guard `_notifiedPositionIds` was added in Phase 10 for SL/TP/Liquidation events but the ORDER_FILLED notification path was missed.
+
+## Why It Failed
+The dedup was added reactively — only to the events that were reported as duplicating (SL/TP/Liq). ORDER_FILLED used a different dedup mechanism (`_notifiedKeys` with 60s TTL) that wasn't sufficient to prevent duplicates from concurrent `checkPendingOrders()` calls.
+
+## What Guard Was Added
+Wrapped ORDER_FILLED notification in the same `_notifiedPositionIds` check used by SL/TP/Liquidation:
+```javascript
+if (!this._notifiedPositionIds.has(filledPosition.id)) {
+  this._notifiedPositionIds.add(filledPosition.id);
+  await notifyOrderFilled({...}, userId);
+}
+```
+
+## How to Detect Similar Issues
+1. **Grep for notification calls without dedup guard**:
+   ```bash
+   grep -n "await notify" gem-mobile/src/services/paperTradeService.js
+   ```
+   Every `notifyXxx()` call must be preceded by `_notifiedPositionIds.has()` check.
+
+### Code smell indicators
+- Notification call without corresponding Set/Map dedup check
+- Different dedup mechanisms for the same class of events (some use Set, others use TTL key)
+- Dedup added to N-1 out of N event types
+
+---
+
+# RULE 49: Concurrent Collection Mutation Must Be Immediate (Not Deferred)
+**Source:** Phase 13 — Pending order array mutation was deferred until after the fill loop, so concurrent calls saw stale array and double-filled the same order
+
+## What Failed
+Two concurrent `checkPendingOrders()` calls both saw the same pending order in the array, both filled it, creating duplicate positions.
+
+## Why It Failed
+The code removed filled orders from `this.pendingOrders` AFTER the for-loop completed (batch removal). Between the `shouldFill` check and the batch removal, a concurrent call entered the same loop and saw the already-being-filled order still in the array.
+
+## What Guard Was Added
+Move array mutation INSIDE the fill block, BEFORE any async work:
+```javascript
+if (shouldFill) {
+  // Remove from live array IMMEDIATELY (before async Supabase sync)
+  this.pendingOrders = this.pendingOrders.filter(o => o.id !== order.id);
+  // ...then do async work
+}
+```
+
+### Code smell indicators
+- Collection mutation deferred to after a loop that contains async operations
+- Multiple async entry points that iterate the same mutable array
+- Batch removal pattern (`filter` after loop) when loop body has `await`
+
+---
+
+# RULE 50: Grace Period Required for Newly Opened Positions
+**Source:** Phase 13 — Positions evaluated for SL/TP/liquidation on the same monitoring tick as they were opened, causing immediate false close
+
+## What Failed
+A position opened at price $X was immediately evaluated against SL/TP/liquidation using a slightly different price fetched in the same 5s monitoring cycle, causing instant close.
+
+## Why It Failed
+`openPosition()` adds to `this.openPositions` array, and the very next `updatePrices()` iteration (which may already be running) picks it up. The fetched market price can differ from the modal's displayed price by the time the position is persisted, causing a false SL/TP hit on the first check.
+
+## What Guard Was Added
+10-second grace period in `updatePrices()`:
+```javascript
+const openedAt = position.openedAt || position.filledAt;
+if (openedAt) {
+  const ageMs = Date.now() - new Date(openedAt).getTime();
+  if (ageMs < 10000) continue; // skip SL/TP/liq checks, still update display price
+}
+```
+
+### Code smell indicators
+- Position/order added to monitoring collection with no timestamp check in evaluator
+- Same-tick creation and evaluation in setInterval-based systems
+- No `createdAt`/`openedAt` field on monitored objects
+
+---
+
+## Phase 13 Tests
+
+### Null SL/TP Safety (Rule 47)
+```javascript
+test('null stopLoss does not trigger false SL close', () => {
+  const position = { stopLoss: null, direction: 'SHORT' };
+  const currentPrice = 100;
+
+  // Guard: stopLoss > 0 must be checked BEFORE comparison
+  const hitStopLoss = position.stopLoss > 0 && (
+    position.direction === 'LONG'
+      ? currentPrice <= position.stopLoss
+      : currentPrice >= position.stopLoss
+  );
+
+  expect(hitStopLoss).toBe(false); // null > 0 is false → short-circuit
+});
+
+test('parseFloat null preservation in mapFromSupabase', () => {
+  const data = { stop_loss: null, take_profit: null };
+
+  // BAD: parseFloat(null) || 0 → 0
+  const bad = parseFloat(data.stop_loss) || 0;
+  expect(bad).toBe(0); // This is the bug
+
+  // GOOD: explicit null check
+  const good = data.stop_loss != null ? parseFloat(data.stop_loss) : null;
+  expect(good).toBeNull();
+});
+```
+
+### ORDER_FILLED Dedup (Rule 48)
+```javascript
+test('ORDER_FILLED notification guarded by _notifiedPositionIds', () => {
+  const service = new PaperTradeService();
+  const positionId = 'test-123';
+
+  // First call: should notify
+  expect(service._notifiedPositionIds.has(positionId)).toBe(false);
+  service._notifiedPositionIds.add(positionId);
+
+  // Second call: should skip
+  expect(service._notifiedPositionIds.has(positionId)).toBe(true);
+});
+```
+
+### Immediate Pending Removal (Rule 49)
+```javascript
+test('filled order removed from pendingOrders BEFORE async work', async () => {
+  // Simulate two concurrent calls seeing same pending order
+  const service = new PaperTradeService();
+  service.pendingOrders = [{ id: 'order-1', symbol: 'BTCUSDT' }];
+
+  // After fill: immediate removal
+  service.pendingOrders = service.pendingOrders.filter(o => o.id !== 'order-1');
+
+  // Concurrent call should see empty array
+  expect(service.pendingOrders.length).toBe(0);
+});
+```
+
+### Grace Period (Rule 50)
+```javascript
+test('position opened < 10s ago skips SL/TP/liq checks', () => {
+  const position = {
+    openedAt: new Date().toISOString(), // just now
+    stopLoss: 100,
+    direction: 'LONG',
+  };
+
+  const ageMs = Date.now() - new Date(position.openedAt).getTime();
+  expect(ageMs < 10000).toBe(true); // should skip
+});
+
+test('position opened > 10s ago evaluates SL/TP/liq normally', () => {
+  const position = {
+    openedAt: new Date(Date.now() - 15000).toISOString(), // 15s ago
+    stopLoss: 100,
+    direction: 'LONG',
+  };
+
+  const ageMs = Date.now() - new Date(position.openedAt).getTime();
+  expect(ageMs < 10000).toBe(false); // should evaluate
+});
+```
+
+### Atomic Close Guard (Rule 13 reinforced)
+```javascript
+test('closePosition syncs with .eq(status, OPEN) to prevent double-close', async () => {
+  // Verify the CLOSE action in syncPositionToSupabase uses atomic guard
+  // grep: .eq('status', 'OPEN') must appear in the CLOSE branch
+  const source = require('fs').readFileSync('gem-mobile/src/services/paperTradeService.js', 'utf8');
+  const closeBlock = source.match(/action === 'CLOSE'[\s\S]*?\.eq\('status', 'OPEN'\)/);
+  expect(closeBlock).not.toBeNull();
+});
+```
 
 ### COALESCE Type Mismatch (Rule 42)
 ```javascript

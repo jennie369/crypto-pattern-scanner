@@ -17,6 +17,8 @@ import {
   notifySLHit,
   notifyLiquidation,
 } from './paperTradeNotificationService';
+// NOTE: pendingOrderService imported lazily inside checkAllOpenPositions()
+// to avoid circular dependency (pendingOrderService imports paperTradeService)
 
 // Fetch with timeout to prevent hanging requests on stalled mobile connections
 const FETCH_TIMEOUT = 10000;
@@ -190,6 +192,21 @@ class PaperTradeService {
 
       // Check pending orders first (may convert to open)
       const { filled } = await this.checkPendingOrders(prices);
+
+      // Check paper_pending_orders table (Limit/Stop orders from pendingOrderService)
+      // These are separate from this.pendingOrders (which come from paper_trades PENDING).
+      // Previously only checked from OpenPositionsScreen — now centralized here (Rule 20).
+      // Lazy require to avoid circular dependency (pendingOrderService imports paperTradeService).
+      try {
+        const { checkAndTriggerOrders } = require('./pendingOrderService');
+        const priceMap = {};
+        for (const [symbol, price] of Object.entries(prices)) {
+          priceMap[symbol] = { last: price, mark: price };
+        }
+        await checkAndTriggerOrders(priceMap, this.currentUserId);
+      } catch (pendingErr) {
+        console.log('[PaperTrade] pendingOrderService check error:', pendingErr.message);
+      }
 
       // Then check open positions for TP/SL hits
       const { closed, updated } = await this.updatePrices(prices);
@@ -992,15 +1009,14 @@ class PaperTradeService {
     }
 
     const filledOrders = [];
-    const remainingPending = [];
 
-    for (const order of this.pendingOrders) {
+    // FIX 4: Iterate a snapshot but mutate the live array immediately on fill.
+    // This prevents concurrent calls from seeing already-filled orders.
+    const snapshot = [...this.pendingOrders];
+
+    for (const order of snapshot) {
       const marketPrice = currentPrices[order.symbol];
-      if (!marketPrice) {
-        // No price available, keep pending
-        remainingPending.push(order);
-        continue;
-      }
+      if (!marketPrice) continue;
 
       // Update current price for display
       order.currentPrice = marketPrice;
@@ -1008,6 +1024,9 @@ class PaperTradeService {
       const shouldFill = this.shouldFillOrder(order, marketPrice);
 
       if (shouldFill) {
+        // FIX 4: Remove from live pending array IMMEDIATELY (before async work)
+        this.pendingOrders = this.pendingOrders.filter(o => o.id !== order.id);
+
         // Fill the order - move to open positions
         const filledPosition = {
           ...order,
@@ -1035,34 +1054,32 @@ class PaperTradeService {
         await this.syncPositionToSupabase(filledPosition, 'UPDATE');
 
         // ═══════════════════════════════════════════════════════════
-        // PUSH NOTIFICATION - Limit Order Filled
+        // PUSH NOTIFICATION - Limit Order Filled (FIX 3: dedup guard)
         // ═══════════════════════════════════════════════════════════
-        try {
-          await notifyOrderFilled({
-            symbol: filledPosition.symbol,
-            direction: filledPosition.direction,
-            entry_price: filledPosition.entryPrice,
-            filledPrice: filledPosition.entryPrice,
-            position_size: filledPosition.positionValue || filledPosition.positionSize,
-            id: filledPosition.id,
-          }, filledPosition.userId);
-        } catch (notifyError) {
-          console.log('[PaperTrade] Notification error (order filled):', notifyError.message);
+        if (!this._notifiedPositionIds.has(filledPosition.id)) {
+          this._notifiedPositionIds.add(filledPosition.id);
+          try {
+            await notifyOrderFilled({
+              symbol: filledPosition.symbol,
+              direction: filledPosition.direction,
+              entry_price: filledPosition.entryPrice,
+              filledPrice: filledPosition.entryPrice,
+              position_size: filledPosition.positionValue || filledPosition.positionSize,
+              id: filledPosition.id,
+            }, filledPosition.userId);
+          } catch (notifyError) {
+            console.log('[PaperTrade] Notification error (order filled):', notifyError.message);
+          }
         }
-      } else {
-        remainingPending.push(order);
       }
     }
-
-    // Update pending orders list
-    this.pendingOrders = remainingPending;
 
     // Save if anything changed
     if (filledOrders.length > 0) {
       await this.saveAll();
     }
 
-    return { filled: filledOrders, pending: remainingPending };
+    return { filled: filledOrders, pending: [...this.pendingOrders] };
   }
 
   /**
@@ -1206,8 +1223,9 @@ class PaperTradeService {
       await this.saveAll();
 
       // Sync to Supabase (best-effort, don't rollback for cloud sync failure)
+      // FIX 6: Use 'CLOSE' action for atomic guard (.eq('status', 'OPEN'))
       try {
-        await this.syncPositionToSupabase(closedTrade, 'UPDATE');
+        await this.syncPositionToSupabase(closedTrade, 'CLOSE');
       } catch (syncError) {
         console.warn('[PaperTrade] Supabase sync failed (local state is correct):', syncError.message);
       }
@@ -1406,12 +1424,26 @@ class PaperTradeService {
       const currentPrice = currentPrices[position.symbol];
       if (!currentPrice) continue;
 
+      // FIX 2: Grace period — skip positions opened within last 10 seconds
+      // Prevents same-tick evaluation where fetched price differs from modal price
+      const openedAt = position.openedAt || position.filledAt;
+      if (openedAt) {
+        const ageMs = Date.now() - new Date(openedAt).getTime();
+        if (ageMs < 10000) {
+          // Still update current price for display, but skip SL/TP/liq checks
+          position.currentPrice = currentPrice;
+          updatedPositions.push(position);
+          continue;
+        }
+      }
+
       const isLong = position.direction === 'LONG';
 
-      // Check Stop Loss
-      const hitStopLoss = isLong
+      // FIX 1: Guard against null/0/undefined SL — without this,
+      // currentPrice >= null coerces to currentPrice >= 0 → always true for SHORT
+      const hitStopLoss = position.stopLoss > 0 && (isLong
         ? currentPrice <= position.stopLoss
-        : currentPrice >= position.stopLoss;
+        : currentPrice >= position.stopLoss);
 
       if (hitStopLoss) {
         const closed = await this.closePosition(
@@ -1436,10 +1468,11 @@ class PaperTradeService {
         continue;
       }
 
-      // Check Take Profit
-      const hitTakeProfit = isLong
+      // FIX 1: Guard against null/0/undefined TP — without this,
+      // currentPrice >= null coerces to currentPrice >= 0 → always true for LONG
+      const hitTakeProfit = position.takeProfit > 0 && (isLong
         ? currentPrice >= position.takeProfit
-        : currentPrice <= position.takeProfit;
+        : currentPrice <= position.takeProfit);
 
       if (hitTakeProfit) {
         const closed = await this.closePosition(
@@ -2144,6 +2177,18 @@ class PaperTradeService {
           const upsertResult = await supabase.from('paper_trades').upsert(data);
           error = upsertResult.error;
         }
+      } else if (action === 'CLOSE') {
+        // FIX 6: Atomic close — only update if status is still OPEN in DB.
+        // Prevents double-close from concurrent updatePrices() calls.
+        const result = await supabase
+          .from('paper_trades')
+          .update(data)
+          .eq('id', data.id)
+          .eq('status', 'OPEN');
+        error = result.error;
+        if (!error) {
+          console.log('[PaperTrade] Atomic close sync successful for', data.id);
+        }
       } else {
         const result = await supabase.from('paper_trades').upsert(data);
         error = result.error;
@@ -2622,8 +2667,10 @@ class PaperTradeService {
       patternType: data.pattern_type,
       timeframe: data.timeframe,
       entryPrice: parseFloat(data.entry_price) || 0,
-      stopLoss: parseFloat(data.stop_loss) || 0,
-      takeProfit: parseFloat(data.take_profit) || 0,
+      // FIX 5: Preserve null for SL/TP — parseFloat(null) || 0 produces 0,
+      // which triggers false positive in updatePrices() (currentPrice >= 0 → always true)
+      stopLoss: data.stop_loss != null ? parseFloat(data.stop_loss) : null,
+      takeProfit: data.take_profit != null ? parseFloat(data.take_profit) : null,
       positionSize: parseFloat(data.position_size) || 0,
       margin: parseFloat(data.margin) || parseFloat(data.position_size) || 0,
       positionValue: parseFloat(data.position_value) || 0,

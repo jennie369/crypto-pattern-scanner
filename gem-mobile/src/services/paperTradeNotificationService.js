@@ -503,6 +503,17 @@ export const notifyLiquidation = async (position, liquidationPrice, pnl, userId 
 };
 
 /**
+ * Notify stop triggered (for stop-limit orders waiting for limit condition)
+ */
+export const notifyStopTriggered = async (order, userId = null) => {
+  return sendNotification(NOTIFICATION_TYPES.STOP_TRIGGERED, {
+    symbol: order.symbol,
+    stopPrice: order.triggerPrice || order.stop_price,
+    orderId: order.id,
+  }, userId);
+};
+
+/**
  * Notify position closed
  */
 export const notifyPositionClosed = async (position, pnl, roe, userId = null) => {
@@ -549,6 +560,7 @@ const paperTradeNotificationService = {
   notifyOrderFilled,
   notifyTPHit,
   notifySLHit,
+  notifyStopTriggered,
   notifyLiquidationWarning,
   notifyLiquidation,
   notifyPositionClosed,

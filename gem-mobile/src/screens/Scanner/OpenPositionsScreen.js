@@ -43,7 +43,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import paperTradeService from '../../services/paperTradeService';
 import { supabase } from '../../services/supabase';
-import { getPendingOrders as fetchPendingOrders, cancelPendingOrder, checkAndTriggerOrders as checkPendingOrderTriggers } from '../../services/pendingOrderService';
+import { getPendingOrders as fetchPendingOrders, cancelPendingOrder } from '../../services/pendingOrderService';
 import { binanceService } from '../../services/binanceService';
 // notificationService import removed — push notifications are now sent solely by
 // paperTradeService → paperTradeNotificationService (single notification source)
@@ -86,8 +86,8 @@ export default function OpenPositionsScreen() {
   const wsUnsubscribesRef = useRef([]);
   const pricesRef = useRef({}); // Store latest prices for all symbols
   const pendingOrdersRef = useRef([]); // [PendingOrders] Ref to track pending orders from pendingOrderService (paper_pending_orders table)
-  const lastPendingCheckRef = useRef(0); // [PendingOrders] Throttle: last time we checked pending orders (ms)
-  const PENDING_CHECK_INTERVAL_MS = 3000; // [PendingOrders] Only check pending order fills every 3 seconds
+  const prevPositionIdsRef = useRef(new Set()); // Track position IDs to detect closures by global monitoring
+  const prevPendingCountRef = useRef(0); // Track pending count to detect fills by global monitoring
 
   // Custom Alert state
   const [alertConfig, setAlertConfig] = useState({
@@ -171,83 +171,59 @@ export default function OpenPositionsScreen() {
   }, [user?.id]);
 
   // Handle real-time price update for a single symbol
+  // DISPLAY ONLY: Compute PnL locally. All SL/TP/liquidation/fill detection
+  // is handled by paperTradeService.startGlobalMonitoring() (5s interval, isChecking guard).
   const handlePriceUpdate = useCallback(async (symbol, price) => {
     try {
-      // Update all prices from ref
-      const prices = { ...pricesRef.current, [symbol]: price };
+      // Read current state from service (global monitoring may have closed/filled positions)
+      const currentPositions = paperTradeService.getOpenPositions(user?.id);
+      const currentIds = new Set(currentPositions.map(p => p.id));
 
-      // [PendingOrders] FIX: Check pending orders via pendingOrderService (paper_pending_orders table)
-      // NOT via paperTradeService.checkPendingOrders() which reads from paper_trades table
-      // Throttled to avoid excessive Supabase queries on every WebSocket tick
-      let pendingFillOccurred = false;
-      const now = Date.now();
-      const shouldCheckPending = (now - lastPendingCheckRef.current) >= PENDING_CHECK_INTERVAL_MS
-        && pendingOrdersRef.current.length > 0;
-
-      if (shouldCheckPending) {
-        lastPendingCheckRef.current = now;
-        try {
-          const pricesForCheck = {};
-          for (const [sym, p] of Object.entries(prices)) {
-            pricesForCheck[sym] = { last: p, mark: p };
-          }
-          const triggerResult = await checkPendingOrderTriggers(pricesForCheck, user?.id);
-          if (triggerResult.executed > 0) {
-            pendingFillOccurred = true;
-            console.log('[PendingOrders] Orders filled via pendingOrderService:', triggerResult.executed);
-          }
-        } catch (triggerErr) {
-          console.log('[PendingOrders] checkPendingOrderTriggers error:', triggerErr);
-        }
-
-        // Also check paperTradeService pending orders (paper_trades table, status=PENDING)
-        // for backward compatibility with legacy orders that may exist there
-        const pendingResult = await paperTradeService.checkPendingOrders(prices);
-        if (pendingResult.filled.length > 0) {
-          pendingFillOccurred = true;
-          for (const filled of pendingResult.filled) {
+      // Detect positions closed by global monitoring since last tick
+      for (const prevId of prevPositionIdsRef.current) {
+        if (!currentIds.has(prevId)) {
+          const closedTrade = paperTradeService.tradeHistory?.find(t => t.id === prevId);
+          if (closedTrade) {
             showAlert(
-              'Lệnh Đã Khớp!',
-              `${filled.symbol} ${filled.direction}\n` +
-                `Giá vào: $${formatPrice(filled.entryPrice)}\n` +
-                `Số lượng: ${formatCurrency(filled.positionSize)} USDT`,
+              closedTrade.result === 'WIN' ? 'Chạm Chốt lời!' : 'Chạm Cắt lỗ!',
+              `${closedTrade.symbol} ${closedTrade.direction}\n` +
+                `P/L: ${closedTrade.realizedPnL >= 0 ? '+' : ''}$${formatCurrency(closedTrade.realizedPnL)}`,
               [{ text: 'OK' }],
-              'success'
+              closedTrade.result === 'WIN' ? 'success' : 'error'
             );
-            // Push notification already sent by paperTradeService.checkPendingOrders() → notifyOrderFilled()
           }
         }
       }
+      prevPositionIdsRef.current = currentIds;
 
-      // Update positions with new prices (includes SL/TP checks)
-      const result = await paperTradeService.updatePrices(prices);
-
-      // Show UI alerts for closed positions (SL/TP hit)
-      // Push notifications already sent by paperTradeService.updatePrices() → notifySLHit/notifyTPHit/notifyLiquidation
-      if (result.closed.length > 0) {
-        for (const closed of result.closed) {
-          showAlert(
-            closed.result === 'WIN' ? 'Chạm Chốt lời!' : 'Chạm Cắt lỗ!',
-            `${closed.symbol} ${closed.direction}\n` +
-              `P/L: ${closed.realizedPnL >= 0 ? '+' : ''}$${formatCurrency(closed.realizedPnL)}`,
-            [{ text: 'OK' }],
-            closed.result === 'WIN' ? 'success' : 'error'
-          );
-        }
-      }
-
-      // Update open positions state (always safe — from paperTradeService in-memory)
-      setPositions(paperTradeService.getOpenPositions(user?.id));
-      setStats(paperTradeService.getStats(user?.id));
-
-      // [PendingOrders] FIX: Only update pendingOrders state if a fill/cancel actually happened
-      // Do NOT blindly overwrite with paperTradeService.getPendingOrders() which reads from wrong table
-      if (pendingFillOccurred || result.closed.length > 0) {
-        console.log('[PendingOrders] Fill/close occurred — refreshing pending orders from DB');
+      // Detect pending orders filled by global monitoring
+      const currentPendingCount = paperTradeService.pendingOrders?.length || 0;
+      if (currentPendingCount !== prevPendingCountRef.current) {
+        prevPendingCountRef.current = currentPendingCount;
         const freshPending = await reloadPendingOrdersFromDB();
         setPendingOrders(freshPending);
       }
-      // Otherwise: keep existing pendingOrders state intact (loaded from paper_pending_orders)
+
+      // LOCAL DISPLAY ONLY: Update PnL with latest WebSocket price
+      const updatedPositions = currentPositions.map(pos => {
+        const currentPrice = pricesRef.current[pos.symbol] || pos.currentPrice;
+        if (!currentPrice) return pos;
+
+        const isLong = pos.direction === 'LONG';
+        const priceDiff = isLong
+          ? currentPrice - pos.entryPrice
+          : pos.entryPrice - currentPrice;
+
+        return {
+          ...pos,
+          currentPrice,
+          unrealizedPnL: (pos.quantity && isFinite(pos.quantity)) ? priceDiff * pos.quantity : 0,
+          unrealizedPnLPercent: (priceDiff / pos.entryPrice) * (pos.leverage || 1) * 100,
+        };
+      });
+
+      setPositions(updatedPositions);
+      setStats(paperTradeService.getStats(user?.id));
     } catch (error) {
       console.log('[OpenPositions] handlePriceUpdate error:', error);
     }
@@ -360,6 +336,9 @@ export default function OpenPositionsScreen() {
       }
 
       const tradeStats = paperTradeService.getStats(user?.id);
+      // Sync refs for closure/fill detection in handlePriceUpdate
+      prevPositionIdsRef.current = new Set(openPositions.map(p => p.id));
+      prevPendingCountRef.current = paperTradeService.pendingOrders?.length || 0;
       setPositions(openPositions);
       setPendingOrders(pending);
       console.log('[OpenPositions] State updated - pendingOrders:', pending.length);
@@ -392,57 +371,17 @@ export default function OpenPositionsScreen() {
     }
   };
 
-  // Manual refresh prices via REST API (for refresh button)
+  // Manual refresh — delegates to checkAllOpenPositions() which has isChecking guard.
+  // This fetches prices, checks pending fills, SL/TP/liquidation in a single guarded call.
   const updatePrices = async () => {
     try {
-      const currentPositions = paperTradeService.getOpenPositions(user?.id);
-      // [PendingOrders] FIX: Use ref for current pending orders, NOT paperTradeService.getPendingOrders()
-      const currentPending = pendingOrdersRef.current;
+      // checkAllOpenPositions fetches its own prices, checks pending fills, and SL/TP/liquidation
+      // It is protected by isChecking concurrency guard (no duplicate execution)
+      const result = await paperTradeService.checkAllOpenPositions(user?.id);
 
-      // Collect all symbols from positions AND pending orders
-      const allSymbols = [
-        ...currentPositions.map((p) => p.symbol),
-        ...currentPending.map((p) => p.symbol),
-      ];
-      const symbols = [...new Set(allSymbols)];
-
-      if (symbols.length === 0) return;
-
-      // Get current prices for all symbols via REST API
-      const prices = {};
-      for (const symbol of symbols) {
-        try {
-          const price = await binanceService.getCurrentPrice(symbol);
-          if (price) {
-            prices[symbol] = price;
-            pricesRef.current[symbol] = price; // Update ref too
-          }
-        } catch (e) {
-          console.log(`[OpenPositions] Failed to get price for ${symbol}`);
-        }
-      }
-
-      // [PendingOrders] FIX: Check pending orders via pendingOrderService (paper_pending_orders table)
-      let pendingFillOccurred = false;
-      try {
-        const pricesForCheck = {};
-        for (const [sym, p] of Object.entries(prices)) {
-          pricesForCheck[sym] = { last: p, mark: p };
-        }
-        const triggerResult = await checkPendingOrderTriggers(pricesForCheck, user?.id);
-        if (triggerResult.executed > 0) {
-          pendingFillOccurred = true;
-          console.log('[PendingOrders] Manual refresh: orders filled:', triggerResult.executed);
-        }
-      } catch (triggerErr) {
-        console.log('[PendingOrders] Manual refresh trigger check error:', triggerErr);
-      }
-
-      // Also check legacy pending orders from paper_trades
-      const pendingResult = await paperTradeService.checkPendingOrders(prices);
-      if (pendingResult.filled.length > 0) {
-        pendingFillOccurred = true;
-        for (const filled of pendingResult.filled) {
+      // Show UI alerts for filled orders
+      if (result.filled?.length > 0) {
+        for (const filled of result.filled) {
           showAlert(
             'Lệnh Đã Khớp!',
             `${filled.symbol} ${filled.direction}\n` +
@@ -451,16 +390,11 @@ export default function OpenPositionsScreen() {
             [{ text: 'OK' }],
             'success'
           );
-          // Push notification already sent by paperTradeService.checkPendingOrders() → notifyOrderFilled()
         }
       }
 
-      // Update positions with new prices (includes SL/TP checks)
-      const result = await paperTradeService.updatePrices(prices);
-
-      // Show UI alerts for closed positions (SL/TP hit)
-      // Push notifications already sent by paperTradeService.updatePrices() → notifySLHit/notifyTPHit/notifyLiquidation
-      if (result.closed.length > 0) {
+      // Show UI alerts for closed positions (SL/TP/liquidation)
+      if (result.closed?.length > 0) {
         for (const closed of result.closed) {
           showAlert(
             closed.result === 'WIN' ? 'Chạm Chốt lời!' : 'Chạm Cắt lỗ!',
@@ -472,17 +406,20 @@ export default function OpenPositionsScreen() {
         }
       }
 
-      // Update open positions and stats
-      setPositions(paperTradeService.getOpenPositions(user?.id));
+      // Update display state from service
+      const currentPositions = paperTradeService.getOpenPositions(user?.id);
+      setPositions(currentPositions);
       setStats(paperTradeService.getStats(user?.id));
+      prevPositionIdsRef.current = new Set(currentPositions.map(p => p.id));
 
-      // [PendingOrders] FIX: Refresh pending orders from DB (not from paperTradeService)
-      if (pendingFillOccurred || result.closed.length > 0) {
+      // Refresh pending orders from DB
+      if (result.filled?.length > 0 || result.closed?.length > 0) {
         const freshPending = await reloadPendingOrdersFromDB();
         setPendingOrders(freshPending);
       }
 
       // Re-setup WebSocket subscriptions in case symbols changed
+      const currentPending = pendingOrdersRef.current;
       setupPriceSubscriptions(currentPositions, currentPending);
     } catch (error) {
       console.log('[OpenPositions] Update prices error:', error);
