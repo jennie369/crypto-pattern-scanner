@@ -5200,10 +5200,8 @@ const generatePostData = ({
   // Append hashtags to content (add newlines before hashtags)
   const hashtagString = hashtags.length > 0 ? '\n\n' + hashtags.join(' ') : '';
 
-  // Add unique invisible marker to prevent duplicate trigger
-  // Uses zero-width characters that won't affect display
-  const uniqueMarker = `\u200B${Date.now()}-${postIndex}-${Math.random().toString(36).substring(2, 8)}\u200B`;
-  const fullContent = rawContent + hashtagString + uniqueMarker;
+  // Content = raw text + hashtags (no invisible markers — they were visible in PostCard)
+  const fullContent = rawContent + hashtagString;
 
   // Sanitize content to remove invalid unicode surrogates
   const content = sanitizeText(fullContent);
@@ -5215,15 +5213,14 @@ const generatePostData = ({
   // Matching actual forum_posts table structure
   const imageUrl = images[0] || null;
 
-  // Generate unique title with timestamp to avoid duplicate trigger
+  // Title = first 90 chars of content (no #N suffix — it was visible in PostCard)
   const baseTitle = sanitizeText(rawContent.substring(0, 90));
-  const uniqueTitle = `${baseTitle} #${postIndex + 1}`;
 
   // Insert into seed_posts table (separate from forum_posts to avoid FK constraint)
   return {
     user_id: authorId,
     content,
-    title: uniqueTitle,
+    title: baseTitle,
     image_url: imageUrl,
     media_urls: images.length > 0 ? images : [],
     seed_topic: topic,

@@ -126,7 +126,7 @@ const FEED_CONFIG = {
   AD_INTERVAL: 10,        // INCREASED from 8 to 10 for better spacing
   MAX_ADS_PER_SESSION: 2, // Max 2 inline ads (header shows 1 separately)
   CACHE_TTL: 60000, // 60 seconds cache (in ms)
-  MAX_SEED_POSTS: 20, // REDUCED for faster load (was 50)
+  MAX_SEED_POSTS: 50, // Increased to show more topic variety (trading, crystal, loa, etc.)
   MAX_FALLBACK_POSTS: 20, // REDUCED for faster load (was 50)
   IMPRESSION_BATCH_SIZE: 50, // Max impressions to check
 };

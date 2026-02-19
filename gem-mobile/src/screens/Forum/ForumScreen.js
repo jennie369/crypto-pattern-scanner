@@ -57,7 +57,7 @@ const forumCache = {
   feedItems: null,
   sessionId: null,
   lastFetch: 0,
-  CACHE_DURATION: 30000, // 30 seconds cache
+  CACHE_DURATION: 300000, // 5 minutes cache — prevents full reset when returning from post detail
   feed: null, // Track active feed for cache invalidation on feed switch
 };
 
@@ -74,16 +74,6 @@ export const clearForumCache = () => {
 // ============================================================
 // FLATLIST OPTIMIZATION CONSTANTS
 // ============================================================
-
-// Estimated post heights for getItemLayout (improves scroll performance)
-const POST_ITEM_HEIGHTS = {
-  TEXT_ONLY: 200,      // Post chỉ có text
-  WITH_IMAGE: 450,     // Post có 1 ảnh
-  WITH_CAROUSEL: 500,  // Post có nhiều ảnh
-  SPONSOR_BANNER: 120, // Sponsor banner height
-  AD_CARD: 280,        // Ad card height
-  AVERAGE: 400,        // Trung bình cho tất cả types
-};
 
 // FlatList optimization config
 const FLATLIST_CONFIG = {
@@ -268,48 +258,10 @@ const ForumScreen = ({ navigation }) => {
   }, []);
 
   // ============================================================
-  // GETITEMLAYOUT: Improve FlatList scroll performance
-  // ============================================================
-  const getItemLayout = useCallback((data, index) => {
-    // Safety check
-    if (!data || index < 0) {
-      return {
-        length: POST_ITEM_HEIGHTS.AVERAGE,
-        offset: POST_ITEM_HEIGHTS.AVERAGE * index,
-        index,
-      };
-    }
-
-    const item = data[index];
-    let height = POST_ITEM_HEIGHTS.AVERAGE;
-
-    if (item) {
-      // Determine height based on item type
-      if (item.type === 'sponsor_banner') {
-        height = POST_ITEM_HEIGHTS.SPONSOR_BANNER;
-      } else if (item.type === 'ad') {
-        height = POST_ITEM_HEIGHTS.AD_CARD;
-      } else if (item.type === 'post' && item.data) {
-        // Estimate post height based on content
-        const post = item.data;
-        const images = post?.media_urls || post?.images || [];
-
-        if (images.length > 1) {
-          height = POST_ITEM_HEIGHTS.WITH_CAROUSEL;
-        } else if (images.length === 1 || post?.image_url) {
-          height = POST_ITEM_HEIGHTS.WITH_IMAGE;
-        } else {
-          height = POST_ITEM_HEIGHTS.TEXT_ONLY;
-        }
-      }
-    }
-
-    return {
-      length: height,
-      offset: height * index,
-      index,
-    };
-  }, []);
+  // getItemLayout REMOVED — was causing scroll jitter because offset calculation
+  // assumed all items have the same height (offset: height * index). PostCard heights
+  // vary wildly (text-only vs images vs carousel). FlatList auto-measurement is
+  // slower but accurate. removeClippedSubviews + windowSize=5 handle performance.
 
   // Viewability config - item is considered "viewed" when 50% visible for 300ms
   // FIXED: Reduced minimumViewTime from 500ms to 300ms for faster tracking
@@ -1626,7 +1578,7 @@ const ForumScreen = ({ navigation }) => {
             onEndReached={onEndReached}
             onEndReachedThreshold={0.3}
             // ========== PERFORMANCE OPTIMIZATIONS ==========
-            getItemLayout={getItemLayout}
+            // getItemLayout removed — variable heights caused scroll jitter
             initialNumToRender={FLATLIST_CONFIG.INITIAL_NUM_TO_RENDER}
             maxToRenderPerBatch={FLATLIST_CONFIG.MAX_TO_RENDER_PER_BATCH}
             windowSize={FLATLIST_CONFIG.WINDOW_SIZE}
