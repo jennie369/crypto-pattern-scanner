@@ -3418,3 +3418,42 @@ The 60s health check now also checks JWT `expires_at`. If the token expires with
 3. **Happens after long idle** (1+ hour) → JWT expiration
 4. **App was never backgrounded** (or resume handler didn't fire) → foreground idle scenario
 5. Check console for `[Supabase] JWT expired/expiring` — if absent, the guard isn't running
+
+## Generalized Pattern: Token-Gated APIs on Mobile
+This rule applies to ANY system where:
+- **API responses are gated by a short-lived token** (JWT, OAuth access_token, API key with TTL)
+- **The app runs on a mobile device** where JS timers, background tasks, and keep-alive mechanisms are unreliable
+- **The API fails silently** when the token expires (returns empty/default data instead of 401)
+
+The same three-link failure chain will occur in ANY mobile app using:
+- Supabase (RLS + JWT)
+- Firebase Auth (ID tokens expire after 1 hour)
+- AWS Cognito (access tokens expire after 1 hour)
+- Any OAuth 2.0 provider with `access_token` + `refresh_token`
+
+**The fix is always the same**: validate the token BEFORE every request, not just on a timer.
+
+## Preventive Measures
+1. **Pre-request token check**: Every HTTP client wrapper must verify token `exp` before sending. This is the ONLY reliable approach on mobile.
+2. **Proactive periodic refresh**: Background timer (60s) that checks token freshness — catches idle scenarios before user interaction.
+3. **Recovery path must refresh auth first**: Any "full recovery" or "reconnect" logic must refresh auth BEFORE re-fetching data. Otherwise recovery fetches use the same expired token.
+4. **Never trust `autoRefreshToken`**: SDK-provided auto-refresh relies on JS timers. On mobile: screen-off kills timers, low-memory kills background JS, OS power-saving throttles intervals. Always have a fallback.
+5. **Dedup concurrent refreshes**: When token expires, N concurrent requests all detect it simultaneously. Use a singleton promise so only 1 refresh call is made.
+6. **Cache decoded token claims**: Don't decode JWT on every request. Cache `exp` and compare against `Date.now()` (sub-ms). Only re-decode when approaching expiry.
+
+## Code Smell Indicators
+- `autoRefreshToken: true` with no fallback mechanism
+- Token refresh only runs on AppState change (misses foreground idle)
+- Health check tests connectivity but not token validity
+- Recovery/reconnect logic that emits "reload" events without refreshing auth first
+- Multiple concurrent `refreshSession()` calls without dedup (race condition → wasted API calls or double-refresh errors)
+- `getUser()` (network call) used where `getSession()` (local read) would suffice
+- Auth token endpoint called through the same interceptor as data endpoints (infinite recursion risk)
+
+## Investigation Steps
+1. Check if ALL screens fail simultaneously vs. just one — confirms global vs. local issue
+2. Check API response bodies — empty arrays/null vs. explicit error codes
+3. Decode the stored JWT: `JSON.parse(atob(token.split('.')[1]))` — check `exp` vs. current time
+4. Check AppState transitions in logs — did the app go through background→active, or stay active?
+5. Check if `autoRefreshToken` timer fired — search logs for SDK refresh events
+6. Check if health check/recovery refreshed auth — search for `refreshSession` calls in logs

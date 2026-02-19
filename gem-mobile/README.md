@@ -39,6 +39,28 @@ gem-mobile/src/
 - **Trading Engine**: `paperTradeService.js` singleton handles order lifecycle, position monitoring (5s interval), SL/TP/liquidation checks, PNL calculation.
 - **Order Types**: MARKET (instant fill) and PENDING (limit + stop orders). Fill direction determined by `createdAtMarketPrice` field.
 
+### Auth & Session Architecture
+
+```
+supabase.js
+├── SecureStorageAdapter       # AES-256-CTR encryption (key in SecureStore, ciphertext in AsyncStorage)
+├── JWT Freshness Guard        # Pre-request JWT exp check + auto-refresh (Rule 59)
+│   ├── _decodeJwtExp()        # Decode JWT exp claim (base64url, no library)
+│   ├── _ensureSessionFresh()  # Cached exp fast path + singleton refresh promise
+│   └── Global fetch wrapper   # Intercepts /rest/v1/ and /functions/v1/ requests
+└── Tiered fetch timeouts      # /rest/v1/ 8s, /auth/v1/ 8s, /functions/v1/ 30s
+
+AppResumeManager.js (singleton)
+├── AppState listener          # background → active resume sequence
+├── Stuck-state timer (15s)    # Resets loading states stuck > 15s
+├── Health check (60s)         # JWT freshness check + Supabase connectivity
+└── Full recovery              # Session refresh → cache clear → WS reconnect → FORCE_REFRESH
+```
+
+- **Token storage**: Hybrid AES-256-CTR — random 256-bit key in SecureStore (hardware keychain), encrypted session ciphertext in AsyncStorage (no size limit). Auto-migrates unencrypted sessions on first read.
+- **JWT freshness**: `autoRefreshToken` timer is unreliable on mobile (screen-off kills JS timers). The global fetch wrapper validates JWT `exp` before every data request. Uses cached `exp` (sub-ms) and singleton promise to dedup concurrent refreshes.
+- **Session refresh**: `getSession()` (local storage read) everywhere, NOT `getUser()` (network API call). Prevents hangs on cold Supabase connections.
+
 ## Getting Started
 
 ### Prerequisites
@@ -119,7 +141,7 @@ User clicks "Paper Trade" on pattern
 | Doc | Description |
 |-----|-------------|
 | `docs/feature-scanner-papertrade-engine.md` | Phase 6 architectural decisions and trade-offs |
-| `docs/Troubleshooting_Tips.md` | 22 generalized engineering rules from Phase 1-6 bugs |
+| `docs/Troubleshooting_Tips.md` | 59 generalized engineering rules from Phase 1-14 bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
 
 ## Important Conventions
@@ -129,3 +151,5 @@ User clicks "Paper Trade" on pattern
 - **Affiliate ID**: Use `affiliate.user_id` (auth UUID), not `affiliate.id` (table UUID)
 - **Notifications**: Only ONE `setNotificationHandler` call (in InAppNotificationContext)
 - **Module caches**: Must clear on logout (forumCache, notificationsCache, etc.)
+- **Auth reads**: Always `getSession()` (local storage), never `getUser()` (network call)
+- **JWT freshness**: Handled by global fetch wrapper — never rely on `autoRefreshToken` alone on mobile
