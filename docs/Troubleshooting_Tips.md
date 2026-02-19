@@ -3226,3 +3226,79 @@ const avatarUrl = displayProfile?.avatar_url;
 1. **Tab screens with `useAuth()` that don't use the profile**: If a tab screen destructures `{ profile: authProfile }` from `useAuth()` but only uses it for fallback in `loadData`, not for display
 2. **Screens with `const [profile, setProfile] = useState(null)`**: If the initial state is null and the display code reads from this state without AuthContext fallback
 3. **"Flash of empty state"**: User sees defaults (letter avatar, email username) before real data appears
+
+---
+
+# RULE 55: Child Components Need Their Own FORCE_REFRESH_EVENT Listener
+**Source:** Phase 14 — AffiliateSection stuck "Đang tải" after app resume
+
+## What Failed
+After app resume, AccountScreen recovered perfectly (it has a FORCE_REFRESH_EVENT listener). But AffiliateSection — a **child component** rendered inside AccountScreen — stayed stuck on "Đang tải..." indefinitely. The affiliate data never loaded.
+
+## Why It Failed
+Phase 7.8 (Rule 31) added FORCE_REFRESH_EVENT listeners to 15 screens. But AffiliateSection is a **component**, not a screen. It manages its own `useState(true)` loading state and its own `loadPartnershipData()` async fetch. The parent AccountScreen's FORCE_REFRESH_EVENT handler resets AccountScreen's states but has **no control** over AffiliateSection's independent loading state.
+
+```javascript
+// BAD: Component with loading state but no recovery listener
+export default function AffiliateSection({ user }) {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (user?.id) loadPartnershipData();
+  }, [user?.id]); // Only fires when user.id changes — NOT on resume
+}
+
+// GOOD: Component adds its own recovery listener
+useEffect(() => {
+  const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+    setLoading(false);
+    if (user?.id) loadPartnershipData();
+  });
+  return () => listener.remove();
+}, [user?.id]);
+```
+
+## How to Detect Similar Issues
+1. Rule 31 audit only checked **screens** (`src/screens/`). Components in `src/screens/**/components/` or `src/components/` were missed
+2. **Grep for independent loading states in components**: `grep -rn "setLoading(true)" src/screens/**/components/ src/components/`
+3. For each match, check: does the SAME file contain `FORCE_REFRESH_EVENT`? If not, it's vulnerable
+4. Any component with `useState(true)` + async fetch in useEffect needs its own listener
+
+---
+
+# RULE 56: Long-Running Operations Need Overall Timeout (Scan-Level Guard)
+**Source:** Phase 14 — Scanner "Scan Now" stuck in infinite loading after idle
+
+## What Failed
+Scanner had all individual safeguards: AbortController on each fetch (Rule 29), try/finally (Rule 28), FORCE_REFRESH_EVENT listener (Rule 31). But the scan STILL hung permanently when post-scan operations (`zoneManager.createZonesFromPatterns()`, `tierAccessService.incrementScanCount()`) made Supabase calls on dead connections.
+
+## Why It Failed
+Individual fetch timeouts (10s) protect each request. But the scan function chains multiple sequential async operations AFTER the main batch loop. If any operation hangs (despite the global Supabase fetch wrapper), the entire scan blocks. The FORCE_REFRESH_EVENT handler resets `scanning=false`, but when the user starts a new scan, the OLD scan's `finally { setScanning(false) }` eventually fires and resets the NEW scan's state.
+
+```javascript
+// BAD: No overall timeout, no scan generation tracking
+try {
+  setScanning(true);
+  // ... batch loop (protected) ...
+  await zoneManager.createZonesFromPatterns(...); // Could hang
+  await tierAccessService.incrementScanCount();  // Could hang
+} finally {
+  setScanning(false); // Interferes with new scan if old scan's finally is delayed
+}
+
+// GOOD: Scan ID prevents interference, timeouts on post-scan operations
+const currentScanId = ++scanIdRef.current;
+try {
+  setScanning(true);
+  // ... batch loop with early bail on scan superseded ...
+  await Promise.race([zoneManager.createZones(...), timeout(15000)]);
+  await Promise.race([tierAccessService.increment(), timeout(8000)]);
+} finally {
+  if (scanIdRef.current === currentScanId) setScanning(false);
+}
+```
+
+## How to Detect Similar Issues
+1. **Find multi-step async functions**: Functions with 3+ sequential `await` calls
+2. **Check if each await has timeout**: Individual calls may have timeout, but does the OVERALL function?
+3. **Check for scan/task ID pattern**: If the function can be re-triggered while in progress, old invocation's finally can corrupt new invocation's state
+4. **Test**: Start operation → background app → return → start operation again → does the first finally interfere?

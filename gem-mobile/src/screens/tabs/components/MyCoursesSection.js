@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import {
   GraduationCap,
@@ -25,6 +26,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../../utils/loadingStateManager';
 import { useAuth } from '../../../contexts/AuthContext';
 import courseService from '../../../services/courseService';
 
@@ -48,6 +50,18 @@ export default function MyCoursesSection({ navigation }) {
       }
     }, [user?.id])
   );
+
+  // Rule 55: Recovery listener for child components
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[MyCoursesSection] Force refresh received');
+      setLoading(false);
+      if (user?.id) {
+        loadCourseStats();
+      }
+    });
+    return () => listener.remove();
+  }, [user?.id]);
 
   const loadCourseStats = async () => {
     try {

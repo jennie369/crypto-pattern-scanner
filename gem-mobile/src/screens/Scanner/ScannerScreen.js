@@ -153,6 +153,7 @@ const ScannerScreen = ({ navigation }) => {
   const [currentPrice, setCurrentPrice] = useState(null);
   const [priceChange, setPriceChange] = useState(null);
   const [scanError, setScanError] = useState(null); // C9 FIX: Error state for scan failures
+  const scanIdRef = useRef(0); // Track scan generation to prevent old scan's finally from interfering
 
   // Paper Trade Modal State
   const [paperTradeModalVisible, setPaperTradeModalVisible] = useState(false);
@@ -528,6 +529,9 @@ const ScannerScreen = ({ navigation }) => {
       setSelectedScanTimeframes(timeframesToUse);
     }
 
+    // Track this scan's ID — if FORCE_REFRESH or another scan starts, this ID becomes stale
+    const currentScanId = ++scanIdRef.current;
+
     try {
       // B11 FIX: Clear candle cache before new scan to ensure fresh data
       binanceService.clearCandleCache();
@@ -560,6 +564,11 @@ const ScannerScreen = ({ navigation }) => {
       console.log('[Scanner] Timeframes to scan:', timeframesToScan, '| Count:', timeframesToScan.length);
 
       for (let i = 0; i < coins.length; i += BATCH_SIZE) {
+        // Bail out early if scan was superseded by FORCE_REFRESH or new scan
+        if (scanIdRef.current !== currentScanId) {
+          console.log('[Scanner] Scan superseded mid-batch, aborting');
+          break;
+        }
         const batch = coins.slice(i, i + BATCH_SIZE);
         console.log(`[Scanner] Scanning batch ${Math.floor(i/BATCH_SIZE) + 1}/${Math.ceil(coins.length/BATCH_SIZE)}: ${batch.length} coins`);
 
@@ -773,19 +782,25 @@ const ScannerScreen = ({ navigation }) => {
       // =====================================================
       // CREATE ZONES FROM PATTERNS (Zone Visualization)
       // ALWAYS create zones for display - tier controls features (rectangles, persistence)
+      // Rule 29: Timeout guard on post-scan operations that could hang
       // =====================================================
-      if (enrichedPatterns.length > 0) {
+      if (scanIdRef.current !== currentScanId) {
+        console.log('[Scanner] Scan superseded, skipping post-processing');
+      } else if (enrichedPatterns.length > 0) {
         try {
           console.log('[Scanner] Creating zones from patterns...');
           console.log('[Scanner] Zone viz enabled:', tierAccessService.isZoneVisualizationEnabled());
           console.log('[Scanner] User tier:', userTier);
 
-          const createdZones = await zoneManager.createZonesFromPatterns(
-            enrichedPatterns, // Pass enriched patterns with IDs
-            displayCoin,
-            selectedTimeframe,
-            user?.id
-          );
+          const createdZones = await Promise.race([
+            zoneManager.createZonesFromPatterns(
+              enrichedPatterns, // Pass enriched patterns with IDs
+              displayCoin,
+              selectedTimeframe,
+              user?.id
+            ),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Zone creation timeout')), 15000)),
+          ]);
           setZones(createdZones);
           console.log('[Scanner] Zones created:', createdZones.length);
 
@@ -800,9 +815,12 @@ const ScannerScreen = ({ navigation }) => {
       // =====================================================
       // INCREMENT SCAN QUOTA (Database-backed)
       // =====================================================
-      if (user?.id) {
+      if (user?.id && scanIdRef.current === currentScanId) {
         try {
-          const incrementResult = await tierAccessService.incrementScanCount();
+          const incrementResult = await Promise.race([
+            tierAccessService.incrementScanCount(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Quota increment timeout')), 8000)),
+          ]);
           console.log('[Scanner] Quota incremented:', incrementResult);
 
           if (incrementResult.limitReached) {
@@ -823,10 +841,16 @@ const ScannerScreen = ({ navigation }) => {
 
     } catch (error) {
       console.error('[Scanner] Scan error:', error);
-      setScanError(error?.message || 'Không thể quét. Vui lòng thử lại.');
-      alertService.error('Error', 'Failed to scan. Please try again.');
+      if (scanIdRef.current === currentScanId) {
+        setScanError(error?.message || 'Không thể quét. Vui lòng thử lại.');
+        alertService.error('Error', 'Failed to scan. Please try again.');
+      }
     } finally {
-      setScanning(false);
+      // Only clear scanning if this is still the active scan
+      // If FORCE_REFRESH or a new scan superseded us, don't touch scanning state
+      if (scanIdRef.current === currentScanId) {
+        setScanning(false);
+      }
     }
   };
 
@@ -1050,6 +1074,7 @@ const ScannerScreen = ({ navigation }) => {
   useEffect(() => {
     const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
       console.log('[Scanner] Force refresh event received');
+      scanIdRef.current++; // Invalidate any in-progress scan so its finally won't reset state
       setLoading(false);
       setScanning(false);
     });

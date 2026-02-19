@@ -23,6 +23,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../../components/CustomAlert';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -45,6 +46,7 @@ import {
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../../utils/loadingStateManager';
 import { partnershipService } from '../../../services/partnershipService';
 import {
   CTV_TIER_CONFIG,
@@ -64,6 +66,18 @@ export default function AffiliateSection({ user, navigation }) {
     if (user?.id) {
       loadPartnershipData();
     }
+  }, [user?.id]);
+
+  // Rule 31: Recovery listener — reset stuck loading + re-fetch on app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[AffiliateSection] Force refresh received');
+      setLoading(false);
+      if (user?.id) {
+        loadPartnershipData();
+      }
+    });
+    return () => listener.remove();
   }, [user?.id]);
 
   const loadPartnershipData = async () => {
