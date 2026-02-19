@@ -1085,6 +1085,107 @@ Khi component nhan data tu API co the la null/undefined/empty array.
 
 ---
 
+## Rule 20: Dual-Table Split — Web and Mobile Writing to Different Tables (Invisible Feature Gap)
+**Source:** Paper Trading Unification — Web trades wrote to 4 web-only tables; mobile wrote to different tables. Server cron only monitored mobile tables, so web trades never auto-closed on TP/SL/liquidation.
+
+### Khi nao ap dung (When to apply)
+Khi web va mobile frontends share backend (Supabase, Firebase, etc.) nhung duoc develop doc lap, moi platform co the tao ra tables rieng cho cung 1 feature.
+
+### Trieu chung (Symptoms)
+- Feature hoat dong tren mobile nhung KHONG hoat dong tren web (hoac nguoc lai)
+- Server-side cron/background job chi process data tu 1 platform
+- Trades/orders dat tren web khong xuat hien tren mobile (va nguoc lai)
+- Auto-close (TP/SL/liquidation) chi fire cho 1 platform
+- User thay 2 balances khac nhau giua web va mobile
+- Admin dashboard chi thay data tu 1 platform
+
+### Nguyen nhan goc (Root cause pattern)
+2 teams (hoac 2 thoi diem dev) tao tables khac nhau cho cung 1 feature:
+
+```
+WEB:    paper_trading_accounts    paper_trading_holdings    paper_trading_orders
+MOBILE: user_paper_trade_settings paper_trades              paper_pending_orders
+
+SERVER CRON: SELECT * FROM paper_trades WHERE status='OPEN'  ← CHI THAY MOBILE!
+             Khong biet paper_trading_holdings ton tai         ← WEB INVISIBLE
+```
+
+**Hau qua cascade:**
+```
+Web user dat TP/SL → Luu vao paper_trading_stop_orders
+  → Cron khong doc paper_trading_stop_orders
+    → TP/SL KHONG BAO GIO trigger
+      → User mat tien vi khong co auto-close
+```
+
+### Cach dieu tra (Investigation steps)
+1. **List tat ca tables cho feature**:
+   ```sql
+   SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename LIKE '%paper%' ORDER BY tablename;
+   ```
+2. **Kiem tra cron/background jobs doc tu table nao**:
+   ```bash
+   grep -rn "from(" supabase/functions/paper-trade-monitor-cron/ --include='*.ts' --include='*.js'
+   ```
+3. **So sanh web va mobile service files**:
+   ```bash
+   grep -rn "from(" frontend/src/services/paperTrading.js | sort
+   grep -rn "from(" gem-mobile/src/services/paperTradeService.js | sort
+   ```
+4. **Kiem tra cross-platform visibility**: tao record tren web, xem mobile co thay khong
+
+### Bien phap phong ngua (Preventive measures)
+- **Single Source of Truth (SSOT)**: moi feature chi co 1 set tables. Document ro trong schema:
+  ```sql
+  COMMENT ON TABLE paper_trades IS 'SSOT for all paper trades (web + mobile). Do NOT create parallel tables.';
+  ```
+- **Return adaptors**: khi table schema khong match UI expectations, dung adaptor functions:
+  ```javascript
+  // Mobile table: entry_price, margin, direction='LONG'
+  // Web UI expects: avg_buy_price, total_cost, side='buy'
+  function adaptTradeToHolding(trade) {
+    return { ...trade, avg_buy_price: trade.entry_price, total_cost: trade.margin };
+  }
+  ```
+- **Grep guard cho deprecated tables**:
+  ```bash
+  VIOLATIONS=$(grep -rn "paper_trading_accounts\|paper_trading_holdings\|paper_trading_orders\|paper_trading_stop_orders" frontend/src/ --include='*.js' --include='*.jsx' | grep -v '//' | grep -v '\*' | wc -l)
+  if [ "$VIOLATIONS" -gt 0 ]; then
+    echo "ERROR: Deprecated paper trading tables found. Use paper_trades/user_paper_trade_settings/paper_pending_orders."
+    exit 1
+  fi
+  ```
+- **Cron/job review**: khi tao feature moi, kiem tra server-side jobs co cover tat ca tables khong
+- **Cross-platform test**: sau moi feature, test: tao data tren web → xem tren mobile (va nguoc lai)
+
+### Atomic guards khi unifying
+Khi migrate sang unified tables, dung atomic UPDATE guards de tranh race conditions:
+```javascript
+// DUNG: Atomic close — chi close neu van dang OPEN
+const { error } = await supabase
+  .from('paper_trades')
+  .update({ status: 'CLOSED', exit_price, realized_pnl })
+  .eq('id', trade.id)
+  .eq('status', 'OPEN');   // ← Atomic guard: cron va web khong close cung luc
+
+// SAI: Non-atomic — cron va web co the close cung 1 trade
+const trade = await supabase.from('paper_trades').select('*').eq('id', tradeId).single();
+if (trade.status === 'OPEN') {
+  // GAP: giua SELECT va UPDATE, cron co the da close roi
+  await supabase.from('paper_trades').update({ status: 'CLOSED' }).eq('id', tradeId);
+}
+```
+
+### Dau hieu nhan biet (Code smell indicators)
+- 2+ tables co ten tuong tu cho cung 1 feature (`paper_trading_orders` + `paper_pending_orders`)
+- Web service file import tables khac voi mobile service file cho cung 1 feature
+- Cron/background job chi reference 1 set tables — khong cover tat ca entry points
+- Feature hoat dong "sometimes" — chi khi user dung dung platform
+- Balance discrepancy giua web va mobile cho cung 1 user
+- New features (auto-close, notifications) chi work cho 1 platform
+
+---
+
 ## Grep Commands for Common Web Issues
 
 ```bash
@@ -1150,6 +1251,9 @@ grep -rn 'localStorage\.setItem' src/ --include='*.js' --include='*.jsx' | grep 
 
 # Rule 12: Design token on input elements
 grep -rn 'TYPOGRAPHY.fontSize' src/ --include='*.jsx' -B2 | grep -i 'input\|textarea\|select'
+
+# Rule 20: Deprecated paper trading tables (should use unified tables)
+grep -rn "paper_trading_accounts\|paper_trading_holdings\|paper_trading_orders\|paper_trading_stop_orders" frontend/src/ --include='*.js' --include='*.jsx' | grep -v '//' | grep -v '\*'
 ```
 
 ---
@@ -1177,3 +1281,4 @@ grep -rn 'TYPOGRAPHY.fontSize' src/ --include='*.jsx' -B2 | grep -i 'input\|text
 | 17 | Accessibility | Missing Tooltips on Icon-Only Buttons | UX/a11y |
 | 18 | Security | Missing Access Control Guards on Mutations | UX/security |
 | 19 | UI | Missing Null Guards and Empty States | Runtime crash |
+| 20 | Architecture | Dual-Table Split (Web/Mobile Different Tables) | Invisible feature gap |

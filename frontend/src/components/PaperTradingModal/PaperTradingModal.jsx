@@ -9,7 +9,6 @@ import {
   getHoldings,
   getUserTier,
   checkDailyTradeLimit,
-  createStopOrder
 } from '../../services/paperTrading';
 import './PaperTradingModal.css';
 
@@ -171,23 +170,8 @@ export const PaperTradingModal = ({ symbol, onClose, prefilledSide = null }) => 
           icon: '✅'
         });
 
-        // Create stop orders if enabled
-        if (useStopLoss && stopLossPrice && userTier !== 'FREE') {
-          console.log('📍 [Paper Trade Modal] Creating stop-loss order...');
-          const stopLossResult = await createStopOrder(user.id, symbol, 'stop_loss', parseFloat(stopLossPrice), qty);
-          if (stopLossResult.success) {
-            console.log('✅ [Paper Trade Modal] Stop-loss created');
-            toast.success('Stop-loss order created', { icon: '🛡️' });
-          }
-        }
-        if (useTakeProfit && takeProfitPrice && userTier !== 'FREE') {
-          console.log('📍 [Paper Trade Modal] Creating take-profit order...');
-          const takeProfitResult = await createStopOrder(user.id, symbol, 'take_profit', parseFloat(takeProfitPrice), qty);
-          if (takeProfitResult.success) {
-            console.log('✅ [Paper Trade Modal] Take-profit created');
-            toast.success('Take-profit order created', { icon: '🎯' });
-          }
-        }
+        // TP/SL are now stored directly on the paper_trades row
+        // via stopLossPrice/takeProfitPrice options passed to executeBuy/executeSell
 
         // Reload data
         console.log('🔄 [Paper Trade Modal] Reloading account data...');

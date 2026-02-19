@@ -138,6 +138,8 @@ frontend/src/
 │   ├── accessControlService.js    # Tier access + quotas (661 lines)
 │   ├── ritualTrackingService.js   # Custom ritual CRUD (840 lines)
 │   ├── userContextService.js      # AI personalization context (696 lines)
+│   ├── paperTrading.js            # Unified paper trading (mobile tables, return adaptors)
+│   ├── orderMonitor.js            # Pending order monitor (paper_pending_orders)
 │   └── ...
 ├── shared/                  # Shared components/utilities
 ├── stores/                  # Zustand stores
@@ -490,6 +492,7 @@ import { COLORS, SPACING } from '../../../../web design-tokens';
 
 | File | Ngay | Mo ta |
 |------|------|-------|
+| `20260219_paper_trading_unification.sql` | 2026-02-19 | Migrate web paper trading tables → mobile tables (cron monitors ALL trades) |
 | `20260219_fix_gemmaster_web_sync_issues.sql` | 2026-02-19 | Fix `get_user_level_info` RPC bug (ROW constructor khong co field names) + RLS patch |
 | `20260217_rls_fix_service_role_policies.sql` | 2026-02-17 | Fix 24 policies tren 23 tables: `TO {public}` -> `TO service_role` |
 | `20260217_rls_enable_missing_tables.sql` | 2026-02-17 | Enable RLS tren 20 tables + them user policies |
@@ -508,6 +511,38 @@ supabase db push --include-all
 # 2. Copy noi dung file SQL
 # 3. Chay query
 ```
+
+### Paper Trading Unification Migration (2026-02-19)
+
+Web paper trading tables da duoc thong nhat voi mobile tables de cron co the monitor tat ca trades.
+
+**Truoc (4 web-only tables — cron KHONG monitor):**
+```
+paper_trading_accounts    → user_paper_trade_settings
+paper_trading_holdings    → paper_trades WHERE status='OPEN'
+paper_trading_orders      → paper_trades + paper_pending_orders
+paper_trading_stop_orders → TP/SL columns tren paper_trades row
+```
+
+**Apply migration:**
+```bash
+# Via Supabase Dashboard > SQL Editor
+# Copy noi dung: supabase/migrations/20260219_paper_trading_unification.sql
+# Chay query
+
+# Hoac via CLI:
+supabase db push
+```
+
+**Verify sau khi apply:**
+```sql
+-- Kiem tra data da migrate thanh cong
+SELECT count(*) FROM user_paper_trade_settings;  -- Co user records
+SELECT count(*) FROM paper_trades WHERE trade_mode='custom' AND leverage=1;  -- Web trades
+SELECT count(*) FROM paper_pending_orders;  -- Pending orders
+```
+
+**Luu y:** Old tables van ton tai (read-only backup 30 ngay). Frontend code da chuyen hoan toan sang mobile tables.
 
 ### Kiem tra RLS (chay sau khi apply):
 
@@ -534,6 +569,7 @@ Ca hai query nen tra ve **0 rows**.
 |---------|-------|
 | `from('profiles')` KHONG PHAI `from('users')` | Tat ca app code doc tu `profiles`. Webhooks va DB functions PHAI ghi vao `profiles`. |
 | `follows` table KHONG ton tai | Dung `user_follows` hoac degrade gracefully voi empty arrays. |
+| Paper trading: `paper_trades` la source of truth | KHONG dung `paper_trading_accounts/holdings/orders/stop_orders` (deprecated 2026-02-19). Xem Rule 20 trong `Web_Troubleshooting_Tips.md`. |
 | RLS bat buoc | Moi table phai co RLS enabled + `service_role ALL` + user policies. |
 | Affiliate ID | Dung `affiliate.user_id` (auth UUID), KHONG dung `affiliate.id` (table UUID). |
 

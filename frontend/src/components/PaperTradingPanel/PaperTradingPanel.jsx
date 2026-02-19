@@ -18,7 +18,6 @@ import {
   getHoldings,
   getUserTier,
   checkDailyTradeLimit,
-  createStopOrder
 } from '../../services/paperTrading';
 import './PaperTradingPanel.css';
 
@@ -604,25 +603,8 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
         setSuccess(successMsg);
         toast.success(successMsg, { icon: '✅' });
 
-        // Create stop orders if enabled (TIER1+ or Admin)
-        const canUseStopOrders = (isAdmin && isAdmin()) || userTier !== 'FREE';
-
-        if (useStopLoss && stopLossPrice && canUseStopOrders) {
-          console.log('🔵 [Paper Trade Panel] Creating stop-loss order...');
-          const stopLossResult = await createStopOrder(user.id, normalizedSymbol, 'stop_loss', parseFloat(stopLossPrice), qty);
-          if (stopLossResult.success) {
-            console.log('✅ [Paper Trade Panel] Stop-loss order created');
-            toast.success('Stop-loss order created', { icon: '🛡️' });
-          }
-        }
-        if (useTakeProfit && takeProfitPrice && canUseStopOrders) {
-          console.log('🔵 [Paper Trade Panel] Creating take-profit order...');
-          const takeProfitResult = await createStopOrder(user.id, normalizedSymbol, 'take_profit', parseFloat(takeProfitPrice), qty);
-          if (takeProfitResult.success) {
-            console.log('✅ [Paper Trade Panel] Take-profit order created');
-            toast.success('Take-profit order created', { icon: '🎯' });
-          }
-        }
+        // TP/SL are now stored directly on the paper_trades row
+        // via the stopLossPrice/takeProfitPrice options passed to executeBuy/executeSell
 
         // Reload data
         await loadAccountData();

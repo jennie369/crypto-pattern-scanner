@@ -49,49 +49,40 @@ export const AuthProvider = ({ children }) => {
   // ===== START ORDER MONITORING WHEN USER LOGS IN =====
   useEffect(() => {
     if (user && profile?.id) {
-      // Get or create paper trading account
+      // Ensure paper trade settings exist + start order monitor
       const initializeAndMonitor = async () => {
         try {
-          // Get account
-          const { data: account, error } = await supabase
-            .from('paper_trading_accounts')
+          // Get or create user_paper_trade_settings
+          const { data: settings, error } = await supabase
+            .from('user_paper_trade_settings')
             .select('id')
             .eq('user_id', user.id)
             .maybeSingle();
 
           if (error && error.code !== 'PGRST116') {
-            console.error('❌ [AuthContext] Error fetching paper trading account:', error);
+            console.error('[AuthContext] Error fetching paper trade settings:', error);
             return;
           }
 
-          let accountId;
-
-          if (!account) {
-            // Create account if doesn't exist
-            const { data: newAccount, error: createError } = await supabase
-              .from('paper_trading_accounts')
+          if (!settings) {
+            const { error: createError } = await supabase
+              .from('user_paper_trade_settings')
               .insert({
                 user_id: user.id,
-                balance: 100000,
-                initial_balance: 100000,
+                balance: 10000,
+                initial_balance: 10000,
               })
               .select('id')
               .single();
 
             if (createError) {
-              console.error('❌ [AuthContext] Error creating paper trading account:', createError);
+              console.error('[AuthContext] Error creating paper trade settings:', createError);
               return;
             }
-
-            accountId = newAccount.id;
-            console.log('✅ [AuthContext] Paper trading account created:', accountId);
-          } else {
-            accountId = account.id;
           }
 
-          // Start monitoring pending orders
-          console.log('🔍 [AuthContext] Starting order monitor for user:', user.id);
-          await orderMonitor.startMonitoring(user.id, accountId);
+          // Start monitoring pending orders (no accountId needed)
+          await orderMonitor.startMonitoring(user.id);
         } catch (error) {
           console.error('❌ [AuthContext] Error initializing order monitor:', error);
         }
