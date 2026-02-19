@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   ScrollView,
   RefreshControl,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,6 +37,7 @@ import { SPREAD_CATEGORIES } from '../../data/tarotSpreads';
 import SpreadCard from '../../components/GemMaster/SpreadCard';
 import SpreadInfoModal from '../../components/GemMaster/SpreadInfoModal';
 import UpgradeModal from '../../components/GemMaster/UpgradeModal';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const CATEGORY_ICONS = {
   all: Grid3X3,
@@ -85,6 +87,17 @@ const SpreadSelectionScreen = () => {
   useEffect(() => {
     fetchSpreads();
   }, [fetchSpreads]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[SpreadSelectionScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => fetchSpreads(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);

@@ -14,7 +14,7 @@ export const pinService = {
    */
   async pinPost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       // Check if user owns the post
@@ -85,7 +85,7 @@ export const pinService = {
    */
   async unpinPost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { error } = await supabase
@@ -110,7 +110,7 @@ export const pinService = {
    */
   async isPostPinned(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data } = await supabase
@@ -135,7 +135,7 @@ export const pinService = {
       let targetUserId = userId;
 
       if (!targetUserId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
         if (!user) return [];
         targetUserId = user.id;
       }
@@ -188,7 +188,7 @@ export const pinService = {
       let targetUserId = userId;
 
       if (!targetUserId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
         if (!user) return [];
         targetUserId = user.id;
       }
@@ -210,7 +210,7 @@ export const pinService = {
    */
   async getPinnedCount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase
@@ -231,7 +231,7 @@ export const pinService = {
    */
   async reorderPins(newOrder) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       // Update each pin's order

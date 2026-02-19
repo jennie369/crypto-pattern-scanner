@@ -41,7 +41,7 @@ class PresenceService {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         console.log('PresenceService: No user logged in');
         return;
@@ -169,7 +169,7 @@ class PresenceService {
   async updateStatus(status) {
     try {
       if (!this.userId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
         if (!user) return;
         this.userId = user.id;
       }

@@ -16,7 +16,7 @@ class MessageRequestService {
    */
   async getMessageRequests(status = 'pending') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Not authenticated', requests: [] };
       }
@@ -88,7 +88,7 @@ class MessageRequestService {
    */
   async getMessageRequestsCount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase
@@ -114,7 +114,7 @@ class MessageRequestService {
    */
   async acceptMessageRequest(requestId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Not authenticated' };
       }
@@ -172,7 +172,7 @@ class MessageRequestService {
    */
   async declineMessageRequest(requestId, blockUser = false) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Not authenticated' };
       }
@@ -249,7 +249,7 @@ class MessageRequestService {
    */
   async isConversationMessageRequest(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -275,7 +275,7 @@ class MessageRequestService {
    */
   async getMessageRequestForConversation(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return null;
 
       // Get the message request
@@ -320,7 +320,7 @@ class MessageRequestService {
    */
   subscribeToMessageRequests(callback) {
     const unsubscribe = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       if (this.subscription) {
@@ -360,7 +360,7 @@ class MessageRequestService {
    */
   async createMessageRequest(conversationId, recipientId, messagePreview) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Not authenticated' };
       }

@@ -13,7 +13,7 @@ export const analyticsService = {
    */
   async trackView(postId, source = 'feed') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       // Track even for anonymous users (viewer_id will be null)
       const { data, error } = await supabase
@@ -69,7 +69,7 @@ export const analyticsService = {
    */
   async getPostAnalytics(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -153,7 +153,7 @@ export const analyticsService = {
    */
   async getOverallAnalytics() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -217,7 +217,7 @@ export const analyticsService = {
    */
   async getTopPosts(limit = 5) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };

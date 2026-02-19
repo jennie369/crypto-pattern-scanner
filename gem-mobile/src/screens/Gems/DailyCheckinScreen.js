@@ -14,6 +14,7 @@ import {
   Animated,
   Easing,
   Modal,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -34,6 +35,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../contexts/AuthContext';
 import gemEconomyService from '../../services/gemEconomyService';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const DailyCheckinScreen = () => {
   const { user } = useAuth();
@@ -54,6 +56,16 @@ const DailyCheckinScreen = () => {
   // ========== EFFECTS ==========
   useEffect(() => {
     loadCheckinStatus();
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[DailyCheckinScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadCheckinStatus(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   // Pulse animation cho nút check-in

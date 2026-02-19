@@ -12,7 +12,7 @@ export const notificationPreferenceService = {
    */
   async mutePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase
@@ -40,7 +40,7 @@ export const notificationPreferenceService = {
    */
   async unmutePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { error } = await supabase
@@ -63,7 +63,7 @@ export const notificationPreferenceService = {
    */
   async isPostMuted(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data } = await supabase
@@ -84,7 +84,7 @@ export const notificationPreferenceService = {
    */
   async getMutedPostIds() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase

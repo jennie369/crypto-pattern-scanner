@@ -524,7 +524,7 @@ export async function connectExchangeAPI(exchangeId, apiKey, secretKey, passphra
       };
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) {
       return { success: false, error: 'Not authenticated' };
     }
@@ -595,7 +595,7 @@ export async function connectExchangeAPI(exchangeId, apiKey, secretKey, passphra
  */
 export async function disconnectExchangeAPI(exchangeId) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) {
       return { success: false, error: 'Not authenticated' };
     }
@@ -639,7 +639,7 @@ export async function disconnectExchangeAPI(exchangeId) {
  */
 export async function getExchangeBalance(exchangeId, forceRefresh = false) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) {
       return { success: false, error: 'Not authenticated' };
     }

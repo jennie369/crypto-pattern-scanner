@@ -123,7 +123,7 @@ export const createContent = async (contentData) => {
     }
 
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) {
       throw new Error('Chưa đăng nhập');
     }
@@ -385,7 +385,7 @@ export const bulkCreateContent = async (contentArray) => {
     }
 
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) {
       throw new Error('Chưa đăng nhập');
     }

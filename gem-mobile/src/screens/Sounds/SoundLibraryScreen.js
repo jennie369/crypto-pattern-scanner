@@ -14,7 +14,9 @@ import {
   FlatList,
   ScrollView,
   RefreshControl,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Audio } from 'expo-av';
@@ -77,22 +79,38 @@ const SoundLibraryScreen = ({ navigation }) => {
     };
   }, [activeTab]);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[SoundLibrary] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadSounds(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
+
   const loadSounds = async () => {
-    setLoading(true);
-    let data = [];
+    try {
+      setLoading(true);
+      let data = [];
 
-    if (activeTab === 'trending') {
-      data = await soundService.getTrendingSounds(50);
-    } else if (activeTab === 'saved') {
-      data = await soundService.getSavedSounds();
-    } else if (activeTab === 'my_sounds') {
-      data = await soundService.getUserSounds();
-    } else {
-      data = await soundService.getSoundsByCategory(activeTab, 50);
+      if (activeTab === 'trending') {
+        data = await soundService.getTrendingSounds(50);
+      } else if (activeTab === 'saved') {
+        data = await soundService.getSavedSounds();
+      } else if (activeTab === 'my_sounds') {
+        data = await soundService.getUserSounds();
+      } else {
+        data = await soundService.getSoundsByCategory(activeTab, 50);
+      }
+
+      setSounds(data);
+    } catch (error) {
+      console.error('[SoundLibrary] Error loading sounds:', error);
+    } finally {
+      setLoading(false);
     }
-
-    setSounds(data);
-    setLoading(false);
   };
 
   const handleRefresh = async () => {
@@ -107,10 +125,15 @@ const SoundLibraryScreen = ({ navigation }) => {
       return;
     }
 
-    setLoading(true);
-    const data = await soundService.searchSounds(searchQuery.trim());
-    setSounds(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const data = await soundService.searchSounds(searchQuery.trim());
+      setSounds(data);
+    } catch (error) {
+      console.error('[SoundLibrary] Error searching sounds:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const playSound = async (sound) => {

@@ -12,7 +12,7 @@ export const blockService = {
    */
   async hidePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -56,7 +56,7 @@ export const blockService = {
    */
   async unhidePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -83,7 +83,7 @@ export const blockService = {
    */
   async getHiddenPostIds() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) return [];
 
@@ -106,7 +106,7 @@ export const blockService = {
    */
   async blockUser(blockedUserId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -161,7 +161,7 @@ export const blockService = {
    */
   async unblockUser(blockedUserId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -189,7 +189,7 @@ export const blockService = {
    */
   async isUserBlocked(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) return false;
 
@@ -211,7 +211,7 @@ export const blockService = {
    */
   async getBlockedUserIds() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) return [];
 
@@ -235,7 +235,7 @@ export const blockService = {
    */
   async getBlockedUsers(page = 1, limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { data: [], count: 0 };

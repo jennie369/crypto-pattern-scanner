@@ -200,7 +200,7 @@ class AffiliateService {
    */
   async getOrCreateProfile() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chưa đăng nhập' };
 
       // Try to get existing profile
@@ -242,7 +242,7 @@ class AffiliateService {
    */
   async getProfile() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return null;
 
       // 1. Try affiliate_profiles first
@@ -316,7 +316,7 @@ class AffiliateService {
     try {
       let uid = userId;
       if (!uid) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
         if (!user) return null;
         uid = user.id;
       }
@@ -468,7 +468,7 @@ class AffiliateService {
    */
   async getReferrals(limit = 50, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -494,7 +494,7 @@ class AffiliateService {
    */
   async getSales(limit = 50, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -517,7 +517,7 @@ class AffiliateService {
    */
   async getCommissions(status = null, limit = 50, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       let query = supabase
@@ -548,7 +548,7 @@ class AffiliateService {
    */
   async getDashboardStats() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return null;
 
       const profile = await this.getProfile();
@@ -633,7 +633,7 @@ class AffiliateService {
    */
   async getKPIBonuses(limit = 12) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -656,7 +656,7 @@ class AffiliateService {
    */
   async requestWithdrawal(amount, method, accountDetails) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -692,7 +692,7 @@ class AffiliateService {
    */
   async getWithdrawals(limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -946,7 +946,7 @@ class AffiliateService {
    */
   async generateProductAffiliateLink(productId, productType, productData = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -1264,7 +1264,7 @@ class AffiliateService {
    */
   async getProductLinks(limit = 50) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -1379,7 +1379,7 @@ class AffiliateService {
    */
   async getProductLinkStats() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return null;
 
       const { data, error } = await supabase

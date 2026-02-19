@@ -39,7 +39,7 @@ export const XP_REWARDS = {
 
 export const getUserLearningStats = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) throw new Error('User not authenticated');
 
     // Check cache
@@ -88,7 +88,7 @@ export const getUserLearningStats = async () => {
 
 export const addXP = async (amount, actionType, description = '', reference = {}) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) throw new Error('Not authenticated');
 
     const { data: stats } = await supabase
@@ -175,7 +175,7 @@ const calculateXPToNextLevel = (totalXP, currentLevel) => {
 
 export const updateStreak = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) throw new Error('Not authenticated');
 
     const { data: stats } = await supabase
@@ -256,7 +256,7 @@ export const updateStreak = async () => {
 
 export const getAchievementsWithProgress = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return { success: false, error: 'Not authenticated' };
 
     const { data: achievements } = await supabase
@@ -331,7 +331,7 @@ export const getAchievementsWithProgress = async () => {
 
 export const awardAchievement = async (achievementCode) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) throw new Error('Not authenticated');
 
     const { data: achievement } = await supabase
@@ -419,7 +419,7 @@ export const checkCourseAchievements = async (totalCourses) => {
 
 export const markAchievementSeen = async (achievementId) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return { success: false };
 
     await supabase
@@ -438,7 +438,7 @@ export const markAchievementSeen = async (achievementId) => {
 
 export const getTodayQuests = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) throw new Error('Not authenticated');
 
     const today = new Date().toISOString().split('T')[0];
@@ -520,7 +520,7 @@ const simpleHash = (str) => {
 
 export const updateQuestProgress = async (requirementType, amount = 1) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return { success: false };
 
     const today = new Date().toISOString().split('T')[0];
@@ -579,7 +579,7 @@ export const updateQuestProgress = async (requirementType, amount = 1) => {
 
 export const claimQuestReward = async (questId) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) throw new Error('Not authenticated');
 
     const today = new Date().toISOString().split('T')[0];
@@ -613,7 +613,7 @@ export const claimQuestReward = async (questId) => {
 
 export const getDailyQuestProgress = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return { success: false, error: 'Not authenticated', data: [] };
 
     const today = new Date().toISOString().split('T')[0];
@@ -644,7 +644,7 @@ export const getDailyQuestProgress = async () => {
 
 export const getWeeklyLeaderboard = async (limit = 50) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     const now = new Date();
     const monday = new Date(now);
@@ -691,7 +691,7 @@ export const getWeeklyLeaderboard = async (limit = 50) => {
 
 const updateWeeklyXP = async (xpAmount) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return;
 
     const now = new Date();
@@ -734,7 +734,7 @@ const updateWeeklyXP = async (xpAmount) => {
 
 export const incrementLessonStats = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return { success: false };
 
     const { data: stats } = await supabase
@@ -764,7 +764,7 @@ export const incrementLessonStats = async () => {
 
 export const incrementCourseStats = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return { success: false };
 
     const { data: stats } = await supabase
@@ -796,7 +796,7 @@ export const incrementCourseStats = async () => {
 
 export const incrementQuizStats = async (isPerfect = false) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return { success: false };
 
     const { data: stats } = await supabase
@@ -827,7 +827,7 @@ export const incrementQuizStats = async (isPerfect = false) => {
 
 export const addWatchTime = async (minutes) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return { success: false };
 
     const { data: stats } = await supabase

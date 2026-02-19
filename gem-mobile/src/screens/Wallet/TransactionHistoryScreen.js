@@ -14,6 +14,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Image,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,6 +37,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/token
 import walletService from '../../services/walletService';
 import gemEconomyService from '../../services/gemEconomyService';
 import { useAuth } from '../../contexts/AuthContext';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const FILTER_OPTIONS = [
   { id: 'all', label: 'Tất cả' },
@@ -58,6 +60,17 @@ const TransactionHistoryScreen = ({ navigation }) => {
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[TransactionHistoryScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   // Helper to detect if transaction is a gift send based on description
@@ -105,30 +118,35 @@ const TransactionHistoryScreen = ({ navigation }) => {
       setPage(0);
     }
 
-    let data = [];
-    // Use gemEconomyService for transactions from gems_transactions table
-    if (user?.id) {
-      data = await gemEconomyService.getGemTransactions(user.id, 50, reset ? 0 : page * 50) || [];
-      // Debug: log first few transactions to see actual data structure
-      console.log('[TransactionHistory] Loaded transactions:', data.slice(0, 3).map(t => ({
-        type: t.type,
-        amount: t.amount,
-        reference_type: t.reference_type,
-        description: t.description?.substring(0, 30),
-      })));
-    } else {
-      // Fallback to walletService
-      data = await walletService.getTransactions(50, reset ? 0 : page * 50);
-    }
+    try {
+      let data = [];
+      // Use gemEconomyService for transactions from gems_transactions table
+      if (user?.id) {
+        data = await gemEconomyService.getGemTransactions(user.id, 50, reset ? 0 : page * 50) || [];
+        // Debug: log first few transactions to see actual data structure
+        console.log('[TransactionHistory] Loaded transactions:', data.slice(0, 3).map(t => ({
+          type: t.type,
+          amount: t.amount,
+          reference_type: t.reference_type,
+          description: t.description?.substring(0, 30),
+        })));
+      } else {
+        // Fallback to walletService
+        data = await walletService.getTransactions(50, reset ? 0 : page * 50);
+      }
 
-    if (reset) {
-      setTransactions(data);
-    } else {
-      setTransactions(prev => [...prev, ...data]);
-    }
+      if (reset) {
+        setTransactions(data);
+      } else {
+        setTransactions(prev => [...prev, ...data]);
+      }
 
-    setHasMore(data.length === 50);
-    setLoading(false);
+      setHasMore(data.length === 50);
+    } catch (error) {
+      console.error('[TransactionHistoryScreen] loadData error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRefresh = useCallback(async () => {

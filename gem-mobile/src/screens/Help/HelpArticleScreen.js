@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Share,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,6 +26,7 @@ import {
 } from 'lucide-react-native';
 
 import { COLORS, SPACING, GRADIENTS, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import helpService from '../../services/helpService';
 import ArticleRenderer from '../../components/Help/ArticleRenderer';
 
@@ -39,6 +41,16 @@ const HelpArticleScreen = ({ navigation, route }) => {
   useEffect(() => {
     loadArticle();
   }, [slug]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[HelpArticleScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadArticle(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadArticle = async () => {
     try {

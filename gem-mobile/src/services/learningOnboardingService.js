@@ -76,7 +76,7 @@ export const getOnboardingState = async () => {
     const localState = await getLocalState();
 
     // Try to get Supabase state if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       return localState;
@@ -135,7 +135,7 @@ export const markFeatureSeen = async (featureKey) => {
     await saveLocalState(localState);
 
     // Update Supabase if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (user) {
       const { error } = await supabase
@@ -191,7 +191,7 @@ export const resetOnboarding = async () => {
     await saveLocalState(initial);
 
     // Reset Supabase if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (user) {
       const updates = { user_id: user.id, updated_at: new Date().toISOString() };
@@ -218,7 +218,7 @@ export const resetOnboarding = async () => {
  */
 export const syncToSupabase = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return;
 
     const localState = await getLocalState();

@@ -16,6 +16,7 @@ import {
   StyleSheet,
   RefreshControl,
   Animated,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
@@ -49,6 +50,7 @@ import {
   generateVietQRUrl,
 } from '../../services/paymentService';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // ============================================================
 // COMPONENT
@@ -142,6 +144,17 @@ const PaymentStatusScreen = () => {
       pulseAnim.setValue(1);
     }
   }, [paymentData?.payment_status]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[PaymentStatusScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => fetchPaymentStatus(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // Navigate to success screen when paid
   useEffect(() => {

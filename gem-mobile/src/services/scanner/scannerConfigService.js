@@ -19,7 +19,7 @@ import { getAccessConfig, hasAccess } from '../../constants/scannerAccess';
  */
 export async function getScannerConfig() {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       console.log('[scannerConfigService] No user logged in, using defaults');
@@ -110,7 +110,7 @@ export async function createScannerConfig(userId) {
  */
 export async function updateScannerConfig(updates, userTier = 0) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       throw new Error('User not authenticated');
@@ -172,7 +172,7 @@ export async function updateScannerConfig(updates, userTier = 0) {
  */
 export async function resetScannerConfig() {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       throw new Error('User not authenticated');

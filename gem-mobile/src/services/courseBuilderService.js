@@ -114,7 +114,7 @@ export const getCourseDetails = async (courseId) => {
  */
 export const createCourse = async (courseData) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) throw new Error('Chưa đăng nhập');
 
     // Generate course ID from title

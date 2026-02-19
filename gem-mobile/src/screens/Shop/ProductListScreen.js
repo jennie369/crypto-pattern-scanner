@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,6 +26,7 @@ import { getSectionById } from '../../utils/shopConfig';
 import shopifyService from '../../services/shopifyService';
 import ProductCard from './components/ProductCard';
 import SponsorBannerSection from '../../components/SponsorBannerSection';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2;
@@ -80,6 +82,17 @@ const ProductListScreen = () => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ProductListScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => fetchProducts(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const handleProductPress = (product) => {
     navigation.navigate('ProductDetail', { product });

@@ -71,7 +71,8 @@ export default function MyCoursesSection({ navigation }) {
       // Get course stats with timeout
       const courseStats = await Promise.race([
         courseService.getUserCourseStats(user.id),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Course stats timeout')), 10000)),
+        // Budget: 4s JWT refresh + 8s query = 12s max → 15s with margin
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Course stats timeout')), 15000)),
       ]);
       setStats(courseStats);
     } catch (error) {

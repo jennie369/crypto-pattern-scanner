@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   StyleSheet,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,6 +32,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../contexts/AuthContext';
 import gemEconomyService from '../../services/gemEconomyService';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const GemPackListScreen = () => {
   const navigation = useNavigation();
@@ -47,6 +49,17 @@ const GemPackListScreen = () => {
   // ========== EFFECTS ==========
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[GemPackListScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   // ========== DATA LOADING ==========

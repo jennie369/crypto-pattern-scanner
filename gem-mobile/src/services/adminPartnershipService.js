@@ -305,7 +305,7 @@ const ADMIN_PARTNERSHIP_SERVICE = {
    */
   async approveApplication(applicationId, type, notes = '') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const adminId = user?.id;
 
       if (!adminId) {
@@ -345,7 +345,7 @@ const ADMIN_PARTNERSHIP_SERVICE = {
    */
   async rejectApplication(applicationId, reason) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const adminId = user?.id;
 
       if (!adminId) {
@@ -535,7 +535,7 @@ const ADMIN_PARTNERSHIP_SERVICE = {
         return { success: false, error: 'Tier khong hop le' };
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const adminId = user?.id;
 
       // Get current partner data
@@ -603,7 +603,7 @@ const ADMIN_PARTNERSHIP_SERVICE = {
    */
   async deactivatePartner(partnerId, reason = '') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const adminId = user?.id;
 
       const { data: partner } = await supabase
@@ -798,7 +798,7 @@ const ADMIN_PARTNERSHIP_SERVICE = {
    */
   async logAdminAction(actionType, details = {}) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       await supabase.from('admin_logs').insert({
         admin_id: user?.id,
@@ -1113,7 +1113,7 @@ const ADMIN_PARTNERSHIP_SERVICE = {
    */
   async approveInstructorApplication(applicationId, revenueShare = '50-50', notes = '') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const adminId = user?.id;
 
       if (!adminId) {
@@ -1175,7 +1175,7 @@ const ADMIN_PARTNERSHIP_SERVICE = {
    */
   async rejectInstructorApplication(applicationId, reason) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const adminId = user?.id;
 
       if (!adminId) {
@@ -1265,7 +1265,7 @@ const ADMIN_PARTNERSHIP_SERVICE = {
    */
   async processInstructorPayout(earningIds, paymentMethod, paymentReference) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const adminId = user?.id;
 
       if (!adminId) {

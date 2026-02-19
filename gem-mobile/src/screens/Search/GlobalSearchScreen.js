@@ -17,6 +17,7 @@ import {
   Keyboard,
   SafeAreaView,
   StatusBar,
+  DeviceEventEmitter,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
@@ -36,6 +37,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import searchService from '../../services/searchService';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const RESULT_TYPES = {
   coins: { icon: Bitcoin, color: '#F7931A', label: 'Coins' },
@@ -59,6 +61,16 @@ const GlobalSearchScreen = () => {
     loadInitialData();
     // Auto focus input
     setTimeout(() => inputRef.current?.focus(), 300);
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[GlobalSearch] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadInitialData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   const loadInitialData = async () => {

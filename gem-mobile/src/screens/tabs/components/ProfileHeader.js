@@ -93,7 +93,7 @@ const ProfileHeader = ({
    */
   const uploadImage = async (uri, type = 'avatar') => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const timestamp = Date.now();
@@ -155,7 +155,7 @@ const ProfileHeader = ({
       const imageUrl = await uploadImage(uri, 'cover');
 
       // Update profile with new cover URL
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       // Try to update cover_url, if column doesn't exist, store in metadata
       const { error } = await supabase
@@ -211,7 +211,7 @@ const ProfileHeader = ({
       const imageUrl = await uploadImage(uri, 'avatar');
 
       // Update profile with new avatar URL
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const { error } = await supabase
         .from('profiles')
         .update({ avatar_url: imageUrl })

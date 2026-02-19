@@ -56,7 +56,7 @@ export const shoppingTagService = {
     imageIndex = 0,
   }) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -106,7 +106,7 @@ export const shoppingTagService = {
    */
   async removeTag(tagId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }

@@ -262,7 +262,7 @@ export const shouldShowBanner = async (bannerKey) => {
  */
 export const trackImpression = async (bannerId, screenName) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     // Insert event
     await supabase.from('upgrade_events').insert({
@@ -300,7 +300,7 @@ export const trackImpression = async (bannerId, screenName) => {
  */
 export const trackClick = async (bannerId, screenName, tierType, tierLevel) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     await supabase.from('upgrade_events').insert({
       user_id: user?.id,
@@ -324,7 +324,7 @@ export const trackClick = async (bannerId, screenName, tierType, tierLevel) => {
  */
 export const trackDismiss = async (bannerId, screenName) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     await supabase.from('upgrade_events').insert({
       user_id: user?.id,
@@ -342,7 +342,7 @@ export const trackDismiss = async (bannerId, screenName) => {
  */
 export const trackCheckoutStart = async (tierType, tierLevel, screenName) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     await supabase.from('upgrade_events').insert({
       user_id: user?.id,

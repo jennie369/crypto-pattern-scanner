@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   ScrollView,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,6 +23,7 @@ import { forumService } from '../../services/forumService';
 import messagingService from '../../services/messagingService';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { UserBadges } from '../../components/UserBadge';
 
 // Import Tab components from ProfileFullScreen
@@ -92,6 +94,17 @@ const UserProfileScreen = ({ route, navigation }) => {
       loadProfileData();
     }
   }, [resolvedUserId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[UserProfileScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadProfileData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadProfileData = async () => {
     if (!resolvedUserId) return;

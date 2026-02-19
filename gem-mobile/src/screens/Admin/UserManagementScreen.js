@@ -17,6 +17,7 @@ import {
   SafeAreaView,
   RefreshControl,
   Image,
+  DeviceEventEmitter,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
@@ -34,6 +35,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import adminUserService from '../../services/adminUserService';
 import { showAlert } from '../../components/CustomAlert';
 
@@ -103,6 +105,20 @@ const UserManagementScreen = () => {
     loadUsers(true);
     loadStats();
   }, [filters]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[UserManagement] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => {
+        loadUsers(true);
+        loadStats();
+      }, 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // Debounced search
   useEffect(() => {

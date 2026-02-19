@@ -128,8 +128,8 @@ const kolVerificationService = {
    */
   async createVerification(data) {
     try {
-      const { data: authUser } = await supabase.auth.getUser();
-      const userId = authUser?.user?.id;
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
 
       if (!userId) {
         throw new Error('User not authenticated');

@@ -732,7 +732,7 @@ class DeepLinkHandler {
       // Update notification_logs for this click
       const { error } = await supabase.rpc('update_notification_log_clicked', {
         p_notification_id: notificationId,
-        p_user_id: (await supabase.auth.getUser()).data.user?.id,
+        p_user_id: (await supabase.auth.getSession()).data.session?.user?.id,
       });
 
       if (error) {

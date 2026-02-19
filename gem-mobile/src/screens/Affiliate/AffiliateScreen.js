@@ -64,7 +64,7 @@ const AffiliateScreen = ({ navigation }) => {
     try {
       setError(null);
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       setPartnerId(user.id);

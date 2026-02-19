@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +30,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useAuth } from '../../contexts/AuthContext';
 import { courseService } from '../../services/courseService';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { addXP, updateStreak, incrementCourseStats } from '../../services/learningGamificationService';
 
@@ -54,6 +56,16 @@ const CertificateScreen = ({ navigation, route }) => {
   useEffect(() => {
     loadCertificate();
   }, [courseId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[CertificateScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadCertificate(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   useEffect(() => {
     if (certificate) {

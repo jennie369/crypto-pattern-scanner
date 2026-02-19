@@ -1839,7 +1839,7 @@ export const processMessage = async (userMessage, history = [], options = {}) =>
         // ========== SAVE KARMA DATA TO DATABASE ==========
         // Get current user and save karma analysis result
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
           if (user?.id) {
             console.log('[GEM] Saving karma analysis for user:', user.id, 'type:', karmaType);
 
@@ -1982,7 +1982,7 @@ export const processMessage = async (userMessage, history = [], options = {}) =>
       console.log('[GEM] Premium content request detected:', premiumCheck.tier, 'Keywords:', premiumCheck.matchedKeywords);
 
       // Get user's current tier
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const userTier = await getUserTier(user?.id);
 
       console.log('[GEM] User tier:', userTier, 'Required tier:', premiumCheck.requiredTier);
@@ -2232,7 +2232,7 @@ export const processMessage = async (userMessage, history = [], options = {}) =>
         });
 
         // Get current user from supabase (if available)
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
         const userId = user?.id;
 
         // Call RAG-enhanced edge function

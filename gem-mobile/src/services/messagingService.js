@@ -88,7 +88,7 @@ class MessagingService {
    */
   async getServerDeletedConversationIds() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -153,7 +153,7 @@ class MessagingService {
    */
   async getConversations() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Step 1: Get conversation IDs where current user is a participant
@@ -271,7 +271,7 @@ class MessagingService {
    */
   async getConversationById(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Fetch conversation with participants
@@ -412,7 +412,7 @@ class MessagingService {
    */
   async sendMessage(conversationId, content, attachment = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Create optimistic message ID (same pattern as web)
@@ -525,7 +525,7 @@ class MessagingService {
       const { callId, callType, callStatus, callerId, duration = 0, endReason = null } = callData;
 
       // RLS yêu cầu sender_id = auth.uid(), nên dùng user hiện tại
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const senderId = user?.id;
       if (!senderId) return null;
 
@@ -648,7 +648,7 @@ class MessagingService {
    */
   async createConversation(participantIds, isGroup = false, name = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Ensure current user is in the participant list
@@ -769,7 +769,7 @@ class MessagingService {
    */
   async markAsRead(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Update conversation participant unread count
@@ -802,7 +802,7 @@ class MessagingService {
    */
   async deleteMessage(messageId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -1051,7 +1051,7 @@ class MessagingService {
    */
   async addReaction(messageId, emoji) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -1081,7 +1081,7 @@ class MessagingService {
    */
   async removeReaction(messageId, emoji) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -1106,7 +1106,7 @@ class MessagingService {
    */
   async toggleReaction(messageId, emoji) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Check if reaction exists
@@ -1145,7 +1145,7 @@ class MessagingService {
     try {
       if (!query || query.length < 2) return [];
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       // PRIVACY: Only select whitelisted fields - NEVER include email
       const { data, error } = await supabase
@@ -1178,7 +1178,7 @@ class MessagingService {
     if (!query || query.length < 2) return [];
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // Step 1: Get users current user follows
@@ -1233,7 +1233,7 @@ class MessagingService {
     if (!query || query.length < 2) return [];
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // ADMIN: Can search anyone (but still NO EMAIL)
@@ -1318,7 +1318,7 @@ class MessagingService {
    */
   async updateOnlineStatus(status) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -1348,7 +1348,7 @@ class MessagingService {
    */
   async blockUser(blockedUserId, reason = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -1377,7 +1377,7 @@ class MessagingService {
    */
   async unblockUser(blockedUserId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -1399,7 +1399,7 @@ class MessagingService {
    */
   async getBlockedUsers() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Step 1: Get blocked user IDs
@@ -1444,7 +1444,7 @@ class MessagingService {
    */
   async isUserBlocked(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { data } = await supabase
@@ -1467,7 +1467,7 @@ class MessagingService {
    */
   async reportUser({ reportedUserId, reportType, description }) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -1503,7 +1503,7 @@ class MessagingService {
    */
   async uploadAttachment(file, conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Generate unique file path (same pattern as web)
@@ -1822,7 +1822,7 @@ class MessagingService {
    */
   async starMessage(messageId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Check if starred_messages table exists by trying to insert
@@ -1861,7 +1861,7 @@ class MessagingService {
    */
   async unstarMessage(messageId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -1893,7 +1893,7 @@ class MessagingService {
    */
   async toggleStarMessage(messageId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Check if already starred
@@ -1935,7 +1935,7 @@ class MessagingService {
    */
   async getStarredMessages(conversationId = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // First get starred message IDs
@@ -2026,7 +2026,7 @@ class MessagingService {
    */
   async isMessageStarred(messageId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -2057,7 +2057,7 @@ class MessagingService {
    */
   async getTotalUnreadCount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 0;
 
       const { data, error } = await supabase
@@ -2111,7 +2111,7 @@ class MessagingService {
    */
   async recallMessage(messageId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Fetch message
@@ -2265,7 +2265,7 @@ class MessagingService {
    */
   async pinConversation(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Check current pinned count
@@ -2321,7 +2321,7 @@ class MessagingService {
    */
   async unpinConversation(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2348,7 +2348,7 @@ class MessagingService {
    */
   async getPinnedConversationIds() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { data, error } = await supabase
@@ -2381,7 +2381,7 @@ class MessagingService {
    */
   async getChatTheme(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { themeId: 'crystal' };
 
       const { data, error } = await supabase
@@ -2411,7 +2411,7 @@ class MessagingService {
    */
   async setChatTheme(conversationId, themeId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2441,7 +2441,7 @@ class MessagingService {
    */
   async setCustomBackground(conversationId, imageUrl) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2474,7 +2474,7 @@ class MessagingService {
    */
   async archiveConversation(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2504,7 +2504,7 @@ class MessagingService {
    */
   async unarchiveConversation(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2531,7 +2531,7 @@ class MessagingService {
    */
   async getArchivedConversations() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Get archived conversation IDs
@@ -2638,7 +2638,7 @@ class MessagingService {
    */
   async getArchivedConversationIds() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -2663,7 +2663,7 @@ class MessagingService {
    */
   async bulkUnarchive(conversationIds) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2696,7 +2696,7 @@ class MessagingService {
    */
   async muteConversation(conversationId, muteUntil) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2725,7 +2725,7 @@ class MessagingService {
    */
   async unmuteConversation(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2752,7 +2752,7 @@ class MessagingService {
    */
   async getMuteStatus(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { isMuted: false };
 
       const { data, error } = await supabase
@@ -2785,7 +2785,7 @@ class MessagingService {
    */
   async updateConversationSound(conversationId, soundId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -2814,7 +2814,7 @@ class MessagingService {
    */
   async deleteConversation(conversationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       console.log('[messagingService] Deleting conversation:', conversationId, 'for user:', user.id);

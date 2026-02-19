@@ -92,7 +92,7 @@ export const giftService = {
     isAnonymous = false,
   }) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -241,7 +241,7 @@ export const giftService = {
    */
   async getReceivedGifts(limit = 20, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // First get sent_gifts data
@@ -296,7 +296,7 @@ export const giftService = {
    */
   async getSentGifts(limit = 20, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // First get sent_gifts data
@@ -668,7 +668,7 @@ export const giftService = {
    */
   async getGiftStats() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { totalSent: 0, totalReceived: 0, gemsSent: 0, gemsReceived: 0 };
 
       // Get sent gifts stats

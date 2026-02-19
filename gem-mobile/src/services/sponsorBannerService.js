@@ -301,7 +301,7 @@ class SponsorBannerService {
       console.log('[SponsorBanner] Updates to save:', JSON.stringify(cleanedUpdates, null, 2));
 
       // Check current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       console.log('[SponsorBanner] Current user ID:', user?.id);
 
       // Check user's role in profiles
@@ -502,7 +502,7 @@ class SponsorBannerService {
       if (error) throw error;
 
       // Get current user's liked comment IDs
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       let likedIds = [];
 
       if (user) {
@@ -641,7 +641,7 @@ class SponsorBannerService {
    */
   async logImpression(adId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       const { error } = await supabase
         .from('sponsor_ad_interactions')

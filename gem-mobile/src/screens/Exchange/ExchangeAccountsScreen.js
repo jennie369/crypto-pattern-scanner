@@ -23,7 +23,9 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeft,
@@ -166,6 +168,17 @@ const ExchangeAccountsScreen = ({ navigation }) => {
   // Load accounts
   useEffect(() => {
     loadAccounts();
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ExchangeAccounts] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadAccounts(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   const loadAccounts = async () => {

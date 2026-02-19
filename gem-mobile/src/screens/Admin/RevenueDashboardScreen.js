@@ -17,6 +17,7 @@ import {
   RefreshControl,
   Image,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
@@ -36,6 +37,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import revenueService from '../../services/revenueService';
 import { showAlert } from '../../components/CustomAlert';
 
@@ -88,6 +90,17 @@ const RevenueDashboardScreen = () => {
   useEffect(() => {
     loadData();
   }, [selectedRange]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[RevenueDashboard] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);

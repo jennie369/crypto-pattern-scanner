@@ -401,7 +401,7 @@ function sortPatterns(patterns) {
  */
 async function logScanHistory(coinsScanned, patternsFound, timeframes, patternTypes) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return;
 
     await supabase.rpc('log_scan_history', {

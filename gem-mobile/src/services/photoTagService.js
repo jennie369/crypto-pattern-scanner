@@ -12,7 +12,7 @@ export const photoTagService = {
    */
   async addTag({ postId, imageIndex = 0, taggedUserId, xPosition, yPosition }) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -64,7 +64,7 @@ export const photoTagService = {
    */
   async removeTag(tagId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -156,7 +156,7 @@ export const photoTagService = {
    */
   async getTaggedPosts(page = 1, limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) return { data: [], count: 0 };
 

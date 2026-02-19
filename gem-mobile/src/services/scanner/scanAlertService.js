@@ -20,7 +20,7 @@ const { TYPES, PRIORITY } = ALERT_CONFIG;
  */
 export async function createScanAlert(alertData) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       console.warn('[scanAlertService] No user logged in');
@@ -78,7 +78,7 @@ export async function createScanAlert(alertData) {
  */
 export async function getAlerts(options = {}) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       return { data: [], error: 'User not authenticated' };
@@ -131,7 +131,7 @@ export async function getAlerts(options = {}) {
  */
 export async function getUnreadCount() {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       return 0;
@@ -160,7 +160,7 @@ export async function getUnreadCount() {
  */
 export async function markAsRead(alertIds) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       return 0;
@@ -195,7 +195,7 @@ export async function markAsRead(alertIds) {
  */
 export async function markAllAsRead() {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       return 0;
@@ -228,7 +228,7 @@ export async function markAllAsRead() {
  */
 export async function deleteAlert(alertId) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       return false;
@@ -260,7 +260,7 @@ export async function deleteAlert(alertId) {
  */
 export async function deleteAlertsForSymbol(symbol) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       return 0;

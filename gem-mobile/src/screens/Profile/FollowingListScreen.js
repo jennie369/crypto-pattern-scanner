@@ -15,6 +15,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,6 +23,7 @@ import { ArrowLeft, UserCheck, Search } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
 import { followService } from '../../services/followService';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { FollowButtonMini } from '../../components/Profile/FollowButton';
 
 const FollowingListScreen = () => {
@@ -41,6 +43,18 @@ const FollowingListScreen = () => {
   useEffect(() => {
     loadFollowing(1, true);
   }, [userId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[FollowingList] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+      setTimeout(() => loadFollowing(1, true), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadFollowing = async (pageNum = 1, reset = false) => {
     if (!userId) return;

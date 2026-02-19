@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +30,7 @@ import {
   AlertTriangle,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, INPUT } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../constants/layout';
 import earningsService from '../../services/earningsService';
 import walletService from '../../services/walletService';
@@ -58,23 +60,38 @@ const WithdrawScreen = ({ navigation }) => {
     loadData();
   }, []);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[WithdrawScreen] Force refresh received');
+      setLoading(false);
+      setSubmitting(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
+
   const loadData = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // Load balance
-    const result = await earningsService.getEarningsSummary();
-    if (result.success) {
-      setAvailableBalance(result.data.available);
+      // Load balance
+      const result = await earningsService.getEarningsSummary();
+      if (result.success) {
+        setAvailableBalance(result.data.available);
+      }
+
+      // Check for pending request
+      if (user?.id) {
+        const { hasPending, request } = await checkPendingWithdraw(user.id);
+        setHasPendingRequest(hasPending);
+        setPendingRequest(request);
+      }
+    } catch (err) {
+      console.error('[WithdrawScreen] Load error:', err);
+    } finally {
+      setLoading(false);
     }
-
-    // Check for pending request
-    if (user?.id) {
-      const { hasPending, request } = await checkPendingWithdraw(user.id);
-      setHasPendingRequest(hasPending);
-      setPendingRequest(request);
-    }
-
-    setLoading(false);
   };
 
   // Alias for backward compatibility

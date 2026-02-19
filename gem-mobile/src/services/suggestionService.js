@@ -25,7 +25,7 @@ export const suggestionService = {
    */
   async getSuggestedUsers(limit = 10) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
       if (!currentUser) return [];
 
       // Get users already followed to exclude
@@ -90,7 +90,7 @@ export const suggestionService = {
    */
   async getSimilarUsers(targetUserId, limit = 10) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
 
       // Get who the target user follows
       const { data: targetFollowing } = await supabase
@@ -340,7 +340,7 @@ export const suggestionService = {
    */
   async getDropdownSuggestions(followedUserId, limit = 5) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
       if (!currentUser) return [];
 
       // Get updated following list
@@ -370,7 +370,7 @@ export const suggestionService = {
    */
   async getPeopleYouMayKnow(limit = 10) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
       if (!currentUser) return [];
 
       // Get users I've interacted with (liked/commented on their posts)

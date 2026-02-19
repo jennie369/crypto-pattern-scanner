@@ -39,7 +39,7 @@ const GoalsWidget = ({ onUpdate }) => {
 
   const loadGoals = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       const today = new Date().toISOString().split('T')[0];
@@ -81,7 +81,7 @@ const GoalsWidget = ({ onUpdate }) => {
     setGoals(updatedGoals);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       const goal = updatedGoals.find(g => g.id === goalId);
@@ -100,7 +100,7 @@ const GoalsWidget = ({ onUpdate }) => {
     if (!newGoalText.trim()) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       const today = new Date().toISOString().split('T')[0];

@@ -159,7 +159,7 @@ const supportTicketService = {
         return { success: false, error: 'Tin nhắn không được để trống' };
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       const { data, error } = await supabase
         .from('ticket_messages')

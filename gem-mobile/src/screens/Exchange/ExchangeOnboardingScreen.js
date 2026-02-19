@@ -27,7 +27,9 @@ import {
   Platform,
   Alert,
   Linking,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeft,
@@ -343,6 +345,16 @@ const ExchangeOnboardingScreen = ({ navigation, route }) => {
   // Load exchanges
   useEffect(() => {
     loadExchanges();
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ExchangeOnboarding] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadExchanges(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   const loadExchanges = async () => {

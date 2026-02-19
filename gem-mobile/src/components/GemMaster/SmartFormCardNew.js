@@ -55,7 +55,7 @@ const SmartFormCardNew = ({ widget, onDismiss }) => {
 
   const handleAddToVisionBoard = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         showAlert('Thông báo', 'Vui lòng đăng nhập để sử dụng tính năng này.');

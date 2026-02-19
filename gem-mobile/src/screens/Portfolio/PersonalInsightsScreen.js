@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,6 +31,7 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, BORDER_RADIUS, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { useAuth } from '../../contexts/AuthContext';
 import { proofAnalyticsService } from '../../services/proofAnalyticsService';
 import { HealthStatusBadge, HealthStatusCard } from '../../components/roi/HealthStatusBadge';
@@ -193,6 +195,17 @@ const PersonalInsightsScreen = ({ navigation }) => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[PersonalInsights] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // Pull to refresh
   const onRefresh = useCallback(() => {

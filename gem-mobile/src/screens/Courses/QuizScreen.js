@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   ScrollView,
   StatusBar,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,6 +32,7 @@ import QuizQuestion from './components/QuizQuestion';
 import QuizTimer from './components/QuizTimer';
 import QuizResult from './components/QuizResult';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { addXP, updateStreak, incrementQuizStats } from '../../services/learningGamificationService';
 
@@ -78,6 +80,16 @@ const QuizScreen = ({ navigation, route }) => {
   useEffect(() => {
     loadQuiz();
   }, [lessonId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[QuizScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadQuiz(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadQuiz = async () => {
     try {

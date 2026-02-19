@@ -694,7 +694,8 @@ export function CallProvider({ children }) {
 
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('getCall timeout after 10s')), 10000)
+        // Budget: 4s JWT refresh + 8s query = 12s max → 15s with margin
+        setTimeout(() => reject(new Error('getCall timeout after 15s')), 15000)
       );
 
       const result = await Promise.race([

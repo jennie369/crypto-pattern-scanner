@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Keyboard,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,6 +21,7 @@ import { Search, X, ArrowLeft, Clock, TrendingUp } from 'lucide-react-native';
 import { ProductCard } from './components';
 import { shopifyService } from '../../services/shopifyService';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const ProductSearchScreen = ({ navigation }) => {
   const [query, setQuery] = useState('');
@@ -41,6 +43,15 @@ const ProductSearchScreen = ({ navigation }) => {
   useEffect(() => {
     // In production, load from AsyncStorage
     setRecentSearches(['Pha lê', 'Thạch anh', 'Vòng tay', 'Đá quý']);
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ProductSearchScreen] Force refresh received');
+      setLoading(false);
+    });
+    return () => listener.remove();
   }, []);
 
   const handleSearch = useCallback(async (searchQuery) => {

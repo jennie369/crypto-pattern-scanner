@@ -100,7 +100,7 @@ export const hashtagService = {
     try {
       const normalizedTag = hashtag.toLowerCase().replace('#', '');
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const currentUserId = user?.id;
 
       const { data, error } = await supabase

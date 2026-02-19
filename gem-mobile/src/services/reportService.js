@@ -24,7 +24,7 @@ export const reportService = {
    */
   async reportPost(postId, reason, description = '') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -73,7 +73,7 @@ export const reportService = {
    */
   async reportComment(commentId, reason, description = '') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
@@ -120,7 +120,7 @@ export const reportService = {
    */
   async hasReportedPost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       if (!user) return false;
 
@@ -191,7 +191,7 @@ export const reportService = {
    */
   async updateReportStatus(reportId, status) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       const { data, error } = await supabase
         .from('post_reports')

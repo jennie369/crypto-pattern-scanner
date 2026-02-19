@@ -15,7 +15,7 @@ export const repostService = {
    */
   async createRepost(originalPostId, quote = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -94,7 +94,7 @@ export const repostService = {
    */
   async removeRepost(originalPostId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -125,7 +125,7 @@ export const repostService = {
    */
   async hasReposted(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -239,7 +239,7 @@ export const repostService = {
    */
   async getFeedWithReposts(limit = 20, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // 'follows' table does not exist — show own posts only

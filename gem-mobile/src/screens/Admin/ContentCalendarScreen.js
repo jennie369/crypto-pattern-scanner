@@ -4,7 +4,7 @@
  * @description Admin UI cho Content Calendar
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   RefreshControl,
   StyleSheet,
   Modal,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -52,6 +53,7 @@ import {
 
 // Theme
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // ========== CONSTANTS ==========
 const PLATFORM_COLORS = {
@@ -119,6 +121,17 @@ const ContentCalendarScreen = () => {
       fetchData();
     }, [currentMonth])
   );
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ContentCalendar] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => fetchData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // ========== DATA FETCHING ==========
   const fetchData = useCallback(async () => {

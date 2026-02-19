@@ -15,6 +15,7 @@ import {
   RefreshControl,
   Keyboard,
   Image,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,6 +32,7 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { searchService } from '../../services/searchService';
 import SearchBar from '../../components/SearchBar';
 import PostCard from './components/PostCard';
@@ -76,6 +78,15 @@ const SearchScreen = ({ navigation }) => {
   useEffect(() => {
     loadRecentSearches();
     loadTrendingSearches();
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[SearchScreen] Force refresh received');
+      setLoading(false);
+    });
+    return () => listener.remove();
   }, []);
 
   // Debounced search suggestions

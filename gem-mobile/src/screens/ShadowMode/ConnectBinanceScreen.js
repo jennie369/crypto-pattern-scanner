@@ -3,7 +3,7 @@
  * IMPORTANT: Only READ-ONLY API keys accepted
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -32,6 +33,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../utils/tokens';
 import binanceApiService from '../../services/binanceApiService';
 import alertService from '../../services/alertService';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const STEPS = [
   {
@@ -66,6 +68,15 @@ const ConnectBinanceScreen = () => {
   const [showSecret, setShowSecret] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ConnectBinance] Force refresh received');
+      setLoading(false);
+    });
+    return () => listener.remove();
+  }, []);
 
   // Handle connect
   const handleConnect = async () => {

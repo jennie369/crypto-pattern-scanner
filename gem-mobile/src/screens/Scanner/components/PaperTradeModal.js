@@ -15,8 +15,10 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  DeviceEventEmitter,
 } from 'react-native';
 import alertService from '../../../services/alertService';
+import { FORCE_REFRESH_EVENT } from '../../../utils/loadingStateManager';
 import {
   X,
   TrendingUp,
@@ -124,6 +126,16 @@ const PaperTradeContent = ({ pattern, onClose, onSuccess }) => {
     loadBalance();
     loadCustomModeLimit();
   }, [user]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[PaperTradeModal] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadBalance(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // Fetch LIVE market price from Binance when modal opens
   useEffect(() => {

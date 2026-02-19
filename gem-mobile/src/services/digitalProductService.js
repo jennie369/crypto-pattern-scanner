@@ -419,7 +419,7 @@ class DigitalProductService {
    */
   async trackView(productId, productType, tier, source = 'shop_tab') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       await supabase.rpc('track_digital_product_view', {
         p_user_id: user?.id || null,
@@ -443,7 +443,7 @@ class DigitalProductService {
    */
   async trackClick(productId, clickType, tierRequired, userTier) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       await supabase.rpc('track_digital_product_click', {
         p_user_id: user?.id || null,

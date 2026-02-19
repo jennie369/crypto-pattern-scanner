@@ -132,9 +132,8 @@ class FeedbackService {
 
     // Log to database
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (user) {
         await supabase.from('feedback_prompts_log').insert({
           user_id: user.id,
@@ -155,9 +154,8 @@ class FeedbackService {
    */
   async submitFeedback(rating, comment = null, screen = null) {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
 
       // Get app version
       const appVersion = Application.nativeApplicationVersion || 'unknown';
@@ -243,9 +241,8 @@ class FeedbackService {
    */
   async rateFeature(feature, isPositive, comment = null) {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
 
       if (!user) {
         // Store locally for anonymous users
@@ -281,9 +278,8 @@ class FeedbackService {
    */
   async getFeatureRatings() {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
 
       if (!user) {
         const stored = await AsyncStorage.getItem(STORAGE_KEYS.FEATURE_RATINGS);
@@ -317,9 +313,8 @@ class FeedbackService {
     await this.markNPSShown();
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (user) {
         await supabase.from('feedback_prompts_log').insert({
           user_id: user.id,

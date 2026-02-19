@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Linking,
   StyleSheet,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -33,6 +34,7 @@ import {
   getOrderStatusColor,
 } from '../../services/orderService';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const OrderDetailScreen = () => {
   const navigation = useNavigation();
@@ -53,6 +55,16 @@ const OrderDetailScreen = () => {
       setLoading(false);
     }
   }, [orderId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[OrderDetailScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadOrderDetail(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // ========== DATA FETCHING ==========
   const loadOrderDetail = useCallback(async () => {

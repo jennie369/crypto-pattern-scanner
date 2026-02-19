@@ -233,7 +233,7 @@ const PARTNER_NOTIFICATION_SERVICE = {
    */
   async getNotifications(page = 0, limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, notifications: [], hasMore: false, total: 0 };
       }
@@ -265,7 +265,7 @@ const PARTNER_NOTIFICATION_SERVICE = {
    */
   async getUnreadCount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 0;
 
       const { count } = await supabase
@@ -310,7 +310,7 @@ const PARTNER_NOTIFICATION_SERVICE = {
    */
   async markAllAsRead() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { error } = await supabase
@@ -356,7 +356,7 @@ const PARTNER_NOTIFICATION_SERVICE = {
    */
   async clearAllNotifications() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { error } = await supabase
@@ -380,7 +380,7 @@ const PARTNER_NOTIFICATION_SERVICE = {
    */
   async getNotificationsByType(type, limit = 10) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, notifications: [] };
 
       const { data, error } = await supabase
@@ -436,7 +436,7 @@ const PARTNER_NOTIFICATION_SERVICE = {
    */
   subscribeToNotifications(callback) {
     const setupSubscription = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return null;
 
       return supabase

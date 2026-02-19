@@ -14,7 +14,7 @@ export const storyService = {
    */
   async createStory(storyData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const expiresAt = new Date(Date.now() + STORY_DURATION);
@@ -49,7 +49,7 @@ export const storyService = {
    */
   async getFollowingStories() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const now = new Date().toISOString();
@@ -135,7 +135,7 @@ export const storyService = {
    */
   async getMyStories() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const now = new Date().toISOString();
@@ -194,7 +194,7 @@ export const storyService = {
    */
   async viewStory(storyId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false };
 
       // Record view
@@ -222,7 +222,7 @@ export const storyService = {
    */
   async getStoryViewers(storyId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -252,7 +252,7 @@ export const storyService = {
    */
   async deleteStory(storyId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { error } = await supabase
@@ -278,7 +278,7 @@ export const storyService = {
    */
   async reactToStory(storyId, reaction) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase
@@ -307,7 +307,7 @@ export const storyService = {
    */
   async replyToStory(storyId, message) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase

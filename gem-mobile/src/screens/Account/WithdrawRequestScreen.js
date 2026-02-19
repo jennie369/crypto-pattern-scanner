@@ -14,7 +14,9 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -58,6 +60,17 @@ export default function WithdrawRequestScreen({ navigation }) {
       loadData();
     }
   }, [user?.id]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[WithdrawRequest] Force refresh received');
+      setLoading(false);
+      setLoadingBalance(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadData = async () => {
     setLoadingBalance(true);

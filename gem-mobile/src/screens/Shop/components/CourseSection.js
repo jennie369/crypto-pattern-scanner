@@ -16,6 +16,7 @@ import {
   Dimensions,
   Animated,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
@@ -34,6 +35,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import { shopifyService } from '../../../services/shopifyService';
 import { SHOP_TABS } from '../../../utils/shopConfig';
 import InAppBrowser from '../../../components/Common/InAppBrowser';
+import { FORCE_REFRESH_EVENT } from '../../../utils/loadingStateManager';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_HEIGHT = 220;
@@ -371,6 +373,16 @@ const CourseSection = ({
 
     // Fetch new data (in background if we have cached data)
     loadCourseProducts();
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[CourseSection] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadCourseProducts(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   /**

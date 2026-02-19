@@ -15,6 +15,7 @@ import {
   ScrollView,
   StyleSheet,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
@@ -40,6 +41,7 @@ import {
   verifyEmailOTP,
 } from '../../services/orderService';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -136,6 +138,16 @@ const LinkOrderScreen = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [emailVerified, setEmailVerified] = useState(false);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[LinkOrderScreen] Force refresh received');
+      setLoading(false);
+      setSendingOtp(false);
+    });
+    return () => listener.remove();
+  }, []);
 
   // Countdown timer
   useEffect(() => {

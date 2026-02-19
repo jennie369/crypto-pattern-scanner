@@ -18,6 +18,7 @@ import {
   Platform,
   StatusBar,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../../components/CustomAlert';
 import {
@@ -39,6 +40,7 @@ import { binanceService } from '../../../services/binanceService';
 import { favoritesService } from '../../../services/favoritesService';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import { formatPrice } from '../../../utils/formatters';
+import { FORCE_REFRESH_EVENT } from '../../../utils/loadingStateManager';
 import { tierAccessService } from '../../../services/tierAccessService';
 import { MULTI_TF_TIMEFRAMES, checkMultiTFAccess } from '../../../services/multiTimeframeScanner';
 
@@ -188,6 +190,16 @@ const CoinSelector = ({
   // Load data on mount
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[CoinSelector] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   // Real-time price updates when modal is open (every 1 second like Binance)

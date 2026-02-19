@@ -17,6 +17,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,6 +37,7 @@ import { useTabBar } from '../../contexts/TabBarContext';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
 import { SHOP_SECTIONS, SHOP_CATEGORIES } from '../../utils/shopConfig';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import useScrollToTop from '../../hooks/useScrollToTop';
 import { StateView } from '../../components/Common';
 
@@ -224,6 +226,17 @@ const ShopScreen = ({ navigation }) => {
       // Use cached data - instant display
       setLoading(false);
     }
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ShopScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadInitialData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   // Fetch wishlist count and refresh on focus

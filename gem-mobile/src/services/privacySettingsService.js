@@ -26,7 +26,7 @@ class PrivacySettingsService {
    */
   async getPrivacySettings() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         console.warn('[PrivacySettings] No user logged in');
         return { success: false, error: 'Not authenticated' };
@@ -70,7 +70,7 @@ class PrivacySettingsService {
    */
   async updatePrivacySettings(updates) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Not authenticated' };
       }
@@ -206,7 +206,7 @@ class PrivacySettingsService {
    */
   async canCallUser(calleeId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { allowed: false, reason: 'Not authenticated' };
       }
@@ -243,7 +243,7 @@ class PrivacySettingsService {
    */
   async areUsersContacts(otherUserId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase

@@ -4,7 +4,7 @@
  * @description Admin UI cho viewing post logs
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   RefreshControl,
   StyleSheet,
   Modal,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -40,6 +41,9 @@ import { getAutoPostLogs, getLogsStats } from '../../services/autoPostService';
 
 // Theme
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+
+// Loading state
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // ========== CONSTANTS ==========
 const PLATFORM_COLORS = {
@@ -85,6 +89,19 @@ const AutoPostLogsScreen = () => {
       fetchData(true);
     }, [filterStatus])
   );
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[AutoPostLogs] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => {
+        fetchData(true);
+      }, 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // ========== DATA FETCHING ==========
   const fetchData = useCallback(async (reset = false) => {

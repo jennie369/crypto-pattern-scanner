@@ -13,7 +13,7 @@ export const earningsService = {
    */
   async getEarningsSummary() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -63,7 +63,7 @@ export const earningsService = {
    */
   async getEarningsHistory(limit = 20, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -88,7 +88,7 @@ export const earningsService = {
    */
   async getEarningsByPeriod(period = 'week') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const now = new Date();
@@ -137,7 +137,7 @@ export const earningsService = {
    */
   async requestWithdrawal({ amount, bankName, accountNumber, accountHolder }) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -207,7 +207,7 @@ export const earningsService = {
    */
   async getWithdrawalHistory(limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -231,7 +231,7 @@ export const earningsService = {
    */
   async getEarningsBreakdown() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return {};
 
       const { data, error } = await supabase

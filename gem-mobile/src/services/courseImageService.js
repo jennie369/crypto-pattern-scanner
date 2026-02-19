@@ -100,13 +100,13 @@ export const search = async (keyword) => {
  */
 export const create = async (imageData) => {
   try {
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
 
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .insert({
         ...imageData,
-        created_by: userData?.user?.id || null,
+        created_by: session?.user?.id || null,
       })
       .select()
       .single();

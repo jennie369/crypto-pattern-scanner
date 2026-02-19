@@ -118,7 +118,7 @@ export const soundService = {
    */
   async getSavedSounds(limit = 50) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -160,7 +160,7 @@ export const soundService = {
     try {
       let targetUserId = userId;
       if (!targetUserId) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
         if (!user) return [];
         targetUserId = user.id;
       }
@@ -214,7 +214,7 @@ export const soundService = {
     isOriginal = false,
   }) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -301,7 +301,7 @@ export const soundService = {
    */
   async saveSound(soundId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -344,7 +344,7 @@ export const soundService = {
    */
   async unsaveSound(soundId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }
@@ -372,7 +372,7 @@ export const soundService = {
    */
   async isSoundSaved(soundId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data } = await supabase
@@ -488,7 +488,7 @@ export const soundService = {
    */
   async deleteSound(soundId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chua dang nhap' };
       }

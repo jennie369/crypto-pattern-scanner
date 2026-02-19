@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   TextInput,
   Modal,
+  DeviceEventEmitter,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,6 +40,9 @@ import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { processWithdrawal, getPendingWithdrawRequests, getAllWithdrawRequests } from '../../services/withdrawService';
 
+// Loading state
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
+
 const AdminWithdrawalsScreen = ({ navigation }) => {
   const { user, isAdmin } = useAuth();
   const { alert, AlertComponent } = useCustomAlert();
@@ -61,6 +65,19 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
       loadWithdrawals();
     }
   }, [isAdmin, filter]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[AdminWithdrawals] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => {
+        loadWithdrawals();
+      }, 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadWithdrawals = async () => {
     try {

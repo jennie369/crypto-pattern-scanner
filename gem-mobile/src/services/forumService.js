@@ -950,7 +950,7 @@ export const forumService = {
    */
   async getLikedPosts(page = 1, limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -980,7 +980,7 @@ export const forumService = {
    */
   async getSavedPosts(page = 1, limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -1009,7 +1009,7 @@ export const forumService = {
    */
   async savePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       console.log('[Forum] Saving post:', postId);
@@ -1048,7 +1048,7 @@ export const forumService = {
    */
   async unsavePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       console.log('[Forum] Unsaving post:', postId);
@@ -1073,7 +1073,7 @@ export const forumService = {
    */
   async isPostSaved(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -1094,7 +1094,7 @@ export const forumService = {
    */
   async isPostLiked(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -1216,7 +1216,7 @@ export const forumService = {
    */
   async uploadPostImage(uri) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       console.log('[Forum] Uploading image:', uri);
@@ -1292,7 +1292,7 @@ export const forumService = {
    */
   async uploadMultipleImages(imageUris) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       if (!imageUris || imageUris.length === 0) {
@@ -1421,7 +1421,7 @@ export const forumService = {
    */
   async createPost(post) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       console.log('[Forum] Creating post for user:', user.id);
@@ -1542,7 +1542,7 @@ export const forumService = {
         return { success: true };
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Prepare insert data
@@ -1582,7 +1582,7 @@ export const forumService = {
    */
   async updatePostProducts(postId, products, isSeedPost = false) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Determine which table to use
@@ -1647,7 +1647,7 @@ export const forumService = {
    */
   async updatePost(postId, userId, updates) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Check if current user is admin
@@ -1796,7 +1796,7 @@ export const forumService = {
    */
   async deletePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Check if current user is admin
@@ -1867,7 +1867,7 @@ export const forumService = {
    */
   async likePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       console.log('[Forum] Liking post:', postId);
@@ -1977,7 +1977,7 @@ export const forumService = {
    */
   async unlikePost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       console.log('[Forum] Unliking post:', postId);
@@ -2033,7 +2033,7 @@ export const forumService = {
    */
   async createComment(postId, content, parentId = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const commentData = {
@@ -2163,7 +2163,7 @@ export const forumService = {
    */
   async followUser(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -2206,7 +2206,7 @@ export const forumService = {
    */
   async unfollowUser(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -2228,7 +2228,7 @@ export const forumService = {
    */
   async isFollowing(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -2404,7 +2404,7 @@ export const forumService = {
    */
   async getUserPosts(userId, page = 1, limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       const currentUserId = user?.id;
 
       // First, try forum_posts (real users)
@@ -2527,7 +2527,7 @@ export const forumService = {
    */
   async getCustomFeeds() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -2564,7 +2564,7 @@ export const forumService = {
    */
   async createCustomFeed(feedData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // 1. Create the feed
@@ -2631,7 +2631,7 @@ export const forumService = {
    */
   async updateCustomFeed(feedId, feedData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // 1. Update the feed
@@ -2697,7 +2697,7 @@ export const forumService = {
    */
   async deleteCustomFeed(feedId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -2719,7 +2719,7 @@ export const forumService = {
    */
   async reorderCustomFeeds(feedIds) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Update sort_order for each feed
@@ -2748,7 +2748,7 @@ export const forumService = {
    */
   async createNotification({ recipientId, type, title, body, data = {} }) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       // Don't notify yourself
@@ -2779,7 +2779,7 @@ export const forumService = {
    */
   async getNotifications(page = 1, limit = 30) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // Get user's notifications AND broadcasts (is_broadcast = true)
@@ -2826,7 +2826,7 @@ export const forumService = {
    */
   async getUnreadCount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase
@@ -2865,7 +2865,7 @@ export const forumService = {
    */
   async markAllAsRead() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false };
 
       const { error } = await supabase
@@ -2887,7 +2887,7 @@ export const forumService = {
    */
   async deleteNotification(notificationId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false };
 
       const { error } = await supabase
@@ -2909,7 +2909,7 @@ export const forumService = {
    */
   async getUnreadNotificationCount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase
@@ -3013,7 +3013,7 @@ export const forumService = {
    */
   async updateProfile(profileData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -3042,7 +3042,7 @@ export const forumService = {
    */
   async uploadAvatar(uri) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       console.log('[Forum] Uploading avatar:', uri);

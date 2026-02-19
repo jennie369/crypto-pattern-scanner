@@ -35,7 +35,7 @@ const useChatTheme = (conversationId) => {
     const fetchTheme = async () => {
       setIsLoading(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
         if (!user) {
           setIsLoading(false);
           return;
@@ -96,7 +96,7 @@ const useChatTheme = (conversationId) => {
     if (!conversationId) return { success: false, error: 'No conversation' };
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Optimistic update
@@ -131,7 +131,7 @@ const useChatTheme = (conversationId) => {
     if (!conversationId) return { success: false, error: 'No conversation' };
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Optimistic update

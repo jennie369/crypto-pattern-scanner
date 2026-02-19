@@ -14,12 +14,13 @@ export const partnershipService = {
    */
   async getPartnershipStatus(userId) {
     try {
-      // Try RPC first with 4s timeout — if it hangs, fall back fast
-      // Global fetch wrapper gives 8s, but we need faster fallback to fit 15s budget
-      // (4s RPC + 8s fallback = 12s < 15s overall timeout in AffiliateSection)
+      // Try RPC first with 10s timeout — if it hangs, fall back fast
+      // Budget: 4s JWT refresh + 8s DB query = 12s worst case. 10s timeout triggers
+      // fallback before global 8s query timeout, giving fallback 8s to finish.
+      // Total worst case: 10s (RPC timeout) + 8s (fallback) = 18s < 20s AffiliateSection timeout
       const rpcResult = await Promise.race([
         supabase.rpc('get_partnership_status', { user_id_param: userId }),
-        new Promise((resolve) => setTimeout(() => resolve({ data: null, error: { message: 'RPC timeout (4s)' } }), 4000)),
+        new Promise((resolve) => setTimeout(() => resolve({ data: null, error: { message: 'RPC timeout (10s)' } }), 10000)),
       ]);
 
       const { data, error } = rpcResult;

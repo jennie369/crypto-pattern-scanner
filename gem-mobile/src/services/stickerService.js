@@ -222,7 +222,7 @@ class StickerService {
    */
   async getRecentItems(type = null, limit = 30) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       let query = supabase
@@ -260,7 +260,7 @@ class StickerService {
    */
   async trackUsage(item) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       const { error } = await supabase.rpc('track_sticker_usage', {
@@ -286,7 +286,7 @@ class StickerService {
    */
   async getFavoritePacks() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -314,7 +314,7 @@ class StickerService {
    */
   async isPackFavorited(packId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -339,7 +339,7 @@ class StickerService {
    */
   async toggleFavoritePack(packId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Check if already favorited

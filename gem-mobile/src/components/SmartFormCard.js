@@ -106,7 +106,7 @@ const SmartFormCard = ({
     setIsSaving(true);
     try {
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         alertService.error('Lỗi', 'Bạn cần đăng nhập để lưu.');
         setIsSaving(false);

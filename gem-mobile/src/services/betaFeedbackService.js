@@ -119,7 +119,7 @@ class BetaFeedbackService {
       };
 
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       // Get user profile tier
       let userTier = null;
@@ -170,7 +170,7 @@ class BetaFeedbackService {
 
     try {
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       // Collect session data if requested
       let sessionData = null;
@@ -311,7 +311,7 @@ class BetaFeedbackService {
 
   async getMyFeedback(limit = 20) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -365,7 +365,7 @@ class BetaFeedbackService {
 
   async updateFeedbackStatus(feedbackId, status, notes = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       const updateData = {
         status,

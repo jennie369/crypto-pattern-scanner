@@ -17,7 +17,7 @@ const MAX_RECENTLY_VIEWED = 20; // Maximum items to keep
  */
 export const getRecentlyViewed = async (limit = 10) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Return local recently viewed for guest users
@@ -63,7 +63,7 @@ export const getLocalRecentlyViewed = async (limit = 10) => {
  */
 export const addToRecentlyViewed = async (productData) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Add to local recently viewed for guest users
@@ -133,7 +133,7 @@ const addToLocalRecentlyViewed = async (productData) => {
  */
 export const clearRecentlyViewed = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       await AsyncStorage.removeItem(RECENTLY_VIEWED_STORAGE_KEY);
@@ -158,7 +158,7 @@ export const clearRecentlyViewed = async () => {
  */
 export const syncLocalRecentlyViewedToSupabase = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return;
 
     const localItems = await getLocalRecentlyViewed(MAX_RECENTLY_VIEWED);
@@ -190,7 +190,7 @@ export const syncLocalRecentlyViewedToSupabase = async () => {
  */
 export const removeFromRecentlyViewed = async (productId) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Remove from local

@@ -11,7 +11,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, HelpCircle, Clock } from 'lucide-react-native';
@@ -62,6 +64,16 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
   useEffect(() => {
     loadInitialData();
   }, [user?.id]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[PartnershipRegistration] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadInitialData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadInitialData = async () => {
     if (!user?.id) {

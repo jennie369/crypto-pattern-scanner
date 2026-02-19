@@ -237,7 +237,7 @@ class NotificationService {
       await AsyncStorage.setItem(PUSH_TOKEN_KEY, token.data);
 
       // Save to database if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (user) {
         await this.savePushTokenToDatabase(user.id, token.data);
       }
@@ -295,7 +295,7 @@ class NotificationService {
     try {
       const storedToken = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (user) {
         // Completely delete the token instead of just deactivating
         await supabase
@@ -1366,7 +1366,7 @@ class NotificationService {
       const body = `${callerName} đã gọi ${callType} cho bạn`;
 
       // Save to database for notification tab
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (user) {
         await supabase.from('notifications').insert({
           user_id: user.id,
@@ -2089,7 +2089,7 @@ class NotificationService {
    */
   async createScheduledNotification(data) {
     try {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
 
       // Calculate estimated reach
       const reach = await this.calculateReach(data.segment || 'all');
@@ -2113,7 +2113,7 @@ class NotificationService {
           is_recurring: data.is_recurring || false,
           recurrence_rule: data.recurrence_rule,
           status: data.scheduled_at ? 'scheduled' : 'draft',
-          created_by: user?.user?.id,
+          created_by: session?.user?.id,
         })
         .select()
         .single();
@@ -2308,7 +2308,7 @@ class NotificationService {
    */
   async sendTest(notificationData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Get admin's token from profiles
@@ -2494,13 +2494,13 @@ class NotificationService {
    */
   async createTemplate(templateData) {
     try {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
 
       const { data, error } = await supabase
         .from('notification_templates')
         .insert({
           ...templateData,
-          created_by: user?.user?.id,
+          created_by: session?.user?.id,
         })
         .select()
         .single();
@@ -2674,7 +2674,7 @@ class NotificationService {
    */
   async getUserNotificationSettings() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return null;
 
       const { data } = await supabase
@@ -2695,7 +2695,7 @@ class NotificationService {
    */
   async updateUserNotificationSettings(settings) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false };
 
       const { error } = await supabase
@@ -2722,7 +2722,7 @@ class NotificationService {
    */
   async toggleNotificationsEnabled(enabled) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false };
 
       const { error } = await supabase
@@ -2749,7 +2749,7 @@ class NotificationService {
    */
   async saveTokenToProfile(token) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       await supabase

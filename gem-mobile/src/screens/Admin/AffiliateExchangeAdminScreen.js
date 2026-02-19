@@ -26,6 +26,7 @@ import {
   Dimensions,
   Modal,
   Pressable,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -47,6 +48,9 @@ import { exchangeAffiliateService } from '../../services/exchangeAffiliateServic
 
 // Constants
 import { getExchangeConfig, EXCHANGE_CONFIGS } from '../../constants/exchangeConfig';
+
+// Loading state
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -159,6 +163,19 @@ const AffiliateExchangeAdminScreen = ({ navigation }) => {
   useEffect(() => {
     loadStats();
   }, [dateRange]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[AffiliateExchangeAdmin] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => {
+        loadStats();
+      }, 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadStats = async () => {
     try {

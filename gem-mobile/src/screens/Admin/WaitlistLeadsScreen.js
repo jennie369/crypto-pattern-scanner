@@ -19,6 +19,7 @@ import {
   Linking,
   Platform,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -54,6 +55,7 @@ import {
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import AdminTooltip from '../../components/Admin/AdminTooltip';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS, BORDER_RADIUS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
 import waitlistLeadService, {
@@ -342,6 +344,21 @@ const WaitlistLeadsScreen = ({ navigation }) => {
   useEffect(() => {
     loadStats();
     loadLeads(true);
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[WaitlistLeads] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+      setTimeout(() => {
+        loadStats();
+        loadLeads(true);
+      }, 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   // Reload on filter change

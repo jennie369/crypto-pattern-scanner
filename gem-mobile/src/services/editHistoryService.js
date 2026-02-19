@@ -78,7 +78,7 @@ export const editHistoryService = {
    */
   async savePostEdit(postId, previousVersion, newVersion) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase
@@ -113,7 +113,7 @@ export const editHistoryService = {
    */
   async saveCommentEdit(commentId, previousContent, newContent) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase

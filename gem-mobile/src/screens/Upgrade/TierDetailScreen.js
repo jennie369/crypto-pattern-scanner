@@ -13,7 +13,9 @@ import {
   ActivityIndicator,
   Linking,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -51,6 +53,17 @@ const TierDetailScreen = ({ navigation, route }) => {
   useEffect(() => {
     loadTier();
   }, [tierType, tierLevel]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[TierDetail] Force refresh received');
+      setLoading(false);
+      setCheckingOut(false);
+      setTimeout(() => loadTier(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadTier = async () => {
     try {

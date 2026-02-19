@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +32,7 @@ import {
 } from 'lucide-react-native';
 
 import { COLORS, SPACING, GRADIENTS } from '../../theme/darkTheme';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import mtfAlignmentService, {
   ALIGNMENT_STATUS,
   ALIGNMENT_LEVELS,
@@ -61,6 +63,17 @@ export default function MTFDashboardScreen({ navigation, route }) {
       fetchAlignment().finally(() => setLoading(false));
     }
   }, [symbol, initialAlignment, fetchAlignment]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[MTFDashboard] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => fetchAlignment(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);

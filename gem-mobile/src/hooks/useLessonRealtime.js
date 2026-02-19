@@ -246,11 +246,11 @@ export function useLessonPresence(lessonId) {
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          const { data: user } = await supabase.auth.getUser();
-          if (user?.user) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
             await channel.track({
-              id: user.user.id,
-              email: user.user.email,
+              id: session.user.id,
+              email: session.user.email,
               role: 'student',
               joined_at: new Date().toISOString(),
             });

@@ -5774,7 +5774,8 @@ const VisionBoardScreen = () => {
 
     // Create timeout promise to prevent infinite loading
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout: Query took too long')), 10000);
+      // Budget: 4s JWT refresh + 8s query = 12s max → 15s with margin
+      setTimeout(() => reject(new Error('Timeout: Query took too long')), 15000);
     });
 
     try {

@@ -17,6 +17,7 @@ import {
   SafeAreaView,
   RefreshControl,
   Image,
+  DeviceEventEmitter,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
@@ -36,6 +37,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import supportTicketService, {
   TICKET_STATUSES,
   TICKET_PRIORITIES,
@@ -102,6 +104,20 @@ const SupportTicketsScreen = () => {
     loadTickets(true);
     loadStats();
   }, [filters]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[SupportTickets] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => {
+        loadTickets(true);
+        loadStats();
+      }, 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // Debounced search
   useEffect(() => {

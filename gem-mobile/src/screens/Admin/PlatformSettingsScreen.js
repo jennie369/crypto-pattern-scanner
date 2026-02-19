@@ -4,7 +4,7 @@
  * @description Admin UI cho platform connections
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import {
   Switch,
   TextInput,
   Modal,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -49,6 +50,7 @@ import {
 
 // Theme
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, INPUT } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // ========== CONSTANTS ==========
 const PLATFORM_CONFIG = {
@@ -84,6 +86,17 @@ const PlatformSettingsScreen = () => {
       fetchData();
     }, [])
   );
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[PlatformSettings] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => fetchData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // ========== DATA FETCHING ==========
   const fetchData = useCallback(async () => {

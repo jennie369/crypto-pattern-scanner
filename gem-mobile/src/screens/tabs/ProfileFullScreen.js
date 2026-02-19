@@ -112,14 +112,14 @@ const ProfileFullScreen = () => {
     }
   }, [user?.id]);
 
-  // Listen for FORCE_REFRESH_EVENT from health monitor / recovery system
+  // Rule 31: Recovery listener for app resume
   useEffect(() => {
     const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
-      console.log('[ProfileFull] Force refresh event received - resetting all states');
+      console.log('[ProfileFull] Force refresh received');
       setLoading(false);
       setRefreshing(false);
       setContentLoading(false);
-      loadProfile();
+      setTimeout(() => loadProfile(), 50); // Rule 57: Break React 18 batch
     });
     return () => listener.remove();
   }, [user?.id]);

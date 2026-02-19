@@ -27,7 +27,9 @@ import {
   Alert,
   Linking,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeft,
@@ -195,6 +197,21 @@ const APIConnectionScreen = ({ navigation, route }) => {
       loadExistingConnection();
     }
   }, [mode, exchangeId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[APIConnection] Force refresh received');
+      setLoading(false);
+      setTesting(false);
+      setTimeout(() => {
+        if (mode === 'view' && exchangeId) {
+          loadExistingConnection();
+        }
+      }, 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadExistingConnection = async () => {
     try {

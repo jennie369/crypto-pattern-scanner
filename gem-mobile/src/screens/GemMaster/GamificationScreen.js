@@ -11,6 +11,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -30,6 +31,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { streakService, LEVELS, BADGES } from '../../services/streakService';
 import { emotionDetectionService } from '../../services/emotionDetectionService';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // Level icons mapping
 const LEVEL_ICONS = {
@@ -55,6 +57,17 @@ const GamificationScreen = ({ navigation }) => {
       loadData();
     }
   }, [user?.id]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[GamificationScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadData = async () => {
     try {

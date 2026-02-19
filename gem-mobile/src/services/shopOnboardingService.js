@@ -71,7 +71,7 @@ export const SHOP_ONBOARDING_STEPS = [
  */
 export const getOnboardingProgress = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Return local progress for guest users
@@ -109,7 +109,7 @@ export const getOnboardingProgress = async () => {
  */
 export const shouldShowOnboarding = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Check local storage for guest users
@@ -143,7 +143,7 @@ export const shouldShowOnboarding = async () => {
  */
 export const markStepComplete = async (featureKey, skipped = false) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     const prefixedKey = featureKey.startsWith('shop_') ? featureKey : `shop_${featureKey}`;
 
     if (!user) {
@@ -211,7 +211,7 @@ export const skipOnboarding = async () => {
  */
 export const resetOnboarding = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Clear local storage for guest users
@@ -349,7 +349,7 @@ const markLocalStepComplete = async (featureKey, skipped = false) => {
  */
 export const syncLocalOnboardingToSupabase = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return;
 
     const localProgress = await getLocalOnboardingProgress();

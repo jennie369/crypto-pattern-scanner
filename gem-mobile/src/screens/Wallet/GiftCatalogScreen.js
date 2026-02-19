@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import alertService from '../../services/alertService';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +29,7 @@ import {
 import { COLORS, SPACING, GLASS, GRADIENTS } from '../../utils/tokens';
 import walletService from '../../services/walletService';
 import { useTabBar } from '../../contexts/TabBarContext';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // Gift categories with items
 const GIFT_CATEGORIES = [
@@ -74,6 +76,16 @@ const GiftCatalogScreen = ({ navigation, route }) => {
     loadBalance();
   }, []);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[GiftCatalogScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadBalance(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
+
   // Handle pre-selected gift from navigation
   useEffect(() => {
     if (preSelectedGift) {
@@ -93,11 +105,16 @@ const GiftCatalogScreen = ({ navigation, route }) => {
 
   const loadBalance = async () => {
     setLoading(true);
-    const result = await walletService.getBalance();
-    if (result.success) {
-      setBalance(result.data.gems || 0);
+    try {
+      const result = await walletService.getBalance();
+      if (result.success) {
+        setBalance(result.data.gems || 0);
+      }
+    } catch (error) {
+      console.error('[GiftCatalogScreen] loadBalance error:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSelectGift = (gift) => {

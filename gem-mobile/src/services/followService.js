@@ -20,7 +20,7 @@ export const followService = {
    */
   async followUser(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Prevent following yourself
@@ -68,7 +68,7 @@ export const followService = {
    */
   async unfollowUser(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { error } = await supabase
@@ -120,7 +120,7 @@ export const followService = {
    */
   async checkFollowStatus(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data, error } = await supabase
@@ -143,7 +143,7 @@ export const followService = {
    */
   async checkMutualFollow(userId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { isFollowing: false, isFollowedBy: false, isMutual: false };
       }
@@ -254,7 +254,7 @@ export const followService = {
    */
   async getFollowers(userId, page = 1, limit = 20) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
 
       const { data, error } = await supabase
         .from('user_follows')
@@ -320,7 +320,7 @@ export const followService = {
    */
   async getFollowing(userId, page = 1, limit = 20) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
 
       const { data, error } = await supabase
         .from('user_follows')
@@ -385,7 +385,7 @@ export const followService = {
    */
   async getMutualFollowers(userId, limit = 10) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
       if (!currentUser || currentUser.id === userId) return [];
 
       // Get followers of target user
@@ -435,7 +435,7 @@ export const followService = {
    */
   async createFollowNotification(recipientId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user || recipientId === user.id) return;
 
       const { error } = await supabase
@@ -470,7 +470,7 @@ export const followService = {
    */
   async searchUsers(query, limit = 20) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
 
       const { data, error } = await supabase
         .from('profiles')

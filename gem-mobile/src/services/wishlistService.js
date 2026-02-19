@@ -18,7 +18,7 @@ const WISHLIST_PRICES_KEY = '@gem_wishlist_prices';
  */
 export const getWishlist = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Return local wishlist for guest users
@@ -46,7 +46,7 @@ export const getWishlist = async () => {
  */
 export const isInWishlist = async (productId) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Check local wishlist for guest users
@@ -76,7 +76,7 @@ export const isInWishlist = async (productId) => {
  */
 export const addToWishlist = async (productData) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Add to local wishlist for guest users
@@ -142,7 +142,7 @@ export const addToWishlist = async (productData) => {
  */
 export const removeFromWishlist = async (productId) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       // Remove from local wishlist for guest users
@@ -191,7 +191,7 @@ export const toggleWishlist = async (productData) => {
  */
 export const getWishlistCount = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     if (!user) {
       const localWishlist = await getLocalWishlist();
@@ -304,7 +304,7 @@ const removeFromLocalWishlist = async (productId) => {
  */
 export const syncLocalWishlistToSupabase = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
     if (!user) return;
 
     const localWishlist = await getLocalWishlist();

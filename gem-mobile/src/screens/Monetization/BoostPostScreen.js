@@ -13,7 +13,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -83,6 +85,17 @@ export default function BoostPostScreen({ navigation, route }) {
   useEffect(() => {
     loadGemBalance();
   }, [loadGemBalance]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[BoostPost] Force refresh received');
+      setLoading(false);
+      setLoadingBalance(false);
+      setTimeout(() => loadGemBalance(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const handleBoost = async () => {
     console.log('[BoostPost] handleBoost called, postId:', postId, 'package:', selectedPackage);

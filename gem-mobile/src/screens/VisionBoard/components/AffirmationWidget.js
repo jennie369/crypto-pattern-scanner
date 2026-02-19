@@ -139,7 +139,7 @@ const AffirmationWidget = ({ completedToday = 0, streak = 0, onComplete }) => {
   // Mark as done
   const handleDone = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       const today = new Date().toISOString().split('T')[0];

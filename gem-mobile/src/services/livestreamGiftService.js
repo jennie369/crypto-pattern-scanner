@@ -172,7 +172,7 @@ class LivestreamGiftService {
   async sendGift(sessionId, giftId, count = 1) {
     try {
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Not authenticated');
 
       // Find gift

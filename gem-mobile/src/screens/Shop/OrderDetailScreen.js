@@ -3,7 +3,7 @@
  * View complete order information and tracking
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   Linking,
   Image,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -33,6 +34,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { orderService } from '../../services/orderService';
 import OrderTimeline from '../../components/OrderTimeline';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const OrderDetailScreen = ({ navigation, route }) => {
   const { orderId } = route.params;
@@ -43,6 +45,16 @@ const OrderDetailScreen = ({ navigation, route }) => {
   useEffect(() => {
     loadOrderDetail();
   }, [orderId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[OrderDetailScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadOrderDetail(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadOrderDetail = async () => {
     try {

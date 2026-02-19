@@ -13,6 +13,7 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,6 +26,7 @@ import {
   Gem,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import earningsService from '../../services/earningsService';
 
 const SOURCE_ICONS = {
@@ -45,22 +47,38 @@ const EarningsHistoryScreen = ({ navigation }) => {
     loadData();
   }, []);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[EarningsHistoryScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(true), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
+
   const loadData = async (reset = true) => {
-    if (reset) {
-      setLoading(true);
-      setPage(0);
+    try {
+      if (reset) {
+        setLoading(true);
+        setPage(0);
+      }
+
+      const data = await earningsService.getEarningsHistory(20, reset ? 0 : page * 20);
+
+      if (reset) {
+        setHistory(data);
+      } else {
+        setHistory(prev => [...prev, ...data]);
+      }
+
+      setHasMore(data.length === 20);
+    } catch (err) {
+      console.error('[EarningsHistoryScreen] Load error:', err);
+    } finally {
+      setLoading(false);
     }
-
-    const data = await earningsService.getEarningsHistory(20, reset ? 0 : page * 20);
-
-    if (reset) {
-      setHistory(data);
-    } else {
-      setHistory(prev => [...prev, ...data]);
-    }
-
-    setHasMore(data.length === 20);
-    setLoading(false);
   };
 
   const handleRefresh = useCallback(async () => {

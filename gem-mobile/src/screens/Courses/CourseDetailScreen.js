@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,6 +37,7 @@ import EnrollmentModal from './EnrollmentModal';
 import { useCourse } from '../../contexts/CourseContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import shopifyService from '../../services/shopifyService';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
@@ -177,6 +179,16 @@ const CourseDetailScreen = ({ navigation, route }) => {
 
     loadCourseData();
   }, [courseId, course?.id]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[CourseDetailScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => refresh(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   // Safety net: ensure CTA button is always visible after loading completes.
   // The entrance animation (buttonSlideAnim) starts at 100 (offscreen) and only

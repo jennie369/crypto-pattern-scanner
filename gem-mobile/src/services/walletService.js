@@ -17,7 +17,7 @@ export const walletService = {
    */
   async getWallet() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -83,7 +83,7 @@ export const walletService = {
    */
   async getBalance() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -141,7 +141,7 @@ export const walletService = {
    */
   async getTransactions(limit = 20, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // PRIMARY: Try gems_transactions table first
@@ -222,7 +222,7 @@ export const walletService = {
    */
   async purchasePackage(packageId, paymentMethod) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -322,7 +322,7 @@ export const walletService = {
    */
   async spendGems(amount, description, referenceId = null, referenceType = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -536,7 +536,7 @@ export const walletService = {
    */
   async addBonus(amount, reason) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }

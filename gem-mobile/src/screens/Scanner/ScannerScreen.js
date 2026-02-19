@@ -468,10 +468,10 @@ const ScannerScreen = ({ navigation }) => {
 
     if (user?.id && !isAdminUser) {
       try {
-        // Wrap quota check with 3 second timeout
+        // Budget: 4s JWT refresh + 8s query = 12s max → 15s with margin
         const quotaCheckPromise = tierAccessService.checkScanLimit();
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Quota check timeout')), 3000)
+          setTimeout(() => reject(new Error('Quota check timeout')), 15000)
         );
 
         const quotaCheck = await Promise.race([quotaCheckPromise, timeoutPromise]);
@@ -826,7 +826,8 @@ const ScannerScreen = ({ navigation }) => {
         try {
           const incrementResult = await Promise.race([
             tierAccessService.incrementScanCount(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Quota increment timeout')), 8000)),
+            // Budget: 4s JWT refresh + 8s query = 12s max → 15s with margin
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Quota increment timeout')), 15000)),
           ]);
           console.log('[Scanner] Quota incremented:', incrementResult);
 
@@ -1009,10 +1010,10 @@ const ScannerScreen = ({ navigation }) => {
     const loadQuota = async () => {
       if (user?.id) {
         try {
-          // Rule 29: Timeout on quota check (could take 8s × 3 retries = 24s)
+          // Budget: 4s JWT refresh + 8s query = 12s max → 15s with margin
           const quota = await Promise.race([
             tierAccessService.checkScanLimit(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Quota load timeout')), 8000)),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Quota load timeout')), 15000)),
           ]);
           setScanQuota(quota);
           console.log('[Scanner] Quota loaded:', quota);
@@ -1070,7 +1071,8 @@ const ScannerScreen = ({ navigation }) => {
             // Rule 29: Timeout on zone cache restore
             const cachedZones = await Promise.race([
               zoneManager.getZonesForChart(displayCoin, selectedTimeframe, user.id),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Zone cache timeout')), 8000)),
+              // Budget: 4s JWT refresh + 8s query = 12s max → 15s with margin
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Zone cache timeout')), 15000)),
             ]);
             if (cachedZones && cachedZones.length > 0) {
               console.log('[Scanner] Restored zones from cache:', cachedZones.length);

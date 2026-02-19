@@ -13,7 +13,7 @@ export const scheduleService = {
    */
   async schedulePost(postData, scheduledAt) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase
@@ -48,7 +48,7 @@ export const scheduleService = {
    */
   async getScheduledPosts(status = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       let query = supabase
@@ -76,7 +76,7 @@ export const scheduleService = {
    */
   async getUpcomingPosts() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const now = new Date();
@@ -106,7 +106,7 @@ export const scheduleService = {
    */
   async updateScheduledPost(postId, updates) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase
@@ -146,7 +146,7 @@ export const scheduleService = {
    */
   async cancelScheduledPost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { error } = await supabase
@@ -175,7 +175,7 @@ export const scheduleService = {
    */
   async deleteScheduledPost(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { error } = await supabase
@@ -200,7 +200,7 @@ export const scheduleService = {
    */
   async publishNow(postId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       // Get the scheduled post
@@ -256,7 +256,7 @@ export const scheduleService = {
    */
   async getPendingCount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase

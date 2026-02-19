@@ -12,7 +12,7 @@ export const liveService = {
    */
   async startStream(streamData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       // Generate stream key
@@ -50,7 +50,7 @@ export const liveService = {
    */
   async endStream(streamId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase
@@ -111,7 +111,7 @@ export const liveService = {
    */
   async getFollowingStreams() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // 'follows' table does not exist — return empty (no follow system yet)
@@ -190,7 +190,7 @@ export const liveService = {
    */
   async joinStream(streamId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false };
 
       // Add viewer record
@@ -218,7 +218,7 @@ export const liveService = {
    */
   async leaveStream(streamId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false };
 
       // Remove viewer record
@@ -245,7 +245,7 @@ export const liveService = {
    */
   async sendChatMessage(streamId, message) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase
@@ -329,7 +329,7 @@ export const liveService = {
    */
   async sendGift(streamId, giftData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false, error: 'Chua dang nhap' };
 
       const { data, error } = await supabase

@@ -56,7 +56,7 @@ class CallService {
         };
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       console.log('[CallService] ========================================');
@@ -265,7 +265,7 @@ class CallService {
    */
   async answerCall(callId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Prevent duplicate answer attempts
@@ -328,7 +328,7 @@ class CallService {
    */
   async markConnected(callId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       // Clear ring timeout
@@ -376,7 +376,7 @@ class CallService {
    */
   async declineCall(callId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       console.log('[CallService] Declining call:', callId);
@@ -641,7 +641,7 @@ class CallService {
    */
   async toggleMute(callId, isMuted) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Update local WebRTC
@@ -675,7 +675,7 @@ class CallService {
    */
   async toggleSpeaker(callId, isSpeakerOn) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Update local WebRTC
@@ -706,7 +706,7 @@ class CallService {
    */
   async toggleVideo(callId, isVideoEnabled) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Update local WebRTC
@@ -741,7 +741,7 @@ class CallService {
     try {
       console.log('[CallService] Upgrading to video call:', callId);
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       // Enable video on WebRTC
@@ -816,7 +816,7 @@ class CallService {
    */
   async getCallHistory(limit = 50, offset = 0) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
 
       const { data, error } = await supabase.rpc('get_call_history', {
@@ -1366,7 +1366,7 @@ class CallService {
    */
   async _logEvent(callId, eventType, metadata = {}) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       await supabase.from('call_events').insert({
         call_id: callId,
@@ -1430,7 +1430,7 @@ class CallService {
 
     // Also cleanup any stale records for current user
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (user) {
         await this._cleanupStaleParticipants(user.id);
       }

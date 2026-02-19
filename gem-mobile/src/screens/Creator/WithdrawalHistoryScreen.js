@@ -13,6 +13,7 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,6 +26,7 @@ import {
   Gem,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import earningsService from '../../services/earningsService';
 
 const STATUS_CONFIG = {
@@ -43,11 +45,27 @@ const WithdrawalHistoryScreen = ({ navigation }) => {
     loadData();
   }, []);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[WithdrawalHistoryScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
+
   const loadData = async () => {
-    setLoading(true);
-    const data = await earningsService.getWithdrawalHistory(50);
-    setWithdrawals(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const data = await earningsService.getWithdrawalHistory(50);
+      setWithdrawals(data);
+    } catch (err) {
+      console.error('[WithdrawalHistoryScreen] Load error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRefresh = useCallback(async () => {

@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +30,7 @@ import {
   BarChart3,
 } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { analyticsService } from '../../services/analyticsService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -44,19 +46,34 @@ const PostAnalyticsScreen = ({ route, navigation }) => {
     loadAnalytics();
   }, [postId]);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[PostAnalyticsScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadAnalytics(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
+
   const loadAnalytics = async () => {
-    setLoading(true);
-    setError(null);
+    try {
+      setLoading(true);
+      setError(null);
 
-    const result = await analyticsService.getPostAnalytics(postId);
+      const result = await analyticsService.getPostAnalytics(postId);
 
-    if (result.success) {
-      setAnalytics(result.data);
-    } else {
-      setError(result.error);
+      if (result.success) {
+        setAnalytics(result.data);
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      console.error('[PostAnalyticsScreen] loadAnalytics error:', err);
+      setError(err?.message || 'Không thể tải thống kê');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   // Stat card component

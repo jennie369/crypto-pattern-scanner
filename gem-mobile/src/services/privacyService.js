@@ -45,7 +45,7 @@ export const privacyService = {
    */
   async getCloseFriends() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -81,7 +81,7 @@ export const privacyService = {
    */
   async addCloseFriend(friendId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -131,7 +131,7 @@ export const privacyService = {
    */
   async removeCloseFriend(friendId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -159,7 +159,7 @@ export const privacyService = {
    */
   async isCloseFriend(friendId) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return false;
 
       const { data } = await supabase
@@ -181,7 +181,7 @@ export const privacyService = {
    */
   async getCloseFriendsCount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase
@@ -203,7 +203,7 @@ export const privacyService = {
    */
   async searchFollowersForCloseFriends(query) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return [];
 
       // Get current close friends to exclude
@@ -249,7 +249,7 @@ export const privacyService = {
    */
   async canViewPost(post) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       // Public posts are always viewable
       if (post.visibility === 'public') return true;
@@ -296,7 +296,7 @@ export const privacyService = {
    */
   async updatePostVisibility(postId, visibility) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }
@@ -335,7 +335,7 @@ export const privacyService = {
    */
   async getDefaultVisibility() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return 'public';
 
       const { data } = await supabase
@@ -357,7 +357,7 @@ export const privacyService = {
    */
   async updateDefaultVisibility(visibility) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         return { success: false, error: 'Chưa đăng nhập' };
       }

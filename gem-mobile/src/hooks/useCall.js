@@ -190,7 +190,7 @@ export const useCall = ({ call, isCaller = false, autoInitialize, onCallEnded })
       }
 
       // Get current user
-      const { data: { user } } = await (await import('../services/supabase')).supabase.auth.getUser();
+      const { data: { session } } = await (await import('../services/supabase')).supabase.auth.getSession(); const user = session?.user;
       if (!user) throw new Error('Chưa đăng nhập');
       userId.current = user.id;
 
@@ -937,7 +937,7 @@ export const useCall = ({ call, isCaller = false, autoInitialize, onCallEnded })
           console.log('[useCall] Connection not established after long background, attempting to re-establish...');
 
           try {
-            const { data: { user } } = await (await import('../services/supabase')).supabase.auth.getUser();
+            const { data: { session } } = await (await import('../services/supabase')).supabase.auth.getSession(); const user = session?.user;
             if (user) {
               // Only re-subscribe to signaling, don't touch WebRTC peer connection
               await callSignalingService.cleanup();

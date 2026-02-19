@@ -14,6 +14,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,6 +32,7 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import earningsService from '../../services/earningsService';
 import walletService from '../../services/walletService';
@@ -61,22 +63,37 @@ const EarningsScreen = ({ navigation }) => {
     loadData();
   }, []);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[EarningsScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
+
   const loadData = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const [summaryResult, breakdownData, historyData] = await Promise.all([
-      earningsService.getEarningsSummary(),
-      earningsService.getEarningsBreakdown(),
-      earningsService.getEarningsHistory(10),
-    ]);
+      const [summaryResult, breakdownData, historyData] = await Promise.all([
+        earningsService.getEarningsSummary(),
+        earningsService.getEarningsBreakdown(),
+        earningsService.getEarningsHistory(10),
+      ]);
 
-    if (summaryResult.success) {
-      setSummary(summaryResult.data);
+      if (summaryResult.success) {
+        setSummary(summaryResult.data);
+      }
+      setBreakdown(breakdownData);
+      setHistory(historyData);
+    } catch (err) {
+      console.error('[EarningsScreen] Load error:', err);
+    } finally {
+      setLoading(false);
     }
-    setBreakdown(breakdownData);
-    setHistory(historyData);
-
-    setLoading(false);
   };
 
   const handleRefresh = useCallback(async () => {

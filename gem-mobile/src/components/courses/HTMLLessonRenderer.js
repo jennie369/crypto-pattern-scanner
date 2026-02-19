@@ -85,14 +85,14 @@ export default function HTMLLessonRenderer({
 
   const loadProgress = async () => {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user?.user?.id) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) return;
 
       const { data } = await supabase
         .from('lesson_progress')
         .select('quiz_results, completed_quizzes')
         .eq('lesson_id', lessonId)
-        .eq('user_id', user.user.id)
+        .eq('user_id', session.user.id)
         .single();
 
       if (data) {
@@ -106,12 +106,12 @@ export default function HTMLLessonRenderer({
 
   const saveProgress = async (newQuizResults, newCompletedQuizzes) => {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user?.user?.id) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) return;
 
       await supabase.from('lesson_progress').upsert({
         lesson_id: lessonId,
-        user_id: user.user.id,
+        user_id: session.user.id,
         quiz_results: newQuizResults,
         completed_quizzes: newCompletedQuizzes,
         progress_percent: Math.round(

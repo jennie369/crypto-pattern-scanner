@@ -13,7 +13,9 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -61,6 +63,18 @@ const PartnerNotificationCenter = ({ navigation }) => {
 
   useEffect(() => {
     loadNotifications(true);
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[PartnerNotificationCenter] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+      setTimeout(() => loadNotifications(true), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
   }, []);
 
   const loadNotifications = async (refresh = false) => {

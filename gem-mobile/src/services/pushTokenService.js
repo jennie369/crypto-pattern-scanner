@@ -385,7 +385,7 @@ const PUSH_TOKEN_SERVICE = {
     console.log('[PushToken] ========================================');
 
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const { data: { session }, error: authError } = await supabase.auth.getSession(); const user = session?.user;
       if (authError) {
         console.error('[PushToken] Auth error:', authError);
         return;
@@ -470,7 +470,7 @@ const PUSH_TOKEN_SERVICE = {
    */
   async removeVoIPToken() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       const { error } = await supabase
@@ -518,7 +518,7 @@ const PUSH_TOKEN_SERVICE = {
    */
   async savePushToken(token) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         console.log('[PushToken] No user logged in');
         return;
@@ -593,7 +593,7 @@ const PUSH_TOKEN_SERVICE = {
    */
   async removePushToken() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       // Completely delete the token instead of just deactivating
@@ -626,7 +626,7 @@ const PUSH_TOKEN_SERVICE = {
    */
   async deletePushToken() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       await supabase
@@ -746,7 +746,7 @@ const PUSH_TOKEN_SERVICE = {
    */
   async getPreferences() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return null;
 
       const { data, error } = await supabase
@@ -772,7 +772,7 @@ const PUSH_TOKEN_SERVICE = {
    */
   async updatePreferences(preferences) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return { success: false };
 
       const { error } = await supabase

@@ -250,7 +250,7 @@ export const searchService = {
    */
   async searchMutualFollowers(query, limit = 10) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
       if (!currentUser) {
         console.log('[SearchService] Not logged in, returning empty');
         return [];
@@ -315,7 +315,7 @@ export const searchService = {
    */
   async searchFollowedUsers(query, limit = 15) {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const currentUser = session?.user;
       if (!currentUser) {
         console.log('[SearchService] Not logged in, returning empty');
         return [];

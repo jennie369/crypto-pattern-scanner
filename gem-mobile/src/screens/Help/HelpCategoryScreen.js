@@ -11,6 +11,7 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react-native';
 
 import { COLORS, SPACING, GRADIENTS, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import helpService from '../../services/helpService';
 
 // Icon mapping
@@ -47,6 +49,16 @@ const HelpCategoryScreen = ({ navigation, route }) => {
   useEffect(() => {
     loadCategoryData();
   }, [categoryId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[HelpCategoryScreen] Force refresh received');
+      setLoading(false);
+      setTimeout(() => loadCategoryData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const loadCategoryData = async () => {
     try {

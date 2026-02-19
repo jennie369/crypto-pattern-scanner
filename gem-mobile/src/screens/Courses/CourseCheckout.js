@@ -23,12 +23,14 @@ import {
   Platform,
   BackHandler,
   Text,
+  DeviceEventEmitter,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useRoute, useNavigation, CommonActions } from '@react-navigation/native';
 import { useCourse } from '../../contexts/CourseContext';
 import { useTabBar } from '../../contexts/TabBarContext';
 import { COLORS, TYPOGRAPHY, SPACING } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 const CourseCheckout = () => {
@@ -54,6 +56,15 @@ const CourseCheckout = () => {
     return () => {
       showTabBar(true);
     };
+  }, []);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[CourseCheckout] Force refresh received');
+      setLoading(false);
+    });
+    return () => listener.remove();
   }, []);
 
   const { checkoutUrl, courseId, courseTitle, productType, returnScreen } = route.params || {};

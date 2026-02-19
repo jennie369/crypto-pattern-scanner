@@ -15,6 +15,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -52,6 +53,7 @@ import {
 
 // Theme
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, INPUT } from '../../utils/tokens';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 // ========== CONSTANTS ==========
 const PLATFORM_OPTIONS = [
@@ -115,6 +117,19 @@ const ContentEditorScreen = () => {
       loadContent();
     }
   }, [contentId]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ContentEditor] Force refresh received');
+      setLoading(false);
+      setSaving(false);
+      if (isEditMode) {
+        setTimeout(() => loadContent(), 50); // Rule 57: Break React 18 batch
+      }
+    });
+    return () => listener.remove();
+  }, []);
 
   // ========== LOAD CONTENT ==========
   const loadContent = async () => {

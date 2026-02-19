@@ -14,6 +14,7 @@ import {
   RefreshControl,
   TextInput,
   Alert,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -33,6 +34,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { useAuth } from '../../contexts/AuthContext';
 import readingHistoryService from '../../services/readingHistoryService';
 import ReadingHistoryItem from '../../components/GemMaster/ReadingHistoryItem';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const FILTER_TABS = [
   { id: 'all', label: 'Tất cả', icon: null },
@@ -116,6 +118,18 @@ const ReadingHistoryScreen = () => {
   useEffect(() => {
     fetchReadings(1);
   }, [fetchReadings]);
+
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[ReadingHistoryScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+      setTimeout(() => fetchReadings(1), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
 
   const handleRefresh = useCallback(() => {
     fetchReadings(1, true);

@@ -302,7 +302,7 @@ const GoalSettingForm = ({
     try {
       setIsSubmitting(true);
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) {
         throw new Error('Vui lòng đăng nhập để sử dụng');
       }
@@ -455,7 +455,7 @@ Lời khuyên: Hãy đọc affirmations mỗi sáng khi thức dậy và tối t
     try {
       setIsSubmitting(true);
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return;
 
       const widgets = analysisResult?.widgets || [];

@@ -19,6 +19,7 @@ import {
   ActivityIndicator,
   Switch,
   Dimensions,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -38,6 +39,7 @@ import {
 } from '../../theme/cosmicTokens';
 import { supabase } from '../../services/supabase';
 import calendarService from '../../services/calendarService';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -131,12 +133,23 @@ const EditEventScreen = () => {
   // Original event data for comparison
   const [originalEvent, setOriginalEvent] = useState(null);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[EditEventScreen] Force refresh received');
+      setLoading(false);
+      setSaving(false);
+      setDeleting(false);
+    });
+    return () => listener.remove();
+  }, []);
+
   // Initialize - get user and load event
   useEffect(() => {
     const init = async () => {
       try {
         // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
         if (!user) {
           Alert.alert('Lỗi', 'Không thể xác định người dùng');
           navigation.goBack();

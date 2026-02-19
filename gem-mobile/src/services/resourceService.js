@@ -67,7 +67,7 @@ const RESOURCE_SERVICE = {
    */
   async getPartnerProfile() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
       if (!user) return null;
 
       const { data, error } = await supabase
@@ -141,7 +141,7 @@ const RESOURCE_SERVICE = {
   async trackDownload(resourceId) {
     try {
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
       // Update download count
       const { data: resource } = await supabase

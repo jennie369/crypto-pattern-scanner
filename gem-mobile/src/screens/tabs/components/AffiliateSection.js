@@ -112,7 +112,8 @@ export default function AffiliateSection({ user, navigation }) {
             }
           }
         })(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Partnership data timeout')), 15000)),
+        // Budget: 10s RPC attempt (4s JWT + 8s query, capped at 10s) + 8s fallback = 18s max
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Partnership data timeout')), 20000)),
       ]);
     } catch (error) {
       console.error('[AffiliateSection] Load error:', error?.message);

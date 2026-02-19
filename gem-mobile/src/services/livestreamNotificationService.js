@@ -82,9 +82,8 @@ class LivestreamNotificationService {
 
   async saveToken(token) {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
 
       await supabase.from('user_profiles').update({ push_token: token }).eq('id', user.id);

@@ -223,7 +223,7 @@ export const createShopBanner = async (bannerData, createdBy) => {
  */
 export const updateShopBanner = async (bannerId, updates) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     // Clean data
     const cleanedUpdates = {
@@ -264,7 +264,7 @@ export const updateShopBanner = async (bannerId, updates) => {
  */
 export const deleteShopBanner = async (bannerId) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     // Log before delete
     await logBannerAction(bannerId, 'delete', null, user?.id);
@@ -291,7 +291,7 @@ export const deleteShopBanner = async (bannerId) => {
  */
 export const toggleBannerActive = async (bannerId, isActive) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     const { data, error } = await supabase
       .from('shop_banners')
@@ -792,7 +792,7 @@ export const getAllFeaturedProducts = async () => {
  */
 export const createFeaturedProduct = async (productData) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user;
 
     const cleanedData = {
       title: productData.title?.trim() || '',

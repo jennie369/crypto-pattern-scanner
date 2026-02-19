@@ -13,6 +13,7 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,6 +30,7 @@ import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import giftService from '../../services/giftService';
 import walletService from '../../services/walletService';
 import { useTabBar } from '../../contexts/TabBarContext';
+import { FORCE_REFRESH_EVENT } from '../../utils/loadingStateManager';
 
 const GiftHistoryScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -48,17 +50,33 @@ const GiftHistoryScreen = ({ navigation }) => {
     loadData();
   }, []);
 
+  // Rule 31: Recovery listener for app resume
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+      console.log('[GiftHistoryScreen] Force refresh received');
+      setLoading(false);
+      setRefreshing(false);
+      setTimeout(() => loadData(), 50); // Rule 57: Break React 18 batch
+    });
+    return () => listener.remove();
+  }, []);
+
   const loadData = async () => {
     setLoading(true);
-    const [received, sent, giftStats] = await Promise.all([
-      giftService.getReceivedGifts(50),
-      giftService.getSentGifts(50),
-      giftService.getGiftStats(),
-    ]);
-    setReceivedGifts(received);
-    setSentGifts(sent);
-    setStats(giftStats);
-    setLoading(false);
+    try {
+      const [received, sent, giftStats] = await Promise.all([
+        giftService.getReceivedGifts(50),
+        giftService.getSentGifts(50),
+        giftService.getGiftStats(),
+      ]);
+      setReceivedGifts(received);
+      setSentGifts(sent);
+      setStats(giftStats);
+    } catch (error) {
+      console.error('[GiftHistoryScreen] loadData error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onRefresh = useCallback(async () => {
